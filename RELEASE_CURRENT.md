@@ -17,9 +17,20 @@ events. Real PostgreSQL child-process tests verify restart, deduplication,
 termination during insertion, and rollback after SIGKILL before commit.
 Mac `start` builds the current checkout before stopping the previous runtime,
 so a build failure does not stop the existing demo. Business scope and all
-existing models/migrations are unchanged. Evidence and the remaining G3 browser
-work are recorded in `docs/WORKER_PROCESS_ACCEPTANCE.md` and
+existing models/migrations are unchanged. Worker evidence is recorded in
+`docs/WORKER_PROCESS_ACCEPTANCE.md` and
 `docs/RC_ACCEPTANCE_RECORD.json`.
+
+## G3 browser acceptance — 2026-10-13
+
+Both real browser routes passed with PostgreSQL facts and independent financial
+oracles. Repairs correct care/finance control labels, permission/read-only
+recovery, and READY task wording. No models or migrations changed. Seven roles,
+stale/revoked contexts, lost responses, narrow Chrome layouts and keyboard
+confirmation boundaries are recorded in `docs/G3_BROWSER_ACCEPTANCE.md`.
+G2 original-backup recovery and G4 public deployment remain NOT_RUN.
+
+## Historical account from the supplied Windows RC archive
 
 候选源码基于完整alpha.10重建；中断目录中的图像不作为代码完成证据。运行基线仍为Windows v0.7，Mac暂停。此次不新增大型业务模块，而是整合可核对、可启动、可验收的课程候选。
 

@@ -53,6 +53,9 @@ the database polling frequency. Compose allows a 30-second stop grace period.
 An abrupt termination before commit is recoverable on restart; a lost receipt
 after commit is handled by reading stored state, rather than replaying delivery.
 See [worker process acceptance](WORKER_PROCESS_ACCEPTANCE.md).
+The two bounded G3 browser routes have also passed; see
+[browser business acceptance](G3_BROWSER_ACCEPTANCE.md) for the actual results,
+repairs, and responsive/keyboard scope.
 
 ## Isolation and runtime
 
@@ -103,5 +106,5 @@ then explicitly run:
 The import restores only into a new empty RC database. It compares the bounded
 legacy summaries before and after schema migration and does not seed or reset
 accounts. This path has not been exercised with a Windows backup during this
-migration, because none was supplied. Independent recovery and complete browser
-business acceptance remain separate from source migration and database tests.
+migration, because none was supplied. Independent recovery remains open; G3
+browser acceptance is separately recorded and does not imply backup recovery.

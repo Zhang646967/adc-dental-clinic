@@ -36,8 +36,10 @@ def quarters(request):
 def detail(request,pk):
     report=quarter_report(request.user,pk)
     action=request.POST.get('action')
-    member=MemberForm(request.POST if action=='add' else None,initial={'expected_version':report.lock_version})
-    confirm=ConfirmedForm(request.POST if action=='confirm' else None,initial={'expected_version':report.lock_version})
+    member=MemberForm(request.POST if action=='add' else None,initial={'expected_version':report.lock_version},auto_id='id_member_%s')
+    confirm=ConfirmedForm(request.POST if action=='confirm' else None,initial={'expected_version':report.lock_version},auto_id='id_roster_%s')
+    member.fields['confirmed'].label='我已核对本次纳入的牙医及季度'
+    confirm.fields['confirmed'].label='我已核对完整纳入清单，包括有成本但无收入的牙医'
     form={'add':member,'confirm':confirm}.get(action)
     if request.method=='POST':
         if not _can_write(request.user): raise PermissionDenied
@@ -62,8 +64,10 @@ def cost(request,pk,cost_pk):
     if c is None:
         raise Http404("成本记录不属于所选季度。")
     action=request.POST.get('action')
-    form=CostForm(request.POST if action=='save' else None,initial={'expected_version':report.lock_version,'supply_cost':c.supply,'operating_expense':c.operating,'notes':c.notes})
-    confirm=ConfirmedForm(request.POST if action=='confirm' else None,initial={'expected_version':report.lock_version})
+    form=CostForm(request.POST if action=='save' else None,initial={'expected_version':report.lock_version,'supply_cost':c.supply,'operating_expense':c.operating,'notes':c.notes},auto_id='id_cost_%s')
+    confirm=ConfirmedForm(request.POST if action=='confirm' else None,initial={'expected_version':report.lock_version},auto_id='id_cost_confirm_%s')
+    form.fields['confirmed'].label='我已核对成本数字及录入依据（保存草稿）'
+    confirm.fields['confirmed'].label='我已核对本条成本，确认将其纳入季度测算'
     active={'save':form,'confirm':confirm}.get(action)
     if request.method=='POST':
         if active is None: raise PermissionDenied

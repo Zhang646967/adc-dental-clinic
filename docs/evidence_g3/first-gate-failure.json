@@ -1,0 +1,10 @@
+{
+  "status": "FAILED",
+  "stage": "pure source checks",
+  "tests": 814,
+  "errors": 4,
+  "django_postgresql_stage_reached": false,
+  "cleanup_returncode": 0,
+  "reason": "Static middleware import fixture still mocked django.http after rendering moved to django.shortcuts.",
+  "resolution": "Update only the import fixture to model render; retain policy and HTTP 403 assertions and add template/read-only reason assertions. Real read-only PostgreSQL HTTP regressions already passed. Full gate rerun required."
+}

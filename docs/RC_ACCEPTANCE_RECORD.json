@@ -3,7 +3,11 @@
   "meaning": "Current evidence-backed acceptance record. Historical evidence is retained; a component PASS does not grant full browser, recovery or production acceptance.",
   "G1_isolated_postgresql_and_dependencies": {
     "status": "PASS",
-    "evidence": ["docs/evidence_macos/postgresql-gate.json", "docs/evidence_worker/postgresql-gate.json"]
+    "evidence": [
+      "docs/evidence_macos/postgresql-gate.json",
+      "docs/evidence_worker/postgresql-gate.json",
+      "docs/evidence_g3/postgresql-gate.json"
+    ]
   },
   "G2_v07_copy_upgrade_and_restore": {
     "status": "NOT_RUN",
@@ -11,17 +15,36 @@
     "evidence": []
   },
   "G3_real_browser_and_worker": {
-    "status": "PARTIAL",
+    "status": "PASS",
     "components": {
       "worker_process_shutdown_and_recovery": {
         "status": "PASS",
-        "evidence": ["docs/evidence_worker/acceptance.json", "docs/WORKER_PROCESS_ACCEPTANCE.md"]
+        "evidence": [
+          "docs/evidence_worker/acceptance.json",
+          "docs/WORKER_PROCESS_ACCEPTANCE.md"
+        ]
       },
-      "full_browser_business_routes_and_accessibility": {"status": "NOT_RUN", "evidence": []}
+      "full_browser_business_routes_and_accessibility": {
+        "status": "PASS",
+        "evidence": [
+          "docs/evidence_g3/acceptance.json",
+          "docs/G3_BROWSER_ACCEPTANCE.md"
+        ]
+      }
     },
-    "evidence": ["docs/evidence_worker/acceptance.json"]
+    "evidence": [
+      "docs/evidence_worker/acceptance.json",
+      "docs/evidence_g3/acceptance.json",
+      "docs/G3_BROWSER_ACCEPTANCE.md"
+    ]
   },
-  "G4_public_deployment": {"status":"NOT_RUN","evidence":[]},
+  "G4_public_deployment": {
+    "status": "NOT_RUN",
+    "evidence": []
+  },
   "public_release_approved": false,
-  "blockers": ["No original Windows database backup", "Full browser acceptance remains", "Target server and domain for G4 are not defined"]
+  "blockers": [
+    "No original Windows database backup",
+    "Target server and domain for G4 are not defined"
+  ]
 }

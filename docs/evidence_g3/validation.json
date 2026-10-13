@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "source_checks": 814,
+  "postgresql_http_tests": 700,
+  "gate_steps": 7,
+  "django_check": "PASS",
+  "migration_drift": "none",
+  "preserved_application_migrations": 16,
+  "preserved_model_files": 11,
+  "verification_exit": 0,
+  "cleanup_exit": 0,
+  "gate_record": "postgresql-gate.json",
+  "source_binding": "Gate executed before final evidence/checksum assembly; implementation hashes in acceptance.json. Exact final commit is revalidated by GitHub CI."
+}

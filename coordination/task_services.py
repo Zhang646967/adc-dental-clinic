@@ -163,7 +163,8 @@ def inspect_task(*,actor,slot_id,task_id=None):
             row['target'] = ('预约' if s['target_kind']=='visit' else '邀约') + ' #' + str(s.get('target_id',''))
         history.append(row)
     data.update(actions=actions,blocked=blocked,active_task_id=active,history=history,
-                terminal=bool(task and task.state not in ACTIVE_STATES),role=identity['role'],
+                terminal=bool(task and task.state not in ACTIVE_STATES),
+                awaiting_review=bool(task and task.state=='READY'),role=identity['role'],
                 history_total=qs.count(),is_owner=bool(task and task.assignee_id==actor.pk))
     state_token=signing.dumps(identity | dict(kind='state',slot=slot_id,task=task_id,state=state),salt=SALT)
     if _binding(actor)!=identity: raise PermissionDenied('工作范围已改变，不返回旧数据。')

@@ -25,9 +25,11 @@ def workspace(request,pk):
     initial={"expected_version":v.lock_version,"patient_version":v.patient.allergy_info_version,
              "status":v.patient.allergy_status,"allergy_ids":list(v.patient.allergy_links.filter(is_active=True).values_list("allergy_id",flat=True))}
     action=request.POST.get("action") if request.method=="POST" else None
-    allergy_form=AllergyReviewForm(request.POST if action=="review" else None,initial=initial)
-    treatment_form=TreatmentForm(request.POST if action=="add" else None,initial=initial)
-    removal_form=RemoveLineForm(request.POST if action=="remove" else None,initial=initial)
+    # Separate HTML ids keep labels attached to the right form on this page.
+    # Keep POST field names unchanged so the command and version checks remain.
+    allergy_form=AllergyReviewForm(request.POST if action=="review" else None,initial=initial,auto_id="id_allergy_%s")
+    treatment_form=TreatmentForm(request.POST if action=="add" else None,initial=initial,auto_id="id_treatment_%s")
+    removal_form=RemoveLineForm(request.POST if action=="remove" else None,initial=initial,auto_id="id_removal_%s")
     active={"review":allergy_form,"add":treatment_form,"remove":removal_form}.get(action)
     if request.method=="POST":
         if active is None: raise PermissionDenied("未知接诊操作。")

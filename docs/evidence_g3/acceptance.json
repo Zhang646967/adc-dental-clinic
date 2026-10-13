@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "scope": "Bounded RC1 G3 business/browser acceptance; synthetic local course instance only",
+  "recorded_at_utc": "2026-10-13T11:45:23.474493+00:00",
+  "source_base_commit": "f8263eb16250bc1a09775739f76b971d2720999b",
+  "implementation_sha256": {
+    "adc_core/middleware.py": "d595fcdfa2211e3dd42467350d097beb3af2f0c93c95913890b8b3e39c591d12",
+    "care/views.py": "8cf54cd32d25eeb8c5041cbe80c18db42484192efd0f6a71416fc2b6a28cb8ed",
+    "coordination/task_services.py": "c2ce38af959779a4e935a9d0567eec45d1f29324994ef978ac9a6741a90ed3ee",
+    "finance/views.py": "b434aa548f3514c593039b6ebb21ed620ef0477939ce0508ca8eb56d3a1ea3ea",
+    "templates/403.html": "83486844b553d3a5fb0aec5865be6a397ce63221841e51a2c27d2adb4fa27d10",
+    "templates/coordination/tasks/detail.html": "3f496407db51342f2d872a3aee15d181c21a7107edac143208a10d7f25316fab",
+    "tests/test_browser_accessibility.py": "410a6c41356e867286940bfe52e9022aa824a9c9077672a64a4b250a129c0d71",
+    "tests/test_v09_hardening.py": "12b7c804d093c3c42a3a5d123df92a94a051fb5d7cb340f0baafd47ecb2f725c",
+    "checks/test_v09_hardening.py": "75394374b67bb73eac147cf0ece085bad69cef3fb34357c4ae963d8d14603784"
+  },
+  "environment": {
+    "browser": "Actual Chrome via Browser client",
+    "database": "PostgreSQL 17",
+    "application": "Actual Django pages and normal accounts",
+    "gateway": "loopback 18001",
+    "fault_and_responsive_proxy": "loopback 18002",
+    "persistent_mac_demo": "18000 preserved"
+  },
+  "business_routes": {
+    "A01_to_A12": "PASS",
+    "B01_to_B10": "PASS"
+  },
+  "browser_case_counts": {
+    "latest_cases": 167,
+    "latest_passed": 167,
+    "recorded_attempts": 181,
+    "first_failures_preserved": 14,
+    "responsive_cases": 68,
+    "meaning": "Executed cases, not coverage percentage"
+  },
+  "repairs": [
+    "Distinct care control IDs",
+    "Distinct finance control IDs and labels",
+    "Accessible permission recovery",
+    "Correct READY vs terminal task wording",
+    "Accessible read-only refusal"
+  ],
+  "focused_postgresql_regression": {
+    "tests": 14,
+    "result": "PASS",
+    "new_tests": 8
+  },
+  "responsive_scope": {
+    "css_widths": [
+      320,
+      390
+    ],
+    "root_font_px": [
+      16,
+      20
+    ],
+    "method": "Live Django same-origin browser frames; local test proxy permits frames only for this harness",
+    "actual_gateway_frame_policy": "unchanged",
+    "not_claimed": [
+      "Physical phones",
+      "Safari",
+      "Screen readers",
+      "Touch hardware"
+    ],
+    "invalid_initial_attempt": "Chrome top-level override did not change actual page width; not counted as mobile validation"
+  },
+  "lost_response_scope": {
+    "actual_upstream_success_response_dropped": true,
+    "paths": [
+      "/portal/book/confirm/",
+      "/slots/16/intake-confirm/"
+    ],
+    "reconciliation": "One new Visit and one receipt; intake changed once without auto-booking",
+    "native_browser_retry": "One retry was blocked by proxy before reaching the application"
+  },
+  "schema_models_and_business_commands": "unchanged",
+  "evidence": [
+    "browser-checks.json",
+    "browser-final-facts.json",
+    "a12-final.json",
+    "a12-quarter-export.csv",
+    "b07-stale-requests-refused.json",
+    "readonly-after-rejections.json",
+    "revocation-after.json",
+    "worker-final-after-restart.json",
+    "lost-response-events.jsonl"
+  ],
+  "limits": [
+    "G2 original Windows database backup absent",
+    "G4 actual public deployment undefined",
+    "RC1 retained; no stable/public release approval"
+  ],
+  "full_isolated_validation": {
+    "status": "PASS",
+    "source_checks": 814,
+    "postgresql_http_tests": 700,
+    "evidence": [
+      "postgresql-gate.json",
+      "validation.json"
+    ]
+  }
+}

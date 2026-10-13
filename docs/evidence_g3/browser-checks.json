@@ -1,0 +1,1936 @@
+[
+  {
+    "id": "ROLE-SYSADMIN",
+    "at": "2026-10-13T08:50:06.838Z",
+    "url": "http://127.0.0.1:18001/technical/",
+    "assertion": "Single-role technical login routes directly to its workspace",
+    "passed": true
+  },
+  {
+    "id": "A01-preview",
+    "at": "2026-10-13T08:51:27.997Z",
+    "url": "http://127.0.0.1:18001/directory/dentist/new/",
+    "assertion": "Dentist preview shows not saved; DB has no G3-D1 before confirmation",
+    "passed": true,
+    "database": {
+      "dentistExists": false
+    }
+  },
+  {
+    "id": "A01",
+    "at": "2026-10-13T08:52:42.963Z",
+    "url": "http://127.0.0.1:18001/directory/dentist/4/",
+    "assertion": "New dentist and two qualification categories/associations saved through preview-confirm screens",
+    "passed": true
+  },
+  {
+    "id": "A01-no-auto-access",
+    "at": "2026-10-13T08:53:25.191Z",
+    "url": "http://127.0.0.1:18001/technical/accounts/new/",
+    "assertion": "Directory registration creates neither login accounts nor availability",
+    "passed": true,
+    "database": {
+      "automaticAccounts": 0,
+      "automaticSlots": 0
+    }
+  },
+  {
+    "id": "A02",
+    "at": "2026-10-13T08:53:42.871Z",
+    "url": "http://127.0.0.1:18001/technical/accounts/12/",
+    "assertion": "Create ordinary dentist-linked account, then explicitly grant DENTIST separately",
+    "passed": true
+  },
+  {
+    "id": "ROLE-MANAGER",
+    "at": "2026-10-13T08:53:50.148Z",
+    "url": "http://127.0.0.1:18001/manager/",
+    "assertion": "Single-role manager routes to workspace then requires an explicit clinic choice",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Manager route observed as /manager/; assertion had assumed an unsupported /workspaces/ prefix."
+  },
+  {
+    "id": "ROLE-MANAGER",
+    "at": "2026-10-13T08:54:12.409Z",
+    "url": "http://127.0.0.1:18001/manager/",
+    "assertion": "Single-role manager routes to /manager/ and requests a separate clinic choice",
+    "passed": true
+  },
+  {
+    "id": "A03",
+    "at": "2026-10-13T08:54:42.826Z",
+    "url": "http://127.0.0.1:18001/slots/",
+    "assertion": "Manager creates next-day 09:00–12:00 G3 dentist availability in clinic 1",
+    "passed": true
+  },
+  {
+    "id": "ROLE-FRONT-DESK",
+    "at": "2026-10-13T08:54:43.191Z",
+    "url": "http://127.0.0.1:18001/frontdesk/",
+    "assertion": "Single-role front desk selects its clinic separately",
+    "passed": true
+  },
+  {
+    "id": "A04",
+    "at": "2026-10-13T08:55:51.155Z",
+    "url": "http://127.0.0.1:18001/patients/5/",
+    "assertion": "Front desk creates synthetic patient with UNKNOWN allergy state",
+    "passed": true
+  },
+  {
+    "id": "A05-front-draft",
+    "at": "2026-10-13T08:56:50.979Z",
+    "url": "http://127.0.0.1:18001/visits/new/?patient_no=P-FF66B6B042DB4179B4F56BF9DB40BEE0",
+    "assertion": "Filling the front-desk appointment form does not submit the booking",
+    "passed": true
+  },
+  {
+    "id": "ROLE-PATIENT",
+    "at": "2026-10-13T08:57:08.441Z",
+    "url": "http://127.0.0.1:18001/portal/",
+    "assertion": "Explicit PatientAccess routes patient login to personal portal",
+    "passed": true
+  },
+  {
+    "id": "A05-preview",
+    "at": "2026-10-13T08:58:02.323Z",
+    "url": "http://127.0.0.1:18001/portal/book/confirm/?slot=15&start=2026-10-14T01%3A00%3A00%2B00%3A00",
+    "assertion": "Patient preview stopped before confirmation; PostgreSQL still has zero visits",
+    "passed": true,
+    "database": {
+      "visits": 0,
+      "qualificationAssociations": 2
+    }
+  },
+  {
+    "id": "A05-confirm",
+    "at": "2026-10-13T08:58:22.203Z",
+    "url": "http://127.0.0.1:18001/portal/visits/1/",
+    "assertion": "Explicit patient confirmation produces a saved appointment with no patient-controlled arrival",
+    "passed": true
+  },
+  {
+    "id": "A05-duplicate",
+    "at": "2026-10-13T08:59:31.208Z",
+    "url": "http://127.0.0.1:18001/portal/visits/1/",
+    "assertion": "Second browser confirmation is refused; PostgreSQL has exactly one SCHEDULED visit",
+    "passed": true,
+    "database": {
+      "visits": 1,
+      "states": [
+        "SCHEDULED"
+      ]
+    }
+  },
+  {
+    "id": "A06",
+    "at": "2026-10-13T08:59:54.642Z",
+    "url": "http://127.0.0.1:18001/visits/1/",
+    "assertion": "Front desk explicitly records arrival; visit moves to CHECKED_IN",
+    "passed": true
+  },
+  {
+    "id": "ROLE-FINANCE",
+    "at": "2026-10-13T09:00:01.479Z",
+    "url": "http://127.0.0.1:18001/financial-workspace/",
+    "assertion": "Single-role finance account routes to finance workspace",
+    "passed": true
+  },
+  {
+    "id": "ROLE-DENTIST",
+    "at": "2026-10-13T09:00:22.534Z",
+    "url": "http://127.0.0.1:18001/doctor/",
+    "assertion": "Ordinary linked DENTIST account routes directly to assigned visits",
+    "passed": true
+  },
+  {
+    "id": "A07-accessible-controls",
+    "at": "2026-10-13T09:01:04.168Z",
+    "url": "http://127.0.0.1:18001/care/1/",
+    "assertion": "Each care confirmation checkbox must have its own accessible name",
+    "passed": false,
+    "classification": "application-defect",
+    "issue": "Duplicate auto-generated id_confirmed on separate care forms",
+    "resolved": true,
+    "resolution": "Separate rendered auto_id values preserve POST field names; two PostgreSQL HTTP regressions and fresh browser label checks pass."
+  },
+  {
+    "id": "A07-accessible-controls",
+    "at": "2026-10-13T09:04:40.369Z",
+    "url": "http://127.0.0.1:18001/care/1/",
+    "assertion": "Both care confirmations now expose separate exact accessible names",
+    "passed": true,
+    "counts": [
+      1,
+      1
+    ],
+    "regressionTests": 2
+  },
+  {
+    "id": "A07-line-rounding",
+    "at": "2026-10-13T09:05:20.158Z",
+    "url": "http://127.0.0.1:18001/care/1/",
+    "assertion": "Independent decimal oracle 1.125 × 99.99 displays 112.49",
+    "passed": true
+  },
+  {
+    "id": "A07",
+    "at": "2026-10-13T09:05:21.053Z",
+    "url": "http://127.0.0.1:18001/care/1/",
+    "assertion": "Responsible dentist reviews allergies and explicitly records two units at 99.99",
+    "passed": true
+  },
+  {
+    "id": "A07-not-yet-invoiced",
+    "at": "2026-10-13T09:06:35.671Z",
+    "url": "http://127.0.0.1:18001/care/1/complete/",
+    "assertion": "Draft treatment persists 199.98 while invoice count stays zero",
+    "passed": true,
+    "evidence": "a07-before-publication.json"
+  },
+  {
+    "id": "A08",
+    "at": "2026-10-13T09:06:36.137Z",
+    "url": "http://127.0.0.1:18001/invoices/1/",
+    "assertion": "Dentist publishes invoice revision 1 at 199.98; published amount is billed revenue",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Invoice shows current V1; assertion expected the literal Chinese phrase version 1."
+  },
+  {
+    "id": "A08",
+    "at": "2026-10-13T09:07:01.071Z",
+    "url": "http://127.0.0.1:18001/invoices/1/",
+    "assertion": "Dentist publishes current V1 at 199.98 with immutable billed-revenue wording",
+    "passed": true
+  },
+  {
+    "id": "A09-price-snapshot",
+    "at": "2026-10-13T09:07:02.107Z",
+    "url": "http://127.0.0.1:18001/invoices/1/",
+    "assertion": "Finance changes catalog to 150.00; original invoice retains 99.99 × 2 = 199.98",
+    "passed": true
+  },
+  {
+    "id": "A09-contact-snapshot",
+    "at": "2026-10-13T09:08:01.331Z",
+    "url": "http://127.0.0.1:18001/invoices/1/",
+    "assertion": "After explicit contact edit, invoice still shows the old address and original total",
+    "passed": true
+  },
+  {
+    "id": "A10-request",
+    "at": "2026-10-13T09:08:53.743Z",
+    "url": "http://127.0.0.1:18001/corrections/1/",
+    "assertion": "Dentist submits correction draft while current original invoice stays authoritative",
+    "passed": true
+  },
+  {
+    "id": "A11-accessible-controls",
+    "at": "2026-10-13T09:10:01.409Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "Quarter member and roster forms have unique rendered control IDs",
+    "passed": false,
+    "duplicates": [
+      "id_confirmed",
+      "id_expected_version"
+    ],
+    "classification": "application-defect",
+    "issue": "Member and roster forms both generate id_confirmed/id_expected_version",
+    "resolved": true,
+    "resolution": "Distinct HTML IDs and labels for member, roster, cost draft and cost confirmation; five relevant PostgreSQL HTTP regressions pass."
+  },
+  {
+    "id": "A11-accessible-controls",
+    "at": "2026-10-13T09:13:54.221Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "Quarter confirmations have distinct IDs and action-specific accessible labels",
+    "passed": true,
+    "regressionTests": 5
+  },
+  {
+    "id": "A11-missing-costs",
+    "at": "2026-10-13T09:14:25.055Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "Confirming roster does not replace missing costs with zero or publish total profit",
+    "passed": true
+  },
+  {
+    "id": "A11-cost-accessible-controls",
+    "at": "2026-10-13T09:14:49.138Z",
+    "url": "http://127.0.0.1:18001/finance/1/cost/1/",
+    "assertion": "Cost draft and confirmation labels target separate controls with no duplicate IDs",
+    "passed": true
+  },
+  {
+    "id": "A11-zero-draft",
+    "at": "2026-10-13T09:14:50.220Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "A zero-valued draft remains unconfirmed and cannot publish overall profit",
+    "passed": true
+  },
+  {
+    "id": "A11-confirmed-zero",
+    "at": "2026-10-13T09:15:05.780Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "Explicitly confirmed zero participates in quarter totals",
+    "passed": true
+  },
+  {
+    "id": "A11-edited-cost-unconfirmed",
+    "at": "2026-10-13T09:15:06.296Z",
+    "url": "http://127.0.0.1:18001/finance/1/cost/2/",
+    "assertion": "Changing a confirmed cost returns it to DRAFT",
+    "passed": true
+  },
+  {
+    "id": "A11-baseline-oracle",
+    "at": "2026-10-13T09:15:06.790Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "199.98 billed income − 10 − 20 − 50 − 50 = 69.98 profit; fund rounds to 7.00",
+    "passed": true
+  },
+  {
+    "id": "MULTI-role-first",
+    "at": "2026-10-13T09:16:37.771Z",
+    "url": "http://127.0.0.1:18001/workspace/select-role/",
+    "assertion": "Multi-role account must select one role before entering a business workspace",
+    "passed": true
+  },
+  {
+    "id": "A10-self-review-refused",
+    "at": "2026-10-13T09:16:37.958Z",
+    "url": "http://127.0.0.1:18001/corrections/1/",
+    "assertion": "The requesting dentist switches to FINANCE but still cannot approve their own correction",
+    "passed": true
+  },
+  {
+    "id": "A10-independent-review",
+    "at": "2026-10-13T09:16:38.750Z",
+    "url": "http://127.0.0.1:18001/corrections/1/",
+    "assertion": "Different financial account applies the correction and retains the original version",
+    "passed": true
+  },
+  {
+    "id": "A10-history",
+    "at": "2026-10-13T09:17:35.645Z",
+    "url": "http://127.0.0.1:18001/invoices/1/?revision=1",
+    "assertion": "Old published V1 remains accessible at 199.98",
+    "passed": true
+  },
+  {
+    "id": "A12-revised-oracle",
+    "at": "2026-10-13T09:17:35.696Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "Current invoice 99.99 gives -30.01 profit with fund withheld; V1 is not double-counted",
+    "passed": true
+  },
+  {
+    "id": "A12-export",
+    "at": "2026-10-13T09:18:27.889Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "Actual browser download matches revised income/profit and the two-member roster",
+    "passed": true
+  },
+  {
+    "id": "ROLE-HQ",
+    "at": "2026-10-13T09:20:37.099Z",
+    "url": "http://127.0.0.1:18001/headquarters/",
+    "assertion": "Single-role HQ routes to corporate reporting without clinical or finance write privileges",
+    "passed": true
+  },
+  {
+    "id": "A12-HQ-read",
+    "at": "2026-10-13T09:22:10.851Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "HQ sees corrected totals and cannot open member/roster write forms",
+    "passed": true
+  },
+  {
+    "id": "A12-committed-facts",
+    "at": "2026-10-13T09:22:10.853Z",
+    "url": "http://127.0.0.1:18001/finance/1/",
+    "assertion": "PostgreSQL retains one invoice, both published versions and a different reviewer; original header hash unchanged",
+    "passed": true,
+    "evidence": "a12-final.json",
+    "invoiceCount": 1,
+    "original": "199.98",
+    "current": "99.99"
+  },
+  {
+    "id": "B-setup-old-draft",
+    "at": "2026-10-13T09:24:39.922Z",
+    "url": "http://127.0.0.1:18001/scheduling/plans/1/",
+    "assertion": "Unpublished plan remains a suggestion; it creates no visit",
+    "passed": true
+  },
+  {
+    "id": "B-setup-promised-offer",
+    "at": "2026-10-13T09:24:40.835Z",
+    "url": "http://127.0.0.1:18001/scheduling/plans/2/",
+    "assertion": "Publishing a 15-minute offer reserves time but does not create the appointment",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Offer enum PENDING is displayed as 等待确认; source enum is checked in PostgreSQL facts."
+  },
+  {
+    "id": "B-setup-promised-offer",
+    "at": "2026-10-13T09:25:11.630Z",
+    "url": "http://127.0.0.1:18001/scheduling/plans/2/",
+    "assertion": "Published offer displays waiting confirmation and a 15-minute deadline",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Deadline cell uses nested text nodes; inspect visible text without assuming an inserted space."
+  },
+  {
+    "id": "B-setup-promised-offer",
+    "at": "2026-10-13T09:25:33.609Z",
+    "url": "http://127.0.0.1:18001/scheduling/plans/2/",
+    "assertion": "Published offer shows waiting confirmation and explicit deadline",
+    "passed": true
+  },
+  {
+    "id": "B01-preview",
+    "at": "2026-10-13T09:26:49.615Z",
+    "url": "http://127.0.0.1:18001/slots/1/intake/pause/",
+    "assertion": "Pause preview leaves source open and keeps the existing appointment and pending offer",
+    "passed": true,
+    "evidence": "b01-before-pause.json"
+  },
+  {
+    "id": "B01",
+    "at": "2026-10-13T09:26:50.070Z",
+    "url": "http://127.0.0.1:18001/slots/1/",
+    "assertion": "Confirmed pause preserves the protected booking and valid offer",
+    "passed": true
+  },
+  {
+    "id": "B02-new-booking-refused",
+    "at": "2026-10-13T09:26:50.579Z",
+    "url": "http://127.0.0.1:18001/portal/slots/",
+    "assertion": "Patient cannot confirm a new appointment into the paused availability",
+    "passed": true
+  },
+  {
+    "id": "B02-result-read-only",
+    "at": "2026-10-13T09:27:56.005Z",
+    "url": "http://127.0.0.1:18001/guide/result/wait/1/",
+    "assertion": "Saved-result inquiry displays pending invitation without accepting or recreating it",
+    "passed": true
+  },
+  {
+    "id": "B02-old-offer-accepted",
+    "at": "2026-10-13T09:27:56.508Z",
+    "url": "http://127.0.0.1:18001/waitlist/",
+    "assertion": "Owner explicitly accepts the pre-pause valid offer under its original deadline",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Successful acceptance redirects to waitlist; paused source is checked in committed DB facts, not unrelated post-redirect wording."
+  },
+  {
+    "id": "B02-old-offer-accepted",
+    "at": "2026-10-13T09:28:25.247Z",
+    "url": "http://127.0.0.1:18001/waitlist/",
+    "assertion": "Previously valid offer is explicitly accepted and exposes its formal appointment",
+    "passed": true
+  },
+  {
+    "id": "B02-result-exact-visit",
+    "at": "2026-10-13T09:29:00.754Z",
+    "url": "http://127.0.0.1:18001/guide/result/wait/1/",
+    "assertion": "Read-only result page points to the exact offer-created appointment",
+    "passed": true
+  },
+  {
+    "id": "B02-committed-facts",
+    "at": "2026-10-13T09:29:56.278Z",
+    "url": "http://127.0.0.1:18001/guide/result/wait/1/",
+    "assertion": "Paused source remains active and paused; old offer is ACCEPTED with one linked visit",
+    "passed": true,
+    "evidence": "b02-after-offer-acceptance.json"
+  },
+  {
+    "id": "B03",
+    "at": "2026-10-13T09:31:57.154Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Manager explicitly opens one REPLACE task; task starts unclaimed",
+    "passed": true
+  },
+  {
+    "id": "B10-stopped-worker-queue",
+    "at": "2026-10-13T09:32:22.897Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Task and PENDING outbox commit with zero inbox rows while worker is stopped",
+    "passed": true,
+    "evidence": "b03-worker-stopped.json"
+  },
+  {
+    "id": "B04-unread-get",
+    "at": "2026-10-13T09:33:13.827Z",
+    "url": "http://127.0.0.1:18001/notifications/",
+    "assertion": "Opening inbox shows an unread message and does not acknowledge it",
+    "passed": true
+  },
+  {
+    "id": "B04-read-is-not-claim",
+    "at": "2026-10-13T09:33:14.071Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Explicit read acknowledgement leaves task OPEN and unclaimed",
+    "passed": true
+  },
+  {
+    "id": "B10-recovered-queue",
+    "at": "2026-10-13T09:33:31.486Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Restarted worker delivered the pending event without modifying the task",
+    "passed": true,
+    "evidence": "b04-read-before-claim.json"
+  },
+  {
+    "id": "B04-claim",
+    "at": "2026-10-13T09:34:08.430Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Front desk explicitly claims the task after a separate preview and confirmation",
+    "passed": true
+  },
+  {
+    "id": "B-cross-clinic-refused",
+    "at": "2026-10-13T09:38:04.358Z",
+    "url": "http://127.0.0.1:18001/front/coordination/slots/2/",
+    "assertion": "Active FRONT_DESK clinic 1 cannot borrow assigned MANAGER clinic 2 privileges",
+    "passed": true
+  },
+  {
+    "id": "DENIAL-recovery-link",
+    "at": "2026-10-13T09:38:04.364Z",
+    "url": "http://127.0.0.1:18001/front/coordination/slots/2/",
+    "assertion": "Denied page provides an accessible return to current workspace",
+    "passed": false,
+    "classification": "application-defect",
+    "issue": "Default 403 page has no recovery navigation",
+    "resolved": true,
+    "resolution": "Neutral accessible 403 template; HTTP refusals remain 403 and do not echo target data."
+  },
+  {
+    "id": "DENIAL-recovery-link",
+    "at": "2026-10-13T09:39:57.650Z",
+    "url": "http://127.0.0.1:18001/front/coordination/slots/2/",
+    "assertion": "Denied page gives a clear alert and safe current-workspace return",
+    "passed": true,
+    "regressionTests": 6
+  },
+  {
+    "id": "B05-declaration-not-consent",
+    "at": "2026-10-13T09:39:58.618Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Recording a progress declaration leaves both protected visits in place",
+    "passed": true
+  },
+  {
+    "id": "B06-blocked-submit",
+    "at": "2026-10-13T09:39:58.630Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Task cannot be submitted while protected appointments remain",
+    "passed": true
+  },
+  {
+    "id": "B06-submit-prepare-refused",
+    "at": "2026-10-13T09:40:53.437Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/act/submit/",
+    "assertion": "Direct attempt to prepare review submission is refused while protected visits remain",
+    "passed": true
+  },
+  {
+    "id": "B05-reschedule-original-booking",
+    "at": "2026-10-13T10:52:20.085Z",
+    "url": "http://127.0.0.1:18001/visits/4/?coord_slot=1",
+    "assertion": "Original booking is moved through the original appointment flow",
+    "passed": true
+  },
+  {
+    "id": "B05-reschedule-offer-booking",
+    "at": "2026-10-13T10:52:20.311Z",
+    "url": "http://127.0.0.1:18001/visits/5/?coord_slot=1",
+    "assertion": "Offer-linked appointment is separately moved; the accepted offer is not replayed",
+    "passed": true
+  },
+  {
+    "id": "B05-committed-history",
+    "at": "2026-10-13T10:53:12.960Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/act/submit/",
+    "assertion": "PostgreSQL retains RESCHEDULED predecessors and SCHEDULED successors without cancelling care",
+    "passed": true,
+    "evidence": "b06-after-reschedules.json"
+  },
+  {
+    "id": "B06-ready",
+    "at": "2026-10-13T10:53:13.622Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Only after original bookings are resolved does explicit submission reach review-ready state",
+    "passed": true
+  },
+  {
+    "id": "B07-same-person-refused",
+    "at": "2026-10-13T10:53:47.191Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Task submitter switches to MANAGER but cannot approve their own submission",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Observed refusal says cannot switch roles to review your own submission; assert that wording and the actual blocked action label."
+  },
+  {
+    "id": "B07-same-person-refused",
+    "at": "2026-10-13T10:54:28.675Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Submitter cannot approve after switching to MANAGER",
+    "passed": true
+  },
+  {
+    "id": "B07-self-review-prepare-refused",
+    "at": "2026-10-13T10:54:28.788Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/act/approve/",
+    "assertion": "Direct self-review preparation is refused by the server",
+    "passed": true
+  },
+  {
+    "id": "TASK-pending-copy",
+    "at": "2026-10-13T10:54:29.120Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "An owner waiting for review is not described as a finished task",
+    "passed": false,
+    "classification": "application-defect",
+    "issue": "Empty action list incorrectly implies the READY task is already ended",
+    "resolved": true,
+    "resolution": "Use the already-authorized awaiting-review fact; READY and CLOSED HTTP wording regressions and fresh browser check pass."
+  },
+  {
+    "id": "TASK-pending-copy",
+    "at": "2026-10-13T11:01:09.444Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Review-ready task is described as awaiting independent review, with no finished-state wording",
+    "passed": true,
+    "regressionTests": 8
+  },
+  {
+    "id": "B07-facts-change-setup",
+    "at": "2026-10-13T11:03:59.043Z",
+    "url": "http://localhost:18001/visits/6/",
+    "assertion": "A separately authorized front desk creates a booking only after explicit admission resume",
+    "passed": true
+  },
+  {
+    "id": "B07-facts-repaused",
+    "at": "2026-10-13T11:05:14.996Z",
+    "url": "http://127.0.0.1:18001/slots/1/",
+    "assertion": "After the new booking, the manager explicitly pauses admissions again",
+    "passed": true
+  },
+  {
+    "id": "B07-stale-approval-rejected",
+    "at": "2026-10-13T11:10:37.049Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/confirm/",
+    "assertion": "Changed booking facts reject an old manager approval; task is not closed",
+    "passed": true,
+    "observed": "- main:\n  - paragraph: 协调任务 · 结果核对\n  - heading \"需要重新核对任务\" [level=1]\n  - paragraph: 本次确认未执行；请重新读取任务及关联事实。\n  - alert:\n    - list:\n      - text: __all__\n      - list:\n        - listitem: 预览后事实已变化，本次未保存；请重新读取。\n  - paragraph: 不自动重新发送；先查询原任务或原出诊。查询失败不等于先前办理失败。\n  - link \"重新读取原任务\":\n    - /url: /coordination/tasks/slots/1/1/\n  - link \"查询任务记录\":\n    - /url: /coordination/tasks/?slot=1&mode=all\n- contentinfo: 北京时间（UTC+8） · 业务操作由你明确确认，助手不会代为提交。"
+  },
+  {
+    "id": "B02-old-booking-form-rejected",
+    "at": "2026-10-13T11:10:39.572Z",
+    "url": "http://localhost:18001/visits/new/",
+    "assertion": "A booking form opened before pause cannot create an appointment after pause",
+    "passed": false,
+    "observed": "- main:\n  - generic: 业务操作\n  - heading \"创建预约\" [level=1]\n  - paragraph: 时间采用北京时间；同时检查患者与牙医的跨店冲突。\n  - alert:\n    - heading \"请检查以下输入，本次尚未保存\" [level=2]\n    - list:\n      - link \"出诊时段:\":\n        - /url: \"#id_slot\"\n  - generic: \"患者业务编号:\"\n  - textbox \"患者业务编号:\": P-FF66B6B042DB4179B4F56BF9DB40BEE0\n  - generic: 从患者页复制完整编号。跨店患者先用精确编号检索。\n  - generic: \"出诊时段:\"\n  - combobox \"出诊时段:\":\n    - option \"---------\" [selected]\n    - option \"演示诊所1 / G3合成牙医 / 10-14 09:00–12:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-15 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-16 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-17 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-18 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-19 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-20 09:00–18:00\"\n  - list:\n    - listitem: 选择一个有效的选项： 该选择不在可用的选项中。\n  - generic: \"预约开始:\"\n  - textbox \"预约开始:\": 2026-10-14T10:30\n  - generic: \"预计结束:\"\n  - textbox \"预计结束:\": 2026-10-14T11:00\n  - generic: \"患者主诉:\"\n  - textbox \"患者主诉:\"\n  - generic: \"特殊需求:\"\n  - textbox \"特殊需求:\"\n  - generic: \"治疗意向（不是已治疗项目）:\"\n  - textbox \"治疗意向（不是已治疗项目）:\"\n  - button \"确认预约\"\n  - link \"返回工作台\":\n    - /url: /\n- contentinfo: 北京时间（UTC+8） · 业务操作由你明确确认，助手不会代为提交。",
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "The observed refusal is the ModelChoiceField unavailable-option error, not literal pause wording; committed snapshot proves no booking."
+  },
+  {
+    "id": "B02-old-booking-form-rejected",
+    "at": "2026-10-13T11:10:57.225Z",
+    "url": "http://localhost:18001/visits/new/",
+    "assertion": "A form opened before pause is refused because its selected slot is no longer available",
+    "passed": true
+  },
+  {
+    "id": "B02-old-inbound-form-rejected",
+    "at": "2026-10-13T11:10:57.361Z",
+    "url": "http://localhost:18001/visits/4/reschedule/?coord_slot=1",
+    "assertion": "An old form cannot move an appointment into a now paused slot",
+    "passed": true,
+    "observed": "- main:\n  - complementary:\n    - 'link \"返回出诊 #1 的关联核对\"':\n      - /url: /front/coordination/slots/1/\n    - paragraph: 本页只办理当前记录；核对结果未知时先查已保存事实，不自动重复提交。返回后重新读取，不将本页操作等同于整条出诊已经可停用。\n  - generic: 业务操作\n  - heading \"改期并保留历史\" [level=1]\n  - paragraph: 新预约失败时，旧预约不会失效。\n  - alert:\n    - heading \"请检查以下输入，本次尚未保存\" [level=2]\n    - list:\n      - link \"新的出诊时段:\":\n        - /url: \"#id_slot\"\n  - generic: \"新的出诊时段:\"\n  - combobox \"新的出诊时段:\":\n    - option \"---------\" [selected]\n    - option \"演示诊所1 / G3合成牙医 / 10-14 09:00–12:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-15 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-16 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-17 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-18 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-19 09:00–18:00\"\n    - option \"演示诊所1 / 演示牙医1 / 10-20 09:00–18:00\"\n  - list:\n    - listitem: 选择一个有效的选项： 该选择不在可用的选项中。\n  - generic: \"新的开始时间:\"\n  - textbox \"新的开始时间:\": 2026-10-14T11:00\n  - generic: \"新的结束时间:\"\n  - textbox \"新的结束时间:\": 2026-10-14T11:30\n  - generic: \"改期原因:\"\n  - textbox \"改期原因:\": G3合成验收：暂停前打开的旧改入表单\n  - button \"确认改期\"\n  - link \"返回工作台\":\n    - /url: /\n- contentinfo: 北京时间（UTC+8） · 业务操作由你明确确认，助手不会代为提交。"
+  },
+  {
+    "id": "B07-return-for-fresh-coordination",
+    "at": "2026-10-13T11:11:37.998Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Changed facts cause explicit manager return to a new claim rather than approving stale work",
+    "passed": true
+  },
+  {
+    "id": "B06-new-blocker-legitimately-rescheduled",
+    "at": "2026-10-13T11:11:56.528Z",
+    "url": "http://127.0.0.1:18001/visits/7/?coord_slot=1",
+    "assertion": "The newly created blocker is handled by a separate explicit reschedule preserving its predecessor",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Observed visit detail formats time as 2026-10-15 10:00, and preserves the predecessor; the original assertion assumed a different date format."
+  },
+  {
+    "id": "B06-new-blocker-legitimately-rescheduled",
+    "at": "2026-10-13T11:12:09.219Z",
+    "url": "http://127.0.0.1:18001/visits/7/?coord_slot=1",
+    "assertion": "The new blocker is explicitly rescheduled with predecessor history kept",
+    "passed": true
+  },
+  {
+    "id": "B07-independent-fresh-approval",
+    "at": "2026-10-13T11:12:33.689Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/slots/1/1/",
+    "assertion": "Different manager approves fresh zero-blocker facts without changing source availability",
+    "passed": true
+  },
+  {
+    "id": "B08-separate-availability-replacement",
+    "at": "2026-10-13T11:13:32.902Z",
+    "url": "http://127.0.0.1:18001/slots/1/",
+    "assertion": "After task approval a separate command preserves the old slot and creates a paused replacement",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "Observed success says 原时段已停用并保留历史；替代时段已建立 and links #16; the original assertion assumed unseen wording."
+  },
+  {
+    "id": "B08-separate-availability-replacement",
+    "at": "2026-10-13T11:13:46.279Z",
+    "url": "http://127.0.0.1:18001/slots/1/",
+    "assertion": "Separate replacement preserves original ID and time as inactive history",
+    "passed": true
+  },
+  {
+    "id": "B08-replacement-inherits-pause",
+    "at": "2026-10-13T11:13:46.395Z",
+    "url": "http://127.0.0.1:18001/slots/16/",
+    "assertion": "New replacement remains paused pending an explicit resume",
+    "passed": true
+  },
+  {
+    "id": "B-readonly-old-confirmation-rejected",
+    "at": "2026-10-13T11:16:11.262Z",
+    "url": "http://127.0.0.1:18001/slots/16/intake-confirm/",
+    "assertion": "Read-only mode refuses a previously prepared manager resume confirmation",
+    "passed": true
+  },
+  {
+    "id": "A-readonly-old-cost-form-rejected",
+    "at": "2026-10-13T11:16:11.270Z",
+    "url": "http://localhost:18001/finance/1/cost/1/",
+    "assertion": "Read-only mode refuses a previously prepared finance cost update",
+    "passed": true
+  },
+  {
+    "id": "READONLY-committed-facts-unchanged",
+    "at": "2026-10-13T11:16:28.623Z",
+    "url": "http://127.0.0.1:18001/slots/16/intake-confirm/",
+    "assertion": "Both refused POSTs leave all allowlisted business rows, invoices and receipts unchanged",
+    "passed": true,
+    "before": "b08-before-readonly.json",
+    "after": "readonly-after-rejections.json"
+  },
+  {
+    "id": "READONLY-accessible-recovery-fixed",
+    "at": "2026-10-13T11:17:44.493Z",
+    "url": "http://localhost:18001/finance/1/cost/1/",
+    "assertion": "Read-only rejection is an accessible page with its reason and a safe return link",
+    "passed": true
+  },
+  {
+    "id": "B-readonly-maintenance-entry-refused",
+    "at": "2026-10-13T11:18:15.733Z",
+    "url": "http://127.0.0.1:18001/slots/16/intake/resume/",
+    "assertion": "Read-only mode also refuses entry to a writing maintenance preview",
+    "passed": false,
+    "classification": "test-expectation-error",
+    "resolved": true,
+    "resolution": "The manager GET remains readable with no form and 当前只读实例不开放提交; original assertion wrongly expected a refusal page."
+  },
+  {
+    "id": "B-readonly-maintenance-entry-refused",
+    "at": "2026-10-13T11:18:57.078Z",
+    "url": "http://127.0.0.1:18001/slots/16/intake/resume/",
+    "assertion": "In read-only mode the manager can inspect the slot but the submission form is withheld",
+    "passed": true
+  },
+  {
+    "id": "B09-duplicate-old-confirmation-rejected",
+    "at": "2026-10-13T11:19:53.922Z",
+    "url": "http://127.0.0.1:18001/slots/16/intake-confirm/",
+    "assertion": "After a committed resume whose response was lost, a second old confirmation is rejected without undoing success",
+    "passed": true
+  },
+  {
+    "id": "B09-lost-response-reconciled",
+    "at": "2026-10-13T11:19:54.038Z",
+    "url": "http://127.0.0.1:18001/slots/16/",
+    "assertion": "Read the saved replacement after a real lost response; resume committed and zero appointments/offers were auto-created",
+    "passed": true,
+    "fault": "lost-response-events.jsonl"
+  },
+  {
+    "id": "A-lost-response-reconciled-once",
+    "at": "2026-10-13T11:21:48.182Z",
+    "url": "http://127.0.0.1:18001/portal/appointments/",
+    "assertion": "After the successful response is deliberately dropped, querying the portal finds exactly one new appointment and one receipt",
+    "passed": true,
+    "before": "a-lost-response-before.json",
+    "after": "a-lost-response-after.json",
+    "fault": "lost-response-events.jsonl"
+  },
+  {
+    "id": "A-empty-candidates-explicit",
+    "at": "2026-10-13T11:22:09.191Z",
+    "url": "http://127.0.0.1:18001/portal/slots/?clinic=&day=2026-11-30",
+    "assertion": "Empty date search explains no current candidates without inferring permanent availability",
+    "passed": true
+  },
+  {
+    "id": "A-other-patient-visit-denied",
+    "at": "2026-10-13T11:22:46.448Z",
+    "url": "http://127.0.0.1:18001/portal/visits/5/",
+    "assertion": "Patient cannot open another patient appointment by its ID",
+    "passed": true
+  },
+  {
+    "id": "B-stale-clinic-context-rejected",
+    "at": "2026-10-13T11:23:03.475Z",
+    "url": "http://127.0.0.1:18001/slots/16/intake-confirm/",
+    "assertion": "Switching to another authorized clinic invalidates an old confirmation, without borrowing the old scope",
+    "passed": true
+  },
+  {
+    "id": "B-empty-task-list-explicit",
+    "at": "2026-10-13T11:23:03.561Z",
+    "url": "http://127.0.0.1:18001/coordination/tasks/",
+    "assertion": "A clinic with no coordination tasks shows an explicit empty list",
+    "passed": true
+  },
+  {
+    "id": "A-stale-role-context-rejected",
+    "at": "2026-10-13T11:23:28.313Z",
+    "url": "http://127.0.0.1:18001/visits/new/",
+    "assertion": "A user with both roles cannot submit the old front-desk booking while currently acting as dentist",
+    "passed": true
+  },
+  {
+    "id": "A-revoked-grant-old-confirmation-rejected",
+    "at": "2026-10-13T11:24:53.733Z",
+    "url": "http://127.0.0.1:18001/patients/5/contact/confirm/",
+    "assertion": "With browser session unchanged, a real UI grant revocation prevents the old contact confirmation",
+    "passed": true
+  },
+  {
+    "id": "B-revoked-grant-old-inbox-post-rejected",
+    "at": "2026-10-13T11:24:53.848Z",
+    "url": "http://127.0.0.1:18001/notifications/17/read/",
+    "assertion": "Grant revocation also prevents a formerly authorized unread notice from being acknowledged by the old tab",
+    "passed": true
+  },
+  {
+    "id": "REVOKED-business-facts-unchanged",
+    "at": "2026-10-13T11:25:24.033Z",
+    "url": "http://127.0.0.1:18001/patients/5/contact/confirm/",
+    "assertion": "Both old revoked requests leave all business and inbox rows unchanged",
+    "passed": true,
+    "before": "revocation-before.json",
+    "after": "revocation-after.json"
+  },
+  {
+    "id": "B10-real-worker-restart-deduplicates",
+    "at": "2026-10-13T11:26:32.335Z",
+    "url": "http://127.0.0.1:18001/slots/16/",
+    "assertion": "A second actual worker restart preserves all delivered event/grant inbox pairs and business rows",
+    "passed": true,
+    "before": "worker-final-before-restart.json",
+    "after": "worker-final-after-restart.json"
+  },
+  {
+    "id": "B-mobile320-large-text",
+    "at": "2026-10-13T11:33:58.945Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fslots%2F16%2F",
+    "assertion": "Live Django slot maintenance fits 320 CSS px in real Chrome with 20px text and named controls",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    },
+    "scope": "real same-origin frame; not mobile hardware"
+  },
+  {
+    "id": "RESP-B-task-320-standard",
+    "at": "2026-10-13T11:33:59.206Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fcoordination%2Ftasks%2Fslots%2F1%2F1%2F",
+    "assertion": "Live Django B-task has no page overflow or duplicate/unlabeled inputs at 320 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-B-task-320-large",
+    "at": "2026-10-13T11:33:59.243Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fcoordination%2Ftasks%2Fslots%2F1%2F1%2F",
+    "assertion": "Live Django B-task has no page overflow or duplicate/unlabeled inputs at 320 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-B-task-390-standard",
+    "at": "2026-10-13T11:33:59.425Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fcoordination%2Ftasks%2Fslots%2F1%2F1%2F",
+    "assertion": "Live Django B-task has no page overflow or duplicate/unlabeled inputs at 390 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-B-task-390-large",
+    "at": "2026-10-13T11:33:59.463Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fcoordination%2Ftasks%2Fslots%2F1%2F1%2F",
+    "assertion": "Live Django B-task has no page overflow or duplicate/unlabeled inputs at 390 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-B-pause-form-320-standard",
+    "at": "2026-10-13T11:33:59.641Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fslots%2F16%2Fintake%2Fpause%2F",
+    "assertion": "Live Django B-pause-form has no page overflow or duplicate/unlabeled inputs at 320 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-B-pause-form-320-large",
+    "at": "2026-10-13T11:33:59.676Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fslots%2F16%2Fintake%2Fpause%2F",
+    "assertion": "Live Django B-pause-form has no page overflow or duplicate/unlabeled inputs at 320 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-B-pause-form-390-standard",
+    "at": "2026-10-13T11:33:59.852Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fslots%2F16%2Fintake%2Fpause%2F",
+    "assertion": "Live Django B-pause-form has no page overflow or duplicate/unlabeled inputs at 390 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-B-pause-form-390-large",
+    "at": "2026-10-13T11:33:59.892Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fslots%2F16%2Fintake%2Fpause%2F",
+    "assertion": "Live Django B-pause-form has no page overflow or duplicate/unlabeled inputs at 390 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-manager-home-320-standard",
+    "at": "2026-10-13T11:34:00.075Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fmanager%2F",
+    "assertion": "Live Django manager-home has no page overflow or duplicate/unlabeled inputs at 320 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-manager-home-320-large",
+    "at": "2026-10-13T11:34:00.106Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fmanager%2F",
+    "assertion": "Live Django manager-home has no page overflow or duplicate/unlabeled inputs at 320 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-manager-home-390-standard",
+    "at": "2026-10-13T11:34:00.286Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fmanager%2F",
+    "assertion": "Live Django manager-home has no page overflow or duplicate/unlabeled inputs at 390 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-manager-home-390-large",
+    "at": "2026-10-13T11:34:00.323Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fmanager%2F",
+    "assertion": "Live Django manager-home has no page overflow or duplicate/unlabeled inputs at 390 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "B-keyboard-preview-and-confirmation",
+    "at": "2026-10-13T11:35:48.478Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fslots%2F16%2Fintake%2Fpause%2F",
+    "assertion": "Tab reaches preview and final confirmation; Enter previews only; the final write awaits explicit consent",
+    "passed": true,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "确认暂停接收新预约"
+    }
+  },
+  {
+    "id": "RESP-finance-home-320-standard",
+    "at": "2026-10-13T11:35:51.908Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ffinance%2F",
+    "assertion": "Live Django finance-home has no page overflow or duplicate/unlabeled inputs at 320 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-finance-home-320-large",
+    "at": "2026-10-13T11:35:51.950Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ffinance%2F",
+    "assertion": "Live Django finance-home has no page overflow or duplicate/unlabeled inputs at 320 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-finance-home-390-standard",
+    "at": "2026-10-13T11:35:52.136Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ffinance%2F",
+    "assertion": "Live Django finance-home has no page overflow or duplicate/unlabeled inputs at 390 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-finance-home-390-large",
+    "at": "2026-10-13T11:35:52.173Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ffinance%2F",
+    "assertion": "Live Django finance-home has no page overflow or duplicate/unlabeled inputs at 390 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-quarter-320-standard",
+    "at": "2026-10-13T11:35:52.373Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ffinance%2F1%2F",
+    "assertion": "Live Django A-quarter has no page overflow or duplicate/unlabeled inputs at 320 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-quarter-320-large",
+    "at": "2026-10-13T11:35:52.412Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ffinance%2F1%2F",
+    "assertion": "Live Django A-quarter has no page overflow or duplicate/unlabeled inputs at 320 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-quarter-390-standard",
+    "at": "2026-10-13T11:35:52.604Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ffinance%2F1%2F",
+    "assertion": "Live Django A-quarter has no page overflow or duplicate/unlabeled inputs at 390 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-quarter-390-large",
+    "at": "2026-10-13T11:35:52.646Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ffinance%2F1%2F",
+    "assertion": "Live Django A-quarter has no page overflow or duplicate/unlabeled inputs at 390 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-cost-320-standard",
+    "at": "2026-10-13T11:35:52.841Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ffinance%2F1%2Fcost%2F1%2F",
+    "assertion": "Live Django A-cost has no page overflow or duplicate/unlabeled inputs at 320 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-cost-320-large",
+    "at": "2026-10-13T11:35:52.883Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ffinance%2F1%2Fcost%2F1%2F",
+    "assertion": "Live Django A-cost has no page overflow or duplicate/unlabeled inputs at 320 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-cost-390-standard",
+    "at": "2026-10-13T11:35:53.075Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ffinance%2F1%2Fcost%2F1%2F",
+    "assertion": "Live Django A-cost has no page overflow or duplicate/unlabeled inputs at 390 CSS px with standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-cost-390-large",
+    "at": "2026-10-13T11:35:53.120Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ffinance%2F1%2Fcost%2F1%2F",
+    "assertion": "Live Django A-cost has no page overflow or duplicate/unlabeled inputs at 390 CSS px with large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-finance-workspace-320-standard",
+    "at": "2026-10-13T11:36:42.718Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django finance-workspace fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-finance-workspace-320-large",
+    "at": "2026-10-13T11:36:42.756Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django finance-workspace fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-finance-workspace-390-standard",
+    "at": "2026-10-13T11:36:42.942Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django finance-workspace fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-finance-workspace-390-large",
+    "at": "2026-10-13T11:36:42.987Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django finance-workspace fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-invoice-320-standard",
+    "at": "2026-10-13T11:36:43.186Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Finvoices%2F1%2F",
+    "assertion": "Live Django A-invoice fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-invoice-320-large",
+    "at": "2026-10-13T11:36:43.226Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Finvoices%2F1%2F",
+    "assertion": "Live Django A-invoice fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-invoice-390-standard",
+    "at": "2026-10-13T11:36:43.412Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Finvoices%2F1%2F",
+    "assertion": "Live Django A-invoice fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-invoice-390-large",
+    "at": "2026-10-13T11:36:43.445Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Finvoices%2F1%2F",
+    "assertion": "Live Django A-invoice fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-hq-workspace-320-standard",
+    "at": "2026-10-13T11:36:44.053Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django hq-workspace fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-hq-workspace-320-large",
+    "at": "2026-10-13T11:36:44.089Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django hq-workspace fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-hq-workspace-390-standard",
+    "at": "2026-10-13T11:36:44.263Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django hq-workspace fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-hq-workspace-390-large",
+    "at": "2026-10-13T11:36:44.294Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django hq-workspace fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-technical-workspace-320-standard",
+    "at": "2026-10-13T11:36:44.854Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django technical-workspace fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-technical-workspace-320-large",
+    "at": "2026-10-13T11:36:44.892Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django technical-workspace fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-technical-workspace-390-standard",
+    "at": "2026-10-13T11:36:45.074Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django technical-workspace fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-technical-workspace-390-large",
+    "at": "2026-10-13T11:36:45.113Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django technical-workspace fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-technical-accounts-320-standard",
+    "at": "2026-10-13T11:36:45.300Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ftechnical%2Faccounts%2F",
+    "assertion": "Live Django technical-accounts fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-technical-accounts-320-large",
+    "at": "2026-10-13T11:36:45.341Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Ftechnical%2Faccounts%2F",
+    "assertion": "Live Django technical-accounts fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-technical-accounts-390-standard",
+    "at": "2026-10-13T11:36:45.524Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ftechnical%2Faccounts%2F",
+    "assertion": "Live Django technical-accounts fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-technical-accounts-390-large",
+    "at": "2026-10-13T11:36:45.569Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Ftechnical%2Faccounts%2F",
+    "assertion": "Live Django technical-accounts fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-front-desk-workspace-320-standard",
+    "at": "2026-10-13T11:37:05.624Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django front-desk-workspace fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-front-desk-workspace-320-large",
+    "at": "2026-10-13T11:37:05.660Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django front-desk-workspace fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-front-desk-workspace-390-standard",
+    "at": "2026-10-13T11:37:05.843Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django front-desk-workspace fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-front-desk-workspace-390-large",
+    "at": "2026-10-13T11:37:05.880Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django front-desk-workspace fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-front-booking-320-standard",
+    "at": "2026-10-13T11:37:06.067Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fvisits%2Fnew%2F",
+    "assertion": "Live Django A-front-booking fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-front-booking-320-large",
+    "at": "2026-10-13T11:37:06.103Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fvisits%2Fnew%2F",
+    "assertion": "Live Django A-front-booking fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-front-booking-390-standard",
+    "at": "2026-10-13T11:37:06.279Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fvisits%2Fnew%2F",
+    "assertion": "Live Django A-front-booking fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-front-booking-390-large",
+    "at": "2026-10-13T11:37:06.312Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fvisits%2Fnew%2F",
+    "assertion": "Live Django A-front-booking fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-dentist-workspace-320-standard",
+    "at": "2026-10-13T11:37:06.975Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django dentist-workspace fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-dentist-workspace-320-large",
+    "at": "2026-10-13T11:37:07.019Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django dentist-workspace fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-dentist-workspace-390-standard",
+    "at": "2026-10-13T11:37:07.198Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django dentist-workspace fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-dentist-workspace-390-large",
+    "at": "2026-10-13T11:37:07.238Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django dentist-workspace fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-care-320-standard",
+    "at": "2026-10-13T11:37:07.424Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fcare%2F1%2F",
+    "assertion": "Live Django A-care fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-care-320-large",
+    "at": "2026-10-13T11:37:07.462Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fcare%2F1%2F",
+    "assertion": "Live Django A-care fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-care-390-standard",
+    "at": "2026-10-13T11:37:07.667Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fcare%2F1%2F",
+    "assertion": "Live Django A-care fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-care-390-large",
+    "at": "2026-10-13T11:37:07.713Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fcare%2F1%2F",
+    "assertion": "Live Django A-care fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-patient-workspace-320-standard",
+    "at": "2026-10-13T11:37:08.319Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django patient-workspace fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-patient-workspace-320-large",
+    "at": "2026-10-13T11:37:08.363Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2F",
+    "assertion": "Live Django patient-workspace fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-patient-workspace-390-standard",
+    "at": "2026-10-13T11:37:08.556Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django patient-workspace fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-patient-workspace-390-large",
+    "at": "2026-10-13T11:37:08.596Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2F",
+    "assertion": "Live Django patient-workspace fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-patient-candidates-320-standard",
+    "at": "2026-10-13T11:37:08.803Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fportal%2Fslots%2F",
+    "assertion": "Live Django A-patient-candidates fits 320 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-patient-candidates-320-large",
+    "at": "2026-10-13T11:37:08.852Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=320&src=%2Fportal%2Fslots%2F",
+    "assertion": "Live Django A-patient-candidates fits 320 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 320,
+      "unlabeled": [],
+      "width": 320
+    }
+  },
+  {
+    "id": "RESP-A-patient-candidates-390-standard",
+    "at": "2026-10-13T11:37:09.050Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fportal%2Fslots%2F",
+    "assertion": "Live Django A-patient-candidates fits 390 CSS px with named controls and standard text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "16px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "RESP-A-patient-candidates-390-large",
+    "at": "2026-10-13T11:37:09.097Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fportal%2Fslots%2F",
+    "assertion": "Live Django A-patient-candidates fits 390 CSS px with named controls and large text",
+    "passed": true,
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "A-keyboard-consent-and-confirmation",
+    "at": "2026-10-13T11:38:18.041Z",
+    "url": "http://127.0.0.1:18002/__g3_responsive__/?width=390&src=%2Fportal%2Fslots%2F",
+    "assertion": "Space activates booking consent and Tab reaches the separate final confirmation button",
+    "passed": true,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "确认提交预约"
+    },
+    "measurement": {
+      "duplicates": [],
+      "fontSize": "20px",
+      "overflowing": [],
+      "scrollWidth": 390,
+      "unlabeled": [],
+      "width": 390
+    }
+  },
+  {
+    "id": "B09-fresh-draft-intake-revision-rejected",
+    "at": "2026-10-13T11:39:57.002Z",
+    "url": "http://127.0.0.1:18001/scheduling/plans/3/",
+    "assertion": "A fresh unexpired plan is rejected after pause/resume even though the slot is open again",
+    "passed": true
+  }
+]

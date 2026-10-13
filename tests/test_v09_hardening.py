@@ -36,6 +36,9 @@ class ReadOnlyHTTPTests(V07Fixture,TransactionTestCase):
         e,p,o=self.offered();self.login(self.pa,'PATIENT')
         with override_settings(ADC_READ_ONLY=True):
             r=self.post('wait_offer',{'confirmed':True,'action':'accept'},args=[o.pk]);self.assertEqual(r.status_code,403)
+            self.assertContains(r,'本次业务写入未执行',status_code=403)
+            self.assertContains(r,'返回当前工作台',status_code=403)
+            self.assertContains(r,'role="alert"',status_code=403)
         self.assertFalse(Visit.objects.exists())
     def test_wrong_role_not_allowed(self):
         e=self.join();self.login(self.manager,'MANAGER',self.a)

@@ -33,15 +33,20 @@ class ReadOnlyPolicyTests(unittest.TestCase):
 class MiddlewareBranchTests(unittest.TestCase):
     def branch(self,enabled,name,method='POST'):
         conf=types.ModuleType('django.conf');conf.settings=types.SimpleNamespace(ADC_READ_ONLY=enabled)
-        http=types.ModuleType('django.http');http.HttpResponseForbidden=lambda text: types.SimpleNamespace(status_code=403,body=text)
+        shortcuts=types.ModuleType('django.shortcuts')
+        shortcuts.render=lambda request,template,context,*,status: types.SimpleNamespace(status_code=status,template=template,context=context)
         spec=importlib.util.spec_from_file_location('_adc_read_only_review',ROOT/'adc_core/middleware.py')
         mod=importlib.util.module_from_spec(spec)
-        with patch.dict(sys.modules,{'django.conf':conf,'django.http':http}):spec.loader.exec_module(mod)
+        with patch.dict(sys.modules,{'django.conf':conf,'django.shortcuts':shortcuts}):spec.loader.exec_module(mod)
         mw=mod.ReadOnlyDemoMiddleware(lambda req:'downstream')
         request=types.SimpleNamespace(method=method,resolver_match=types.SimpleNamespace(view_name=name),path='/fake/')
         return mw.process_view(request,None,[],{})
     def test_readonly_query_reaches_handler(self):self.assertIsNone(self.branch(True,'guide_result_wait'))
-    def test_readonly_write_rejected(self):self.assertEqual(self.branch(True,'wait_offer').status_code,403)
+    def test_readonly_write_rejected(self):
+        result=self.branch(True,'wait_offer')
+        self.assertEqual(result.status_code,403)
+        self.assertEqual(result.template,'403.html')
+        self.assertTrue(result.context['read_only_denial'])
     def test_normal_mode_unchanged(self):self.assertIsNone(self.branch(False,'wait_offer'))
     def test_path_spelling_does_not_grant(self):self.assertEqual(self.branch(True,'unknown').status_code,403)
 

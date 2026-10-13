@@ -57,11 +57,17 @@ import into a separate empty instance.
 
 `./RC_MACOS.sh verify` uses a new temporary PostgreSQL database and writes
 results under `evidence/verification/`. Current Mac validation is summarized in
-[docs/evidence_macos](docs/evidence_macos/).
+[docs/evidence_macos](docs/evidence_macos/) and the latest
+[G3 PostgreSQL gate](docs/evidence_g3/postgresql-gate.json).
 
 Database regression, browser interaction, backup recovery and public deployment
 are separate checks. A public **source repository** does not make the local
 application a public deployment. This course demonstrator is still an RC.
+
+G3's two browser business routes（业务验收）and worker recovery have passed on
+the Mac synthetic environment. See [the browser acceptance record](docs/G3_BROWSER_ACCEPTANCE.md)
+for financial oracles, permission refusals, lost responses and 320/390 CSS-pixel
+Chrome checks. Original Windows backup recovery and public deployment remain open.
 
 - [Release scope and history](RELEASE_CURRENT.md)
 - [Two business demonstration routes](docs/DEMO_ROUTES_RC1.md)

@@ -1,0 +1,32 @@
+{% load static %}<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% if read_only_denial %}当前实例只读{% else %}核对当前身份{% endif %} · ADC</title>
+  <link rel="stylesheet" href="{% static 'app.css' %}">
+  <link rel="stylesheet" href="{% static 'experience.css' %}">
+  <script defer src="{% static 'experience.js' %}"></script>
+</head>
+<body class="login-body">
+  <a class="skip" href="#main">跳到主要内容</a>
+  <main id="main" class="login-card" tabindex="-1">
+    <div class="eyebrow">ADC / 业务范围核对</div>
+    {% if read_only_denial %}
+    <h1>当前实例只读</h1>
+    <p role="alert">当前实例仅供只读演示。本次业务写入未执行。</p>
+    {% else %}
+    <h1>当前身份无法继续这一步</h1>
+    <p role="alert">当前身份、诊所范围、授权或页面状态不允许继续。请从当前工作台核对后重新进入。</p>
+    {% endif %}
+    <button class="button secondary mode-toggle" type="button" aria-pressed="false">大字简明模式</button>
+    {% if read_only_denial %}
+    <p>仍可查阅获授权的记录；身份或诊所切换不会解除只读限制。</p>
+    {% else %}
+    <p>切换身份或诊所后，请重新打开业务页面；授权变化后，请重新登录。</p>
+    {% endif %}
+    <p>如果刚才提交的结果不确定，请先在工作台核对已保存记录，再决定是否重新办理。</p>
+    <a class="button" href="{% url 'dashboard' %}">返回当前工作台</a>
+  </main>
+</body>
+</html>

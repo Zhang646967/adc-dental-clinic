@@ -1,0 +1,3 @@
+{"path": "/slots/16/intake-confirm/", "upstream_status": 302, "response_dropped": true}
+{"path": "/portal/book/confirm/", "upstream_status": 302, "response_dropped": true}
+{"path": "/portal/book/confirm/", "retry_blocked": true}

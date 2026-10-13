@@ -13,3 +13,5 @@
 *.pdf binary
 *.docx binary
 *.zip binary
+# Retain the exact browser-downloaded G3 CSV bytes as evidence.
+docs/evidence_g3/*.csv binary

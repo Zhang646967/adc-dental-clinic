@@ -1,0 +1,667 @@
+{
+  "scope": "Committed allowlisted synthetic PostgreSQL facts",
+  "observed_at": "2026-10-13 09:33:16.820281+00:00",
+  "rows": {
+    "accounts.UserAccount": [
+      {
+        "id": 1,
+        "username": "front_a",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 2,
+        "username": "front_b",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 3,
+        "username": "doctor_a",
+        "dentist_id": 1,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 4,
+        "username": "manager_a",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 5,
+        "username": "hq_demo",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 6,
+        "username": "finance_demo",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 7,
+        "username": "tech_demo",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 8,
+        "username": "patient_demo_a",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 9,
+        "username": "patient_demo_b",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 10,
+        "username": "doctor_b",
+        "dentist_id": 2,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 11,
+        "username": "multi_demo",
+        "dentist_id": 3,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 12,
+        "username": "g3_doctor",
+        "dentist_id": 4,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      },
+      {
+        "id": 13,
+        "username": "g3_patient",
+        "dentist_id": null,
+        "is_active": true,
+        "is_staff": false,
+        "is_superuser": false
+      }
+    ],
+    "accounts.RoleAssignment": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "role": "FRONT_DESK",
+        "clinic_id": 1,
+        "is_active": true
+      },
+      {
+        "id": 2,
+        "user_id": 2,
+        "role": "FRONT_DESK",
+        "clinic_id": 2,
+        "is_active": true
+      },
+      {
+        "id": 3,
+        "user_id": 3,
+        "role": "DENTIST",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 4,
+        "user_id": 4,
+        "role": "MANAGER",
+        "clinic_id": 1,
+        "is_active": true
+      },
+      {
+        "id": 5,
+        "user_id": 5,
+        "role": "HQ",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 6,
+        "user_id": 6,
+        "role": "FINANCE",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 7,
+        "user_id": 7,
+        "role": "SYSADMIN",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 8,
+        "user_id": 10,
+        "role": "DENTIST",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 9,
+        "user_id": 11,
+        "role": "DENTIST",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 10,
+        "user_id": 11,
+        "role": "MANAGER",
+        "clinic_id": 1,
+        "is_active": true
+      },
+      {
+        "id": 11,
+        "user_id": 11,
+        "role": "MANAGER",
+        "clinic_id": 2,
+        "is_active": true
+      },
+      {
+        "id": 12,
+        "user_id": 12,
+        "role": "DENTIST",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 13,
+        "user_id": 12,
+        "role": "FINANCE",
+        "clinic_id": null,
+        "is_active": true
+      },
+      {
+        "id": 14,
+        "user_id": 11,
+        "role": "FRONT_DESK",
+        "clinic_id": 1,
+        "is_active": true
+      }
+    ],
+    "registry.Dentist": [
+      {
+        "id": 1,
+        "employee_no": "DEMO-D1",
+        "is_active": true
+      },
+      {
+        "id": 2,
+        "employee_no": "DEMO-D2",
+        "is_active": true
+      },
+      {
+        "id": 3,
+        "employee_no": "DEMO-D3",
+        "is_active": true
+      },
+      {
+        "id": 4,
+        "employee_no": "G3-D1",
+        "is_active": true
+      }
+    ],
+    "registry.Qualification": [
+      {
+        "id": 1,
+        "code": "DEMO-Q",
+        "is_active": true
+      },
+      {
+        "id": 2,
+        "code": "G3-Q1",
+        "is_active": true
+      },
+      {
+        "id": 3,
+        "code": "G3-Q2",
+        "is_active": true
+      }
+    ],
+    "registry.DentistQualification": [
+      {
+        "id": 1,
+        "dentist_id": 4,
+        "qualification_id": 2,
+        "is_active": true
+      },
+      {
+        "id": 2,
+        "dentist_id": 4,
+        "qualification_id": 3,
+        "is_active": true
+      }
+    ],
+    "registry.TreatmentType": [
+      {
+        "id": 1,
+        "code": "DEMO-T",
+        "standard_unit_price": "150.00"
+      }
+    ],
+    "patients.Patient": [
+      {
+        "id": 1,
+        "patient_no": "P-CFBB8C995D17491EBDF52F17BECC4B8B",
+        "allergy_status": "UNKNOWN",
+        "allergy_info_version": 1
+      },
+      {
+        "id": 2,
+        "patient_no": "P-17D62ECF8A7042E4B151CE2C11A2032C",
+        "allergy_status": "UNKNOWN",
+        "allergy_info_version": 1
+      },
+      {
+        "id": 3,
+        "patient_no": "PORTAL-DEMO-1",
+        "allergy_status": "UNKNOWN",
+        "allergy_info_version": 1
+      },
+      {
+        "id": 4,
+        "patient_no": "PORTAL-DEMO-2",
+        "allergy_status": "UNKNOWN",
+        "allergy_info_version": 1
+      },
+      {
+        "id": 5,
+        "patient_no": "P-FF66B6B042DB4179B4F56BF9DB40BEE0",
+        "allergy_status": "NO_KNOWN",
+        "allergy_info_version": 2
+      }
+    ],
+    "scheduling.AvailabilitySlot": [
+      {
+        "id": 1,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-14 01:00:00+00:00",
+        "ends_at": "2026-10-14 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": true,
+        "intake_revision": 1
+      },
+      {
+        "id": 2,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-14 01:00:00+00:00",
+        "ends_at": "2026-10-14 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 3,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-15 01:00:00+00:00",
+        "ends_at": "2026-10-15 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 4,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-15 01:00:00+00:00",
+        "ends_at": "2026-10-15 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 5,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-16 01:00:00+00:00",
+        "ends_at": "2026-10-16 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 6,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-16 01:00:00+00:00",
+        "ends_at": "2026-10-16 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 7,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-17 01:00:00+00:00",
+        "ends_at": "2026-10-17 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 8,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-17 01:00:00+00:00",
+        "ends_at": "2026-10-17 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 9,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-18 01:00:00+00:00",
+        "ends_at": "2026-10-18 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 10,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-18 01:00:00+00:00",
+        "ends_at": "2026-10-18 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 11,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-19 01:00:00+00:00",
+        "ends_at": "2026-10-19 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 12,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-19 01:00:00+00:00",
+        "ends_at": "2026-10-19 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 13,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "starts_at": "2026-10-20 01:00:00+00:00",
+        "ends_at": "2026-10-20 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 14,
+        "clinic_id": 2,
+        "dentist_id": 2,
+        "starts_at": "2026-10-20 01:00:00+00:00",
+        "ends_at": "2026-10-20 10:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      },
+      {
+        "id": 15,
+        "clinic_id": 1,
+        "dentist_id": 4,
+        "starts_at": "2026-10-14 01:00:00+00:00",
+        "ends_at": "2026-10-14 04:00:00+00:00",
+        "is_active": true,
+        "booking_paused": false,
+        "intake_revision": 0
+      }
+    ],
+    "scheduling.Visit": [
+      {
+        "id": 1,
+        "visit_no": "V-E7395A74331D49C88AE0CC18A0140DF6",
+        "patient_id": 5,
+        "clinic_id": 1,
+        "dentist_id": 4,
+        "availability_slot_id": 15,
+        "status": "COMPLETED",
+        "scheduled_start": "2026-10-14 01:00:00+00:00",
+        "scheduled_end": "2026-10-14 01:30:00+00:00",
+        "attended": true,
+        "attended_at": "2026-10-13 08:59:54.569830+00:00",
+        "completed_at": "2026-10-13 09:06:36.054408+00:00",
+        "lock_version": 8,
+        "replaces_visit_id": null
+      },
+      {
+        "id": 2,
+        "visit_no": "V-5BEE1B0A8DF943B2B9C5522E981247B6",
+        "patient_id": 3,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "availability_slot_id": 1,
+        "status": "SCHEDULED",
+        "scheduled_start": "2026-10-14 01:00:00+00:00",
+        "scheduled_end": "2026-10-14 01:30:00+00:00",
+        "attended": false,
+        "attended_at": null,
+        "completed_at": null,
+        "lock_version": 0,
+        "replaces_visit_id": null
+      },
+      {
+        "id": 3,
+        "visit_no": "V-A1A25B93BA0044778C0E83CD45BEDCBC",
+        "patient_id": 4,
+        "clinic_id": 1,
+        "dentist_id": 1,
+        "availability_slot_id": 1,
+        "status": "SCHEDULED",
+        "scheduled_start": "2026-10-14 01:30:00+00:00",
+        "scheduled_end": "2026-10-14 02:00:00+00:00",
+        "attended": false,
+        "attended_at": null,
+        "completed_at": null,
+        "lock_version": 0,
+        "replaces_visit_id": null
+      }
+    ],
+    "care.VisitRecordVersion": [
+      {
+        "id": 1,
+        "visit_id": 1,
+        "revision_no": 1,
+        "state": "PUBLISHED",
+        "total_amount": "199.98",
+        "previous_version_id": null,
+        "correction_request_id": null,
+        "prepared_by_id": 12,
+        "reviewed_by_id": 12,
+        "published_at": "2026-10-13 09:06:36.054408+00:00"
+      },
+      {
+        "id": 2,
+        "visit_id": 1,
+        "revision_no": 2,
+        "state": "PUBLISHED",
+        "total_amount": "99.99",
+        "previous_version_id": 1,
+        "correction_request_id": 1,
+        "prepared_by_id": 12,
+        "reviewed_by_id": 6,
+        "published_at": "2026-10-13 09:16:38.684568+00:00"
+      }
+    ],
+    "care.TreatmentRecord": [
+      {
+        "id": 2,
+        "record_version_id": 1,
+        "quantity": "2.000",
+        "unit_price": "99.99",
+        "line_amount": "199.98"
+      },
+      {
+        "id": 3,
+        "record_version_id": 2,
+        "quantity": "1.000",
+        "unit_price": "99.99",
+        "line_amount": "99.99"
+      }
+    ],
+    "care.Invoice": [
+      {
+        "id": 1,
+        "visit_id": 1,
+        "current_record_version_id": 2,
+        "first_issued_at": "2026-10-13 09:06:36.056643+00:00"
+      }
+    ],
+    "care.CorrectionRequest": [
+      {
+        "id": 1,
+        "visit_id": 1,
+        "kind": "RECORD_CONTENT",
+        "status": "APPLIED",
+        "requester_id": 12,
+        "reviewer_id": 6,
+        "base_record_version_id": 1
+      }
+    ],
+    "finance.Quarter": [
+      {
+        "id": 1,
+        "year": 2026,
+        "quarter_no": 4,
+        "roster_status": "CONFIRMED"
+      }
+    ],
+    "finance.DentistQuarterCost": [
+      {
+        "id": 1,
+        "quarter_id": 1,
+        "dentist_id": 4,
+        "cost_status": "CONFIRMED",
+        "supply_cost": "10.00",
+        "operating_expense": "20.00"
+      },
+      {
+        "id": 2,
+        "quarter_id": 1,
+        "dentist_id": 2,
+        "cost_status": "CONFIRMED",
+        "supply_cost": "50.00",
+        "operating_expense": "50.00"
+      }
+    ],
+    "coordination.WaitRequest": [
+      {
+        "id": 1,
+        "patient_id": 4,
+        "clinic_id": 1,
+        "state": "BOOKED",
+        "revision": 2
+      }
+    ],
+    "coordination.WaitOffer": [
+      {
+        "id": 1,
+        "request_id": 1,
+        "slot_id": 1,
+        "state": "ACCEPTED",
+        "visit_id": 3,
+        "starts_at": "2026-10-14 01:30:00+00:00",
+        "ends_at": "2026-10-14 02:00:00+00:00",
+        "expires_at": "2026-10-13 09:39:40.776145+00:00"
+      }
+    ],
+    "coordination.CoordinationTask": [
+      {
+        "id": 1,
+        "slot_id": 1,
+        "purpose": "REPLACE",
+        "state": "OPEN",
+        "assignee_id": null,
+        "submitted_by_id": null,
+        "closed_by_id": null,
+        "revision": 0
+      }
+    ],
+    "notifications.NotificationOutbox": [
+      {
+        "id": 1,
+        "task_id": 1,
+        "action": "open",
+        "state": "DELIVERED",
+        "event_state": "OPEN",
+        "completed_at": "2026-10-13 09:32:26.043587+00:00"
+      }
+    ],
+    "notifications.InboxMessage": [
+      {
+        "id": 1,
+        "event_id": 1,
+        "recipient_id": 1,
+        "grant_id": 1,
+        "clinic_id": 1,
+        "role": "FRONT_DESK",
+        "read_at": null
+      },
+      {
+        "id": 2,
+        "event_id": 1,
+        "recipient_id": 11,
+        "grant_id": 14,
+        "clinic_id": 1,
+        "role": "FRONT_DESK",
+        "read_at": "2026-10-13 09:33:13.909149+00:00"
+      }
+    ]
+  },
+  "billing_header_hashes": [
+    {
+      "record_id": 1,
+      "sha256": "1d4086517714f88da6d04240752a378fbff77944edb4750ddb6f6110796ea0df"
+    },
+    {
+      "record_id": 2,
+      "sha256": "1d4086517714f88da6d04240752a378fbff77944edb4750ddb6f6110796ea0df"
+    }
+  ],
+  "booking_receipts": 2
+}
