@@ -1,7 +1,9 @@
 """Bounded PostgreSQL inbox dispatcher; no broker or external transport.
-Event lock + all inbox inserts + completion state commit atomically. A process
-crash rolls this attempt back, leaving it eligible; there is no leased/stuck
-PROCESSING state. Handled failures roll back a savepoint before retry scheduling.
+Event lock + all inbox inserts + completion state commit atomically. A crash
+before commit leaves the event eligible; a crash after commit may lose the
+process receipt, so restart reads the stored state instead of replaying it.
+There is no leased/stuck PROCESSING state. Handled failures roll back a
+savepoint before retry scheduling.
 """
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -77,9 +79,13 @@ def dispatch_one():
                 'delivered':event.delivered_count,'suppressed':event.suppressed_count}
 
 
-def dispatch_batch(batch_size=25):
+def dispatch_batch(batch_size=25, *, should_stop=None):
     results=[]
     for _ in range(bounded_batch(batch_size)):
+        # Admit no next event after a stop request. Never interrupt dispatch_one:
+        # its inbox rows and completion state must commit or roll back together.
+        if should_stop is not None and should_stop():
+            break
         result=dispatch_one()
         if result is None:
             break

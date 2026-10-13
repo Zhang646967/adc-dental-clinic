@@ -27,6 +27,7 @@ elif args[:2] == ['volume','ls']:
     if os.environ.get('MOCK_VOLUME_ERROR'): sys.exit(7)
     if os.environ.get('MOCK_VOLUME_EXISTS'): print('existing_rc_data')
 elif args[:1] == ['compose']:
+    if args[-1:] == ['build'] and os.environ.get('MOCK_BUILD_ERROR'): sys.exit(7)
     if args[-3:] == ['run','--rm','schema'] and os.environ.get('MOCK_SCHEMA_ERROR'): sys.exit(7)
     if args[-1:] == ['bootstrap_release_demo']: print('mock-credentials-only')
 else: sys.exit(9)
@@ -48,7 +49,7 @@ class MacLauncherTests(unittest.TestCase):
         self.env = {**os.environ, 'ADC_DOCKER_BIN': str(self.binary),
                     'MOCK_LOG': str(self.log), 'MOCK_ROOT': str(self.root)}
         for key in ('DOCKER_HOST','DOCKER_CONTEXT','MOCK_ENDPOINT','MOCK_VOLUME_EXISTS',
-                    'MOCK_VOLUME_ERROR','MOCK_SCHEMA_ERROR'):
+                    'MOCK_VOLUME_ERROR','MOCK_SCHEMA_ERROR','MOCK_BUILD_ERROR'):
             self.env.pop(key, None)
 
     def invoke(self, *args, **overrides):
@@ -117,10 +118,21 @@ class MacLauncherTests(unittest.TestCase):
         (self.root / '.rc/READY').write_text('synthetic-demo\n')
         self.assertEqual(self.invoke('start').returncode, 0)
         commands = [x['args'] for x in self.calls() if 'compose' in x['args']]
+        build = next(i for i,x in enumerate(commands) if x[-1:] == ['build'])
+        stop = next(i for i,x in enumerate(commands) if x[-4:] == ['stop','gateway','web','notification-worker'])
         schema = next(i for i,x in enumerate(commands) if x[-3:] == ['run','--rm','schema'])
         start = next(i for i,x in enumerate(commands) if x[-5:] == ['up','-d','web','gateway','notification-worker'])
+        self.assertLess(build, stop)
         self.assertLess(schema, start)
         self.assertFalse(any('bootstrap_release_demo' in x for x in commands))
+
+    def test_failed_build_does_not_stop_the_previous_runtime(self):
+        self.prepare()
+        (self.root / '.rc/READY').write_text('synthetic-demo\n')
+        self.assertNotEqual(self.invoke('start', MOCK_BUILD_ERROR='1').returncode, 0)
+        commands = [x['args'] for x in self.calls() if 'compose' in x['args']]
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0][-1], 'build')
 
     def test_stop_preserves_database_volumes(self):
         self.prepare()

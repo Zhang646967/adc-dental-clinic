@@ -40,6 +40,20 @@ Daily commands are `start`, `stop` and `status`. `stop` retains the database
 volume. If setup fails after a volume was created, diagnose that instance;
 do not repeatedly seed it or delete its volume to hide the error.
 
+After a source update, `start` builds the current checkout before stopping the
+previous Web server and worker. If the build fails, the previous runtime is not
+stopped. After a successful build, schema preparation runs before the updated
+services start. This refreshes the code without reseeding accounts or replacing
+the private configuration or data volume.
+
+The notification worker handles normal termination and Ctrl+C at an event
+boundary. It finishes or rolls back the current event, admits no further event,
+and exits cleanly. Its idle wait responds to a stop request without increasing
+the database polling frequency. Compose allows a 30-second stop grace period.
+An abrupt termination before commit is recoverable on restart; a lost receipt
+after commit is handled by reading stored state, rather than replaying delivery.
+See [worker process acceptance](WORKER_PROCESS_ACCEPTANCE.md).
+
 ## Isolation and runtime
 
 The launcher pins an inspected local Docker context（本地上下文）and rejects

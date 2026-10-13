@@ -21,6 +21,11 @@ PostgreSQL and Node.js are not needed for the application.
 ./RC_MACOS.sh start
 ```
 
+`start` builds the current source before stopping the previous runtime, then
+prepares the schema and starts the updated services. Demo accounts and data are
+retained. The worker supports graceful shutdown（平稳停止）and tested recovery
+after termination; see [the process acceptance record](docs/WORKER_PROCESS_ACCEPTANCE.md).
+
 Open **http://127.0.0.1:18000**. Read your generated login credentials locally
 from `.rc/private/demo-credentials.txt`. Initialization runs once; normal startup
 does not reset accounts or seed data again.

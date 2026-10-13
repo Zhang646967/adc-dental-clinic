@@ -1,10 +1,27 @@
 {
   "version": "1.0.0-rc.1",
-  "meaning": "Blank acceptance record; NOT_RUN is not PASS.",
-  "G1_isolated_postgresql_and_dependencies": {"status":"NOT_RUN","evidence":[]},
-  "G2_v07_copy_upgrade_and_restore": {"status":"NOT_RUN","evidence":[]},
-  "G3_real_browser_and_worker": {"status":"NOT_RUN","evidence":[]},
+  "meaning": "Current evidence-backed acceptance record. Historical evidence is retained; a component PASS does not grant full browser, recovery or production acceptance.",
+  "G1_isolated_postgresql_and_dependencies": {
+    "status": "PASS",
+    "evidence": ["docs/evidence_macos/postgresql-gate.json", "docs/evidence_worker/postgresql-gate.json"]
+  },
+  "G2_v07_copy_upgrade_and_restore": {
+    "status": "NOT_RUN",
+    "reason": "The Windows host was reset and no v0.7 database backup was supplied. Source migration is not recovery of that database.",
+    "evidence": []
+  },
+  "G3_real_browser_and_worker": {
+    "status": "PARTIAL",
+    "components": {
+      "worker_process_shutdown_and_recovery": {
+        "status": "PASS",
+        "evidence": ["docs/evidence_worker/acceptance.json", "docs/WORKER_PROCESS_ACCEPTANCE.md"]
+      },
+      "full_browser_business_routes_and_accessibility": {"status": "NOT_RUN", "evidence": []}
+    },
+    "evidence": ["docs/evidence_worker/acceptance.json"]
+  },
   "G4_public_deployment": {"status":"NOT_RUN","evidence":[]},
   "public_release_approved": false,
-  "blockers": []
+  "blockers": ["No original Windows database backup", "Full browser acceptance remains", "Target server and domain for G4 are not defined"]
 }

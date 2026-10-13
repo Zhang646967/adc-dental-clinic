@@ -88,6 +88,9 @@ case "$ACTION" in
     ;;
   start)
     [ -f .rc/READY ] || die 'Initialize a new demo or a trusted backup copy before starting.'
+    # Build the current checkout before stopping the previous runtime. A failed
+    # build leaves that runtime available; schema uses the newly built image.
+    "${DC[@]}" build
     "${DC[@]}" --profile worker stop gateway web notification-worker
     "${DC[@]}" run --rm schema
     "${DC[@]}" --profile worker up -d web gateway notification-worker

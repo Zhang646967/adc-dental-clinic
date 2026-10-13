@@ -1,0 +1,28 @@
+{
+  "date_local": "2026-10-13",
+  "parent_commit": "50c33281715dc2de4a4c645636fa5e6bf7e80e99",
+  "scope": "Actual POSIX child processes against isolated PostgreSQL; not full manual browser acceptance",
+  "status": "PASS",
+  "worker_process_checks": 8,
+  "cases": [
+    "idle SIGTERM clean exit",
+    "stopped worker and restart without replay",
+    "SIGTERM during insert: commit current event and leave next pending",
+    "SIGINT during insert: same boundary",
+    "SIGKILL before commit: rollback and restart",
+    "stop before batch: no attempts",
+    "readonly wrapper: no Django setup or connection",
+    "non-course wrapper: refuses startup"
+  ],
+  "models_or_migrations_changed": false,
+  "business_task_changed_by_worker": false,
+  "known_remaining": [
+    "Full seven-role and two-chain browser acceptance",
+    "Original v0.7 backup recovery",
+    "Target public deployment"
+  ],
+  "source_checks_passed": 814,
+  "django_postgresql_tests_passed": 692,
+  "isolated_cleanup_exit": 0,
+  "mac_start_build_failure_keeps_previous_runtime": true
+}
