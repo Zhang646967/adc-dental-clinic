@@ -42,8 +42,10 @@ class V04Fixture(FixtureMixin):
         return change_appointment(actor=self.front,visit_id=v.pk,expected_version=v.lock_version,action="check_in")
     def review(self,v,status="NO_KNOWN",ids=()):
         v.refresh_from_db();self.p1.refresh_from_db()
+        patient=v.patient
+        patient.refresh_from_db()
         return review_allergies(actor=self.doctor,visit_id=v.pk,expected_version=v.lock_version,
-            patient_version=self.p1.allergy_info_version,status=status,allergy_ids=ids)
+            patient_version=patient.allergy_info_version,status=status,allergy_ids=ids)
     def line(self,v,quantity=Decimal("1.125")):
         v.refresh_from_db()
         return add_treatment(actor=self.doctor,visit_id=v.pk,expected_version=v.lock_version,

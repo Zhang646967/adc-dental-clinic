@@ -180,7 +180,8 @@
         "rc_static:/srv/static:ro"
       ],
       "networks": [
-        "private"
+        "private",
+        "loopback"
       ],
       "restart": "on-failure:3"
     }
@@ -192,6 +193,12 @@
   "networks": {
     "private": {
       "internal": true
+    },
+    "loopback": {
+      "driver": "bridge",
+      "driver_opts": {
+        "com.docker.network.bridge.host_binding_ipv4": "127.0.0.1"
+      }
     }
   }
 }

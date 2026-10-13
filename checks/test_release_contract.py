@@ -37,6 +37,14 @@ class ReleaseContractTests(unittest.TestCase):
  def test_no_external_volumes(self):
   self.assertTrue(all(not x.get('external') for x in self.config()['volumes'].values()))
  def test_internal_network(self):self.assertTrue(self.config()['networks']['private']['internal'])
+ def test_only_gateway_has_host_facing_network(self):
+  services=self.config()['services']
+  self.assertIn('loopback',services['gateway']['networks'])
+  for name in ('db','schema','web','notification-worker'):
+   self.assertEqual(services[name]['networks'],['private'])
+ def test_host_facing_network_defaults_to_loopback(self):
+  opts=self.config()['networks']['loopback']['driver_opts']
+  self.assertEqual(opts['com.docker.network.bridge.host_binding_ipv4'],'127.0.0.1')
  def test_no_ai_keys_in_rc_environment(self):
   env=self.config()['services']['web']['environment']
   self.assertEqual(env['AI_MODE'],'demo');self.assertEqual(env['AI_API_KEY'],'');self.assertEqual(env['OPENAI_API_KEY'],'')

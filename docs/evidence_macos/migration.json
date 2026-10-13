@@ -1,0 +1,33 @@
+{
+  "migration_date_local": "2026-10-12",
+  "source_archive": "ADC_engineering_v1.0rc1.zip",
+  "archive_sha256": "2c53e25fefbbb512826e67ff02c4553e219c819d7bf8b820c5852a179e2a4292",
+  "original_git_history_in_archive": false,
+  "original_database_backup_in_archive": false,
+  "baseline_tag": "v1.0.0-rc.1",
+  "source_checks_passed": 813,
+  "django_postgresql_tests_passed": 684,
+  "isolated_gate_passed": true,
+  "isolated_project_cleanup_exit": 0,
+  "protected_model_and_migration_files_changed": [],
+  "startup_fix": "Contact form EmailField constructor rejected strip=False; use untrimmed CharField with Django email validation and EmailInput.",
+  "test_definition_repairs": [
+    "Review the patient attached to each visit, not the first fixture patient.",
+    "Confirm the second operator proposal as that same operator.",
+    "Check recipient payload keys independently of the aggregate no_recipients counter."
+  ],
+  "gaps": [
+    "No Windows database backup was supplied; previous user data was not recovered.",
+    "Full manual browser business acceptance not completed.",
+    "Public production deployment and backup recovery not performed."
+  ],
+  "local_demo": {
+    "login_http_status": 200,
+    "url": "http://127.0.0.1:18000",
+    "database": "fresh synthetic demo",
+    "gateway_host_binding": "127.0.0.1:18000",
+    "database_and_app_network": "internal only",
+    "web_and_notification_worker_started": true
+  },
+  "configuration_fix": "Only gateway also joins a loopback-default bridge; internal-only gateway did not publish its port on the Mac Docker engine."
+}

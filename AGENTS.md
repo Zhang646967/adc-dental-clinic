@@ -1,4 +1,11 @@
-# ADC v0.9.0-alpha.10 engineering rules
+# ADC RC1 engineering rules — macOS development
+
+The user resumed macOS migration on 2026-10-12 and requested a public
+`adc-dental-clinic` repository. The original Windows host was reset. The supplied
+RC1 ZIP contains source and historical artifacts, but no Git history or database
+backup. Preserve tag `v1.0.0-rc.1`; develop on `main`. Use a fresh synthetic demo.
+Current host instructions are in `docs/MACOS.md`; older Windows reports retain
+their historical validation status.
 
 Synthetic local course demonstrator; not a medical, payment or public-production product.
 
@@ -26,7 +33,7 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 17. Migration tools must never restore into an existing database or infer a Docker target. Pin a local context and an explicit source container ID. Keep PG17, business timezone, schema and historical data unchanged during host migration.
 18. Logical transfer bundles are PRIVATE and unencrypted; exclude .env and Git history. Preserve unlisted/local files separately. Rehearsal success is not a live cutover, E2E result, production release or evidence that Windows can be discarded.
 
-19. Host migration is ON HOLD. Do not invoke export, restore, cutover or a user-instance upgrade without explicit next-stage authorization. Existing migration tools stay unchanged.
+19. macOS source migration and a new synthetic local demo are authorized. Do not claim recovery of the reset Windows database. Backup import still requires a supplied trusted synthetic backup and the explicit import-copy flag. Existing logical migration tools stay unchanged.
 20. SU-27/28 is SYSADMIN/current-workspace-only bounded directory registration and qualification-record association, not clinical verification or a general CRUD editor. Keep code uniqueness, preview-before-save, password/confirmation checks, signed context binding, audit-cursor ABA protection and replay guards. No automatic accounts, grants, appointments, scheduling eligibility or history rewrites. No deletion or renaming.
 
 ## Availability maintenance (alpha.6)
@@ -35,7 +42,7 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 - Never rewrite original interval/clinic/dentist or delete history; replacement uses a new row.
 - Maintain actor/context/grant/source-slot lock ordering and retain original exclusion constraints.
 - Record true test scope: static/template/AST tests do not prove ORM/HTTP/PG behavior.
-- Mac migration remains paused; the user's v0.7 instance must not be overwritten implicitly.
+- Mac source migration is active; do not infer or restore a missing v0.7 database.
 
 ## Front desk coordination (alpha.7)
 - SU31 is an explicit-slot, current-clinic FRONT_DESK read projection; never a ticket, patient consent or stop-booking flag.

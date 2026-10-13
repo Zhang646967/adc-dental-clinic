@@ -167,7 +167,12 @@ class NotificationTests(FixtureMixin,TransactionTestCase):
         self.assertNotEqual(row['event_revision'],row['current_revision']);self.assertNotEqual(row['event_state'],row['current_state'])
     def test_status_has_no_recipient_names_or_patient(self):
         self.delivered();result=delivery_status(actor=self.manager)
-        for k in ('test_front','患者姓名','recipients'): self.assertNotIn(k,str(result))
+        for k in ('test_front','患者姓名'): self.assertNotIn(k,str(result))
+        # no_recipients is an aggregate counter, not a recipient list.
+        for projected in (result,*result['rows']):
+            for key in ('recipients','recipient_id','username','patient_id','patient_name'):
+                self.assertNotIn(key,projected)
+        self.assertIsInstance(result['no_recipients'],int)
     def test_status_front_denied(self):
         with self.assertRaises(PermissionDenied): delivery_status(actor=self.front)
     @override_settings(ADC_READ_ONLY=True)

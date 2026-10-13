@@ -1,5 +1,14 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
+## macOS development — 2026-10-12
+
+Source migration was resumed by the user. `v1.0.0-rc.1` preserves the supplied
+Windows ZIP; `main` contains the Mac launcher and verified fixes. Use
+`RC_MACOS.sh` and `docs/MACOS.md`. The Windows host was reset and no database
+backup was supplied, so the Mac demo starts with synthetic data. The release
+account below describes the original archive; current validation is recorded in
+`docs/evidence_macos/`.
+
 候选源码基于完整alpha.10重建；中断目录中的图像不作为代码完成证据。运行基线仍为Windows v0.7，Mac暂停。此次不新增大型业务模块，而是整合可核对、可启动、可验收的课程候选。
 
 ## A：运营核对与交互

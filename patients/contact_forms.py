@@ -1,10 +1,14 @@
 from django import forms
+from django.core.validators import validate_email
 from patients.contact_rules import CONTACT_FIELDS, REASONS, normalize_details, ContactInputError
 
 class ContactEditForm(forms.Form):
     state_token = forms.CharField(widget=forms.HiddenInput, max_length=16000)
     phone = forms.CharField(label='联系电话', max_length=32, strip=False, widget=forms.TextInput(attrs={'type':'tel','autocomplete':'off'}))
-    email = forms.EmailField(label='邮箱（选填，可清空）', required=False, max_length=254, strip=False)
+    # EmailField forces strip=True. Keep the contact policy's original input
+    # intact and validate it without silently trimming surrounding whitespace.
+    email = forms.CharField(label='邮箱（选填，可清空）', required=False, max_length=254,
+                            strip=False, validators=[validate_email], widget=forms.EmailInput)
     billing_address = forms.CharField(label='当前账单地址', max_length=255, strip=False)
     emergency_name = forms.CharField(label='紧急联系人', max_length=80, strip=False)
     emergency_phone = forms.CharField(label='紧急联系电话', max_length=32, strip=False, widget=forms.TextInput(attrs={'type':'tel','autocomplete':'off'}))

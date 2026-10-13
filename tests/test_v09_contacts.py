@@ -101,7 +101,7 @@ class ContactChangeTests(V04Fixture, TransactionTestCase):
         with self.assertRaises(PermissionDenied):self.confirm(p)
     def test_stale_data_between_edit_and_preview(self):
         editor=contact_editor(actor=self.front,patient_id=self.p1.pk)
-        self.confirm(self.proposal(actor=self.front2))
+        self.confirm(self.proposal(actor=self.front2),actor=self.front2)
         with self.assertRaises(RuleError):prepare_contact_change(actor=self.front,patient_id=self.p1.pk,
             state_token=editor.state_token,details=self.values()|{'phone':'000-2222'},reason_code='PATIENT_UPDATE')
     def test_stale_data_between_preview_and_confirm(self):
