@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<h1>{{ preview.title }}</h1><p class="notice" role="status"><strong>尚未保存。</strong>请核对以下目标与资料。确认页有效15分钟，换身份或过期后应重新读取。</p>
+<section class="panel"><h2>拟保存内容</h2><dl class="directory-details">{% for row in preview.rows %}<div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>{% endfor %}</dl><p>操作依据：{{ preview.reason_label }}</p></section>
+<form class="panel" method="post" action="{% url 'directory_confirm' %}">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<div class="actions"><button class="button" type="submit">确认并保存本次变更</button><a class="button secondary" href="{% url 'directory_home' %}">放弃，返回目录</a></div></form>
+<p>本次只维护登记资料；不自动发放账号权限、不认定专业能力、不改变已有预约、治疗或历史账单。误关联撤回也不代替人员安全封禁或业务交接。</p>
+{% endblock %}

@@ -1,0 +1,334 @@
+{
+  "timestamp_utc": "2026-10-09T00:02:17.477004+00:00",
+  "report": "R5 / 1.0.0-rc.1",
+  "physical_pages": 63,
+  "body_pages": 60,
+  "system_use_cases": 38,
+  "shared_subfunction": 1,
+  "model_figures": 19,
+  "historical_v07_screenshots": 2,
+  "font_embedding_checked": true,
+  "review_method": "All pages rendered and visually reviewed. Last revision compared against reviewed render; only pages 26 and 44 changed and both were re-reviewed.",
+  "last_revision_changed_pages": [
+    26,
+    44
+  ],
+  "scope": "Report typography and references, not application/database validation.",
+  "pages": [
+    {
+      "physical_page": 1,
+      "image_sha256": "aa8356ad49a15dbf9e3b7515d5d23774734ed266d01d1dfe619b15f16034a9af",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 2,
+      "image_sha256": "7c349b68fda8dc0b4eed8830e980673efc766d76e04a5bebf6542674e99677ad",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 3,
+      "image_sha256": "c408bdcbfa01618a49bdbc15180d8e8460bd916a70f1d12e3cbc787d53b3069f",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 4,
+      "image_sha256": "e5b6ccdb36d434a4b54d12e63530d49bb51db63060332961174484f4ccea9318",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 5,
+      "image_sha256": "82f97282c93592cf8d2d562dca0f77c77055de43d4f5df5e35e4b204658d7102",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 6,
+      "image_sha256": "3d30cbe6a0ecf8825c6d417848b7ad56757c8ea7b7509925352502ff00191290",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 7,
+      "image_sha256": "77d00a59a5beaebe15e3f87b6965aae3ec9ab9c6bb30624096e9a61e23808bc8",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 8,
+      "image_sha256": "fe7de2e32144776a085fd1c3f00279e548d84953ad933f7f00af59db96fd2470",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 9,
+      "image_sha256": "94157460b976c61a9da7cf8f601e2a00f4de24a40eb9fb7647c45bfb53541e2c",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 10,
+      "image_sha256": "9eb92e837812c7e3ed6db3fb436be2dc35b4ab48211350e2c6ff747986331cf5",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 11,
+      "image_sha256": "bab841311abd85aaf1d1a59567461426316e4e2a7a0159b958c437e4b0e54271",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 12,
+      "image_sha256": "b544cb0293e4466b4c9437740c8ad9e8cc35fbef09183302ad7da70ad4d094f8",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 13,
+      "image_sha256": "28ada8f0d386041061cabff434eee617e0fb6f10f08a4c1d3f2a05dbc0e9dbd6",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 14,
+      "image_sha256": "555e8ee6640af4e6ada0f36c001247c1abb6532076f6605e2433f016ad7b2939",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 15,
+      "image_sha256": "c383fea1b863df0a56570a20b3dc69ec4e31196ad5cc77bb0c6fb1f25188806a",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 16,
+      "image_sha256": "8a45a6b2b2bb64f9f72551fff52fbaf00ad8c4403a72bd909b027e598055c67a",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 17,
+      "image_sha256": "29964a89a06610733194a8d2431990e454fe2a935df9adf5173dd4939a2c8b5f",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 18,
+      "image_sha256": "8163c7a4d0ed45f44b4e324b464e15f70d5680dbc4a5c48411ad9c7f332cb9a4",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 19,
+      "image_sha256": "026afdbab469366d7a654f4a1f965e6244bae9cc665b3652786fea61d8359e17",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 20,
+      "image_sha256": "0c3aef5c86c6218337ec96e8e12e9f660ad6590e994024f695224abc850483c8",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 21,
+      "image_sha256": "80acb3f31a5bb5b0fa8e5150760fd54118c5f1f99c5735805c19baf1870544af",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 22,
+      "image_sha256": "1bb4ce808828eae4f6877c974911adbe06cfddff3af664869c1bfe4342f5c466",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 23,
+      "image_sha256": "e1faac86a937abb82334b2347e29446ca92fa4b71fdc2fcefde43932a72c0e89",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 24,
+      "image_sha256": "4d99283f02537a21b53abf343bfef9987b5863c75742da8568de01292fc544ed",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 25,
+      "image_sha256": "dc02223dde57a063d96ab50fe7ea8f247bbb45ca3c5efa28558d1307564d382f",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 26,
+      "image_sha256": "954e0bf07dbb134fc3cf0fa73649ab599e32a21b45e2759de9cd0ab77eb9a6ee",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 27,
+      "image_sha256": "fbe96b90cb42bbbbd7573345d2ce917610765482aa538decaeba3fcc3b2081c0",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 28,
+      "image_sha256": "96c799ac033ce6ba0eb7251a3b0ff13e6ab07b31afaaf5d16a9cf00b844b64d0",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 29,
+      "image_sha256": "dac27d0af5ff3921574dc817d79ba884ff4cd12b7dabb6145bbb16f09fa5394d",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 30,
+      "image_sha256": "6c207b6b8b919239d6a9329fd60625268cbe7c44320d862c4a99fc7e44494c01",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 31,
+      "image_sha256": "df75b6fcce7acdffd87e24b41504da2e5eb626e0dc9a9b7ae691748ab175f5eb",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 32,
+      "image_sha256": "12454f6524bfd33c6ff3011df552fafa15196fd2c8353764b871266393d141c6",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 33,
+      "image_sha256": "c66b0ed5f4167139eeaae43c1852341a3397c941854e2bbbfbeafb2fff2904c7",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 34,
+      "image_sha256": "d55ca29b121e44c5c203c065f4c0044da603318c3b69501f4c6c8f85d133f9fa",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 35,
+      "image_sha256": "fd2ba8b5de5d3f0f24f401429523794825d36e9ac7a8c5ed7f0bcdff133847e6",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 36,
+      "image_sha256": "45d2709290d89b34430676f8dae644f5eba6148f98cb0fa958f5711aecc12db2",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 37,
+      "image_sha256": "e0aed41aa3d681ec9133d30b7a2f1d637a342748d988eb7b30045bdb3a4b06d0",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 38,
+      "image_sha256": "dd6f0cacc1da5a0387abcdb932e5867b4b98bd1c5ba00c5eee8526d26db14252",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 39,
+      "image_sha256": "e233c7400db401ffb212cec9b8fcd3a1cd09aebff39fe67d1c5bc591978d51ca",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 40,
+      "image_sha256": "855d426cca9538f7f8da614573181acf5eafd40555d559306966e054a3251625",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 41,
+      "image_sha256": "5e7f9f1cc6d5e31275ecf61ce1b8e9e1729f86c7f67a3171b8b17a8fa64383db",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 42,
+      "image_sha256": "eca6f2b9033a861a8ef202639e5386547fdfe7264e86531039c0d06d876c3051",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 43,
+      "image_sha256": "98bdc662423f782ccec0c93ad71f744df455d46789e955fd095a1b3051a45b16",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 44,
+      "image_sha256": "ceaabf29bbb39e9ed98c3a5384392bc2af343450cc45e1a7b03bc17971ed3706",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 45,
+      "image_sha256": "6b9381696876bb661ea3e14ae20c3ac1e89b8c59a06408b45e611a43f58064e1",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 46,
+      "image_sha256": "8195f62c7c2152bcc064c3a5d79daa831861005031b77f55eeb221f6ddf57536",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 47,
+      "image_sha256": "b3d51dd511a4e673f9af4e0ad373f74dd8f5182479872bfc6c085717bb2298cd",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 48,
+      "image_sha256": "bf788e7f24e955ee829b5d2a1dca9d65c81aea6801e012cbb9434559ad275c3d",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 49,
+      "image_sha256": "9a3db0f5dbcba5b268d34147cc9ec42d5a180563e2d065ad4478ca6b3c42e3a8",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 50,
+      "image_sha256": "d34f3d2f24a1121bdef75ea6e3f3eff500f2d28374e2b37ed6c06b0af1d13237",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 51,
+      "image_sha256": "ae72387b2553763a675a33e354123c134d7a98189d81fb4483d927db49a7edfe",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 52,
+      "image_sha256": "a20b1312c7da43509cdd1e7f352dbaa1016b2dda73859a91f50649a7bc63a82d",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 53,
+      "image_sha256": "5baa20b7623a19683a61e30675636d48d5539cf9777cb394e45be9f7ed4f2dbb",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 54,
+      "image_sha256": "e99119567c81edd0b03689265df6f2bfd7918e294f475633cdbf8c0ccd9527c9",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 55,
+      "image_sha256": "9375a665f83f6446fb3d213a9861a7e45440935a2841cf24f1daa155ac6b0dc0",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 56,
+      "image_sha256": "db1bcaba7edcde63c50405c8038a32b57ef78987480d7a53931dababe847c461",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 57,
+      "image_sha256": "2127755529ab97779d47f1a09d5b86cf5b1239e557a6a847945cbcd9c385057b",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 58,
+      "image_sha256": "fdc06499eed8fffe26bb6c047ab09bcf9d9f636603bc4bc397a78a9d8bd4c6a7",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 59,
+      "image_sha256": "e72018a4350563219453e7ee81b41bd0a9ff81c97b7089457aa26cbc5ab376ee",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 60,
+      "image_sha256": "87c33ab66975a091f293d311a9deb5152b7918d962ce0ea8e16d57f483d32d51",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 61,
+      "image_sha256": "d2abf27027178ad2c8291e291b43236e451471126cb08a8d6e3b2964a5f6febd",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 62,
+      "image_sha256": "7087f805946dfceb33dbeb42ffcb2e267e626cb04e271c59038ffba35edaeb2c",
+      "visual_review": "reviewed"
+    },
+    {
+      "physical_page": 63,
+      "image_sha256": "b902b83d42dc87c813c55b1b8fb460d3d7684c0bca7574d358c6a374a3351ca0",
+      "visual_review": "reviewed"
+    }
+  ]
+}

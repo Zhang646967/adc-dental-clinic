@@ -1,0 +1,3 @@
+# Candidate dependency selection; not an installed lock or vulnerability attestation.
+-r requirements.txt
+gunicorn==26.2.0

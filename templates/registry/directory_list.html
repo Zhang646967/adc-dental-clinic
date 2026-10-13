@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block content %}
+<a href="{% url 'directory_home' %}">返回基础资料目录</a><h1>{{ label }}目录</h1>
+<p>登记状态不等于账号授权、出诊安排或执业资格核验。列表不展示个人联系地址与出生日期。</p>
+{% if not read_only %}<p><a class="button" href="{% url 'directory_create' kind %}">登记新的{{ label }}</a></p>{% else %}<p role="status">当前只读，不允许保存。</p>{% endif %}
+<form method="get" class="panel"><label for="directory-search">按编码或名称查找</label><input id="directory-search" name="q" maxlength="120" value="{{ q }}"><button class="button secondary" type="submit">查找</button></form>
+<div class="role-grid">{% for row in rows %}<article class="role-card"><h2>{{ row.name }}</h2><p>{{ row.code }} · {% if row.active %}可用目录记录{% else %}已停用记录{% endif %}</p><a class="button secondary" href="{% url 'directory_detail' kind row.pk %}">核对登记资料</a></article>{% empty %}<section class="panel"><p>没有符合条件的{{ label }}。请检查编码或名称；不要为同一对象换一个新编号来绕过重复登记。</p></section>{% endfor %}</div>
+<p>第 {{ page.number }} / {{ page.paginator.num_pages }} 页 {% if page.has_previous %}<a href="?q={{ q|urlencode }}&page={{ page.previous_page_number }}">上一页</a>{% endif %} {% if page.has_next %}<a href="?q={{ q|urlencode }}&page={{ page.next_page_number }}">下一页</a>{% endif %}</p>
+{% endblock %}

@@ -1,0 +1,15 @@
+.notice-board {max-width:1120px;margin:0 auto;min-width:0;overflow-wrap:anywhere}
+.notice-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:1.25rem}
+.notice-links {display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;margin:1rem 0}
+.notice-links form {margin:0}
+.notice-filter {display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin:1rem 0}
+.notice-filter input,.notice-filter select {width:auto;max-width:100%;min-width:0}
+.notice-card {min-width:0}
+.notice-card dl {display:grid;grid-template-columns:minmax(0,1fr);gap:.3rem}
+.notice-card dt {font-weight:700;margin-top:.4rem}
+.notice-card dd {margin:0}
+.notice-retry {margin-top:1.2rem;display:grid;gap:.8rem}
+.notice-retry input[type=checkbox] {width:auto;min-height:24px;min-width:24px;vertical-align:middle}
+.notice-board .button,.notice-board button {white-space:normal;overflow-wrap:anywhere;min-height:44px}
+.notice-board a:focus-visible,.notice-board button:focus-visible {outline:3px solid currentColor;outline-offset:3px}
+@media(max-width:480px){.notice-links>* {max-width:100%}.notice-filter select{width:100%}.notice-card{padding:1.1rem}}

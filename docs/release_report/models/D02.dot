@@ -1,0 +1,12 @@
+digraph D02 {graph[rankdir=TB,bgcolor="white",nodesep=.7,ranksep=.85,pad=.2];node[shape=record,fontname="Noto Sans CJK SC",fontsize=18];edge[fontname="Noto Sans CJK SC",fontsize=15,arrowhead=none];
+slot[label="{AvailabilitySlot|原出诊编号、起止时间\lbooking_paused\lintake_revision\l}"];
+task[label="{CoordinationTask|目标、状态、修订\lassignee / submitted_by / reviewed_by\l提交事实摘要\l}"];
+audit[label="{AuditEvent|动作、对象、发生时点\l有限变更摘要\l}"];
+outbox[label="{NotificationOutbox|原任务事件、原收件授权快照\l派发状态、重试轮次\l}"];
+msg[label="{InboxMessage|原事件、收件账号和授权\l首次已读标记时间\l}"];
+slot->task[label="来源",taillabel="1",headlabel="0..*"];
+task->outbox[label="任务变化",taillabel="1",headlabel="0..*"];
+audit->outbox[label="唯一源事件",taillabel="1",headlabel="0..1"];
+outbox->msg[label="站内生成",taillabel="1",headlabel="0..*"];
+note[shape=note,fontsize=14,label="任务、审计及待派发事件同事务。\n通知只保存必要标识；查询时重新授权。\n未画出的账号、诊所及RoleAssignment外键保持独立。"];
+msg->note[style=invis];}

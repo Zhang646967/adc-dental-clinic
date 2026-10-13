@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}<div class="task-board">
+<p class="eyebrow">本店协作 · 任务与业务事实分开</p><h1>出诊协调任务</h1>
+<p>主管发起，前台明确受理，另一账号的主管复核。任务不是停诊指令、患者通知或预约确认。</p>
+<p><a href="{% url 'notification_inbox' %}">查看本人当前身份的站内消息</a>{% if result.role == 'MANAGER' %} · <a href="{% url 'notification_status' %}">核对本店通知派发</a>{% endif %}</p>
+<form method="get" class="panel task-filter"><div><label for="mode">查看范围</label><select id="mode" name="mode">
+<option value="active"{% if result.mode == 'active' %} selected{% endif %}>未结束任务</option><option value="mine"{% if result.mode == 'mine' %} selected{% endif %}>本人受理的未结束任务</option><option value="history"{% if result.mode == 'history' %} selected{% endif %}>已结束历史</option><option value="all"{% if result.mode == 'all' %} selected{% endif %}>全部任务</option></select></div>
+<div><label for="slot">出诊编号（可不填）</label><input type="number" id="slot" name="slot" min="1" value="{{ result.slot_filter }}"></div><button type="submit">查询任务</button></form>
+<p>本次筛选 {{ result.total }} 条 · 读取时点 {{ result.observed_at }}（北京时间）。本页不自动刷新或标记已处理。</p>
+{% if result.role == 'MANAGER' %}<p><a href="{% url 'availability_list' %}">从原出诊核对并发起新任务</a></p>{% endif %}
+<div class="task-grid">{% for row in result.rows %}<section class="panel"><p class="status">{{ row.status }}</p><h2>协调任务 #{{ row.id }}</h2><p>{{ row.purpose }} · 出诊 #{{ row.slot_id }}</p><p>{{ row.dentist }} · {{ row.start }}—{{ row.end }}</p><p>受理人：{{ row.assignee }}</p><p>{% if not row.slot_active %}原出诊已停用，请核对历史{% elif row.paused %}原出诊已暂停新增{% else %}原出诊仍接收新增，不能直接提交复核{% endif %}</p><a class="button" href="{% url 'coordination_task_detail' row.slot_id row.id %}">查看任务与当前事实</a></section>{% empty %}<section class="panel"><h2>没有符合筛选的任务</h2><p>未受理不等于已协调。可调整筛选，或由主管核对原出诊。</p></section>{% endfor %}</div>
+<p>第 {{ result.number }} / {{ result.pages }} 页</p><form class="task-paging" method="get"><input type="hidden" name="mode" value="{{ result.mode }}"><input type="hidden" name="slot" value="{{ result.slot_filter }}"><label for="page">转到页码</label><input id="page" name="page" type="number" min="1" max="{{ result.pages }}" value="{{ result.number }}"><button class="secondary" type="submit">跳转</button></form>
+</div>{% endblock %}

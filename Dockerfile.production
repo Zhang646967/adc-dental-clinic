@@ -1,0 +1,9 @@
+FROM python:3.13-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DJANGO_SETTINGS_MODULE=config.settings.production
+WORKDIR /app
+COPY requirements.txt requirements-production.txt ./
+RUN pip install --no-cache-dir -r requirements-production.txt && useradd --create-home --uid 10001 app
+COPY --chown=app:app . .
+RUN mkdir -p /app/staticfiles && chown app:app /app/staticfiles
+USER app
+CMD ["gunicorn", "config.wsgi:application", "--config", "deployment/gunicorn.conf.py"]

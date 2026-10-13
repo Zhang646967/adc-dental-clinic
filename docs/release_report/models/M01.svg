@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="755" viewBox="0 0 1050 755">
+<rect width="100%" height="100%" fill="white"/>
+<text x="25" y="34.0" font-family="Noto Sans CJK SC" font-size="24" text-anchor="start" font-weight="700" fill="#101010">stm 候补请求</text>
+<circle cx="100" cy="116" r="10" fill="#202020"/>
+<polyline points="110,116 175,116" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="175,116 164.86832906596825,120.28360176539516 164.86832906596825,111.71639823460484" fill="#202020"/>
+<rect x="175" y="70" width="250" height="90" rx="16" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="300" y="107.0" font-family="Noto Sans CJK SC" font-size="26" text-anchor="middle" fill="#101010">等待安排</text>
+<text x="300" y="139.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">WAITING</text>
+<rect x="645" y="70" width="250" height="90" rx="16" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="770" y="107.0" font-family="Noto Sans CJK SC" font-size="26" text-anchor="middle" fill="#101010">等待确认</text>
+<text x="770" y="139.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">OFFERED</text>
+<rect x="645" y="470" width="250" height="90" rx="16" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="770" y="507.0" font-family="Noto Sans CJK SC" font-size="26" text-anchor="middle" fill="#101010">已转预约</text>
+<text x="770" y="539.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">BOOKED</text>
+<rect x="175" y="470" width="250" height="90" rx="16" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="300" y="507.0" font-family="Noto Sans CJK SC" font-size="26" text-anchor="middle" fill="#101010">已退出</text>
+<text x="300" y="539.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">WITHDRAWN</text>
+<polyline points="425,111 645,111" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="645,111 634.8683290659683,115.28360176539516 634.8683290659683,106.71639823460484" fill="#202020"/>
+<text x="535" y="42.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">发布邀约[核验通过]</text>
+<text x="535" y="67.65" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">/ 建立限时保留</text>
+<polyline points="700,160 700,237 372,237 372,160" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="372,160 376.28360176539513,170.13167093403175 367.71639823460487,170.13167093403175" fill="#202020"/>
+<rect x="396.8" y="193" width="260.4" height="29.3" fill="white"/>
+<text x="527" y="211.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">拒绝邀约[尚有效] / 释放保留</text>
+<polyline points="839,160 839,303 235,303 235,160" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="235,160 239.28360176539516,170.13167093403175 230.71639823460484,170.13167093403175" fill="#202020"/>
+<rect x="333.79999999999995" y="262" width="386.4000000000001" height="29.3" fill="white"/>
+<text x="527" y="280.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">回收过期邀约[已到期] / 标记过期并恢复等待</text>
+<polyline points="895,137 981,137 981,513 895,513" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="895,513 905.1316709340317,508.71639823460487 905.1316709340317,517.2836017653951" fill="#202020"/>
+<text x="974" y="354.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="end" fill="#101010">接受邀约</text>
+<text x="974" y="378.3" font-family="Noto Sans CJK SC" font-size="18" text-anchor="end" fill="#101010">[尚有效且核验通过]</text>
+<text x="974" y="402.6" font-family="Noto Sans CJK SC" font-size="18" text-anchor="end" fill="#101010">/ 建立关联预约</text>
+<polyline points="255,160 255,470" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="255,470 250.71639823460484,459.8683290659683 259.28360176539513,459.8683290659683" fill="#202020"/>
+<rect x="97.36" y="356" width="109.28" height="56.300000000000004" fill="white"/>
+<text x="152" y="375.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">退出候补</text>
+<text x="152" y="400.65" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">/ 保留历史</text>
+<polyline points="645,142 606,142 606,420 355,420 355,470" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="355,470 350.71639823460487,459.8683290659683 359.28360176539513,459.8683290659683" fill="#202020"/>
+<rect x="412.88" y="380" width="240.24" height="29.3" fill="white"/>
+<text x="533" y="398.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">退出候补 / 撤回未接受邀约</text>
+<rect x="25" y="603" width="1000" height="94.95" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="37" y="628.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="start" fill="#101010">状态所属对象是“候补请求”，不是整个办理流程。</text>
+<text x="37" y="653.65" font-family="Noto Sans CJK SC" font-size="19" text-anchor="start" fill="#101010">邀约到期先改变其有效性；没有执行SU-17前，请求可能仍存为OFFERED。</text>
+<text x="37" y="679.3" font-family="Noto Sans CJK SC" font-size="19" text-anchor="start" fill="#101010">已转预约后的取消改变“就诊”，不删除候补历史；新候补是另一个对象。</text>
+</svg>

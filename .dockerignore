@@ -1,0 +1,28 @@
+.env
+.venv
+__pycache__
+*.pyc
+.git
+.runtime
+backups
+
+.env*
+*.dump
+.local_credentials*
+
+evidence/
+*.log
+
+# Portable development / private migration artifacts
+.DS_Store
+._*
+__MACOSX/
+private_migration/
+.migration/
+*.p12
+*.pfx
+*.pem
+*.key
+
+# RC host-only private instance material
+.rc/

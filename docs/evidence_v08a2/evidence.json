@@ -1,0 +1,11 @@
+{
+  "timestamp_utc": "2026-09-27T09:37:00.390335+00:00",
+  "version": "0.8.0-alpha.2",
+  "pure_test_methods_passed": 240,
+  "node_assertions_passed": 18,
+  "database_test_methods_authored": 269,
+  "database_tests_executed": false,
+  "report_pages": 35,
+  "external_model_calls": 0,
+  "public_deployment": false
+}

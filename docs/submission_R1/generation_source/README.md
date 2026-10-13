@@ -1,0 +1,1 @@
+报告源数据为上层目录use_cases.json。依赖python-docx、Pillow、cairosvg及Graphviz。运行make_models.py生成图，再运行build_report.py生成DOCX；使用Word或LibreOffice导出PDF。必须在最终编辑后复查所有页面。字体名称只作排版设置，本包不附字体文件。

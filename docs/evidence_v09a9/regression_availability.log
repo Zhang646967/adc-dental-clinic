@@ -1,0 +1,38 @@
+CHECK list 320
+CHECK list 390
+CHECK list 1440
+CHECK empty 320
+CHECK empty 390
+CHECK empty 1440
+CHECK detail 320
+CHECK detail 390
+CHECK detail 1440
+CHECK readonly 320
+CHECK readonly 390
+CHECK readonly 1440
+CHECK inactive 320
+CHECK inactive 390
+CHECK inactive 1440
+CHECK blocked 320
+CHECK blocked 390
+CHECK blocked 1440
+CHECK replace 320
+CHECK replace 390
+CHECK replace 1440
+CHECK stop 320
+CHECK stop 390
+CHECK stop 1440
+CHECK confirm 320
+CHECK confirm 390
+CHECK confirm 1440
+CHECK recovery 320
+CHECK recovery 390
+CHECK recovery 1440
+CHECK escape 320
+CHECK escape 390
+CHECK escape 1440
+{
+  "scope": "Static converted source templates + synthetic forms/facts. Not Django E2E or actual database state.",
+  "total": 396,
+  "passed": 396
+}

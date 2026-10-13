@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="1100" viewBox="0 0 1050 1100">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="235" y="20" width="580" height="1010" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="56.0" font-family="Noto Sans CJK SC" font-size="22" text-anchor="middle" font-weight="700" fill="#101010">ADC软件系统：身份、引导与账号安全</text>
+<ellipse cx="510" cy="138" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="133.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-01</text>
+<text x="510" y="159.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">登录、选择与切换身份</text>
+<ellipse cx="510" cy="255" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="250.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-20</text>
+<text x="510" y="276.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">选择显示方式与非聊天帮助</text>
+<ellipse cx="510" cy="372" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="367.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-22</text>
+<text x="510" y="393.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">修改本人密码</text>
+<ellipse cx="510" cy="489" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="484.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-02</text>
+<text x="510" y="510.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">选择与切换诊所</text>
+<ellipse cx="510" cy="606" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="601.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-18</text>
+<text x="510" y="627.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">获取操作引导</text>
+<ellipse cx="510" cy="723" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="718.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-24</text>
+<text x="510" y="744.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">核对候补是否已转预约</text>
+<ellipse cx="510" cy="840" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="835.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-21</text>
+<text x="510" y="861.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">维护普通账号与业务授权</text>
+<ellipse cx="510" cy="957" rx="197" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="510" y="952.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-25</text>
+<text x="510" y="978.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">紧急安全封禁普通账号</text>
+<ellipse cx="88" cy="192" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="204" x2="88" y2="236" stroke="#202020" stroke-width="1.7"/>
+<line x1="67" y1="216" x2="109" y2="216" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="236" x2="71" y2="258" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="236" x2="105" y2="258" stroke="#202020" stroke-width="1.7"/>
+<text x="88" y="288.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">账号使用者</text>
+<text x="88" y="316.35" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">（角色概括）</text>
+<polyline points="112,216 313,138" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="305.104290861587,145.6588365435999 313,138 302.0048934244587,137.67192776330774" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="112,216 313,255" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="302.2378944578638,257.275320702653 313,255 303.8697536972935,248.8649692378999" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="112,216 313,372" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="302.36973581368693,369.17201779899705 313,372 307.6224938761077,362.40404106472414" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="88" cy="502" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="514" x2="88" y2="546" stroke="#202020" stroke-width="1.7"/>
+<line x1="67" y1="526" x2="109" y2="526" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="546" x2="71" y2="568" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="546" x2="105" y2="568" stroke="#202020" stroke-width="1.7"/>
+<text x="88" y="598.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">前台</text>
+<polyline points="112,526 313,497" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="303.58386104182745,502.6865039453416 313,497 302.36046457058103,494.20710081704726" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="112,526 313,731" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="302.8480965918173,726.7645711916114 313,731 308.96541143614365,720.7666185881499" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="88" cy="742" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="754" x2="88" y2="786" stroke="#202020" stroke-width="1.7"/>
+<line x1="67" y1="766" x2="109" y2="766" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="786" x2="71" y2="808" stroke="#202020" stroke-width="1.7"/>
+<line x1="88" y1="786" x2="105" y2="808" stroke="#202020" stroke-width="1.7"/>
+<text x="88" y="838.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">业务用户</text>
+<text x="88" y="866.35" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">（角色概括）</text>
+<polyline points="112,766 313,614" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="307.5025893576093,623.5277739388027 313,614 302.33511045369596,616.6944630198121" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="950" cy="352" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="364" x2="950" y2="396" stroke="#202020" stroke-width="1.7"/>
+<line x1="929" y1="376" x2="971" y2="376" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="396" x2="933" y2="418" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="396" x2="967" y2="418" stroke="#202020" stroke-width="1.7"/>
+<text x="950" y="448.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">诊所主管</text>
+<polyline points="926,376 707,489" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="714.0395517007715,480.54750262631427 707,489 717.9679533750494,488.1609536587644" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="950" cy="692" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="704" x2="950" y2="736" stroke="#202020" stroke-width="1.7"/>
+<line x1="929" y1="716" x2="971" y2="716" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="736" x2="933" y2="758" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="736" x2="967" y2="758" stroke="#202020" stroke-width="1.7"/>
+<text x="950" y="788.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">患者</text>
+<polyline points="926,716 707,723" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="716.9896504285869,718.3949066985962 707,723 717.2633482065519,726.9577371806461" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="950" cy="917" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="929" x2="950" y2="961" stroke="#202020" stroke-width="1.7"/>
+<line x1="929" y1="941" x2="971" y2="941" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="961" x2="933" y2="983" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="961" x2="967" y2="983" stroke="#202020" stroke-width="1.7"/>
+<text x="950" y="1013.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">技术管理员</text>
+<polyline points="926,941 707,840" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="717.9943268142514,840.3532391561447 707,840 714.4064229960397,848.1329513956333" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="926,941 707,957" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="716.79261363854,951.9895391303513 707,957 717.4168642470715,960.5339693346268" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="950" cy="487" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="499" x2="950" y2="531" stroke="#202020" stroke-width="1.7"/>
+<line x1="929" y1="511" x2="971" y2="511" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="531" x2="933" y2="553" stroke="#202020" stroke-width="1.7"/>
+<line x1="950" y1="531" x2="967" y2="553" stroke="#202020" stroke-width="1.7"/>
+<text x="950" y="583.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">外部意图模型</text>
+<text x="950" y="611.35" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">（可选辅执行者）</text>
+<polyline points="707,606 926,511" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="918.4098799662487,518.9617886101835 926,511 915.0004748937656,511.1022127062487" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="756.0" y="554" width="80" height="27.950000000000003" fill="white"/>
+<text x="796" y="571.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">识别意图</text>
+<text x="525" y="86.0" font-family="Noto Sans CJK SC" font-size="16" text-anchor="middle" fill="#101010">实线：功能交互；模型服务为辅助，不决定授权或办理结果。</text>
+<rect x="18" y="1042" width="1014" height="39.6" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="30" y="1064.0" font-family="Noto Sans CJK SC" font-size="16" text-anchor="start" fill="#101010">角色概括仅压缩图面：账号使用者含七类身份；业务用户不含技术身份，均不产生新授权。</text>
+</svg>

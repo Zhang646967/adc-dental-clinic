@@ -1,0 +1,1 @@
+{"scope": "Static translated templates with synthetic data; no Django/PG/API execution", "total": 84, "passed": 84}

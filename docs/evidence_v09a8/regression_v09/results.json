@@ -1,0 +1,1003 @@
+{
+  "scope": "Chromium source-template / synthetic data, no Django, no PostgreSQL, no external AI",
+  "total": 249,
+  "passed": 249,
+  "checks": [
+    {
+      "name": "waiting/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "waiting/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "waiting/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "waiting/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "pending/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "pending/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "pending/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "pending/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "pending/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "pending/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "pending/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "pending/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "pending/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "pending/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "pending/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "pending/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "pending/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "pending/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "pending/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "pending/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "pending/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "pending/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "pending/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "pending/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "pending/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "booked/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "booked/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "booked/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "booked/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "booked/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "booked/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "booked/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "booked/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/320/exact-link",
+      "passed": true
+    },
+    {
+      "name": "booked/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "booked/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "booked/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "booked/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "booked/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "booked/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "booked/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "booked/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "booked/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/390/exact-link",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "booked/1440/exact-link",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "cancelled/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "cancelled/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "cancelled/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "inconsistent/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/320/alert",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/390/alert",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "unavailable/1440/alert",
+      "passed": true
+    },
+    {
+      "name": "stale/320/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "stale/320/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "stale/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "stale/320/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "stale/320/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "stale/320/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "stale/320/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "stale/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "stale/320/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "stale/320/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "stale/320/alert",
+      "passed": true
+    },
+    {
+      "name": "stale/390/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "stale/390/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "stale/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "stale/390/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "stale/390/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "stale/390/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "stale/390/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "stale/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "stale/390/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "stale/390/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "stale/390/alert",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/False/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/False/font-size",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/False/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/False/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/True/no-overflow",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/True/font-size",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/True/no-accept-form",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/True/no-business-accept-button",
+      "passed": true
+    },
+    {
+      "name": "stale/1440/alert",
+      "passed": true
+    }
+  ]
+}

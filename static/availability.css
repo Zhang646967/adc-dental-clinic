@@ -1,0 +1,13 @@
+.availability {max-width:1160px;margin-inline:auto;min-width:0;}
+.availability .av-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1.1rem;}
+.availability .av-facts {display:grid;grid-template-columns:minmax(10rem,1fr) minmax(0,2fr);gap:.65rem 1rem;}
+.availability .av-facts dt {font-weight:700;}
+.availability .av-facts dd {margin:0;overflow-wrap:anywhere;}
+.availability .av-comparison {background:#f4f7f6;padding:1rem;border:1px solid #cbded9;border-radius:10px;min-width:0;}
+.availability .av-filter {display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;}
+.availability .av-filter select {width:auto;max-width:100%;}
+.availability .av-history {border-top:1px solid #cbded9;padding-block:.8rem;}
+.availability .actions {flex-wrap:wrap;gap:.7rem;}
+.availability input,.availability select {max-width:100%;min-width:0;}
+.availability .panel,.availability p,.availability li,.availability a,.availability h2 {overflow-wrap:anywhere;}
+@media(max-width:600px){.availability .av-facts {grid-template-columns:1fr;gap:.3rem;}.availability .av-facts dd{margin-bottom:.7rem;}.availability .av-filter select{width:100%;}}

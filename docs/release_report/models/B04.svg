@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="1054" viewBox="0 0 1050 1054">
+<rect width="100%" height="100%" fill="white"/>
+<text x="15" y="25.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="start" fill="#101010">sd B04  业务序列</text>
+<ellipse cx="100.0" cy="46" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="95.0" y1="56" x2="109.0" y2="42" stroke="#202020" stroke-width="1.1"/>
+<line x1="100.0" y1="58" x2="100.0" y2="90" stroke="#202020" stroke-width="1.7"/>
+<line x1="79.0" y1="70" x2="121.0" y2="70" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="90" x2="83.0" y2="112" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="90" x2="117.0" y2="112" stroke="#202020" stroke-width="1.7"/>
+<text x="100.0" y="142.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010"></text>
+<line x1="58.96" y1="144.0" x2="141.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="100.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:总部管理</text>
+<line x1="100.0" y1="155" x2="100.0" y2="994" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="383.3333333333333" cy="71" rx="24" ry="38" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="385.3333333333333" y1="108" x2="405.3333333333333" y2="77" stroke="#202020" stroke-width="1.2"/>
+<ellipse cx="383.3333333333333" cy="52" rx="6" ry="8" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="383.3333333333333" y1="61" x2="383.3333333333333" y2="82" stroke="#202020" stroke-width="1.7"/>
+<line x1="373.3333333333333" y1="69" x2="393.3333333333333" y2="69" stroke="#202020" stroke-width="1.7"/>
+<line x1="383.3333333333333" y1="82" x2="373.3333333333333" y2="98" stroke="#202020" stroke-width="1.7"/>
+<line x1="383.3333333333333" y1="82" x2="393.3333333333333" y2="98" stroke="#202020" stroke-width="1.7"/>
+<polyline points="388.3333333333333,30 380.3333333333333,32 385.3333333333333,39" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="375.95870908645816,33.24531319445619 385.3333333333333,39 382.93012935410275,28.265727288995762" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="360.2933333333333" y1="144.0" x2="406.37333333333333" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="383.3333333333333" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:财务</text>
+<line x1="383.3333333333333" y1="155" x2="383.3333333333333" y2="994" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="666.6666666666666" cy="71" rx="24" ry="38" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="668.6666666666666" y1="108" x2="688.6666666666666" y2="77" stroke="#202020" stroke-width="1.2"/>
+<ellipse cx="666.6666666666666" cy="52" rx="6" ry="8" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="666.6666666666666" y1="61" x2="666.6666666666666" y2="82" stroke="#202020" stroke-width="1.7"/>
+<line x1="656.6666666666666" y1="69" x2="676.6666666666666" y2="69" stroke="#202020" stroke-width="1.7"/>
+<line x1="666.6666666666666" y1="82" x2="656.6666666666666" y2="98" stroke="#202020" stroke-width="1.7"/>
+<line x1="666.6666666666666" y1="82" x2="676.6666666666666" y2="98" stroke="#202020" stroke-width="1.7"/>
+<polyline points="671.6666666666666,30 663.6666666666666,32 668.6666666666666,39" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="659.2920424197914,33.24531319445619 668.6666666666666,39 666.263462687436,28.265727288995762" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="607.6266666666667" y1="144.0" x2="725.7066666666666" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="666.6666666666666" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:各店工作人员</text>
+<line x1="666.6666666666666" y1="155" x2="666.6666666666666" y2="994" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="950.0" cy="71" rx="25" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="942.0" y1="105" x2="973.0" y2="78" stroke="#202020" stroke-width="1.7"/>
+<line x1="921.0" y1="111" x2="979.0" y2="111" stroke="#202020" stroke-width="1.7"/>
+<line x1="872.96" y1="144.0" x2="1027.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="950.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:本店业务记录载体</text>
+<line x1="950.0" y1="155" x2="950.0" y2="994" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<rect x="18" y="520" width="1014" height="294" rx="0" fill="none" stroke="#202020" stroke-width="1.4"/>
+<rect x="18" y="520" width="62" height="30" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="49" y="542.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">alt</text>
+<rect x="124.46666666666664" y="145" width="234.40000000000003" height="32.0" fill="white"/>
+<text x="241.66666666666666" y="165.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">编制季度核对结果(季度)</text>
+<rect x="378.3333333333333" y="175" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="100.0,180 378.3333333333333,180" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="378.3333333333333,180 368.2016623993016,184.28360176539516 368.2016623993016,175.71639823460484" fill="#202020"/>
+<rect x="397.79999999999995" y="194" width="254.40000000000003" height="32.0" fill="white"/>
+<text x="525.0" y="214.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">归集业务与成本资料(季度)</text>
+<rect x="661.6666666666666" y="224" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="383.3333333333333,229 661.6666666666666,229" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="661.6666666666666,229 651.5349957326349,233.28360176539516 651.5349957326349,224.71639823460484" fill="#202020"/>
+<rect x="711.1333333333332" y="243" width="194.40000000000003" height="32.0" fill="white"/>
+<text x="808.3333333333333" y="263.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">检索季度明细(季度)</text>
+<rect x="945.0" y="273" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="666.6666666666666,278 945.0,278" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,278 934.8683290659683,282.28360176539513 934.8683290659683,273.71639823460487" fill="#202020"/>
+<rect x="742.3333333333333" y="292" width="132" height="32.0" fill="white"/>
+<text x="808.3333333333333" y="312.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">本店业务明细</text>
+<polyline points="950.0,327 671.6666666666666,327" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="681.7983376006983,322.71639823460487 671.6666666666666,327 681.7983376006983,331.28360176539513" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="399.0" y="341" width="252" height="59.0" fill="white"/>
+<text x="525.0" y="361.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">收入依据、用品成本及运营</text>
+<text x="525.0" y="388.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">费用</text>
+<polyline points="666.6666666666666,400 388.3333333333333,400" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="398.46500426736503,395.71639823460487 388.3333333333333,400 398.46500426736503,404.28360176539513" fill="none" stroke="#202020" stroke-width="1.7"/>
+<text x="419.3333333333333" y="426.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">核对人员范围与</text>
+<text x="419.3333333333333" y="453.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">资料缺失()</text>
+<rect x="378.3333333333333" y="438" width="10" height="73" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="388.3333333333333,442 416.3333333333333,442 416.3333333333333,496 388.3333333333333,496" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="388.3333333333333,496 398.46500426736503,491.71639823460487 398.46500426736503,500.28360176539513" fill="#202020"/>
+<text x="91" y="549.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="start" fill="#101010">[发现缺失，需要补充]</text>
+<rect x="407.79999999999995" y="560" width="234.40000000000003" height="32.0" fill="white"/>
+<text x="525.0" y="580.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">补充或解释缺失项(清单)</text>
+<rect x="661.6666666666666" y="590" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="383.3333333333333,595 661.6666666666666,595" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="661.6666666666666,595 651.5349957326349,599.2836017653951 651.5349957326349,590.7163982346049" fill="#202020"/>
+<rect x="429.0" y="609" width="192" height="32.0" fill="white"/>
+<text x="525.0" y="629.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">补充资料或缺失说明</text>
+<polyline points="666.6666666666666,644 388.3333333333333,644" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="398.46500426736503,639.7163982346049 388.3333333333333,644 398.46500426736503,648.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="18" y1="662" x2="1032" y2="662" stroke="#202020" stroke-width="1" stroke-dasharray="7,5"/>
+<text x="91" y="692.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="start" fill="#101010">[未发现缺失]</text>
+<text x="419.3333333333333" y="724.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">确认已收到资料</text>
+<text x="419.3333333333333" y="751.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">可供汇总()</text>
+<rect x="378.3333333333333" y="736" width="10" height="73" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="388.3333333333333,740 416.3333333333333,740 416.3333333333333,794 388.3333333333333,794" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="388.3333333333333,794 398.46500426736503,789.7163982346049 398.46500426736503,798.2836017653951" fill="#202020"/>
+<text x="419.3333333333333" y="849.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">汇总并说明口径()</text>
+<rect x="378.3333333333333" y="861" width="10" height="49" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="388.3333333333333,865 416.3333333333333,865 416.3333333333333,895 388.3333333333333,895" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="388.3333333333333,895 398.46500426736503,890.7163982346049 398.46500426736503,899.2836017653951" fill="#202020"/>
+<rect x="125.66666666666666" y="901" width="232" height="32.0" fill="white"/>
+<text x="241.66666666666666" y="921.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">季度核对结果及未决事项</text>
+<polyline points="383.3333333333333,936 105.0,936" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="115.13167093403173,931.7163982346049 105.0,936 115.13167093403173,940.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="18" y="1001" width="1014" height="40.95" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="30" y="1024.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="start" fill="#101010">A2/A3：归集和追问顺序为分析假设；未收到成本不等于成本为零。</text>
+</svg>

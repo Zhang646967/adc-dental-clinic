@@ -1,0 +1,487 @@
+{
+  "scope": "Source-template Chromium checks with synthetic fields; no Django, database, real form validation or network AI",
+  "total": 120,
+  "passed": 120,
+  "checks": [
+    {
+      "name": "edit/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "edit/320/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "edit/320/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "edit/320/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "edit/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "edit/320/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "edit/320/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "edit/320/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "edit/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "edit/390/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "edit/390/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "edit/390/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "edit/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "edit/390/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "edit/390/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "edit/390/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "edit/1440/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/write-disabled",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/write-disabled",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/write-disabled",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/write-disabled",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/write-disabled",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/write-disabled",
+      "passed": true
+    },
+    {
+      "name": "preview/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "preview/320/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "preview/320/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "preview/320/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "preview/320/False/manual-confirm-required",
+      "passed": true
+    },
+    {
+      "name": "preview/320/False/correct-target",
+      "passed": true
+    },
+    {
+      "name": "preview/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "preview/320/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "preview/320/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "preview/320/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "preview/320/True/manual-confirm-required",
+      "passed": true
+    },
+    {
+      "name": "preview/320/True/correct-target",
+      "passed": true
+    },
+    {
+      "name": "preview/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "preview/390/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "preview/390/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "preview/390/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "preview/390/False/manual-confirm-required",
+      "passed": true
+    },
+    {
+      "name": "preview/390/False/correct-target",
+      "passed": true
+    },
+    {
+      "name": "preview/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "preview/390/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "preview/390/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "preview/390/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "preview/390/True/manual-confirm-required",
+      "passed": true
+    },
+    {
+      "name": "preview/390/True/correct-target",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/False/manual-confirm-required",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/False/correct-target",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/True/manual-confirm-required",
+      "passed": true
+    },
+    {
+      "name": "preview/1440/True/correct-target",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/False/safe-recovery",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "recovery/320/True/safe-recovery",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/False/safe-recovery",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "recovery/390/True/safe-recovery",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/False/one-heading",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/False/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/False/form-context",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/False/safe-recovery",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/True/one-heading",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/True/no-injected-script",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/True/form-context",
+      "passed": true
+    },
+    {
+      "name": "recovery/1440/True/safe-recovery",
+      "passed": true
+    }
+  ]
+}

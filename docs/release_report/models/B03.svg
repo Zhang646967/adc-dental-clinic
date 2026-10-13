@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="1111" viewBox="0 0 1050 1111">
+<rect width="100%" height="100%" fill="white"/>
+<text x="15" y="25.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="start" fill="#101010">sd B03  业务序列</text>
+<ellipse cx="100.0" cy="46" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="95.0" y1="56" x2="109.0" y2="42" stroke="#202020" stroke-width="1.1"/>
+<line x1="100.0" y1="58" x2="100.0" y2="90" stroke="#202020" stroke-width="1.7"/>
+<line x1="79.0" y1="70" x2="121.0" y2="70" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="90" x2="83.0" y2="112" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="90" x2="117.0" y2="112" stroke="#202020" stroke-width="1.7"/>
+<text x="100.0" y="142.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010"></text>
+<line x1="76.96000000000001" y1="144.0" x2="123.03999999999999" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="100.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:患者</text>
+<line x1="100.0" y1="155" x2="100.0" y2="1051" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="383.3333333333333" cy="71" rx="24" ry="38" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="385.3333333333333" y1="108" x2="405.3333333333333" y2="77" stroke="#202020" stroke-width="1.2"/>
+<ellipse cx="383.3333333333333" cy="52" rx="6" ry="8" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="383.3333333333333" y1="61" x2="383.3333333333333" y2="82" stroke="#202020" stroke-width="1.7"/>
+<line x1="373.3333333333333" y1="69" x2="393.3333333333333" y2="69" stroke="#202020" stroke-width="1.7"/>
+<line x1="383.3333333333333" y1="82" x2="373.3333333333333" y2="98" stroke="#202020" stroke-width="1.7"/>
+<line x1="383.3333333333333" y1="82" x2="393.3333333333333" y2="98" stroke="#202020" stroke-width="1.7"/>
+<polyline points="388.3333333333333,30 380.3333333333333,32 385.3333333333333,39" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="375.95870908645816,33.24531319445619 385.3333333333333,39 382.93012935410275,28.265727288995762" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="360.2933333333333" y1="144.0" x2="406.37333333333333" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="383.3333333333333" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:前台</text>
+<line x1="383.3333333333333" y1="155" x2="383.3333333333333" y2="1051" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="666.6666666666666" cy="71" rx="24" ry="38" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="668.6666666666666" y1="108" x2="688.6666666666666" y2="77" stroke="#202020" stroke-width="1.2"/>
+<ellipse cx="666.6666666666666" cy="52" rx="6" ry="8" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="666.6666666666666" y1="61" x2="666.6666666666666" y2="82" stroke="#202020" stroke-width="1.7"/>
+<line x1="656.6666666666666" y1="69" x2="676.6666666666666" y2="69" stroke="#202020" stroke-width="1.7"/>
+<line x1="666.6666666666666" y1="82" x2="656.6666666666666" y2="98" stroke="#202020" stroke-width="1.7"/>
+<line x1="666.6666666666666" y1="82" x2="676.6666666666666" y2="98" stroke="#202020" stroke-width="1.7"/>
+<polyline points="671.6666666666666,30 663.6666666666666,32 668.6666666666666,39" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="659.2920424197914,33.24531319445619 668.6666666666666,39 666.263462687436,28.265727288995762" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="625.6266666666667" y1="144.0" x2="707.7066666666666" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="666.6666666666666" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:负责牙医</text>
+<line x1="666.6666666666666" y1="155" x2="666.6666666666666" y2="1051" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="950.0" cy="71" rx="25" ry="37" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="942.0" y1="105" x2="973.0" y2="78" stroke="#202020" stroke-width="1.7"/>
+<line x1="921.0" y1="111" x2="979.0" y2="111" stroke="#202020" stroke-width="1.7"/>
+<line x1="911.84" y1="144.0" x2="988.16" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="950.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:ADC系统</text>
+<line x1="950.0" y1="155" x2="950.0" y2="1051" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<rect x="134.46666666666664" y="145" width="214.40000000000003" height="32.0" fill="white"/>
+<text x="241.66666666666666" y="165.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">受理预约(资料、意向)</text>
+<rect x="378.3333333333333" y="175" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="100.0,180 378.3333333333333,180" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="378.3333333333333,180 368.2016623993016,184.28360176539516 368.2016623993016,175.71639823460484" fill="#202020"/>
+<rect x="529.4666666666666" y="194" width="274.40000000000003" height="32.0" fill="white"/>
+<text x="666.6666666666666" y="214.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">识别或登记患者(资料、过敏)</text>
+<rect x="945.0" y="224" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="383.3333333333333,229 945.0,229" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,229 934.8683290659683,233.28360176539516 934.8683290659683,224.71639823460484" fill="#202020"/>
+<rect x="590.6666666666666" y="243" width="152" height="32.0" fill="white"/>
+<text x="666.6666666666666" y="263.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">可复用患者编号</text>
+<polyline points="950.0,278 388.3333333333333,278" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="398.46500426736503,273.71639823460487 388.3333333333333,278 398.46500426736503,282.28360176539513" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="499.4666666666666" y="292" width="334.40000000000003" height="32.0" fill="white"/>
+<text x="666.6666666666666" y="312.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">创建预约(患者、牙医、时间、意向)</text>
+<rect x="945.0" y="322" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="383.3333333333333,327 945.0,327" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,327 934.8683290659683,331.28360176539513 934.8683290659683,322.71639823460487" fill="#202020"/>
+<text x="914.0" y="362.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="end" fill="#101010">核验时间与占用()</text>
+<rect x="945.0" y="374" width="10" height="49" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="945.0,378 917.0,378 917.0,408 945.0,408" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,408 934.8683290659683,412.28360176539513 934.8683290659683,403.71639823460487" fill="#202020"/>
+<rect x="590.6666666666666" y="414" width="152" height="32.0" fill="white"/>
+<text x="666.6666666666666" y="434.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">预约编号与安排</text>
+<polyline points="950.0,449 388.3333333333333,449" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="398.46500426736503,444.71639823460487 388.3333333333333,449 398.46500426736503,453.28360176539513" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="195.66666666666666" y="463" width="92" height="32.0" fill="white"/>
+<text x="241.66666666666666" y="483.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">预约安排</text>
+<polyline points="383.3333333333333,498 105.0,498" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="115.13167093403173,493.71639823460487 105.0,498 115.13167093403173,502.28360176539513" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="16" y1="546" x2="1035" y2="546" stroke="#202020" stroke-width="1" stroke-dasharray="7,5"/>
+<rect x="474.0" y="534" width="102" height="29.3" fill="white"/>
+<text x="525" y="552.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">预约日到店</text>
+<rect x="164.46666666666664" y="554" width="154.40000000000003" height="32.0" fill="white"/>
+<text x="241.66666666666666" y="574.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">办理到诊(预约)</text>
+<rect x="378.3333333333333" y="584" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="100.0,589 378.3333333333333,589" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="378.3333333333333,589 368.2016623993016,593.2836017653951 368.2016623993016,584.7163982346049" fill="#202020"/>
+<rect x="569.4666666666666" y="603" width="194.40000000000003" height="32.0" fill="white"/>
+<text x="666.6666666666666" y="623.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">登记实际到诊(预约)</text>
+<rect x="945.0" y="633" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="383.3333333333333,638 945.0,638" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,638 934.8683290659683,642.2836017653951 934.8683290659683,633.7163982346049" fill="#202020"/>
+<rect x="256.1333333333333" y="652" width="254.40000000000003" height="32.0" fill="white"/>
+<text x="383.3333333333333" y="672.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">提供诊疗服务(主诉、就诊)</text>
+<rect x="661.6666666666666" y="682" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="100.0,687 661.6666666666666,687" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="661.6666666666666,687 651.5349957326349,691.2836017653951 651.5349957326349,682.7163982346049" fill="#202020"/>
+<text x="702.6666666666666" y="722.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">复核过敏并实施</text>
+<text x="702.6666666666666" y="749.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">专业治疗()</text>
+<rect x="661.6666666666666" y="734" width="10" height="73" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="671.6666666666666,738 699.6666666666666,738 699.6666666666666,792 671.6666666666666,792" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="671.6666666666666,792 681.7983376006983,787.7163982346049 681.7983376006983,796.2836017653951" fill="#202020"/>
+<rect x="676.7333333333332" y="781" width="263.20000000000005" height="59.0" fill="white"/>
+<text x="808.3333333333333" y="801.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">记录复核及实际治疗(就诊、</text>
+<text x="808.3333333333333" y="828.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">明细)</text>
+<rect x="945.0" y="835" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="666.6666666666666,840 945.0,840" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,840 934.8683290659683,844.2836017653951 934.8683290659683,835.7163982346049" fill="#202020"/>
+<rect x="676.7333333333332" y="845" width="263.20000000000005" height="59.0" fill="white"/>
+<text x="808.3333333333333" y="865.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">完成就诊并开单(已核对的明</text>
+<text x="808.3333333333333" y="892.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">细)</text>
+<rect x="945.0" y="899" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="666.6666666666666,904 945.0,904" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,904 934.8683290659683,908.2836017653951 934.8683290659683,899.7163982346049" fill="#202020"/>
+<rect x="702.3333333333333" y="909" width="212" height="32.0" fill="white"/>
+<text x="808.3333333333333" y="929.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">唯一结算单与当前明细</text>
+<polyline points="950.0,944 671.6666666666666,944" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="681.7983376006983,939.7163982346049 671.6666666666666,944 681.7983376006983,948.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="287.3333333333333" y="958" width="192" height="32.0" fill="white"/>
+<text x="383.3333333333333" y="978.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">本次诊疗与费用说明</text>
+<polyline points="666.6666666666666,993 105.0,993" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="115.13167093403173,988.7163982346049 105.0,993 115.13167093403173,997.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="18" y="1058" width="1014" height="40.95" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="30" y="1081.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="start" fill="#101010">前台代办主路径；患者自助是SU-04的另一入口。专业诊疗责任仍由牙医承担。</text>
+</svg>

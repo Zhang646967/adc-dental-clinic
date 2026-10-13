@@ -1,0 +1,63 @@
+{
+  "date_utc": "2026-09-27T08:01:49.445555+00:00",
+  "version": "0.8.0-alpha.1",
+  "base_archive_sha256": "65cb353f8c1846128ef5216649a6dc005ff9796b5d34d2f88a944fa7de832aee",
+  "observed_user_baseline": "User reports v0.7 running; screenshots show selected happy paths and context rejection. New full test log not supplied.",
+  "executed": {
+    "python_unittest_methods": 225,
+    "node_assertions": 18,
+    "new_browser_assertions": 123,
+    "workspace_browser_assertions": 157,
+    "assistant_browser_assertions": 87,
+    "management_browser_assertions": 84,
+    "python_compile": "passed",
+    "javascript_syntax": "passed"
+  },
+  "blocked": {
+    "django_check": "Django unavailable; package index/DNS access failed",
+    "postgresql_tests": 253,
+    "windows_upgrade": "Not executed on a Windows host"
+  },
+  "not_run": [
+    "remote AI",
+    "public deployment",
+    "production security audit",
+    "load test",
+    "real database restore",
+    "full role/payment/clinical E2E"
+  ],
+  "database_test_inventory": {
+    "tests/test_concurrency.py": 2,
+    "tests/test_integration.py": 28,
+    "tests/test_v04.py": 54,
+    "tests/test_v04_concurrency.py": 2,
+    "tests/test_v05.py": 55,
+    "tests/test_v05_concurrency.py": 2,
+    "tests/test_v07.py": 52,
+    "tests/test_v07_concurrency.py": 2,
+    "tests/test_v08_alpha.py": 56
+  },
+  "unchanged_migrations": {
+    "coordination/migrations/0001_initial.py": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+    "finance/migrations/0002_quarter_lock_version.py": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+    "finance/migrations/0001_initial.py": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+    "care/migrations/0003_correction_publication_guard.py": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+    "care/migrations/0002_database_guards.py": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+    "care/migrations/0001_initial.py": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+    "workspaces/migrations/0001_initial.py": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+    "scheduling/migrations/0001_initial.py": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+    "accounts/migrations/0001_initial.py": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+    "patients/migrations/0001_initial.py": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+    "portal/migrations/0001_initial.py": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+    "registry/migrations/0001_initial.py": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+    "assistants/migrations/0001_initial.py": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6"
+  },
+  "new_migrations": [],
+  "document_pages_rendered_and_inspected": 4,
+  "verification_code_notes": [
+    "No SQLite fallback",
+    "13 original migrations unchanged",
+    "Manual screenshots from user are scenario evidence only",
+    "No .env or keys loaded"
+  ]
+}

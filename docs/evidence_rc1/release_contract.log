@@ -1,0 +1,25 @@
+test_cmd_no_source_project_no_volume_delete (checks.test_release_contract.ReleaseContractTests.test_cmd_no_source_project_no_volume_delete) ... ok
+test_database_no_published_port (checks.test_release_contract.ReleaseContractTests.test_database_no_published_port) ... ok
+test_fresh_private_configuration (checks.test_release_contract.ReleaseContractTests.test_fresh_private_configuration) ... ok
+test_gateway_loopback_only (checks.test_release_contract.ReleaseContractTests.test_gateway_loopback_only) ... ok
+test_global_templates_readonly_and_error_support (checks.test_release_contract.ReleaseContractTests.test_global_templates_readonly_and_error_support) ... ok
+test_import_does_not_seed (checks.test_release_contract.ReleaseContractTests.test_import_does_not_seed) ... ok
+test_internal_network (checks.test_release_contract.ReleaseContractTests.test_internal_network) ... ok
+test_isolated_gate_requires_test_database (checks.test_release_contract.ReleaseContractTests.test_isolated_gate_requires_test_database) ... ok
+test_no_ai_keys_in_rc_environment (checks.test_release_contract.ReleaseContractTests.test_no_ai_keys_in_rc_environment) ... ok
+test_no_existing_env_overwrite (checks.test_release_contract.ReleaseContractTests.test_no_existing_env_overwrite) ... ok
+test_no_external_volumes (checks.test_release_contract.ReleaseContractTests.test_no_external_volumes) ... ok
+test_no_private_data_in_build_or_git (checks.test_release_contract.ReleaseContractTests.test_no_private_data_in_build_or_git) ... ok
+test_no_rc_secret_reset (checks.test_release_contract.ReleaseContractTests.test_no_rc_secret_reset) ... ok
+test_old_upgrade_paths_stop (checks.test_release_contract.ReleaseContractTests.test_old_upgrade_paths_stop) ... ok
+test_original_form_business_controls_preserved (checks.test_release_contract.ReleaseContractTests.test_original_form_business_controls_preserved) ... ok
+test_readonly_worker_exits_before_dispatch (checks.test_release_contract.ReleaseContractTests.test_readonly_worker_exits_before_dispatch) ... ok
+test_reject_bad_port (checks.test_release_contract.ReleaseContractTests.test_reject_bad_port) ... ok
+test_reject_project_injection (checks.test_release_contract.ReleaseContractTests.test_reject_project_injection) ... ok
+test_start_does_not_seed (checks.test_release_contract.ReleaseContractTests.test_start_does_not_seed) ... ok
+test_web_and_worker_wait_schema_completion (checks.test_release_contract.ReleaseContractTests.test_web_and_worker_wait_schema_completion) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.003s
+
+OK

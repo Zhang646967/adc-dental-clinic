@@ -1,0 +1,1206 @@
+{
+  "scope": "Chromium set_content source-template fixtures; no Django, PostgreSQL, actual model call or clinical user study. JS confirm dialog and highlight checked.",
+  "passed": 157,
+  "total": 157,
+  "checks": [
+    {
+      "name": "roles/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "roles/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "roles/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "clinics/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "clinics/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "clinics/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "manager/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "manager/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "manager/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "doctor/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "doctor/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "doctor/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "plan/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "plan/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          56,
+          58
+        ]
+      }
+    },
+    {
+      "name": "plan/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "guide/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "guide/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          58,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "guide/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "guided_form/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "guided_form/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "s": 1440,
+        "f": "20px",
+        "h": [
+          58,
+          58,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "guided_form/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/highlight/1440",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/dirty-switch-cancel/1440",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/1440/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "roles/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "roles/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "roles/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "clinics/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "clinics/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "clinics/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "manager/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "manager/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "manager/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "doctor/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "doctor/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "doctor/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "plan/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "plan/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          56,
+          58
+        ]
+      }
+    },
+    {
+      "name": "plan/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "guide/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "guide/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          58,
+          58,
+          88,
+          88,
+          88
+        ]
+      }
+    },
+    {
+      "name": "guide/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "guided_form/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "guided_form/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "s": 390,
+        "f": "20px",
+        "h": [
+          58,
+          58,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "guided_form/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/highlight/390",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/dirty-switch-cancel/390",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/390/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "roles/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "roles/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          88
+        ]
+      }
+    },
+    {
+      "name": "roles/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "clinics/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "clinics/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "clinics/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "manager/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "manager/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "manager/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "doctor/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "doctor/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          56,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "doctor/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "doctor/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "plan/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "plan/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          56,
+          58
+        ]
+      }
+    },
+    {
+      "name": "plan/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "plan/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "guide/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          70.78125,
+          70.78125,
+          70.78125
+        ]
+      }
+    },
+    {
+      "name": "guide/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          58,
+          58,
+          88,
+          88,
+          88
+        ]
+      }
+    },
+    {
+      "name": "guide/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "guided_form/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "16px",
+        "h": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "name": "guided_form/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "s": 320,
+        "f": "20px",
+        "h": [
+          58,
+          58,
+          58,
+          58,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "name": "guided_form/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/highlight/320",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guide/dirty-switch-cancel/320",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "guided_form/320/javascript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "patient-guide-does-not-link-staff",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "manager-home-no-care-or-finance-write",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "roles-do-not-include-clinics",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "clinics-selected-after-manager-entry",
+      "passed": true,
+      "detail": null
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="879" viewBox="0 0 1050 879">
+<rect width="100%" height="100%" fill="white"/>
+<text x="15" y="25.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="start" fill="#101010">sd X03  分析序列（基本路径）</text>
+<ellipse cx="100.0" cy="46" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="58" x2="100.0" y2="90" stroke="#202020" stroke-width="1.7"/>
+<line x1="79.0" y1="70" x2="121.0" y2="70" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="90" x2="83.0" y2="112" stroke="#202020" stroke-width="1.7"/>
+<line x1="100.0" y1="90" x2="117.0" y2="112" stroke="#202020" stroke-width="1.7"/>
+<text x="100.0" y="142.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010"></text>
+<line x1="76.96000000000001" y1="144.0" x2="123.03999999999999" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="100.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:患者</text>
+<line x1="100.0" y1="155" x2="100.0" y2="819" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="270.0" cy="73" rx="28" ry="28" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="230.0" y1="43" x2="230.0" y2="103" stroke="#202020" stroke-width="1.7"/>
+<line x1="230.0" y1="73" x2="242.0" y2="73" stroke="#202020" stroke-width="1.7"/>
+<line x1="228.96" y1="144.0" x2="311.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="270.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:患者接口</text>
+<line x1="270.0" y1="155" x2="270.0" y2="819" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="440.0" cy="73" rx="28" ry="28" fill="white" stroke="#202020" stroke-width="1.7"/>
+<polyline points="447.0,44 437.0,44 442.0,37" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="439.59679602076943,47.73427271100424 442.0,37 432.62537575312484,42.75468680554381" fill="none" stroke="#202020" stroke-width="1.7"/>
+<line x1="362.96000000000004" y1="144.0" x2="517.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="440.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:核对候补结果控制</text>
+<line x1="440.0" y1="155" x2="440.0" y2="819" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="610.0" cy="73" rx="28" ry="28" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="577.0" y1="105" x2="643.0" y2="105" stroke="#202020" stroke-width="1.7"/>
+<line x1="559.96" y1="144.0" x2="660.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="610.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:工作上下文</text>
+<line x1="610.0" y1="155" x2="610.0" y2="819" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="780.0" cy="73" rx="28" ry="28" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="747.0" y1="105" x2="813.0" y2="105" stroke="#202020" stroke-width="1.7"/>
+<line x1="738.96" y1="144.0" x2="821.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="780.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:候补请求</text>
+<line x1="780.0" y1="155" x2="780.0" y2="819" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<ellipse cx="950.0" cy="73" rx="28" ry="28" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="917.0" y1="105" x2="983.0" y2="105" stroke="#202020" stroke-width="1.7"/>
+<line x1="926.96" y1="144.0" x2="973.04" y2="144.0" stroke="#202020" stroke-width="1"/>
+<text x="950.0" y="139.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" text-decoration="underline" fill="#101010">:就诊</text>
+<line x1="950.0" y1="155" x2="950.0" y2="819" stroke="#202020" stroke-width="1.1" stroke-dasharray="7,5"/>
+<rect x="103.39999999999999" y="145" width="163.20000000000002" height="59.0" fill="white"/>
+<text x="185.0" y="165.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">核对候补结果(所</text>
+<text x="185.0" y="192.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">选请求)</text>
+<rect x="265.0" y="199" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="100.0,204 265.0,204" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="265.0,204 254.86832906596825,208.28360176539516 254.86832906596825,199.71639823460484" fill="#202020"/>
+<rect x="273.4" y="209" width="163.20000000000002" height="59.0" fill="white"/>
+<text x="355.0" y="229.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">核对结果(主体、</text>
+<text x="355.0" y="256.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">请求)</text>
+<rect x="435.0" y="263" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="270.0,268 435.0,268" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="435.0,268 424.8683290659683,272.28360176539513 424.8683290659683,263.71639823460487" fill="#202020"/>
+<rect x="437.79999999999995" y="273" width="174.40000000000003" height="32.0" fill="white"/>
+<text x="525.0" y="293.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">校验工作上下文()</text>
+<rect x="605.0" y="303" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="440.0,308 605.0,308" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="605.0,308 594.8683290659683,312.28360176539513 594.8683290659683,303.71639823460487" fill="#202020"/>
+<rect x="492.79999999999995" y="322" width="234.40000000000003" height="32.0" fill="white"/>
+<text x="610.0" y="342.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">核对转换结果(读取时点)</text>
+<rect x="775.0" y="352" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="440.0,357 775.0,357" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="775.0,357 764.8683290659683,361.28360176539513 764.8683290659683,352.71639823460487" fill="#202020"/>
+<text x="816.0" y="392.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">核验相关邀约</text>
+<text x="816.0" y="419.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">及准确关联()</text>
+<rect x="775.0" y="404" width="10" height="73" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="785.0,408 813.0,408 813.0,462 785.0,462" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="785.0,462 795.1316709340317,457.71639823460487 795.1316709340317,466.28360176539513" fill="#202020"/>
+<rect x="783.4" y="451" width="163.20000000000002" height="59.0" fill="white"/>
+<text x="865.0" y="471.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">判定当前安排(关</text>
+<text x="865.0" y="498.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">联预约)</text>
+<rect x="945.0" y="505" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="780.0,510 945.0,510" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="945.0,510 934.8683290659683,514.2836017653951 934.8683290659683,505.71639823460487" fill="#202020"/>
+<rect x="799.0" y="515" width="132" height="32.0" fill="white"/>
+<text x="865.0" y="535.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">当前安排结论</text>
+<polyline points="950.0,550 785.0,550" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="795.1316709340317,545.7163982346049 785.0,550 795.1316709340317,554.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="494.0" y="564" width="232" height="32.0" fill="white"/>
+<text x="610.0" y="584.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">历史转换与当前安排摘要</text>
+<polyline points="780.0,599 445.0,599" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="455.1316709340317,594.7163982346049 445.0,599 455.1316709340317,603.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="447.79999999999995" y="613" width="154.40000000000003" height="32.0" fill="white"/>
+<text x="525.0" y="633.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">复核当前授权()</text>
+<rect x="605.0" y="643" width="10" height="24" rx="0" fill="white" stroke="#202020" stroke-width="1"/>
+<polyline points="440.0,648 605.0,648" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="605.0,648 594.8683290659683,652.2836017653951 594.8683290659683,643.7163982346049" fill="#202020"/>
+<rect x="279.0" y="662" width="152" height="32.0" fill="white"/>
+<text x="355.0" y="682.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">结论与操作入口</text>
+<polyline points="440.0,697 275.0,697" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="285.1316709340317,692.7163982346049 275.0,697 285.1316709340317,701.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="99.0" y="711" width="172" height="59.0" fill="white"/>
+<text x="185.0" y="731.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">核对结果、时点与</text>
+<text x="185.0" y="758.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">下一步</text>
+<polyline points="270.0,770 105.0,770" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="115.13167093403173,765.7163982346049 105.0,770 115.13167093403173,774.2836017653951" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="18" y="826" width="1014" height="40.95" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="30" y="849.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="start" fill="#101010">分析责任分配：不是逐行代码调用或多次SQL查询。前台路径换用前台接口，并核验本店范围。</text>
+</svg>

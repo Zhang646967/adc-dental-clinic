@@ -1,0 +1,4 @@
+@echo off
+REM Compatibility entry: no implicit database operations.
+call "%~dp0UPGRADE_V09_WINDOWS.cmd" %*
+exit /b %errorlevel%

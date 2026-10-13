@@ -1,0 +1,6 @@
+<section class="panel" aria-labelledby="intake-title"><h2 id="intake-title">控制是否接收新预约</h2>
+<p>暂停新增与停用出诊不同：只停止新增预约、改入预约及新邀约；已有预约、接诊和有效邀约继续按原规则办理。不会通知患者或延长邀约期限。</p>
+{% if read_only %}<p>只读实例不能改变接收状态。</p>{% elif slot.intake_editable %}<div class="actions">
+{% if slot.paused %}<a class="button secondary" href="{% url 'intake_change' slot.id 'resume' %}">核对并恢复接收</a>{% else %}<a class="button" href="{% url 'intake_change' slot.id 'pause' %}">核对并暂停新增</a>{% endif %}
+</div>{% else %}<p>已停用或已结束的出诊不提供接收控制操作。</p>{% endif %}
+<p class="muted">此处控制当前出诊，不控制该牙医其他出诊。已经开始的接诊不会因此中断；暂停不是临床停诊指令。</p></section>

@@ -1,0 +1,19 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.15",nodesep="0.25",ranksep="0.55",label="S03 系统用例：工作身份与操作引导",labelloc=t,fontsize=18,fontname="Noto Sans CJK SC"];
+node [fontname="Noto Sans CJK SC",fontsize=13,color="#27483f"]; edge [color="#536960",arrowhead=none];
+u [shape=box,style="rounded",label="«参与者»\n系统用户"];
+c [shape=box,style="rounded",label="«参与者»\n前台/主管"];
+b [shape=box,style="rounded",label="«参与者»\n业务用户\n（不含技术身份的聊天）"];
+ai [shape=box,style="rounded",label="«参与者»\n外部模型服务\n（可选）"];
+subgraph cluster_sys { label="ADC 软件系统｜公共能力";fontname="Noto Sans CJK SC";fontsize=14;color="#708f84";
+u1 [shape=ellipse,label="SU-01 登录、选择/切换身份"];
+u2 [shape=ellipse,label="SU-02 选择/切换诊所"];
+u18 [shape=ellipse,label="SU-18 获取逐步操作引导"];
+u20 [shape=ellipse,label="SU-20 使用大字/非聊天帮助"];
+}
+u -> u1;
+c -> u2;
+b -> u18;
+ai -> u18;
+u -> u20;
+}

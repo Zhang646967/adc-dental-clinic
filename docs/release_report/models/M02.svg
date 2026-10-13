@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1180" viewBox="0 0 1120 1180">
+<rect width="100%" height="100%" fill="white"/>
+<text x="560" y="42.0" font-family="Noto Sans CJK SC" font-size="25" text-anchor="middle" font-weight="700" fill="#101010">stm M02　协调任务的状态与责任</text>
+<rect x="370" y="180" width="350" height="96" rx="18" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="545" y="216.0" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">待前台受理</text>
+<text x="545" y="248.4" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">OPEN</text>
+<rect x="370" y="410" width="350" height="96" rx="18" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="545" y="446.0" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">前台协调中</text>
+<text x="545" y="478.4" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">IN_PROGRESS</text>
+<rect x="370" y="640" width="350" height="96" rx="18" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="545" y="676.0" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">待主管复核</text>
+<text x="545" y="708.4" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">READY</text>
+<rect x="370" y="900" width="350" height="96" rx="18" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="545" y="936.0" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">核对已通过</text>
+<text x="545" y="968.4" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" fill="#101010">CLOSED</text>
+<ellipse cx="545" cy="83" rx="8" ry="8" fill="#202020" stroke="#202020" stroke-width="1.7"/>
+<polyline points="545,92 545,180" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="545,180 540.7163982346049,169.86832906596825 549.2836017653951,169.86832906596825" fill="#202020"/>
+<text x="725" y="119.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">发起 [未来有效且已暂停]</text>
+<polyline points="545,276 545,410" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="545,410 540.7163982346049,399.8683290659683 549.2836017653951,399.8683290659683" fill="#202020"/>
+<rect x="447.03999999999996" y="303" width="195.92000000000002" height="56.300000000000004" fill="white"/>
+<text x="545" y="322.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">受理 [当前本店前台]</text>
+<text x="545" y="347.65" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">／指定本人负责</text>
+<polyline points="545,506 545,640" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="545,640 540.7163982346049,629.8683290659683 549.2836017653951,629.8683290659683" fill="#202020"/>
+<rect x="437.53999999999996" y="531" width="214.92000000000002" height="56.300000000000004" fill="white"/>
+<text x="545" y="550.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">提交 [无当前业务阻断]</text>
+<text x="545" y="575.65" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">／保存事实摘要</text>
+<polyline points="545,736 545,900" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="545,900 540.7163982346049,889.8683290659683 549.2836017653951,889.8683290659683" fill="#202020"/>
+<rect x="423.86" y="772" width="242.28000000000003" height="56.300000000000004" fill="white"/>
+<text x="545" y="791.0" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">批准 [不同账号、事实未变</text>
+<text x="545" y="816.65" font-family="Noto Sans CJK SC" font-size="19" text-anchor="middle" fill="#101010">且当前无业务阻断]</text>
+<polyline points="370,443 185,443 185,222 370,222" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="370,222 359.8683290659683,226.28360176539516 359.8683290659683,217.71639823460484" fill="#202020"/>
+<rect x="112.0" y="298" width="138" height="53.6" fill="white"/>
+<text x="181" y="316.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">本人或主管退回</text>
+<text x="181" y="340.3" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">／解除当前受理</text>
+<polyline points="370,685 82,685 82,249 370,249" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="370,249 359.8683290659683,253.28360176539516 359.8683290659683,244.71639823460484" fill="#202020"/>
+<rect x="103.0" y="567" width="102" height="53.6" fill="white"/>
+<text x="154" y="585.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">主管退回</text>
+<text x="154" y="609.3" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">／重新受理</text>
+<polyline points="720,449 806,449 806,484 720,484" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="720,484 730.1316709340317,479.71639823460487 730.1316709340317,488.28360176539513" fill="#202020"/>
+<rect x="802.0" y="375" width="120" height="53.6" fill="white"/>
+<text x="862" y="393.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">办理声明</text>
+<text x="862" y="417.3" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">／不改变预约</text>
+<rect x="826" y="887" width="250" height="105" rx="18" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="951" y="923.0" font-family="Noto Sans CJK SC" font-size="22" text-anchor="middle" fill="#101010">任务已撤销</text>
+<text x="951" y="952.7" font-family="Noto Sans CJK SC" font-size="22" text-anchor="middle" fill="#101010">CANCELLED</text>
+<polyline points="720,206 1045,206" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="720,433 1045,433" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="720,665 1045,665" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="1045,206 1045,850 952,850 952,887" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polygon points="952,887 947.7163982346049,876.8683290659683 956.2836017653951,876.8683290659683" fill="#202020"/>
+<rect x="896.88" y="743" width="150.24" height="53.6" fill="white"/>
+<text x="972" y="761.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">撤销 [本店主管]</text>
+<text x="972" y="785.3" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">任一未结束状态</text>
+<rect x="50" y="1040" width="1020" height="72.0" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="62" y="1066.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">研究对象：CoordinationTask。终态保留历史，不原地重开。</text>
+<text x="62" y="1093.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="start" fill="#101010">“核对已通过”不自动停用出诊；“撤销任务”不恢复新增接收。</text>
+</svg>

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="notice-board"><p class="eyebrow">诊所主管 · 当前诊所</p><h1>通知派发状态</h1>
+<p>仅核对协调任务通知，不发送患者短信、邮件或推送。站内消息生成不等于对方已查看、受理或完成业务。</p>
+<div class="notice-links"><a href="{% url 'notification_inbox' %}">返回本人消息</a><a href="{% url 'coordination_task_list' %}">查看协调任务</a></div>
+<section class="panel"><h2>本店待处理概况</h2><p>待派发 {{ result.pending }} 条 · 失败待处理 {{ result.failed }} 条 · 无符合条件收件人 {{ result.no_recipients }} 条</p>{% if result.oldest %}<p>最早等待事件：{{ result.oldest }}</p>{% endif %}<p>读取时点 {{ result.observed_at }}（北京时间）。长时间等待时，请由技术维护人员核对后台进程；本页不能证明进程健康，也不会自行派发。</p></section>
+{% if read_only %}<p class="notice">当前实例只读，不允许重试写入。</p>{% endif %}
+<div class="notice-grid">{% for row in result.rows %}<section class="panel notice-card"><span class="status">{{ row.status }}</span><h2>{{ row.title }}</h2><p>任务 #{{ row.task_id }} · 出诊 #{{ row.slot_id }} · 通知事件 #{{ row.id }}</p>
+<dl><dt>事件发生于</dt><dd>{{ row.occurred_at }}</dd><dt>本轮尝试次数</dt><dd>{{ row.attempts }} / 5 · 人工重试轮次 {{ row.retry_round }}</dd><dt>站内消息生成数</dt><dd>{{ row.delivered }} · 授权变化跳过 {{ row.suppressed }}</dd>{% if row.next_attempt_at %}<dt>下次可尝试于</dt><dd>{{ row.next_attempt_at }}</dd>{% endif %}{% if row.completed_at %}<dt>本轮处理结束于</dt><dd>{{ row.completed_at }}</dd>{% endif %}</dl>
+{% if row.error %}<p class="notice">{{ row.error }}</p>{% endif %}<a href="{% url 'coordination_task_detail' row.slot_id row.task_id %}">核对原任务</a>
+{% if row.can_retry and not read_only %}<form method="post" action="{% url 'notification_retry' row.id %}" class="notice-retry">{% csrf_token %}{% workspace_token %}<input type="hidden" name="expected_round" value="{{ row.retry_round }}"><label><input type="checkbox" name="confirmed" required>我已核对失败状态；只重新排队原通知，不重复办理任务或预约。</label><button class="secondary" type="submit">仅重试通知</button></form>{% endif %}
+</section>{% empty %}<section class="panel"><h2>尚无本店通知事件</h2><p>本增量只从新的任务变化开始记录，不给旧审计批量补发。原任务列表仍是业务查询入口。</p></section>{% endfor %}</div>
+<p>第 {{ result.number }} / {{ result.pages }} 页</p><form method="get" class="notice-filter"><label for="page">页码</label><input id="page" name="page" type="number" min="1" max="{{ result.pages }}" value="{{ result.number }}"><button class="secondary" type="submit">跳转</button></form></div>{% endblock %}

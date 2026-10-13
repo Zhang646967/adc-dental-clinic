@@ -1,0 +1,262 @@
+{
+  "timestamp_utc": "2026-10-08T14:24:58.512521+00:00",
+  "version": "0.9.0-alpha.9",
+  "parent": "0.9.0-alpha.8",
+  "user_validation": "Deferred until v1.0 candidate. User running v0.7 not accessed; Mac paused; R4.4 unchanged.",
+  "developer_checks": {
+    "parent_basic_methods": 635,
+    "current_basic_methods_passed": 708,
+    "new_basic_methods": 73,
+    "javascript": {
+      "wait_window": 18,
+      "availability": 16
+    },
+    "static_browser": {
+      "tasks": {
+        "assertions": 888,
+        "passed": 888,
+        "path": "docs/evidence_v09a9/browser/results.json",
+        "real_django": false
+      },
+      "front_coordination": {
+        "assertions": 684,
+        "passed": 684,
+        "path": "docs/evidence_v09a9/regression_front_coordination/results.json",
+        "real_django": false
+      },
+      "availability": {
+        "assertions": 396,
+        "passed": 396,
+        "path": "docs/evidence_v09a9/regression_availability/results.json",
+        "real_django": false
+      },
+      "intake": {
+        "assertions": 498,
+        "passed": 498,
+        "path": "docs/evidence_v09a9/regression_intake/results.json",
+        "real_django": false
+      }
+    }
+  },
+  "database_tests": {
+    "authored": 620,
+    "new_methods": 66,
+    "executed": false,
+    "schema_migration_executed": false
+  },
+  "previous_migrations": [
+    {
+      "path": "accounts/migrations/0001_initial.py",
+      "parent_sha256": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+      "current_sha256": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+      "unchanged": true
+    },
+    {
+      "path": "assistants/migrations/0001_initial.py",
+      "parent_sha256": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+      "current_sha256": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+      "unchanged": true
+    },
+    {
+      "path": "care/migrations/0001_initial.py",
+      "parent_sha256": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+      "current_sha256": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+      "unchanged": true
+    },
+    {
+      "path": "care/migrations/0002_database_guards.py",
+      "parent_sha256": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+      "current_sha256": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+      "unchanged": true
+    },
+    {
+      "path": "care/migrations/0003_correction_publication_guard.py",
+      "parent_sha256": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+      "current_sha256": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+      "unchanged": true
+    },
+    {
+      "path": "coordination/migrations/0001_initial.py",
+      "parent_sha256": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+      "current_sha256": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+      "unchanged": true
+    },
+    {
+      "path": "finance/migrations/0001_initial.py",
+      "parent_sha256": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+      "current_sha256": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+      "unchanged": true
+    },
+    {
+      "path": "finance/migrations/0002_quarter_lock_version.py",
+      "parent_sha256": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+      "current_sha256": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+      "unchanged": true
+    },
+    {
+      "path": "patients/migrations/0001_initial.py",
+      "parent_sha256": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+      "current_sha256": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+      "unchanged": true
+    },
+    {
+      "path": "portal/migrations/0001_initial.py",
+      "parent_sha256": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+      "current_sha256": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+      "unchanged": true
+    },
+    {
+      "path": "registry/migrations/0001_initial.py",
+      "parent_sha256": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+      "current_sha256": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/migrations/0001_initial.py",
+      "parent_sha256": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+      "current_sha256": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/migrations/0002_slot_intake_control.py",
+      "parent_sha256": "7f7251c5c2a66a90e48d2a9b1a3775f0ccb25a30c87094e6718473ef045564df",
+      "current_sha256": "7f7251c5c2a66a90e48d2a9b1a3775f0ccb25a30c87094e6718473ef045564df",
+      "unchanged": true
+    },
+    {
+      "path": "workspaces/migrations/0001_initial.py",
+      "parent_sha256": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+      "current_sha256": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+      "unchanged": true
+    }
+  ],
+  "model_file_comparison": [
+    {
+      "path": "accounts/models.py",
+      "parent_sha256": "a8edf8fb93dfc392db7dfb23e74973dd6246316bb9eac48e54854d8a1992f2e8",
+      "current_sha256": "a8edf8fb93dfc392db7dfb23e74973dd6246316bb9eac48e54854d8a1992f2e8",
+      "unchanged": true
+    },
+    {
+      "path": "assistants/models.py",
+      "parent_sha256": "f9e1313c2e12ca748c5760b0a022409971d9907c6c646875a17e1291de7baecc",
+      "current_sha256": "f9e1313c2e12ca748c5760b0a022409971d9907c6c646875a17e1291de7baecc",
+      "unchanged": true
+    },
+    {
+      "path": "care/models.py",
+      "parent_sha256": "2f5b7b86936111489fdd498cf5850f3948645728bd0c70306d2801626e89fc45",
+      "current_sha256": "2f5b7b86936111489fdd498cf5850f3948645728bd0c70306d2801626e89fc45",
+      "unchanged": true
+    },
+    {
+      "path": "coordination/models.py",
+      "parent_sha256": "b71e264468b40ce01a15eb65c14473bd5a24c700bece448d8bfefa43e102f328",
+      "current_sha256": "931503a290e904c9a37e19935b51c444070bf2f5bd363bce6fb88fe650a925d9",
+      "unchanged": false
+    },
+    {
+      "path": "finance/models.py",
+      "parent_sha256": "a8f1d0acdaacf508e2e7734195d8b71728500b66cd0802d6cc1568977a61a309",
+      "current_sha256": "a8f1d0acdaacf508e2e7734195d8b71728500b66cd0802d6cc1568977a61a309",
+      "unchanged": true
+    },
+    {
+      "path": "patients/models.py",
+      "parent_sha256": "a7d7d41ea81b6c04eb37cba787a6703ae99d0b4943560f9263d96ff80189124e",
+      "current_sha256": "a7d7d41ea81b6c04eb37cba787a6703ae99d0b4943560f9263d96ff80189124e",
+      "unchanged": true
+    },
+    {
+      "path": "portal/models.py",
+      "parent_sha256": "ac6e13bcedb177bd035b4c4ca25d5c52f33ad38c52afe8ccd1946303accf279d",
+      "current_sha256": "ac6e13bcedb177bd035b4c4ca25d5c52f33ad38c52afe8ccd1946303accf279d",
+      "unchanged": true
+    },
+    {
+      "path": "registry/models.py",
+      "parent_sha256": "6732e44269224e3073d2fb89e2407b7ffaefbe231901528e5a466628d2762827",
+      "current_sha256": "6732e44269224e3073d2fb89e2407b7ffaefbe231901528e5a466628d2762827",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/models.py",
+      "parent_sha256": "e0e42e78a6ae67d433fe0db7765b88b2d5f07fa884a43b46d134e9f375a92600",
+      "current_sha256": "e0e42e78a6ae67d433fe0db7765b88b2d5f07fa884a43b46d134e9f375a92600",
+      "unchanged": true
+    },
+    {
+      "path": "workspaces/models.py",
+      "parent_sha256": "f37a0cc188383970a5f6a418e3bbd10ff35d94d61f2b9d79ec615ebb0ac70f80",
+      "current_sha256": "f37a0cc188383970a5f6a418e3bbd10ff35d94d61f2b9d79ec615ebb0ac70f80",
+      "unchanged": true
+    }
+  ],
+  "original_write_service_comparison": [
+    {
+      "path": "scheduling/services.py",
+      "parent_sha256": "86da1a8a9546f682f594dc2c3028898d26e5a16cfede2114aa767fc084dc66c0",
+      "current_sha256": "86da1a8a9546f682f594dc2c3028898d26e5a16cfede2114aa767fc084dc66c0",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/intake_services.py",
+      "parent_sha256": "8799bbc204806a0fe1e1ddf33244addf7f926b7cb183e67608ec446f5888c371",
+      "current_sha256": "8799bbc204806a0fe1e1ddf33244addf7f926b7cb183e67608ec446f5888c371",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/availability_services.py",
+      "parent_sha256": "c5cebcd634c624bbd59515587e611771032ac8bba02856a018ff65ec00b55a9c",
+      "current_sha256": "c5cebcd634c624bbd59515587e611771032ac8bba02856a018ff65ec00b55a9c",
+      "unchanged": true
+    },
+    {
+      "path": "coordination/services.py",
+      "parent_sha256": "4f9b5eeca25683820bfcca56e7f3c8a8dc5df4a6e5e633c705afaf995b061cd9",
+      "current_sha256": "4f9b5eeca25683820bfcca56e7f3c8a8dc5df4a6e5e633c705afaf995b061cd9",
+      "unchanged": true
+    },
+    {
+      "path": "coordination/reservations.py",
+      "parent_sha256": "894a0d3a230a17b31cc83e2236d31712342099e3d8f408b9279fb6abfce804e1",
+      "current_sha256": "894a0d3a230a17b31cc83e2236d31712342099e3d8f408b9279fb6abfce804e1",
+      "unchanged": true
+    },
+    {
+      "path": "portal/services.py",
+      "parent_sha256": "0a81a54354d336586a8e2474e7b561718e5eae8a4305be1a067edc5fe7ba14ae",
+      "current_sha256": "0a81a54354d336586a8e2474e7b561718e5eae8a4305be1a067edc5fe7ba14ae",
+      "unchanged": true
+    }
+  ],
+  "new_migration": {
+    "path": "coordination/migrations/0002_coordination_tasks.py",
+    "sha256": "3e27c0281a87f1ca4ff6abece50430c3bc717549e5ede4a3f88e9e123563c91e",
+    "new_tables": 1,
+    "cumulative_migration_files": 15
+  },
+  "environment": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "docker": null,
+    "django_installed": false,
+    "psycopg_installed": false,
+    "pypi.org": {
+      "resolved": false,
+      "error": "[Errno -3] Temporary failure in name resolution"
+    },
+    "files.pythonhosted.org": {
+      "resolved": false,
+      "error": "[Errno -3] Temporary failure in name resolution"
+    }
+  },
+  "live_deployment": false,
+  "mac_migration": false,
+  "test_caveats": [
+    "Pure methods include source contracts and inherited process doubles, not real HTTP/ORM.",
+    "Static screenshots use converted source templates and synthetic fixtures.",
+    "One combined browser run exceeded the tool timeout; logs preserved and affected runners rerun separately.",
+    "Original directory/contact/result/interaction static suites were not rerun in this increment; no historical run is claimed as new."
+  ]
+}

@@ -1,0 +1,28 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.15",nodesep="0.25",ranksep="0.55",label="S01 系统用例：患者服务与接诊",labelloc=t,fontsize=18,fontname="Noto Sans CJK SC"];
+node [fontname="Noto Sans CJK SC",fontsize=13,color="#27483f"]; edge [color="#536960",arrowhead=none];
+p [shape=box,style="rounded",label="«参与者»\n患者"];
+f [shape=box,style="rounded",label="«参与者»\n前台"];
+d [shape=box,style="rounded",label="«参与者»\n负责牙医"];
+subgraph cluster_sys { label="ADC 软件系统｜服务主线";fontname="Noto Sans CJK SC";fontsize=14;color="#708f84";
+u3 [shape=ellipse,label="SU-03 建立/查阅患者档案"];
+u4 [shape=ellipse,label="SU-04 创建预约"];
+u5 [shape=ellipse,label="SU-05 调整预约"];
+u6 [shape=ellipse,label="SU-06 登记到诊"];
+u7 [shape=ellipse,label="SU-07 复核与记录治疗"];
+u8 [shape=ellipse,label="SU-08 完成并开单"];
+u9 [shape=ellipse,label="SU-09 查阅结算单"];
+}
+p -> u4;
+p -> u5;
+p -> u9;
+f -> u3;
+f -> u4;
+f -> u5;
+f -> u6;
+f -> u9;
+d -> u3;
+d -> u7;
+d -> u8;
+d -> u9;
+}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}更正患者联络资料{% endblock %}
+{% block content %}
+<section class="panel">
+  <p><a href="{% url 'patient_detail' patient.pk %}">返回患者档案</a></p>
+  <p class="eyebrow">步骤 1／2 · 填写拟更正资料</p>
+  <h1>更正联络资料</h1>
+  <p>患者：{{ patient.name }} · <span class="mono">{{ patient.patient_no }}</span></p>
+  <p>只更正电话、邮箱、账单地址和紧急联系人。不能在这里更改姓名、出生日期、过敏信息或账号绑定。</p>
+  <p class="small">请先与患者核对。下一步只预览差异，不保存；已发布结算单仍保留开单时的资料快照。</p>
+  {% if read_only %}<p role="status">当前为只读演示，不能提交联络资料更正。</p>{% endif %}
+  {% if form.errors %}<div role="alert" tabindex="-1">请检查下方字段错误；当前尚未保存。</div>{% endif %}
+  <form method="post" autocomplete="off">
+    {% csrf_token %}<input type="hidden" name="workspace_token" value="{{ workspace_token_value }}">
+    {{ form.as_p }}
+    <button type="submit" {% if read_only %}disabled{% endif %}>下一步：核对差异（不保存）</button>
+    <a class="button secondary" href="{% url 'patient_detail' patient.pk %}">放弃本次填写</a>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.25",nodesep="0.23",ranksep="0.55",fontname="Noto Sans CJK SC",fontsize=18];
+node [fontname="Noto Sans CJK SC",fontsize=16,color="#45616d",penwidth=1.3]; edge [color="#78909a",arrowhead=none,penwidth=1.2];
+p [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n患者"];
+f [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n前台"];
+d [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n牙医"];
+fi [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n财务"];
+subgraph cluster_system {label="ADC信息系统｜服务主线（分视图）";labelloc=t;fontname="Noto Sans CJK SC";fontsize=19;color="#496c78";penwidth=1.5;style=rounded;
+u3 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-03 建立／查阅患者档案"];
+u4 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-04 创建预约"];
+u5 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-05 调整预约结果"];
+u6 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-06 登记实际到诊"];
+u7 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-07 复核与记录实际治疗"];
+u8 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-08 完成接诊并开单"];
+u9 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-09 查阅与打印结算单"];
+}
+p -> u4;
+p -> u5;
+p -> u9;
+f -> u3;
+f -> u4;
+f -> u5;
+f -> u6;
+f -> u9;
+d -> u3;
+d -> u7;
+d -> u8;
+d -> u9;
+fi -> u9;
+}

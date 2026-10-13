@@ -1,0 +1,197 @@
+{
+  "x-app": {
+    "build": {
+      "context": ".",
+      "dockerfile": "Dockerfile.production"
+    },
+    "image": "${RC_PROJECT:?Prepare RC configuration}-app:1.0.0-rc.1",
+    "environment": {
+      "ADC_RC_SYNTHETIC": "1",
+      "ADC_RC_INSTANCE": "${RC_PROJECT:?}",
+      "DJANGO_SETTINGS_MODULE": "config.settings.course_demo",
+      "DJANGO_SECRET_KEY": "${RC_APP_SECRET:?}",
+      "POSTGRES_DB": "adc_rc_demo",
+      "POSTGRES_USER": "adc_rc_owner",
+      "POSTGRES_PASSWORD": "${RC_DB_PASSWORD:?}",
+      "DB_HOST": "db",
+      "DB_PORT": "5432",
+      "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
+      "AI_MODE": "demo",
+      "AI_API_KEY": "",
+      "OPENAI_API_KEY": ""
+    },
+    "networks": [
+      "private"
+    ]
+  },
+  "services": {
+    "db": {
+      "image": "postgres:17",
+      "environment": {
+        "POSTGRES_DB": "adc_rc_demo",
+        "POSTGRES_USER": "adc_rc_owner",
+        "POSTGRES_PASSWORD": "${RC_DB_PASSWORD:?}"
+      },
+      "volumes": [
+        "rc_data:/var/lib/postgresql/data"
+      ],
+      "networks": [
+        "private"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "pg_isready -U adc_rc_owner -d adc_rc_demo"
+        ],
+        "interval": "3s",
+        "timeout": "3s",
+        "retries": 30
+      }
+    },
+    "schema": {
+      "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile.production"
+      },
+      "image": "${RC_PROJECT:?Prepare RC configuration}-app:1.0.0-rc.1",
+      "environment": {
+        "ADC_RC_SYNTHETIC": "1",
+        "ADC_RC_INSTANCE": "${RC_PROJECT:?}",
+        "DJANGO_SETTINGS_MODULE": "config.settings.course_demo",
+        "DJANGO_SECRET_KEY": "${RC_APP_SECRET:?}",
+        "POSTGRES_DB": "adc_rc_demo",
+        "POSTGRES_USER": "adc_rc_owner",
+        "POSTGRES_PASSWORD": "${RC_DB_PASSWORD:?}",
+        "DB_HOST": "db",
+        "DB_PORT": "5432",
+        "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
+        "AI_MODE": "demo",
+        "AI_API_KEY": "",
+        "OPENAI_API_KEY": ""
+      },
+      "networks": [
+        "private"
+      ],
+      "depends_on": {
+        "db": {
+          "condition": "service_healthy"
+        }
+      },
+      "volumes": [
+        "rc_static:/app/staticfiles"
+      ],
+      "command": [
+        "sh",
+        "-c",
+        "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py check"
+      ],
+      "restart": "no"
+    },
+    "web": {
+      "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile.production"
+      },
+      "image": "${RC_PROJECT:?Prepare RC configuration}-app:1.0.0-rc.1",
+      "environment": {
+        "ADC_RC_SYNTHETIC": "1",
+        "ADC_RC_INSTANCE": "${RC_PROJECT:?}",
+        "DJANGO_SETTINGS_MODULE": "config.settings.course_demo",
+        "DJANGO_SECRET_KEY": "${RC_APP_SECRET:?}",
+        "POSTGRES_DB": "adc_rc_demo",
+        "POSTGRES_USER": "adc_rc_owner",
+        "POSTGRES_PASSWORD": "${RC_DB_PASSWORD:?}",
+        "DB_HOST": "db",
+        "DB_PORT": "5432",
+        "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
+        "AI_MODE": "demo",
+        "AI_API_KEY": "",
+        "OPENAI_API_KEY": ""
+      },
+      "networks": [
+        "private"
+      ],
+      "depends_on": {
+        "schema": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "command": [
+        "gunicorn",
+        "config.wsgi:application",
+        "--config",
+        "deployment/gunicorn.conf.py"
+      ],
+      "restart": "on-failure:3"
+    },
+    "notification-worker": {
+      "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile.production"
+      },
+      "image": "${RC_PROJECT:?Prepare RC configuration}-app:1.0.0-rc.1",
+      "environment": {
+        "ADC_RC_SYNTHETIC": "1",
+        "ADC_RC_INSTANCE": "${RC_PROJECT:?}",
+        "DJANGO_SETTINGS_MODULE": "config.settings.course_demo",
+        "DJANGO_SECRET_KEY": "${RC_APP_SECRET:?}",
+        "POSTGRES_DB": "adc_rc_demo",
+        "POSTGRES_USER": "adc_rc_owner",
+        "POSTGRES_PASSWORD": "${RC_DB_PASSWORD:?}",
+        "DB_HOST": "db",
+        "DB_PORT": "5432",
+        "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
+        "AI_MODE": "demo",
+        "AI_API_KEY": "",
+        "OPENAI_API_KEY": ""
+      },
+      "networks": [
+        "private"
+      ],
+      "profiles": [
+        "worker"
+      ],
+      "depends_on": {
+        "schema": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "command": [
+        "python",
+        "scripts/rc_worker.py"
+      ],
+      "restart": "on-failure:3"
+    },
+    "gateway": {
+      "image": "nginx:stable-alpine",
+      "depends_on": {
+        "schema": {
+          "condition": "service_completed_successfully"
+        },
+        "web": {
+          "condition": "service_started"
+        }
+      },
+      "ports": [
+        "127.0.0.1:${RC_WEB_PORT:-18000}:8080"
+      ],
+      "volumes": [
+        "./deployment/nginx.course.conf:/etc/nginx/conf.d/default.conf:ro",
+        "rc_static:/srv/static:ro"
+      ],
+      "networks": [
+        "private"
+      ],
+      "restart": "on-failure:3"
+    }
+  },
+  "volumes": {
+    "rc_data": {},
+    "rc_static": {}
+  },
+  "networks": {
+    "private": {
+      "internal": true
+    }
+  }
+}

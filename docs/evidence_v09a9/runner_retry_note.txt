@@ -1,0 +1,1 @@
+Initial combined runner exceeded 200 seconds and was terminated during front-coordination checks (EPIPE), not a business-test failure. No completed front claim from that run. Cards inadvertently inserted in title block were discovered in source review, moved into content, and a regression contract added. Retrying affected screens separately.

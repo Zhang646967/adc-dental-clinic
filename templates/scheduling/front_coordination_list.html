@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% block title %}出诊协调 · 前台 · ADC{% endblock %}{% block content %}
+<div class="coordination-desk">
+<p class="eyebrow">前台 · 当前诊所 · 只读核对</p><h1>按出诊协调预约</h1>
+<p>输入主管提供的出诊编号，集中核对该安排关联的预约和邀约。这里不是自动生成的停诊任务列表。</p>
+<form method="get" class="panel coord-query" action="{% url 'front_coordination_list' %}">
+{{ form.as_p }}<button class="button" type="submit">查找本店出诊</button>
+<p class="muted">精确编号查询包含历史；不输入编号时使用所选查询范围。每页20条。</p></form>
+{% if read_only %}<p class="notice">只读实例：可以核对本店数据，不能在此实例办理业务变更。</p>{% endif %}
+{% if form.errors %}<p class="notice" role="alert">请更正查询条件；不会忽略错误条件而展示另一批记录。</p>{% else %}
+<p class="muted">查询时点：{{ observed_at }}（北京时间） · 共{{ total }}条。列表计数仅用于定位，进入详情后会重新完整核对。</p>
+<div class="coord-cards">{% for row in rows %}<section class="panel coord-record"><h2>出诊 #{{ row.id }}</h2>
+<p><strong>{{ row.dentist }}</strong> · 工号 {{ row.employee_no }}</p><p>{{ row.start }} — {{ row.end }}</p>
+<p>{% if row.active %}原出诊可用{% else %}原出诊已停用{% endif %}</p>
+<dl class="coord-counts"><div><dt>已预约</dt><dd>{{ row.scheduled_count }}</dd></div><div><dt>受保护接诊</dt><dd>{{ row.care_count }}</dd></div><div><dt>有效待确认邀约</dt><dd>{% if row.has_effective_offer %}有{% else %}未发现{% endif %}</dd></div></dl>
+<a class="button secondary" href="{% url 'front_coordination_detail' row.id %}">核对本出诊关联业务</a></section>
+{% empty %}<section class="panel"><h2>没有符合条件的本店出诊</h2><p>请核对当前诊所和出诊编号。这里不会搜索其他诊所，也不会自动切换工作范围。</p></section>{% endfor %}</div>
+<nav class="coord-pagination" aria-label="出诊列表分页">{% if previous_url %}<a href="{{ previous_url }}">上一页</a>{% endif %}<span>第{{ number }}页／共{{ pages }}页</span>{% if next_url %}<a href="{{ next_url }}">下一页</a>{% endif %}</nav>{% endif %}
+</div>{% endblock %}

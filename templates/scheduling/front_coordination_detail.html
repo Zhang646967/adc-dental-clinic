@@ -1,0 +1,33 @@
+{% extends 'base.html' %}{% block title %}出诊 #{{ slot.id }} 关联核对 · ADC{% endblock %}{% block content %}
+<div class="coordination-desk"><a href="{% url 'front_coordination_list' %}">返回本店出诊协调</a>
+<p class="eyebrow">前台 · {{ slot.clinic }} · 不代患者作决定</p><h1>核对出诊 #{{ slot.id }}</h1>
+<section class="panel"><h2>{{ slot.dentist }} · {{ slot.employee_no }}</h2><p>{{ slot.start }} — {{ slot.end }}（北京时间）</p>
+<p>{% if slot.active %}原出诊仍可用{% else %}原出诊已停用{% endif %} · 本页读取时点：{{ observed_at }}</p>
+<section class="notice" role="status"><strong>{% if not slot.active %}原出诊已停用{% elif slot.paused %}主管已暂停本出诊新增预约{% else %}当前仍接收新预约{% endif %}</strong>
+<p>{% if slot.paused %}新预约、改入预约及新邀约被暂停；已有预约与仍有效邀约不取消。仍有效邀约可以在原期限内确认，关联预约数可能随之变化。{% else %}协调期间仍可能出现新预约，需要时请主管在自己的工作台明确暂停接收。{% endif %}</p></section>
+<p class="muted">规则 {{ contract }}。本页不暂停接收新预约，不创建协调工单，不自动联系患者；上述接收状态来自主管已保存的设置。</p>
+<a class="button secondary" href="{% url 'front_coordination_detail' slot.id %}">重新核对当前状态</a></section>
+<section class="notice" role="status"><h2>{{ assessment.title }}</h2><p>{{ assessment.explanation }}</p>
+{% if assessment.can_ask_manager_to_recheck %}<p>将出诊编号 #{{ slot.id }} 交给本店主管，主管另行进入自己的“出诊安排”核对。本页没有取得主管操作权限。</p>{% endif %}</section>
+{% if read_only %}<p class="notice">只读实例：核对结果可读，业务变更不开放；不代表协调已经完成。</p>{% endif %}
+{% if unsafe %}<section class="panel"><h2>未展开不完整或可疑的关联记录</h2><p>没有使用局部结果判断空闲，也没有生成针对可疑对象的处理入口。请按受控方式核对后重新读取。</p></section>{% else %}
+<nav class="coord-jump" aria-label="当前出诊的关联类型"><a href="#coord-visits">预约与接诊 {{ visit_count }}条</a><a href="#coord-offers">候补邀约历史 {{ offer_count }}条</a></nav>
+<section id="coord-visits" aria-labelledby="coord-visits-title"><h2 id="coord-visits-title">预约与接诊</h2>
+<p class="muted">患者仅显示业务编号；姓名、联络方式须在原有获授权详情中核实。不要仅凭编号代替身份核对。</p>
+{% for row in visits %}<article class="panel coord-record"><span class="tag">{{ row.label }}</span><h3>预约 {{ row.visit_no }}</h3><p class="muted">本系统预约记录编号 #{{ row.id }}（用于关联办理声明）</p>
+<p>患者编号：<span class="coord-code">{{ row.patient_no }}</span></p><p>{{ row.start }} — {{ row.end }}</p><p>{{ row.instruction }}</p>
+<div class="actions"><a class="button secondary" href="{{ row.detail_url }}">查看原预约并核对</a>{% if row.reschedule_url %}<a class="button secondary" href="{{ row.reschedule_url }}">进入原改期流程</a>{% endif %}</div>
+</article>{% empty %}<div class="panel"><p>本出诊没有关联预约记录；仍需核对下方邀约，不能仅凭此处为空认定可停用。</p></div>{% endfor %}
+<nav class="coord-pagination" aria-label="关联预约分页">{% if visit_previous %}<a href="{{ visit_previous }}">上一页预约</a>{% endif %}<span>第{{ visit_number }}页／共{{ visit_pages }}页</span>{% if visit_next %}<a href="{{ visit_next }}">下一页预约</a>{% endif %}</nav></section>
+<section id="coord-offers" aria-labelledby="coord-offers-title"><h2 id="coord-offers-title">候补邀约</h2>
+<p class="muted">已接受邀约不再计作第二份保留，其对应正式预约在上方计数。已到期与已经回收状态分别说明。</p>
+{% for row in offers %}<article class="panel coord-record"><span class="tag">{{ row.label }}</span><h3>邀约 #{{ row.id }} · 候补 #{{ row.request_id }}</h3>
+<p>患者编号：<span class="coord-code">{{ row.patient_no }}</span></p><p>{{ row.start }} — {{ row.end }}</p>
+<p>{% if row.offer %}确认截止{% else %}原确认截止{% endif %}：{{ row.expires }}（北京时间）</p><p>{{ row.instruction }}</p>
+<div class="actions">{% if row.detail_url %}<a class="button secondary" href="{{ row.detail_url }}">查看邀约并核实患者意思</a>{% endif %}{% if row.appointment_url %}<a class="button secondary" href="{{ row.appointment_url }}">核对准确关联的正式预约</a>{% endif %}</div>
+</article>{% empty %}<div class="panel"><p>本出诊没有关联邀约历史。等待中的候补和未发布草案不保留本出诊机会。</p></div>{% endfor %}
+<nav class="coord-pagination" aria-label="邀约分页">{% if offer_previous %}<a href="{{ offer_previous }}">上一页邀约</a>{% endif %}<span>第{{ offer_number }}页／共{{ offer_pages }}页</span>{% if offer_next %}<a href="{{ offer_next }}">下一页邀约</a>{% endif %}</nav>
+{% if impact.expired_pending %}<p>本出诊有{{ impact.expired_pending }}条到期未回收邀约。<a href="{% url 'waitlist' %}">到本店候补核对回收</a>（原入口按本店批量处理，本页不执行）。</p>{% endif %}</section>
+{% endif %}
+<section class="panel"><h2>怎样确认下一步？</h2><ol><li>先核实主管是否确需调整，以及患者的真实意思；关联列表本身不是停诊指令。</li><li>需要变更的记录，逐条进入原有业务页面确认；不在本页批量取消、代接受邀约或修改治疗。</li><li>返回本页重新核对，再请主管在自己的工作台检查是否允许维护。查询期间可能出现新的预约。</li></ol></section>
+</div><section class="panel"><h2>查看本出诊协调责任</h2><p>按记录办理不等于受理任务；请在任务中明确受理并核对进度。</p><a href="{% url 'coordination_task_list' %}?slot={{ slot.id }}&amp;mode=all">打开本出诊任务</a></section>{% endblock %}

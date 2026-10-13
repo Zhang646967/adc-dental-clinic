@@ -1,0 +1,1999 @@
+{
+  "scope": "Converted actual templates with synthetic fixtures; NOT Django/HTTP/PG/E2E.",
+  "total": 498,
+  "passed": 498,
+  "checks": [
+    {
+      "name": "manager_open/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/False/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/False/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/True/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/320/True/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/False/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/False/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/True/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/390/True/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/False/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/False/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/True/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_open/1440/True/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/False/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/False/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/True/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/320/True/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/False/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/False/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/True/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/390/True/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/False/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/False/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/True/right-action",
+      "passed": true
+    },
+    {
+      "name": "manager_paused/1440/True/no-empty-slot-maintenance",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/320/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/390/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_inactive/1440/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/320/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/390/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_ended/1440/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/320/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/390/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/False/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "manager_readonly/1440/True/no-intake-action",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "pause_edit/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "resume_edit/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/False/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/320/True/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/False/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/390/True/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/False/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_pause/1440/True/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/False/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/320/True/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/False/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/390/True/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/False/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/explicit-confirm",
+      "passed": true
+    },
+    {
+      "name": "confirm_resume/1440/True/two-tokens",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/False/no-form",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/320/True/no-form",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/False/no-form",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/390/True/no-form",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/False/no-form",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/not-yet-saved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/promises-preserved",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/no-notification-claim",
+      "passed": true
+    },
+    {
+      "name": "confirm_readonly/1440/True/no-form",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/False/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_paused/320/True/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/False/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_paused/390/True/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/False/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_paused/1440/True/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/False/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_open/320/True/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/False/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_open/390/True/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/False/saved-state",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/no-manager-action",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/query-only",
+      "passed": true
+    },
+    {
+      "name": "front_open/1440/True/saved-state",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/False/fits",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/False/heading",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/True/fits",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/True/heading",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "unknown/320/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/False/fits",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/False/heading",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/True/fits",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/True/heading",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "unknown/390/True/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/False/fits",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/False/heading",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/False/no-injection",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/False/no-inline-action",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/True/fits",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/True/heading",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/True/no-injection",
+      "passed": true
+    },
+    {
+      "name": "unknown/1440/True/no-inline-action",
+      "passed": true
+    }
+  ]
+}

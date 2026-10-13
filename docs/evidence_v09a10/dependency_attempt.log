@@ -1,0 +1,2 @@
+ERROR: Could not find a version that satisfies the requirement Django==5.2.17 (from versions: none)
+ERROR: No matching distribution found for Django==5.2.17

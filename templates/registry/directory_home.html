@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}
+<div class="workspace-heading"><p class="eyebrow">基础目录 · 技术管理</p><h1>先登记资料，再分别办理授权与出诊</h1><p>本入口维护诊所、牙医及资格类别的合成登记资料。登记不等于认证，不接管临床或财务业务。</p></div>
+{% if read_only %}<p class="notice" role="status">当前为只读实例，可查目录，不能保存任何登记或关联变更。</p>{% endif %}
+<div class="role-grid">{% for row in counts %}<section class="role-card"><h2>{{ row.label }}</h2><p>已登记 {{ row.count }} 条（含已停用记录）</p><a class="button secondary" href="{% url 'directory_list' row.kind %}">查阅{{ row.label }}目录</a>{% if not read_only %}<p><a href="{% url 'directory_create' row.kind %}">登记新的{{ row.label }}</a></p>{% endif %}</section>{% endfor %}</div>
+<section class="panel"><h2>登记以后还需要做什么？</h2><p>新记录默认成为可用目录资料，但没有登录权限或出诊安排。新牙医：核对员工资料 → 登记资格关联 → 在“账号与授权”单独创建并绑定账号 → 由主管单独安排出诊。</p><p>新诊所：核对资料 → 为已有账号单独授予这家店的前台或主管身份 → 对方切换身份并选择新店。</p><p>资格仅记录类别及关联；本版本不存有效期或核验机构，不据此认定执业许可、不自动判断可做哪种治疗。</p><a class="button secondary" href="{% url 'account_manage_list' %}">转到账号与授权</a></section>
+{% endblock %}

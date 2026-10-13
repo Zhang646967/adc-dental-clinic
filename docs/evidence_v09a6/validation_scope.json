@@ -1,0 +1,30 @@
+{
+  "timestamp_utc": "2026-10-08T12:14:30.666979+00:00",
+  "target": "0.9.0-alpha.6",
+  "parent": "0.9.0-alpha.5",
+  "actual": {
+    "parent_basic_methods": 485,
+    "current_basic_methods": 542,
+    "new_basic_methods": 57,
+    "wait_window_node_assertions": 18,
+    "availability_node_assertions": 16,
+    "availability_browser_assertions": 396,
+    "directory_browser_regression": 318,
+    "contact_browser_regression": 120,
+    "results_browser_regression": 249,
+    "interactions_browser_regression": 129,
+    "all_python_ast_parse": true,
+    "models_unchanged": 10,
+    "migrations_unchanged": 13
+  },
+  "not_executed": {
+    "authored_django_pg_methods": 455,
+    "new_authored_django_pg_methods": 56,
+    "database_tests": true,
+    "user_upgrade": true,
+    "real_browser_e2e": true,
+    "production": true,
+    "mac_migration": true
+  },
+  "scope": "Static/standalone/source contracts are distinct from runtime DB/HTTP proof."
+}

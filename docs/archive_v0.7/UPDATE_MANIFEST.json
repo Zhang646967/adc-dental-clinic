@@ -1,0 +1,24 @@
+{
+  "target": "0.7-candidate",
+  "basis": "v0.5 source with original v0.3/v0.4 migrations preserved",
+  "intended_update_sources": [
+    "v0.3",
+    "v0.4",
+    "v0.5"
+  ],
+  "verified_populated_upgrade_paths": [],
+  "preserve": [
+    ".env",
+    "existing Compose project name",
+    "existing DB volume",
+    "existing accounts/passwords",
+    "published historical records"
+  ],
+  "entrypoint": "UPGRADE_V07_WINDOWS.cmd",
+  "backup": "backups/pre_v07.dump",
+  "new_migrations": [
+    "coordination/migrations/0001_initial.py",
+    "workspaces/migrations/0001_initial.py"
+  ],
+  "important": "Do not execute down -v or overwrite backup. Code coverage is not database rollback. All gates stop at first failure."
+}

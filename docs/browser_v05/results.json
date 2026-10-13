@@ -1,0 +1,685 @@
+{
+  "scope": "Static translated templates with synthetic data; no Django/PG/API execution",
+  "total": 84,
+  "passed": 84,
+  "checks": [
+    {
+      "check": "finance_ready/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "finance_ready/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58,
+          56.5,
+          56.5,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "check": "finance_ready/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/1440/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "finance_missing/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48,
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "finance_missing/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58,
+          56.5,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "check": "finance_missing/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/1440/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "operations/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "operations/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58
+        ]
+      }
+    },
+    {
+      "check": "operations/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/1440/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "correction/1440/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "correction/1440/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/1440/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/1440/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 1440,
+        "sw": 1440,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58
+        ]
+      }
+    },
+    {
+      "check": "correction/1440/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/1440/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/1440/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "finance_ready/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48,
+          113.96875,
+          113.96875,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "finance_ready/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58,
+          142,
+          142,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "check": "finance_ready/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/390/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "finance_missing/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48,
+          113.96875,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "finance_missing/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58,
+          142,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "check": "finance_missing/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/390/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "operations/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "operations/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58
+        ]
+      }
+    },
+    {
+      "check": "operations/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/390/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "correction/390/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "correction/390/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/390/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/390/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 390,
+        "sw": 390,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58
+        ]
+      }
+    },
+    {
+      "check": "correction/390/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/390/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/390/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "finance_ready/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48,
+          113.96875,
+          113.96875,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "finance_ready/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58,
+          142,
+          142,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "check": "finance_ready/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_ready/320/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "finance_missing/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48,
+          113.96875,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "finance_missing/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58,
+          142,
+          58,
+          58
+        ]
+      }
+    },
+    {
+      "check": "finance_missing/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "finance_missing/320/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "operations/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "operations/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58
+        ]
+      }
+    },
+    {
+      "check": "operations/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "operations/320/js",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "correction/320/standard/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "16px",
+        "heights": [
+          48,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "correction/320/standard/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/320/standard/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/320/comfortable/overflow",
+      "passed": true,
+      "detail": {
+        "w": 320,
+        "sw": 320,
+        "font": "20px",
+        "heights": [
+          56,
+          48,
+          58
+        ]
+      }
+    },
+    {
+      "check": "correction/320/comfortable/font",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/320/comfortable/targets",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "correction/320/js",
+      "passed": true,
+      "detail": []
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}核对联络资料处理结果{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>请先核对当前资料</h1>
+  <p role="alert">{{ problem }}</p>
+  {% if errors %}<div>{{ errors }}</div>{% endif %}
+  <p>不要重复提交旧确认页；核对档案后，仍需更正时再重新开始。</p>
+  <a class="button" href="{% url 'patient_detail' patient.pk %}">核对当前患者档案</a>
+  <a class="button secondary" href="{% url 'patient_contact_edit' patient.pk %}">重新填写并核对</a>
+</section>
+{% endblock %}

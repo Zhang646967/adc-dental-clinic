@@ -1,0 +1,57 @@
+{
+  "timestamp_utc": "2026-10-08T12:49:32.530103+00:00",
+  "source_version": "0.9.0-alpha.7",
+  "parent_archive_sha256": "816ac23379354d615041717f549ff1e3913bcdb32934225300f6c48c5f9b938d",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "environment": {
+    "django": false,
+    "psycopg": false,
+    "playwright": true
+  },
+  "docker_available": false,
+  "parent_basic_test_methods_executed": 542,
+  "basic_test_methods_executed": 578,
+  "new_basic_methods": 36,
+  "database_test_methods_authored": 496,
+  "new_database_methods": 41,
+  "database_tests_executed": false,
+  "schema_model_file_count": 10,
+  "changed_model_files": [],
+  "old_migration_count": 13,
+  "migrations_unchanged": true,
+  "migration_sha256": {
+    "accounts/migrations/0001_initial.py": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+    "scheduling/migrations/0001_initial.py": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+    "workspaces/migrations/0001_initial.py": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+    "registry/migrations/0001_initial.py": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+    "care/migrations/0003_correction_publication_guard.py": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+    "care/migrations/0001_initial.py": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+    "care/migrations/0002_database_guards.py": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+    "coordination/migrations/0001_initial.py": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+    "portal/migrations/0001_initial.py": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+    "assistants/migrations/0001_initial.py": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+    "patients/migrations/0001_initial.py": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+    "finance/migrations/0001_initial.py": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+    "finance/migrations/0002_quarter_lock_version.py": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff"
+  },
+  "original_write_commands_unchanged": {
+    "scheduling/services.py": true,
+    "scheduling/availability_services.py": true,
+    "coordination/services.py": true,
+    "scheduling/availability_rules.py": true,
+    "coordination/reservations.py": true
+  },
+  "node_wait_assertions": 18,
+  "node_availability_assertions": 16,
+  "static_browser_assertions": {
+    "browser": 684,
+    "availability_regression": 396,
+    "directory_regression": 318,
+    "contact_regression": 120,
+    "result_regression": 249,
+    "account_regression": 129
+  },
+  "external_ai_called": false,
+  "user_instance_touched": false,
+  "mac_migration_executed": false
+}

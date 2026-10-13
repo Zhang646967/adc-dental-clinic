@@ -1,0 +1,139 @@
+{
+  "version": "0.9.0-alpha.10",
+  "parent": "0.9.0-alpha.9",
+  "old_models": {
+    "assistants/models.py": {
+      "parent": "f9e1313c2e12ca748c5760b0a022409971d9907c6c646875a17e1291de7baecc",
+      "current": "f9e1313c2e12ca748c5760b0a022409971d9907c6c646875a17e1291de7baecc",
+      "unchanged": true
+    },
+    "registry/models.py": {
+      "parent": "6732e44269224e3073d2fb89e2407b7ffaefbe231901528e5a466628d2762827",
+      "current": "6732e44269224e3073d2fb89e2407b7ffaefbe231901528e5a466628d2762827",
+      "unchanged": true
+    },
+    "workspaces/models.py": {
+      "parent": "f37a0cc188383970a5f6a418e3bbd10ff35d94d61f2b9d79ec615ebb0ac70f80",
+      "current": "f37a0cc188383970a5f6a418e3bbd10ff35d94d61f2b9d79ec615ebb0ac70f80",
+      "unchanged": true
+    },
+    "finance/models.py": {
+      "parent": "a8f1d0acdaacf508e2e7734195d8b71728500b66cd0802d6cc1568977a61a309",
+      "current": "a8f1d0acdaacf508e2e7734195d8b71728500b66cd0802d6cc1568977a61a309",
+      "unchanged": true
+    },
+    "coordination/models.py": {
+      "parent": "931503a290e904c9a37e19935b51c444070bf2f5bd363bce6fb88fe650a925d9",
+      "current": "931503a290e904c9a37e19935b51c444070bf2f5bd363bce6fb88fe650a925d9",
+      "unchanged": true
+    },
+    "accounts/models.py": {
+      "parent": "a8edf8fb93dfc392db7dfb23e74973dd6246316bb9eac48e54854d8a1992f2e8",
+      "current": "a8edf8fb93dfc392db7dfb23e74973dd6246316bb9eac48e54854d8a1992f2e8",
+      "unchanged": true
+    },
+    "scheduling/models.py": {
+      "parent": "e0e42e78a6ae67d433fe0db7765b88b2d5f07fa884a43b46d134e9f375a92600",
+      "current": "e0e42e78a6ae67d433fe0db7765b88b2d5f07fa884a43b46d134e9f375a92600",
+      "unchanged": true
+    },
+    "care/models.py": {
+      "parent": "2f5b7b86936111489fdd498cf5850f3948645728bd0c70306d2801626e89fc45",
+      "current": "2f5b7b86936111489fdd498cf5850f3948645728bd0c70306d2801626e89fc45",
+      "unchanged": true
+    },
+    "portal/models.py": {
+      "parent": "ac6e13bcedb177bd035b4c4ca25d5c52f33ad38c52afe8ccd1946303accf279d",
+      "current": "ac6e13bcedb177bd035b4c4ca25d5c52f33ad38c52afe8ccd1946303accf279d",
+      "unchanged": true
+    },
+    "patients/models.py": {
+      "parent": "a7d7d41ea81b6c04eb37cba787a6703ae99d0b4943560f9263d96ff80189124e",
+      "current": "a7d7d41ea81b6c04eb37cba787a6703ae99d0b4943560f9263d96ff80189124e",
+      "unchanged": true
+    }
+  },
+  "old_migrations": {
+    "assistants/migrations/0001_initial.py": {
+      "parent": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+      "current": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+      "unchanged": true
+    },
+    "registry/migrations/0001_initial.py": {
+      "parent": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+      "current": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+      "unchanged": true
+    },
+    "workspaces/migrations/0001_initial.py": {
+      "parent": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+      "current": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+      "unchanged": true
+    },
+    "finance/migrations/0001_initial.py": {
+      "parent": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+      "current": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+      "unchanged": true
+    },
+    "finance/migrations/0002_quarter_lock_version.py": {
+      "parent": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+      "current": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+      "unchanged": true
+    },
+    "coordination/migrations/0002_coordination_tasks.py": {
+      "parent": "3e27c0281a87f1ca4ff6abece50430c3bc717549e5ede4a3f88e9e123563c91e",
+      "current": "3e27c0281a87f1ca4ff6abece50430c3bc717549e5ede4a3f88e9e123563c91e",
+      "unchanged": true
+    },
+    "coordination/migrations/0001_initial.py": {
+      "parent": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+      "current": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+      "unchanged": true
+    },
+    "accounts/migrations/0001_initial.py": {
+      "parent": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+      "current": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+      "unchanged": true
+    },
+    "scheduling/migrations/0002_slot_intake_control.py": {
+      "parent": "7f7251c5c2a66a90e48d2a9b1a3775f0ccb25a30c87094e6718473ef045564df",
+      "current": "7f7251c5c2a66a90e48d2a9b1a3775f0ccb25a30c87094e6718473ef045564df",
+      "unchanged": true
+    },
+    "scheduling/migrations/0001_initial.py": {
+      "parent": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+      "current": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+      "unchanged": true
+    },
+    "care/migrations/0003_correction_publication_guard.py": {
+      "parent": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+      "current": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+      "unchanged": true
+    },
+    "care/migrations/0001_initial.py": {
+      "parent": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+      "current": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+      "unchanged": true
+    },
+    "care/migrations/0002_database_guards.py": {
+      "parent": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+      "current": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+      "unchanged": true
+    },
+    "portal/migrations/0001_initial.py": {
+      "parent": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+      "current": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+      "unchanged": true
+    },
+    "patients/migrations/0001_initial.py": {
+      "parent": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+      "current": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+      "unchanged": true
+    }
+  },
+  "database_tests_authored": 673,
+  "database_tests_executed": false,
+  "new_app": "notifications",
+  "new_migration": "notifications.0001_initial",
+  "user_instance_touched": false,
+  "mac_migration_paused": true
+}

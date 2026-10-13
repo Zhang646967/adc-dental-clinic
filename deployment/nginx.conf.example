@@ -1,0 +1,40 @@
+# Candidate only: replace adc.example.invalid and provision trusted TLS certificates.
+# The application must NOT have a published host port. Run nginx -t before reload.
+limit_req_zone $binary_remote_addr zone=adc_general:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=adc_login:10m rate=10r/m;
+log_format adc_minimal '$request_method $status $request_time';
+server { listen 80 default_server; server_name _; return 444; }
+server {
+    listen 80; server_name adc.example.invalid;
+    return 308 https://adc.example.invalid$request_uri;
+}
+server {
+    listen 443 ssl; server_name adc.example.invalid;
+    ssl_certificate /etc/adc/tls/fullchain.pem;
+    ssl_certificate_key /etc/adc/tls/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    server_tokens off;
+    if ($host != 'adc.example.invalid') { return 444; }
+    client_max_body_size 1m;
+    access_log /var/log/nginx/adc_access.log adc_minimal;
+    limit_req_status 429;
+    location /static/ { alias /srv/adc/static/; autoindex off; }
+    location ~ ^/(accounts|portal)/login/$ {
+        limit_req zone=adc_login burst=10 nodelay;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Connection '';
+        proxy_read_timeout 35s;
+        proxy_pass http://web:8000;
+    }
+    location / {
+        limit_req zone=adc_general burst=20 nodelay;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Connection '';
+        proxy_read_timeout 35s;
+        proxy_pass http://web:8000;
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "registry/migrations/0001_initial.py": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+  "registry/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "care/migrations/0001_initial.py": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+  "care/migrations/0002_database_guards.py": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+  "care/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scheduling/migrations/0001_initial.py": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+  "scheduling/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "patients/migrations/0001_initial.py": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+  "patients/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "finance/migrations/0001_initial.py": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+  "finance/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "accounts/migrations/0001_initial.py": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+  "accounts/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

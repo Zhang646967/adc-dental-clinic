@@ -1,0 +1,25 @@
+{
+  "operation": "doctor",
+  "tool_version": "0.9.0-alpha.4",
+  "checked_at_utc": "2026-10-08T07:34:26.643536+00:00",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "python": "3.13.5"
+  },
+  "database_accessed": false,
+  "live_environment_modified": false,
+  "mac_native_validation": "not_performed_by_this_probe",
+  "architecture_image_support": "requires actual target pull/build and tests",
+  "source": {
+    "declared_version": "0.7-candidate",
+    "unlisted_file_count": 0,
+    "runtime_image_matches_source": "not_verified",
+    "declared_files_present": 379,
+    "locally_modified_file_count": 0
+  },
+  "docker": {
+    "local_engine_available": false,
+    "reason": "Docker CLI not found; start/install local Docker Desktop first."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "time": "2026-10-08T10:58:40.129190+00:00",
+  "checks": {
+    "pypi.org": {
+      "resolves": false,
+      "error": "[Errno -3] Temporary failure in name resolution"
+    },
+    "files.pythonhosted.org": {
+      "resolves": false,
+      "error": "[Errno -3] Temporary failure in name resolution"
+    }
+  }
+}

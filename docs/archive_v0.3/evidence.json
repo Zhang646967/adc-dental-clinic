@@ -1,0 +1,44 @@
+{
+  "artifact": "ADC_engineering_v0.3",
+  "status": "unexecuted-django-postgresql-candidate",
+  "recorded_at_utc": "2026-09-21T13:16:04.813203+00:00",
+  "python_version": "3.13.5",
+  "executed": [
+    {
+      "suite": "checks/test_rules.py",
+      "kind": "framework-free functions",
+      "tests": 46,
+      "passed": 46
+    },
+    {
+      "suite": "checks/test_artifacts.py",
+      "kind": "static source/package consistency",
+      "tests": 11,
+      "passed": 11
+    }
+  ],
+  "not_executed": [
+    {
+      "suite": "tests/test_integration.py",
+      "tests": 28,
+      "reason": "Django and PostgreSQL absent; dependency download failed"
+    },
+    {
+      "suite": "tests/test_concurrency.py",
+      "tests": 2,
+      "reason": "No PostgreSQL engine / independent DB connections available"
+    }
+  ],
+  "release_blockers": [
+    "Django imports/system checks",
+    "migration autodetector consistency",
+    "real PostgreSQL migrations",
+    "30 integration/concurrency tests",
+    "browser validation",
+    "core care and financial workflows",
+    "public deployment/security/restore"
+  ],
+  "network_observation": "pip dependency lookup failed with temporary name-resolution errors; container download also failed",
+  "model_count": 20,
+  "authored_migration_count": 7
+}

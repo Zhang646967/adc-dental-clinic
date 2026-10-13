@@ -1,0 +1,15 @@
+{% extends base_template %}{% load workspace_tags %}{% block content %}
+<p class="eyebrow">候补服务 · {{ workspace_scope }}</p><h1>{% if workspace_role == 'PATIENT' %}我的候补{% else %}本店候补协调{% endif %}</h1>
+<p>登记偏好不是正式预约。发布邀约后临时保留时间，由患者或前台明确接受才创建预约。</p>
+{% if may_join %}{% if workspace_role == 'PATIENT' and has_open_wait %}<p>你已有一条有效候补，请先处理或退出后再登记。</p>{% else %}<a class="button" href="{% url 'waitlist_join' %}">登记候补</a>{% endif %}{% endif %}
+{% if may_plan %}<section class="panel" aria-label="下一步安排"><h2>下一步：安排本店候补</h2><p>本店有 {{ waiting_count }} 条等待安排的需求。先查看或生成建议，再核对并发布限时邀约。</p><a class="button" href="{% url 'schedule_plans' %}">前往排程建议</a><p class="soft">打开此页面不会自动生成方案或发出邀约。</p></section>{% endif %}
+{% if may_recycle %}{% if expired_count %}<form class="panel" method="post" action="{% url 'expire_offers' %}">{% csrf_token %}{% workspace_token %}<p>有 {{ expired_count }} 条过期邀约待处理。到期已不占用时间，回收后需求可重新参与匹配。</p>{{ confirm_form.as_div }}<button class="button secondary" type="submit">回收过期邀约</button></form>{% else %}<p class="soft">当前没有待回收的过期邀约。</p>{% endif %}{% endif %}
+{% for e in rows %}<article class="panel"><p class="badge">{{ e.label }}</p><h2>{{ e.patient }} · {{ e.clinic }}</h2><p>可接受：{{ e.earliest|date:'Y-m-d H:i' }} 至 {{ e.latest|date:'Y-m-d H:i' }}（北京时间）</p>{% if e.can_withdraw %}<a class="button secondary" href="{% url 'waitlist_withdraw' e.id %}">退出这条候补</a>{% endif %}
+{% if workspace_role == 'PATIENT' or workspace_role == 'FRONT_DESK' %}<form method="post" action="{% url 'guide_result_wait' e.id %}" class="result-check-form">{% csrf_token %}{% workspace_token %}<button class="button secondary" type="submit">核对这条候补是否已转预约</button><p class="soft">只是查看已保存结果，不会接受邀约或再次创建预约。</p></form>{% endif %}
+{% for o in e.offers %}<section class="panel"><strong>{{ o.doctor }} · {{ o.start|date:'Y-m-d H:i' }}—{{ o.end|date:'H:i' }}</strong>
+{% if o.state == 'ACCEPTED' %}<p>已接受，已转为正式预约。</p><p class="soft">原邀约截止（历史信息）：{{ o.expires|date:'m-d H:i:s' }}。临时保留已结束，正式占用由预约承担。</p>{% if workspace_role == 'PATIENT' and o.visit_id %}<a class="button secondary" href="{% url 'portal_visit' o.visit_id %}">查看正式预约</a>{% elif workspace_role == 'FRONT_DESK' and o.visit_id %}<a class="button secondary" href="{% url 'visit_detail' o.visit_id %}">查看正式预约</a>{% endif %}
+{% else %}<p>{{ o.status }} · 确认截止：{{ o.expires|date:'m-d H:i:s' }}（北京时间）{% if not o.active %} · 该邀约当前已不可接受{% endif %}</p>{% endif %}
+{% if o.may_answer %}<a class="button" href="{% url 'wait_offer' o.id %}">查看并确认邀约</a>{% endif %}</section>
+{% empty %}{% if e.state == 'WAITING' %}{% if may_plan %}<p>尚未发出邀约。请前往排程建议，生成并核对本店候选安排。</p><a href="{% url 'schedule_plans' %}">前往排程建议</a>{% else %}<p>尚未向你提供邀约。工作人员核对时段后，你可以在这里查看并决定是否接受。</p>{% endif %}{% else %}<p class="soft">这条历史记录没有邀约。</p>{% endif %}{% endfor %}</article>
+{% empty %}<section class="panel"><h2>暂无候补记录</h2><p>没有合适的预约时段时，可以登记未来14天内的偏好。</p></section>{% endfor %}
+<p>第 {{ page.number }} / {{ page.paginator.num_pages }} 页 {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">上一页</a>{% endif %} {% if page.has_next %}<a href="?page={{ page.next_page_number }}">下一页</a>{% endif %}</p>{% endblock %}

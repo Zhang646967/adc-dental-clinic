@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block title %}{{ title }}{% endblock %}{% block content %}
+<section class="panel"><p><a href="{% url 'catalogue_list' %}">返回价格目录</a></p><h1>{{ title }}</h1>
+{% if item %}<p>项目：{{ item.name }} · 单位：{{ item.unit_definition }} · 当前单价：{{ item.standard_unit_price }} 元</p>{% endif %}
+<p>只修改当前目录。不能在这里回填历史价格、改写既有治疗明细或代替结算更正审批。</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="workspace_token" value="{{ workspace_token_value }}">{{ form.as_p }}<button type="submit">确认保存目录</button></form></section>{% endblock %}

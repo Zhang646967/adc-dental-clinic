@@ -1,0 +1,14 @@
+digraph M02 { graph[rankdir=TB,bgcolor="white",nodesep=.6,ranksep=.75,pad=.25];node[fontname="Noto Sans CJK SC",fontsize=18,shape=box,style=rounded];edge[fontname="Noto Sans CJK SC",fontsize=14];
+start[shape=point,label=""];open[label="待前台受理\nOPEN"];doing[label="前台协调中\nIN_PROGRESS"];ready[label="待主管复核\nREADY"];closed[label="协调核对已通过\nCLOSED"];cancel[label="任务已撤销\nCANCELLED"];
+start->open[label="发起 [未来有效出诊且已暂停]"];
+open->doing[label="受理 [当前本店前台] / 指定本人负责"];
+doing->doing[label="记录办理声明 / 不改变预约事实"];
+doing->ready[label="提交 [无当前业务阻断] / 保存事实摘要"];
+ready->closed[label="批准 [不同账号、事实未变化且无阻断]"];
+doing->open[label="本人退回或主管退回 / 解除当前受理"];
+ready->open[label="主管退回 / 重新受理与核对"];
+open->cancel[label="撤销 [当前本店主管]"];
+doing->cancel[label="撤销 [当前本店主管]"];
+ready->cancel[label="撤销 [当前本店主管]"];
+note[shape=note,style="",fontsize=14,label="研究对象：CoordinationTask\nCLOSED与CANCELLED保留历史，不原地重开。\n任务终态不等于出诊已停用，也不恢复接收。"];
+{rank=same;closed;cancel;}closed->note[style=invis];}

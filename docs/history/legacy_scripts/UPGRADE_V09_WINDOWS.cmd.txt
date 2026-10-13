@@ -1,0 +1,44 @@
+@echo off
+setlocal
+cd /d "%~dp0"
+if /I not "%~1"=="--after-isolated-pass" (
+ echo STOP: run VERIFY_ISOLATED_WINDOWS.cmd in a separate extracted directory first.
+ echo Then validate a private copy of old data and preserve your backups.
+ echo This script changes the current instance; use --after-isolated-pass only after reviewing those results.
+ exit /b 2
+)
+echo ADC 0.9.0-alpha.10: task notifications with additive migrations. NOT a public release.
+if not exist .env (
+ echo ERROR: existing .env required. Do not initialize over your database.
+ exit /b 1
+)
+if not exist manage.py exit /b 1
+REM Make a private source backup before applying the update. Database volume is never deleted.
+docker compose stop web
+if errorlevel 1 exit /b 1
+docker compose up -d db
+if errorlevel 1 exit /b 1
+if not exist backups mkdir backups
+if exist backups\pre_v09a10.dump (
+ echo ERROR: pre_v09a10.dump exists; preserve it and choose another backup name before retrying.
+ exit /b 1
+)
+docker compose exec -T db sh -c "pg_dump -U $POSTGRES_USER -d $POSTGRES_DB -Fc" > backups\pre_v09a10.dump
+if errorlevel 1 exit /b 1
+docker compose exec -T db pg_restore --list < backups\pre_v09a10.dump > backups\pre_v09a10.contents.txt
+if errorlevel 1 exit /b 1
+docker compose build web
+if errorlevel 1 exit /b 1
+docker compose run --rm web python scripts/verify_update.py
+if errorlevel 1 exit /b 1
+if not exist evidence mkdir evidence
+docker compose run --rm -v "%cd%\evidence:/evidence" -e ADC_EVIDENCE_DIR=/evidence web python scripts/integration_gate.py
+if errorlevel 1 (
+ echo ERROR: validation failed. Preserve evidence and the first error; do not skip checks or delete data.
+ exit /b 1
+)
+docker compose up -d web
+if errorlevel 1 exit /b 1
+echo LOCAL alpha gate finished. Verify intake pause/resume, honored offers, migration, history and the complete business chain.
+echo Existing passwords and data were not reset. No external AI call or public deployment was performed.
+endlocal

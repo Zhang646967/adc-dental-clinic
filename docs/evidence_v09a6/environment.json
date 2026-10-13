@@ -1,0 +1,21 @@
+{
+  "timestamp_utc": "2026-10-08T12:08:01.406317+00:00",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "host": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "commands": {
+    "docker": false,
+    "psql": false,
+    "postgres": false,
+    "node": true
+  },
+  "packages": {
+    "django": false,
+    "psycopg": false,
+    "playwright": true,
+    "jinja2": true
+  },
+  "dns": {
+    "pypi.org": "[Errno -3] Temporary failure in name resolution",
+    "files.pythonhosted.org": "[Errno -3] Temporary failure in name resolution"
+  }
+}

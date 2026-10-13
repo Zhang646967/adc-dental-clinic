@@ -1,0 +1,21 @@
+digraph G {rankdir=TB;graph [fontname="Noto Sans CJK SC", bgcolor="white", pad="0.18", nodesep="0.30", ranksep="0.4"];
+node [fontname="Noto Sans CJK SC", shape=box, style="rounded,filled", fillcolor="#F1F6F4", color="#76928A", fontsize=12, margin="0.15,0.10"];
+edge [fontname="Noto Sans CJK SC", color="#44685D", fontsize=10, arrowsize=0.7];
+p[label="Patient
+患者身份与当前资料"];dt[label="Dentist / Clinic
+负责牙医与业务诊所"];
+v[label="Visit
+预约 → 到诊 → 结果
+计划与实际时间分别保存"];
+r[label="VisitRecordVersion
+完整草稿 / 已发布历史"];
+l[label="TreatmentRecord
+某版本中的实际治疗行"];
+i[label="Invoice
+同次就诊唯一逻辑单号"];
+x[label="CorrectionRequest
+申请 · 审核 · 发布关联"];
+p->v[label="1 : 0..*"];dt->v[label="各1 : 0..*"];
+v->r[label="1 : 0..*"];r->l[label="1 : 0..*"];v->i[label="1 : 0..1"];i->r[label="当前已发布版本",style=dashed];x->r[label="更正版本"];
+{rank=same;p;dt;} {rank=same;r;i;x;}
+}

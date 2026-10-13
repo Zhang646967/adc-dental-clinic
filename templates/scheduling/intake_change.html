@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="availability">
+<a href="{% url 'availability_detail' slot_id %}">返回原出诊 #{{ slot_id }}</a><p class="eyebrow">主管 · {{ clinic }} · 既有承诺保留</p><h1>{{ action_label }}</h1>
+<section class="panel"><h2>核对目标</h2><p>出诊 #{{ slot_id }} · {{ dentist }}</p><p>{{ start }} — {{ end }}（北京时间）</p><p>当前新增接收：{% if paused %}已暂停{% else %}开放{% endif %}</p>
+<p>关联预约／接诊 {{ impact.visit_count }} 条；有效待确认邀约 {{ impact.effective_offers }} 条。本操作不会取消或移动这些记录。</p></section>
+<section class="notice"><h2>这不是停诊或批量取消</h2><p>新预约和新邀约受接收状态控制；已发布的有效邀约仍可按原期限接受。需要处理既有安排时，由前台逐条核实患者意思并通过原流程办理。</p></section>
+<section class="panel"><h2>说明依据并预览</h2>{% if read_only %}<p>当前只读实例不开放提交。</p>{% else %}
+<form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button type="submit">预览接收变更，尚不保存</button></form>{% endif %}</section></div>{% endblock %}

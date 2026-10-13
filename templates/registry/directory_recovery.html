@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="panel"><h1>先核对当前目录，再重新办理</h1><p role="alert">{{ problem }}</p>{% if errors %}<div class="errors" role="alert">{{ errors }}</div>{% endif %}<p>不要为同一个诊所、牙医或资格类别换用新编码重复登记。成功回执丢失时，应先按原编码查询。</p><a class="button" href="{% url 'directory_home' %}">返回目录核对</a></section>{% endblock %}

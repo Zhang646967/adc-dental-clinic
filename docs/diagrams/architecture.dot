@@ -1,0 +1,18 @@
+digraph G {rankdir=TB;graph [fontname="Noto Sans CJK SC", bgcolor="white", pad="0.18", nodesep="0.30", ranksep="0.4"];
+node [fontname="Noto Sans CJK SC", shape=box, style="rounded,filled", fillcolor="#F1F6F4", color="#76928A", fontsize=12, margin="0.15,0.10"];
+edge [fontname="Noto Sans CJK SC", color="#44685D", fontsize=10, arrowsize=0.7];
+a[label="患者服务端 / 员工工作台
+普通表单 + 可选大字模式 + AI助手"];
+b[label="身份认证 · 范围授权 · 输入校验
+所有重要写入由用户明确确认"];
+c[label="预约 / 接诊 / 更正
+命令服务 + 事务 + 审计"];
+d[label="季度财务 / 运营分析
+只读查询模型 + 纯政策计算"];
+e[label="AI适配器
+同意后外发问题 · 仅识别意图"];
+f[label="PostgreSQL
+关联与排斥约束 · 历史版本 · 保护触发器"];
+a->b;b->c;b->d;b->e;c->f;d->f;e->b[label="分类结果重查权限",style=dashed,constraint=false];
+{rank=same;c;d;e;}
+}

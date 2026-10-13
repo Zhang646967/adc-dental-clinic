@@ -1,0 +1,58 @@
+{
+  "S04": {
+    "kind": "system-use-case",
+    "course_pages": [
+      138,
+      139,
+      141,
+      150,
+      206,
+      212
+    ],
+    "description": "独立用户目标；不以顺序、菜单或授权依赖充当include关系。",
+    "width": 1050,
+    "height": 870
+  },
+  "S05": {
+    "kind": "system-use-case",
+    "course_pages": [
+      138,
+      139,
+      141,
+      206,
+      212
+    ],
+    "description": "工作台相互独立，前台与主管共享本人消息目标但不共享业务权限。",
+    "width": 1050,
+    "height": 1240
+  },
+  "B07": {
+    "kind": "business-sequence",
+    "course_pages": [
+      87,
+      89,
+      108,
+      109,
+      112,
+      139
+    ],
+    "description": "消息为接收者承担的责任；实例、生命线和返回分开；无额外业务能力。",
+    "width": 1050,
+    "height": 1112
+  },
+  "M02": {
+    "kind": "state-machine",
+    "course_pages": [
+      339,
+      341,
+      350
+    ],
+    "description": "限定任务对象；迁移为事件、警戒与动作。各状态事实与原预约状态分开。",
+    "width": 1120,
+    "height": 1180
+  },
+  "D02": {
+    "kind": "class-diagram",
+    "scope": "RC-added task/intake/notifications; no clinical authentication claim"
+  }
+}

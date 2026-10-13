@@ -1,0 +1,31 @@
+# LOCAL DEVELOPMENT ONLY. Mutable major image tags are not a release artifact lock.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Run init_local.py first}
+      POSTGRES_USER: ${POSTGRES_USER:?Run init_local.py first}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run init_local.py first}
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - adc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DJANGO_SETTINGS_MODULE: config.settings.local
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  adc_pgdata:

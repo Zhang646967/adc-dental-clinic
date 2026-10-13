@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="565" viewBox="0 0 1050 565">
+<rect width="100%" height="100%" fill="white"/>
+<text x="25" y="34.0" font-family="Noto Sans CJK SC" font-size="23" text-anchor="start" font-weight="700" fill="#101010">pkg 模块责任视图</text>
+<rect x="35" y="95" width="265" height="127" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<rect x="35" y="72" width="200" height="23" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="167.5" y="135.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">guidance / assistants</text>
+<text x="167.5" y="177.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">说明与受限结果查询</text>
+<rect x="390" y="95" width="300" height="127" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<rect x="390" y="72" width="200" height="23" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="540.0" y="135.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">coordination / scheduling</text>
+<text x="540.0" y="177.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">候补、预约与占用</text>
+<rect x="780" y="95" width="230" height="127" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<rect x="780" y="72" width="200" height="23" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="895.0" y="135.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">care / finance</text>
+<text x="895.0" y="177.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">治疗与结算</text>
+<rect x="215" y="375" width="310" height="123" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<rect x="215" y="352" width="200" height="23" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="370.0" y="415.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">accounts / workspaces</text>
+<text x="370.0" y="457.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">账号、身份与范围</text>
+<rect x="645" y="375" width="330" height="123" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<rect x="645" y="352" width="200" height="23" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="810.0" y="415.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">operations / 查询层</text>
+<text x="810.0" y="457.0" font-family="Noto Sans CJK SC" font-size="20" text-anchor="middle" fill="#101010">授权指标与事实查询</text>
+<polyline points="300,158 390,158" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="379.8683290659683,162.28360176539516 390,158 379.8683290659683,153.71639823460484" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="308.0" y="124" width="72" height="25.25" fill="white"/>
+<text x="344" y="139.0" font-family="Noto Sans CJK SC" font-size="15" text-anchor="middle" fill="#101010">受限查询</text>
+<polyline points="690,158 780,158" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="769.8683290659683,162.28360176539516 780,158 769.8683290659683,153.71639823460484" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="699.0" y="124" width="72" height="25.25" fill="white"/>
+<text x="735" y="139.0" font-family="Noto Sans CJK SC" font-size="15" text-anchor="middle" fill="#101010">业务关联</text>
+<polyline points="165,222 300,375" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="290.0846605291987,370.23701320820965 300,375 296.5086740512027,364.56876598291194" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="516,222 465,375" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="464.1401342151565,364.03365918676354 465,375 472.26769711581665,366.7428468203169" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="886,222 495,375" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="502.8741037107834,367.31895249644765 495,375 505.99598709656004,375.2970989267658" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="435.0" y="297" width="174" height="29.3" fill="white"/>
+<text x="522" y="315.0" font-family="Noto Sans CJK SC" font-size="18" text-anchor="middle" fill="#101010">使用身份与范围合同</text>
+<polyline points="810,375 886,222" fill="none" stroke="#202020" stroke-width="1.7" stroke-dasharray="7,5"/>
+<polyline points="885.3290887114165,232.97952084759854 886,222 877.656345448684,229.16822354062032" fill="none" stroke="#202020" stroke-width="1.7"/>
+<rect x="864.0" y="277" width="76" height="26.6" fill="white"/>
+<text x="902" y="293.0" font-family="Noto Sans CJK SC" font-size="16" text-anchor="middle" fill="#101010">事实读取</text>
+<rect x="25" y="509" width="1000" height="40.95" rx="0" fill="#f7f7f7" stroke="#202020" stroke-width="1"/>
+<text x="37" y="532.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="start" fill="#101010">代表性依赖（使用方 → 被依赖方），并非源代码全部导入，也不表示办理顺序。</text>
+</svg>

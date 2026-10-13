@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="notice-board"><p class="eyebrow">本人收件箱 · 当前身份与诊所</p><h1>站内消息</h1>
+<p>{{ result.boundary }}</p><p>打开页面不会自动标记已读。此入口只接收协调任务消息，不包含患者邀约通知；没有消息不代表没有任务。</p>
+<div class="notice-links"><a class="button secondary" href="{% url 'coordination_task_list' %}">查看本店协调任务</a>{% if workspace_role == 'MANAGER' %}<a href="{% url 'notification_status' %}">核对本店通知派发</a>{% endif %}</div>
+<form method="get" class="panel notice-filter"><label for="mode">消息范围</label><select id="mode" name="mode"><option value="unread"{% if result.mode == 'unread' %} selected{% endif %}>未读消息</option><option value="all"{% if result.mode == 'all' %} selected{% endif %}>全部历史消息</option></select><button type="submit">查询消息</button></form>
+<p>当前身份及本店未读 {{ result.unread }} 条 · 本次筛选 {{ result.total }} 条 · 读取时点 {{ result.observed_at }}（北京时间）。按事件发生顺序排列。</p>
+{% if read_only %}<p class="notice">当前实例只读，可查询但不能保存已读标记。</p>{% endif %}
+<div class="notice-grid">{% for row in result.rows %}<section class="panel notice-card"><span class="status">{% if row.read %}已明确标记已读{% else %}未读{% endif %}</span><h2>{{ row.title }}</h2>
+<p>协调任务 #{{ row.task_id }} · 出诊 #{{ row.slot_id }}</p>
+<dl><dt>事件发生时</dt><dd>{{ row.occurred_at }} · {{ row.event_state }}（修订 {{ row.event_revision }}）</dd><dt>当前查询到的任务状态</dt><dd>{{ row.current_state }}（修订 {{ row.current_revision }}）</dd><dt>站内消息生成于</dt><dd>{{ row.delivered_at }}</dd>{% if row.read %}<dt>本人标记已读于</dt><dd>{{ row.read_at }}</dd>{% endif %}</dl>
+<p class="muted">历史通知不表示当前仍待办理，任务页面会重新核验权限和状态。</p>
+<div class="notice-links"><a class="button" href="{% url 'coordination_task_detail' row.slot_id row.task_id %}">查看任务当前事实</a>
+{% if not row.read and not read_only %}<form method="post" action="{% url 'notification_read' row.id %}">{% csrf_token %}{% workspace_token %}<button type="submit" class="button secondary">标记已读</button></form>{% endif %}</div>
+</section>{% empty %}<section class="panel"><h2>没有符合条件的消息</h2><p>尚未产生事件、没有原始收件授权、后台尚未派发或权限变化均可能影响消息。不要据此推断“全部任务已经完成”。</p><a href="{% url 'coordination_task_list' %}">直接查看协调任务</a></section>{% endfor %}</div>
+<p>第 {{ result.number }} / {{ result.pages }} 页</p><form method="get" class="notice-filter"><input type="hidden" name="mode" value="{{ result.mode }}"><label for="page">页码</label><input id="page" name="page" type="number" min="1" max="{{ result.pages }}" value="{{ result.number }}"><button type="submit" class="secondary">跳转</button></form>
+</div>{% endblock %}

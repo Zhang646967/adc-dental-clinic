@@ -1,0 +1,117 @@
+{
+  "recorded_at_utc": "2026-09-27T00:03:50.447189+00:00",
+  "application": "0.5-candidate",
+  "actual_execution": {
+    "pure_static_mock_contract_methods": 147,
+    "management_static_browser_assertions": 84,
+    "existing_static_browser_regression_assertions": 87,
+    "compileall": true,
+    "javascript_syntax": true
+  },
+  "authored_not_run": {
+    "postgresql_test_methods": 143,
+    "breakdown": {
+      "test_concurrency.py": 2,
+      "test_integration.py": 28,
+      "test_v05_concurrency.py": 2,
+      "test_v05.py": 55,
+      "test_v04.py": 54,
+      "test_v04_concurrency.py": 2
+    },
+    "new_migrations": [
+      "finance.0002_quarter_lock_version",
+      "care.0003_correction_publication_guard"
+    ]
+  },
+  "not_executed": [
+    "Django checks",
+    "PostgreSQL migrations and regression",
+    "Windows upgrade script",
+    "real AI API",
+    "public deployment",
+    "load test",
+    "backup restore rehearsal"
+  ],
+  "old_migrations": [
+    {
+      "path": "portal/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "portal/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "finance/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "finance/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "scheduling/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "patients/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "patients/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "registry/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "registry/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "assistants/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "assistants/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "accounts/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "accounts/migrations/0001_initial.py",
+      "unchanged": true
+    },
+    {
+      "path": "care/migrations/__init__.py",
+      "unchanged": true
+    },
+    {
+      "path": "care/migrations/0002_database_guards.py",
+      "unchanged": true
+    },
+    {
+      "path": "care/migrations/0001_initial.py",
+      "unchanged": true
+    }
+  ],
+  "prior_user_evidence": "User supplied v0.3 PostgreSQL log: 30 tests passed on 2026-09-22; not v0.5 evidence.",
+  "final_check_utc": "2026-09-27T00:16:01.129739+00:00",
+  "report_visual_qa": {
+    "pages": 19,
+    "rendered": true,
+    "all_pages_inspected": true,
+    "last_changes_visual_checked": [
+      5,
+      6,
+      11
+    ]
+  }
+}

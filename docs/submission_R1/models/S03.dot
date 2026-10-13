@@ -1,0 +1,30 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.25",nodesep="0.23",ranksep="0.55",fontname="Noto Sans CJK SC",fontsize=18];
+node [fontname="Noto Sans CJK SC",fontsize=16,color="#45616d",penwidth=1.3]; edge [color="#78909a",arrowhead=none,penwidth=1.2];
+u [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n系统用户（通用角色）"];
+m [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n前台／主管"];
+t [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n技术管理"];
+f [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n财务／总部"];
+llm [shape=box,style="rounded",margin="0.15,0.10",label="«actor»\n外部语言模型\n可选支持者"];
+subgraph cluster_system {label="ADC信息系统｜公共与管理（分视图）";labelloc=t;fontname="Noto Sans CJK SC";fontsize=19;color="#496c78";penwidth=1.5;style=rounded;
+u1 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-01 登录、选择与切换身份"];
+u2 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-02 选择与切换诊所"];
+u18 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-18 获取手动操作引导"];
+u20 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-20 选择显示与帮助方式"];
+u21 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-21 创建普通演示账号"];
+u22 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-22 管理角色与患者绑定"];
+u23 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-23 管理账号状态与重置"];
+u24 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-24 修改本人密码"];
+u25 [shape=ellipse,style=filled,fillcolor="#f1f6f7",margin="0.15,0.09",label="SU-25 维护／查阅标准价格目录"];
+}
+u -> u1;
+u -> u20;
+m -> u2;
+u -> u18;
+llm -> u18;
+t -> u21;
+t -> u22;
+t -> u23;
+u -> u24;
+f -> u25;
+}

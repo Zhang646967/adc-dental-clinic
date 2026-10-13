@@ -1,0 +1,10 @@
+Verification did not complete. Check local Docker and preserve evidence. No running ADC instance was upgraded.
+{
+  "project": "adc_verify_20261008t110431z_57ce7c3f",
+  "timestamp_utc": "20261008T110431Z",
+  "scope": "isolated local Docker only",
+  "executed": false,
+  "all_gates_passed": false,
+  "cleanup_returncode": null,
+  "error_type": "FileNotFoundError"
+}

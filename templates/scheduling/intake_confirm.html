@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="availability">
+<a href="{% url 'availability_detail' preview.slot_id %}">返回原出诊</a><p class="eyebrow">接收控制 · 第二步</p><h1>核对接收状态变更</h1>
+<p class="notice" role="status"><strong>尚未保存。</strong>请核对出诊编号、状态与既有承诺。</p>
+<section class="panel"><h2>出诊 #{{ preview.slot_id }} · {{ preview.clinic }}</h2><p>{{ preview.dentist }} · {{ preview.start }} — {{ preview.end }}（北京时间）</p>
+<dl class="av-facts"><dt>原接收状态</dt><dd>{{ preview.before }}</dd><dt>拟保存状态</dt><dd>{{ preview.after }}</dd><dt>依据</dt><dd>{{ preview.reason }}</dd></dl>
+<p>读取时点：{{ preview.observed_at }}。预约／接诊 {{ preview.impact.visit_count }} 条，有效邀约 {{ preview.impact.effective_offers }} 条。</p></section>
+<section class="panel"><h2>哪些会改变，哪些不会？</h2><p>{% if preview.action == 'pause' %}保存后不再接收新预约、改入预约或发布新邀约。暂停不占用额外资源，也不释放原牙医出诊时间。{% else %}保存后可以重新提供剩余机会，但不会自动生成预约、邀约或派单。{% endif %}</p>
+<p><strong>已有预约与有效邀约保留；到诊、治疗、取消与改出继续按原规则办理。</strong>不会自动通知患者，不延长任何确认期限。</p>
+<p>确认期限15分钟；提交时还会核对当前身份、诊所及关联记录。若发生变化，需要重新预览。</p>
+{% if read_only %}<p>只读实例不能保存。</p>{% else %}<form method="post" action="{% url 'intake_confirm' preview.slot_id %}">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button type="submit">确认{{ preview.action_label }}</button></form>{% endif %}
+</section></div>{% endblock %}

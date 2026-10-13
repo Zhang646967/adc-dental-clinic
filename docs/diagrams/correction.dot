@@ -1,0 +1,17 @@
+digraph G {rankdir=LR;graph [fontname="Noto Sans CJK SC", bgcolor="white", pad="0.18", nodesep="0.30", ranksep="0.4"];
+node [fontname="Noto Sans CJK SC", shape=box, style="rounded,filled", fillcolor="#F1F6F4", color="#76928A", fontsize=12, margin="0.15,0.10"];
+edge [fontname="Noto Sans CJK SC", color="#44685D", fontsize=10, arrowsize=0.7];
+v1[label="已发布 V1
+199.98 元",fillcolor="#EDF1F3"];
+d[label="负责牙医提出
+更正草稿 V2
+99.99 元"];
+f[label="不同账号的财务审核
+权限 / 基版 / 金额复核"];
+v2[label="批准：发布 V2
+切换同一账单当前指针"];
+r[label="拒绝：弃用草稿
+当前仍为 V1"];
+v1->d;d->f;f->v2[label="事务成功"];f->r[label="不批准"];
+v1->v2[label="V1仍可查；不是199.98+99.99",style=dashed];
+}

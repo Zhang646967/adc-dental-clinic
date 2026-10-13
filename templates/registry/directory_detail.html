@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<a href="{% url 'directory_list' kind %}">返回{{ label }}目录</a><h1>{{ label }}登记资料</h1>
+<section class="panel"><h2>{{ object.name }}</h2><p>{% if object.is_active %}可用目录记录{% else %}已停用；本入口不会自动恢复资料{% endif %}</p><dl class="directory-details">{% for row in rows %}<div><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>{% endfor %}</dl></section>
+{% if kind == 'dentist' %}<section class="panel"><h2>资格关联记录</h2><p>这是资料登记，不是执业资格核验。撤回关联只表示更正当前登记，不自动停用账号或取消出诊。</p>{% if not read_only and object.is_active %}<p><a class="button" href="{% url 'directory_attach' object.pk %}">登记或恢复资格关联</a></p>{% endif %}
+{% for link in associations %}<article class="role-card"><h3>{{ link.qualification.code }} · {{ link.qualification.name }}</h3><p>{% if link.is_active %}有效登记关联{% else %}已撤回关联，历史保留{% endif %}{% if not link.qualification.is_active %} · 资格目录已停用{% endif %}</p>{% if link.is_active and not read_only %}<form method="post" action="{% url 'directory_withdraw_preview' object.pk link.qualification_id %}">{% csrf_token %}{% workspace_token %}<button class="button secondary" type="submit">预览撤回误关联</button><p>此步骤只核对影响，下一页明确确认后才保存。</p></form>{% endif %}</article>{% empty %}<p>尚未登记资格关联。未登记不等于没有资格；不能把缺失资料作临床能力结论。</p>{% endfor %}</section>
+<section class="panel"><h2>下一步：账号与出诊分别办理</h2><p>登记牙医不会产生登录账号。技术人员另行创建账号并明确关联牙医、授予身份；主管随后在本店安排出诊。</p>{% if not read_only %}<a class="button secondary" href="{% url 'account_manage_create' %}">转到创建演示账号</a>{% else %}<p>当前只读，账号创建须在可写实例另行核对。</p>{% endif %}</section>
+{% elif kind == 'clinic' %}<section class="panel"><h2>下一步：单独分配诊所权限</h2><p>主管联络姓名不是账号授权。请在账号与授权中核对实际账号，再授予这家店的前台或主管身份。</p><a class="button secondary" href="{% url 'account_manage_list' %}">转到账号与授权</a></section>
+{% else %}<p><a class="button secondary" href="{% url 'directory_list' 'dentist' %}">选择牙医，登记资格关联</a></p>{% endif %}
+<p>本轮不开放编码、姓名和出生日期纠错、诊所或牙医停用、目录删除。此类操作须另行评估历史与在途业务。</p>
+{% endblock %}

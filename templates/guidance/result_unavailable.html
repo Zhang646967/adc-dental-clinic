@@ -1,0 +1,9 @@
+{% load static %}<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>暂时无法核对 · ADC</title><link rel="stylesheet" href="{% static 'experience.css' %}"></head>
+<body class="patient-body"><main class="patient-main"><section class="panel" role="alert">
+<p class="eyebrow">ADC · 核对结果未知</p><h1>暂时无法核对已保存记录</h1>
+<p>这不代表之前的确认失败。不要再次提交预约或接受邀约。</p>
+<p>稍后返回原记录重新核对，或者请前台帮助查询。此页不显示任何患者、邀约或预约详情。</p>
+<a class="button" href="{{ home_url }}">返回工作台，稍后核对</a>
+</section></main></body></html>

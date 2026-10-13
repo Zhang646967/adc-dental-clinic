@@ -1,0 +1,5 @@
+{
+  "scope": "Converted actual templates with synthetic fixtures; NOT Django/HTTP/PG/E2E.",
+  "total": 498,
+  "passed": 498
+}

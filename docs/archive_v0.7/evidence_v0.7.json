@@ -1,0 +1,80 @@
+{
+  "version": "0.7-candidate",
+  "recorded_at_utc": "2026-09-27T05:03:26.920147+00:00",
+  "generation_environment": {
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "django_postgresql_runtime_available": false,
+    "external_ai_calls": 0,
+    "public_deployment": false
+  },
+  "executed": {
+    "pure_static_mock_contract_methods": 181,
+    "browser_fixture_assertions": {
+      "v07": 157,
+      "assistant_regression": 87,
+      "management_regression": 84
+    },
+    "python_compile": true,
+    "javascript_parse_files": 3
+  },
+  "not_executed": [
+    "Django system check",
+    "Django migration autodetection",
+    "PostgreSQL migrations",
+    "197 database methods",
+    "live AI",
+    "Windows upgrade script",
+    "source-version-specific populated upgrade rehearsals",
+    "full live browser E2E",
+    "load/security audit",
+    "restore rehearsal",
+    "public deployment"
+  ],
+  "authored_database_methods": {
+    "tests/test_v05_concurrency.py": 2,
+    "tests/test_v07_concurrency.py": 2,
+    "tests/test_concurrency.py": 2,
+    "tests/test_v05.py": 55,
+    "tests/test_v04.py": 54,
+    "tests/test_v04_concurrency.py": 2,
+    "tests/test_v07.py": 52,
+    "tests/test_integration.py": 28
+  },
+  "authored_pure_methods": {
+    "checks/test_management_rules.py": 46,
+    "checks/test_rules.py": 46,
+    "checks/test_v07_rules.py": 34,
+    "checks/test_ai_portal.py": 44,
+    "checks/test_artifacts.py": 11
+  },
+  "preserved_migrations": {
+    "portal/migrations/0001_initial.py": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+    "assistants/migrations/0001_initial.py": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+    "registry/migrations/0001_initial.py": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+    "accounts/migrations/0001_initial.py": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+    "scheduling/migrations/0001_initial.py": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+    "care/migrations/0001_initial.py": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+    "care/migrations/0003_correction_publication_guard.py": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+    "care/migrations/0002_database_guards.py": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+    "patients/migrations/0001_initial.py": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+    "finance/migrations/0001_initial.py": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+    "finance/migrations/0002_quarter_lock_version.py": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff"
+  },
+  "new_migrations": [
+    "coordination/migrations/0001_initial.py",
+    "workspaces/migrations/0001_initial.py"
+  ],
+  "test_client_note": "Legacy HTTP clients now perform real role/scope POST activation. New context boundary tests use plain Client. Middleware and database invariants not disabled.",
+  "report": {
+    "pages": 26,
+    "figures": 9,
+    "use_case_specifications": 20,
+    "kind": "complete teacher-stage vision/business-model/requirements report, not runtime certification"
+  },
+  "final_report_visual_review": {
+    "pages": 26,
+    "all_pages_opened": true,
+    "clipping_or_missing_glyphs_found": false
+  },
+  "task_guides": 19
+}

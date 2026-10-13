@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="task-board">
+<a href="{% url 'coordination_task_list' %}?slot={{ preview.slot_id }}&amp;mode=all">放弃并返回任务列表</a><p class="eyebrow">协调任务 · 第二步</p><h1>核对并确认任务变更</h1>
+<p class="notice"><strong>尚未保存。</strong>确认有效期15分钟；任务或相关事实变化后，需要重新预览。</p>
+<section class="panel"><h2>{{ preview.action_label }}</h2><p>出诊 #{{ preview.slot_id }} · {{ preview.clinic }} · {{ preview.dentist }}</p><p>{{ preview.start }}—{{ preview.end }}（北京时间）</p><dl class="av-facts"><dt>协调目标</dt><dd>{{ preview.purpose }}</dd><dt>原任务状态</dt><dd>{{ preview.status }}</dd><dt>拟保存状态</dt><dd>{{ preview.after }}</dd><dt>依据</dt><dd>{{ preview.reason }}</dd>{% if preview.target_label %}<dt>声明对象</dt><dd>{{ preview.target_label }}</dd>{% endif %}</dl></section>
+<section class="panel"><h2>明确操作边界</h2><p><strong>不取消或改期任何预约，不接受或拒绝任何邀约，不改变出诊暂停标志。</strong></p>
+{% if preview.action == 'progress' %}<p>记录是工作人员声明，不是患者同意证明，也不自动清除业务阻断。</p>{% elif preview.action == 'cancel' %}<p>任务撤销不恢复接收。已有承诺继续有效，主管需另行决定后续安排。</p>{% elif preview.action == 'approve' %}<p>复核通过仅结束本次协调任务。原出诊尚未因此停用或替换。</p>{% endif %}
+{% if read_only %}<p>只读实例不能保存。</p>{% else %}<form method="post" action="{% if preview.task_id %}{% url 'coordination_task_confirm' preview.slot_id preview.task_id %}{% else %}{% url 'coordination_task_confirm_new' preview.slot_id %}{% endif %}">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button type="submit">{% if preview.action == 'approve' %}确认协调核对通过{% else %}确认{{ preview.action_label }}{% endif %}</button></form>{% endif %}
+</section></div>{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}标准治疗价格目录{% endblock %}{% block content %}
+<section class="panel"><h1>标准治疗价格目录</h1>
+<p>这是当前的项目名称、计价单位与标准单价。目录不是临床资质判定；已有治疗和账单使用当时记录的快照。</p>
+{% if can_edit %}<p><a class="button" href="{% url 'catalogue_create' %}">新增项目</a></p>{% endif %}
+<form method="get"><label for="catalog-q">按项目名称查找</label><input id="catalog-q" name="q" value="{{ q }}" maxlength="120"><button type="submit">查询</button></form>
+{% for item in page %}<article class="panel"><h2>{{ item.name }}</h2><p>编码：{{ item.code }} · 单位：{{ item.unit_definition }}</p><p>当前标准单价：{{ item.standard_unit_price }} 元 · {% if item.is_active %}启用{% else %}已停用{% endif %}</p>
+{% if can_edit and item.is_active %}<a class="button secondary" href="{% url 'catalogue_price' item.pk %}">核对并调价</a>{% endif %}</article>{% empty %}<p>没有匹配的目录项目。请调整查询词。</p>{% endfor %}
+<nav aria-label="目录分页">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}&q={{ q|urlencode }}">上一页</a>{% endif %} 第{{ page.number }}页 / 共{{ page.paginator.num_pages }}页 {% if page.has_next %}<a href="?page={{ page.next_page_number }}&q={{ q|urlencode }}">下一页</a>{% endif %}</nav>
+</section>{% endblock %}

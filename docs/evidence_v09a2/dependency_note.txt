@@ -1,0 +1,1 @@
+Dependency acquisition attempted with configured pip index and direct PyPI. Direct URL probe: URLError <urlopen error [Errno -3] Temporary failure in name resolution>. Django, psycopg, PostgreSQL and Docker were not available. No real ORM/HTTP/PG test is reported as passed.

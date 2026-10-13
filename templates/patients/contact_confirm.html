@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}核对联络资料变更{% endblock %}
+{% block content %}
+<section class="panel">
+  <p class="eyebrow">步骤 2／2 · 核对差异后保存</p>
+  <h1>请核对本次变更</h1>
+  <p>患者：{{ patient.name }} · <span class="mono">{{ patient.patient_no }}</span></p>
+  <p role="status">尚未保存。请逐项核对变更前后内容；没有列出的字段不会改变。</p>
+  <div class="contact-differences">
+  {% for row in rows %}
+    <section class="panel" aria-label="{{ row.label }}变更">
+      <h2>{{ row.label }}</h2>
+      <p><strong>变更前：</strong><span class="contact-value">{{ row.before|default:'未填写' }}</span></p>
+      <p><strong>拟保存：</strong><span class="contact-value">{{ row.after|default:'清空（未填写）' }}</span></p>
+    </section>
+  {% endfor %}
+  </div>
+  <p>更正依据：{{ reason_label }}</p>
+  <p class="small">确认有效期为15分钟。切换身份／诊所或资料再次变化后，必须重新读取并核对。确认不会修改已经发布的账单。</p>
+  <form method="post" action="{% url 'patient_contact_confirm' patient.pk %}">
+    {% csrf_token %}<input type="hidden" name="workspace_token" value="{{ workspace_token_value }}">
+    {{ form.as_p }}
+    <button type="submit">确认保存以上变更</button>
+    <a class="button secondary" href="{% url 'patient_contact_edit' patient.pk %}">返回重新填写</a>
+    <a href="{% url 'patient_detail' patient.pk %}">放弃本次更正</a>
+  </form>
+</section>
+{% endblock %}

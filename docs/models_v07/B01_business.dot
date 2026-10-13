@@ -1,0 +1,16 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.15",nodesep="0.25",ranksep="0.55",label="B01 业务用例图",labelloc=t,fontsize=18,fontname="Noto Sans CJK SC"];
+node [fontname="Noto Sans CJK SC",fontsize=13,color="#27483f"]; edge [color="#536960",arrowhead=none];
+p [shape=box,style="rounded",label="«参与者»\n患者"];
+h [shape=box,style="rounded",label="«参与者»\n运营结果使用者\n（总部管理）"];
+subgraph cluster_sys { label="ADC 诊所服务与运营核对业务域";fontname="Noto Sans CJK SC";fontsize=14;color="#708f84";
+b1 [shape=ellipse,label="BU-01 获得就诊服务"];
+b2 [shape=ellipse,label="BU-02 调整就诊安排"];
+b3 [shape=ellipse,label="BU-03 获取结算说明"];
+b4 [shape=ellipse,label="BU-04 获取运营核对结果"];
+}
+p -> b1;
+p -> b2;
+p -> b3;
+h -> b4;
+}

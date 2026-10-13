@@ -1,0 +1,2743 @@
+{
+  "scope": "Static converted source templates and synthetic facts only; NOT Django/HTTP/PG/E2E.",
+  "total": 684,
+  "passed": 684,
+  "checks": [
+    {
+      "name": "list/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "list/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "list/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "list/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "list/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "list/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "list/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "list/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "list/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "list/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "list/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "list/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "list/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "list/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "list/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "list/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "list/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "list/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "list/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "list/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "list/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "list/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "list/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "list/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "list/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "list/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "list/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "list/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "list/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "list/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "list/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "list/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "list/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "list/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "list/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "list/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/False/bad-filter-not-ignored",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/320/True/bad-filter-not-ignored",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/False/bad-filter-not-ignored",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/390/True/bad-filter-not-ignored",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/False/bad-filter-not-ignored",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "invalid_query/1440/True/bad-filter-not-ignored",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "empty_list/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "empty_list/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "empty_list/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/typed-visit-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/False/typed-offer-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/typed-visit-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/320/True/typed-offer-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/typed-visit-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/False/typed-offer-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/typed-visit-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/390/True/typed-offer-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/typed-visit-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/False/typed-offer-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/typed-visit-origin",
+      "passed": true
+    },
+    {
+      "name": "mixed/1440/True/typed-offer-origin",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "readonly/320/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "readonly/390/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "readonly/1440/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "clear/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "clear/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "clear/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "clear/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "clear/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "expired/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "expired/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "expired/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "expired/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "expired/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/False/no-repeat-offer-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/320/True/no-repeat-offer-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/False/no-repeat-offer-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/390/True/no-repeat-offer-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/False/no-repeat-offer-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "accepted_history/1440/True/no-repeat-offer-action",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "care/320/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "care/320/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "care/390/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "care/390/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "care/1440/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "care/1440/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "inactive/320/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "inactive/390/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "inactive/1440/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/False/no-record-identifiers",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/320/True/no-record-identifiers",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/False/no-record-identifiers",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/390/True/no-record-identifiers",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/False/no-record-identifiers",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-reschedule-action",
+      "passed": true
+    },
+    {
+      "name": "unsafe/1440/True/no-record-identifiers",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/False/unknown-is-not-failure",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "read_error/320/True/unknown-is-not-failure",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/False/unknown-is-not-failure",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "read_error/390/True/unknown-is-not-failure",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/False/unknown-is-not-failure",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "read_error/1440/True/unknown-is-not-failure",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "escape/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "escape/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "escape/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "escape/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "escape/1440/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "pagination/320/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "pagination/390/True/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/one-h1",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/False/manual-reload",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/no-horizontal-overflow",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/one-h1",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/no-script-injection",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/no-business-post",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/no-manager-action-links",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/no-auto-action",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/no-freeze-disclosure",
+      "passed": true
+    },
+    {
+      "name": "pagination/1440/True/manual-reload",
+      "passed": true
+    }
+  ]
+}

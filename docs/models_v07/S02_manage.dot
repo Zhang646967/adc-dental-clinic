@@ -1,0 +1,36 @@
+digraph G {
+graph [rankdir=LR,bgcolor="white",pad="0.15",nodesep="0.25",ranksep="0.55",label="S02 系统用例：协同与管理",labelloc=t,fontsize=18,fontname="Noto Sans CJK SC"];
+node [fontname="Noto Sans CJK SC",fontsize=13,color="#27483f"]; edge [color="#536960",arrowhead=none];
+p [shape=box,style="rounded",label="«参与者»\n患者"];
+fd [shape=box,style="rounded",label="«参与者»\n前台"];
+m [shape=box,style="rounded",label="«参与者»\n诊所主管"];
+h [shape=box,style="rounded",label="«参与者»\n总部管理"];
+f [shape=box,style="rounded",label="«参与者»\n财务"];
+d [shape=box,style="rounded",label="«参与者»\n负责牙医"];
+subgraph cluster_sys { label="ADC 软件系统｜管理协同";fontname="Noto Sans CJK SC";fontsize=14;color="#708f84";
+u10 [shape=ellipse,label="SU-10 申请/审核数字更正"];
+u11 [shape=ellipse,label="SU-11 季度核对"];
+u12 [shape=ellipse,label="SU-12 运营分析"];
+u13 [shape=ellipse,label="SU-13 登记/退出候补"];
+u14 [shape=ellipse,label="SU-14 生成排程建议"];
+u15 [shape=ellipse,label="SU-15 发布限时邀约"];
+u16 [shape=ellipse,label="SU-16 接受/拒绝邀约"];
+u17 [shape=ellipse,label="SU-17 回收过期邀约"];
+u19 [shape=ellipse,label="SU-19 新增出诊安排"];
+}
+d -> u10;
+f -> u10;
+f -> u11;
+h -> u11;
+h -> u12;
+m -> u12;
+p -> u13;
+p -> u16;
+fd -> u13;
+fd -> u16;
+m -> u14;
+m -> u15;
+m -> u17;
+fd -> u17;
+m -> u19;
+}

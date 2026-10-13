@@ -1,0 +1,15 @@
+# Portable working-tree contract. Verify before renormalizing existing changes.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.sh text eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.docx binary
+*.zip binary

@@ -1,0 +1,1 @@
+{"scope": "Chromium set_content source-template fixtures; no Django, PostgreSQL, actual model call or clinical user study. JS confirm dialog and highlight checked.", "passed": 157, "total": 157}

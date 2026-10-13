@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<a href="{% url 'directory_list' kind %}">返回目录</a><h1>{{ title }}</h1>
+{% if dentist %}<p>当前牙医：{{ dentist.employee_no }} · {{ dentist.name }}</p><p>已有撤回记录应选择恢复依据；恢复沿用原关联编号。</p>{% endif %}
+<p class="notice">先填写，再核对，最后明确保存。只使用合成演示资料，不输入真实患者资料、证件照片、密码或API Key。</p>
+{% if read_only %}<p role="status">当前为只读实例；不能提交登记或关联变更。</p>{% endif %}
+<form class="panel" method="post">{% csrf_token %}{% workspace_token %}{% if form.errors %}<div role="alert"><strong>请检查下方错误；尚未保存。</strong></div>{% endif %}{{ form.as_p }}<div class="actions"><button class="button" type="submit"{% if read_only %} disabled{% endif %}>预览并核对（尚不保存）</button><a class="button secondary" href="{% url 'directory_list' kind %}">放弃并返回</a></div></form>
+<p>登记资料不会自动创建账号、授予门店权限或安排出诊。资格登记也不构成执业许可认证。</p>
+{% endblock %}

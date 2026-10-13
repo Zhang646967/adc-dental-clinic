@@ -1,0 +1,11 @@
+{
+  "host": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.13.5",
+  "docker_found": false,
+  "django_installed": false,
+  "psycopg_installed": false,
+  "dns": {
+    "pypi.org": "[Errno -3] Temporary failure in name resolution",
+    "files.pythonhosted.org": "[Errno -3] Temporary failure in name resolution"
+  }
+}

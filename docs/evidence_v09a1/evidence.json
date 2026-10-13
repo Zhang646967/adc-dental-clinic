@@ -1,0 +1,42 @@
+{
+  "source_version": "0.9.0-alpha.1",
+  "date_utc": "2026-09-27T11:23:21.051514+00:00",
+  "executed": {
+    "python_check_methods": {
+      "passed": 283,
+      "total": 283
+    },
+    "existing_wait_window_node_assertions": {
+      "passed": 18,
+      "total": 18
+    },
+    "synthetic_source_template_chromium_assertions": {
+      "passed": 249,
+      "total": 249,
+      "widths": [
+        320,
+        390,
+        1440
+      ],
+      "modes": [
+        "standard_16px",
+        "comfortable_20px"
+      ],
+      "limits": "No Django HTTP/ORM/PostgreSQL/live API; templates converted to static fixtures."
+    },
+    "prior_migrations": {
+      "total": 13,
+      "byte_identical": true
+    }
+  },
+  "not_executed": {
+    "django_postgresql_methods_authored": 290,
+    "new_methods": 21,
+    "real_browser_e2e": "NOT RUN",
+    "user_installation": "NOT PERFORMED",
+    "live_ai": "NOT CALLED",
+    "backup_restore": "NOT RUN",
+    "public_deployment": "NOT RUN"
+  },
+  "dependency_attempt": "pip download of baseline Django==5.2.17 and psycopg==3.2.10 did not obtain distributions; see exact error log. No substitute SQLite/ORM."
+}

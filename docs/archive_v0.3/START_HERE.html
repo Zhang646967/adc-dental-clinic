@@ -1,0 +1,579 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADC 工程候选版 v0.3 · 本地验收指南</title><style>
+:root{--ink:#172f3d;--muted:#5c727d;--teal:#196858;--line:#dbe6e5}*{box-sizing:border-box}body{margin:0;color:var(--ink);background:#f3f7f6;font:16px/1.85 system-ui,"Microsoft YaHei",sans-serif}header{padding:30px 5vw;background:#163c35;color:white}header .kicker{letter-spacing:.14em;font-size:12px;color:#b9d9cf}header h1{font-size:29px;margin:8px 0}header p{max-width:1020px;margin:10px 0;color:#d8eae5}.layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:25px;max-width:1440px;margin:auto;padding:25px}nav{background:white;border:1px solid var(--line);border-radius:9px;padding:14px;position:sticky;top:18px;align-self:start}nav a{display:block;padding:9px;text-decoration:none;color:var(--teal);font-size:14px}nav p{font-size:12px;color:var(--muted);padding:8px}article{padding:30px 36px;background:white;border:1px solid var(--line);border-radius:9px;margin:0 0 25px;min-width:0;overflow:hidden}main{min-width:0}h1{font-size:27px;line-height:1.5}h2{font-size:22px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-top:32px}h3{font-size:18px;margin-top:28px}blockquote{padding:14px 20px;background:#fff6e5;border-left:4px solid #b77a26;margin:20px 0}blockquote p{margin:0}p{margin:12px 0}table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;font-size:14px;line-height:1.75;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;min-width:100px;vertical-align:top;text-align:left}th{background:#edf5f1}pre{padding:16px;background:#f0f5f3;border:1px solid var(--line);overflow:auto;border-radius:5px;font-size:13px;line-height:1.8}code{font:13px/1.8 ui-monospace,Consolas,monospace;word-break:break-word;background:#eef4f2;padding:2px 4px}pre code{white-space:pre;background:none;padding:0;word-break:normal}a{color:var(--teal)}footer{padding:25px;text-align:center;font-size:12px;color:var(--muted)}a:focus-visible{outline:3px solid #cb963e;outline-offset:3px}@media(max-width:850px){.layout{display:block;padding:12px}nav{position:static;display:flex;flex-wrap:wrap;margin-bottom:16px}nav a{padding:6px 10px}nav p{width:100%;margin:0}article{padding:18px}header{padding:23px}header h1{font-size:24px}h1{font-size:24px}h2{font-size:21px}}@media print{body{background:white}nav{display:none}.layout{display:block;padding:0}article{border:0;break-before:page}header{background:white;color:black}header p,header .kicker{color:black}pre{white-space:pre-wrap}table{display:table;font-size:10pt}th,td{min-width:0}}
+</style></head><body><header><div class="kicker">ADC / SYSTEMS ANALYSIS & DESIGN</div><h1>工程候选版 v0.3 · 本地验收指南</h1><p>从20个逻辑对象到字段、约束与源码。此文件是离线指南，不是业务系统，不显示伪造的运行结果。</p><p>已执行：46项纯规则 + 11项静态检查。未执行：Django启动、数据库迁移、30项集成/并发测试、浏览器和公网验收。</p></header><div class="layout"><nav aria-label="文档目录"><a href="#start">开始使用</a><a href="#design">物理设计</a><a href="#change">本轮变更</a><a href="#trace">实现追踪</a><a href="#tests">实际检查</a><p>完整源码、字段清单和待执行脚本在工程压缩包中。不要输入真实患者数据。</p></nav><main><article id="start"><h1>ADC 工程候选版 v0.3</h1>
+<p><strong>逻辑链：v0.2 模型 → 物理字段与约束 → Django 源码 → 本地 PostgreSQL 验收 → 下一增量。</strong></p>
+<blockquote>
+<p>本包是代码与迁移的候选交付，不是已验证运行的系统。生成环境没有 Django、PostgreSQL 或 Docker，依赖下载因网络/DNS失败；因此没有执行 Django 导入检查、数据库迁移、网页启动或真实并发测试。已执行的只有 <code>checks/</code> 中 46 项纯规则测试与 11 项静态检查。详见 <code>docs/TEST_REPORT.md</code>。</p>
+</blockquote>
+<p>个人开发、质量优先、没有明确截止日期。沿用 v0.2 的 20 个逻辑对象和状态/历史版本设计；没有改成另一个项目，也没有把课程案例的未说明内容伪装成已确认政策。</p>
+<h2>1. 本轮交付到哪里</h2>
+<p>已经编写源代码：员工登录；前台权限范围内的患者列表、建档、档案页；跨店精确患者编号识别；主管新增出诊时段；预约创建、列表、详情、到诊、取消、核实爽约、保留历史的改期；必要审计事件；随机密码的本地虚构数据初始化。</p>
+<p>已经编写模型和候选迁移：20 个逻辑对象对应的 Django 模型、6 份初始迁移、1 份 PostgreSQL 保护迁移。Django 的组、权限、会话等还会产生额外表，20 不是最终数据库总表数。</p>
+<p>尚未开放业务入口：实际治疗录入与确认、过敏复核界面、治疗完成、无治疗关闭、结算展示、受控更正、季度成本确认、经营统计。这些对应模型不代表这些功能已经实现。</p>
+<p>未完成：Django/PostgreSQL 运行验收、浏览器验收、性能测试、公网部署、恢复演练、全部需求验收。生产设置明确阻断当前候选版直接上线。</p>
+<h2>2. 文件阅读顺序</h2>
+<table>
+<thead>
+<tr>
+  <th>文件/目录</th>
+  <th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>START_HERE.html</code></td>
+  <td>本说明的离线阅读版；不是业务页面预览</td>
+</tr>
+<tr>
+  <td><code>docs/PHYSICAL_DESIGN.md</code></td>
+  <td>类型、约束位置、锁与事务、剩余缺口</td>
+</tr>
+<tr>
+  <td><code>docs/FIELD_CATALOG.md</code></td>
+  <td>20 个模型的逐字段定义，来自源码静态提取</td>
+</tr>
+<tr>
+  <td><code>docs/CHANGELOG_v0.3.md</code></td>
+  <td>本轮新增字段和工程限制，不暗中改变 v0.2</td>
+</tr>
+<tr>
+  <td><code>docs/TRACEABILITY.md</code></td>
+  <td>需求/用例 → 源码 → 待执行验收</td>
+</tr>
+<tr>
+  <td><code>docs/REPORT_SECTION.md</code></td>
+  <td>可用于课程报告的工程章节草稿，保留真实验证状态</td>
+</tr>
+<tr>
+  <td><code>docs/TEST_REPORT.md</code></td>
+  <td>已运行与未运行项目的明确分界</td>
+</tr>
+<tr>
+  <td><code>scripts/integration_gate.py</code></td>
+  <td>本地真实验收的顺序执行入口；任一步失败即停止</td>
+</tr>
+<tr>
+  <td><code>AGENTS.md</code></td>
+  <td>后续人工/AI 修改代码时的约束与检查要求</td>
+</tr>
+</tbody>
+</table>
+<h2>3. 技术基线</h2>
+<p>本地目标是 Python 3.13、Django 5.2.17、PostgreSQL 17、Psycopg 3.2.10。Web 使用服务端模板，不另开 React/Vue 工程。</p>
+<p><code>requirements.txt</code> 固定主要框架/驱动版本，但没有完整锁定传递依赖；<code>python:3.13-slim</code> 和 <code>postgres:17</code> 也是可变标签。这是<strong>候选基线，不是已经复现的完整环境锁</strong>。首次成功验收后，需要保存实际包版本、容器摘要和测试结果，再决定正式发布的锁定方式。</p>
+<h2>4. 首次本地运行：Windows + Docker Compose</h2>
+<p>以下是待在你的机器执行的步骤，不是本会话已经完成的步骤。先确认 Docker Desktop/Engine 正常运行，并有可用的 Compose；宿主机上的 Python 只用于生成随机配置。</p>
+<h3>第一步：解压并检查环境</h3>
+<p>把包解压到一个新目录，进入包含 <code>manage.py</code> 的工程根目录，打开 PowerShell：</p>
+<pre><code class="language-powershell">py --version
+docker --version
+docker compose version
+</code></pre>
+<p>如果只有 <code>python</code> 命令而没有 <code>py</code>，后面的宿主机 <code>py</code> 命令改用 <code>python</code>。不要因此改动容器中的 <code>python</code> 命令。建议宿主机 Python 3.11+；容器目标版本已在 Dockerfile 中声明。</p>
+<h3>第二步：生成配置，构建并启动数据库</h3>
+<p>逐条执行，前一条成功后再执行下一条：</p>
+<pre><code class="language-powershell">py scripts/init_local.py
+docker compose build web
+docker compose up -d db
+</code></pre>
+<p><code>init_local.py</code> 只在 <code>.env</code> 不存在时生成随机本地密钥，不覆盖已有配置、不改密码、不清空数据库。不要提交 <code>.env</code>，不要把其内容发到聊天中。</p>
+<p>镜像/依赖下载失败属于环境问题；先保存错误输出，不要删除迁移、改用 SQLite 或关闭约束来绕过它。</p>
+<h3>第三步：执行真实验收门槛</h3>
+<pre><code class="language-powershell">docker compose run --rm web python scripts/integration_gate.py
+</code></pre>
+<p>脚本顺序执行：Django 系统检查 → 模型与迁移一致性检查 → 实际迁移 → 30 项集成/并发测试。它在第一处失败时退出，不能把后续未执行的项目记为通过。</p>
+<p>初始迁移是本轮编写的候选源码，<strong>没有用 Django 的迁移探测器验证过</strong>。<code>makemigrations --check --dry-run</code> 若发现差异，需要检查差异后修正迁移/模型；不要跳过检查直接宣称模型一致。</p>
+<p>测试只应运行在本包独立的合成数据开发数据库上。Django 会建立和删除独立的 <code>test_...</code> 数据库，不能把这些命令指向有真实业务数据的数据库。</p>
+<h3>第四步：通过门槛后再初始化和打开页面</h3>
+<pre><code class="language-powershell">docker compose run --rm web python manage.py seed_demo
+docker compose up -d web
+</code></pre>
+<p>浏览器打开：</p>
+<pre><code class="language-text">http://127.0.0.1:8000/
+</code></pre>
+<p><code>seed_demo</code> 为首次创建的账号随机生成密码，在事务成功后显示。密码不是公开通用的 admin/admin。重复初始化不会重置已有密码；只有显式传入 <code>--reset-passwords</code> 才会重置指定演示账号。</p>
+<table>
+<thead>
+<tr>
+  <th>演示账号</th>
+  <th>职责</th>
+  <th>当前可验证范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>front_a</code> / <code>front_b</code></td>
+  <td>两家店的前台</td>
+  <td>各自店的患者与预约；不能互借角色权限</td>
+</tr>
+<tr>
+  <td><code>doctor_a</code></td>
+  <td>本人接诊</td>
+  <td>有本人的预约以后才有相应可见记录</td>
+</tr>
+<tr>
+  <td><code>manager_a</code></td>
+  <td>第一家店主管</td>
+  <td>新增出诊安排、运营元数据；不读患者临床详情</td>
+</tr>
+<tr>
+  <td><code>hq_demo</code></td>
+  <td>总部</td>
+  <td>跨店预约元数据；不默认开放临床详情</td>
+</tr>
+<tr>
+  <td><code>finance_demo</code></td>
+  <td>财务</td>
+  <td>本轮只有身份/角色，财务页面尚未实现</td>
+</tr>
+<tr>
+  <td><code>tech_demo</code></td>
+  <td>技术管理</td>
+  <td>本轮无账号管理网页；不默认拥有业务数据权限</td>
+</tr>
+</tbody>
+</table>
+<p>前台创建一个患者后，可从档案页直接进入预约；初始化包含未来7天的虚构出诊时段。到诊以后会停在“已到诊”，不是已经可以治疗并开单。未来的预约不能直接认定爽约。所有日期表单按 Asia/Shanghai 解释。</p>
+<h2>5. 不使用 Docker 时</h2>
+<p>需要自行准备 PostgreSQL 17 和具有本地建库/安装 <code>btree_gist</code> 权限的开发账号，然后设置 <code>.env</code> 的连接参数。不要使用共享生产数据库。</p>
+<pre><code class="language-powershell">py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+py scripts/init_local.py
+# 编辑本地 .env：填写你自己创建的开发数据库信息；不要公开。
+.\.venv\Scripts\python.exe scripts/integration_gate.py
+# 仅在门槛通过后继续：
+.\.venv\Scripts\python.exe manage.py seed_demo
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+</code></pre>
+<p>Python 3.13 未安装时不要照抄版本选择命令；先核实实际 Python 版本。Compose 路径通常能减少宿主机依赖差异，本轮不要求两条路径同时使用。</p>
+<h2>6. 数据与发布边界</h2>
+<p>Compose 只将 Web 和数据库端口绑定到宿主机 <code>127.0.0.1</code>，用于本地开发。数据库卷持久化保存数据，不能随意使用删除卷的命令。</p>
+<p>本包没有购买服务器、绑定域名、上传 GitHub、创建云数据库或公网服务；没有原案例 PDF、原照片、字体文件、真实患者数据或预置固定密码。不要上传真实医疗资料来试用。</p>
+<p><code>config/settings/production.py</code> 当前有明确的发布阻断。将来要单独完成生产 Web 服务、HTTPS、登录节流、最小数据库权限、依赖锁定、备份恢复及各项验收后才能替换它；不能简单删除阻断就把本包称为生产版本。</p>
+<h2>7. 笔记总结</h2>
+<pre><code class="language-text">工程 v0.3
+├─ 模型：保留20个对象，落地字段与关系
+├─ 约束：唯一 / 检查 / 排斥 / 跨表保护
+├─ 代码：页面入口 → 权限 → 业务服务 → ORM → PostgreSQL
+├─ 增量：先建档、预约和到诊，后治疗、结算和分析
+├─ 已检查：46项纯规则 + 11项静态检查
+└─ 下一道门槛：Django检查、迁移、30项真实集成/并发测试
+</code></pre>
+</article><article id="design"><h1>ADC 物理设计 v0.3</h1>
+<p><strong>性质：工程实现候选；所有 ORM/SQL 尚未在目标引擎执行。</strong></p>
+<p>逻辑链：事实粒度 → 字段类型 → 同表约束 → 跨表一致性 → 命令与事务 → 验证证据。</p>
+<h2>1. 与材料的关系</h2>
+<p>CASE 第1–2页给出患者、过敏、牙医、诊所、资格、治疗、季度成本与一就诊一结算单的信息需求。NOTE3 第1页区分需求与设计，第11页讨论模型、不变量及操作前后条件；NOTE4 第7页要求功能与数据并行细化，第11页强调清楚的模块联系。</p>
+<p>这些材料<strong>没有</strong>指定 Django、数据库字段长度、锁算法、数据库触发器或下面的模块名；这些均为本项目设计 [D]。v0.2 具体逻辑对象可对照 <code>reference/schema_model_v0.2.json</code>；本轮没有把患者身份改成患者网站账号。</p>
+<h2>2. 模块与模型对应</h2>
+<table>
+<thead>
+<tr>
+  <th>模块</th>
+  <th>逻辑对象</th>
+  <th>当前行为实现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>registry</td>
+  <td>Clinic、Dentist、Qualification、DentistQualification、Allergy、TreatmentType</td>
+  <td>模型与演示初始化；完整维护界面待做</td>
+</tr>
+<tr>
+  <td>accounts</td>
+  <td>UserAccount、RoleAssignment</td>
+  <td>框架登录、范围授权；账号维护网页待做</td>
+</tr>
+<tr>
+  <td>patients</td>
+  <td>Patient、PatientAllergy</td>
+  <td>建档和受限查阅；过敏更新服务已写，编辑页面未写</td>
+</tr>
+<tr>
+  <td>scheduling</td>
+  <td>AvailabilitySlot、Visit、VisitRequest</td>
+  <td>新建时段、预约、到诊、取消、爽约、改期</td>
+</tr>
+<tr>
+  <td>care</td>
+  <td>VisitRecordVersion、TreatmentRecord、Invoice、CorrectionRequest、AuditEvent</td>
+  <td>审计写入；其余业务只有模型和保护设计</td>
+</tr>
+<tr>
+  <td>finance</td>
+  <td>Quarter、DentistQuarterCost</td>
+  <td>模型；成本确认、汇总与分析服务未实现</td>
+</tr>
+<tr>
+  <td>adc_core</td>
+  <td>无额外业务表</td>
+  <td>纯规则、命令页面、表单、配置入口</td>
+</tr>
+</tbody>
+</table>
+<p>20 个逻辑对象不是整个数据库只有20张表：框架权限、内容类型、会话、用户-组关系等另有表。</p>
+<h2>3. 统一类型决策 [D]</h2>
+<table>
+<thead>
+<tr>
+  <th>事实</th>
+  <th>源码选择</th>
+  <th>设计理由与范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>内部主键</td>
+  <td>BigAutoField</td>
+  <td>不把内部ID当授权凭证；业务编号另存</td>
+</tr>
+<tr>
+  <td>患者/就诊/账单编号</td>
+  <td>varchar(40)，UUID4派生字符串，唯一约束</td>
+  <td>非固定演示流水号，不用“查最大号+1”生成</td>
+</tr>
+<tr>
+  <td>业务时间</td>
+  <td>DateTimeField + USE_TZ=True</td>
+  <td>PostgreSQL目标为 timestamptz；页面按Asia/Shanghai解释和显示</td>
+</tr>
+<tr>
+  <td>出生日期</td>
+  <td>DateField</td>
+  <td>不把生日当瞬时时间，也不保存不断过时的“年龄”</td>
+</tr>
+<tr>
+  <td>电话</td>
+  <td>varchar(32)</td>
+  <td>保留前导零、区号和标点；不设唯一</td>
+</tr>
+<tr>
+  <td>治疗数量</td>
+  <td>DecimalField(12,3)</td>
+  <td>单位含义另存，不能使用浮点金额</td>
+</tr>
+<tr>
+  <td>标准/实际单价</td>
+  <td>DecimalField(12,2)</td>
+  <td>非负；零价格需要原因与未来业务授权</td>
+</tr>
+<tr>
+  <td>行金额/版本总额/成本</td>
+  <td>DecimalField(16,2)</td>
+  <td>先对每行按HALF_UP舍入，再求和</td>
+</tr>
+<tr>
+  <td>未录入成本</td>
+  <td>NULL + MISSING状态</td>
+  <td>与“已确认零成本”不同</td>
+</tr>
+<tr>
+  <td>当前业务关系</td>
+  <td>外键/连接表</td>
+  <td>过敏、资格等不塞成逗号分隔的字符串</td>
+</tr>
+<tr>
+  <td>历史展示快照</td>
+  <td>JSONField</td>
+  <td>仅用于固定历史内容；目前DB只限制对象类型，完整schema和复核服务待实现</td>
+</tr>
+</tbody>
+</table>
+<p>字段上限是工作方案，不是根据真实门诊量测得。金额字段溢出必须报错，不能静默截断。全字段清单见 <code>FIELD_CATALOG.md</code>。</p>
+<h2>4. 约束分层</h2>
+<table>
+<thead>
+<tr>
+  <th>规则</th>
+  <th>本轮源码载体</th>
+  <th>不能据此声称什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>唯一编号、一个Visit一张Invoice</td>
+  <td>字段 unique / OneToOne</td>
+  <td>未执行并发插入，不可声称已经验证唯一性</td>
+</tr>
+<tr>
+  <td>同患者过敏项不重复、同牙医资格不重复</td>
+  <td>UniqueConstraint</td>
+  <td>不代表过敏/资格已经过真实专业验证</td>
+</tr>
+<tr>
+  <td>状态、到诊标志、时间、取消元数据一致</td>
+  <td>CheckConstraint</td>
+  <td>普通状态命令是否被授权仍由服务判断</td>
+</tr>
+<tr>
+  <td>牙医/患者预约区间不重叠</td>
+  <td>两个ExclusionConstraint；[start,end)</td>
+  <td>不解决通勤、椅位、设备、实际治疗超时</td>
+</tr>
+<tr>
+  <td>同牙医有效出诊安排不重叠</td>
+  <td>AvailabilitySlot的ExclusionConstraint</td>
+  <td>不等于优化排班</td>
+</tr>
+<tr>
+  <td>每次一个DRAFT、一个OPEN更正</td>
+  <td>条件唯一约束</td>
+  <td>不意味着更正流程已实现</td>
+</tr>
+<tr>
+  <td>角色范围含NULL时去重</td>
+  <td>分别对clinic非空、空值建立条件唯一约束</td>
+  <td>不能依赖普通多列UNIQUE自动去掉所有NULL重复</td>
+</tr>
+<tr>
+  <td>Invoice版本必须属于同Visit</td>
+  <td>复合外键(id,visit_id)引用 + SQL保护</td>
+  <td>两个独立外键不能证明业务归属相同</td>
+</tr>
+<tr>
+  <td>已发布版本/治疗行、审计不可普通改写</td>
+  <td>PostgreSQL BEFORE触发器候选</td>
+  <td>不防数据库所有者、禁用触发器、TRUNCATE等特权操作</td>
+</tr>
+<tr>
+  <td>已闭合必须有单；当前金额/结果一致</td>
+  <td>DEFERRABLE约束触发器候选，在事务结束检查</td>
+  <td>不是全部基线不变量的形式化证明</td>
+</tr>
+<tr>
+  <td>过敏状态与关联项、出生日期、范围授权</td>
+  <td>受控服务 + 待执行测试</td>
+  <td>不能说普通数据库CHECK已经覆盖跨行与动态时间规则</td>
+</tr>
+</tbody>
+</table>
+<p>模型中46个显式命名约束包含检查、唯一和排斥约束；SQL保护迁移还增加额外约束/触发器。该计数不包含字段自带的所有主键、外键、唯一性或正数检查，因此不当作最终数据库约束总数。</p>
+<h2>5. 写入流程与失败边界</h2>
+<p>页面和表单只收集、展示输入，不直接保存关键状态；服务重新读取权限与记录。<code>create_appointment</code>、<code>change_appointment</code>、<code>reschedule</code> 等把业务数据与成功审计放在同一 <code>transaction.atomic()</code> 中。</p>
+<p>预约中的牙医和诊所从已锁定的出诊时段取得，不相信浏览器独立提交的牙医/诊所组合。没有用 MAX(id)+1 生成业务号。后端按已登记约束名识别资源冲突；不把任意数据库异常误报为“有人抢了时段”。</p>
+<p>锁顺序工作协议：写入账号 → 相关角色绑定 → 出诊时段按主键升序 → 目标Visit。新增角色的技术命令对涉及账号按主键升序锁定。普通角色变更必须使用统一边界，直接数据库所有者修改不在应用层保证内。</p>
+<p>跨店改期同时验证原店与目标店授权；先在同一事务中将旧预约标记为被替代，再尝试建立新预约，复制的是治疗意向，不是已经执行的治疗。新预约失败会回滚旧状态更新；用 <code>lock_version</code> 拒绝陈旧命令。并发数据库保护仍需以两个独立连接验证。</p>
+<p>没有在v0.3实现“完成并开单”的服务。下一版应统一采用 Visit → VisitRecordVersion → TreatmentRecord → Invoice 的锁与写入协议，不能仅通过新增按钮直接操作模型。</p>
+<h2>6. 本轮特别记录的细化决策</h2>
+<p><strong>D31：患者增加 created_in_clinic。</strong> 用于授权前台在第一次预约创建之前查看自己刚建立的档案；它是建档来源，不是永久所属诊所。患者仍可跨店预约，权限也可以来自已有Visit关系。</p>
+<p><strong>D32：本轮是本地候选，不开放生产配置。</strong> 这是阶段门槛，不撤销最终公网目标。安全节流、生产服务、TLS、完整依赖锁定和备份恢复需要独立完成。</p>
+<p><strong>D33：有历史引用的出诊时段身份/时间在v0.3不原地调整。</strong> 本轮只有新增时段入口；对已有记录的安全编辑能力留到下一增量，不能将当前限制宣传为已实现完整排班维护。</p>
+<p><strong>D34：改期后继在物理层要求由后来创建的自增ID记录引用较早ID。</strong> 该限制服务于新建后继的既定命令，辅助阻止环；业务发生时间仍由日期字段表达，不能从ID推断真实就诊时间。</p>
+<p><strong>D35：过敏三态具体化。</strong> KNOWN要求至少一项；NO_KNOWN和UNKNOWN都不得同时带有效项目。有已经明确记录的过敏项时应进入KNOWN，KNOWN不保证已经发现所有过敏。应用不作临床安全判断。</p>
+<h2>7. 尚未落实的完整性规则</h2>
+<p>未开放care业务前仍须补齐并验证：完整快照schema、同就诊的前后版本链、更正请求与新发布版本的一致性、申请人/审核人/负责牙医权限、确认资格和价格变更授权、首次发布与更正发布区分、开单幂等、当前版本切换的并发保护。当前DB护栏不等于以上规则全部实现。</p>
+<p>财务方面仍须完成清单确认失效、含零收入牙医、成本完整性、当前版本收入汇总、查询时刻/口径记录、缺失和亏损政策提示等服务。单有Quarter/Cost表不足以宣称已经实现绩效管理。</p>
+<p>当前没有完整患者基本信息编辑、停用/删除工作流、角色撤销网页、真实病历管理、收款、退款、税务能力。不要通过通用管理后台绕过未完成服务。</p>
+<h2>思维导图</h2>
+<pre><code class="language-text">物理设计
+├─ 保留模型语义：Visit / 版本 / 唯一逻辑账单
+├─ 规范类型：标识、时间、精确金额、NULL、历史快照
+├─ 数据库：唯一、检查、排斥、外键、必要触发器
+├─ 用例服务：范围授权、状态守卫、事务、锁顺序
+└─ 验收：静态与纯规则已检查；真实引擎与页面尚未检查
+</code></pre>
+</article><article id="change"><h1>v0.2 → v0.3 变更登记</h1>
+<p>所有本轮新增决定均为项目设计[D]。没有教师批准、真实访谈或真实机构适用性认证。</p>
+<table>
+<thead>
+<tr>
+  <th>决定</th>
+  <th>变化</th>
+  <th>影响与回归要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>D31</td>
+  <td>Patient新增created_in_clinic外键</td>
+  <td>解决首次预约前的建档可见性；不能限制跨店就诊；需测试同绑定范围</td>
+</tr>
+<tr>
+  <td>D32</td>
+  <td>明确仅本地候选，生产配置阻断</td>
+  <td>最终公网目标保留；先通过运行/安全/恢复门槛</td>
+</tr>
+<tr>
+  <td>D33</td>
+  <td>被Visit引用的Slot身份与时间在本轮冻结</td>
+  <td>本轮没有排班编辑界面；后续受控编辑需要单独变更设计</td>
+</tr>
+<tr>
+  <td>D34</td>
+  <td>自动新建的改期后继ID须大于前驱ID</td>
+  <td>辅助无环约束；不把ID当业务时间；历史导入不在本轮</td>
+</tr>
+<tr>
+  <td>D35</td>
+  <td>UNKNOWN不与有效过敏项同时存在</td>
+  <td>已记录某种过敏时应是KNOWN；KNOWN不代表完整医学调查</td>
+</tr>
+</tbody>
+</table>
+<p>保留：七状态、到诊布尔、零治疗零金额的设计、唯一逻辑账单、多内容版本、历史不覆盖、成本NULL/确认态、前台与诊所范围同一绑定、数据库非公开暴露。</p>
+<p>没有实现的功能不删除需求：UC-06/07/08/09/11/12仍在后续增量。特别是无治疗关闭和更正政策已经在v0.2定义，但v0.3没有对应业务服务，不能把模型字段当已完成的功能。</p>
+</article><article id="trace"><h1>工程追踪 v0.3</h1>
+<p><code>已写源码</code>、<code>已运行测试</code>和<code>已满足需求</code>不是同一状态。本表的集成测试名称指待执行脚本。</p>
+<table>
+<thead>
+<tr>
+  <th>基线需求/用例</th>
+  <th>模型/服务/入口</th>
+  <th>对应测试或下一门槛</th>
+  <th>当前状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>FR-01 / UC-01 患者档案</td>
+  <td>patients.models / create_patient / patient_create</td>
+  <td>实际建档、跨店复用、身份查重</td>
+  <td>部分源码；C/R入口，完整编辑未做</td>
+</tr>
+<tr>
+  <td>FR-02 过敏</td>
+  <td>PatientAllergy / validate_allergies / update_allergies</td>
+  <td>checks.DataRulesTests；数据库关联与并发回归待补</td>
+  <td>纯规则已测；编辑页面/接诊复核未做</td>
+</tr>
+<tr>
+  <td>FR-03 / UC-02 基础资料</td>
+  <td>registry.models / seed_demo</td>
+  <td>迁移、初始化、停用关系测试</td>
+  <td>模型/种子；完整维护未做</td>
+</tr>
+<tr>
+  <td>FR-04 / UC-03 / UC-14</td>
+  <td>create_slot / create_appointment / ExclusionConstraint</td>
+  <td>tests.BusinessIntegrationTests；2项DatabaseConcurrencyTests</td>
+  <td>源码候选，尚未执行真实DB测试</td>
+</tr>
+<tr>
+  <td>FR-05 / UC-04/05</td>
+  <td>change_appointment / Visit状态约束</td>
+  <td>状态纯规则已测；实际服务回归待执行</td>
+  <td>源码候选</td>
+</tr>
+<tr>
+  <td>FR-06 治疗意向</td>
+  <td>VisitRequest / form字段 / reschedule复制</td>
+  <td>原子创建/复制，不进入治疗收费</td>
+  <td>源码候选</td>
+</tr>
+<tr>
+  <td>FR-07 / UC-06 实际治疗</td>
+  <td>care.TreatmentRecord及版本结构</td>
+  <td>JSONschema、确认事实、历史保护及真实编辑竞争</td>
+  <td>仅结构/护栏，未开放</td>
+</tr>
+<tr>
+  <td>FR-08 / UC-07/11/13 结算</td>
+  <td>Invoice/Version/复合FK/保护SQL</td>
+  <td>首次开单、零治疗、重试与并发</td>
+  <td>仅结构/护栏，未开放</td>
+</tr>
+<tr>
+  <td>FR-09/10 / UC-08</td>
+  <td>finance.Quarter / DentistQuarterCost</td>
+  <td>全部成本完整性、无收入人员、当前版本汇总</td>
+  <td>仅结构，未开放</td>
+</tr>
+<tr>
+  <td>FR-11 / UC-09 经营分析</td>
+  <td>只写quarter_bounds纯函数</td>
+  <td>取消率等指标实现留下一阶段</td>
+  <td>未实现；概览计数不是经营报表</td>
+</tr>
+<tr>
+  <td>FR-12 / UC-10</td>
+  <td>accounts.policies / selectors / 后端重查</td>
+  <td>direct URL / stale grant / same binding / CSRF</td>
+  <td>源码候选，真实授权测试未执行</td>
+</tr>
+<tr>
+  <td>FR-13 / UC-12</td>
+  <td>AuditEvent / emit / 保护SQL / CorrectionRequest</td>
+  <td>审计回滚与DML保护待执行；完整更正未实现</td>
+  <td>部分源码</td>
+</tr>
+<tr>
+  <td>FR-14 公网</td>
+  <td>Compose本地环境 / 发布阻断</td>
+  <td>TLS、节流、权限、备份恢复、依赖锁</td>
+  <td>未上线</td>
+</tr>
+</tbody>
+</table>
+<p>下一增量之前先运行 <code>scripts/integration_gate.py</code>。未运行的测试没有结果；测试文件数量或断言数量不代表覆盖了全部需求。</p>
+</article><article id="tests"><h1>实际检查记录 v0.3</h1>
+<p><strong>结果不能跨层使用：纯规则和静态检查通过，不等于Django、数据库或网页通过。</strong></p>
+<p>记录时间（UTC）：2026-09-21T13:16:04.813203+00:00。Python：3.13.5。</p>
+<table>
+<thead>
+<tr>
+  <th>项目</th>
+  <th>实际结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>框架无关业务规则</td>
+  <td>46项通过；代码位于<code>checks/test_rules.py</code>，测试真实使用的<code>adc_core/rules.py</code></td>
+</tr>
+<tr>
+  <td>静态结构/打包检查</td>
+  <td>11项通过；模型覆盖、迁移字段声明、SQL快照、模板URL等有限检查</td>
+</tr>
+<tr>
+  <td>合计已执行</td>
+  <td>57个test方法；子场景不另外冒充独立测试计数</td>
+</tr>
+<tr>
+  <td>Python语法编译</td>
+  <td>已执行compileall；不验证第三方模块导入或Django模型元类行为</td>
+</tr>
+<tr>
+  <td>Django系统检查/模型校验</td>
+  <td>未执行：运行环境未安装Django</td>
+</tr>
+<tr>
+  <td>模型—迁移状态比较</td>
+  <td>未执行：未运行Django迁移探测器；不是Django自动生成的迁移证据</td>
+</tr>
+<tr>
+  <td>PostgreSQL迁移/触发器</td>
+  <td>未执行：无PostgreSQL引擎</td>
+</tr>
+<tr>
+  <td>业务集成测试</td>
+  <td>28项已编写，未运行</td>
+</tr>
+<tr>
+  <td>独立连接并发测试</td>
+  <td>2项已编写，未运行</td>
+</tr>
+<tr>
+  <td>浏览器功能/布局检查</td>
+  <td>未执行；没有生成冒充实测的业务截图</td>
+</tr>
+<tr>
+  <td>公网/压测/安全审计/恢复</td>
+  <td>未执行</td>
+</tr>
+</tbody>
+</table>
+<p>环境观察：<code>pip</code>依赖查询遇到DNS解析失败；额外下载尝试也失败。这里的失败仅描述本次执行环境，不代表用户电脑不能安装。</p>
+<p>完整实际输出：<code>unit_test_output.txt</code>。机器可读边界：<code>evidence.json</code>。</p>
+<h2>已执行命令</h2>
+<pre><code class="language-text">python -m compileall -q /mnt/data/ADC_engineering_v0.3
+python -m unittest discover -s checks -v
+</code></pre>
+<p>上述命令中的路径是生成时的工作路径，不应直接当作用户电脑的路径。</p>
+<h2>下一道真实门槛</h2>
+<p>在独立本地PostgreSQL17环境内运行：</p>
+<pre><code class="language-text">python scripts/integration_gate.py
+</code></pre>
+<p>顺序是系统检查、迁移差异检查、实际迁移、集成/并发测试。出现任何错误均停止，并将真实输出作为后续修订依据。当前证据文件不会被脚本偷偷重写成“通过”。</p>
+<p>30项待运行测试并没有覆盖所有v0.1/v0.2需求；care/finance/完整权限变更/历史更正/快照/备份等还需要新增测试。代码中的数据库护栏只是候选实现，不能宣称已经完成正式验证或全状态空间证明。</p>
+</article></main></div><footer>候选源码与已验证系统分开记录 · 所有新增技术决定均为本项目设计</footer></body></html>

@@ -1,0 +1,24 @@
+{
+  "timestamp_utc": "2026-10-08T14:57:59.345782+00:00",
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "tools": {
+    "docker": null,
+    "psql": null,
+    "pg_ctl": null,
+    "node": "/opt/nvm/versions/node/v22.16.0/bin/node",
+    "chromium": "/usr/bin/chromium"
+  },
+  "packages": {
+    "django": false,
+    "psycopg": false,
+    "playwright": true,
+    "jinja2": true
+  },
+  "dependency_attempt": "see dependency_attempt.log; pinned requirements download returned 1",
+  "pypi_dns": {
+    "resolved": false,
+    "error_type": "gaierror",
+    "errno": -3
+  }
+}

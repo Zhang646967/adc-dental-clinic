@@ -1,0 +1,376 @@
+{
+  "version": "1.0.0-rc.1",
+  "report": "R5",
+  "use_cases": [
+    {
+      "use_case": "SU-01",
+      "appendix": "A",
+      "source_paths": [
+        "accounts/models.py",
+        "workspaces/activation.py",
+        "workspaces/selection.py",
+        "workspaces/context.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-02",
+      "appendix": "A",
+      "source_paths": [
+        "accounts/models.py",
+        "workspaces/activation.py",
+        "workspaces/selection.py",
+        "workspaces/context.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-03",
+      "appendix": "A",
+      "source_paths": [
+        "patients/services.py",
+        "patients/selectors.py",
+        "adc_core/views.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-04",
+      "appendix": "A",
+      "source_paths": [
+        "scheduling/services.py",
+        "patients/models.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-05",
+      "appendix": "A",
+      "source_paths": [
+        "scheduling/services.py",
+        "patients/models.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-06",
+      "appendix": "A",
+      "source_paths": [
+        "scheduling/services.py",
+        "patients/models.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-07",
+      "appendix": "A",
+      "source_paths": [
+        "care/services.py",
+        "care/corrections.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-08",
+      "appendix": "A",
+      "source_paths": [
+        "care/services.py",
+        "care/corrections.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-09",
+      "appendix": "A",
+      "source_paths": [
+        "care/services.py",
+        "care/corrections.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-10",
+      "appendix": "A",
+      "source_paths": [
+        "care/services.py",
+        "care/corrections.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-11",
+      "appendix": "A",
+      "source_paths": [
+        "finance/selectors.py",
+        "operations/selectors.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-12",
+      "appendix": "A",
+      "source_paths": [
+        "finance/selectors.py",
+        "operations/selectors.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-13",
+      "appendix": "A",
+      "source_paths": [
+        "coordination/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-14",
+      "appendix": "A",
+      "source_paths": [
+        "coordination/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-15",
+      "appendix": "A",
+      "source_paths": [
+        "coordination/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-16",
+      "appendix": "A",
+      "source_paths": [
+        "coordination/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-17",
+      "appendix": "A",
+      "source_paths": [
+        "coordination/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-18",
+      "appendix": "A",
+      "source_paths": [
+        "guidance/catalog.py",
+        "scheduling/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-19",
+      "appendix": "A",
+      "source_paths": [
+        "guidance/catalog.py",
+        "scheduling/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-20",
+      "appendix": "A",
+      "source_paths": [
+        "guidance/catalog.py",
+        "scheduling/services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-21",
+      "appendix": "A",
+      "source_paths": [
+        "accounts/governance.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-22",
+      "appendix": "A",
+      "source_paths": [
+        "accounts/governance.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-23",
+      "appendix": "A",
+      "source_paths": [
+        "registry/catalog.py",
+        "registry/catalog_views.py",
+        "registry/catalog_forms.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-24",
+      "appendix": "A",
+      "source_paths": [
+        "guidance/result_views.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-25",
+      "appendix": "A",
+      "source_paths": [
+        "accounts/governance.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-26",
+      "appendix": "B",
+      "source_paths": [
+        "patients/contact_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-27",
+      "appendix": "B",
+      "source_paths": [
+        "registry/directory_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-28",
+      "appendix": "B",
+      "source_paths": [
+        "registry/directory_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-29",
+      "appendix": "B",
+      "source_paths": [
+        "scheduling/availability_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-30",
+      "appendix": "B",
+      "source_paths": [
+        "scheduling/availability_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-31",
+      "appendix": "B",
+      "source_paths": [
+        "scheduling/front_coordination_selectors.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-32",
+      "appendix": "B",
+      "source_paths": [
+        "scheduling/intake_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-33",
+      "appendix": "B",
+      "source_paths": [
+        "scheduling/intake_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-34",
+      "appendix": "B",
+      "source_paths": [
+        "coordination/task_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-35",
+      "appendix": "B",
+      "source_paths": [
+        "coordination/task_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-36",
+      "appendix": "B",
+      "source_paths": [
+        "coordination/task_services.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-37",
+      "appendix": "B",
+      "source_paths": [
+        "notifications/services.py",
+        "notifications/dispatcher.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    },
+    {
+      "use_case": "SU-38",
+      "appendix": "B",
+      "source_paths": [
+        "notifications/services.py",
+        "notifications/dispatcher.py"
+      ],
+      "implementation_status": "candidate",
+      "real_database_validation": "NOT_RUN"
+    }
+  ],
+  "shared": [
+    "SF-01"
+  ],
+  "source_existence_is_not_runtime_validation": true
+}

@@ -1,0 +1,95 @@
+test_extra_authority_fields_rejected (test_availability_rules.AvailabilityPayloadTests.test_extra_authority_fields_rejected) ... ok
+test_future_unknown_contract_rejected (test_availability_rules.AvailabilityPayloadTests.test_future_unknown_contract_rejected) ... ok
+test_invalid_uuid_revision_and_hash_rejected (test_availability_rules.AvailabilityPayloadTests.test_invalid_uuid_revision_and_hash_rejected) ... ok
+test_missing_state_rejected (test_availability_rules.AvailabilityPayloadTests.test_missing_state_rejected) ... ok
+test_state_token_cannot_act_as_confirmation (test_availability_rules.AvailabilityPayloadTests.test_state_token_cannot_act_as_confirmation) ... ok
+test_stop_proposal_has_no_new_interval (test_availability_rules.AvailabilityPayloadTests.test_stop_proposal_has_no_new_interval) ... ok
+test_valid_state_and_proposal (test_availability_rules.AvailabilityPayloadTests.test_valid_state_and_proposal) ... ok
+test_accepted_cancelled_visit_keeps_conversion_history (test_availability_rules.AvailabilityRulesTests.test_accepted_cancelled_visit_keeps_conversion_history) ... ok
+test_accepted_live_visit_still_blocks (test_availability_rules.AvailabilityRulesTests.test_accepted_live_visit_still_blocks) ... ok
+test_accepted_offer_without_matching_visit_fails_closed (test_availability_rules.AvailabilityRulesTests.test_accepted_offer_without_matching_visit_fails_closed) ... ok
+test_adjustment_permits_new_interval_overlapping_original (test_availability_rules.AvailabilityRulesTests.test_adjustment_permits_new_interval_overlapping_original) ... ok
+test_cancelled_noshow_and_rescheduled_are_retained_nonblocking_history (test_availability_rules.AvailabilityRulesTests.test_cancelled_noshow_and_rescheduled_are_retained_nonblocking_history) ... ok
+test_checked_in_visit_blocks (test_availability_rules.AvailabilityRulesTests.test_checked_in_visit_blocks) ... ok
+test_closed_visits_conservatively_protected (test_availability_rules.AvailabilityRulesTests.test_closed_visits_conservatively_protected) ... ok
+test_declined_revoked_expired_are_nonblocking_history (test_availability_rules.AvailabilityRulesTests.test_declined_revoked_expired_are_nonblocking_history) ... ok
+test_display_time_is_beijing (test_availability_rules.AvailabilityRulesTests.test_display_time_is_beijing) ... ok
+test_empty_future_slot_is_clear (test_availability_rules.AvailabilityRulesTests.test_empty_future_slot_is_clear) ... ok
+test_equivalent_timezone_instants (test_availability_rules.AvailabilityRulesTests.test_equivalent_timezone_instants) ... ok
+test_exact_offer_expiry_is_no_longer_effective (test_availability_rules.AvailabilityRulesTests.test_exact_offer_expiry_is_no_longer_effective) ... ok
+test_expired_pending_not_implicitly_recycled (test_availability_rules.AvailabilityRulesTests.test_expired_pending_not_implicitly_recycled) ... ok
+test_half_open_adjacent_is_not_overlap (test_availability_rules.AvailabilityRulesTests.test_half_open_adjacent_is_not_overlap) ... ok
+test_inactive_dentist_can_stop_empty_future_but_cannot_replace (test_availability_rules.AvailabilityRulesTests.test_inactive_dentist_can_stop_empty_future_but_cannot_replace) ... ok
+test_inactive_original_cannot_be_revived (test_availability_rules.AvailabilityRulesTests.test_inactive_original_cannot_be_revived) ... ok
+test_input_count_mismatch_fails_closed (test_availability_rules.AvailabilityRulesTests.test_input_count_mismatch_fails_closed) ... ok
+test_input_facts_not_mutated (test_availability_rules.AvailabilityRulesTests.test_input_facts_not_mutated) ... ok
+test_invalid_action_and_reason_are_rejected (test_availability_rules.AvailabilityRulesTests.test_invalid_action_and_reason_are_rejected) ... ok
+test_naive_times_rejected_by_domain (test_availability_rules.AvailabilityRulesTests.test_naive_times_rejected_by_domain) ... ok
+test_new_end_must_be_later (test_availability_rules.AvailabilityRulesTests.test_new_end_must_be_later) ... ok
+test_new_start_must_be_strictly_future (test_availability_rules.AvailabilityRulesTests.test_new_start_must_be_strictly_future) ... ok
+test_nonaccepted_offer_with_visit_is_anomaly (test_availability_rules.AvailabilityRulesTests.test_nonaccepted_offer_with_visit_is_anomaly) ... ok
+test_offer_wrong_clinic_is_anomaly (test_availability_rules.AvailabilityRulesTests.test_offer_wrong_clinic_is_anomaly) ... ok
+test_original_already_started_blocks_even_empty (test_availability_rules.AvailabilityRulesTests.test_original_already_started_blocks_even_empty) ... ok
+test_out_of_bounds_history_is_not_ignored (test_availability_rules.AvailabilityRulesTests.test_out_of_bounds_history_is_not_ignored) ... ok
+test_parse_requires_timezone (test_availability_rules.AvailabilityRulesTests.test_parse_requires_timezone) ... ok
+test_pending_request_state_mismatch_fails_closed (test_availability_rules.AvailabilityRulesTests.test_pending_request_state_mismatch_fails_closed) ... ok
+test_pending_valid_offer_blocks (test_availability_rules.AvailabilityRulesTests.test_pending_valid_offer_blocks) ... ok
+test_positive_ids_reject_booleans_and_strings (test_availability_rules.AvailabilityRulesTests.test_positive_ids_reject_booleans_and_strings) ... ok
+test_positive_length_overlap (test_availability_rules.AvailabilityRulesTests.test_positive_length_overlap) ... ok
+test_scheduled_visit_blocks (test_availability_rules.AvailabilityRulesTests.test_scheduled_visit_blocks) ... ok
+test_second_precision_not_silently_rounded (test_availability_rules.AvailabilityRulesTests.test_second_precision_not_silently_rounded) ... ok
+test_snapshot_order_is_canonical_but_changes_are_visible (test_availability_rules.AvailabilityRulesTests.test_snapshot_order_is_canonical_but_changes_are_visible) ... ok
+test_state_hash_is_not_clock_dependent (test_availability_rules.AvailabilityRulesTests.test_state_hash_is_not_clock_dependent) ... ok
+test_stopping_cannot_smuggle_new_times (test_availability_rules.AvailabilityRulesTests.test_stopping_cannot_smuggle_new_times) ... ok
+test_truncation_cannot_prove_no_promises (test_availability_rules.AvailabilityRulesTests.test_truncation_cannot_prove_no_promises) ... ok
+test_unchanged_interval_is_rejected (test_availability_rules.AvailabilityRulesTests.test_unchanged_interval_is_rejected) ... ok
+test_wrong_clinic_visit_is_anomaly (test_availability_rules.AvailabilityRulesTests.test_wrong_clinic_visit_is_anomaly) ... ok
+test_wrong_dentist_visit_is_anomaly (test_availability_rules.AvailabilityRulesTests.test_wrong_dentist_visit_is_anomaly) ... ok
+test_atomic_confirm_and_shared_slot_protocol (test_availability_rules.AvailabilitySourceContracts.test_atomic_confirm_and_shared_slot_protocol) ... ok
+test_confirm_requires_post_and_csrf_present (test_availability_rules.AvailabilitySourceContracts.test_confirm_requires_post_and_csrf_present) ... ok
+test_guide_is_role_scoped (test_availability_rules.AvailabilitySourceContracts.test_guide_is_role_scoped) ... ok
+test_new_mutations_not_readonly_allowlisted (test_availability_rules.AvailabilitySourceContracts.test_new_mutations_not_readonly_allowlisted) ... ERROR
+test_new_routes_are_manager_only (test_availability_rules.AvailabilitySourceContracts.test_new_routes_are_manager_only) ... ERROR
+test_no_business_record_deletion (test_availability_rules.AvailabilitySourceContracts.test_no_business_record_deletion) ... ok
+test_no_patient_or_offer_writes (test_availability_rules.AvailabilitySourceContracts.test_no_patient_or_offer_writes) ... ok
+test_original_slot_only_active_flag_written (test_availability_rules.AvailabilitySourceContracts.test_original_slot_only_active_flag_written) ... ok
+test_scope_first_before_source_lock (test_availability_rules.AvailabilitySourceContracts.test_scope_first_before_source_lock) ... ok
+test_service_snapshot_contains_no_patient_fields (test_availability_rules.AvailabilitySourceContracts.test_service_snapshot_contains_no_patient_fields) ... ok
+
+======================================================================
+ERROR: test_new_mutations_not_readonly_allowlisted (test_availability_rules.AvailabilitySourceContracts.test_new_mutations_not_readonly_allowlisted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/ADC_engineering_v0.9a6/checks/test_availability_rules.py", line 158, in test_new_mutations_not_readonly_allowlisted
+    from adc_core.read_only import readonly_post_allowed
+ModuleNotFoundError: No module named 'adc_core.read_only'
+
+======================================================================
+ERROR: test_new_routes_are_manager_only (test_availability_rules.AvailabilitySourceContracts.test_new_routes_are_manager_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/data/ADC_engineering_v0.9a6/checks/test_availability_rules.py", line 151, in test_new_routes_are_manager_only
+    mapping=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='ROUTES' for t in n.targets))
+  File "/mnt/data/ADC_engineering_v0.9a6/checks/test_availability_rules.py", line 151, in <genexpr>
+    mapping=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='ROUTES' for t in n.targets))
+                 ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/ast.py", line 110, in literal_eval
+    return _convert(node_or_string)
+  File "/usr/lib/python3.13/ast.py", line 99, in _convert
+    return dict(zip(map(_convert, node.keys),
+                    map(_convert, node.values)))
+  File "/usr/lib/python3.13/ast.py", line 109, in _convert
+    return _convert_signed_num(node)
+  File "/usr/lib/python3.13/ast.py", line 83, in _convert_signed_num
+    return _convert_num(node)
+  File "/usr/lib/python3.13/ast.py", line 74, in _convert_num
+    _raise_malformed_node(node)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/ast.py", line 71, in _raise_malformed_node
+    raise ValueError(msg + f': {node!r}')
+ValueError: malformed node or string on line 26: <ast.Name object at 0x7fcff14ac6d0>
+
+----------------------------------------------------------------------
+Ran 57 tests in 0.082s
+
+FAILED (errors=2)

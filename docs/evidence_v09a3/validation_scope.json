@@ -1,0 +1,113 @@
+{
+  "timestamp_utc": "2026-10-08T07:05:49.410149+00:00",
+  "candidate": "0.9.0-alpha.3",
+  "parent_zip": "ADC_engineering_v0.9a2.zip",
+  "parent_zip_sha256": "41fe25db8085ac4fe5283220398db9048df2ee4a1608d06dbd8e39a5ccfd3091",
+  "python": "3.13.5",
+  "node": "v22.16.0",
+  "basic_tests_executed_passed": 372,
+  "basic_tests_parent_executed_passed": 325,
+  "new_basic_test_methods": 47,
+  "node_assertions_executed_passed": 18,
+  "static_browser_assertions": {
+    "contacts": 120,
+    "existing_results": 249,
+    "wait_window_accounts": 129
+  },
+  "django_pg_authored_methods": 344,
+  "new_contact_django_pg_authored": 33,
+  "django_pg_executed": false,
+  "docker_executed": false,
+  "real_browser_e2e_executed": false,
+  "user_instance_modified": false,
+  "public_deployed": false,
+  "new_migrations": 0,
+  "migration_files": [
+    {
+      "file": "accounts/migrations/0001_initial.py",
+      "sha256": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "assistants/migrations/0001_initial.py",
+      "sha256": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "care/migrations/0001_initial.py",
+      "sha256": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "care/migrations/0002_database_guards.py",
+      "sha256": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "care/migrations/0003_correction_publication_guard.py",
+      "sha256": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "coordination/migrations/0001_initial.py",
+      "sha256": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "finance/migrations/0001_initial.py",
+      "sha256": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "finance/migrations/0002_quarter_lock_version.py",
+      "sha256": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "patients/migrations/0001_initial.py",
+      "sha256": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "portal/migrations/0001_initial.py",
+      "sha256": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "registry/migrations/0001_initial.py",
+      "sha256": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "scheduling/migrations/0001_initial.py",
+      "sha256": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    },
+    {
+      "file": "workspaces/migrations/0001_initial.py",
+      "sha256": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+      "unchanged_from_09a2": true,
+      "unchanged_from_07": true
+    }
+  ],
+  "model_files_unchanged": true,
+  "default_compose_unchanged": true,
+  "notes": [
+    "No Django, psycopg, PostgreSQL or Docker available in this runtime.",
+    "Dependency download and DNS failed; no framework/version downgrade or SQLite substitution.",
+    "Static browser uses transformed source templates and synthetic field stubs, not Django form validation or live sessions.",
+    "Fresh random isolated runner attempt returned false before containers could start."
+  ]
+}

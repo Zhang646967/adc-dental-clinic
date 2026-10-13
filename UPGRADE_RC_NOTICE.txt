@@ -1,0 +1,4 @@
+RC1 cumulative update files are for a NEW copy of the original source tree.
+Do not extract over the running v0.7 directory. Old scripts do not stop all writers.
+Use RC_WINDOWS.cmd import-copy on a trusted synthetic logical backup in a new instance.
+No automatic in-place upgrade, downgrade or data-volume deletion is provided.

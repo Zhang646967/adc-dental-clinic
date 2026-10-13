@@ -1,0 +1,22 @@
+{
+  "timestamp_utc": "2026-10-08T23:57:09.108976+00:00",
+  "python": "3.13.5",
+  "system": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "tools": {
+    "docker": null,
+    "psql": null,
+    "pg_dump": null,
+    "pg_restore": null,
+    "node": "/opt/nvm/versions/node/v22.16.0/bin/node",
+    "libreoffice": "/usr/bin/libreoffice"
+  },
+  "modules": {
+    "django": false,
+    "psycopg": false,
+    "playwright": true,
+    "jinja2": true
+  },
+  "database_tests_executed": false,
+  "windows_cmd_executed": false,
+  "user_instance_accessed": false
+}

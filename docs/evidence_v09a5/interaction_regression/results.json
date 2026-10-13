@@ -1,0 +1,829 @@
+{
+  "scope": "Chromium source-template fixtures with fixed form fields; no Django/DB, no remote AI",
+  "passed": 129,
+  "total": 129,
+  "checks": [
+    {
+      "name": "Asia/Shanghai/1440/enhanced",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/end-disabled-until-start",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/submit-disabled-empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/no-past-day",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/server-beijing-not-browser-zone",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/end-before-plus30-not-listed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/valid-serialization",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/no-auto-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/changing-start-clears-invalid-end",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/clearing-is-explained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/valid-enables-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/start-needs-end-room",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/rolling-last-date-boundary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/standard/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 1440,
+        "width": 1440,
+        "h": [
+          50,
+          50,
+          50,
+          50
+        ]
+      }
+    },
+    {
+      "name": "Asia/Shanghai/1440/standard/targets",
+      "passed": true,
+      "detail": [
+        50,
+        50,
+        50,
+        50
+      ]
+    },
+    {
+      "name": "Asia/Shanghai/1440/comfortable/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 1440,
+        "width": 1440,
+        "h": [
+          55,
+          55,
+          55,
+          55
+        ]
+      }
+    },
+    {
+      "name": "Asia/Shanghai/1440/comfortable/targets",
+      "passed": true,
+      "detail": [
+        55,
+        55,
+        55,
+        55
+      ]
+    },
+    {
+      "name": "Asia/Shanghai/1440/keyboard-order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/1440/no-js-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Asia/Shanghai/390/enhanced",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/end-disabled-until-start",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/submit-disabled-empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/no-past-day",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/server-beijing-not-browser-zone",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/end-before-plus30-not-listed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/valid-serialization",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/no-auto-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/changing-start-clears-invalid-end",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/clearing-is-explained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/valid-enables-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/start-needs-end-room",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/rolling-last-date-boundary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/standard/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 390,
+        "width": 390,
+        "h": [
+          50,
+          50,
+          50,
+          50
+        ]
+      }
+    },
+    {
+      "name": "Asia/Shanghai/390/standard/targets",
+      "passed": true,
+      "detail": [
+        50,
+        50,
+        50,
+        50
+      ]
+    },
+    {
+      "name": "Asia/Shanghai/390/comfortable/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 390,
+        "width": 390,
+        "h": [
+          55,
+          55,
+          55,
+          55
+        ]
+      }
+    },
+    {
+      "name": "Asia/Shanghai/390/comfortable/targets",
+      "passed": true,
+      "detail": [
+        55,
+        55,
+        55,
+        55
+      ]
+    },
+    {
+      "name": "Asia/Shanghai/390/keyboard-order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/390/no-js-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Asia/Shanghai/320/enhanced",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/end-disabled-until-start",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/submit-disabled-empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/no-past-day",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/server-beijing-not-browser-zone",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/end-before-plus30-not-listed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/valid-serialization",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/no-auto-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/changing-start-clears-invalid-end",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/clearing-is-explained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/valid-enables-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/start-needs-end-room",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/rolling-last-date-boundary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/standard/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 320,
+        "width": 320,
+        "h": [
+          50,
+          50,
+          50,
+          50
+        ]
+      }
+    },
+    {
+      "name": "Asia/Shanghai/320/standard/targets",
+      "passed": true,
+      "detail": [
+        50,
+        50,
+        50,
+        50
+      ]
+    },
+    {
+      "name": "Asia/Shanghai/320/comfortable/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 320,
+        "width": 320,
+        "h": [
+          55,
+          55,
+          55,
+          55
+        ]
+      }
+    },
+    {
+      "name": "Asia/Shanghai/320/comfortable/targets",
+      "passed": true,
+      "detail": [
+        55,
+        55,
+        55,
+        55
+      ]
+    },
+    {
+      "name": "Asia/Shanghai/320/keyboard-order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Asia/Shanghai/320/no-js-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "America/Chicago/1440/enhanced",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/end-disabled-until-start",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/submit-disabled-empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/no-past-day",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/server-beijing-not-browser-zone",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/end-before-plus30-not-listed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/valid-serialization",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/no-auto-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/changing-start-clears-invalid-end",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/clearing-is-explained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/valid-enables-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/start-needs-end-room",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/rolling-last-date-boundary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/standard/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 1440,
+        "width": 1440,
+        "h": [
+          50,
+          50,
+          50,
+          50
+        ]
+      }
+    },
+    {
+      "name": "America/Chicago/1440/standard/targets",
+      "passed": true,
+      "detail": [
+        50,
+        50,
+        50,
+        50
+      ]
+    },
+    {
+      "name": "America/Chicago/1440/comfortable/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 1440,
+        "width": 1440,
+        "h": [
+          55,
+          55,
+          55,
+          55
+        ]
+      }
+    },
+    {
+      "name": "America/Chicago/1440/comfortable/targets",
+      "passed": true,
+      "detail": [
+        55,
+        55,
+        55,
+        55
+      ]
+    },
+    {
+      "name": "America/Chicago/1440/keyboard-order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/1440/no-js-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "America/Chicago/390/enhanced",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/end-disabled-until-start",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/submit-disabled-empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/no-past-day",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/server-beijing-not-browser-zone",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/end-before-plus30-not-listed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/valid-serialization",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/no-auto-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/changing-start-clears-invalid-end",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/clearing-is-explained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/valid-enables-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/start-needs-end-room",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/rolling-last-date-boundary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/standard/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 390,
+        "width": 390,
+        "h": [
+          50,
+          50,
+          50,
+          50
+        ]
+      }
+    },
+    {
+      "name": "America/Chicago/390/standard/targets",
+      "passed": true,
+      "detail": [
+        50,
+        50,
+        50,
+        50
+      ]
+    },
+    {
+      "name": "America/Chicago/390/comfortable/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 390,
+        "width": 390,
+        "h": [
+          55,
+          55,
+          55,
+          55
+        ]
+      }
+    },
+    {
+      "name": "America/Chicago/390/comfortable/targets",
+      "passed": true,
+      "detail": [
+        55,
+        55,
+        55,
+        55
+      ]
+    },
+    {
+      "name": "America/Chicago/390/keyboard-order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/390/no-js-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "America/Chicago/320/enhanced",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/end-disabled-until-start",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/submit-disabled-empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/no-past-day",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/server-beijing-not-browser-zone",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/end-before-plus30-not-listed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/valid-serialization",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/no-auto-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/changing-start-clears-invalid-end",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/clearing-is-explained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/valid-enables-submit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/start-needs-end-room",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/rolling-last-date-boundary",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/standard/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 320,
+        "width": 320,
+        "h": [
+          50,
+          50,
+          50,
+          50
+        ]
+      }
+    },
+    {
+      "name": "America/Chicago/320/standard/targets",
+      "passed": true,
+      "detail": [
+        50,
+        50,
+        50,
+        50
+      ]
+    },
+    {
+      "name": "America/Chicago/320/comfortable/no-overflow",
+      "passed": true,
+      "detail": {
+        "scroll": 320,
+        "width": 320,
+        "h": [
+          55,
+          55,
+          55,
+          55
+        ]
+      }
+    },
+    {
+      "name": "America/Chicago/320/comfortable/targets",
+      "passed": true,
+      "detail": [
+        55,
+        55,
+        55,
+        55
+      ]
+    },
+    {
+      "name": "America/Chicago/320/keyboard-order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "America/Chicago/320/no-js-errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "accounts/1440/layout",
+      "passed": true,
+      "detail": {
+        "scroll": 1440,
+        "width": 1440
+      }
+    },
+    {
+      "name": "accounts/1440/self-password-route",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/1440/technical-actions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/1440/security-action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/1440/separate-meaning",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/390/layout",
+      "passed": true,
+      "detail": {
+        "scroll": 390,
+        "width": 390
+      }
+    },
+    {
+      "name": "accounts/390/self-password-route",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/390/technical-actions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/390/security-action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/390/separate-meaning",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/320/layout",
+      "passed": true,
+      "detail": {
+        "scroll": 320,
+        "width": 320
+      }
+    },
+    {
+      "name": "accounts/320/self-password-route",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/320/technical-actions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/320/security-action",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accounts/320/separate-meaning",
+      "passed": true,
+      "detail": null
+    }
+  ]
+}

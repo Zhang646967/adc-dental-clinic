@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="870" viewBox="0 0 1050 870">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="225" y="20" width="600" height="810" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="57.0" font-family="Noto Sans CJK SC" font-size="24" text-anchor="middle" font-weight="700" fill="#101010">ADC软件系统：资料与出诊维护</text>
+<ellipse cx="525" cy="145" rx="180" ry="42" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="140.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-26</text>
+<text x="525" y="166.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">更正患者联络资料</text>
+<ellipse cx="525" cy="290" rx="180" ry="42" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="285.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-27</text>
+<text x="525" y="311.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">登记基础目录资料</text>
+<ellipse cx="525" cy="435" rx="180" ry="42" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="430.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-28</text>
+<text x="525" y="456.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">维护牙医资格关联</text>
+<ellipse cx="525" cy="580" rx="180" ry="42" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="575.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-29</text>
+<text x="525" y="601.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">调整未来空闲出诊</text>
+<ellipse cx="525" cy="725" rx="180" ry="42" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="720.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-30</text>
+<text x="525" y="746.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">停用未来空闲出诊</text>
+<ellipse cx="85" cy="103" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="85" y1="115" x2="85" y2="147" stroke="#202020" stroke-width="1.7"/>
+<line x1="64" y1="127" x2="106" y2="127" stroke="#202020" stroke-width="1.7"/>
+<line x1="85" y1="147" x2="68" y2="169" stroke="#202020" stroke-width="1.7"/>
+<line x1="85" y1="147" x2="102" y2="169" stroke="#202020" stroke-width="1.7"/>
+<text x="85" y="199.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">前台</text>
+<polyline points="110,127 345,145" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="334.57077231763424,148.49731467691643 345,145 335.2250671151083,139.955132598783" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="958" cy="332" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="958" y1="344" x2="958" y2="376" stroke="#202020" stroke-width="1.7"/>
+<line x1="937" y1="356" x2="979" y2="356" stroke="#202020" stroke-width="1.7"/>
+<line x1="958" y1="376" x2="941" y2="398" stroke="#202020" stroke-width="1.7"/>
+<line x1="958" y1="376" x2="975" y2="398" stroke="#202020" stroke-width="1.7"/>
+<text x="958" y="428.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">技术维护</text>
+<polyline points="934,356 705,290" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="715.9216898513091,288.6897745263462 705,290 713.5491128207932,296.9218978594999" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="934,356 705,435" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="713.1808041921623,427.64646732722974 705,435 715.9747226209753,435.74529416518135" fill="none" stroke="#202020" stroke-width="1.7"/>
+<ellipse cx="85" cy="597" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="85" y1="609" x2="85" y2="641" stroke="#202020" stroke-width="1.7"/>
+<line x1="64" y1="621" x2="106" y2="621" stroke="#202020" stroke-width="1.7"/>
+<line x1="85" y1="641" x2="68" y2="663" stroke="#202020" stroke-width="1.7"/>
+<line x1="85" y1="641" x2="102" y2="663" stroke="#202020" stroke-width="1.7"/>
+<text x="85" y="693.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">诊所主管</text>
+<polyline points="110,621 345,580" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="335.75532599773743,585.9612081486802 345,580 334.2828646223208,577.5214905090969" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="110,621 345,725" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="334.00152357667395,724.8169252460302 345,725 337.4686174731223,716.9826265377094" fill="none" stroke="#202020" stroke-width="1.7"/>
+</svg>

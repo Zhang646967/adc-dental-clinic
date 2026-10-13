@@ -1,0 +1,42 @@
+{
+  "timestamp_utc": "2026-10-08T07:40:52.663434+00:00",
+  "candidate": "0.9.0-alpha.4",
+  "parent": "0.9.0-alpha.3",
+  "basic_methods_passed": 425,
+  "new_basic_methods": 53,
+  "node_contract_assertions_passed": 18,
+  "database_test_methods_authored": 344,
+  "database_tests_executed": false,
+  "real_export_restore_executed": false,
+  "windows_or_macos_native_executed": false,
+  "docker_available_in_generation_environment": false,
+  "models_unchanged": {
+    "coordination/models.py": "b71e264468b40ce01a15eb65c14473bd5a24c700bece448d8bfefa43e102f328",
+    "patients/models.py": "a7d7d41ea81b6c04eb37cba787a6703ae99d0b4943560f9263d96ff80189124e",
+    "accounts/models.py": "a8edf8fb93dfc392db7dfb23e74973dd6246316bb9eac48e54854d8a1992f2e8",
+    "scheduling/models.py": "3015f6c8d133d89c018b3c87f6252e1b39b3846bc68f69ce29a73f95f0205011",
+    "workspaces/models.py": "f37a0cc188383970a5f6a418e3bbd10ff35d94d61f2b9d79ec615ebb0ac70f80",
+    "finance/models.py": "a8f1d0acdaacf508e2e7734195d8b71728500b66cd0802d6cc1568977a61a309",
+    "assistants/models.py": "f9e1313c2e12ca748c5760b0a022409971d9907c6c646875a17e1291de7baecc",
+    "registry/models.py": "6732e44269224e3073d2fb89e2407b7ffaefbe231901528e5a466628d2762827",
+    "portal/models.py": "ac6e13bcedb177bd035b4c4ca25d5c52f33ad38c52afe8ccd1946303accf279d",
+    "care/models.py": "2f5b7b86936111489fdd498cf5850f3948645728bd0c70306d2801626e89fc45"
+  },
+  "old_migrations_unchanged": {
+    "coordination/migrations/0001_initial.py": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+    "patients/migrations/0001_initial.py": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+    "accounts/migrations/0001_initial.py": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+    "scheduling/migrations/0001_initial.py": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+    "workspaces/migrations/0001_initial.py": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+    "finance/migrations/0002_quarter_lock_version.py": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+    "finance/migrations/0001_initial.py": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+    "assistants/migrations/0001_initial.py": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+    "registry/migrations/0001_initial.py": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+    "portal/migrations/0001_initial.py": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+    "care/migrations/0002_database_guards.py": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+    "care/migrations/0001_initial.py": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+    "care/migrations/0003_correction_publication_guard.py": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09"
+  },
+  "report_R44_modified": false,
+  "note": "Fake Docker and FakeSession test results are NOT SQL/restore results."
+}

@@ -1,0 +1,19 @@
+# Optional LOCAL worker overlay. Only combine with the local compose.yaml after migrations.
+# Not used by verification, not started by default, not a production deployment.
+services:
+  notification-worker:
+    build: .
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      AI_MODE: disabled
+      AI_API_KEY: ""
+      OPENAI_API_KEY: ""
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "manage.py", "dispatch_notifications", "--watch", "--interval", "5", "--batch-size", "25"]
+    restart: "no"
+    stop_grace_period: 15s

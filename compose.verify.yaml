@@ -1,0 +1,40 @@
+# Synthetic isolated validation only. Do not merge with compose.yaml.
+services:
+  verify-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: adc_verify
+      POSTGRES_USER: adc_verify_owner
+      POSTGRES_PASSWORD: synthetic-verification-only-2026
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adc_verify_owner -d adc_verify"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  verify:
+    # Only the disposable verification container runs as root to export host evidence.
+    # The course Web/worker image still runs as uid 10001.
+    user: "0:0"
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    environment:
+      DJANGO_SECRET_KEY: synthetic-isolated-verification-key-not-for-use-in-production-2026
+      POSTGRES_DB: adc_verify
+      POSTGRES_USER: adc_verify_owner
+      POSTGRES_PASSWORD: synthetic-verification-only-2026
+      DB_HOST: verify-db
+      DB_PORT: "5432"
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      AI_MODE: disabled
+      AI_API_KEY: ""
+      OPENAI_API_KEY: ""
+      ADC_EVIDENCE_DIR: /evidence
+    depends_on:
+      verify-db:
+        condition: service_healthy
+    volumes:
+      - ./evidence/verification:/evidence
+    command: ["python", "scripts/integration_gate.py"]

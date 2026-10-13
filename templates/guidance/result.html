@@ -1,0 +1,23 @@
+{% extends base_template %}{% load workspace_tags %}
+{% block title %}核对候补办理结果 · ADC{% endblock %}
+{% block content %}
+<p class="eyebrow">只读核对 · 当前身份与本人／本店范围</p>
+<h1>这条候补办到哪一步了？</h1>
+<p>核对对象：候补 #{{ entry_id }}。这里不创建预约，不接受邀约，也不会替你重做刚才的操作。</p>
+{% if problem %}
+<section class="panel" role="alert"><h2>暂时不能给出核对结论</h2><p>{{ problem }}</p><p class="soft">错误类别：{{ error_code }}</p></section>
+<a class="button secondary" href="{% url 'dashboard' %}">返回当前工作台</a>
+{% else %}
+<section class="panel" aria-labelledby="result-title" data-result-code="{{ result.code }}">
+<p class="badge">当前记录核对结果</p><h2 id="result-title">{{ result.title }}</h2>
+<p>{{ result.explanation }}</p>
+{% if result.visit %}<dl><dt>对应正式预约编号</dt><dd class="result-identifier">{{ result.visit.number }}</dd><dt>计划时间（北京时间）</dt><dd>{{ result.visit.start|date:'Y年m月d日 H:i' }} — {{ result.visit.end|date:'Y年m月d日 H:i' }}</dd></dl>{% endif %}
+{% if result.code == 'NEEDS_CONFIRMATION' %}<p>邀约时段：{{ result.offer.start|date:'Y年m月d日 H:i' }} — {{ result.offer.end|date:'H:i' }}（北京时间）</p><p>本次确认截止：{{ result.offer.expires|date:'Y年m月d日 H:i:s' }}（北京时间）</p>{% endif %}
+<h3>接下来怎样手动操作</h3><p>{{ result.next_step }}</p>
+<a class="button" href="{{ target_url }}">{% if result.target == 'visit' %}查看对应预约{% elif result.target == 'offer' %}打开邀约，由我核对确认{% else %}返回候补列表{% endif %}</a>
+<p class="soft">读取完成于：{{ observed_at|date:'Y年m月d日 H:i:s' }}（北京时间）。这是查询时点的记录，不锁定时段；之后的操作仍须重新核验。</p>
+</section>
+<form method="post" class="panel" action="{% url 'guide_result_wait' entry_id %}">{% csrf_token %}{% workspace_token %}<p>页面停留后需要确认最新状态，可以再次只读核对。</p><button class="button secondary" type="submit">重新核对，不提交业务</button></form>
+{% endif %}
+<p class="soft">本次未调用外部 AI。规则版本：{{ contract }}。这里只核对候补与关联预约，不核实诊疗质量、治疗金额或付款。</p>
+{% endblock %}

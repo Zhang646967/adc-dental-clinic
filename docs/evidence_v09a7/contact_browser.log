@@ -1,0 +1,5 @@
+{
+  "scope": "Source-template Chromium checks with synthetic fields; no Django, database, real form validation or network AI",
+  "total": 120,
+  "passed": 120
+}

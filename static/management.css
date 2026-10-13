@@ -1,0 +1,13 @@
+/* Management pages share standard/comfortable modes, no chart-only data. */
+.management-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1.3rem 0}.management-summary .metric{min-width:0}.management-summary .metric strong{font-size:1.8rem;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.management-summary .metric p{font-size:.85rem;margin:.5rem 0 0}.status-warning{background:#fff4e1;border-left:4px solid #95530d;padding:1rem 1.2rem;margin:1rem 0}.split-panels{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.split-panels>.panel{margin-top:0}.report-metadata{font-size:.86rem;color:var(--muted);overflow-wrap:anywhere}.diff-table td{font-variant-numeric:tabular-nums}.report-note{max-width:65rem}.measure-name{font-weight:650}.step-label{font-size:.83rem;color:var(--teal);font-weight:700}.management-form label{margin-top:.8rem}.management-form button{margin-top:1rem}.metric-unit{font-size:.8rem;font-weight:400}.report-actions{display:flex;gap:.7rem;flex-wrap:wrap}html[data-display="comfortable"] .management-summary,html[data-display="comfortable"] .split-panels{grid-template-columns:1fr}
+@media(max-width:950px){.management-summary{grid-template-columns:1fr}.split-panels{grid-template-columns:1fr}.management-summary .metric strong{font-size:1.65rem}}
+@media(max-width:650px){.report-actions{display:grid;grid-template-columns:1fr}.report-actions .button{width:100%}.management-form button{width:100%}.filter-form{display:block}.filter-form>div{min-width:0;margin-bottom:.7rem}th,td{padding:.7rem}.management-summary .metric{padding:1.1rem}}
+@media print{.management-summary{grid-template-columns:repeat(3,1fr)}.filter-form,.report-actions{display:none}.panel{break-inside:avoid}}
+
+/* Bounded directory pages: no personal contacts on list cards. */
+.directory-details { margin: 0; }
+.directory-details > div { display: grid; grid-template-columns: minmax(7em, 28%) minmax(0, 1fr); gap: .6rem 1rem; padding: .7rem 0; border-bottom: 1px solid #d9e2df; }
+.directory-details dt { font-weight: 600; }
+.directory-details dd { margin: 0; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.directory-details + p { overflow-wrap: anywhere; }
+@media(max-width: 560px) { .directory-details > div { grid-template-columns: minmax(0, 1fr); gap: .25rem; } }

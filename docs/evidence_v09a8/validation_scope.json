@@ -1,0 +1,115 @@
+{
+  "timestamp_utc": "2026-10-08T13:35:42.671697+00:00",
+  "version": "0.9.0-alpha.8",
+  "parent": "0.9.0-alpha.7",
+  "user_validation": "deferred_to_v1.0_release_candidate_by_user",
+  "checks": {
+    "parent_methods": 578,
+    "current_methods": 635,
+    "new_pure_or_structure_methods": 57,
+    "new_static_browser": 498,
+    "regression": {
+      "availability": 396,
+      "front_coordination": 684,
+      "directory": 318,
+      "contact": 120,
+      "result": 249,
+      "legacy": 129
+    },
+    "node": {
+      "wait_window": 18,
+      "availability": 16
+    }
+  },
+  "database": {
+    "authored_methods": 554,
+    "new_methods": 58,
+    "executed": false
+  },
+  "old_migrations": [
+    {
+      "path": "coordination/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47"
+    },
+    {
+      "path": "portal/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e"
+    },
+    {
+      "path": "finance/migrations/0002_quarter_lock_version.py",
+      "unchanged": true,
+      "sha256": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff"
+    },
+    {
+      "path": "finance/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7"
+    },
+    {
+      "path": "registry/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2"
+    },
+    {
+      "path": "accounts/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b"
+    },
+    {
+      "path": "workspaces/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb"
+    },
+    {
+      "path": "assistants/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6"
+    },
+    {
+      "path": "care/migrations/0003_correction_publication_guard.py",
+      "unchanged": true,
+      "sha256": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09"
+    },
+    {
+      "path": "care/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03"
+    },
+    {
+      "path": "care/migrations/0002_database_guards.py",
+      "unchanged": true,
+      "sha256": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a"
+    },
+    {
+      "path": "scheduling/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3"
+    },
+    {
+      "path": "patients/migrations/0001_initial.py",
+      "unchanged": true,
+      "sha256": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492"
+    }
+  ],
+  "models_unchanged": {
+    "coordination/models.py": true,
+    "portal/models.py": true,
+    "finance/models.py": true,
+    "registry/models.py": true,
+    "accounts/models.py": true,
+    "workspaces/models.py": true,
+    "assistants/models.py": true,
+    "care/models.py": true,
+    "scheduling/models.py": false,
+    "patients/models.py": true
+  },
+  "added_migrations": [
+    "scheduling/migrations/0002_slot_intake_control.py"
+  ],
+  "live_user_instance_accessed": false,
+  "mac_migration_executed": false,
+  "production_deployment": false,
+  "external_ai": false
+}

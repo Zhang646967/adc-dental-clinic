@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block content %}<div class="availability">
+<p class="eyebrow">诊所主管 · 当前店范围</p><h1>本店出诊安排</h1>
+<p class="lede">先查阅原安排和关联业务，再决定是否调整。调整出诊不会替患者改期或取消预约。</p>
+<div class="actions">{% if not read_only %}<a class="button" href="{% url 'slot_create' %}">新增出诊安排</a>{% endif %}<a class="button secondary" href="{% url 'schedule_plans' %}">前往排程建议</a></div>
+<form class="panel av-filter" method="get"><label for="mode">查看范围</label><select id="mode" name="mode"><option value="future"{% if mode == 'future' %} selected{% endif %}>仍有效且尚未结束</option><option value="inactive"{% if mode == 'inactive' %} selected{% endif %}>已停用历史</option><option value="all"{% if mode == 'all' %} selected{% endif %}>全部记录</option></select><button type="submit">查询</button></form>
+{% if read_only %}<p class="notice">当前为只读实例，可以查阅，但不能新增或提交变更。</p>{% endif %}
+<div class="av-grid">{% for row in rows %}<section class="panel"><p class="pill">{% if not row.active %}已停用{% elif row.paused %}暂停新增 · 原出诊保留{% elif row.started %}已开始或历史{% else %}未来可用{% endif %}</p><h2>出诊 #{{ row.id }} · {{ row.dentist }}</h2><p>员工编号：{{ row.employee_no }}</p><p>{{ row.start }}<br>至 {{ row.end }}</p><a class="button secondary" href="{% url 'availability_detail' row.id %}">查看安排与影响</a></section>{% empty %}<section class="panel"><h2>该范围暂无出诊记录</h2><p>可调整查看范围，或使用“新增出诊安排”。系统不会自动创建演示排班。</p></section>{% endfor %}</div>
+<nav class="actions" aria-label="出诊列表分页">{% if previous_url %}<a href="{{ previous_url }}">上一页</a>{% endif %}<span>第 {{ page.number }} 页 / 共 {{ page.paginator.num_pages }} 页</span>{% if next_url %}<a href="{{ next_url }}">下一页</a>{% endif %}</nav></div>{% endblock %}

@@ -1,0 +1,47 @@
+CHECK list 320
+CHECK list 390
+CHECK list 1440
+CHECK invalid_query 320
+CHECK invalid_query 390
+CHECK invalid_query 1440
+CHECK empty_list 320
+CHECK empty_list 390
+CHECK empty_list 1440
+CHECK mixed 320
+CHECK mixed 390
+CHECK mixed 1440
+CHECK readonly 320
+CHECK readonly 390
+CHECK readonly 1440
+CHECK clear 320
+CHECK clear 390
+CHECK clear 1440
+CHECK expired 320
+CHECK expired 390
+CHECK expired 1440
+CHECK accepted_history 320
+CHECK accepted_history 390
+CHECK accepted_history 1440
+CHECK care 320
+CHECK care 390
+CHECK care 1440
+CHECK inactive 320
+CHECK inactive 390
+CHECK inactive 1440
+CHECK unsafe 320
+CHECK unsafe 390
+CHECK unsafe 1440
+CHECK read_error 320
+CHECK read_error 390
+CHECK read_error 1440
+CHECK escape 320
+CHECK escape 390
+CHECK escape 1440
+CHECK pagination 320
+CHECK pagination 390
+CHECK pagination 1440
+{
+  "scope": "Static converted source templates and synthetic facts only; NOT Django/HTTP/PG/E2E.",
+  "total": 684,
+  "passed": 684
+}

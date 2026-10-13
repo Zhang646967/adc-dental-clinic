@@ -1,0 +1,327 @@
+{
+  "contract": "ADC-RC-ORACLE-1",
+  "source": "Project policy; expected literals independently calculated in integer milli-units and cents; synthetic only.",
+  "lines": [
+    {
+      "id": "half-cent-up",
+      "quantity": "0.500",
+      "price": "0.01",
+      "expected": "0.01"
+    },
+    {
+      "id": "below-half",
+      "quantity": "0.499",
+      "price": "0.01",
+      "expected": "0.00"
+    },
+    {
+      "id": "three-decimal-units",
+      "quantity": "1.125",
+      "price": "99.99",
+      "expected": "112.49"
+    },
+    {
+      "id": "integer-units",
+      "quantity": "2",
+      "price": "99.99",
+      "expected": "199.98"
+    },
+    {
+      "id": "authorized-zero",
+      "quantity": "1",
+      "price": "0.00",
+      "reason": "课程合成零价依据",
+      "expected": "0.00"
+    }
+  ],
+  "row_rounding": {
+    "lines": [
+      {
+        "quantity": "0.500",
+        "price": "0.01"
+      },
+      {
+        "quantity": "0.500",
+        "price": "0.01"
+      }
+    ],
+    "expected_total": "0.02",
+    "incorrect_round_after_sum": "0.01"
+  },
+  "finance": [
+    {
+      "id": "zero-revenue-cost-retained",
+      "income": {
+        "1": "199.98"
+      },
+      "costs": [
+        [
+          1,
+          "CONFIRMED",
+          "10.00",
+          "20.00"
+        ],
+        [
+          2,
+          "CONFIRMED",
+          "50.00",
+          "50.00"
+        ]
+      ],
+      "roster": true,
+      "expected": {
+        "ready": true,
+        "income": "199.98",
+        "supply": "60.00",
+        "operating": "70.00",
+        "profit": "69.98",
+        "fund": "7.00"
+      }
+    },
+    {
+      "id": "corrected-current-version",
+      "income": {
+        "1": "99.99"
+      },
+      "costs": [
+        [
+          1,
+          "CONFIRMED",
+          "10.00",
+          "20.00"
+        ],
+        [
+          2,
+          "CONFIRMED",
+          "50.00",
+          "50.00"
+        ]
+      ],
+      "roster": true,
+      "expected": {
+        "ready": true,
+        "income": "99.99",
+        "supply": "60.00",
+        "operating": "70.00",
+        "profit": "-30.01",
+        "fund": null
+      }
+    },
+    {
+      "id": "missing-is-not-zero",
+      "income": {
+        "1": "199.98"
+      },
+      "costs": [
+        [
+          1,
+          "MISSING",
+          null,
+          null
+        ]
+      ],
+      "roster": true,
+      "expected": {
+        "ready": false,
+        "income": "199.98",
+        "profit": null,
+        "fund": null
+      }
+    },
+    {
+      "id": "confirmed-zero",
+      "income": {},
+      "costs": [
+        [
+          1,
+          "CONFIRMED",
+          "0.00",
+          "0.00"
+        ]
+      ],
+      "roster": true,
+      "expected": {
+        "ready": true,
+        "income": "0.00",
+        "profit": "0.00",
+        "fund": null
+      }
+    },
+    {
+      "id": "draft-zero-not-confirmed",
+      "income": {},
+      "costs": [
+        [
+          1,
+          "DRAFT",
+          "0.00",
+          "0.00"
+        ]
+      ],
+      "roster": true,
+      "expected": {
+        "ready": false,
+        "income": "0.00",
+        "profit": null
+      }
+    },
+    {
+      "id": "roster-unconfirmed",
+      "income": {
+        "1": "10.00"
+      },
+      "costs": [
+        [
+          1,
+          "CONFIRMED",
+          "0.00",
+          "0.00"
+        ]
+      ],
+      "roster": false,
+      "expected": {
+        "ready": false,
+        "profit": null
+      }
+    },
+    {
+      "id": "earner-not-listed",
+      "income": {
+        "2": "10.00"
+      },
+      "costs": [
+        [
+          1,
+          "CONFIRMED",
+          "0.00",
+          "0.00"
+        ]
+      ],
+      "roster": true,
+      "expected": {
+        "ready": false,
+        "profit": null,
+        "off_roster_ids": [
+          2
+        ]
+      }
+    },
+    {
+      "id": "empty-roster",
+      "income": {},
+      "costs": [],
+      "roster": true,
+      "expected": {
+        "ready": false,
+        "profit": null
+      }
+    }
+  ],
+  "operations": [
+    {
+      "id": "mature-groups-only",
+      "groups": [
+        [
+          "COMPLETED",
+          "",
+          3
+        ],
+        [
+          "CHECKED_IN",
+          "",
+          2
+        ],
+        [
+          "CLOSED_NO_TREATMENT",
+          "",
+          1
+        ],
+        [
+          "CANCELLED",
+          "PATIENT",
+          2
+        ],
+        [
+          "CANCELLED",
+          "CLINIC",
+          1
+        ],
+        [
+          "NO_SHOW",
+          "",
+          1
+        ],
+        [
+          "SCHEDULED",
+          "",
+          2
+        ],
+        [
+          "CANCELLED",
+          "",
+          1
+        ],
+        [
+          "RESCHEDULED",
+          "",
+          5
+        ]
+      ],
+      "expected": {
+        "arrived": 6,
+        "patient_cancel": 2,
+        "clinic_cancel": 1,
+        "no_show": 1,
+        "pending": 3,
+        "denominator": 9,
+        "cancel_rate": "22.22",
+        "no_show_rate": "11.11",
+        "completeness": "76.92"
+      }
+    },
+    {
+      "id": "empty-not-zero-rate",
+      "groups": [],
+      "expected": {
+        "denominator": 0,
+        "cancel_rate": null,
+        "no_show_rate": null,
+        "completeness": null
+      }
+    },
+    {
+      "id": "all-clinic-cancel",
+      "groups": [
+        [
+          "CANCELLED",
+          "CLINIC",
+          2
+        ]
+      ],
+      "expected": {
+        "denominator": 0,
+        "cancel_rate": null,
+        "completeness": "100.00"
+      }
+    }
+  ],
+  "boundaries": [
+    {
+      "instant": "2026-09-30T15:59:59+00:00",
+      "quarter": 3
+    },
+    {
+      "instant": "2026-09-30T16:00:00+00:00",
+      "quarter": 4
+    },
+    {
+      "instant": "2026-12-31T15:59:59+00:00",
+      "quarter": 4
+    },
+    {
+      "instant": "2026-12-31T16:00:00+00:00",
+      "quarter": 1,
+      "year": 2027
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-27",
+  "report": "R1.0",
+  "pages": 35,
+  "models": 9,
+  "system_use_cases": 25,
+  "acceptance_conditions": 25,
+  "checks": "PASS",
+  "type": "static correspondence and PDF geometry",
+  "not_claimed": [
+    "formal UML verification",
+    "all role/path coverage",
+    "database tests",
+    "public deployment"
+  ],
+  "pdf_sha256": "2f9b66d3ef385ad45d8f56161c2338075c5e2a619fe209bd19f8401f070996f8"
+}

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="task-board">
+<a href="{% url 'coordination_task_list' %}?slot={{ data.slot_id }}&amp;mode=all">返回本出诊任务</a><p class="eyebrow">协调任务 · 第一步</p><h1>{{ action_label }}</h1>
+<section class="panel"><h2>出诊 #{{ data.slot_id }}</h2><p>{{ data.clinic }} · {{ data.dentist }}</p><p>{{ data.start }}—{{ data.end }}（北京时间）</p><p>当前任务：{{ data.status }}；受理人：{{ data.assignee }}</p><p>此操作只更新任务，不办理预约、不代替患者决定、不自动暂停或恢复接收。</p></section>
+{% if action == 'progress' %}<p class="notice">仅记录本人办理声明，不填姓名、电话、病史或对话。可从本店出诊协调核对对象编号。</p>{% elif action == 'approve' %}<p class="notice">主管必须与本次提交复核的前台为不同账号。通过后仍须另行维护原出诊。</p>{% endif %}
+<section class="panel">{% if read_only %}<h2>当前只读</h2><p>不提供保存操作。</p>{% else %}<h2>填写本次依据</h2><form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button type="submit">预览任务变更</button></form>{% endif %}</section>
+</div>{% endblock %}

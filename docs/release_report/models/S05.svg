@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="1240" viewBox="0 0 1050 1240">
+<rect width="100%" height="100%" fill="white"/>
+<rect x="225" y="20" width="600" height="1180" rx="0" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="57.0" font-family="Noto Sans CJK SC" font-size="23" text-anchor="middle" font-weight="700" fill="#101010">ADC软件系统：责任协调与站内通知</text>
+<ellipse cx="525" cy="145" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="140.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-31</text>
+<text x="525" y="166.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">核对出诊关联业务</text>
+<ellipse cx="525" cy="285" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="280.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-32</text>
+<text x="525" y="306.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">暂停新增接收</text>
+<ellipse cx="525" cy="425" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="420.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-33</text>
+<text x="525" y="446.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">恢复新增接收</text>
+<ellipse cx="525" cy="565" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="560.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-34</text>
+<text x="525" y="586.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">发起或撤销协调任务</text>
+<ellipse cx="525" cy="705" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="700.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-35</text>
+<text x="525" y="726.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">受理与办理协调任务</text>
+<ellipse cx="525" cy="845" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="840.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-36</text>
+<text x="525" y="866.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">独立复核协调任务</text>
+<ellipse cx="525" cy="985" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="980.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-37</text>
+<text x="525" y="1006.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">查阅并标记本人消息</text>
+<ellipse cx="525" cy="1125" rx="190" ry="43" fill="white" stroke="#202020" stroke-width="1.7"/>
+<text x="525" y="1120.0" font-family="Noto Sans CJK SC" font-size="17" text-anchor="middle" fill="#101010">SU-38</text>
+<text x="525" y="1146.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">核对派发并请求重试</text>
+<ellipse cx="82" cy="547" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="82" y1="559" x2="82" y2="591" stroke="#202020" stroke-width="1.7"/>
+<line x1="61" y1="571" x2="103" y2="571" stroke="#202020" stroke-width="1.7"/>
+<line x1="82" y1="591" x2="65" y2="613" stroke="#202020" stroke-width="1.7"/>
+<line x1="82" y1="591" x2="99" y2="613" stroke="#202020" stroke-width="1.7"/>
+<text x="82" y="643.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">前台</text>
+<ellipse cx="965" cy="547" rx="10" ry="12" fill="white" stroke="#202020" stroke-width="1.7"/>
+<line x1="965" y1="559" x2="965" y2="591" stroke="#202020" stroke-width="1.7"/>
+<line x1="944" y1="571" x2="986" y2="571" stroke="#202020" stroke-width="1.7"/>
+<line x1="965" y1="591" x2="948" y2="613" stroke="#202020" stroke-width="1.7"/>
+<line x1="965" y1="591" x2="982" y2="613" stroke="#202020" stroke-width="1.7"/>
+<text x="965" y="643.0" font-family="Noto Sans CJK SC" font-size="21" text-anchor="middle" fill="#101010">诊所主管</text>
+<polyline points="107,571 335,145" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="333.9957993970079,155.95406687714433 335,145 326.44240010792475,151.91140246890262" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="107,571 335,705" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="324.0947406783085,703.559403204689 335,705 328.4356535490535,696.1733723499887" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="107,571 335,985" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="326.36020982121215,978.191620922237 335,985 333.8646324156729,974.0587505078963" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="940,571 715,285" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="724.6311220405369,290.3142721270447 715,285 717.8978418651503,295.61143310418447" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="940,571 715,425" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="725.8308529199913,426.9216204166054 715,425 721.1674417870616,434.1083841488601" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="940,571 715,565" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="725.2422592694394,560.9880023607208 715,565 725.0138816951031,569.5521613983336" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="940,571 715,845" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="718.1192772883212,834.4515352207744 715,845 724.7402268741042,839.888446376983" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="940,571 715,985" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="716.0743303287865,974.0525886920857 715,985 723.6016853294353,978.1435424967862" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="940,571 715,1125" fill="none" stroke="#202020" stroke-width="1.7"/>
+<polyline points="714.8436494078704,1114.0011112155664 715,1125 722.7811893560929,1117.2248413389418" fill="none" stroke="#202020" stroke-width="1.7"/>
+</svg>

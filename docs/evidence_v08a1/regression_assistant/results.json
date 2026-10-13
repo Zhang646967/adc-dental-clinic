@@ -1,0 +1,442 @@
+{
+  "scope": "Chromium set_content on translated source templates. fetch/localStorage controlled doubles; NO Django/PG end-to-end, real browser-origin storage, or live AI.",
+  "passed": 87,
+  "total": 87,
+  "checks": [
+    {
+      "check": "patient.html/1440/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/1440/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/1440/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/1440/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/1440/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/1440/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/1440/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/1440/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/1440/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/1440/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/1440/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/1440/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/1440/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/1440/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/1440/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/1440/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/1440/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/1440/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/1440/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/1440/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/1440/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/1440/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/1440/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/1440/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "javascript-no-errors/1440",
+      "passed": true,
+      "details": []
+    },
+    {
+      "check": "patient.html/390/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/390/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/390/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/390/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/390/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/390/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/390/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/390/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/390/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/390/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/390/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/390/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/390/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/390/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/390/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/390/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/390/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/390/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/390/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/390/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/390/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/390/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/390/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/390/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "javascript-no-errors/390",
+      "passed": true,
+      "details": []
+    },
+    {
+      "check": "patient.html/320/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/320/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/320/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/320/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/320/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient.html/320/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/320/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/320/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/320/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/320/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/320/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "patient_ai.html/320/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/320/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/320/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/320/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/320/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/320/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "staff_ai.html/320/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/320/standard/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/320/standard/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/320/standard/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/320/comfortable/no-horizontal-overflow",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/320/comfortable/primary-targets",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "care.html/320/comfortable/font",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "javascript-no-errors/320",
+      "passed": true,
+      "details": []
+    },
+    {
+      "check": "quick-prompt-requires-explicit-send",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "fetch-mock-check-csrf-and-payload",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "answer-text-not-html",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "external-link-rejected",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "local-voice-fallback-no-auto-read",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "clear-removes-dom-content",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "mock-storage-no-transcript",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "mock-storage-restores-mode-on-reinitialize",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "quota-error-visible-retry-not-automatic",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "keyboard-skip-link-first",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "keyboard-skip-target",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reduced-motion-rule",
+      "passed": true,
+      "details": null
+    }
+  ]
+}

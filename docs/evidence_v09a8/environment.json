@@ -1,0 +1,20 @@
+{
+  "python": "3.13.5",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "dependencies": {
+    "django": false,
+    "psycopg": false,
+    "playwright": true
+  },
+  "executables": {
+    "docker": null,
+    "psql": null,
+    "postgres": null,
+    "node": "/opt/nvm/versions/node/v22.16.0/bin/node",
+    "chromium": "/usr/bin/chromium"
+  },
+  "host_dns": {
+    "pypi.org": "[Errno -3] Temporary failure in name resolution",
+    "files.pythonhosted.org": "[Errno -3] Temporary failure in name resolution"
+  }
+}

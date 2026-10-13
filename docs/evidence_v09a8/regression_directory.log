@@ -1,0 +1,5 @@
+{
+  "scope": "Source templates + synthetic form fields in Chromium. No Django, database, actual HTTP POST, external AI or user session.",
+  "total": 318,
+  "passed": 318
+}

@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="panel"><h1>本次操作未执行</h1><p role="alert">{{ problem }}</p><p>不要重复提交旧页面。请返回当前工作台，核对身份和诊所后重新开始。</p><a class="button" href="{% url 'dashboard' %}">返回当前工作台</a><a class="button secondary" href="{% url 'select_role' %}">重新选择身份</a></section>{% endblock %}

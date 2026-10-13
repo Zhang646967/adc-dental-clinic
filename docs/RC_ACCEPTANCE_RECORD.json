@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0-rc.1",
+  "meaning": "Blank acceptance record; NOT_RUN is not PASS.",
+  "G1_isolated_postgresql_and_dependencies": {"status":"NOT_RUN","evidence":[]},
+  "G2_v07_copy_upgrade_and_restore": {"status":"NOT_RUN","evidence":[]},
+  "G3_real_browser_and_worker": {"status":"NOT_RUN","evidence":[]},
+  "G4_public_deployment": {"status":"NOT_RUN","evidence":[]},
+  "public_release_approved": false,
+  "blockers": []
+}

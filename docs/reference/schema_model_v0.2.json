@@ -1,0 +1,887 @@
+[
+  {
+    "name": "Patient",
+    "cn": "患者",
+    "grain": "一名全链患者",
+    "source": "[C] CASE p1；过敏知识状态/版本为[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部稳定标识"
+      ],
+      [
+        "patient_no",
+        "UK",
+        "全链业务编号，不是登录账号"
+      ],
+      [
+        "name, date_of_birth",
+        "必填",
+        "姓名、出生日期"
+      ],
+      [
+        "billing_address, phone",
+        "必填",
+        "账单地址、电话；phone 不设唯一"
+      ],
+      [
+        "email",
+        "可空",
+        "电子邮箱"
+      ],
+      [
+        "emergency_name, emergency_phone",
+        "必填",
+        "紧急联系人"
+      ],
+      [
+        "allergy_status, allergy_info_version",
+        "必填",
+        "UNKNOWN/NO_KNOWN/KNOWN；信息版本递增"
+      ],
+      [
+        "is_active",
+        "必填",
+        "停用保留历史"
+      ]
+    ],
+    "rules": [
+      "出生日期不晚于当前业务日。KNOWN 至少一个有效过敏项；NO_KNOWN 不得有有效项。跨行一致性须受控服务实现。"
+    ]
+  },
+  {
+    "name": "Allergy",
+    "cn": "过敏项目",
+    "grain": "一种受维护的过敏条目",
+    "source": "[C] CASE p1；目录标准化[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "code",
+        "UK",
+        "稳定条目代码"
+      ],
+      [
+        "name, is_active",
+        "必填",
+        "名称与可用性"
+      ]
+    ],
+    "rules": [
+      "不是医学自动判断规则；不得通过删除目录破坏历史。"
+    ]
+  },
+  {
+    "name": "PatientAllergy",
+    "cn": "患者过敏关联",
+    "grain": "一名患者与一种过敏的关联",
+    "source": "[C] 多过敏；连接表[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "patient_id",
+        "FK→Patient",
+        "所属患者"
+      ],
+      [
+        "allergy_id",
+        "FK→Allergy",
+        "条目"
+      ],
+      [
+        "notes, is_active",
+        "字段",
+        "记录说明与是否当前有效"
+      ]
+    ],
+    "rules": [
+      "UNIQUE(patient_id, allergy_id)；历史变更在事件与就诊快照保留，不依赖删除关联。"
+    ]
+  },
+  {
+    "name": "Dentist",
+    "cn": "牙医",
+    "grain": "一位负责牙医",
+    "source": "[C] CASE p1–2",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "employee_no",
+        "UK",
+        "员工编号"
+      ],
+      [
+        "name, date_of_birth",
+        "必填",
+        "姓名、出生日期"
+      ],
+      [
+        "home_address, phone, email",
+        "必填",
+        "家庭住址及联系方式"
+      ],
+      [
+        "is_active",
+        "必填",
+        "停用标志"
+      ]
+    ],
+    "rules": [
+      "不含永久所属唯一诊所的业务外键；不能仅凭资格表声称已验证执业资质。"
+    ]
+  },
+  {
+    "name": "Qualification",
+    "cn": "资格类型",
+    "grain": "一种资格类别",
+    "source": "[C] CASE p2；目录代码[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "code",
+        "UK",
+        "稳定类别代码"
+      ],
+      [
+        "name, is_active",
+        "必填",
+        "名称与可用性"
+      ]
+    ],
+    "rules": [
+      "仅表达记录的资格，不与治疗项目建立未经确认的医学适配映射。"
+    ]
+  },
+  {
+    "name": "DentistQualification",
+    "cn": "牙医资格关联",
+    "grain": "一位牙医持有一种资格的记录",
+    "source": "[C] CASE p2；连接表[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "dentist_id",
+        "FK→Dentist",
+        "持有人"
+      ],
+      [
+        "qualification_id",
+        "FK→Qualification",
+        "资格类别"
+      ],
+      [
+        "notes, is_active",
+        "字段",
+        "说明与当前状态"
+      ]
+    ],
+    "rules": [
+      "UNIQUE(dentist_id, qualification_id)；暂不模拟权威证书审核流程。"
+    ]
+  },
+  {
+    "name": "Clinic",
+    "cn": "诊所",
+    "grain": "一个营业地点",
+    "source": "[C] CASE p2；代码/停用[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "clinic_code",
+        "UK",
+        "稳定诊所代码"
+      ],
+      [
+        "name",
+        "必填[D]",
+        "显示名称"
+      ],
+      [
+        "postal_address, supervisor_name",
+        "必填",
+        "地址、主管姓名"
+      ],
+      [
+        "phone, email, area_sqm",
+        "必填",
+        "电话、邮箱、面积（平方米）"
+      ],
+      [
+        "is_active",
+        "必填",
+        "是否可供新预约选用"
+      ]
+    ],
+    "rules": [
+      "area_sqm>0；主管姓名是案例资料字段，不自动产生具有主管角色的登录账号。"
+    ]
+  },
+  {
+    "name": "AvailabilitySlot",
+    "cn": "出诊时段",
+    "grain": "一位牙医在一店的一段可用区间",
+    "source": "[D] 支持可运行预约",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "dentist_id",
+        "FK→Dentist",
+        "牙医"
+      ],
+      [
+        "clinic_id",
+        "FK→Clinic",
+        "出诊店"
+      ],
+      [
+        "starts_at, ends_at",
+        "必填",
+        "起止时间"
+      ],
+      [
+        "is_active",
+        "必填",
+        "当前是否可用"
+      ]
+    ],
+    "rules": [
+      "starts_at<ends_at；同牙医跨店有效区间不重叠。变动不得使保留占用的预约落出安排；既有业务引用的时段不物理删除。"
+    ]
+  },
+  {
+    "name": "Visit",
+    "cn": "预约/就诊过程",
+    "grain": "一次预约至其业务结果",
+    "source": "[C] CASE p1–2；状态/锁/改期[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "visit_no",
+        "UK",
+        "业务编号"
+      ],
+      [
+        "patient_id",
+        "FK→Patient",
+        "一位患者"
+      ],
+      [
+        "dentist_id",
+        "FK→Dentist",
+        "一位负责牙医"
+      ],
+      [
+        "clinic_id",
+        "FK→Clinic",
+        "实际业务地点"
+      ],
+      [
+        "availability_slot_id",
+        "FK→AvailabilitySlot",
+        "预约采用的可用时段"
+      ],
+      [
+        "scheduled_start, scheduled_end",
+        "必填",
+        "原预约计划区间"
+      ],
+      [
+        "status, attended",
+        "必填",
+        "7种状态；布尔值由命令统一维护"
+      ],
+      [
+        "attended_at, completed_at",
+        "可空",
+        "实际到诊与完成时间，不是录入时间"
+      ],
+      [
+        "chief_complaint, special_needs",
+        "文本",
+        "患者主诉、特殊需求"
+      ],
+      [
+        "cancellation_party, cancellation_reason",
+        "条件必填",
+        "取消发起方和原因"
+      ],
+      [
+        "replaces_visit_id",
+        "可空FK→Visit；UK",
+        "新预约指向被替代旧预约；最多一个后继"
+      ],
+      [
+        "lock_version",
+        "必填[D]",
+        "用于拒绝陈旧命令"
+      ],
+      [
+        "created_at",
+        "必填",
+        "系统创建时间"
+      ]
+    ],
+    "rules": [
+      "INV-01/02；区间、状态和到诊时间保持一致。处于闭合状态时 completed_at 非空且不早于 attended_at。",
+      "新旧改期患者相同；后继链无环；旧状态 RESCHEDULED 当且仅当存在对应成功的新预约。",
+      "patient/dentist/clinic 与被引用出诊安排一致，时间在区间内；已发布后身份和原完成时间冻结。",
+      "跨牙医/患者的预约不重叠策略由真实数据库详细设计实现；本字典不是已实现约束。"
+    ]
+  },
+  {
+    "name": "VisitRequest",
+    "cn": "治疗意向",
+    "grain": "一次就诊表达的一项期望或问题",
+    "source": "[C] CASE p2；单列记录[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "visit_id",
+        "FK→Visit",
+        "所属就诊"
+      ],
+      [
+        "description",
+        "必填",
+        "自然语言诉求，不强制确诊"
+      ],
+      [
+        "treatment_type_id",
+        "可空FK→TreatmentType",
+        "确实能对应目录时才关联"
+      ]
+    ],
+    "rules": [
+      "意向不能自动充当实际治疗记录或收费依据。"
+    ]
+  },
+  {
+    "name": "TreatmentType",
+    "cn": "治疗目录",
+    "grain": "一个标准项目",
+    "source": "[C] CASE p2；目录与单位定义[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "内部标识"
+      ],
+      [
+        "code",
+        "UK",
+        "稳定项目代码"
+      ],
+      [
+        "name, unit_definition",
+        "必填",
+        "名称、标准单位含义"
+      ],
+      [
+        "standard_unit_price",
+        "金额",
+        "当前标准单价，非负"
+      ],
+      [
+        "is_active",
+        "必填",
+        "可供新业务选择"
+      ]
+    ],
+    "rules": [
+      "单位不同不能直接相加成总工作量；目录变价不修改历史发布版本。"
+    ]
+  },
+  {
+    "name": "VisitRecordVersion",
+    "cn": "就诊治疗记录版本",
+    "grain": "一次 Visit 的一套完整草稿或已发布事实快照",
+    "source": "[D] CR-02 支持有限更正",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "版本标识"
+      ],
+      [
+        "visit_id",
+        "FK→Visit",
+        "所属就诊"
+      ],
+      [
+        "revision_no",
+        "必填",
+        "1,2,...；同 Visit 唯一且不复用"
+      ],
+      [
+        "state",
+        "必填",
+        "DRAFT/PUBLISHED/ABANDONED"
+      ],
+      [
+        "outcome",
+        "必填",
+        "TREATED/NO_TREATMENT"
+      ],
+      [
+        "previous_version_id",
+        "可空FK→VisitRecordVersion",
+        "同 Visit 的前一发布版本"
+      ],
+      [
+        "correction_request_id",
+        "可空FK→CorrectionRequest",
+        "更正发布时指向请求"
+      ],
+      [
+        "prepared_by_id",
+        "FK→UserAccount",
+        "准备/事实确认者"
+      ],
+      [
+        "reviewed_by_id",
+        "可空FK→UserAccount",
+        "更正审核者"
+      ],
+      [
+        "created_at, published_at",
+        "时刻",
+        "系统时间；草稿未发布则后者为空"
+      ],
+      [
+        "allergy_review_snapshot",
+        "受控快照",
+        "当次知识状态、条目、信息版本、复核者和复核时间"
+      ],
+      [
+        "billing_header_snapshot",
+        "受控快照",
+        "当时患者/诊所抬头，牙医显示名称等"
+      ],
+      [
+        "clinical_note, no_treatment_reason",
+        "文本",
+        "结果说明；无治疗必须有原因"
+      ],
+      [
+        "total_amount, currency",
+        "必填",
+        "行金额之和；单币种 CNY"
+      ]
+    ],
+    "rules": [
+      "UNIQUE(visit_id,revision_no)；每 Visit 至多一个 DRAFT；首次发布版本无更正请求，之后的发布必须关联已应用更正。",
+      "PUBLISHED 及其治疗行不可普通修改；旧版仍为 PUBLISHED，“非当前”由 Invoice 的当前指针计算，不原地改旧内容。",
+      "DRAFT/ABANDONED 不进入账单统计；当前发布版本与 Visit 闭合结果类型一致。",
+      "快照结构在物理设计中约束；使用封闭的历史快照字段不意味着用 JSON 替代活跃患者/过敏的规范化关联。"
+    ]
+  },
+  {
+    "name": "TreatmentRecord",
+    "cn": "实际治疗行",
+    "grain": "某个完整记录版本中的一项实际治疗",
+    "source": "[C] CASE p2；版本归属/快照[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "行标识"
+      ],
+      [
+        "record_version_id",
+        "FK→VisitRecordVersion",
+        "所属完整版本"
+      ],
+      [
+        "line_no",
+        "必填",
+        "版本内部的显示顺序"
+      ],
+      [
+        "treatment_type_id",
+        "FK→TreatmentType",
+        "原项目目录"
+      ],
+      [
+        "name_snapshot, unit_snapshot",
+        "必填",
+        "当时名称和单位"
+      ],
+      [
+        "quantity, unit_price",
+        "十进制",
+        "数量最多3位小数、单价2位小数"
+      ],
+      [
+        "line_amount",
+        "金额",
+        "先按分四舍五入的行金额"
+      ],
+      [
+        "confirmed_by_id, confirmed_at",
+        "可空FK→UserAccount / 时刻",
+        "发布前必须由负责牙医确认"
+      ],
+      [
+        "price_reason",
+        "条件必填",
+        "零价格或经审核更正的价格说明"
+      ]
+    ],
+    "rules": [
+      "UNIQUE(record_version_id,line_no)；quantity>0；unit_price≥0；line_amount=ROUND_HALF_UP(quantity×unit_price,2)。",
+      "所属版本发布后不可普通改写；所有实际已提供项目都须进入发布前确认，不遗漏后再假装无治疗。"
+    ]
+  },
+  {
+    "name": "Invoice",
+    "cn": "逻辑结算单",
+    "grain": "一次闭合 Visit 的唯一逻辑账单",
+    "source": "[C] CASE p2；当前版本引用[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "单据标识"
+      ],
+      [
+        "invoice_no",
+        "UK",
+        "唯一单号，重复打印/更正不换号"
+      ],
+      [
+        "visit_id",
+        "FK→Visit；UK",
+        "唯一就诊关系"
+      ],
+      [
+        "current_record_version_id",
+        "FK→VisitRecordVersion；UK",
+        "当前有效已发布版本"
+      ],
+      [
+        "first_issued_at",
+        "必填",
+        "首次开单时刻"
+      ]
+    ],
+    "rules": [
+      "当前版本必须属于同 Visit 且已发布。不是单有两个独立外键就自动保证同一 Visit。",
+      "不另建可独立编辑的 InvoiceLine；展示逐行费用读取当前版本的 TreatmentRecord。",
+      "历史打印指定同 Visit 的任意已发布版本，并明确标明是否当前；不存在指向草稿的公开结算单。"
+    ]
+  },
+  {
+    "name": "Quarter",
+    "cn": "财务季度范围",
+    "grain": "一个自然季度及其纳入清单确认",
+    "source": "[D] 承接季度要求",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "季度标识"
+      ],
+      [
+        "year, quarter_no",
+        "必填",
+        "自然年与1..4"
+      ],
+      [
+        "roster_status",
+        "必填",
+        "DRAFT/CONFIRMED"
+      ],
+      [
+        "roster_confirmed_by_id",
+        "可空FK→UserAccount",
+        "财务确认者"
+      ],
+      [
+        "roster_confirmed_at",
+        "可空",
+        "确认时刻"
+      ]
+    ],
+    "rules": [
+      "UNIQUE(year,quarter_no)；时区/季度规则使用 Asia/Shanghai。变更纳入清单使确认失效并重新确认。"
+    ]
+  },
+  {
+    "name": "DentistQuarterCost",
+    "cn": "纳入牙医及季度成本",
+    "grain": "一名纳入牙医 × 一个季度",
+    "source": "[C] CASE p2；清单/状态[D]",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "记录标识"
+      ],
+      [
+        "quarter_id",
+        "FK→Quarter",
+        "所属季度"
+      ],
+      [
+        "dentist_id",
+        "FK→Dentist",
+        "纳入牙医"
+      ],
+      [
+        "cost_status",
+        "必填",
+        "MISSING/DRAFT/CONFIRMED"
+      ],
+      [
+        "supply_cost, operating_expense",
+        "可空金额",
+        "未填为NULL；已确认可显式为0"
+      ],
+      [
+        "confirmed_by_id, confirmed_at",
+        "可空FK→UserAccount / 时刻",
+        "确认责任"
+      ],
+      [
+        "notes",
+        "文本",
+        "依据与说明"
+      ]
+    ],
+    "rules": [
+      "UNIQUE(quarter_id,dentist_id)；CONFIRMED 必须两项非空且非负；空不等于零。",
+      "整季计算前先确认清单完整，含有成本无收入者及所有有开单收入者；不能从账单反推全部人员。"
+    ]
+  },
+  {
+    "name": "UserAccount",
+    "cn": "员工账号抽象",
+    "grain": "一个登录主体",
+    "source": "[D] 逻辑模型；物理实现采用框架账号",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "主体标识"
+      ],
+      [
+        "username",
+        "UK",
+        "用户名"
+      ],
+      [
+        "dentist_id",
+        "可空FK→Dentist；UK",
+        "用于匹配本人接诊的牙医身份"
+      ],
+      [
+        "is_active",
+        "必填",
+        "启停"
+      ]
+    ],
+    "rules": [
+      "密码/会话使用框架机制，本字典不自建明文密码或密码学算法；不等同于患者编号。"
+    ]
+  },
+  {
+    "name": "RoleAssignment",
+    "cn": "角色范围绑定",
+    "grain": "一个用户的一项角色及其作用范围",
+    "source": "[D] BR-17",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "绑定标识"
+      ],
+      [
+        "user_id",
+        "FK→UserAccount",
+        "登录主体"
+      ],
+      [
+        "role",
+        "必填",
+        "FRONT_DESK/DENTIST/MANAGER/HQ/FINANCE/SYSADMIN"
+      ],
+      [
+        "scope_kind",
+        "必填",
+        "CLINIC/CHAIN/SELF_DENTIST/TECHNICAL"
+      ],
+      [
+        "clinic_id",
+        "可空FK→Clinic",
+        "CLINIC 时必填，其他范围为空"
+      ],
+      [
+        "is_active",
+        "必填",
+        "是否有效"
+      ]
+    ],
+    "rules": [
+      "每个角色限制允许的 scope_kind，使用默认拒绝策略；只有同一绑定满足动作和范围才授权。",
+      "DENTIST/SELF_DENTIST 要求账号关联 Dentist；SYSADMIN/TECHNICAL 不自动授权财务/临床。",
+      "去重约束需考虑可空 clinic_id；物理设计时不能假设普通多列 UNIQUE 自动解决所有 NULL 情形。"
+    ]
+  },
+  {
+    "name": "CorrectionRequest",
+    "cn": "更正请求",
+    "grain": "针对一条 Visit 的一次受控更正",
+    "source": "[D] CR-02/03",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "请求标识"
+      ],
+      [
+        "visit_id",
+        "FK→Visit",
+        "目标就诊"
+      ],
+      [
+        "kind",
+        "必填",
+        "APPOINTMENT_STATUS/RECORD_CONTENT"
+      ],
+      [
+        "base_record_version_id",
+        "可空FK→VisitRecordVersion",
+        "已开单内容更正的基版本"
+      ],
+      [
+        "expected_visit_lock_version",
+        "必填",
+        "防止过期申请覆盖当前事实"
+      ],
+      [
+        "requester_id",
+        "FK→UserAccount",
+        "提交者"
+      ],
+      [
+        "reviewer_id",
+        "可空FK→UserAccount",
+        "审核者，必须不同用户"
+      ],
+      [
+        "dentist_confirmed_by_id",
+        "可空FK→UserAccount",
+        "涉及临床/到诊事实的负责牙医确认"
+      ],
+      [
+        "status",
+        "必填",
+        "OPEN/APPLIED/REJECTED/WITHDRAWN"
+      ],
+      [
+        "reason, proposed_change",
+        "必填",
+        "理由及类型化变化，不当作任意SQL"
+      ],
+      [
+        "requested_at, applied_at",
+        "时刻",
+        "记录真实系统操作时间"
+      ]
+    ],
+    "rules": [
+      "每 Visit 至多一条 OPEN 请求；更正草稿不是第二张独立 Invoice。",
+      "审核时按类型重验权限、基版本/锁版本、全部守卫；APPLIED 和切换状态/版本在同一事务。",
+      "重试已应用请求返回同一结果；不能由原请求继续发布另一版本。"
+    ]
+  },
+  {
+    "name": "AuditEvent",
+    "cn": "业务审计事件",
+    "grain": "一次关键操作及其必要上下文",
+    "source": "[D] BR-18",
+    "fields": [
+      [
+        "id",
+        "PK",
+        "事件标识"
+      ],
+      [
+        "actor_id",
+        "可空FK→UserAccount",
+        "自动系统事件可空"
+      ],
+      [
+        "visit_id",
+        "可空FK→Visit",
+        "与就诊有关则关联"
+      ],
+      [
+        "correction_request_id",
+        "可空FK→CorrectionRequest",
+        "与更正有关则关联"
+      ],
+      [
+        "event_type",
+        "必填",
+        "预约/到诊/发布/授权等事件类型"
+      ],
+      [
+        "occurred_at, recorded_at",
+        "必填",
+        "业务发生时间与系统记录时间"
+      ],
+      [
+        "subject_type, subject_key",
+        "字段",
+        "其他对象的类型和业务标识"
+      ],
+      [
+        "reason, change_summary",
+        "受控文本",
+        "必要摘要，避免整段临床数据"
+      ]
+    ],
+    "rules": [
+      "业务关键事件与成功写入同事务；普通界面不允许改删。",
+      "日志不是密码学防篡改、全量事件溯源或法律认证；服务器控制者的能力不在本应用层保证内。"
+    ]
+  }
+]

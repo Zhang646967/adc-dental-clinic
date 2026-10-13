@@ -1,0 +1,114 @@
+{
+  "migrations": 16,
+  "model_files": 11,
+  "files": {
+    "accounts/migrations/0001_initial.py": {
+      "sha256": "46942a545e972ae818f27f941f9820caaaf5a58722c7dc8c4de5eeee4443778b",
+      "same_as_parent": true
+    },
+    "accounts/models.py": {
+      "sha256": "a8edf8fb93dfc392db7dfb23e74973dd6246316bb9eac48e54854d8a1992f2e8",
+      "same_as_parent": true
+    },
+    "assistants/migrations/0001_initial.py": {
+      "sha256": "a4fe49a8640142465a5be27bf502aeb6f041caa0f35aadcce11b5fc031098ce6",
+      "same_as_parent": true
+    },
+    "assistants/models.py": {
+      "sha256": "f9e1313c2e12ca748c5760b0a022409971d9907c6c646875a17e1291de7baecc",
+      "same_as_parent": true
+    },
+    "care/migrations/0001_initial.py": {
+      "sha256": "90c4241c8ce589a3fcf7e6f625bf8087fe28e20dd6b9f3de3b4d2dd0ae4b6c03",
+      "same_as_parent": true
+    },
+    "care/migrations/0002_database_guards.py": {
+      "sha256": "5d6dbe4ba980390d736709bd6a0e37d054f9e28e873dce866d2ab921012cc78a",
+      "same_as_parent": true
+    },
+    "care/migrations/0003_correction_publication_guard.py": {
+      "sha256": "4460070c85112ba290864d6de069c2f3c10bad8d57d3a3294e05329bfdf8df09",
+      "same_as_parent": true
+    },
+    "care/models.py": {
+      "sha256": "2f5b7b86936111489fdd498cf5850f3948645728bd0c70306d2801626e89fc45",
+      "same_as_parent": true
+    },
+    "coordination/migrations/0001_initial.py": {
+      "sha256": "0932131ffbf58fba180bee576012fc662bfe176f46967bbc0b9a5c306ad31c47",
+      "same_as_parent": true
+    },
+    "coordination/migrations/0002_coordination_tasks.py": {
+      "sha256": "3e27c0281a87f1ca4ff6abece50430c3bc717549e5ede4a3f88e9e123563c91e",
+      "same_as_parent": true
+    },
+    "coordination/models.py": {
+      "sha256": "931503a290e904c9a37e19935b51c444070bf2f5bd363bce6fb88fe650a925d9",
+      "same_as_parent": true
+    },
+    "finance/migrations/0001_initial.py": {
+      "sha256": "deb2631d18d9d7409c9f3759dd4725d6c2088eef981a9145ea7e8102e994d4b7",
+      "same_as_parent": true
+    },
+    "finance/migrations/0002_quarter_lock_version.py": {
+      "sha256": "8da8da73f4646968d19adf8ed73c6ecd8e99a0c7b1b038d862cdb7dbbfcee2ff",
+      "same_as_parent": true
+    },
+    "finance/models.py": {
+      "sha256": "a8f1d0acdaacf508e2e7734195d8b71728500b66cd0802d6cc1568977a61a309",
+      "same_as_parent": true
+    },
+    "notifications/migrations/0001_initial.py": {
+      "sha256": "a523cfdc7273a9132b16e7958a5a9d9c56b42b43067eb8897d44d8de99e8f487",
+      "same_as_parent": true
+    },
+    "notifications/models.py": {
+      "sha256": "9858c3664b97d9471a7a41379cbfc3a59846bf43d85f36dd801fce14b2b6e1af",
+      "same_as_parent": true
+    },
+    "patients/migrations/0001_initial.py": {
+      "sha256": "b78bf8587c8497f407f4e8639a7a65992c5d522a06efd26c387301cec7a8f492",
+      "same_as_parent": true
+    },
+    "patients/models.py": {
+      "sha256": "a7d7d41ea81b6c04eb37cba787a6703ae99d0b4943560f9263d96ff80189124e",
+      "same_as_parent": true
+    },
+    "portal/migrations/0001_initial.py": {
+      "sha256": "7d48de0d6beae8503ffc15492eebc9f0d028fbab03ec7dc7929b83e42f4d137e",
+      "same_as_parent": true
+    },
+    "portal/models.py": {
+      "sha256": "ac6e13bcedb177bd035b4c4ca25d5c52f33ad38c52afe8ccd1946303accf279d",
+      "same_as_parent": true
+    },
+    "registry/migrations/0001_initial.py": {
+      "sha256": "da3dd951e9c061a19dbf0f0d1045882d0780d25ae38001bf496ebc12dd4bbdc2",
+      "same_as_parent": true
+    },
+    "registry/models.py": {
+      "sha256": "6732e44269224e3073d2fb89e2407b7ffaefbe231901528e5a466628d2762827",
+      "same_as_parent": true
+    },
+    "scheduling/migrations/0001_initial.py": {
+      "sha256": "dc7157fd14df3284344c2419cb6d0a841ec7fffaeaaad9a323ebe9c332d6ffd3",
+      "same_as_parent": true
+    },
+    "scheduling/migrations/0002_slot_intake_control.py": {
+      "sha256": "7f7251c5c2a66a90e48d2a9b1a3775f0ccb25a30c87094e6718473ef045564df",
+      "same_as_parent": true
+    },
+    "scheduling/models.py": {
+      "sha256": "e0e42e78a6ae67d433fe0db7765b88b2d5f07fa884a43b46d134e9f375a92600",
+      "same_as_parent": true
+    },
+    "workspaces/migrations/0001_initial.py": {
+      "sha256": "bb8d8d8e7c44cff6344f315e77884e2cd54b4a486d7008414361e2ee25afd5fb",
+      "same_as_parent": true
+    },
+    "workspaces/models.py": {
+      "sha256": "f37a0cc188383970a5f6a418e3bbd10ff35d94d61f2b9d79ec615ebb0ac70f80",
+      "same_as_parent": true
+    }
+  }
+}

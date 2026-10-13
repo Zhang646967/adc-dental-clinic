@@ -1,0 +1,1170 @@
+[
+  {
+    "app": "registry",
+    "model": "Clinic",
+    "table": "adc_clinic",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "clinic_code",
+        "definition": "models.CharField(max_length=24, unique=True)",
+        "kind": "CharField"
+      },
+      {
+        "name": "name",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "postal_address",
+        "definition": "models.CharField(max_length=255)",
+        "kind": "CharField"
+      },
+      {
+        "name": "supervisor_name",
+        "definition": "models.CharField(max_length=80)",
+        "kind": "CharField"
+      },
+      {
+        "name": "phone",
+        "definition": "models.CharField(max_length=32)",
+        "kind": "CharField"
+      },
+      {
+        "name": "email",
+        "definition": "models.EmailField()",
+        "kind": "EmailField"
+      },
+      {
+        "name": "area_sqm",
+        "definition": "models.DecimalField(max_digits=10, decimal_places=2)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(area_sqm__gt=0), name='clinic_area_positive')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_clinic",
+      "ordering": [
+        "clinic_code"
+      ]
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "registry",
+    "model": "Dentist",
+    "table": "adc_dentist",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "employee_no",
+        "definition": "models.CharField(max_length=24, unique=True)",
+        "kind": "CharField"
+      },
+      {
+        "name": "name",
+        "definition": "models.CharField(max_length=80)",
+        "kind": "CharField"
+      },
+      {
+        "name": "date_of_birth",
+        "definition": "models.DateField()",
+        "kind": "DateField"
+      },
+      {
+        "name": "home_address",
+        "definition": "models.CharField(max_length=255)",
+        "kind": "CharField"
+      },
+      {
+        "name": "phone",
+        "definition": "models.CharField(max_length=32)",
+        "kind": "CharField"
+      },
+      {
+        "name": "email",
+        "definition": "models.EmailField()",
+        "kind": "EmailField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_dentist",
+      "ordering": [
+        "employee_no"
+      ]
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "registry",
+    "model": "Qualification",
+    "table": "adc_qualification",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "code",
+        "definition": "models.CharField(max_length=24, unique=True)",
+        "kind": "CharField"
+      },
+      {
+        "name": "name",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_qualification"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "registry",
+    "model": "DentistQualification",
+    "table": "adc_dentist_qualification",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "dentist",
+        "definition": "models.ForeignKey('registry.Dentist', on_delete=models.PROTECT, related_name='qualifications')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "qualification",
+        "definition": "models.ForeignKey('registry.Qualification', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "notes",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.UniqueConstraint(fields=['dentist', 'qualification'], name='dentist_qualification_unique')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_dentist_qualification"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "registry",
+    "model": "Allergy",
+    "table": "adc_allergy",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "code",
+        "definition": "models.CharField(max_length=24, unique=True)",
+        "kind": "CharField"
+      },
+      {
+        "name": "name",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_allergy"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "registry",
+    "model": "TreatmentType",
+    "table": "adc_treatment_type",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "code",
+        "definition": "models.CharField(max_length=24, unique=True)",
+        "kind": "CharField"
+      },
+      {
+        "name": "name",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "unit_definition",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "standard_unit_price",
+        "definition": "models.DecimalField(max_digits=12, decimal_places=2)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(standard_unit_price__gte=0), name='treatment_price_nonnegative')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_treatment_type"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "accounts",
+    "model": "UserAccount",
+    "table": "adc_user",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "dentist",
+        "definition": "models.OneToOneField('registry.Dentist', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "OneToOneField"
+      }
+    ],
+    "constraints": [],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_user",
+      "verbose_name": "员工账号",
+      "verbose_name_plural": "员工账号"
+    },
+    "inherits_framework_fields": true
+  },
+  {
+    "app": "accounts",
+    "model": "RoleAssignment",
+    "table": "adc_role_assignment",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "user",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, related_name='role_assignments')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "role",
+        "definition": "models.CharField(max_length=16, choices=(('FRONT_DESK', '前台'), ('DENTIST', '牙医'), ('MANAGER', '诊所主管'), ('HQ', '总部管理'), ('FINANCE', '财务'), ('SYSADMIN', '系统管理员')))",
+        "kind": "CharField"
+      },
+      {
+        "name": "scope_kind",
+        "definition": "models.CharField(max_length=16, choices=(('CLINIC', '诊所'), ('SELF_DENTIST', '本人接诊'), ('CHAIN', '全链'), ('TECHNICAL', '技术管理')))",
+        "kind": "CharField"
+      },
+      {
+        "name": "clinic",
+        "definition": "models.ForeignKey('registry.Clinic', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(role__in=['FRONT_DESK', 'MANAGER'], scope_kind='CLINIC', clinic__isnull=False) | Q(role='DENTIST', scope_kind='SELF_DENTIST', clinic__isnull=True) | Q(role__in=['HQ', 'FINANCE'], scope_kind='CHAIN', clinic__isnull=True) | Q(role='SYSADMIN', scope_kind='TECHNICAL', clinic__isnull=True), name='role_scope_valid')",
+      "models.UniqueConstraint(fields=['user', 'role', 'scope_kind', 'clinic'], condition=Q(clinic__isnull=False), name='role_clinic_unique')",
+      "models.UniqueConstraint(fields=['user', 'role', 'scope_kind'], condition=Q(clinic__isnull=True), name='role_noclinic_unique')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_role_assignment"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "patients",
+    "model": "Patient",
+    "table": "adc_patient",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "patient_no",
+        "definition": "models.CharField(max_length=40, unique=True, default=patient_no, editable=False)",
+        "kind": "CharField"
+      },
+      {
+        "name": "name",
+        "definition": "models.CharField(max_length=80)",
+        "kind": "CharField"
+      },
+      {
+        "name": "date_of_birth",
+        "definition": "models.DateField()",
+        "kind": "DateField"
+      },
+      {
+        "name": "billing_address",
+        "definition": "models.CharField(max_length=255)",
+        "kind": "CharField"
+      },
+      {
+        "name": "phone",
+        "definition": "models.CharField(max_length=32)",
+        "kind": "CharField"
+      },
+      {
+        "name": "email",
+        "definition": "models.EmailField(blank=True, default='')",
+        "kind": "EmailField"
+      },
+      {
+        "name": "emergency_name",
+        "definition": "models.CharField(max_length=80)",
+        "kind": "CharField"
+      },
+      {
+        "name": "emergency_phone",
+        "definition": "models.CharField(max_length=32)",
+        "kind": "CharField"
+      },
+      {
+        "name": "allergy_status",
+        "definition": "models.CharField(max_length=12, default='UNKNOWN', choices=[('UNKNOWN', '未询问/未知'), ('NO_KNOWN', '已确认无已知过敏'), ('KNOWN', '已知过敏')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "allergy_info_version",
+        "definition": "models.PositiveIntegerField(default=1)",
+        "kind": "PositiveIntegerField"
+      },
+      {
+        "name": "created_in_clinic",
+        "definition": "models.ForeignKey('registry.Clinic', on_delete=models.PROTECT, related_name='registered_patients')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(allergy_status__in=['UNKNOWN', 'NO_KNOWN', 'KNOWN']), name='patient_allergy_status_valid')",
+      "models.CheckConstraint(condition=Q(allergy_info_version__gte=1), name='allergy_version_positive')"
+    ],
+    "indexes": [
+      "models.Index(fields=['phone'], name='patient_phone_idx')"
+    ],
+    "options": {
+      "db_table": "adc_patient",
+      "ordering": [
+        "-id"
+      ]
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "patients",
+    "model": "PatientAllergy",
+    "table": "adc_patient_allergy",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "patient",
+        "definition": "models.ForeignKey('patients.Patient', on_delete=models.PROTECT, related_name='allergy_links')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "allergy",
+        "definition": "models.ForeignKey('registry.Allergy', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "notes",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.UniqueConstraint(fields=['patient', 'allergy'], name='patient_allergy_unique')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_patient_allergy"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "scheduling",
+    "model": "AvailabilitySlot",
+    "table": "adc_availability_slot",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "dentist",
+        "definition": "models.ForeignKey('registry.Dentist', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "clinic",
+        "definition": "models.ForeignKey('registry.Clinic', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "starts_at",
+        "definition": "models.DateTimeField()",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "ends_at",
+        "definition": "models.DateTimeField()",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "is_active",
+        "definition": "models.BooleanField(default=True)",
+        "kind": "BooleanField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(ends_at__gt=F('starts_at')), name='slot_time_order')",
+      "ExclusionConstraint(name='slot_dentist_no_overlap', expressions=[(TsTzRange('starts_at', 'ends_at', RangeBoundary()), RangeOperators.OVERLAPS), ('dentist', RangeOperators.EQUAL)], condition=Q(is_active=True))"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_availability_slot",
+      "ordering": [
+        "starts_at",
+        "id"
+      ]
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "scheduling",
+    "model": "Visit",
+    "table": "adc_visit",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "visit_no",
+        "definition": "models.CharField(max_length=40, unique=True, default=visit_no, editable=False)",
+        "kind": "CharField"
+      },
+      {
+        "name": "patient",
+        "definition": "models.ForeignKey('patients.Patient', on_delete=models.PROTECT, related_name='visits')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "dentist",
+        "definition": "models.ForeignKey('registry.Dentist', on_delete=models.PROTECT, related_name='visits')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "clinic",
+        "definition": "models.ForeignKey('registry.Clinic', on_delete=models.PROTECT, related_name='visits')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "availability_slot",
+        "definition": "models.ForeignKey('scheduling.AvailabilitySlot', on_delete=models.PROTECT, related_name='visits')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "scheduled_start",
+        "definition": "models.DateTimeField()",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "scheduled_end",
+        "definition": "models.DateTimeField()",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "status",
+        "definition": "models.CharField(max_length=24, choices=(('SCHEDULED', '已预约'), ('CHECKED_IN', '已到诊'), ('COMPLETED', '治疗完成'), ('CLOSED_NO_TREATMENT', '无治疗关闭'), ('CANCELLED', '已取消'), ('NO_SHOW', '已爽约'), ('RESCHEDULED', '已改期替代')), default='SCHEDULED')",
+        "kind": "CharField"
+      },
+      {
+        "name": "attended",
+        "definition": "models.BooleanField(default=False)",
+        "kind": "BooleanField"
+      },
+      {
+        "name": "attended_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "completed_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "chief_complaint",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "special_needs",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "cancellation_party",
+        "definition": "models.CharField(max_length=8, blank=True, default='', choices=[('', '不适用'), ('PATIENT', '患者'), ('CLINIC', '诊所')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "cancellation_reason",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "replaces_visit",
+        "definition": "models.OneToOneField('scheduling.Visit', on_delete=models.PROTECT, null=True, blank=True, related_name='replacement')",
+        "kind": "OneToOneField"
+      },
+      {
+        "name": "lock_version",
+        "definition": "models.PositiveIntegerField(default=0)",
+        "kind": "PositiveIntegerField"
+      },
+      {
+        "name": "created_at",
+        "definition": "models.DateTimeField(auto_now_add=True)",
+        "kind": "DateTimeField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(status__in=['SCHEDULED', 'CHECKED_IN', 'COMPLETED', 'CLOSED_NO_TREATMENT', 'CANCELLED', 'NO_SHOW', 'RESCHEDULED']), name='visit_status_valid')",
+      "models.CheckConstraint(condition=Q(scheduled_end__gt=F('scheduled_start')), name='visit_time_order')",
+      "models.CheckConstraint(condition=Q(status__in=('CHECKED_IN', 'COMPLETED', 'CLOSED_NO_TREATMENT'), attended=True, attended_at__isnull=False) | ~Q(status__in=('CHECKED_IN', 'COMPLETED', 'CLOSED_NO_TREATMENT')) & Q(attended=False, attended_at__isnull=True), name='visit_attendance_consistent')",
+      "models.CheckConstraint(condition=Q(status__in=('COMPLETED', 'CLOSED_NO_TREATMENT')) & Q(completed_at__isnull=False, completed_at__gte=F('attended_at')) | ~Q(status__in=('COMPLETED', 'CLOSED_NO_TREATMENT')) & Q(completed_at__isnull=True), name='visit_completion_consistent')",
+      "models.CheckConstraint(condition=Q(status='CANCELLED', cancellation_party__in=['PATIENT', 'CLINIC']) & ~Q(cancellation_reason='') | ~Q(status='CANCELLED') & Q(cancellation_party='', cancellation_reason=''), name='visit_cancellation_consistent')",
+      "models.CheckConstraint(condition=~Q(replaces_visit=F('id')), name='visit_not_replace_self')",
+      "ExclusionConstraint(name='visit_dentist_no_overlap', expressions=[(TsTzRange('scheduled_start', 'scheduled_end', RangeBoundary()), RangeOperators.OVERLAPS), ('dentist', RangeOperators.EQUAL)], condition=Q(status__in=('SCHEDULED', 'CHECKED_IN', 'COMPLETED', 'CLOSED_NO_TREATMENT')))",
+      "ExclusionConstraint(name='visit_patient_no_overlap', expressions=[(TsTzRange('scheduled_start', 'scheduled_end', RangeBoundary()), RangeOperators.OVERLAPS), ('patient', RangeOperators.EQUAL)], condition=Q(status__in=('SCHEDULED', 'CHECKED_IN', 'COMPLETED', 'CLOSED_NO_TREATMENT')))"
+    ],
+    "indexes": [
+      "models.Index(fields=['clinic', 'scheduled_start'], name='visit_clinic_time_idx')",
+      "models.Index(fields=['dentist', 'completed_at'], name='visit_dentist_completed_idx')"
+    ],
+    "options": {
+      "db_table": "adc_visit",
+      "ordering": [
+        "-scheduled_start",
+        "-id"
+      ]
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "scheduling",
+    "model": "VisitRequest",
+    "table": "adc_visit_request",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "visit",
+        "definition": "models.ForeignKey('scheduling.Visit', on_delete=models.PROTECT, related_name='requests')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "description",
+        "definition": "models.CharField(max_length=500)",
+        "kind": "CharField"
+      },
+      {
+        "name": "treatment_type",
+        "definition": "models.ForeignKey('registry.TreatmentType', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      }
+    ],
+    "constraints": [],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_visit_request"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "care",
+    "model": "CorrectionRequest",
+    "table": "adc_correction_request",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "visit",
+        "definition": "models.ForeignKey('scheduling.Visit', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "kind",
+        "definition": "models.CharField(max_length=24, choices=[('APPOINTMENT_STATUS', '预约结果'), ('RECORD_CONTENT', '治疗内容')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "base_record_version",
+        "definition": "models.ForeignKey('care.VisitRecordVersion', on_delete=models.PROTECT, null=True, blank=True, related_name='based_corrections')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "expected_visit_lock_version",
+        "definition": "models.PositiveIntegerField()",
+        "kind": "PositiveIntegerField"
+      },
+      {
+        "name": "requester",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, related_name='requested_corrections')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "reviewer",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True, related_name='reviewed_corrections')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "dentist_confirmed_by",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True, related_name='confirmed_corrections')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "status",
+        "definition": "models.CharField(max_length=12, default='OPEN', choices=[('OPEN', '待审核'), ('APPLIED', '已应用'), ('REJECTED', '已拒绝'), ('WITHDRAWN', '已撤回')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "reason",
+        "definition": "models.TextField()",
+        "kind": "TextField"
+      },
+      {
+        "name": "proposed_change",
+        "definition": "models.JSONField(default=dict)",
+        "kind": "JSONField"
+      },
+      {
+        "name": "requested_at",
+        "definition": "models.DateTimeField(auto_now_add=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "applied_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      }
+    ],
+    "constraints": [
+      "models.CheckConstraint(condition=Q(kind__in=['APPOINTMENT_STATUS', 'RECORD_CONTENT']), name='correction_kind_valid')",
+      "models.CheckConstraint(condition=Q(status__in=['OPEN', 'APPLIED', 'REJECTED', 'WITHDRAWN']), name='correction_status_valid')",
+      "models.CheckConstraint(condition=~Q(requester=F('reviewer')), name='correction_no_self_approval')",
+      "models.CheckConstraint(condition=Q(kind='APPOINTMENT_STATUS', base_record_version__isnull=True) | Q(kind='RECORD_CONTENT', base_record_version__isnull=False), name='correction_base_required')",
+      "models.CheckConstraint(condition=Q(status='APPLIED', reviewer__isnull=False, applied_at__isnull=False) | ~Q(status='APPLIED') & Q(applied_at__isnull=True), name='correction_applied_metadata')",
+      "models.UniqueConstraint(fields=['visit'], condition=Q(status='OPEN'), name='one_open_correction_per_visit')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_correction_request"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "care",
+    "model": "VisitRecordVersion",
+    "table": "adc_visit_record_version",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "visit",
+        "definition": "models.ForeignKey('scheduling.Visit', on_delete=models.PROTECT, related_name='record_versions')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "revision_no",
+        "definition": "models.PositiveIntegerField()",
+        "kind": "PositiveIntegerField"
+      },
+      {
+        "name": "state",
+        "definition": "models.CharField(max_length=12, default='DRAFT', choices=[('DRAFT', '草稿'), ('PUBLISHED', '已发布'), ('ABANDONED', '已弃用')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "outcome",
+        "definition": "models.CharField(max_length=16, choices=[('TREATED', '有治疗'), ('NO_TREATMENT', '无治疗')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "previous_version",
+        "definition": "models.ForeignKey('care.VisitRecordVersion', on_delete=models.PROTECT, null=True, blank=True, related_name='next_versions')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "correction_request",
+        "definition": "models.OneToOneField('care.CorrectionRequest', on_delete=models.PROTECT, null=True, blank=True, related_name='new_version')",
+        "kind": "OneToOneField"
+      },
+      {
+        "name": "prepared_by",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, related_name='prepared_versions')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "reviewed_by",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True, related_name='reviewed_versions')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "created_at",
+        "definition": "models.DateTimeField(auto_now_add=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "published_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "allergy_review_snapshot",
+        "definition": "models.JSONField(default=dict)",
+        "kind": "JSONField"
+      },
+      {
+        "name": "billing_header_snapshot",
+        "definition": "models.JSONField(default=dict)",
+        "kind": "JSONField"
+      },
+      {
+        "name": "clinical_note",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "no_treatment_reason",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      },
+      {
+        "name": "total_amount",
+        "definition": "models.DecimalField(max_digits=16, decimal_places=2, default=0)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "currency",
+        "definition": "models.CharField(max_length=3, default='CNY')",
+        "kind": "CharField"
+      }
+    ],
+    "constraints": [
+      "models.UniqueConstraint(fields=['visit', 'revision_no'], name='visit_revision_unique')",
+      "models.UniqueConstraint(fields=['id', 'visit'], name='version_id_visit_unique')",
+      "models.UniqueConstraint(fields=['visit'], condition=Q(state='DRAFT'), name='one_draft_per_visit')",
+      "models.CheckConstraint(condition=Q(revision_no__gte=1), name='revision_positive')",
+      "models.CheckConstraint(condition=Q(state__in=['DRAFT', 'PUBLISHED', 'ABANDONED']), name='version_state_valid')",
+      "models.CheckConstraint(condition=Q(outcome__in=['TREATED', 'NO_TREATMENT']), name='version_outcome_valid')",
+      "models.CheckConstraint(condition=Q(total_amount__gte=0, currency='CNY'), name='version_money_valid')",
+      "models.CheckConstraint(condition=Q(state='PUBLISHED', published_at__isnull=False) | ~Q(state='PUBLISHED') & Q(published_at__isnull=True), name='version_publish_metadata')",
+      "models.CheckConstraint(condition=~Q(previous_version=F('id')), name='version_not_previous_self')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_visit_record_version"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "care",
+    "model": "TreatmentRecord",
+    "table": "adc_treatment_record",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "record_version",
+        "definition": "models.ForeignKey('care.VisitRecordVersion', on_delete=models.PROTECT, related_name='treatment_lines')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "line_no",
+        "definition": "models.PositiveIntegerField()",
+        "kind": "PositiveIntegerField"
+      },
+      {
+        "name": "treatment_type",
+        "definition": "models.ForeignKey('registry.TreatmentType', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "name_snapshot",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "unit_snapshot",
+        "definition": "models.CharField(max_length=120)",
+        "kind": "CharField"
+      },
+      {
+        "name": "quantity",
+        "definition": "models.DecimalField(max_digits=12, decimal_places=3)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "unit_price",
+        "definition": "models.DecimalField(max_digits=12, decimal_places=2)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "line_amount",
+        "definition": "models.DecimalField(max_digits=16, decimal_places=2)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "confirmed_by",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "confirmed_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "price_reason",
+        "definition": "models.CharField(max_length=500, blank=True, default='')",
+        "kind": "CharField"
+      }
+    ],
+    "constraints": [
+      "models.UniqueConstraint(fields=['record_version', 'line_no'], name='record_line_unique')",
+      "models.CheckConstraint(condition=Q(line_no__gte=1, quantity__gt=0, unit_price__gte=0, line_amount__gte=0), name='record_values_valid')",
+      "models.CheckConstraint(condition=Q(unit_price__gt=0) | ~Q(price_reason=''), name='zero_price_reason_required')",
+      "models.CheckConstraint(condition=Q(confirmed_by__isnull=True, confirmed_at__isnull=True) | Q(confirmed_by__isnull=False, confirmed_at__isnull=False), name='line_confirmation_consistent')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_treatment_record",
+      "ordering": [
+        "line_no"
+      ]
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "care",
+    "model": "Invoice",
+    "table": "adc_invoice",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "invoice_no",
+        "definition": "models.CharField(max_length=40, unique=True, default=invoice_no, editable=False)",
+        "kind": "CharField"
+      },
+      {
+        "name": "visit",
+        "definition": "models.OneToOneField('scheduling.Visit', on_delete=models.PROTECT, related_name='invoice')",
+        "kind": "OneToOneField"
+      },
+      {
+        "name": "current_record_version",
+        "definition": "models.OneToOneField('care.VisitRecordVersion', on_delete=models.PROTECT, related_name='current_invoice')",
+        "kind": "OneToOneField"
+      },
+      {
+        "name": "first_issued_at",
+        "definition": "models.DateTimeField(auto_now_add=True)",
+        "kind": "DateTimeField"
+      }
+    ],
+    "constraints": [],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_invoice"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "care",
+    "model": "AuditEvent",
+    "table": "adc_audit_event",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "actor",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "visit",
+        "definition": "models.ForeignKey('scheduling.Visit', on_delete=models.PROTECT, null=True, blank=True, related_name='events')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "correction_request",
+        "definition": "models.ForeignKey('care.CorrectionRequest', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "event_type",
+        "definition": "models.CharField(max_length=48)",
+        "kind": "CharField"
+      },
+      {
+        "name": "occurred_at",
+        "definition": "models.DateTimeField()",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "recorded_at",
+        "definition": "models.DateTimeField(auto_now_add=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "subject_type",
+        "definition": "models.CharField(max_length=32)",
+        "kind": "CharField"
+      },
+      {
+        "name": "subject_key",
+        "definition": "models.CharField(max_length=80)",
+        "kind": "CharField"
+      },
+      {
+        "name": "reason",
+        "definition": "models.CharField(max_length=500, blank=True, default='')",
+        "kind": "CharField"
+      },
+      {
+        "name": "change_summary",
+        "definition": "models.JSONField(default=dict)",
+        "kind": "JSONField"
+      }
+    ],
+    "constraints": [],
+    "indexes": [
+      "models.Index(fields=['subject_type', 'subject_key', 'recorded_at'], name='audit_subject_time_idx')"
+    ],
+    "options": {
+      "db_table": "adc_audit_event"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "finance",
+    "model": "Quarter",
+    "table": "adc_quarter",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "year",
+        "definition": "models.PositiveSmallIntegerField()",
+        "kind": "PositiveSmallIntegerField"
+      },
+      {
+        "name": "quarter_no",
+        "definition": "models.PositiveSmallIntegerField()",
+        "kind": "PositiveSmallIntegerField"
+      },
+      {
+        "name": "roster_status",
+        "definition": "models.CharField(max_length=12, default='DRAFT', choices=[('DRAFT', '未确认'), ('CONFIRMED', '已确认')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "roster_confirmed_by",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "roster_confirmed_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      }
+    ],
+    "constraints": [
+      "models.UniqueConstraint(fields=['year', 'quarter_no'], name='quarter_unique')",
+      "models.CheckConstraint(condition=Q(year__gte=1900, year__lte=9998, quarter_no__gte=1, quarter_no__lte=4), name='quarter_range_valid')",
+      "models.CheckConstraint(condition=Q(roster_status='CONFIRMED', roster_confirmed_by__isnull=False, roster_confirmed_at__isnull=False) | Q(roster_status='DRAFT', roster_confirmed_by__isnull=True, roster_confirmed_at__isnull=True), name='quarter_confirmation_valid')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_quarter"
+    },
+    "inherits_framework_fields": false
+  },
+  {
+    "app": "finance",
+    "model": "DentistQuarterCost",
+    "table": "adc_dentist_quarter_cost",
+    "fields": [
+      {
+        "name": "id",
+        "kind": "BigAutoField",
+        "definition": "models.BigAutoField(primary_key=True)"
+      },
+      {
+        "name": "quarter",
+        "definition": "models.ForeignKey('finance.Quarter', on_delete=models.PROTECT, related_name='dentist_costs')",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "dentist",
+        "definition": "models.ForeignKey('registry.Dentist', on_delete=models.PROTECT)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "cost_status",
+        "definition": "models.CharField(max_length=12, default='MISSING', choices=[('MISSING', '未录入'), ('DRAFT', '草稿'), ('CONFIRMED', '已确认')])",
+        "kind": "CharField"
+      },
+      {
+        "name": "supply_cost",
+        "definition": "models.DecimalField(max_digits=16, decimal_places=2, null=True, blank=True)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "operating_expense",
+        "definition": "models.DecimalField(max_digits=16, decimal_places=2, null=True, blank=True)",
+        "kind": "DecimalField"
+      },
+      {
+        "name": "confirmed_by",
+        "definition": "models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True)",
+        "kind": "ForeignKey"
+      },
+      {
+        "name": "confirmed_at",
+        "definition": "models.DateTimeField(null=True, blank=True)",
+        "kind": "DateTimeField"
+      },
+      {
+        "name": "notes",
+        "definition": "models.TextField(blank=True, default='')",
+        "kind": "TextField"
+      }
+    ],
+    "constraints": [
+      "models.UniqueConstraint(fields=['quarter', 'dentist'], name='dentist_quarter_unique')",
+      "models.CheckConstraint(condition=Q(cost_status__in=['MISSING', 'DRAFT', 'CONFIRMED']), name='cost_status_valid')",
+      "models.CheckConstraint(condition=(Q(supply_cost__isnull=True) | Q(supply_cost__gte=0)) & (Q(operating_expense__isnull=True) | Q(operating_expense__gte=0)), name='cost_nonnegative')",
+      "models.CheckConstraint(condition=Q(cost_status='CONFIRMED', supply_cost__isnull=False, operating_expense__isnull=False, confirmed_by__isnull=False, confirmed_at__isnull=False) | ~Q(cost_status='CONFIRMED') & Q(confirmed_by__isnull=True, confirmed_at__isnull=True), name='cost_confirmation_valid')",
+      "models.CheckConstraint(condition=~Q(cost_status='MISSING') | Q(supply_cost__isnull=True, operating_expense__isnull=True), name='missing_cost_is_null')"
+    ],
+    "indexes": [],
+    "options": {
+      "db_table": "adc_dentist_quarter_cost"
+    },
+    "inherits_framework_fields": false
+  }
+]
