@@ -1,0 +1,291 @@
+{
+  "recorded_at_utc": "2026-10-14T08:35:39.457005+00:00",
+  "scope": "Entry recovery after the accepted ten-minute window; this replacement hostname is rechecked separately",
+  "reason": "Automatic selection returned to QUIC after an HTTP/2 disconnect; UDP dial failures caused minutes of delayed recovery",
+  "failure_started_utc": "2026-10-14T08:18:19Z",
+  "correction": "Keep HTTP/2 as the Mac default; auto remains an explicit option; no system network setting changed",
+  "host": "diy-considers-snap-customize.trycloudflare.com",
+  "configured_protocol": "http2",
+  "registered_protocol": "http2",
+  "https": {
+    "scope": "Read-only network preflight; not full G4 acceptance",
+    "host": "diy-considers-snap-customize.trycloudflare.com",
+    "trust": "system certificate trust",
+    "dns_cutover_verified": true,
+    "results": [
+      {
+        "check": "HTTP redirects to domain HTTPS",
+        "passed": true
+      },
+      {
+        "check": "Verified TLS and login GET",
+        "passed": true
+      },
+      {
+        "check": "CSRF cookie is Secure and SameSite Lax",
+        "passed": true
+      },
+      {
+        "check": "HSTS, no-store and frame protection",
+        "passed": true
+      },
+      {
+        "check": "Collected static asset",
+        "passed": true
+      },
+      {
+        "check": "Gateway overwrites spoofed proxy scheme",
+        "passed": true
+      },
+      {
+        "check": "Foreign Host is not served",
+        "passed": true
+      }
+    ],
+    "network_checks_passed": true,
+    "public_acceptance_executed": false
+  },
+  "browser": {
+    "scope": "Real public Chromium, synthetic read-only course demo; bounded checks",
+    "host": "diy-considers-snap-customize.trycloudflare.com",
+    "checks": [
+      {
+        "check": "front_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "front_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "front_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "front_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Authenticated signed business POST refused by read-only policy",
+        "passed": true
+      },
+      {
+        "check": "390px large-text workspace fits viewport",
+        "passed": true
+      },
+      {
+        "check": "front_b public login GET",
+        "passed": true
+      },
+      {
+        "check": "front_b authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "front_b secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "front_b read-only notice",
+        "passed": true
+      },
+      {
+        "check": "manager_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "manager_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "manager_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "manager_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "doctor_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "doctor_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "doctor_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "doctor_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Doctor cannot inherit finance permission",
+        "passed": true
+      },
+      {
+        "check": "hq_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "hq_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "hq_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "hq_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "finance_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "finance_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "finance_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "finance_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "tech_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "tech_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "tech_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "tech_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Patient booking POST refused in read-only demo",
+        "passed": true
+      },
+      {
+        "check": "multi_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "Multi-role account requires explicit role selection",
+        "passed": true
+      },
+      {
+        "check": "multi_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "multi_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "multi_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Login POST without CSRF token refused",
+        "passed": true
+      },
+      {
+        "check": "No frontend execution errors during tested flows",
+        "passed": true
+      }
+    ],
+    "page_errors": 0,
+    "public_release_approved": false,
+    "browser_version": "155.0.8059.79",
+    "all_checks_passed": true
+  },
+  "preservation": {
+    "scope": "Private hashes and read-only allowlisted committed business comparison after load and browser refusal checks",
+    "checks": {
+      "original_g4_database_container_preserved": true,
+      "immutable_images_and_app_source_preserved": true,
+      "runtime.env_only_hostname_changed": true,
+      "maintenance.env_only_hostname_changed": true,
+      "private/database.env_preserved": true,
+      "compose.env_preserved": true,
+      "private/demo-credentials.txt_preserved": true,
+      "backups/mac-course-demo.dump_preserved": true,
+      "private_access_guide_only_login_links_changed": true,
+      "business_hash_and_all_allowlisted_counts_unchanged": true,
+      "actual_runtime_read_only_ai_disabled_uid_timezone_pg17": true,
+      "current_tunnel_registered_and_origin_healthy": true
+    },
+    "business_sha256_before": "74875e0038f46c291b5bf3bf1e7379dde72a44f87696730e1cb324a261c20128",
+    "business_sha256_after": "74875e0038f46c291b5bf3bf1e7379dde72a44f87696730e1cb324a261c20128",
+    "business_counts_after": {
+      "accounts.UserAccount": 11,
+      "accounts.RoleAssignment": 11,
+      "registry.Dentist": 3,
+      "registry.Qualification": 1,
+      "registry.DentistQualification": 0,
+      "registry.TreatmentType": 1,
+      "patients.Patient": 4,
+      "scheduling.AvailabilitySlot": 14,
+      "scheduling.Visit": 0,
+      "care.VisitRecordVersion": 0,
+      "care.TreatmentRecord": 0,
+      "care.Invoice": 0,
+      "care.CorrectionRequest": 0,
+      "finance.Quarter": 0,
+      "finance.DentistQuarterCost": 0,
+      "coordination.WaitRequest": 0,
+      "coordination.WaitOffer": 0,
+      "coordination.CoordinationTask": 0,
+      "notifications.NotificationOutbox": 0,
+      "notifications.InboxMessage": 0,
+      "portal.BookingReceipt": 0
+    },
+    "runtime": {
+      "read_only": true,
+      "external_ai_disabled": true,
+      "business_timezone": "Asia/Shanghai",
+      "uid": 10001,
+      "postgresql_major": 17
+    },
+    "private_material_exported": false
+  },
+  "accepted_window_evidence": "docs/evidence_g4/capacity-and-stability.json",
+  "accepted_window_reassigned_to_this_hostname": false,
+  "same_registered_protocol_as_measured_window": true,
+  "capacity_commit_ci": {
+    "head": "71ea525bbc127d6fc83537d0cbae8cd216bf0599",
+    "conclusion": "success",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38534811679"
+  },
+  "continuous_availability_established": false,
+  "overall_G4_status": "PARTIAL",
+  "private_material_exported": false
+}

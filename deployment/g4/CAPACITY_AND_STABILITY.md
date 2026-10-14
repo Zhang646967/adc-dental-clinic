@@ -104,6 +104,13 @@ emulation; public mode measures the actual free hostname through HTTPS.
    nine accounts were then checked successfully before the repeated run.
    Neither fallback nor a successful short window proves that reconnect gaps
    have been eliminated. Original failures remain part of the evidence.
+6. After the successful measured window, automatic selection returned to QUIC
+   when HTTP/2 disconnected. QUIC dial timeouts then delayed recovery for
+   minutes. The Mac helper retains HTTP/2 as its default; automatic selection
+   remains an explicit option. This avoids re-probing blocked UDP on this host,
+   while short HTTP/2 reconnect gaps and continuous availability remain outside
+   the accepted envelope. A replacement hostname is checked separately; the
+   measured window retains its actual original hostname and timestamps.
 
 ## Recorded bounded result — 2026-10-14
 

@@ -143,7 +143,7 @@ def compose_command(bundle, plan):
             '-p', plan['project'], '-f', str(bundle / 'compose.yaml')]
 
 
-def start(bundle, binary, protocol='auto'):
+def start(bundle, binary, protocol='http2'):
     if protocol not in ('auto', 'quic', 'http2'):
         raise ValueError('Only reviewed tunnel protocols are accepted.')
     plan = checked_bundle(bundle)
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('action', choices=('start', 'status', 'stop'))
     parser.add_argument('--output', default=str(ROOT / '.g4'))
     parser.add_argument('--cloudflared')
-    parser.add_argument('--protocol', choices=('auto', 'quic', 'http2'), default='auto')
+    parser.add_argument('--protocol', choices=('auto', 'quic', 'http2'), default='http2')
     args = parser.parse_args()
     bundle = Path(args.output).resolve()
     try:

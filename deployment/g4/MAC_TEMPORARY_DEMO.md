@@ -58,9 +58,9 @@ python3 scripts/g4_mac_demo.py stop
 The start helper checks the actual gateway binding, uses a dedicated empty
 Cloudflare configuration, and keeps logs private. It waits for actual tunnel
 registration before changing the host and again after origin readiness. The
-default `--protocol auto` permits QUIC-to-HTTP/2 fallback, with up to three
-minutes for initial registration; `--protocol http2` is available on networks
-without UDP egress. The actual registered protocol is recorded separately from
+default `--protocol http2` avoids QUIC re-probes on this Mac's UDP-limited
+network. Explicit `--protocol auto` permits QUIC-to-HTTP/2 fallback, with up to
+three minutes for initial registration on networks that support it. The actual registered protocol is recorded separately from
 the configured preference. It records the assigned host
 in runtime/maintenance/Nginx configuration, validates rendered Compose, and
 recreates only this project's Web/gateway. Source images, database identity,

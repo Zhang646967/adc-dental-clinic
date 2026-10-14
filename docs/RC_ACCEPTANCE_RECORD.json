@@ -10,7 +10,8 @@
       "docs/evidence_g4/postgresql-gate.json",
       "docs/evidence_g4/mac-postgresql-gate.json",
       "docs/evidence_g4/mac-status-postgresql-gate.json",
-      "docs/evidence_g4/capacity-postgresql-gate.json"
+      "docs/evidence_g4/capacity-postgresql-gate.json",
+      "docs/evidence_g4/http2-postgresql-gate.json"
     ]
   },
   "G2_v07_copy_upgrade_and_restore": {
@@ -48,7 +49,8 @@
       "docs/evidence_g4/mac-public-demo.json",
       "docs/evidence_g4/external-network.json",
       "docs/evidence_g4/capacity-and-stability.json",
-      "docs/evidence_g4/capacity-external-network.json"
+      "docs/evidence_g4/capacity-external-network.json",
+      "docs/evidence_g4/http2-entry-recovery.json"
     ],
     "preparation": {
       "status": "PREPARATION_PASS",
@@ -104,12 +106,14 @@
         "evidence": [
           "docs/evidence_g4/capacity-and-stability.json",
           "deployment/g4/CAPACITY_AND_STABILITY.md",
-          "docs/evidence_g4/capacity-postgresql-gate.json"
+          "docs/evidence_g4/capacity-postgresql-gate.json",
+          "docs/evidence_g4/http2-entry-recovery.json",
+          "docs/evidence_g4/http2-postgresql-gate.json"
         ]
       },
       "continuous_public_availability": {
         "status": "NOT_ESTABLISHED",
-        "scope": "The first public soak and a later preflight failed during tunnel reconnects; a subsequent successful ten-minute window is bounded evidence only",
+        "scope": "First soak, reconnecting preflight and a post-window auto-to-QUIC recovery failure retained. The repeated successful ten-minute HTTP/2 window is bounded evidence; Mac defaults to explicit HTTP/2 to avoid blocked-UDP re-probes.",
         "evidence": [
           "docs/evidence_g4/capacity-and-stability.json"
         ]

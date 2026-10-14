@@ -1,0 +1,93 @@
+{
+  "timestamp_utc": "2026-10-14T08:37:12.919607+00:00",
+  "python": "3.13.16",
+  "source_sha256": "c991b508043606849106848b32e769874174d5530f93d18e6417a7668bfecfce",
+  "results": [
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/verify_update.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "checks",
+        "-v"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/record_runtime.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "check"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "makemigrations",
+        "--check",
+        "--dry-run"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "migrate",
+        "--noinput"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "test",
+        "tests",
+        "--settings=config.settings.test",
+        "--noinput",
+        "--verbosity=2"
+      ],
+      "returncode": 0
+    }
+  ],
+  "all_gates_passed": true,
+  "source_checks": 859,
+  "django_tests": 705,
+  "focused_capacity_transport_and_status_checks": 34,
+  "host_validation": {
+    "project": "adc_verify_20261014t083545z_837b7626",
+    "timestamp_utc": "20261014T083545Z",
+    "scope": "isolated local Docker only",
+    "executed": true,
+    "all_gates_passed": true,
+    "cleanup_returncode": 0,
+    "returncode": 0
+  },
+  "public_acceptance_executed": false,
+  "operational_file_sha256": {
+    "scripts/g4_mac_demo.py": "613c012c9237124b75c27862da619e9b568fc47ca6c5567903a4e0660afe426e",
+    "scripts/g4_https_probe.py": "e189b4a049b04d087f5e87307ebc13a7616501c61bb253a9a92b1ead655794e9",
+    "scripts/g4_load.py": "33f4d330f0333c7e16c37196a2d173aa06bdd889db3d829f945161553ee46ec9",
+    "scripts/g4_observe.py": "6d4c65902cd7c5f966dd07885bbc0edbdb954766bb9d5f130f18677d7b966351",
+    "deployment/g4/nginx.mac-tunnel.template.conf": "665a71d6df50ffa225e7bda96e5dad91bf191158f49016bf5d8e776b0522cfef"
+  }
+}
