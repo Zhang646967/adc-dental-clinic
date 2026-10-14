@@ -1,0 +1,142 @@
+{
+  "status": "PREPARATION_PASS",
+  "public_deployment_status": "NOT_RUN",
+  "recorded_at_utc": "2026-10-14T02:15:52.131742+00:00",
+  "source_base_commit": "ff26d67de6556f7f68a7b9f51d5ff2e57c854a52",
+  "scope": "New isolated synthetic local G4 rehearsal; not the existing Mac demo or an actual public server",
+  "storage": "Disposable PostgreSQL tmpfs for rehearsal; target template uses a new persistent volume",
+  "host": "adc.g4.test",
+  "gateway_bind": "127.0.0.1",
+  "gateway_ports": [
+    19480,
+    19443
+  ],
+  "tls": "Self-signed test certificate, explicit local CA; untrusted certificate refused with normal system trust",
+  "steps": [
+    {
+      "step": "database",
+      "returncode": 0
+    },
+    {
+      "step": "schema",
+      "returncode": 0
+    },
+    {
+      "step": "bootstrap",
+      "returncode": 0
+    },
+    {
+      "step": "runtime-role",
+      "returncode": 0
+    },
+    {
+      "step": "web",
+      "returncode": 0
+    },
+    {
+      "step": "nginx-syntax",
+      "returncode": 0
+    },
+    {
+      "step": "gateway",
+      "returncode": 0
+    }
+  ],
+  "runtime_guards": [
+    {
+      "check": "runtime-dml",
+      "returncode": 0,
+      "passed": true,
+      "table_count": 39,
+      "no_role_membership": true,
+      "first_attempt": "Read-only probe used incorrect has_role function name; corrected catalog query, no application change."
+    },
+    {
+      "check": "readonly-worker",
+      "returncode": 0,
+      "passed": true
+    },
+    {
+      "check": "maintenance-server-refused",
+      "returncode": 1,
+      "passed": true
+    }
+  ],
+  "network_probe": {
+    "scope": "Read-only network preflight; not full G4 acceptance",
+    "host": "adc.g4.test",
+    "trust": "explicit CA (rehearsal/private)",
+    "dns_cutover_verified": false,
+    "results": [
+      {
+        "check": "HTTP redirects to domain HTTPS",
+        "passed": true
+      },
+      {
+        "check": "Verified TLS and login GET",
+        "passed": true
+      },
+      {
+        "check": "CSRF cookie is Secure and SameSite Lax",
+        "passed": true
+      },
+      {
+        "check": "HSTS, no-store and frame protection",
+        "passed": true
+      },
+      {
+        "check": "Collected static asset",
+        "passed": true
+      },
+      {
+        "check": "Gateway overwrites spoofed proxy scheme",
+        "passed": true
+      },
+      {
+        "check": "Foreign Host is not served",
+        "passed": true
+      }
+    ],
+    "network_checks_passed": true,
+    "public_acceptance_executed": false
+  },
+  "first_failures": [
+    {
+      "kind": "configuration-review",
+      "reason": "Django W005/W021 for intended short HSTS, no subdomain inheritance/preload policy.",
+      "resolution": "Explicit checker retains and reports these two warnings; every other warning/error still blocks."
+    },
+    {
+      "kind": "rehearsal-probe-error",
+      "reason": "Read-only SQL probe used has_role instead of a PostgreSQL function/catalog query.",
+      "resolution": "Corrected read-only catalog query confirms 39 DML-granted tables and zero role memberships; no application or business data change."
+    }
+  ],
+  "pending_target_checks": [
+    "Actual server/SSH, architecture and firewall",
+    "Real DNS A/AAAA and certificate trust/renewal",
+    "Image revision/dependencies on target",
+    "Target backup and independent restore",
+    "Target browser roles, service/reboot/worker and capacity",
+    "Intended read/write audience"
+  ],
+  "public_acceptance_executed": false,
+  "regression": {
+    "status": "PASS",
+    "source_checks": 822,
+    "django_tests_on_postgresql_environment": 704,
+    "preserved_application_migrations": 16,
+    "preserved_model_files": 11,
+    "cleanup_returncode": 0,
+    "evidence": "postgresql-gate.json",
+    "source_sha256": "083b105a6ec9f20ef2bbc9a4bc80ac168784862607ef034cdbb8acc969339795",
+    "timestamp_utc": "2026-10-14T02:15:05.099824+00:00"
+  },
+  "rehearsal_cleanup_returncode": 0,
+  "certificate_challenge_preflight": {
+    "status": "PASS",
+    "scope": "Local loopback Nginx HTTP-01 public token readability; no target DNS, certificate issuance or renewal executed",
+    "http_port": 19580,
+    "container_cleanup_returncode": 0
+  }
+}

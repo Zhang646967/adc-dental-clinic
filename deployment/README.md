@@ -1,5 +1,14 @@
 # 生产配置候选与独立验证
 
+## G4 preparation — 2026-10-13
+
+The current preparation package is in [g4/README.md](g4/README.md). It provides
+separate maintenance/runtime credentials, pinned images, private PostgreSQL,
+an HTTPS gateway, read-only startup, and preparation/network checks. An isolated
+local rehearsal validates these components; it does not certify a public server.
+Server/SSH, DNS, trusted certificate, backup and audience details remain required.
+The earlier candidate description below is retained as design history.
+
 本目录是配置候选，不是已部署、已恢复或安全认证结果。本地 `compose.yaml` 与现有 `.env` 均不改；没有把开发端口开放到公网。当前仍有真实PostgreSQL、TLS/代理、镜像、依赖、恢复和容量门禁待执行。
 
 ## 独立数据库回归

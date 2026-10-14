@@ -6,7 +6,8 @@
     "evidence": [
       "docs/evidence_macos/postgresql-gate.json",
       "docs/evidence_worker/postgresql-gate.json",
-      "docs/evidence_g3/postgresql-gate.json"
+      "docs/evidence_g3/postgresql-gate.json",
+      "docs/evidence_g4/postgresql-gate.json"
     ]
   },
   "G2_v07_copy_upgrade_and_restore": {
@@ -40,7 +41,15 @@
   },
   "G4_public_deployment": {
     "status": "NOT_RUN",
-    "evidence": []
+    "evidence": [],
+    "preparation": {
+      "status": "PREPARATION_PASS",
+      "evidence": [
+        "docs/evidence_g4/preparation.json",
+        "deployment/g4/README.md"
+      ]
+    },
+    "reason": "Target server/SSH, hostname/DNS, trusted certificate and operations details are not supplied. Local rehearsal is separate."
   },
   "public_release_approved": false,
   "blockers": [

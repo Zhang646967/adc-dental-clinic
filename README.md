@@ -74,6 +74,7 @@ Chrome checks. Original Windows backup recovery and public deployment remain ope
 - [R5 course report and UML models](docs/release_report/)
 - [Historical Windows instructions](docs/history/README_RC1_WINDOWS.md)
 - [Production configuration candidates](deployment/README.md)
+- [G4 deployment preparation and required server/domain details](deployment/g4/README.md)
 
 Keep `.env`, `.rc/`, credentials, database dumps and migration bundles private.
 The ignored `evidence/` directory contains local run output; packaged historical

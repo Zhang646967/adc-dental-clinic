@@ -26,3 +26,4 @@ private_migration/
 
 # RC host-only private instance material
 .rc/
+.g4/
