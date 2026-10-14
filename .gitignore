@@ -29,3 +29,6 @@ private_migration/
 # RC host-only private instance material
 .rc/
 .g4/
+.course-private/
+*.tar.age
+*.tar.age.json

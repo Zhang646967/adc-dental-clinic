@@ -4,7 +4,7 @@ Logic chain: freeze source/image → create separate private credentials → mig
 with the owner → serve with the restricted runtime → verify DNS/TLS and recovery.
 
 This package is preparation for public acceptance（公网验收）, not a completed
-public deployment. The first target starts in business read-only mode with
+public deployment. The default starts in business read-only mode with
 external AI disabled. Mac `.rc`, credentials, data volumes and port 18000 are
 separate. Only the gateway publishes ports; Web, worker and PostgreSQL remain
 on the internal Docker network.

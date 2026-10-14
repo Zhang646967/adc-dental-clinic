@@ -31,6 +31,41 @@ class G4PreparationTests(unittest.TestCase):
         self.assertEqual((self.folder / 'private').stat().st_mode & 0o077, 0)
         self.assertFalse(inspect_bundle(self.folder)['public_acceptance_executed'])
 
+    def test_course_mode_requires_direct_tls_and_starts_separate_runtime_worker(self):
+        plan = prepare(self.folder, **self.inputs, access_mode='course-writable')
+        runtime = read_env(self.folder / 'private/runtime.env')
+        self.assertEqual(runtime['ADC_READ_ONLY'], '0')
+        self.assertEqual(runtime['ADC_DEPLOYMENT_STAGE'], 'production')
+        self.assertNotIn('ADC_MIGRATION_PASSWORD', runtime)
+        self.assertFalse(plan['read_only'])
+        self.assertFalse(inspect_bundle(self.folder)['read_only'])
+        compose = (self.folder / 'compose.yaml').read_text()
+        self.assertNotIn('profiles: [writer]', compose)
+        self.assertIn('notification-worker:', compose)
+        self.assertNotIn('on-failure:5', compose)
+        self.assertFalse(plan['public_acceptance_executed'])
+
+    def test_course_mode_cannot_enable_mac_tunnel_writes(self):
+        with self.assertRaises(ValueError):
+            prepare(self.folder, **(self.inputs | dict(
+                host='course-demo.trycloudflare.com', http_port=18020,
+                mode='mac_tunnel', access_mode='course-writable')))
+        self.assertFalse(self.folder.exists())
+
+    def test_access_mode_and_runtime_disagreement_is_refused(self):
+        prepare(self.folder, **self.inputs, access_mode='course-writable')
+        path = self.folder / 'private/runtime.env'
+        path.write_text(path.read_text().replace('ADC_READ_ONLY=0', 'ADC_READ_ONLY=1'))
+        with self.assertRaises(ValueError):
+            inspect_bundle(self.folder)
+
+    def test_readonly_bundle_cannot_become_writable_by_flipping_env(self):
+        prepare(self.folder, **self.inputs)
+        path = self.folder / 'private/runtime.env'
+        path.write_text(path.read_text().replace('ADC_READ_ONLY=1', 'ADC_READ_ONLY=0'))
+        with self.assertRaises(ValueError):
+            inspect_bundle(self.folder)
+
     def test_existing_private_state_is_never_overwritten(self):
         prepare(self.folder, **self.inputs)
         before = (self.folder / 'private/runtime.env').read_bytes()

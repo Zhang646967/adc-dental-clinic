@@ -45,12 +45,18 @@ def write_env(path, values):
 
 
 def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
-            bind_ip='127.0.0.1', http_port=80, https_port=443, mode='direct_tls'):
+            bind_ip='127.0.0.1', http_port=80, https_port=443, mode='direct_tls',
+            access_mode='read-only'):
     output = Path(output)
     if output.name != '.g4' or output.exists() or output.is_symlink():
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
     if mode not in ('direct_tls', 'mac_tunnel'):
         raise ValueError('Unknown deployment mode.')
+    if access_mode not in ('read-only', 'course-writable'):
+        raise ValueError('Unknown access mode.')
+    writable = access_mode == 'course-writable'
+    if writable and mode != 'direct_tls':
+        raise ValueError('Course writes require a separate direct HTTPS deployment.')
     if mode == 'mac_tunnel' and (bind_ip != '127.0.0.1' or http_port == 18000 or
                                 not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com', host)):
         raise ValueError('Mac tunnel requires its assigned hostname and a separate IPv4 loopback origin.')
@@ -66,19 +72,23 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         raise ValueError('Two distinct valid gateway ports are required.')
     # Validate before creating any files. Secrets are generated separately from
     # the Mac configuration and are never printed.
+    project = 'adc_g4_' + secrets.token_hex(6)
     runtime = {
         'DJANGO_SETTINGS_MODULE': 'config.settings.production',
-        'ADC_DEPLOYMENT_STAGE': 'staging', 'ADC_PUBLIC_HOST': host,
+        'ADC_DEPLOYMENT_STAGE': 'production' if writable else 'staging', 'ADC_PUBLIC_HOST': host,
         'DJANGO_SECRET_KEY': secrets.token_urlsafe(64),
         'POSTGRES_DB': 'adc_rc_demo', 'POSTGRES_USER': 'adc_g4_runtime',
         'POSTGRES_PASSWORD': secrets.token_urlsafe(48),
         'ADC_DATABASE_OWNER': 'adc_g4_owner', 'DB_HOST': 'db', 'DB_PORT': '5432',
         'ADC_DB_SSLMODE': 'disable', 'ADC_PRIVATE_DB_NETWORK_ACK': '1',
-        'ADC_TRUST_PROXY_HEADERS': '1', 'ADC_READ_ONLY': '1',
+        'ADC_TRUST_PROXY_HEADERS': '1', 'ADC_READ_ONLY': '0' if writable else '1',
         'AI_MODE': 'disabled', 'AI_API_KEY': '', 'OPENAI_API_KEY': '',
     }
     checked = validate_production_inputs(runtime)
     runtime['ADC_PUBLIC_HOST'] = checked.host
+    if writable:
+        runtime['ADC_COURSE_PROJECT'] = project
+        runtime['ADC_COURSE_SYNTHETIC'] = '1'
     owner_password = secrets.token_urlsafe(48)
     admin_password = secrets.token_urlsafe(48)
     maintenance = runtime | {
@@ -101,7 +111,6 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     write_env(output / 'private/runtime.env', runtime)
     write_env(output / 'private/maintenance.env', maintenance)
     write_env(output / 'private/database.env', database)
-    project = 'adc_g4_' + secrets.token_hex(6)
     write_env(output / 'compose.env', {
         'G4_PROJECT': project, 'G4_SOURCE_COMMIT': source_commit,
         'G4_APP_IMAGE': app_image, 'G4_DB_IMAGE': db_image, 'G4_NGINX_IMAGE': nginx_image,
@@ -111,6 +120,11 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     compose_template = 'compose.mac-tunnel.template.yaml' if mode == 'mac_tunnel' else 'compose.template.yaml'
     for source, target in [(compose_template, 'compose.yaml'), ('init-db.sh', 'init-db.sh')]:
         (output / target).write_bytes((templates / source).read_bytes())
+    if writable:
+        compose = (output / 'compose.yaml').read_text()
+        compose = compose.replace('    profiles: [writer]\n', '')
+        compose = compose.replace('restart: "on-failure:5"', 'restart: unless-stopped')
+        (output / 'compose.yaml').write_text(compose)
     os.chmod(output / 'init-db.sh', 0o555)
     nginx_template = 'nginx.mac-tunnel.template.conf' if mode == 'mac_tunnel' else 'nginx.template.conf'
     nginx = (templates / nginx_template).read_text().replace('__ADC_HOST__', checked.host)
@@ -118,7 +132,8 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     plan = {
         'status': 'PREPARED_NOT_DEPLOYED', 'project': project, 'host': checked.host,
         'mode': mode,
-        'requested_source_commit': source_commit, 'read_only': True,
+        'requested_source_commit': source_commit, 'read_only': not writable,
+        'access_mode': access_mode,
         'bind_ip': bind_ip, 'ports': [http_port] if mode == 'mac_tunnel' else [http_port, https_port],
         'images': {'app': app_image, 'db': db_image, 'nginx': nginx_image},
         'public_acceptance_executed': False,
@@ -156,8 +171,16 @@ def inspect_bundle(output, rendered=None):
     if runtime.get('ADC_PUBLIC_HOST') != plan['host'] or maintenance.get('ADC_PUBLIC_HOST') != plan['host']:
         raise ValueError('Runtime, maintenance and plan hostname must agree.')
     inputs = validate_production_inputs(runtime)
-    if not inputs.read_only or runtime['DJANGO_SETTINGS_MODULE'] != 'config.settings.production':
-        raise ValueError('First G4 acceptance must use read-only runtime production settings.')
+    access_mode = plan.get('access_mode', 'read-only')
+    writable = access_mode == 'course-writable'
+    if (access_mode not in ('read-only', 'course-writable') or
+            plan['read_only'] != (not writable) or inputs.read_only != (not writable) or
+            runtime['DJANGO_SETTINGS_MODULE'] != 'config.settings.production' or
+            (writable and (plan.get('mode') != 'direct_tls' or
+                           runtime.get('ADC_DEPLOYMENT_STAGE') != 'production' or
+                           runtime.get('ADC_COURSE_PROJECT') != plan['project'] or
+                           runtime.get('ADC_COURSE_SYNTHETIC') != '1'))):
+        raise ValueError('Reviewed access mode, deployment mode and runtime must agree.')
     if runtime['AI_MODE'] != 'disabled' or runtime.get('ADC_MIGRATION_PASSWORD') or runtime.get('ADC_G4_MAINTENANCE'):
         raise ValueError('Runtime must not receive maintenance credentials/flags or external AI.')
     if (maintenance.get('DJANGO_SETTINGS_MODULE') != 'config.settings.g4_maintenance' or
@@ -184,6 +207,9 @@ def inspect_bundle(output, rendered=None):
         for name in ('web', 'notification-worker'):
             if services[name]['environment'] != runtime or services[name]['image'] != plan['images']['app']:
                 raise ValueError('Runtime service configuration does not match the reviewed bundle.')
+        worker = services['notification-worker']
+        if writable and (worker.get('profiles') or worker.get('restart') != 'unless-stopped'):
+            raise ValueError('The course writer must start automatically and recover after reboot.')
         ports = services['gateway'].get('ports', [])
         targets = {80} if plan.get('mode') == 'mac_tunnel' else {80, 443}
         if len(ports) != len(targets) or {int(p['target']) for p in ports} != targets:
@@ -194,7 +220,8 @@ def inspect_bundle(output, rendered=None):
                 any(int(p.get('published', 0)) != plan['ports'][0] for p in ports)):
             raise ValueError('Mac tunnel origin must use the reviewed IPv4 loopback port.')
     return {'status': 'PREPARED_NOT_DEPLOYED', 'configuration_checks': 'PASS',
-            'project': plan['project'], 'host': inputs.host, 'read_only': True,
+            'project': plan['project'], 'host': inputs.host, 'read_only': inputs.read_only,
+            'access_mode': access_mode,
             'tls_files_present': all((output / 'tls' / p).is_file() for p in ('fullchain.pem', 'privkey.pem')),
             'public_acceptance_executed': False}
 
@@ -210,6 +237,7 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--http-port', type=int, default=80)
     prepare_parser.add_argument('--https-port', type=int, default=443)
     prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel'), default='direct_tls')
+    prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable'), default='read-only')
     inspect_parser = sub.add_parser('inspect')
     inspect_parser.add_argument('--output', default=str(ROOT / '.g4'))
     inspect_parser.add_argument('--rendered-compose')
@@ -218,7 +246,8 @@ if __name__ == '__main__':
         if args.action == 'prepare':
             plan = prepare(args.output, host=args.host, source_commit=args.source_commit,
                            app_image=args.app_image, db_image=args.db_image, nginx_image=args.nginx_image,
-                           bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port, mode=args.mode)
+                           bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port,
+                           mode=args.mode, access_mode=args.access_mode)
             result = {'status': plan['status'], 'project': plan['project'], 'host': plan['host'],
                       'credentials': 'private files only; not displayed', 'public_acceptance_executed': False}
         else:
