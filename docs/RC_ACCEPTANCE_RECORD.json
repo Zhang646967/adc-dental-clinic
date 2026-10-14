@@ -41,8 +41,10 @@
     ]
   },
   "G4_public_deployment": {
-    "status": "NOT_RUN",
-    "evidence": [],
+    "status": "PARTIAL",
+    "evidence": [
+      "docs/evidence_g4/mac-public-demo.json"
+    ],
     "preparation": {
       "status": "PREPARATION_PASS",
       "evidence": [
@@ -51,17 +53,33 @@
         "deployment/g4/MAC_TEMPORARY_DEMO.md"
       ]
     },
-    "reason": "Mac/free tunnel selected; actual public HTTPS/browser and independent recovery/availability evidence is pending.",
+    "reason": "Selected temporary Mac demonstration passes bounded checks; independent external probe, off-host recovery and availability/capacity evidence remain.",
     "selected_target": {
       "kind": "temporary_mac_course_demo",
       "domain": "free provider-assigned trycloudflare.com hostname",
       "data": "new synthetic business-read-only instance",
       "external_AI": "disabled"
+    },
+    "components": {
+      "temporary_mac_https_and_browser": {
+        "status": "PASS",
+        "scope": "7 public HTTPS checks and 43 real Chromium checks; business facts unchanged"
+      },
+      "private_backup_and_separate_empty_restore": {
+        "status": "PASS",
+        "scope": "Same-Mac independent PostgreSQL restore, runtime role and normal backend login with CSRF"
+      },
+      "independent_external_network_probe": {
+        "status": "NOT_RUN"
+      },
+      "off_host_recovery_and_availability": {
+        "status": "NOT_RUN"
+      }
     }
   },
   "public_release_approved": false,
   "blockers": [
     "No original Windows database backup",
-    "Temporary Mac public access and independent host recovery/availability are not yet accepted"
+    "Temporary Mac demonstration does not establish off-host recovery or continuous target availability/capacity"
   ]
 }

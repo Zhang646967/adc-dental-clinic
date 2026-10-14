@@ -1,0 +1,285 @@
+{
+  "status": "LOCAL_PUBLIC_DEMO_CHECKS_PASS_EXTERNAL_PENDING",
+  "recorded_at_utc": "2026-10-14T03:32:15.281329+00:00",
+  "scope": "Temporary Mac course demo; new synthetic business-read-only data",
+  "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+  "project": "adc_g4_8e25aae81918",
+  "application_source_commit": "0bbea59dc823860251563359a127bcddc7ac5ba2",
+  "application_image": "sha256:4fd9ea307a57b4bb133d56f9ad1a4c371f272e0a66ee3e06902b77a9cb4862d3",
+  "gateway_bind": "127.0.0.1:18020",
+  "cloudflared_version": "2026.10.0",
+  "external_AI": "disabled",
+  "network": {
+    "scope": "Read-only network preflight; not full G4 acceptance",
+    "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+    "trust": "system certificate trust",
+    "dns_cutover_verified": true,
+    "results": [
+      {
+        "check": "HTTP redirects to domain HTTPS",
+        "passed": true
+      },
+      {
+        "check": "Verified TLS and login GET",
+        "passed": true
+      },
+      {
+        "check": "CSRF cookie is Secure and SameSite Lax",
+        "passed": true
+      },
+      {
+        "check": "HSTS, no-store and frame protection",
+        "passed": true
+      },
+      {
+        "check": "Collected static asset",
+        "passed": true
+      },
+      {
+        "check": "Gateway overwrites spoofed proxy scheme",
+        "passed": true
+      },
+      {
+        "check": "Foreign Host is not served",
+        "passed": true
+      }
+    ],
+    "network_checks_passed": true,
+    "public_acceptance_executed": false
+  },
+  "browser": {
+    "scope": "Real public Chromium, synthetic read-only course demo; bounded checks",
+    "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+    "checks": [
+      {
+        "check": "front_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "front_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "front_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "front_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Authenticated signed business POST refused by read-only policy",
+        "passed": true
+      },
+      {
+        "check": "390px large-text workspace fits viewport",
+        "passed": true
+      },
+      {
+        "check": "front_b public login GET",
+        "passed": true
+      },
+      {
+        "check": "front_b authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "front_b secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "front_b read-only notice",
+        "passed": true
+      },
+      {
+        "check": "manager_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "manager_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "manager_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "manager_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "doctor_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "doctor_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "doctor_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "doctor_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Doctor cannot inherit finance permission",
+        "passed": true
+      },
+      {
+        "check": "hq_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "hq_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "hq_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "hq_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "finance_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "finance_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "finance_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "finance_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "tech_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "tech_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "tech_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "tech_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a public login GET",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "patient_demo_a read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Patient booking POST refused in read-only demo",
+        "passed": true
+      },
+      {
+        "check": "multi_demo public login GET",
+        "passed": true
+      },
+      {
+        "check": "Multi-role account requires explicit role selection",
+        "passed": true
+      },
+      {
+        "check": "multi_demo authorized workspace route",
+        "passed": true
+      },
+      {
+        "check": "multi_demo secure authenticated session",
+        "passed": true
+      },
+      {
+        "check": "multi_demo read-only notice",
+        "passed": true
+      },
+      {
+        "check": "Login POST without CSRF token refused",
+        "passed": true
+      },
+      {
+        "check": "No frontend execution errors during tested flows",
+        "passed": true
+      }
+    ],
+    "page_errors": 0,
+    "public_release_approved": false,
+    "browser_version": "155.0.8059.40",
+    "all_checks_passed": true
+  },
+  "business_and_restore": {
+    "business_facts_unchanged": true,
+    "snapshot": {
+      "scope": "Allowlisted committed synthetic business facts; technical sessions/context excluded",
+      "counts": {
+        "accounts.UserAccount": 11,
+        "accounts.RoleAssignment": 11,
+        "registry.Dentist": 3,
+        "registry.Qualification": 1,
+        "registry.DentistQualification": 0,
+        "registry.TreatmentType": 1,
+        "patients.Patient": 4,
+        "scheduling.AvailabilitySlot": 14,
+        "scheduling.Visit": 0,
+        "care.VisitRecordVersion": 0,
+        "care.TreatmentRecord": 0,
+        "care.Invoice": 0,
+        "care.CorrectionRequest": 0,
+        "finance.Quarter": 0,
+        "finance.DentistQuarterCost": 0,
+        "coordination.WaitRequest": 0,
+        "coordination.WaitOffer": 0,
+        "coordination.CoordinationTask": 0,
+        "notifications.NotificationOutbox": 0,
+        "notifications.InboxMessage": 0,
+        "portal.BookingReceipt": 0
+      },
+      "business_sha256": "74875e0038f46c291b5bf3bf1e7379dde72a44f87696730e1cb324a261c20128"
+    },
+    "backup_sha256": "eec110f38d71b9725344fc29ee0015b8c559d24b1624bd48bbbc1e7bea779870",
+    "backup_size_bytes": 206899,
+    "restore_project": "adc_g4_1cd7eeb55eca",
+    "restore_empty_database_verified": true,
+    "restore_single_transaction": true,
+    "restored_role_check": "PASS",
+    "restored_business_hash_matches": true,
+    "restored_normal_login_with_csrf": "PASS",
+    "restore_cleanup": "PASS, volumes preserved",
+    "off_host_backup": "NOT_RUN: backup is private on this Mac",
+    "windows_recovery": "NOT_RUN"
+  },
+  "external_runner": {
+    "status": "PENDING"
+  },
+  "first_public_failure": {
+    "reason": "Long assigned hostname exceeded Nginx default server-name hash bucket; gateway restarted after early startup status.",
+    "fix": "Explicit 512-byte bucket, gateway configuration healthcheck and actual loopback readiness check."
+  },
+  "full_G4_accepted": false,
+  "remaining": [
+    "Off-host backup/host-loss recovery",
+    "Temporary-host availability/reboot and bounded-capacity checks"
+  ]
+}

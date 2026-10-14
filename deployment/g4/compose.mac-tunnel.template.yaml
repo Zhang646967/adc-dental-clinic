@@ -67,6 +67,12 @@ services:
     stop_grace_period: 30s
   gateway:
     image: ${G4_NGINX_IMAGE:?Pinned Nginx image required}
+    healthcheck:
+      test: [CMD, nginx, -t]
+      interval: 5s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
     depends_on: {web: {condition: service_healthy}}
     networks: [private, edge]
     ports:

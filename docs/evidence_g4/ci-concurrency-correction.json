@@ -10,5 +10,9 @@
     "status": "PASS",
     "evidence": "mac-postgresql-gate.json"
   },
-  "github_revalidation": "PENDING"
+  "github_revalidation": {
+    "status": "PASS",
+    "run": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38502354687",
+    "source_commit": "0bbea59dc823860251563359a127bcddc7ac5ba2"
+  }
 }

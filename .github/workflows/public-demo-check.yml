@@ -1,0 +1,36 @@
+name: ADC public demo network check
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: Active free Mac demo hostname (without https or a path)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  public_https:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ADC_DEMO_HOST: ${{ inputs.host }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Validate the selected course hostname
+        run: |
+          python3 - <<'PY'
+          import os, re
+          if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com', os.environ['ADC_DEMO_HOST']):
+              raise SystemExit('Only an explicitly selected free course-demo hostname is accepted.')
+          PY
+      - name: Read-only HTTPS check from the external runner
+        run: python3 scripts/g4_https_probe.py --host "$ADC_DEMO_HOST" > public-demo-network.json
+      - name: Display the sanitized network evidence
+        if: always()
+        run: |
+          if [ -f public-demo-network.json ]; then
+            cat public-demo-network.json
+          fi

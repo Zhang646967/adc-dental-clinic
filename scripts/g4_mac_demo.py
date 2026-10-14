@@ -6,6 +6,7 @@ Use only a verified cloudflared binary and a separate mac_tunnel .g4 bundle.
 import argparse
 import fcntl
 import hashlib
+from http.client import HTTPConnection
 import json
 import os
 from pathlib import Path
@@ -44,6 +45,18 @@ def process_stamp(pid):
 def matches_process(metadata):
     return bool(metadata.get('pid') and metadata.get('process_stamp') and
                 process_stamp(metadata['pid']) == metadata['process_stamp'])
+
+
+def check_origin(hostname, port):
+    connection = HTTPConnection('127.0.0.1', port, timeout=10)
+    try:
+        connection.request('GET', '/health/', headers={'Host': hostname, 'X-Forwarded-Proto': 'https'})
+        response = connection.getresponse()
+        response.read(4096)
+        if response.status != 200:
+            raise RuntimeError('The actual loopback gateway is not ready.')
+    finally:
+        connection.close()
 
 
 def checked_bundle(bundle):
@@ -129,6 +142,7 @@ def start(bundle, binary):
         inspect_bundle(bundle, private_render)
         subprocess.run(command + ['up', '-d', '--wait', '--wait-timeout', '90',
                                    '--force-recreate', 'web', 'gateway'], check=True, timeout=120)
+        check_origin(hostname, plan['ports'][0])
         if process.poll() is not None:
             raise RuntimeError('Tunnel exited during startup.')
         metadata = {'pid': process.pid, 'process_stamp': process_stamp(process.pid),
