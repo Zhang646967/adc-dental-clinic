@@ -46,7 +46,7 @@ def write_env(path, values):
 
 def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
             bind_ip='127.0.0.1', http_port=80, https_port=443, mode='direct_tls',
-            access_mode='read-only'):
+            access_mode='read-only', architecture='amd64'):
     output = Path(output)
     if output.name != '.g4' or output.exists() or output.is_symlink():
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
@@ -57,6 +57,9 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     writable = access_mode == 'course-writable'
     if writable and mode != 'direct_tls':
         raise ValueError('Course writes require a separate direct HTTPS deployment.')
+    if architecture not in ('amd64', 'arm64') or (writable and architecture == 'arm64' and
+            (bind_ip != '127.0.0.1' or http_port == 80 or https_port == 443)):
+        raise ValueError('Cloud course images require amd64; arm64 is limited to isolated loopback rehearsals.')
     if mode == 'mac_tunnel' and (bind_ip != '127.0.0.1' or http_port == 18000 or
                                 not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com', host)):
         raise ValueError('Mac tunnel requires its assigned hostname and a separate IPv4 loopback origin.')
@@ -122,6 +125,10 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         (output / target).write_bytes((templates / source).read_bytes())
     if writable:
         compose = (output / 'compose.yaml').read_text()
+        platform = 'linux/' + architecture
+        compose = compose.replace('x-app: &app\n', 'x-app: &app\n  platform: ' + platform + '\n')
+        for service in ('db', 'gateway'):
+            compose = compose.replace('  ' + service + ':\n', '  ' + service + ':\n    platform: ' + platform + '\n')
         compose = compose.replace('    profiles: [writer]\n', '')
         compose = compose.replace('restart: "on-failure:5"', 'restart: unless-stopped')
         (output / 'compose.yaml').write_text(compose)
@@ -134,6 +141,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'mode': mode,
         'requested_source_commit': source_commit, 'read_only': not writable,
         'access_mode': access_mode,
+        'architecture': architecture if writable else None,
         'bind_ip': bind_ip, 'ports': [http_port] if mode == 'mac_tunnel' else [http_port, https_port],
         'images': {'app': app_image, 'db': db_image, 'nginx': nginx_image},
         'public_acceptance_executed': False,
@@ -210,6 +218,8 @@ def inspect_bundle(output, rendered=None):
         worker = services['notification-worker']
         if writable and (worker.get('profiles') or worker.get('restart') != 'unless-stopped'):
             raise ValueError('The course writer must start automatically and recover after reboot.')
+        if writable and any(service.get('platform') != 'linux/' + plan['architecture'] for service in services.values()):
+            raise ValueError('All course services must use the reviewed image architecture.')
         ports = services['gateway'].get('ports', [])
         targets = {80} if plan.get('mode') == 'mac_tunnel' else {80, 443}
         if len(ports) != len(targets) or {int(p['target']) for p in ports} != targets:
@@ -238,6 +248,7 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--https-port', type=int, default=443)
     prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel'), default='direct_tls')
     prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable'), default='read-only')
+    prepare_parser.add_argument('--architecture', choices=('amd64', 'arm64'), default='amd64')
     inspect_parser = sub.add_parser('inspect')
     inspect_parser.add_argument('--output', default=str(ROOT / '.g4'))
     inspect_parser.add_argument('--rendered-compose')
@@ -247,7 +258,7 @@ if __name__ == '__main__':
             plan = prepare(args.output, host=args.host, source_commit=args.source_commit,
                            app_image=args.app_image, db_image=args.db_image, nginx_image=args.nginx_image,
                            bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port,
-                           mode=args.mode, access_mode=args.access_mode)
+                           mode=args.mode, access_mode=args.access_mode, architecture=args.architecture)
             result = {'status': plan['status'], 'project': plan['project'], 'host': plan['host'],
                       'credentials': 'private files only; not displayed', 'public_acceptance_executed': False}
         else:

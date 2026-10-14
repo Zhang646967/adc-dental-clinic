@@ -32,7 +32,7 @@ from scripts.g4_https_probe import TargetHTTPSConnection
 
 READ_ROUTES = ('/frontdesk/', '/patients/', '/visits/', '/patients/new/')
 SETUP_PATTERN = re.compile(r'/(?:accounts/login/|workspace/(?:clinic|role)/activate/|'
-    r'workspace/clinics/|technical/|technical/accounts/(?:new/|[0-9]+/(?:grant/)?)|'
+    r'workspace/(?:select-clinic|select-role|activate)/|technical/|technical/accounts/(?:new/|[0-9]+/(?:grant/)?)|'
     r'frontdesk/|patients/(?:new/|[0-9]+/)?|visits/)')
 
 

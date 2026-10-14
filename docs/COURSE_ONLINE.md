@@ -170,7 +170,8 @@ Check business/credential digests and normal login after restore. Recovery targe
 proof of original Windows/v0.7 recovery.
 
 For an isolated Mac rehearsal, prepare a NEW direct-TLS course bundle on separate
-loopback ports and use g4_course.py --rehearsal --architecture arm64 --ca-file
+loopback ports with --architecture arm64 (or amd64 for emulation); use the matching
+image architecture in g4_course.py --rehearsal --architecture arm64 --ca-file
 LOCAL_CA --output NEW_BUNDLE --context desktop-linux restore --backup-file
 PRIVATE_BACKUP --identity-file PRIVATE_KEY --trusted-synthetic-copy.
 Both projects stay intact. Never use down -v or overwrite a current database.

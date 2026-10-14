@@ -147,6 +147,8 @@ class Course:
         if (self.plan.get('mode') != 'direct_tls' or self.plan.get('access_mode') != 'course-writable'
                 or self.plan['read_only']):
             raise ValueError('Use a separate reviewed course-writable direct HTTPS bundle.')
+        if self.plan.get('architecture') != architecture:
+            raise ValueError('Operation architecture must match the reviewed bundle.')
         if rehearsal:
             if self.plan['bind_ip'] != '127.0.0.1' or 80 in self.plan['ports'] or 443 in self.plan['ports']:
                 raise ValueError('Rehearsals require separate IPv4 loopback ports.')
@@ -169,7 +171,7 @@ class Course:
 
     def images(self):
         for name, image in self.plan['images'].items():
-            obj = json.loads(run(self.docker + ['image', 'inspect', image], self.log))[0]
+            obj = json.loads(run(self.docker + ['image', 'inspect', '--platform', 'linux/' + self.architecture, image], self.log))[0]
             if obj['Architecture'] != self.architecture:
                 raise ValueError('Image architecture does not match the selected target.')
             if name == 'app' and ((obj['Config'].get('Labels') or {}).get('org.opencontainers.image.revision')
