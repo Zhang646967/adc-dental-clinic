@@ -8,7 +8,8 @@
       "docs/evidence_worker/postgresql-gate.json",
       "docs/evidence_g3/postgresql-gate.json",
       "docs/evidence_g4/postgresql-gate.json",
-      "docs/evidence_g4/mac-postgresql-gate.json"
+      "docs/evidence_g4/mac-postgresql-gate.json",
+      "docs/evidence_g4/mac-status-postgresql-gate.json"
     ]
   },
   "G2_v07_copy_upgrade_and_restore": {
@@ -83,6 +84,15 @@
       "demo_web_and_gateway_restart": {
         "status": "PASS",
         "scope": "Same-Mac service restart; original volume preserved and public HTTPS rechecked"
+      },
+      "demo_operations_status_and_login_links": {
+        "status": "PASS",
+        "scope": "Controlled Mac CLI/HTTP failure rehearsal and private login-link refresh; live origin and public HTTPS rechecked without restarting the public tunnel",
+        "evidence": [
+          "docs/evidence_g4/mac-status-reliability.json",
+          "docs/evidence_g4/mac-status-network.json",
+          "docs/evidence_g4/mac-status-postgresql-gate.json"
+        ]
       }
     }
   },

@@ -5,6 +5,6 @@ A/B的编码、配置、脚本定义和报告整合已形成可交付RC。没有
 1. G1：真实依赖、Django检查、16份迁移及PG/HTTP/并发回归已通过。后续修改仍需重跑；本次方法数和实际结果见`RC_ACCEPTANCE_RECORD.json`，不是覆盖率。
 2. G2：Windows已重置，交付包没有原v0.7数据库备份；未宣称恢复原数据。若找到可信旧备份，仍需单事务恢复、前后记录和金额/权限核对；新的RC备份演练不能冒充原v0.7恢复。
 3. G3：PASS。真实worker进程恢复与七角色、两条浏览器业务主链均已执行；覆盖旧页面、跨店、撤权、只读、真实回执丢失、320/390 CSS像素Chrome布局、大字和键盘确认。首个失败、修复及数据库事实保留在`G3_BROWSER_ACCEPTANCE.md`和`evidence_g3/`；窄屏浏览器帧不冒充实体手机/Safari测试。
-4. G4：部署准备包已形成，见`deployment/g4/README.md`；本地独立演练验证迁移/运行账号分离及HTTPS配置。实际服务器、SSH、域名/DNS、可信证书、备份与访问范围仍待提供，公网验收保持NOT_RUN。当前loopback RC不是公网配置。
+4. G4：PARTIAL。用户已选择本台Mac和免费的临时HTTPS子域名，见`deployment/g4/MAC_TEMPORARY_DEMO.md`；无需购买服务器或域名。独立合成只读实例已通过7项公网HTTPS检查、43项真实Chrome检查、外部GitHub runner访问、Web/gateway重启及同机独立空库恢复。原本地RC的18000端口与演示实例分离。离机备份/主机损失恢复、整机重启、持续可用性与容量验证仍未执行；临时演示通过不能替代完整G4。当前证据见`RC_ACCEPTANCE_RECORD.json`及`evidence_g4/`。
 
 Mac源码迁移已完成。CP-SAT/多资源、专业资格认证、短信/邮件、支付和通用AI代理仍在冻结范围之外；不列为1.0已完成。正式发布由真实证据决定，不由版本号决定。

@@ -1,0 +1,62 @@
+{
+  "recorded_at_utc": "2026-10-14T04:16:50.022029+00:00",
+  "scope": "Controlled loopback HTTP fixture and actual Mac CLI; no Docker, public tunnel or business data changed",
+  "first_failure": {
+    "previous_status": "RUNNING",
+    "fixture_http_status": 503,
+    "reason": "Previous status reported a live process without checking its origin"
+  },
+  "status_cases": [
+    {
+      "case": "HTTP 503 origin with live recorded process",
+      "status": "DEGRADED",
+      "exit_code": 1,
+      "public_https": "NOT_CHECKED",
+      "passed": true
+    },
+    {
+      "case": "Unrelated HTTP 200 origin",
+      "status": "DEGRADED",
+      "exit_code": 1,
+      "public_https": "NOT_CHECKED",
+      "passed": true
+    },
+    {
+      "case": "Expected health body",
+      "status": "RUNNING",
+      "exit_code": 0,
+      "public_https": "NOT_CHECKED",
+      "passed": true
+    },
+    {
+      "case": "Origin connection refused",
+      "status": "DEGRADED",
+      "exit_code": 1,
+      "public_https": "NOT_CHECKED",
+      "passed": true
+    },
+    {
+      "case": "Stopped record",
+      "status": "STOPPED",
+      "exit_code": 1,
+      "public_https": "NOT_CHECKED",
+      "passed": true
+    }
+  ],
+  "private_guide_refresh": "PASS, account entries preserved, mode 600",
+  "signals_sent": 0,
+  "public_acceptance_executed": false,
+  "operator_helper_sha256": "cefd8d82cd8c2515f15a7d3c7d36e1cc926de17235b7f41aefa485c56b7ee5f2",
+  "focused_checks": 14,
+  "live_origin_status": {
+    "status": "RUNNING",
+    "tunnel_running": true,
+    "origin_ready": true,
+    "public_https": "NOT_CHECKED",
+    "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+    "public_acceptance_executed": false
+  },
+  "live_network_evidence": "docs/evidence_g4/mac-status-network.json",
+  "public_tunnel_restarted": false,
+  "full_G4_accepted": false
+}

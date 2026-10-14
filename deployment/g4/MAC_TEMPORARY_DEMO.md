@@ -60,9 +60,20 @@ Cloudflare configuration, and keeps logs private. It records the assigned host
 in runtime/maintenance/Nginx configuration, validates rendered Compose, and
 recreates only this project's Web/gateway. Source images, database identity,
 passwords and read-only mode remain pinned. A failed startup stops its tunnel.
+After readiness succeeds, it also refreshes the links in the private
+`.g4/private/DEMO_ACCESS.md`, preserving existing account/password entries.
+
+`status` checks both the recorded process identity and the actual loopback
+gateway's database health response. `RUNNING` means those local checks passed;
+`DEGRADED` means the tunnel is alive but the origin is unavailable. `STOPPED`
+does not print an obsolete sharing URL. Status exits nonzero for either failure
+state and performs no restart or business write. It reports public HTTPS as
+`NOT_CHECKED`; use the HTTPS probe separately to establish public reachability.
 
 The stop helper compares both recorded PID and process start/command information
-before signalling it. A reused PID is never killed. Stopping closes the public
+before signalling it. A reused PID is never killed. It also works when the
+origin is unhealthy. Metadata from another project is refused, and
+process-group/malformed PIDs are never signalled. Stopping closes the public
 entry without deleting or stopping the database. Restart via `start` after the
 previous tunnel has stopped; use the new printed URL for sharing. Never use an
 old address as evidence that the current demo is reachable.
@@ -107,3 +118,13 @@ and measured capacity remain unexecuted; overall G4 is partial and RC1 retained.
 
 Read the active URL and private accounts in `.g4/private/DEMO_ACCESS.md` on this
 Mac. Credentials and database dumps are never committed to GitHub.
+
+The operations follow-up passed 14 focused checks and 5 controlled Mac CLI/HTTP
+cases, including an unavailable origin and an unrelated HTTP 200 response.
+Private login-link refresh preserved account entries. The live origin and all
+7 public HTTPS checks passed with the current tunnel still running; hostname
+refresh was exercised in the private fixture. The latest regression passed
+839 source checks and 705 Django tests. Evidence:
+[status rehearsal](../../docs/evidence_g4/mac-status-reliability.json),
+[live HTTPS](../../docs/evidence_g4/mac-status-network.json) and
+[regression](../../docs/evidence_g4/mac-status-postgresql-gate.json).

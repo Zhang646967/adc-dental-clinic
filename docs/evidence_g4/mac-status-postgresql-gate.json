@@ -1,0 +1,86 @@
+{
+  "timestamp_utc": "2026-10-14T04:17:30.047520+00:00",
+  "python": "3.13.16",
+  "source_sha256": "1830c74fe434da3c8b753b8dfc8ceeab6df79a97c97b4468dedcc562bd2b6bbf",
+  "results": [
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/verify_update.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "checks",
+        "-v"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/record_runtime.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "check"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "makemigrations",
+        "--check",
+        "--dry-run"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "migrate",
+        "--noinput"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "test",
+        "tests",
+        "--settings=config.settings.test",
+        "--noinput",
+        "--verbosity=2"
+      ],
+      "returncode": 0
+    }
+  ],
+  "all_gates_passed": true,
+  "source_checks": 839,
+  "django_tests": 705,
+  "focused_mac_demo_checks": 14,
+  "host_validation": {
+    "project": "adc_verify_20261014t041605z_58966b5d",
+    "timestamp_utc": "20261014T041605Z",
+    "scope": "isolated local Docker only",
+    "executed": true,
+    "all_gates_passed": true,
+    "cleanup_returncode": 0,
+    "returncode": 0
+  },
+  "public_acceptance_executed": false
+}

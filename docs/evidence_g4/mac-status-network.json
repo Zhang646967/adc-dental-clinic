@@ -1,0 +1,38 @@
+{
+  "scope": "Read-only network preflight; not full G4 acceptance",
+  "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+  "trust": "system certificate trust",
+  "dns_cutover_verified": true,
+  "results": [
+    {
+      "check": "HTTP redirects to domain HTTPS",
+      "passed": true
+    },
+    {
+      "check": "Verified TLS and login GET",
+      "passed": true
+    },
+    {
+      "check": "CSRF cookie is Secure and SameSite Lax",
+      "passed": true
+    },
+    {
+      "check": "HSTS, no-store and frame protection",
+      "passed": true
+    },
+    {
+      "check": "Collected static asset",
+      "passed": true
+    },
+    {
+      "check": "Gateway overwrites spoofed proxy scheme",
+      "passed": true
+    },
+    {
+      "check": "Foreign Host is not served",
+      "passed": true
+    }
+  ],
+  "network_checks_passed": true,
+  "public_acceptance_executed": false
+}

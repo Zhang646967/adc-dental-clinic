@@ -6,7 +6,7 @@ Use only a verified cloudflared binary and a separate mac_tunnel .g4 bundle.
 import argparse
 import fcntl
 import hashlib
-from http.client import HTTPConnection
+from http.client import HTTPConnection, HTTPException
 import json
 import os
 from pathlib import Path
@@ -43,7 +43,8 @@ def process_stamp(pid):
 
 
 def matches_process(metadata):
-    return bool(metadata.get('pid') and metadata.get('process_stamp') and
+    pid = metadata.get('pid')
+    return bool(type(pid) is int and pid > 0 and metadata.get('process_stamp') and
                 process_stamp(metadata['pid']) == metadata['process_stamp'])
 
 
@@ -52,11 +53,34 @@ def check_origin(hostname, port):
     try:
         connection.request('GET', '/health/', headers={'Host': hostname, 'X-Forwarded-Proto': 'https'})
         response = connection.getresponse()
-        response.read(4096)
-        if response.status != 200:
+        body = response.read(4097)
+        try:
+            healthy = len(body) <= 4096 and json.loads(body).get('status') == 'ok'
+        except (ValueError, AttributeError, UnicodeError):
+            healthy = False
+        if response.status != 200 or not healthy:
             raise RuntimeError('The actual loopback gateway is not ready.')
     finally:
         connection.close()
+
+
+def refresh_access(bundle, hostname):
+    """Keep the private operator guide current without reading seed credentials."""
+    if not re.fullmatch(HOST_PATTERN, hostname):
+        raise ValueError('Use the assigned free demo hostname.')
+    path = bundle / 'private/DEMO_ACCESS.md'
+    text = path.read_text() if path.exists() else (
+        '# Temporary course demo access（临时演示登录）\n\n'
+        'Business read-only mode. Accounts remain in private `demo-credentials.txt`.\n'
+    )
+    url = 'https://' + hostname
+    for label, route in (('Staff login', '/accounts/login/'), ('Patient login', '/portal/login/')):
+        # Replace only the defined login lines; account entries are opaque text.
+        pattern = r'^' + re.escape(label) + r': https://' + HOST_PATTERN + re.escape(route) + r'(?=$|[ \t\r])'
+        text, replaced = re.subn(pattern, label + ': ' + url + route, text, flags=re.MULTILINE)
+        if not replaced:
+            text = text.rstrip() + '\n\n' + label + ': ' + url + route + '\n'
+    atomic_text(path, text)
 
 
 def checked_bundle(bundle):
@@ -145,6 +169,7 @@ def start(bundle, binary):
         check_origin(hostname, plan['ports'][0])
         if process.poll() is not None:
             raise RuntimeError('Tunnel exited during startup.')
+        refresh_access(bundle, hostname)
         metadata = {'pid': process.pid, 'process_stamp': process_stamp(process.pid),
                     'url': 'https://' + hostname, 'project': plan['project'],
                     'read_only': True, 'public_acceptance_executed': False}
@@ -162,16 +187,26 @@ def start(bundle, binary):
 
 
 def status_or_stop(bundle, stop=False):
-    checked_bundle(bundle)
+    plan = checked_bundle(bundle)
     path = bundle / 'private/tunnel.json'
     metadata = json.loads(path.read_text()) if path.exists() else {}
-    running = matches_process(metadata)
+    running = (metadata.get('project') == plan['project'] and matches_process(metadata))
     if stop and running:
         os.kill(metadata['pid'], signal.SIGTERM)
         metadata['stopped'] = True
         atomic_text(path, json.dumps(metadata, indent=2) + '\n')
-    return {'status': 'STOP_REQUESTED' if stop else ('RUNNING' if running else 'STOPPED'),
-            'url': metadata.get('url'), 'database': 'preserved',
+    origin_ready = None
+    if running and not stop:
+        try:
+            check_origin(plan['host'], plan['ports'][0])
+            origin_ready = True
+        except (OSError, HTTPException, RuntimeError):
+            origin_ready = False
+    status = ('STOP_REQUESTED' if running else 'STOPPED') if stop else (
+        'RUNNING' if running and origin_ready else ('DEGRADED' if running else 'STOPPED'))
+    return {'status': status, 'tunnel_running': running, 'origin_ready': origin_ready,
+            'public_https': 'NOT_CHECKED',
+            'url': 'https://' + plan['host'] if running else None, 'database': 'preserved',
             'public_acceptance_executed': False}
 
 
@@ -190,5 +225,7 @@ if __name__ == '__main__':
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             result = start(bundle, args.cloudflared) if args.action == 'start' else status_or_stop(bundle, args.action == 'stop')
         print(json.dumps(result, indent=2))
-    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
+        if args.action == 'status' and result['status'] != 'RUNNING':
+            raise SystemExit(1)
+    except (OSError, ValueError, RuntimeError, HTTPException, subprocess.SubprocessError):
         raise SystemExit('Mac demo operation stopped. Preserve private state and inspect .g4/private locally; no volumes removed.') from None
