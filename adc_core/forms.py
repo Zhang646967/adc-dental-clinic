@@ -43,8 +43,8 @@ class AppointmentForm(forms.Form):
 class RescheduleForm(forms.Form):
     expected_version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
     slot = forms.ModelChoiceField(label="新的出诊时段", queryset=None)
-    start = forms.DateTimeField(label="新的开始时间", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
-    end = forms.DateTimeField(label="新的结束时间", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
+    start = forms.DateTimeField(label="新的开始时间", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M:%S", attrs={"type": "datetime-local", "step": "1"}))
+    end = forms.DateTimeField(label="新的结束时间", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M:%S", attrs={"type": "datetime-local", "step": "1"}))
     reason = forms.CharField(label="改期原因", max_length=500)
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)

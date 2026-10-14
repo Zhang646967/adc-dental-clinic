@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}<div class="reschedule-flow">{% include 'scheduling/coordination_return.html' %}
+<div class="eyebrow">先核对记录，再继续办理</div><h1>核对这次改期的当前状态</h1>
+<section class="panel"><p role="status">{{ problem }}</p>{% if form %}{{ form.non_field_errors }}{% for field in form %}{% if field.errors %}<div>{% if field.is_hidden %}<p>确认信息需要重新核对：</p>{% else %}<p>{{ field.label }}</p>{% endif %}{{ field.errors }}</div>{% endif %}{% endfor %}{% endif %}
+<p>原预约：{{ visit.visit_no }} · {{ visit.get_status_display }}。已保存的改期可从原记录的关联预约查看。</p>
+<div class="actions"><a class="button" href="{% url 'visit_detail' visit.pk %}{% if coordination_slot_id %}?coord_slot={{ coordination_slot_id }}{% endif %}">打开原预约核对结果</a>
+<a class="button secondary" href="{% url 'visit_reschedule' visit.pk %}{% if coordination_slot_id %}?coord_slot={{ coordination_slot_id }}{% endif %}">重新选择并预览</a></div></section></div>{% endblock %}

@@ -7,20 +7,29 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError, ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db import connection
+from django.db import DatabaseError
 from django.db.models import Q, Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from datetime import timedelta
 from accounts.policies import has_role, clinic_ids, bindings
 from adc_core.forms import PatientForm, AppointmentForm, RescheduleForm, ActionForm, SlotForm
 from adc_core.rules import RuleError
 from patients.models import Patient
 from patients.selectors import visible_patients
 from patients.services import create_patient, PATIENT_FIELDS
-from scheduling.selectors import visible_visits, can_read_visit_details
+from scheduling.selectors import visible_visits, can_read_visit_details, booking_slots
 from scheduling.services import create_appointment, change_appointment, reschedule, create_slot
 from scheduling.models import Visit
 from scheduling.worklists import VisitFilterForm, filtered_visits
+from scheduling.reschedule_forms import ReplacementSearchForm, RescheduleConfirmForm
+from scheduling.reschedule_selectors import replacement_options, check_target, HORIZON_DAYS
+from scheduling.reschedule_services import prepare_reschedule, confirm_reschedule
 
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 
@@ -147,23 +156,87 @@ def visit_detail(request, pk):
                   "events": v.events.order_by("-recorded_at")[:15], "requests": v.requests.all(), **return_context(origin), **visit_chain_context(request.user, v, origin)})
 
 @login_required
+@never_cache
+@sensitive_post_parameters()
 @require_http_methods(["GET", "POST"])
 def visit_reschedule(request, pk):
     v = get_object_or_404(visible_visits(request.user), pk=pk)
     if not bindings(request.user).filter(role="FRONT_DESK", scope_kind="CLINIC", clinic_id=v.clinic_id).exists():
         raise PermissionDenied
     origin = visit_return_slot(request.user, request.GET.get("coord_slot"), v)
-    form = RescheduleForm(request.POST or None, user=request.user, initial={"expected_version": v.lock_version})
-    if request.method == "POST" and form.is_valid():
+    action = request.POST.get('action', 'preview') if request.method == 'POST' else None
+    if action == 'confirm':
+        confirm = RescheduleConfirmForm(request.POST)
+        if confirm.is_valid():
+            try:
+                result = confirm_reschedule(actor=request.user, visit_id=v.pk,
+                    proposal_token=confirm.cleaned_data['proposal_token'], confirmed=confirm.cleaned_data['confirmed'])
+            except EXPECTED_ERRORS as exc:
+                add_error(confirm, exc)
+            except DatabaseError:
+                return render(request, 'scheduling/reschedule_recovery.html', {'visit': v,
+                    'problem': '本次提交结果暂时不能核实。请先打开原预约查询关联记录，不要推断改期失败或反复创建。'}, status=503)
+            else:
+                origin = visit_return_slot(request.user, str(result.origin), result.visit) if result.origin else None
+                messages.success(request, '这次改期此前已保存，本次返回关联预约的当前状态，没有重复创建。' if result.repeated else
+                    '新预约已创建，原预约及改期原因已保留。')
+                return redirect(reverse('visit_detail', args=[result.visit.pk]) + ('?'+urlencode({'coord_slot': origin}) if origin else ''))
+        return render(request, 'scheduling/reschedule_recovery.html', {'visit': v, 'form': confirm,
+            'problem': '本次确认未执行。先核对原预约当前状态，再重新选择并预览。', **return_context(origin)}, status=409)
+    if request.method == 'POST' and action != 'preview':
+        raise PermissionDenied('未知改期操作。')
+    if v.status != 'SCHEDULED':
+        return render(request, 'scheduling/reschedule_recovery.html', {'visit': v,
+            'problem': '原预约当前不能普通改期。请打开原记录核对状态与直接关联的后继预约。', **return_context(origin)}, status=409)
+    initial = {'expected_version': v.lock_version}
+    selection_problem = ''
+    if request.method == 'GET' and any(name in request.GET for name in ('slot', 'start', 'end')):
+        try:
+            slot = booking_slots(request.user).get(pk=int(request.GET.get('slot', '0')))
+            start = parse_datetime(request.GET.get('start', ''))
+            end = parse_datetime(request.GET.get('end', ''))
+            if start is None or end is None or timezone.is_naive(start) or timezone.is_naive(end):
+                raise RuleError('选定时间无效，请重新查询。')
+            check_target(v, slot, start, end, timezone.now())
+            initial.update(slot=slot.pk, start=start, end=end)
+        except (ValueError, *EXPECTED_ERRORS):
+            selection_problem = '选定时段已变化或无权使用，请重新查询；原预约未改变。'
+    form = RescheduleForm(request.POST if request.method == 'POST' else None, user=request.user, initial=initial)
+    if request.method == 'POST' and form.is_valid():
         d = form.cleaned_data
         try:
-            new = reschedule(actor=request.user, visit_id=v.pk, expected_version=d["expected_version"], new_slot_id=d["slot"].pk, start=d["start"], end=d["end"], reason=d["reason"])
+            preview = prepare_reschedule(actor=request.user, visit_id=v.pk, expected_version=d['expected_version'],
+                new_slot_id=d['slot'].pk, start=d['start'], end=d['end'], reason=d['reason'], origin=origin)
         except EXPECTED_ERRORS as exc:
             add_error(form, exc)
+        except DatabaseError:
+            form.add_error(None, '本次预览不可用，尚未执行改期；请稍后重新核对。')
         else:
-            messages.success(request, "新预约已创建；原预约及改期原因已保留。")
-            return redirect(reverse("visit_detail", args=[new.pk]) + ("?"+urlencode({"coord_slot":origin}) if origin else ""))
-    return render(request, "form.html", {"form": form, "title": "改期并保留历史", "subtitle": "新预约失败时，旧预约不会失效。", "button": "确认改期", **return_context(origin)})
+            return render(request, 'scheduling/reschedule_confirm.html', {'preview': preview,
+                'form': RescheduleConfirmForm(initial={'proposal_token': preview['proposal_token']}),
+                'read_only': settings.ADC_READ_ONLY, **return_context(origin)})
+    now = timezone.localdate()
+    source_day = timezone.localtime(v.scheduled_start).date()
+    default_day = source_day if now <= source_day <= now+timedelta(days=HORIZON_DAYS) else now
+    search = ReplacementSearchForm({'day': request.GET.get('day', default_day.isoformat()),
+        'dentist': request.GET.get('dentist', '')}, actor=request.user, auto_id='id_search_%s')
+    options = None
+    if search.is_valid():
+        try:
+            options = replacement_options(actor=request.user, visit_id=v.pk, day=search.cleaned_data['day'],
+                dentist_id=search.cleaned_data['dentist'].pk if search.cleaned_data['dentist'] else None)
+        except EXPECTED_ERRORS as exc:
+            add_error(search, exc)
+        except DatabaseError:
+            search.add_error(None, '候选读取暂时不可用，不能据此认定没有空闲时间。')
+        if options:
+            for row in options['rows']:
+                query = {'day': search.cleaned_data['day'].isoformat(), 'dentist': search.cleaned_data['dentist'].pk if search.cleaned_data['dentist'] else '',
+                         'slot': row['slot_id'], 'start': row['start_iso'], 'end': row['end_iso']}
+                if origin: query['coord_slot'] = origin
+                row['choose_url'] = reverse('visit_reschedule', args=[v.pk])+'?'+urlencode(query)
+    return render(request, 'scheduling/reschedule.html', {'visit': v, 'form': form, 'search': search,
+        'options': options, 'selection_problem': selection_problem, 'read_only': settings.ADC_READ_ONLY, **return_context(origin)})
 
 @login_required
 @require_http_methods(["GET", "POST"])

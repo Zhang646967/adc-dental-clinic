@@ -179,6 +179,9 @@ class FrontCoordinationTests(FixtureMixin, TransactionTestCase):
         c=self.client_front();url=reverse('visit_reschedule',args=[v.pk])+'?coord_slot='+str(self.slot1.pk)
         r=c.post(url,{'expected_version':0,'slot':new_slot.pk,'start':new_slot.starts_at.isoformat(),
             'end':(new_slot.starts_at+timedelta(minutes=30)).isoformat(),'reason':'合成患者同意改期'})
+        self.assertEqual(r.status_code,200)
+        self.assertFalse(Visit.objects.filter(replaces_visit=v).exists())
+        r=c.post(url,{'action':'confirm','proposal_token':r.context['preview']['proposal_token'],'confirmed':'on'})
         self.assertEqual(r.status_code,302);new=Visit.objects.get(replaces_visit=v)
         self.assertEqual(visit_return_slot(self.front,str(self.slot1.pk),new),self.slot1.pk)
         self.assertEqual(self.read()['assessment'].code,'RECHECK')

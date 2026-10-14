@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="reschedule-flow">
+{% include 'scheduling/coordination_return.html' %}
+<div class="eyebrow">预约改期 · 最后确认</div><h1>核对原安排与新安排</h1>
+<p class="notice" role="status">尚未保存，原预约仍有效。本确认页15分钟内有效；确认时会重新核对权限和当前安排。</p>
+<p>{{ preview.original.patient.name }} · {{ preview.original.visit_no }} · {{ preview.original.clinic.name }}</p>
+<div class="split-panels"><section class="panel"><h2>原安排</h2><p>{{ preview.original.dentist.name }}</p><p>{{ preview.original.scheduled_start|date:'Y-m-d H:i:s' }} 至 {{ preview.original.scheduled_end|date:'Y-m-d H:i:s' }}（北京时间）</p></section>
+<section class="panel"><h2>拟改为</h2><p>{{ preview.destination.dentist.name }}</p><p>{{ preview.start|date:'Y-m-d H:i:s' }} 至 {{ preview.end|date:'Y-m-d H:i:s' }}（北京时间）</p></section></div>
+{% if preview.duration_changed %}<p class="notice" role="status">你人工输入的新预约时长与原预约不同，请特别核对预计结束时间。</p>{% endif %}
+<section class="panel"><h2>改期原因</h2><p>{{ preview.reason }}</p>
+<p>成功后保留原预约编号、计划时间和改期原因，创建唯一关联的新预约。新安排失败时保留原预约。</p></section>
+<section class="panel form-panel"><form method="post">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="confirm">{{ form.as_div }}
+<div class="actions"><button type="submit"{% if read_only %} disabled{% endif %}>确认改期并保留原记录</button><a class="button secondary" href="{% url 'visit_reschedule' preview.original.pk %}{% if coordination_slot_id %}?coord_slot={{ coordination_slot_id }}{% endif %}">返回重新选择</a></div></form></section>
+</div>{% endblock %}

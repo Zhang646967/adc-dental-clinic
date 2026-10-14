@@ -1,0 +1,450 @@
+{
+  "accepted_at_utc": "2026-10-14T17:12:42.788626+00:00",
+  "scope": "Local isolated synthetic developer acceptance; independent cloud course acceptance remains NOT_RUN",
+  "base_commit": "b1c86a01c89b0080ead3de84a6c5504ee5329c28",
+  "application_changes_sha256": {
+    "adc_core/forms.py": "b608ec723eb336c845baf5809ea6f8c8dcf24aa207908c6ef9acf5d294e41fdf",
+    "adc_core/views.py": "386b6e4c7a28f3933289065c86d17bf8eb91479b2305da592754457d6340588b",
+    "guidance/catalog.py": "49b60e687461e694bade58184b0ac01c1cf76b2cbf4e419a55a9ba55be590907",
+    "scheduling/reschedule_forms.py": "15cc219a218eec0710ece38278913cf212e6cb7677a4c9fac4d37667e67f7060",
+    "scheduling/reschedule_selectors.py": "dee8867196479f7873162f7d92863cecef129b5dac1e0a3ed3b76c3eb229bac4",
+    "scheduling/reschedule_services.py": "b1c31ad2bc4541e087f432c442c34cca680d8b3a565cc0734c9b460878469888",
+    "static/workspace.css": "e9f5efb137e2bb1500ae8ddfde9b8799c1f2860ccaf7d287277e935476db2c1e",
+    "templates/scheduling/reschedule.html": "df39f0cac2ebe900f20a4ad760cec5b7c703dd0bbe1e130c7f510f22a37a5482",
+    "templates/scheduling/reschedule_confirm.html": "a4ad4884e07dd16150cbae9a051e69ba11d142e3a348c72c7eb8443b795ffe95",
+    "templates/scheduling/reschedule_recovery.html": "4f1615e94d0fcd38a81f0ad352d29ed2ea851a613e5a2ea8e5f19ff376da18a6"
+  },
+  "models_or_migrations_changed": false,
+  "regression": {
+    "source_checks": 884,
+    "postgresql_http_concurrency_tests": 793,
+    "new_rescheduling_methods": 50,
+    "gate": {
+      "timestamp_utc": "2026-10-14T17:12:42.788626+00:00",
+      "python": "3.13.16",
+      "source_sha256": "410bde4669cff0a832b8cb14ce9de6d719a9338165bec876ad39650c41184da5",
+      "results": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_update.py"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "checks",
+            "-v"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/record_runtime.py"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "check"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "makemigrations",
+            "--check",
+            "--dry-run"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "migrate",
+            "--noinput"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "test",
+            "tests",
+            "--settings=config.settings.test",
+            "--noinput",
+            "--verbosity=2"
+          ],
+          "returncode": 0
+        }
+      ],
+      "all_gates_passed": true
+    },
+    "cleanup_exit": 0
+  },
+  "complete_flow_browser": {
+    "checks": [
+      {
+        "name": "front_a login page",
+        "passed": true
+      },
+      {
+        "name": "front_a workspace",
+        "passed": true
+      },
+      {
+        "name": "Selection page 5",
+        "passed": true
+      },
+      {
+        "name": "Feasible candidate found 5",
+        "passed": true
+      },
+      {
+        "name": "Candidate prefills China time 5",
+        "passed": true
+      },
+      {
+        "name": "Selection leaves all source bookings unchanged",
+        "passed": true
+      },
+      {
+        "name": "Candidate search 390px large text",
+        "passed": true
+      },
+      {
+        "name": "Original/new preview visible",
+        "passed": true
+      },
+      {
+        "name": "Preview explicitly unsaved",
+        "passed": true
+      },
+      {
+        "name": "Preview leaves original bookings unchanged",
+        "passed": true
+      },
+      {
+        "name": "Comparison 390px",
+        "passed": true
+      },
+      {
+        "name": "Comparison 390px large text",
+        "passed": true
+      },
+      {
+        "name": "Confirmation opens successor",
+        "passed": true
+      },
+      {
+        "name": "Coordination return retained",
+        "passed": true
+      },
+      {
+        "name": "Duplicate confirmation returns same saved successor",
+        "passed": true
+      },
+      {
+        "name": "One successor and one reschedule event",
+        "passed": true
+      },
+      {
+        "name": "Selection page 2",
+        "passed": true
+      },
+      {
+        "name": "Feasible candidate found 2",
+        "passed": true
+      },
+      {
+        "name": "Candidate prefills China time 2",
+        "passed": true
+      },
+      {
+        "name": "Original/new preview visible",
+        "passed": true
+      },
+      {
+        "name": "Preview explicitly unsaved",
+        "passed": true
+      },
+      {
+        "name": "Late booking conflict refused",
+        "passed": true
+      },
+      {
+        "name": "Recovery links original record",
+        "passed": true
+      },
+      {
+        "name": "Conflict recovery 390px large text",
+        "passed": true
+      },
+      {
+        "name": "Late conflict preserves original source",
+        "passed": true
+      },
+      {
+        "name": "Selection page 3",
+        "passed": true
+      },
+      {
+        "name": "Feasible candidate found 3",
+        "passed": true
+      },
+      {
+        "name": "Candidate prefills China time 3",
+        "passed": true
+      },
+      {
+        "name": "Original/new preview visible",
+        "passed": true
+      },
+      {
+        "name": "Preview explicitly unsaved",
+        "passed": true
+      },
+      {
+        "name": "Pause/resume invalidates old preview",
+        "passed": true
+      },
+      {
+        "name": "Pause/resume original preserved",
+        "passed": true
+      },
+      {
+        "name": "front_b login page",
+        "passed": true
+      },
+      {
+        "name": "front_b workspace",
+        "passed": true
+      },
+      {
+        "name": "front_b cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "doctor_a login page",
+        "passed": true
+      },
+      {
+        "name": "doctor_a workspace",
+        "passed": true
+      },
+      {
+        "name": "doctor_a cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "manager_a login page",
+        "passed": true
+      },
+      {
+        "name": "manager_a workspace",
+        "passed": true
+      },
+      {
+        "name": "manager_a cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "finance_demo login page",
+        "passed": true
+      },
+      {
+        "name": "finance_demo workspace",
+        "passed": true
+      },
+      {
+        "name": "finance_demo cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "hq_demo login page",
+        "passed": true
+      },
+      {
+        "name": "hq_demo workspace",
+        "passed": true
+      },
+      {
+        "name": "hq_demo cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "tech_demo login page",
+        "passed": true
+      },
+      {
+        "name": "tech_demo workspace",
+        "passed": true
+      },
+      {
+        "name": "tech_demo cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "patient_demo_a login page",
+        "passed": true
+      },
+      {
+        "name": "patient_demo_a workspace",
+        "passed": true
+      },
+      {
+        "name": "patient_demo_a cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "multi_demo login page",
+        "passed": true
+      },
+      {
+        "name": "multi_demo workspace",
+        "passed": true
+      },
+      {
+        "name": "multi_demo cannot borrow reschedule scope",
+        "passed": true
+      },
+      {
+        "name": "No browser JavaScript errors",
+        "passed": true
+      }
+    ],
+    "page_errors": 0,
+    "scope": "Isolated real Chrome reschedule business acceptance",
+    "screenshots": [
+      "replacement-search-large-text.png",
+      "replacement-comparison.png",
+      "replacement-comparison-large-text.png",
+      "replacement-conflict-large-text.png"
+    ],
+    "browser_version": "155.0.8059.79",
+    "repeat_receipt": {
+      "status": 302,
+      "first_path": "/visits/6/",
+      "repeat_path": "/visits/6/",
+      "first_query": "?coord_slot=1",
+      "repeat_query": "?coord_slot=1",
+      "inherited_anchor": "#reschedule-edit"
+    },
+    "passed": true
+  },
+  "recovery_page_browser_after_message_fix": {
+    "checks": [
+      {
+        "name": "front_a login page",
+        "passed": true
+      },
+      {
+        "name": "front_a workspace",
+        "passed": true
+      },
+      {
+        "name": "Selection page 2",
+        "passed": true
+      },
+      {
+        "name": "Feasible candidate found 2",
+        "passed": true
+      },
+      {
+        "name": "Candidate prefills China time 2",
+        "passed": true
+      },
+      {
+        "name": "Original/new preview visible",
+        "passed": true
+      },
+      {
+        "name": "Preview explicitly unsaved",
+        "passed": true
+      },
+      {
+        "name": "Preview creates no booking",
+        "passed": true
+      },
+      {
+        "name": "Late conflict still refused",
+        "passed": true
+      },
+      {
+        "name": "Error describes booking conflict",
+        "passed": true
+      },
+      {
+        "name": "No internal error field key",
+        "passed": true
+      },
+      {
+        "name": "Readable conflict 390px large text",
+        "passed": true
+      },
+      {
+        "name": "Original and earlier reschedules retained",
+        "passed": true
+      },
+      {
+        "name": "No JavaScript errors",
+        "passed": true
+      }
+    ],
+    "page_errors": 0,
+    "scope": "Isolated real Chrome reschedule business acceptance",
+    "screenshots": [
+      "replacement-conflict-readable-large-text.png"
+    ],
+    "browser_version": "155.0.8059.79",
+    "passed": true
+  },
+  "independent_database_oracle": {
+    "passed": true,
+    "checks": {
+      "source_history_1": true,
+      "unique_matching_successor_1": true,
+      "requests_copied_1": true,
+      "one_reschedule_audit_1": true,
+      "source_history_5": true,
+      "unique_matching_successor_5": true,
+      "requests_copied_5": true,
+      "one_reschedule_audit_5": true,
+      "refused_attempt_preserves_source_2": true,
+      "refused_attempt_preserves_source_3": true,
+      "pause_resume_revision_kept": true,
+      "ordinary_competing_booking_retained": true,
+      "readable_error_competing_booking_retained": true,
+      "no_duplicate_after_replay": true,
+      "no_implicit_care_billing_or_waitlist": true
+    },
+    "visits": 8,
+    "reschedule_audits": 2,
+    "scope": "Independent read-only PostgreSQL oracle; original partial-run history retained"
+  },
+  "earlier_attempts": {
+    "large_text_identifier_overflow": "fixed; original failed layout evidence retained privately",
+    "repeat_navigation_comparison": "corrected inherited-anchor comparison; database and same-successor assertions retained",
+    "original_partial_run_history": "retained; no database reset"
+  },
+  "limits": {
+    "cloud_course_ready": false,
+    "windows_original_data_recovery": "unresolved",
+    "financial_business_writes_in_this_browser_batch": false,
+    "no_new_business_api_or_schema": true,
+    "synthetic_data_only": true,
+    "external_ai_used": false
+  }
+}

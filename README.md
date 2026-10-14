@@ -49,6 +49,10 @@ import into a separate empty instance.
   care, coordination, patient offers and quarterly financial completeness; see
   [the business improvement record](docs/BUSINESS_FOLLOW_UP.md).
 - Explicit appointment confirmation; waitlist suggestions never create bookings.
+- Guided rescheduling（预约改期）finds replacement intervals, compares original/new
+  arrangements and requires final confirmation. Conflicts preserve the original;
+  repeated confirmation returns the existing successor. See
+  [the rescheduling workflow and local acceptance](docs/RESCHEDULING_OPTIMIZATION.md).
 - Versioned care records and invoices, independent correction review, and clear
   distinctions between billed revenue, cash and missing cost data.
 - Availability maintenance, intake control, coordination tasks, audited notices

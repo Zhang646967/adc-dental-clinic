@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="reschedule-flow">
+{% include 'scheduling/coordination_return.html' %}
+<div class="eyebrow">预约改期 · 先选时间，再核对</div><h1>为原预约找一个新安排</h1>
+<section class="panel"><h2>原预约仍保留</h2><p>{{ visit.patient.name }} · {{ visit.visit_no }}</p>
+<p>{{ visit.clinic.name }} · {{ visit.dentist.name }} · {{ visit.scheduled_start|date:'Y-m-d H:i:s' }} 至 {{ visit.scheduled_end|date:'Y-m-d H:i:s' }}（北京时间）</p>
+<p>查询、选择和预览都不会取消原预约。最终确认成功后，原记录才转为改期历史。</p></section>
+{% if selection_problem %}<p class="notice" role="alert">{{ selection_problem }}</p>{% endif %}
+<section class="panel"><h2>1. 查找本店可推荐时间</h2>
+<p>搜索未来14天内可开始的安排，按原预约时长核对；开始时间每30分钟取一个候选。清单按出诊时间先后返回，最多显示30项。</p>
+<form method="get" class="worklist-filters">{{ search.as_div }}{% if coordination_slot_id %}<input type="hidden" name="coord_slot" value="{{ coordination_slot_id }}">{% endif %}<div class="actions"><button type="submit">查询替代时间</button></div></form>
+{% if options %}<p class="muted">读取 {{ options.observed_at|date:'Y-m-d H:i:s' }} · 原预约时长 {{ options.duration_minutes|floatformat:'-2' }} 分钟。候选仅为读取时点的结果，尚未保留时间。</p>
+{% if options.limited %}<p class="notice" role="status">{{ options.limit_reason }}</p>{% endif %}
+<div class="table-scroll" tabindex="0"><table><caption>只列当前诊所的候选；已核对患者与牙医的跨店占用及有效候补保留</caption><thead><tr><th>牙医</th><th>新的开始 / 结束</th><th>选择</th></tr></thead><tbody>
+{% for row in options.rows %}<tr><td>{{ row.dentist }}</td><td>{{ row.start|date:'Y-m-d H:i:s' }}<small>至 {{ row.end|date:'Y-m-d H:i:s' }}</small></td><td><a class="button secondary" href="{{ row.choose_url }}#reschedule-edit">选择这个时间</a></td></tr>
+{% empty %}<tr><td colspan="3">{% if options.limited %}本次未能完成候选核对，未返回推荐时间，不能据此认定没有空闲时段。{% else %}本次筛选与搜索范围内没有可推荐时间。{% endif %}可调整日期或牙医再核对；原预约仍保留。</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+</section>
+<section class="panel form-panel" id="reschedule-edit"><h2>2. 核对新安排并填写原因</h2>
+<p>选中的候选会填入下面的时间；也可按原有预约规则人工核对输入。预览时会再次检查冲突。</p>
+<form method="post">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">
+{{ form.as_div }}<div class="actions"><button type="submit"{% if read_only %} disabled{% endif %}>预览原安排与新安排</button><a class="button secondary" href="{% url 'visit_detail' visit.pk %}">放弃并查看原预约</a></div></form>
+</section></div>{% endblock %}

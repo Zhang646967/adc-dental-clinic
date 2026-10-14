@@ -23,3 +23,8 @@ html[data-display=comfortable] .role-grid{grid-template-columns:1fr}html[data-di
 .worklist-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem}.worklist-filters>div{min-width:0}.worklist-filters input,.worklist-filters select{width:100%;min-width:0}.worklist-filters .actions{grid-column:1/-1}.business-worklist p,.business-worklist strong{overflow-wrap:anywhere}
 @media(max-width:700px){.worklist-items>li{display:grid;grid-template-columns:minmax(0,1fr)}.worklist-items .button{width:100%;justify-content:center}.business-worklist .heading-row{align-items:flex-start;flex-wrap:wrap}.worklist-filters{grid-template-columns:minmax(0,1fr)}}
 html[data-display=comfortable] .worklist-items>li{display:grid;grid-template-columns:minmax(0,1fr)}
+
+/* Replacement booking identifiers and native controls fit large-text screens. */
+.reschedule-flow{min-width:0;overflow-wrap:anywhere}
+.reschedule-flow input,.reschedule-flow select,.reschedule-flow textarea{min-width:0;max-width:100%}
+.reschedule-flow .actions>*{min-width:0;max-width:100%}

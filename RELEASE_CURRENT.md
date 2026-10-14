@@ -50,6 +50,20 @@ All links return to existing permission-checked confirmation workflows; GET
 never performs a business operation. No models or migrations changed. See
 docs/BUSINESS_FOLLOW_UP.md for current local evidence, separate from G3/G4 history.
 
+## Replacement appointment workflow — 2026-10-14
+
+Current-clinic front desk staff can find bounded replacement intervals using the
+original duration, compare both arrangements and explicitly confirm. Patient and
+dentist conflicts across clinics and live waitlist holds are checked. The original
+is released only inside the successful transaction that creates its unique
+successor. Signed previews bind the workspace, source version and admission
+revision; repeat confirmation returns the saved successor's current state.
+No models or migrations changed. Local validation passed 884 source checks,
+793 PostgreSQL/HTTP tests, 57 complete-flow and 14 recovery-page Chrome checks,
+plus an independent database oracle. See docs/RESCHEDULING_OPTIMIZATION.md.
+These are local development results; historical G3/G4 and Windows recovery
+statuses remain separate.
+
 ## Historical account from the supplied Windows RC archive
 
 候选源码基于完整alpha.10重建；中断目录中的图像不作为代码完成证据。运行基线仍为Windows v0.7，Mac暂停。此次不新增大型业务模块，而是整合可核对、可启动、可验收的课程候选。
