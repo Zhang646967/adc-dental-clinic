@@ -1,0 +1,14 @@
+{
+  "failed_run": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38500193783",
+  "failed_revision": "ed7bc6f83500fc6beb3605428e94b0241c07431d",
+  "failure": "Direct ORM exclusion-constraint race can abort its loser with PostgreSQL SQLSTATE 40P01, not only an IntegrityError.",
+  "correction": "Recognize only 40P01 as the aborted conflicting transaction; retain exactly one committed transaction and one Visit row. Other OperationalError values propagate.",
+  "negative_check": "Synthetic connection failure 08006 is not counted as a booking conflict.",
+  "local_regression": {
+    "source_checks": 828,
+    "django_tests": 705,
+    "status": "PASS",
+    "evidence": "mac-postgresql-gate.json"
+  },
+  "github_revalidation": "PENDING"
+}

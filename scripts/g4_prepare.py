@@ -45,10 +45,15 @@ def write_env(path, values):
 
 
 def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
-            bind_ip='127.0.0.1', http_port=80, https_port=443):
+            bind_ip='127.0.0.1', http_port=80, https_port=443, mode='direct_tls'):
     output = Path(output)
     if output.name != '.g4' or output.exists() or output.is_symlink():
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
+    if mode not in ('direct_tls', 'mac_tunnel'):
+        raise ValueError('Unknown deployment mode.')
+    if mode == 'mac_tunnel' and (bind_ip != '127.0.0.1' or http_port == 18000 or
+                                not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com', host)):
+        raise ValueError('Mac tunnel requires its assigned hostname and a separate IPv4 loopback origin.')
     if not re.fullmatch('[0-9a-f]{40}', source_commit):
         raise ValueError('A complete reviewed source commit is required.')
     if not all(pinned_image(x) for x in (app_image, db_image, nginx_image)):
@@ -103,15 +108,18 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'G4_BIND_IP': bind_ip, 'G4_HTTP_PORT': http_port, 'G4_HTTPS_PORT': https_port,
     })
     templates = ROOT / 'deployment/g4'
-    for source, target in [('compose.template.yaml', 'compose.yaml'), ('init-db.sh', 'init-db.sh')]:
+    compose_template = 'compose.mac-tunnel.template.yaml' if mode == 'mac_tunnel' else 'compose.template.yaml'
+    for source, target in [(compose_template, 'compose.yaml'), ('init-db.sh', 'init-db.sh')]:
         (output / target).write_bytes((templates / source).read_bytes())
     os.chmod(output / 'init-db.sh', 0o555)
-    nginx = (templates / 'nginx.template.conf').read_text().replace('__ADC_HOST__', checked.host)
+    nginx_template = 'nginx.mac-tunnel.template.conf' if mode == 'mac_tunnel' else 'nginx.template.conf'
+    nginx = (templates / nginx_template).read_text().replace('__ADC_HOST__', checked.host)
     (output / 'nginx.conf').write_text(nginx)
     plan = {
         'status': 'PREPARED_NOT_DEPLOYED', 'project': project, 'host': checked.host,
+        'mode': mode,
         'requested_source_commit': source_commit, 'read_only': True,
-        'bind_ip': bind_ip, 'ports': [http_port, https_port],
+        'bind_ip': bind_ip, 'ports': [http_port] if mode == 'mac_tunnel' else [http_port, https_port],
         'images': {'app': app_image, 'db': db_image, 'nginx': nginx_image},
         'public_acceptance_executed': False,
         'pending': ['Actual server/SSH and firewall', 'DNS and trusted TLS',
@@ -120,6 +128,12 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'file_sha256': {name: hashlib.sha256((output / name).read_bytes()).hexdigest()
                         for name in ('compose.yaml', 'init-db.sh', 'nginx.conf')},
     }
+    if mode == 'mac_tunnel':
+        plan['pending'] = ['Live free tunnel and public certificate verification',
+                           'Public browser permissions/read-only/CSRF checks',
+                           'Private backup/independent restore and service restart checks']
+        plan['transport'] = 'Cloudflare edge HTTPS; authenticated outbound tunnel; IPv4 loopback HTTP origin'
+        plan['availability'] = 'Temporary: Mac, Docker and tunnel must stay running; hostname changes on tunnel restart'
     write_private(output / 'plan.json', json.dumps(plan, indent=2) + '\n')
     return plan
 
@@ -139,6 +153,8 @@ def inspect_bundle(output, rendered=None):
     runtime = read_env(output / 'private/runtime.env')
     maintenance = read_env(output / 'private/maintenance.env')
     database = read_env(output / 'private/database.env')
+    if runtime.get('ADC_PUBLIC_HOST') != plan['host'] or maintenance.get('ADC_PUBLIC_HOST') != plan['host']:
+        raise ValueError('Runtime, maintenance and plan hostname must agree.')
     inputs = validate_production_inputs(runtime)
     if not inputs.read_only or runtime['DJANGO_SETTINGS_MODULE'] != 'config.settings.production':
         raise ValueError('First G4 acceptance must use read-only runtime production settings.')
@@ -169,10 +185,14 @@ def inspect_bundle(output, rendered=None):
             if services[name]['environment'] != runtime or services[name]['image'] != plan['images']['app']:
                 raise ValueError('Runtime service configuration does not match the reviewed bundle.')
         ports = services['gateway'].get('ports', [])
-        if len(ports) != 2 or {int(p['target']) for p in ports} != {80, 443}:
-            raise ValueError('Gateway must publish only HTTP/HTTPS.')
+        targets = {80} if plan.get('mode') == 'mac_tunnel' else {80, 443}
+        if len(ports) != len(targets) or {int(p['target']) for p in ports} != targets:
+            raise ValueError('Gateway ports do not match the reviewed deployment mode.')
         if any(p.get('host_ip') != plan['bind_ip'] for p in ports):
             raise ValueError('Gateway binding does not match the reviewed plan.')
+        if plan.get('mode') == 'mac_tunnel' and (plan['bind_ip'] != '127.0.0.1' or
+                any(int(p.get('published', 0)) != plan['ports'][0] for p in ports)):
+            raise ValueError('Mac tunnel origin must use the reviewed IPv4 loopback port.')
     return {'status': 'PREPARED_NOT_DEPLOYED', 'configuration_checks': 'PASS',
             'project': plan['project'], 'host': inputs.host, 'read_only': True,
             'tls_files_present': all((output / 'tls' / p).is_file() for p in ('fullchain.pem', 'privkey.pem')),
@@ -189,6 +209,7 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--bind-ip', default='127.0.0.1')
     prepare_parser.add_argument('--http-port', type=int, default=80)
     prepare_parser.add_argument('--https-port', type=int, default=443)
+    prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel'), default='direct_tls')
     inspect_parser = sub.add_parser('inspect')
     inspect_parser.add_argument('--output', default=str(ROOT / '.g4'))
     inspect_parser.add_argument('--rendered-compose')
@@ -197,7 +218,7 @@ if __name__ == '__main__':
         if args.action == 'prepare':
             plan = prepare(args.output, host=args.host, source_commit=args.source_commit,
                            app_image=args.app_image, db_image=args.db_image, nginx_image=args.nginx_image,
-                           bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port)
+                           bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port, mode=args.mode)
             result = {'status': plan['status'], 'project': plan['project'], 'host': plan['host'],
                       'credentials': 'private files only; not displayed', 'public_acceptance_executed': False}
         else:

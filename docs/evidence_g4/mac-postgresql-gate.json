@@ -1,0 +1,73 @@
+{
+  "timestamp_utc": "2026-10-14T02:38:55.259323+00:00",
+  "python": "3.13.16",
+  "source_sha256": "a72c4e41567a2e3ed6802ce880019b79550762c2e07c4d4fb2e5471f855d970a",
+  "results": [
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/verify_update.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "checks",
+        "-v"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/record_runtime.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "check"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "makemigrations",
+        "--check",
+        "--dry-run"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "migrate",
+        "--noinput"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "test",
+        "tests",
+        "--settings=config.settings.test",
+        "--noinput",
+        "--verbosity=2"
+      ],
+      "returncode": 0
+    }
+  ],
+  "all_gates_passed": true
+}

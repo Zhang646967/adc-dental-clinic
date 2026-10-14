@@ -1,4 +1,4 @@
-# G4 preparation: one Linux host, synthetic course data
+# G4 preparation: course demonstration with synthetic data
 
 Logic chain: freeze source/image → create separate private credentials → migrate
 with the owner → serve with the restricted runtime → verify DNS/TLS and recovery.
@@ -9,11 +9,17 @@ external AI disabled. Mac `.rc`, credentials, data volumes and port 18000 are
 separate. Only the gateway publishes ports; Web, worker and PostgreSQL remain
 on the internal Docker network.
 
-The supported first topology is a new, dedicated Docker Compose project with
+The user selected a **temporary demonstration on this Mac with a free hostname**.
+Follow [Mac temporary demo](MAC_TEMPORARY_DEMO.md): Cloudflare Quick Tunnel supplies
+the hostname and public HTTPS, with no server/domain purchase or DNS changes.
+The Mac, Docker and tunnel must stay running; restarting the tunnel changes its
+hostname. This selection does not establish permanent deployment/recovery.
+
+The separately prepared Linux topology is a new, dedicated Docker Compose project with
 PostgreSQL 17 on the same host. Existing reverse proxies, managed databases,
 CDNs, or IPv6 need a target-specific adaptation after their details are known.
 
-## Information to provide
+## Information for a later Linux host
 
 | Item | Needed details |
 |---|---|
@@ -134,6 +140,8 @@ restart, monitoring/renewal and bounded capacity. Until these target checks run,
 - [Let's Encrypt challenge types](https://letsencrypt.org/docs/challenge-types/)
 
 Local preparation evidence: [rehearsal](../../docs/evidence_g4/preparation.json) and
-[full isolated regression](../../docs/evidence_g4/postgresql-gate.json). The latest
-run passed 822 source checks and 704 Django tests in the PostgreSQL environment.
+[full isolated regression](../../docs/evidence_g4/postgresql-gate.json). The original
+preparation passed 822 source checks and 704 Django tests. The selected Mac mode
+passed 828 source checks and 705 Django tests in the PostgreSQL environment; see
+[Mac regression](../../docs/evidence_g4/mac-postgresql-gate.json).
 No model or application migration changed; verification cleanup succeeded.

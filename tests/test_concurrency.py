@@ -2,7 +2,8 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from threading import Barrier
-from django.db import connections, close_old_connections, transaction, IntegrityError
+from unittest.mock import patch
+from django.db import connections, close_old_connections, transaction, IntegrityError, OperationalError
 from django.test import TransactionTestCase
 from tests.fixtures import FixtureMixin
 from scheduling.models import Visit
@@ -26,6 +27,13 @@ class DatabaseConcurrencyTests(FixtureMixin, TransactionTestCase):
                     if getattr(getattr(exc.__cause__,'diag',None),'constraint_name',None) in ('visit_dentist_no_overlap','visit_patient_no_overlap'):
                         return 'conflict'
                     raise
+                except OperationalError as exc:
+                    # Direct inserts can deadlock while arbitrating two GiST
+                    # exclusion constraints. PostgreSQL aborts the loser; the
+                    # one-commit/one-row assertions below must still hold.
+                    if getattr(exc.__cause__, 'sqlstate', None) == '40P01':
+                        return 'conflict'
+                    raise
             finally:
                 connections['default'].close()
         with ThreadPoolExecutor(max_workers=2) as pool:
@@ -39,3 +47,12 @@ class DatabaseConcurrencyTests(FixtureMixin, TransactionTestCase):
     def test_same_patient_across_dentists_only_one_commit(self):
         self.assertEqual(self.race([self.values(self.p1,self.slot1),self.values(self.p1,self.slot2)]),['committed','conflict'])
         self.assertEqual(Visit.objects.count(),1)
+    def test_connection_failure_is_not_counted_as_an_overlap_conflict(self):
+        from psycopg.errors import ConnectionFailure
+        def unavailable(**values):
+            error = OperationalError('Synthetic connection failure')
+            error.__cause__ = ConnectionFailure('Synthetic connection failure')
+            raise error
+        with patch.object(Visit.objects, 'create', side_effect=unavailable), self.assertRaises(OperationalError):
+            self.race([self.values(self.p1,self.slot1),self.values(self.p1,self.slot2)])
+        self.assertEqual(Visit.objects.count(),0)

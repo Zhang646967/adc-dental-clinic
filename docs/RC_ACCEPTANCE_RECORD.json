@@ -7,7 +7,8 @@
       "docs/evidence_macos/postgresql-gate.json",
       "docs/evidence_worker/postgresql-gate.json",
       "docs/evidence_g3/postgresql-gate.json",
-      "docs/evidence_g4/postgresql-gate.json"
+      "docs/evidence_g4/postgresql-gate.json",
+      "docs/evidence_g4/mac-postgresql-gate.json"
     ]
   },
   "G2_v07_copy_upgrade_and_restore": {
@@ -46,14 +47,21 @@
       "status": "PREPARATION_PASS",
       "evidence": [
         "docs/evidence_g4/preparation.json",
-        "deployment/g4/README.md"
+        "deployment/g4/README.md",
+        "deployment/g4/MAC_TEMPORARY_DEMO.md"
       ]
     },
-    "reason": "Target server/SSH, hostname/DNS, trusted certificate and operations details are not supplied. Local rehearsal is separate."
+    "reason": "Mac/free tunnel selected; actual public HTTPS/browser and independent recovery/availability evidence is pending.",
+    "selected_target": {
+      "kind": "temporary_mac_course_demo",
+      "domain": "free provider-assigned trycloudflare.com hostname",
+      "data": "new synthetic business-read-only instance",
+      "external_AI": "disabled"
+    }
   },
   "public_release_approved": false,
   "blockers": [
     "No original Windows database backup",
-    "Target server and domain for G4 are not defined"
+    "Temporary Mac public access and independent host recovery/availability are not yet accepted"
   ]
 }

@@ -96,3 +96,39 @@ class G4PreparationTests(unittest.TestCase):
         rendered.write_text(json.dumps(doc))
         with self.assertRaises(ValueError):
             inspect_bundle(self.folder, rendered)
+
+    def test_mac_tunnel_has_one_loopback_origin_and_no_tls_key_mount(self):
+        plan = prepare(self.folder, **(self.inputs | dict(host='course-demo.trycloudflare.com',
+                       http_port=18020, mode='mac_tunnel')))
+        self.assertEqual(plan['ports'], [18020])
+        compose = (self.folder / 'compose.yaml').read_text()
+        self.assertIn('127.0.0.1:${G4_HTTP_PORT:', compose)
+        self.assertNotIn('./tls:', compose)
+        self.assertNotIn('}:443', compose)
+        nginx = (self.folder / 'nginx.conf').read_text()
+        self.assertIn("if ($http_x_forwarded_proto != 'https')", nginx)
+        self.assertTrue(inspect_bundle(self.folder)['read_only'])
+
+    def test_mac_tunnel_refuses_public_binding_original_port_and_unassigned_host(self):
+        inputs = self.inputs | dict(host='course-demo.trycloudflare.com', http_port=18020, mode='mac_tunnel')
+        for change in (dict(bind_ip='0.0.0.0'), dict(http_port=18000), dict(host='adc.example.com')):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                prepare(self.folder, **(inputs | change))
+            self.assertFalse(self.folder.exists())
+
+    def test_mac_tunnel_rendered_port_change_refused(self):
+        plan = prepare(self.folder, **(self.inputs | dict(host='course-demo.trycloudflare.com',
+                       http_port=18020, mode='mac_tunnel')))
+        runtime = read_env(self.folder / 'private/runtime.env')
+        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway')},
+               'networks': {'private': {'internal': True}, 'edge': {}}}
+        for name in ('web', 'notification-worker'):
+            doc['services'][name] = {'environment': runtime, 'image': plan['images']['app']}
+        doc['services']['gateway']['ports'] = [{'target': 80, 'published': '18020', 'host_ip': '127.0.0.1'}]
+        rendered = self.folder / 'private/rendered.json'
+        rendered.write_text(json.dumps(doc))
+        self.assertEqual(inspect_bundle(self.folder, rendered)['configuration_checks'], 'PASS')
+        doc['services']['gateway']['ports'][0]['published'] = '18000'
+        rendered.write_text(json.dumps(doc))
+        with self.assertRaises(ValueError):
+            inspect_bundle(self.folder, rendered)

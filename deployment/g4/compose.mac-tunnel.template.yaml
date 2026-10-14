@@ -1,0 +1,85 @@
+# Mac temporary course demo: only the loopback HTTP tunnel origin is published.
+# Render with scripts/g4_prepare.py; keep separate from the Mac RC project.
+x-app: &app
+  image: ${G4_APP_IMAGE:?Pinned application image required}
+  pull_policy: never
+  env_file: ./private/runtime.env
+  networks: [private]
+  init: true
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  logging: &logs
+    driver: json-file
+    options: {max-size: "10m", max-file: "3"}
+services:
+  db:
+    image: ${G4_DB_IMAGE:?Pinned PostgreSQL 17 image required}
+    env_file: ./private/database.env
+    networks: [private]
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/10-adc-g4.sh:ro
+    command: [postgres, -c, log_min_error_statement=panic]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U adc_g4_admin -d adc_rc_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    stop_grace_period: 30s
+    logging: *logs
+  schema:
+    <<: *app
+    profiles: [maintenance]
+    env_file: ./private/maintenance.env
+    depends_on: {db: {condition: service_healthy}}
+    volumes: ["static:/app/staticfiles"]
+    command: [sh, -c, "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py check_g4_deployment"]
+    restart: "no"
+  bootstrap:
+    <<: *app
+    profiles: [maintenance]
+    env_file: ./private/maintenance.env
+    environment: {ADC_RC_SYNTHETIC: "1"}
+    depends_on: {db: {condition: service_healthy}}
+    command: [python, manage.py, bootstrap_release_demo]
+    # Credentials go only to the operator's redirected private file.
+    logging: {driver: none}
+    restart: "no"
+  web:
+    <<: *app
+    depends_on: {db: {condition: service_healthy}}
+    command: [sh, -c, "python manage.py check_runtime_role && python manage.py migrate --check && exec gunicorn config.wsgi:application --config deployment/gunicorn.conf.py"]
+    healthcheck:
+      test: [CMD, python, scripts/g4_health.py]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 4
+    restart: unless-stopped
+    stop_grace_period: 30s
+  notification-worker:
+    <<: *app
+    profiles: [writer]
+    depends_on: {web: {condition: service_healthy}}
+    command: [python, scripts/g4_worker.py]
+    restart: "on-failure:5"
+    stop_grace_period: 30s
+  gateway:
+    image: ${G4_NGINX_IMAGE:?Pinned Nginx image required}
+    depends_on: {web: {condition: service_healthy}}
+    networks: [private, edge]
+    ports:
+      - "127.0.0.1:${G4_HTTP_PORT:?Separate loopback port required}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static:/srv/adc/static:ro
+    restart: unless-stopped
+    stop_grace_period: 30s
+    logging: *logs
+volumes:
+  data: {}
+  static: {}
+networks:
+  private: {internal: true}
+  edge: {driver: bridge}
