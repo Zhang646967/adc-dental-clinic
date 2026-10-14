@@ -8,7 +8,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 from scripts.g4_prepare import prepare
-from scripts.g4_mac_demo import atomic_text, check_origin, matches_process, refresh_access, start, status_or_stop
+from scripts.g4_mac_demo import (atomic_text, check_origin, matches_process, refresh_access,
+                                 start, status_or_stop, tunnel_registration, tunnel_protocol, wait_for_registration)
 
 
 class MacDemoProcessTests(unittest.TestCase):
@@ -24,6 +25,8 @@ class MacDemoProcessTests(unittest.TestCase):
         atomic_text(self.metadata, json.dumps({'pid': 12345, 'process_stamp': 'original process',
                                               'project': self.plan['project'],
                                               'url': 'https://course-demo.trycloudflare.com'}))
+        atomic_text(self.folder / 'private/tunnel.log',
+                    'INF Registered tunnel connection protocol=http2\n')
 
     def test_reused_pid_is_never_signalled(self):
         with patch('scripts.g4_mac_demo.sys.platform', 'darwin'), \
@@ -168,3 +171,62 @@ class MacDemoProcessTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             refresh_access(self.folder, 'course-demo.trycloudflare.com/untrusted')
         self.assertEqual(path.read_text(), 'unchanged')
+
+    def test_retired_public_tunnel_is_degraded_even_with_a_healthy_origin(self):
+        atomic_text(self.folder / 'private/tunnel.log',
+                    'INF Registered tunnel connection\nERR Unauthorized: Tunnel not found\n')
+        with patch('scripts.g4_mac_demo.sys.platform', 'darwin'), \
+             patch('scripts.g4_mac_demo.process_stamp', return_value='original process'), \
+             patch('scripts.g4_mac_demo.check_origin'):
+            result = status_or_stop(self.folder)
+        self.assertTrue(result['origin_ready'])
+        self.assertEqual(result['status'], 'DEGRADED')
+        self.assertEqual(result['tunnel_registration'], 'RETIRED')
+        self.assertIsNone(result['url'])
+
+    def test_latest_registration_event_can_recover_an_older_failure(self):
+        path = self.folder / 'private/tunnel.log'
+        atomic_text(path, 'ERR Unauthorized: Tunnel not found\nINF Registered tunnel connection\n')
+        self.assertEqual(tunnel_registration(path), 'REGISTERED')
+        wait_for_registration(Mock(poll=Mock(return_value=None)), path)
+
+    def test_start_cannot_claim_readiness_from_a_retired_registration(self):
+        path = self.folder / 'private/tunnel.log'
+        atomic_text(path, 'ERR Unauthorized: Tunnel not found\n')
+        with self.assertRaises(RuntimeError):
+            wait_for_registration(Mock(poll=Mock(return_value=None)), path)
+
+    def test_single_connection_reconnect_is_not_reported_as_ready(self):
+        path = self.folder / 'private/tunnel.log'
+        atomic_text(path, 'INF Registered tunnel connection protocol=http2\nERR Connection terminated\n')
+        self.assertEqual(tunnel_registration(path), 'RECONNECTING')
+        with patch('scripts.g4_mac_demo.sys.platform', 'darwin'), \
+             patch('scripts.g4_mac_demo.process_stamp', return_value='original process'), \
+             patch('scripts.g4_mac_demo.check_origin'):
+            self.assertEqual(status_or_stop(self.folder)['status'], 'DEGRADED')
+        atomic_text(path, path.read_text() + 'INF Registered tunnel connection protocol=quic\n')
+        self.assertEqual(tunnel_registration(path), 'REGISTERED')
+        self.assertEqual(tunnel_protocol(path), 'quic')
+
+    def test_unreviewed_protocol_is_refused_before_deployment_or_launch(self):
+        with patch('scripts.g4_mac_demo.subprocess.Popen') as launch:
+            with self.assertRaises(ValueError):
+                start(self.folder, '/unused', protocol='unreviewed')
+            launch.assert_not_called()
+
+    def test_auto_protocol_can_register_after_the_initial_sixty_seconds(self):
+        with patch('scripts.g4_mac_demo.tunnel_registration',
+                   side_effect=['UNOBSERVED'] * 250 + ['REGISTERED']), \
+             patch('scripts.g4_mac_demo.time.sleep') as sleep:
+            wait_for_registration(Mock(poll=Mock(return_value=None)),
+                                  self.folder / 'private/tunnel.log', 180)
+        self.assertEqual(sleep.call_count, 250)
+
+    def test_a_live_process_without_registration_evidence_is_degraded(self):
+        atomic_text(self.folder / 'private/tunnel.log', 'INF Starting tunnel\n')
+        with patch('scripts.g4_mac_demo.sys.platform', 'darwin'), \
+             patch('scripts.g4_mac_demo.process_stamp', return_value='original process'), \
+             patch('scripts.g4_mac_demo.check_origin'):
+            result = status_or_stop(self.folder)
+        self.assertEqual(result['status'], 'DEGRADED')
+        self.assertEqual(result['tunnel_registration'], 'UNOBSERVED')

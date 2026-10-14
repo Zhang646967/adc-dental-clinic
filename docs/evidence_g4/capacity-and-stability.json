@@ -1,0 +1,1104 @@
+{
+  "recorded_at_utc": "2026-10-14T08:10:03.927568+00:00",
+  "scope": "Bounded synthetic read-only Mac course demonstration; no maximum or production capacity claim",
+  "overall_G4_status": "PARTIAL",
+  "public_release_approved": false,
+  "bounded_capacity_and_stability_status": "PASS",
+  "selected_target": {
+    "host": "revenues-diamond-whole-farming.trycloudflare.com",
+    "bind": "127.0.0.1:18020",
+    "application_source_commit": "0bbea59dc823860251563359a127bcddc7ac5ba2",
+    "images": {
+      "app": "sha256:4fd9ea307a57b4bb133d56f9ad1a4c371f272e0a66ee3e06902b77a9cb4862d3",
+      "db": "postgres:17@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3",
+      "nginx": "nginx:stable-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94"
+    },
+    "business_timezone": "Asia/Shanghai",
+    "registered_protocol": "http2"
+  },
+  "workload": {
+    "accounts": "Nine seeded sessions reused by virtual users; no new registrations",
+    "initial_business_counts": {
+      "accounts.UserAccount": 11,
+      "accounts.RoleAssignment": 11,
+      "registry.Dentist": 3,
+      "registry.Qualification": 1,
+      "registry.DentistQualification": 0,
+      "registry.TreatmentType": 1,
+      "patients.Patient": 4,
+      "scheduling.AvailabilitySlot": 14,
+      "scheduling.Visit": 0,
+      "care.VisitRecordVersion": 0,
+      "care.TreatmentRecord": 0,
+      "care.Invoice": 0,
+      "care.CorrectionRequest": 0,
+      "finance.Quarter": 0,
+      "finance.DentistQuarterCost": 0,
+      "coordination.WaitRequest": 0,
+      "coordination.WaitOffer": 0,
+      "coordination.CoordinationTask": 0,
+      "notifications.NotificationOutbox": 0,
+      "notifications.InboxMessage": 0,
+      "portal.BookingReceipt": 0
+    },
+    "timed_methods": [
+      "GET"
+    ],
+    "business_writes": false,
+    "setup": "Normal CSRF login and signed workspace selection only",
+    "offered_load": "Open-loop; full queues count as failures; no request retry/redirect",
+    "normal_failure_allowance": 0,
+    "max_p95_ms": {
+      "origin": 2000,
+      "public": 5000
+    },
+    "max_web_memory_growth_mib": 64,
+    "max_app_connections": 20
+  },
+  "retained_first_failures": {
+    "origin_health_before_rate_fix": {
+      "recorded_at_utc": "2026-10-14T06:01:31.820634+00:00",
+      "scope": "Bounded origin baseline, anonymous database health GET only; no auth/business POST",
+      "project": "adc_g4_8e25aae81918",
+      "offered_rps": 10,
+      "requests": 60,
+      "max_concurrency": 10,
+      "elapsed_seconds": 5.906,
+      "statuses": {
+        "200": 50,
+        "429": 10
+      },
+      "success_p95_ms": 16.207,
+      "accepted_capacity_established": false
+    },
+    "retired_initial_tunnel": {
+      "registration": "RETIRED",
+      "local_origin": "healthy",
+      "external_workflow": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38522098518"
+    },
+    "public_cold_connection_before_explicit_warmup": {
+      "recorded_at_utc": "2026-10-14T06:46:28.334025+00:00",
+      "transport": "public",
+      "virtual_users": 1,
+      "distinct_seeded_accounts": 1,
+      "offered_rps": 1.0,
+      "planned_seconds": 15,
+      "elapsed_seconds": 14.437,
+      "attempted": 15,
+      "completed": 14,
+      "successful": 14,
+      "queue_dropped": 1,
+      "statuses": {
+        "200": 14
+      },
+      "failure_rate": 0.066667,
+      "successful_rps": 0.97,
+      "success_p50_ms": 455.563,
+      "success_p95_ms": 2064.163,
+      "success_p99_ms": 2064.163,
+      "max_p95_ms": 5000,
+      "expected_throttle": false,
+      "roles": {
+        "FRONT_DESK_A": 14
+      },
+      "routes": {
+        "/patients/": 5,
+        "/frontdesk/": 5,
+        "/visits/": 4
+      },
+      "passed": false
+    },
+    "first_public_ten_minute_soak": {
+      "recorded_at_utc": "2026-10-14T07:09:11.501780+00:00",
+      "transport": "public",
+      "virtual_users": 10,
+      "distinct_seeded_accounts": 9,
+      "offered_rps": 10.0,
+      "planned_seconds": 600,
+      "elapsed_seconds": 600.863,
+      "attempted": 6000,
+      "completed": 6000,
+      "successful": 5943,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 5943,
+        "0": 10,
+        "530": 47
+      },
+      "failure_rate": 0.0095,
+      "successful_rps": 9.891,
+      "success_p50_ms": 455.991,
+      "success_p95_ms": 676.819,
+      "success_p99_ms": 989.099,
+      "max_p95_ms": 5000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 10,
+        "passed": true,
+        "statuses": {
+          "200": 10
+        },
+        "max_latency_ms": 2334.006
+      },
+      "roles": {
+        "FRONT_DESK_A": 1200,
+        "FRONT_DESK_B": 600,
+        "MANAGER": 600,
+        "DENTIST": 600,
+        "PATIENT_A": 600,
+        "PATIENT_B": 600,
+        "FINANCE": 600,
+        "HQ": 600,
+        "SYSADMIN": 600
+      },
+      "routes": {
+        "/frontdesk/": 600,
+        "/manager/": 200,
+        "/doctor/": 300,
+        "/portal/": 400,
+        "/financial-workspace/": 300,
+        "/headquarters/": 600,
+        "/technical/": 600,
+        "/patients/": 600,
+        "/slots/": 200,
+        "/visits/": 900,
+        "/portal/slots/": 400,
+        "/finance/": 300,
+        "/coordination/tasks/": 200,
+        "/portal/appointments/": 400
+      },
+      "passed": false
+    },
+    "first_soak_resource_observation": {
+      "passed": true,
+      "services": {
+        "db": {
+          "health_always_ready": true,
+          "oom_observed": false,
+          "restart_count_unchanged": true,
+          "container_start_unchanged": true,
+          "peak_cpu_percent": 10.2,
+          "peak_memory_mib": 44.64
+        },
+        "web": {
+          "health_always_ready": true,
+          "oom_observed": false,
+          "restart_count_unchanged": true,
+          "container_start_unchanged": true,
+          "peak_cpu_percent": 41.47,
+          "peak_memory_mib": 131.6
+        },
+        "gateway": {
+          "health_always_ready": true,
+          "oom_observed": false,
+          "restart_count_unchanged": true,
+          "container_start_unchanged": true,
+          "peak_cpu_percent": 1.92,
+          "peak_memory_mib": 16.06
+        }
+      },
+      "samples": 37,
+      "web_first_to_last_quarter_median_growth_mib": 0.7,
+      "max_allowed_growth_mib": 64,
+      "peak_app_connections": 2,
+      "idle_in_transaction_observed": false,
+      "waiting_lock_observed": false,
+      "distinct_worker_pids_observed": 13,
+      "worker_recycling_observed": true,
+      "memory_leak_absence_proven": false
+    },
+    "auto_transport_initial_attempt": {
+      "status": "FAIL",
+      "reason": "No QUIC registration within original 60-second wait; stopped before hostname retarget"
+    },
+    "later_account_preflight": {
+      "status": "FAIL",
+      "timed_load_started": false,
+      "correlated_tunnel_reconnect_utc": "2026-10-14T07:46:10Z",
+      "subsequent_complete_preflight": "PASS: all nine seeded accounts"
+    }
+  },
+  "repairs": [
+    "Dynamic admission keyed by Cloudflare client/peer plus gateway-wide limit",
+    "Password-attempt limit applies to login POST; login GET retains general limits",
+    "Retired, reconnecting or unobserved registration cannot report RUNNING",
+    "Automatic transport fallback receives bounded registration wait and records actual protocol",
+    "HTTPS clients honor configured HTTP proxy without disabling TLS verification",
+    "Cold authenticated connections measured and gated before timed steady load"
+  ],
+  "origin_ramp": [
+    {
+      "recorded_at_utc": "2026-10-14T08:02:14.535526+00:00",
+      "transport": "origin",
+      "virtual_users": 1,
+      "distinct_seeded_accounts": 1,
+      "offered_rps": 1.0,
+      "planned_seconds": 15,
+      "elapsed_seconds": 15.004,
+      "attempted": 15,
+      "completed": 15,
+      "successful": 15,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 15
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 1.0,
+      "success_p50_ms": 33.389,
+      "success_p95_ms": 41.009,
+      "success_p99_ms": 41.009,
+      "max_p95_ms": 2000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 1,
+        "passed": true,
+        "statuses": {
+          "200": 1
+        },
+        "max_latency_ms": 34.181
+      },
+      "roles": {
+        "FRONT_DESK_A": 15
+      },
+      "routes": {
+        "/frontdesk/": 5,
+        "/patients/": 5,
+        "/visits/": 5
+      },
+      "passed": true
+    },
+    {
+      "recorded_at_utc": "2026-10-14T08:02:47.707113+00:00",
+      "transport": "origin",
+      "virtual_users": 5,
+      "distinct_seeded_accounts": 5,
+      "offered_rps": 5.0,
+      "planned_seconds": 30,
+      "elapsed_seconds": 30.003,
+      "attempted": 150,
+      "completed": 150,
+      "successful": 150,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 150
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 4.999,
+      "success_p50_ms": 35.441,
+      "success_p95_ms": 53.512,
+      "success_p99_ms": 83.209,
+      "max_p95_ms": 2000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 5,
+        "passed": true,
+        "statuses": {
+          "200": 5
+        },
+        "max_latency_ms": 68.226
+      },
+      "roles": {
+        "FRONT_DESK_A": 30,
+        "FRONT_DESK_B": 30,
+        "MANAGER": 30,
+        "DENTIST": 30,
+        "PATIENT_A": 30
+      },
+      "routes": {
+        "/frontdesk/": 20,
+        "/manager/": 10,
+        "/doctor/": 15,
+        "/portal/": 10,
+        "/patients/": 20,
+        "/slots/": 10,
+        "/visits/": 35,
+        "/portal/slots/": 10,
+        "/coordination/tasks/": 10,
+        "/portal/appointments/": 10
+      },
+      "passed": true
+    },
+    {
+      "recorded_at_utc": "2026-10-14T08:03:20.933404+00:00",
+      "transport": "origin",
+      "virtual_users": 10,
+      "distinct_seeded_accounts": 9,
+      "offered_rps": 10.0,
+      "planned_seconds": 30,
+      "elapsed_seconds": 30.003,
+      "attempted": 300,
+      "completed": 300,
+      "successful": 300,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 300
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 9.999,
+      "success_p50_ms": 25.752,
+      "success_p95_ms": 37.869,
+      "success_p99_ms": 42.98,
+      "max_p95_ms": 2000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 10,
+        "passed": true,
+        "statuses": {
+          "200": 10
+        },
+        "max_latency_ms": 98.812
+      },
+      "roles": {
+        "FRONT_DESK_A": 60,
+        "FRONT_DESK_B": 30,
+        "MANAGER": 30,
+        "DENTIST": 30,
+        "PATIENT_A": 30,
+        "PATIENT_B": 30,
+        "FINANCE": 30,
+        "HQ": 30,
+        "SYSADMIN": 30
+      },
+      "routes": {
+        "/frontdesk/": 30,
+        "/manager/": 10,
+        "/doctor/": 15,
+        "/portal/": 20,
+        "/financial-workspace/": 15,
+        "/headquarters/": 30,
+        "/technical/": 30,
+        "/patients/": 30,
+        "/slots/": 10,
+        "/visits/": 45,
+        "/portal/slots/": 20,
+        "/finance/": 15,
+        "/coordination/tasks/": 10,
+        "/portal/appointments/": 20
+      },
+      "passed": true
+    },
+    {
+      "recorded_at_utc": "2026-10-14T08:03:54.210912+00:00",
+      "transport": "origin",
+      "virtual_users": 20,
+      "distinct_seeded_accounts": 9,
+      "offered_rps": 20.0,
+      "planned_seconds": 30,
+      "elapsed_seconds": 30.001,
+      "attempted": 600,
+      "completed": 600,
+      "successful": 600,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 600
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 19.999,
+      "success_p50_ms": 20.116,
+      "success_p95_ms": 30.987,
+      "success_p99_ms": 35.692,
+      "max_p95_ms": 2000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 20,
+        "passed": true,
+        "statuses": {
+          "200": 20
+        },
+        "max_latency_ms": 159.04
+      },
+      "roles": {
+        "FRONT_DESK_A": 90,
+        "FRONT_DESK_B": 90,
+        "MANAGER": 60,
+        "DENTIST": 60,
+        "PATIENT_A": 60,
+        "PATIENT_B": 60,
+        "FINANCE": 60,
+        "HQ": 60,
+        "SYSADMIN": 60
+      },
+      "routes": {
+        "/frontdesk/": 60,
+        "/manager/": 20,
+        "/doctor/": 30,
+        "/portal/": 40,
+        "/financial-workspace/": 30,
+        "/headquarters/": 60,
+        "/technical/": 60,
+        "/patients/": 60,
+        "/slots/": 20,
+        "/visits/": 90,
+        "/portal/slots/": 40,
+        "/finance/": 30,
+        "/coordination/tasks/": 20,
+        "/portal/appointments/": 40
+      },
+      "passed": true
+    }
+  ],
+  "public_ramp_on_first_replacement_hostname": [
+    {
+      "recorded_at_utc": "2026-10-14T06:50:40.916054+00:00",
+      "transport": "public",
+      "virtual_users": 1,
+      "distinct_seeded_accounts": 1,
+      "offered_rps": 1.0,
+      "planned_seconds": 15,
+      "elapsed_seconds": 15.002,
+      "attempted": 15,
+      "completed": 15,
+      "successful": 15,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 15
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 1.0,
+      "success_p50_ms": 452.479,
+      "success_p95_ms": 557.382,
+      "success_p99_ms": 557.382,
+      "max_p95_ms": 5000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 1,
+        "passed": true,
+        "statuses": {
+          "200": 1
+        },
+        "max_latency_ms": 2127.318
+      },
+      "roles": {
+        "FRONT_DESK_A": 15
+      },
+      "routes": {
+        "/frontdesk/": 5,
+        "/patients/": 5,
+        "/visits/": 5
+      },
+      "passed": true
+    },
+    {
+      "recorded_at_utc": "2026-10-14T06:54:17.353209+00:00",
+      "transport": "public",
+      "virtual_users": 5,
+      "distinct_seeded_accounts": 5,
+      "offered_rps": 5.0,
+      "planned_seconds": 30,
+      "elapsed_seconds": 30.229,
+      "attempted": 150,
+      "completed": 150,
+      "successful": 150,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 150
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 4.962,
+      "success_p50_ms": 449.201,
+      "success_p95_ms": 596.482,
+      "success_p99_ms": 668.551,
+      "max_p95_ms": 5000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 5,
+        "passed": true,
+        "statuses": {
+          "200": 5
+        },
+        "max_latency_ms": 2056.029
+      },
+      "roles": {
+        "FRONT_DESK_A": 30,
+        "FRONT_DESK_B": 30,
+        "MANAGER": 30,
+        "DENTIST": 30,
+        "PATIENT_A": 30
+      },
+      "routes": {
+        "/frontdesk/": 20,
+        "/manager/": 10,
+        "/doctor/": 15,
+        "/portal/": 10,
+        "/patients/": 20,
+        "/slots/": 10,
+        "/visits/": 35,
+        "/portal/slots/": 10,
+        "/coordination/tasks/": 10,
+        "/portal/appointments/": 10
+      },
+      "passed": true
+    },
+    {
+      "recorded_at_utc": "2026-10-14T06:54:49.689195+00:00",
+      "transport": "public",
+      "virtual_users": 10,
+      "distinct_seeded_accounts": 9,
+      "offered_rps": 10.0,
+      "planned_seconds": 30,
+      "elapsed_seconds": 30.356,
+      "attempted": 300,
+      "completed": 300,
+      "successful": 300,
+      "queue_dropped": 0,
+      "statuses": {
+        "200": 300
+      },
+      "failure_rate": 0.0,
+      "successful_rps": 9.883,
+      "success_p50_ms": 440.082,
+      "success_p95_ms": 568.359,
+      "success_p99_ms": 709.75,
+      "max_p95_ms": 5000,
+      "expected_throttle": false,
+      "connection_warmup": {
+        "requests": 10,
+        "passed": true,
+        "statuses": {
+          "200": 10
+        },
+        "max_latency_ms": 1880.077
+      },
+      "roles": {
+        "FRONT_DESK_A": 60,
+        "FRONT_DESK_B": 30,
+        "MANAGER": 30,
+        "DENTIST": 30,
+        "PATIENT_A": 30,
+        "PATIENT_B": 30,
+        "FINANCE": 30,
+        "HQ": 30,
+        "SYSADMIN": 30
+      },
+      "routes": {
+        "/frontdesk/": 30,
+        "/manager/": 10,
+        "/doctor/": 15,
+        "/portal/": 20,
+        "/financial-workspace/": 15,
+        "/headquarters/": 30,
+        "/technical/": 30,
+        "/patients/": 30,
+        "/slots/": 10,
+        "/visits/": 45,
+        "/portal/slots/": 20,
+        "/finance/": 15,
+        "/coordination/tasks/": 10,
+        "/portal/appointments/": 20
+      },
+      "passed": true
+    }
+  ],
+  "controlled_overload": {
+    "recorded_at_utc": "2026-10-14T08:04:17.492720+00:00",
+    "transport": "origin",
+    "virtual_users": 20,
+    "distinct_seeded_accounts": 9,
+    "offered_rps": 40.0,
+    "planned_seconds": 20,
+    "elapsed_seconds": 20.003,
+    "attempted": 800,
+    "completed": 800,
+    "successful": 423,
+    "queue_dropped": 0,
+    "statuses": {
+      "200": 423,
+      "429": 377
+    },
+    "failure_rate": 0.47125,
+    "successful_rps": 21.147,
+    "success_p50_ms": 18.795,
+    "success_p95_ms": 29.809,
+    "success_p99_ms": 34.7,
+    "max_p95_ms": 2000,
+    "expected_throttle": true,
+    "connection_warmup": {
+      "requests": 20,
+      "passed": true,
+      "statuses": {
+        "200": 20
+      },
+      "max_latency_ms": 166.032
+    },
+    "roles": {
+      "FRONT_DESK_A": 120,
+      "FRONT_DESK_B": 120,
+      "MANAGER": 80,
+      "DENTIST": 80,
+      "PATIENT_A": 80,
+      "PATIENT_B": 80,
+      "FINANCE": 80,
+      "HQ": 80,
+      "SYSADMIN": 80
+    },
+    "routes": {
+      "/frontdesk/": 84,
+      "/manager/": 28,
+      "/doctor/": 40,
+      "/portal/": 56,
+      "/financial-workspace/": 40,
+      "/headquarters/": 80,
+      "/technical/": 80,
+      "/patients/": 78,
+      "/slots/": 26,
+      "/visits/": 118,
+      "/portal/slots/": 52,
+      "/finance/": 40,
+      "/coordination/tasks/": 26,
+      "/portal/appointments/": 52
+    },
+    "passed": true
+  },
+  "post_overload_recovery": {
+    "recorded_at_utc": "2026-10-14T08:04:30.698657+00:00",
+    "transport": "origin",
+    "virtual_users": 10,
+    "distinct_seeded_accounts": 9,
+    "offered_rps": 10.0,
+    "planned_seconds": 10,
+    "elapsed_seconds": 10.005,
+    "attempted": 100,
+    "completed": 100,
+    "successful": 100,
+    "queue_dropped": 0,
+    "statuses": {
+      "200": 100
+    },
+    "failure_rate": 0.0,
+    "successful_rps": 9.995,
+    "success_p50_ms": 26.092,
+    "success_p95_ms": 37.31,
+    "success_p99_ms": 43.214,
+    "max_p95_ms": 2000,
+    "expected_throttle": false,
+    "connection_warmup": {
+      "requests": 10,
+      "passed": true,
+      "statuses": {
+        "200": 10
+      },
+      "max_latency_ms": 89.271
+    },
+    "roles": {
+      "FRONT_DESK_A": 20,
+      "FRONT_DESK_B": 10,
+      "MANAGER": 10,
+      "DENTIST": 10,
+      "PATIENT_A": 10,
+      "PATIENT_B": 10,
+      "FINANCE": 10,
+      "HQ": 10,
+      "SYSADMIN": 10
+    },
+    "routes": {
+      "/frontdesk/": 12,
+      "/manager/": 4,
+      "/doctor/": 5,
+      "/portal/": 8,
+      "/financial-workspace/": 5,
+      "/headquarters/": 10,
+      "/technical/": 10,
+      "/patients/": 9,
+      "/slots/": 3,
+      "/visits/": 14,
+      "/portal/slots/": 6,
+      "/finance/": 5,
+      "/coordination/tasks/": 3,
+      "/portal/appointments/": 6
+    },
+    "passed": true
+  },
+  "login_admission": {
+    "scope": "Actual loopback Nginx fixture; documentation-only forwarded client key; no credentials or valid POST",
+    "post_without_csrf_statuses": {
+      "403": 11,
+      "429": 13
+    },
+    "subsequent_login_get_statuses": {
+      "200": 12
+    },
+    "passed": true,
+    "public_forwarded_header_trust_proven": false
+  },
+  "repeated_public_ten_minute_soak": {
+    "recorded_at_utc": "2026-10-14T08:00:40.856439+00:00",
+    "transport": "public",
+    "virtual_users": 10,
+    "distinct_seeded_accounts": 9,
+    "offered_rps": 10.0,
+    "planned_seconds": 600,
+    "elapsed_seconds": 600.354,
+    "attempted": 6000,
+    "completed": 6000,
+    "successful": 6000,
+    "queue_dropped": 0,
+    "statuses": {
+      "200": 6000
+    },
+    "failure_rate": 0.0,
+    "successful_rps": 9.994,
+    "success_p50_ms": 451.904,
+    "success_p95_ms": 565.652,
+    "success_p99_ms": 725.88,
+    "max_p95_ms": 5000,
+    "expected_throttle": false,
+    "connection_warmup": {
+      "requests": 10,
+      "passed": true,
+      "statuses": {
+        "200": 10
+      },
+      "max_latency_ms": 2879.299
+    },
+    "roles": {
+      "FRONT_DESK_A": 1200,
+      "FRONT_DESK_B": 600,
+      "DENTIST": 600,
+      "MANAGER": 600,
+      "PATIENT_A": 600,
+      "PATIENT_B": 600,
+      "FINANCE": 600,
+      "HQ": 600,
+      "SYSADMIN": 600
+    },
+    "routes": {
+      "/frontdesk/": 600,
+      "/doctor/": 300,
+      "/manager/": 200,
+      "/portal/": 400,
+      "/financial-workspace/": 300,
+      "/headquarters/": 600,
+      "/technical/": 600,
+      "/patients/": 600,
+      "/slots/": 200,
+      "/visits/": 900,
+      "/portal/slots/": 400,
+      "/finance/": 300,
+      "/coordination/tasks/": 200,
+      "/portal/appointments/": 400
+    },
+    "passed": true
+  },
+  "repeated_soak_resource_observation": {
+    "elapsed_seconds": 632.537,
+    "summary": {
+      "passed": true,
+      "services": {
+        "db": {
+          "health_always_ready": true,
+          "oom_observed": false,
+          "restart_count_unchanged": true,
+          "container_start_unchanged": true,
+          "peak_cpu_percent": 11.54,
+          "peak_memory_mib": 40.36
+        },
+        "web": {
+          "health_always_ready": true,
+          "oom_observed": false,
+          "restart_count_unchanged": true,
+          "container_start_unchanged": true,
+          "peak_cpu_percent": 32.56,
+          "peak_memory_mib": 123.2
+        },
+        "gateway": {
+          "health_always_ready": true,
+          "oom_observed": false,
+          "restart_count_unchanged": true,
+          "container_start_unchanged": true,
+          "peak_cpu_percent": 1.83,
+          "peak_memory_mib": 16.12
+        }
+      },
+      "samples": 37,
+      "web_first_to_last_quarter_median_growth_mib": -1.4,
+      "max_allowed_growth_mib": 64,
+      "peak_app_connections": 2,
+      "idle_in_transaction_observed": false,
+      "waiting_lock_observed": false,
+      "distinct_worker_pids_observed": 12,
+      "worker_recycling_observed": true,
+      "memory_leak_absence_proven": false
+    }
+  },
+  "current_hostname_rechecks": {
+    "https": {
+      "scope": "Read-only network preflight; not full G4 acceptance",
+      "host": "revenues-diamond-whole-farming.trycloudflare.com",
+      "trust": "system certificate trust",
+      "dns_cutover_verified": true,
+      "results": [
+        {
+          "check": "HTTP redirects to domain HTTPS",
+          "passed": true
+        },
+        {
+          "check": "Verified TLS and login GET",
+          "passed": true
+        },
+        {
+          "check": "CSRF cookie is Secure and SameSite Lax",
+          "passed": true
+        },
+        {
+          "check": "HSTS, no-store and frame protection",
+          "passed": true
+        },
+        {
+          "check": "Collected static asset",
+          "passed": true
+        },
+        {
+          "check": "Gateway overwrites spoofed proxy scheme",
+          "passed": true
+        },
+        {
+          "check": "Foreign Host is not served",
+          "passed": true
+        }
+      ],
+      "network_checks_passed": true,
+      "public_acceptance_executed": false
+    },
+    "browser": {
+      "scope": "Real public Chromium, synthetic read-only course demo; bounded checks",
+      "host": "revenues-diamond-whole-farming.trycloudflare.com",
+      "checks": [
+        {
+          "check": "front_a public login GET",
+          "passed": true
+        },
+        {
+          "check": "front_a authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "front_a secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "front_a read-only notice",
+          "passed": true
+        },
+        {
+          "check": "Authenticated signed business POST refused by read-only policy",
+          "passed": true
+        },
+        {
+          "check": "390px large-text workspace fits viewport",
+          "passed": true
+        },
+        {
+          "check": "front_b public login GET",
+          "passed": true
+        },
+        {
+          "check": "front_b authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "front_b secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "front_b read-only notice",
+          "passed": true
+        },
+        {
+          "check": "manager_a public login GET",
+          "passed": true
+        },
+        {
+          "check": "manager_a authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "manager_a secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "manager_a read-only notice",
+          "passed": true
+        },
+        {
+          "check": "doctor_a public login GET",
+          "passed": true
+        },
+        {
+          "check": "doctor_a authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "doctor_a secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "doctor_a read-only notice",
+          "passed": true
+        },
+        {
+          "check": "Doctor cannot inherit finance permission",
+          "passed": true
+        },
+        {
+          "check": "hq_demo public login GET",
+          "passed": true
+        },
+        {
+          "check": "hq_demo authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "hq_demo secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "hq_demo read-only notice",
+          "passed": true
+        },
+        {
+          "check": "finance_demo public login GET",
+          "passed": true
+        },
+        {
+          "check": "finance_demo authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "finance_demo secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "finance_demo read-only notice",
+          "passed": true
+        },
+        {
+          "check": "tech_demo public login GET",
+          "passed": true
+        },
+        {
+          "check": "tech_demo authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "tech_demo secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "tech_demo read-only notice",
+          "passed": true
+        },
+        {
+          "check": "patient_demo_a public login GET",
+          "passed": true
+        },
+        {
+          "check": "patient_demo_a authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "patient_demo_a secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "patient_demo_a read-only notice",
+          "passed": true
+        },
+        {
+          "check": "Patient booking POST refused in read-only demo",
+          "passed": true
+        },
+        {
+          "check": "multi_demo public login GET",
+          "passed": true
+        },
+        {
+          "check": "Multi-role account requires explicit role selection",
+          "passed": true
+        },
+        {
+          "check": "multi_demo authorized workspace route",
+          "passed": true
+        },
+        {
+          "check": "multi_demo secure authenticated session",
+          "passed": true
+        },
+        {
+          "check": "multi_demo read-only notice",
+          "passed": true
+        },
+        {
+          "check": "Login POST without CSRF token refused",
+          "passed": true
+        },
+        {
+          "check": "No frontend execution errors during tested flows",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "public_release_approved": false,
+      "browser_version": "155.0.8059.79",
+      "all_checks_passed": true
+    }
+  },
+  "preservation": {
+    "scope": "Private hashes and read-only allowlisted committed business comparison after load and browser refusal checks",
+    "checks": {
+      "original_g4_database_container_preserved": true,
+      "immutable_images_and_app_source_preserved": true,
+      "runtime.env_only_hostname_changed": true,
+      "maintenance.env_only_hostname_changed": true,
+      "private/database.env_preserved": true,
+      "compose.env_preserved": true,
+      "private/demo-credentials.txt_preserved": true,
+      "backups/mac-course-demo.dump_preserved": true,
+      "private_access_guide_only_login_links_changed": true,
+      "business_hash_and_all_allowlisted_counts_unchanged": true,
+      "actual_runtime_read_only_ai_disabled_uid_timezone_pg17": true,
+      "current_tunnel_registered_and_origin_healthy": true
+    },
+    "business_sha256_before": "74875e0038f46c291b5bf3bf1e7379dde72a44f87696730e1cb324a261c20128",
+    "business_sha256_after": "74875e0038f46c291b5bf3bf1e7379dde72a44f87696730e1cb324a261c20128",
+    "business_counts_after": {
+      "accounts.UserAccount": 11,
+      "accounts.RoleAssignment": 11,
+      "registry.Dentist": 3,
+      "registry.Qualification": 1,
+      "registry.DentistQualification": 0,
+      "registry.TreatmentType": 1,
+      "patients.Patient": 4,
+      "scheduling.AvailabilitySlot": 14,
+      "scheduling.Visit": 0,
+      "care.VisitRecordVersion": 0,
+      "care.TreatmentRecord": 0,
+      "care.Invoice": 0,
+      "care.CorrectionRequest": 0,
+      "finance.Quarter": 0,
+      "finance.DentistQuarterCost": 0,
+      "coordination.WaitRequest": 0,
+      "coordination.WaitOffer": 0,
+      "coordination.CoordinationTask": 0,
+      "notifications.NotificationOutbox": 0,
+      "notifications.InboxMessage": 0,
+      "portal.BookingReceipt": 0
+    },
+    "runtime": {
+      "read_only": true,
+      "external_ai_disabled": true,
+      "business_timezone": "Asia/Shanghai",
+      "uid": 10001,
+      "postgresql_major": 17
+    },
+    "private_material_exported": false
+  },
+  "remaining_limits": [
+    "First failed public run and reconnecting preflight remain evidence; reconnect gaps not proven eliminated",
+    "Only four synthetic patients, fourteen slots and zero visits/invoices/tasks were exercised",
+    "Read-only request capacity does not establish concurrent booking/write capacity",
+    "Ten-minute observation does not prove leak absence, maximum capacity or continuous availability",
+    "Off-Mac backup/host-loss recovery and whole-Mac reboot remain unexecuted",
+    "No original Windows database backup was supplied; G2 remains NOT_RUN"
+  ],
+  "private_material_exported": false
+}

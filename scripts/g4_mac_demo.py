@@ -64,6 +64,46 @@ def check_origin(hostname, port):
         connection.close()
 
 
+def tunnel_log_lines(path):
+    if not path.exists():
+        return []
+    with path.open('rb') as log:
+        log.seek(max(0, path.stat().st_size - 65536))
+        return log.read().decode('utf-8', errors='replace').splitlines()
+
+
+def tunnel_registration(path):
+    for line in reversed(tunnel_log_lines(path)):
+        if 'Unauthorized: Tunnel not found' in line:
+            return 'RETIRED'
+        if 'Connection terminated' in line or 'connection with edge closed' in line:
+            return 'RECONNECTING'
+        if 'Registered tunnel connection' in line:
+            return 'REGISTERED'
+    return 'UNOBSERVED'
+
+
+def tunnel_protocol(path):
+    for line in reversed(tunnel_log_lines(path)):
+        if 'Registered tunnel connection' in line:
+            found = re.search(r'\bprotocol=(quic|http2)\b', line)
+            return found.group(1) if found else 'UNOBSERVED'
+    return 'UNOBSERVED'
+
+
+def wait_for_registration(process, log_file, timeout_seconds=60):
+    # Automatic selection may exhaust several QUIC address attempts before
+    # falling back to HTTP/2 on networks without UDP egress.
+    for _ in range(timeout_seconds * 4):
+        state = tunnel_registration(log_file)
+        if state == 'REGISTERED' and process.poll() is None:
+            return
+        if state == 'RETIRED' or process.poll() is not None:
+            raise RuntimeError('The assigned tunnel registration did not pass.')
+        time.sleep(.25)
+    raise RuntimeError('No registered public tunnel; preserve private logs.')
+
+
 def refresh_access(bundle, hostname):
     """Keep the private operator guide current without reading seed credentials."""
     if not re.fullmatch(HOST_PATTERN, hostname):
@@ -103,7 +143,9 @@ def compose_command(bundle, plan):
             '-p', plan['project'], '-f', str(bundle / 'compose.yaml')]
 
 
-def start(bundle, binary):
+def start(bundle, binary, protocol='auto'):
+    if protocol not in ('auto', 'quic', 'http2'):
+        raise ValueError('Only reviewed tunnel protocols are accepted.')
     plan = checked_bundle(bundle)
     metadata_file = bundle / 'private/tunnel.json'
     if metadata_file.exists() and matches_process(json.loads(metadata_file.read_text())):
@@ -131,7 +173,7 @@ def start(bundle, binary):
         environment = {k: v for k, v in os.environ.items() if not k.startswith('TUNNEL_')}
         environment['NO_PROXY'] = '127.0.0.1,localhost'
         process = subprocess.Popen([str(binary), 'tunnel', '--config', str(config), '--no-autoupdate',
-                                    '--protocol', 'http2', '--metrics', '127.0.0.1:0',
+                                    '--protocol', protocol, '--metrics', '127.0.0.1:0',
                                     '--url', 'http://127.0.0.1:' + str(plan['ports'][0])],
                                    stdout=log, stderr=subprocess.STDOUT, start_new_session=True, env=environment)
     try:
@@ -146,6 +188,7 @@ def start(bundle, binary):
             time.sleep(0.25)
         if not hostname:
             raise RuntimeError('No assigned free hostname; inspect the private tunnel log.')
+        wait_for_registration(process, log_file, 180 if protocol == 'auto' else 60)
         # Only the explicit hostname changes on restart. Passwords, image IDs,
         # database identity and business read-only state remain pinned.
         for name in ('runtime.env', 'maintenance.env'):
@@ -167,11 +210,13 @@ def start(bundle, binary):
         subprocess.run(command + ['up', '-d', '--wait', '--wait-timeout', '90',
                                    '--force-recreate', 'web', 'gateway'], check=True, timeout=120)
         check_origin(hostname, plan['ports'][0])
+        wait_for_registration(process, log_file)
         if process.poll() is not None:
             raise RuntimeError('Tunnel exited during startup.')
         refresh_access(bundle, hostname)
         metadata = {'pid': process.pid, 'process_stamp': process_stamp(process.pid),
                     'url': 'https://' + hostname, 'project': plan['project'],
+                    'configured_protocol': protocol, 'registered_protocol': tunnel_protocol(log_file),
                     'read_only': True, 'public_acceptance_executed': False}
         atomic_text(metadata_file, json.dumps(metadata, indent=2) + '\n')
         return {'status': 'TEMPORARY_DEMO_RUNNING', 'url': metadata['url'],
@@ -191,6 +236,7 @@ def status_or_stop(bundle, stop=False):
     path = bundle / 'private/tunnel.json'
     metadata = json.loads(path.read_text()) if path.exists() else {}
     running = (metadata.get('project') == plan['project'] and matches_process(metadata))
+    registration = tunnel_registration(bundle / 'private/tunnel.log')
     if stop and running:
         os.kill(metadata['pid'], signal.SIGTERM)
         metadata['stopped'] = True
@@ -203,10 +249,12 @@ def status_or_stop(bundle, stop=False):
         except (OSError, HTTPException, RuntimeError):
             origin_ready = False
     status = ('STOP_REQUESTED' if running else 'STOPPED') if stop else (
-        'RUNNING' if running and origin_ready else ('DEGRADED' if running else 'STOPPED'))
+        'RUNNING' if running and origin_ready and registration == 'REGISTERED' else ('DEGRADED' if running else 'STOPPED'))
     return {'status': status, 'tunnel_running': running, 'origin_ready': origin_ready,
+            'tunnel_registration': registration,
+            'last_registered_protocol': tunnel_protocol(bundle / 'private/tunnel.log'),
             'public_https': 'NOT_CHECKED',
-            'url': 'https://' + plan['host'] if running else None, 'database': 'preserved',
+            'url': 'https://' + plan['host'] if running and registration != 'RETIRED' else None, 'database': 'preserved',
             'public_acceptance_executed': False}
 
 
@@ -215,6 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('action', choices=('start', 'status', 'stop'))
     parser.add_argument('--output', default=str(ROOT / '.g4'))
     parser.add_argument('--cloudflared')
+    parser.add_argument('--protocol', choices=('auto', 'quic', 'http2'), default='auto')
     args = parser.parse_args()
     bundle = Path(args.output).resolve()
     try:
@@ -223,7 +272,7 @@ if __name__ == '__main__':
         with (bundle / 'private/tunnel.lock').open('a') as lock:
             os.chmod(lock.name, 0o600)
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            result = start(bundle, args.cloudflared) if args.action == 'start' else status_or_stop(bundle, args.action == 'stop')
+            result = start(bundle, args.cloudflared, args.protocol) if args.action == 'start' else status_or_stop(bundle, args.action == 'stop')
         print(json.dumps(result, indent=2))
         if args.action == 'status' and result['status'] != 'RUNNING':
             raise SystemExit(1)

@@ -1,0 +1,97 @@
+{
+  "timestamp_utc": "2026-10-14T08:14:05.401545+00:00",
+  "python": "3.13.16",
+  "source_sha256": "bd30c7fc0d77004aa34d64611e90f54e32c907d2c6208fb1eb4b4a817cc678c8",
+  "results": [
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/verify_update.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "checks",
+        "-v"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/record_runtime.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "check"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "makemigrations",
+        "--check",
+        "--dry-run"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "migrate",
+        "--noinput"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "test",
+        "tests",
+        "--settings=config.settings.test",
+        "--noinput",
+        "--verbosity=2"
+      ],
+      "returncode": 0
+    }
+  ],
+  "all_gates_passed": true,
+  "source_checks": 859,
+  "django_tests": 705,
+  "focused_capacity_transport_and_status_checks": 34,
+  "declared_update_files": 760,
+  "host_validation": {
+    "project": "adc_verify_20261014t081241z_7219831a",
+    "timestamp_utc": "20261014T081241Z",
+    "scope": "isolated local Docker only",
+    "executed": true,
+    "all_gates_passed": true,
+    "cleanup_returncode": 0,
+    "returncode": 0
+  },
+  "public_acceptance_executed": false,
+  "operational_file_sha256": {
+    "scripts/g4_load.py": "33f4d330f0333c7e16c37196a2d173aa06bdd889db3d829f945161553ee46ec9",
+    "scripts/g4_observe.py": "6d4c65902cd7c5f966dd07885bbc0edbdb954766bb9d5f130f18677d7b966351",
+    "scripts/g4_mac_demo.py": "a5a4aecd8f7ebd20e1709f4ce1a7390821ad267c04491002c0771e8ffdee1360",
+    "scripts/g4_https_probe.py": "e189b4a049b04d087f5e87307ebc13a7616501c61bb253a9a92b1ead655794e9",
+    "deployment/g4/nginx.mac-tunnel.template.conf": "665a71d6df50ffa225e7bda96e5dad91bf191158f49016bf5d8e776b0522cfef",
+    "checks/test_g4_load.py": "375189b5d6016de3da48b9d0bf9d05f45c45535fe74861ecda3960d5e94c183f",
+    "checks/test_g4_transport.py": "3d586c19c11d1db1afc50d4d50ecfd29bdd016cdb8f5b1220ea0a168d4e3ca93",
+    "checks/test_g4_mac_demo.py": "ef800e8029c96cb9bc3be4b080c0f3fd39fca759cd3a8cb70e350c3f5e00cc70"
+  }
+}

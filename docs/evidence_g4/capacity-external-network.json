@@ -1,0 +1,51 @@
+{
+  "recorded_at_utc": "2026-10-14T08:20:50.418880+00:00",
+  "status": "PASS",
+  "scope": "Anonymous HTTPS from independent GitHub-hosted runner; no credentials or business data provided",
+  "workflow_run": {
+    "conclusion": "success",
+    "headSha": "6558e1845aec792767cfd38934a1aad45c25628c",
+    "status": "completed",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38533929589"
+  },
+  "network_report": {
+    "scope": "Read-only network preflight; not full G4 acceptance",
+    "host": "revenues-diamond-whole-farming.trycloudflare.com",
+    "trust": "system certificate trust",
+    "dns_cutover_verified": true,
+    "results": [
+      {
+        "check": "HTTP redirects to domain HTTPS",
+        "passed": true
+      },
+      {
+        "check": "Verified TLS and login GET",
+        "passed": true
+      },
+      {
+        "check": "CSRF cookie is Secure and SameSite Lax",
+        "passed": true
+      },
+      {
+        "check": "HSTS, no-store and frame protection",
+        "passed": true
+      },
+      {
+        "check": "Collected static asset",
+        "passed": true
+      },
+      {
+        "check": "Gateway overwrites spoofed proxy scheme",
+        "passed": true
+      },
+      {
+        "check": "Foreign Host is not served",
+        "passed": true
+      }
+    ],
+    "network_checks_passed": true,
+    "public_acceptance_executed": false
+  },
+  "full_G4_accepted": false,
+  "private_material_uploaded": false
+}

@@ -56,16 +56,23 @@ python3 scripts/g4_mac_demo.py stop
 ```
 
 The start helper checks the actual gateway binding, uses a dedicated empty
-Cloudflare configuration, and keeps logs private. It records the assigned host
+Cloudflare configuration, and keeps logs private. It waits for actual tunnel
+registration before changing the host and again after origin readiness. The
+default `--protocol auto` permits QUIC-to-HTTP/2 fallback, with up to three
+minutes for initial registration; `--protocol http2` is available on networks
+without UDP egress. The actual registered protocol is recorded separately from
+the configured preference. It records the assigned host
 in runtime/maintenance/Nginx configuration, validates rendered Compose, and
 recreates only this project's Web/gateway. Source images, database identity,
 passwords and read-only mode remain pinned. A failed startup stops its tunnel.
 After readiness succeeds, it also refreshes the links in the private
 `.g4/private/DEMO_ACCESS.md`, preserving existing account/password entries.
 
-`status` checks both the recorded process identity and the actual loopback
-gateway's database health response. `RUNNING` means those local checks passed;
-`DEGRADED` means the tunnel is alive but the origin is unavailable. `STOPPED`
+`status` checks the recorded process identity, the actual loopback gateway's
+database health response and the latest registration/termination event in the
+private log. `RUNNING` requires registration plus healthy origin checks;
+`DEGRADED` covers an unavailable origin, retired/reconnecting tunnel or missing
+registration evidence. A retired tunnel is never offered as a sharing URL. `STOPPED`
 does not print an obsolete sharing URL. Status exits nonzero for either failure
 state and performs no restart or business write. It reports public HTTPS as
 `NOT_CHECKED`; use the HTTPS probe separately to establish public reachability.
@@ -114,7 +121,9 @@ Evidence: [bounded acceptance](../../docs/evidence_g4/mac-public-demo.json),
 [external runner](../../docs/evidence_g4/external-network.json) and
 [regression](../../docs/evidence_g4/mac-postgresql-gate.json). The local regression
 passed 828 source checks and 705 Django tests. Off-host recovery, whole-Mac reboot
-and measured capacity remain unexecuted; overall G4 is partial and RC1 retained.
+remain unexecuted; measured course capacity is tracked separately in
+[capacity and stability](CAPACITY_AND_STABILITY.md). Overall G4 is partial and
+RC1 retained.
 
 Read the active URL and private accounts in `.g4/private/DEMO_ACCESS.md` on this
 Mac. Credentials and database dumps are never committed to GitHub.
@@ -128,3 +137,15 @@ refresh was exercised in the private fixture. The latest regression passed
 [status rehearsal](../../docs/evidence_g4/mac-status-reliability.json),
 [live HTTPS](../../docs/evidence_g4/mac-status-network.json) and
 [regression](../../docs/evidence_g4/mac-status-postgresql-gate.json).
+
+The capacity follow-up passed the declared small-dataset read-only envelope:
+20 users/20 GETs per second at origin, and a repeated public 10-user/10 GETs per
+second run with 6,000/6,000 successes over ten minutes (p95 565.652 ms). Explicit
+overload throttling, recovery and POST-only password budgeting passed. The
+current hostname also passed 43 Chrome checks. Credentials, backup and business
+facts were preserved. Earlier reconnect failures remain in the evidence;
+continuous availability and write/large-dataset capacity remain unestablished.
+The regression passed 859 source checks and 705 Django/PostgreSQL tests. See
+[method and limits](CAPACITY_AND_STABILITY.md),
+[measured evidence](../../docs/evidence_g4/capacity-and-stability.json) and
+[regression](../../docs/evidence_g4/capacity-postgresql-gate.json).
