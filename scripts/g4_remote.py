@@ -96,6 +96,16 @@ class Remote:
         for name, field in (('source.tar', 'source_sha256'), ('application.tar', 'image_archive_sha256')):
             if digest(private_file(artifacts / name)) != metadata[field]:
                 raise ValueError('Build archive checksum differs.')
+        if restore_backup:
+            if not identity_file:
+                raise ValueError('Recovery requires the Mac key.')
+            with tempfile.TemporaryDirectory(dir=self.bundle / 'private') as folder:
+                meta = decrypt_backup(private_file(restore_backup), private_file(identity_file),
+                                      Path(folder), self.log, age)
+                if (meta['project'] == self.plan['project'] or
+                        meta['source_commit'] != self.plan['requested_source_commit'] or
+                        meta['images']['app'] != self.plan['images']['app']):
+                    raise ValueError('Recovery backup must match the image/source and use a new project.')
         # An existing directory is never overwritten: status and sync are the
         # recovery operations after an interrupted publish.
         setup = ("from pathlib import Path; import os,pwd; "
@@ -153,6 +163,12 @@ class Remote:
                             "(p/" + repr('recovery-' + name) + ").replace(p/'.g4/private'/" + repr(name) + "); "
                             "os.chmod(p/'.g4/private'/" + repr(name) + ",0o600)")
                     self.ssh(['python3', '-c', move])
+                original = folder / 'demo-credentials.txt'
+                if original.exists():
+                    local = self.bundle / 'private/demo-credentials.txt'
+                    if local.exists():
+                        raise ValueError('Existing private credential record is preserved.')
+                    os.replace(original, local)
             result = self.operation('restore-verified-dump', [
                 '--dump-file', self.remote_bundle + '/private/database.dump',
                 '--manifest-file', self.remote_bundle + '/private/archive.json',
@@ -161,6 +177,10 @@ class Remote:
                       "(p/'private/database.dump').unlink(); (p/'private/archive.json').unlink()"])
         else:
             result = self.operation('deploy')
+            self.copy(self.bundle / 'private/demo-credentials.txt',
+                      self.remote_bundle + '/private/demo-credentials.txt', download=True)
+        self.copy(self.bundle / 'private/COURSE_ACCESS.md',
+                  self.remote_bundle + '/private/COURSE_ACCESS.md', download=True)
         self.operation('install-server-jobs', ['--recipient-file', self.remote_bundle + '/private/backup-recipient.txt'])
         self.operation('backup', ['--recipient-file', self.remote_bundle + '/private/backup-recipient.txt'])
         return {'status': result['status'], 'hostname': self.plan['host'],
@@ -195,7 +215,6 @@ class Remote:
                             raise ValueError('Downloaded backup provenance differs.')
                         os.replace(pending, target)
                 atomic_text(destination / (row['name'] + '.json'), json.dumps(row) + '\n')
-            prune_backups(destination, self.plan['project'], 30)
             last = listing['backups'][-1]
             # Also validate cached copies with the CURRENT key; otherwise a
             # lost/replaced key could make an unusable cache look recoverable.
@@ -203,6 +222,7 @@ class Remote:
                 meta = decrypt_backup(destination / last['name'], identity, Path(folder), self.log, age)
                 if meta['project'] != self.plan['project'] or meta['source_commit'] != self.plan['requested_source_commit']:
                     raise ValueError('Cached recovery copy provenance differs.')
+            prune_backups(destination, self.plan['project'], 30)
             result = {'status': 'MAC_BACKUP_VERIFIED', 'project': self.plan['project'],
                       'last_off_host_backup': last['created_at'], 'sha256': last['sha256'],
                       'verified_at': datetime.now(timezone.utc).isoformat(),

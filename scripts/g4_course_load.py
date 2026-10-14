@@ -176,6 +176,19 @@ def read_actors(path, plan):
     return doc
 
 
+def actor_index_for(index):
+    write = index % 5 == 4
+    return ((index // 5) % 10 if write else ((index // 5) * 4 + index % 5) % 10), write
+
+
+def patient_submission(fields, clinic, name):
+    return {key: fields[key] for key in ('csrfmiddlewaretoken', 'workspace_token')} | {
+        'clinic': clinic, 'name': name, 'date_of_birth': '2000-01-01',
+        'billing_address': 'Synthetic course address', 'phone': '000-DEMO',
+        'email': 'load@example.invalid', 'emergency_name': 'Synthetic contact',
+        'emergency_phone': '000-DEMO', 'allergy_status': 'UNKNOWN'}
+
+
 def workload(bundle, plan, scope, ca_file, duration=1800, rps=5):
     if not (5 <= duration <= 1800 and 1 <= rps <= 5):
         raise ValueError('Workload exceeds the bounded ten-user course envelope.')
@@ -187,26 +200,24 @@ def workload(bundle, plan, scope, ca_file, duration=1800, rps=5):
             clients.append(client)
             if client.login(actor['username'], actor['password'], actor['clinic']) != '/frontdesk/':
                 raise ValueError('Expected the assigned front-desk workspace.')
-            forms.append(client.form('/patients/new/', ('csrfmiddlewaretoken', 'workspace_token')))
-            time.sleep(.6)
+            forms.append(client.form('/patients/new/', ('csrfmiddlewaretoken', 'workspace_token', 'name', 'date_of_birth')))
+            # Setup respects the sustained 10/minute shared-peer login budget,
+            # including repeated rehearsals; measured writes are never retried.
+            time.sleep(6.1)
         prefix = 'COURSE-LOAD-' + doc['run_id'] + '-' + secrets.token_hex(4) + '-'
         planned = duration * rps
         samples, pending, drops = [], set(), 0
-        start = time.monotonic()
         def measure(index, scheduled):
-            write = index % 5 == 4
-            actor_index = (index // 5) % 10 if write else index % 10
+            actor_index, write = actor_index_for(index)
             client, actor = clients[actor_index], doc['actors'][actor_index]
             status, ok = 0, False
             with client.lock:
                 try:
                     if write:
-                        fields = forms[actor_index] | {
-                            'clinic': actor['clinic'], 'name': prefix + str(index),
-                            'date_of_birth': '2000-01-01', 'billing_address': 'Synthetic course address',
-                            'phone': '000-DEMO', 'email': 'load@example.invalid',
-                            'emergency_name': 'Synthetic contact', 'emergency_phone': '000-DEMO',
-                            'allergy_status': 'UNKNOWN'}
+                        # Unchecked allergy checkboxes are absent in a real
+                        # browser submission. Carry only the signed hidden
+                        # inputs, then the explicitly chosen patient fields.
+                        fields = patient_submission(forms[actor_index], actor['clinic'], prefix + str(index))
                         status, location, _ = client.request('POST', '/patients/new/', fields)
                         ok = status == 302 and bool(re.fullmatch(r'/patients/[0-9]+/', location or ''))
                     else:
@@ -225,6 +236,16 @@ def workload(bundle, plan, scope, ca_file, duration=1800, rps=5):
             return {'status': status, 'ok': ok, 'write': write,
                     'elapsed_ms': (time.monotonic() - scheduled) * 1000}
         with ThreadPoolExecutor(max_workers=10) as pool:
+            def warm(index):
+                client = clients[index]
+                client.close()  # Paced logins can outlive an idle keepalive socket.
+                began = time.monotonic()
+                status, _, body = client.request('GET', '/frontdesk/')
+                if status != 200 or doc['actors'][index]['username'].encode() not in body:
+                    raise ValueError('Fresh concurrent authenticated preflight failed.')
+                return (time.monotonic() - began) * 1000
+            cold = list(pool.map(warm, range(10)))
+            start = time.monotonic()
             for index in range(planned):
                 scheduled = start + index / rps
                 time.sleep(max(0, scheduled - time.monotonic()))
@@ -249,6 +270,7 @@ def workload(bundle, plan, scope, ca_file, duration=1800, rps=5):
                   'statuses': dict(Counter(str(s['status']) for s in samples)), 'queue_dropped': drops,
                   'successful_writes': sum(s['ok'] for s in writes), 'planned_writes': planned // 5,
                   'p95_ms': p95, 'patient_name_prefix': prefix, 'db_oracle': 'REQUIRED',
+                  'cold_preflight_max_ms': round(max(cold), 3), 'read_fraction': .8, 'write_fraction': .2,
                   'http_passed': not drops and len(samples) == planned and all(s['ok'] for s in samples) and p95 <= 5000,
                   'public_acceptance_executed': scope == 'public',
                   'course_online_readiness': 'NOT_GRANTED_BY_LOAD_ALONE'}

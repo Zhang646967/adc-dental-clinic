@@ -44,6 +44,7 @@ and archive checksums. Read these IDs privately; pin PostgreSQL 17 and
 nginx:stable-alpine by digest, selecting amd64 images on the cloud host.
 
 ```sh
+mkdir -p .course-private/cloud
 python3 scripts/g4_prepare.py prepare \
   --output .course-private/cloud/.g4 --mode direct_tls \
   --access-mode course-writable --bind-ip 0.0.0.0 \
@@ -113,7 +114,9 @@ gateway reload follows nginx -t. Rehearsal certificates cannot contact the CA.
 ## Account handover and demonstration（账号交付）
 
 Read .g4/private/demo-credentials.txt privately on the server; never attach it
-to GitHub, screenshots or the report. COURSE_ACCESS.md contains the fixed staff
+to GitHub, screenshots or the report. Publish also downloads that initial
+credential record privately to the Mac bundle for acceptance setup.
+COURSE_ACCESS.md contains the fixed staff
 and patient login links. Use technical account governance to create ordinary
 assigned accounts, grant one role/clinic at a time, bind synthetic patients and
 reset/disable accounts. Change passwords before handing accounts to users.
@@ -138,7 +141,8 @@ reset the database after handing accounts to the class.
 
 Server snapshots contain a PostgreSQL 17 custom-format dump, reviewed deployment
 configuration, source/image identifiers and internal checksums, encrypted with
-age X25519. Server retention: seven completed copies; Mac: 30 completed copies.
+age X25519. Retain the latest completed copy for each UTC day: seven daily copies
+on the server and 30 on Mac. Manual runs cannot crowd older daily recovery points out.
 Corrupt files block synchronization/pruning. Partial downloads never replace a
 verified copy. Plain temporary recovery material is removed after operations.
 
@@ -199,6 +203,13 @@ patient-creation POST, without retries. Require all 9,000 requests successful,
 unintended records, p95 <= 5 seconds, and no sampled OOM/restart/DB wait.
 This write workload alone does not test booking conflicts or financial integrity;
 those require the separate A/B and refusal scenarios.
+
+scripts/g4_course_browser.cjs runs real Chrome smoke checks for seven roles,
+normal signed clinic selection, a patient write, refusal and narrow large text.
+Run it from a Mac with Playwright and Chrome, passing BUNDLE public. The origin
+mode is restricted to separate loopback ports and pins the locally generated
+certificate public key; it never relaxes public certificate validation.
+These smoke checks supplement the complete A/B scenarios.
 
 Execute scripts/g4_course_facts.py inside the explicitly matched runtime with
 --project PROJECT and --load-prefix RECORDED_PREFIX. It emits hashed business

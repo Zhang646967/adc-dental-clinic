@@ -127,5 +127,30 @@
   "blockers": [
     "No original Windows database backup",
     "Temporary Mac demonstration does not establish off-host recovery, whole-host reboot, write/large-dataset capacity or continuous target availability"
-  ]
+  ],
+  "course_online_readiness": {
+    "status": "NOT_RUN",
+    "reason": "Server not purchased. Local writable deployment/recovery preparation passed; real cloud acceptance remains required.",
+    "selected_target": {
+      "provider": "Tencent Cloud Lighthouse",
+      "region": "Hong Kong",
+      "os": "Ubuntu 24.04 amd64",
+      "cores": 2,
+      "memory_gb": 2,
+      "rental_months": 1,
+      "domain": "owned free DuckDNS hostname",
+      "data": "synthetic, assigned accounts",
+      "backup": "encrypted daily server copies and verified Mac downloads"
+    },
+    "local_preparation": {
+      "status": "PASS",
+      "evidence": [
+        "docs/evidence_course_local/acceptance.json",
+        "docs/evidence_course_local/postgresql-gate.json",
+        "docs/COURSE_ONLINE.md"
+      ]
+    },
+    "cloud_acceptance": "NOT_RUN",
+    "historical_G2_unchanged": true
+  }
 }

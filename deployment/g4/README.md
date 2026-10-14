@@ -127,10 +127,16 @@ original database. Do not restore over a running target, delete its volume, or
 roll back the binary/schema while ignoring new writes. Import does not recover
 the reset Windows database; G2 remains a separate unmet requirement.
 
+The writable course target is documented in
+[the course online guide](../../docs/COURSE_ONLINE.md). It requires an explicit
+course-writable access mode and a separate direct-TLS bundle; the Mac tunnel
+remains read-only.
+
 G4 needs evidence for the target host/images, DNS/trusted TLS, external HTTPS and
 browser use, private ports, credentials/roles, backup/restore, service/worker
-restart, monitoring/renewal and bounded capacity. Until these target checks run,
-`G4_public_deployment.status` remains `NOT_RUN`; preparation is tracked separately.
+restart, monitoring/renewal and bounded capacity.
+The current `G4_public_deployment.status` is `PARTIAL` for the temporary Mac demo;
+the independent writable cloud target remains `NOT_RUN` until its checks run.
 
 ## Primary references checked 2026-10-13
 

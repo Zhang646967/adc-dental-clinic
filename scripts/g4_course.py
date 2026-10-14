@@ -298,6 +298,10 @@ class Course:
                      'database.env': self.bundle / 'private/database.env',
                      'compose.yaml': self.bundle / 'compose.yaml', 'compose.env': self.bundle / 'compose.env',
                      'nginx.conf': self.bundle / 'nginx.conf', 'init-db.sh': self.bundle / 'init-db.sh'}
+            for private_name in ('demo-credentials.txt', 'COURSE_ACCESS.md'):
+                path = self.bundle / 'private' / private_name
+                if path.exists():
+                    files[private_name] = private_file(path)
             meta = {'format': 1, 'project': self.plan['project'], 'server_major': 17,
                     'source_commit': self.plan['requested_source_commit'], 'images': self.plan['images'],
                     'created_at': datetime.now(timezone.utc).isoformat(),
@@ -475,7 +479,15 @@ def backup_inventory(folder, project):
 
 def prune_backups(folder, project, keep):
     rows = backup_inventory(folder, project)
-    for row in rows[:-keep]:
+    if type(keep) is not int or keep <= 0:
+        raise ValueError('Positive daily retention is required.')
+    daily = {}
+    for row in rows:
+        daily[row['name'][7:15]] = row
+    retained = {r['name'] for r in sorted(daily.values(), key=lambda r: r['name'])[-keep:]}
+    for row in rows:
+        if row['name'] in retained:
+            continue
         (Path(folder) / row['name']).unlink()
         (Path(folder) / (row['name'] + '.json')).unlink()
 

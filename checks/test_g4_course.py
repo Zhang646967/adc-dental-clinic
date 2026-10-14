@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
-from scripts.g4_course import (Course, backup_inventory, decrypt_backup, digest,
+from scripts.g4_course import (BACKUP_NAME, Course, backup_inventory, decrypt_backup, digest,
                                private_file, prune_backups)
 from scripts.g4_prepare import prepare
 from scripts.g4_remote import Remote
@@ -181,10 +181,27 @@ class CourseSafetyTests(unittest.TestCase):
             prune_backups(folder, self.plan['project'], 7)
         self.assertTrue(path.exists())
 
+    def test_private_access_guides_cannot_replace_the_encrypted_backup_name(self):
+        course = self.course()
+        for name in ('demo-credentials.txt', 'COURSE_ACCESS.md'):
+            path = self.bundle / 'private' / name
+            path.write_text('synthetic private guide')
+            os.chmod(path, 0o600)
+        recipient = self.private('recipient', ('age1' + 'a' * 58).encode())
+        def dump(*args, **kwargs):
+            kwargs['output_file'].write(b'PGDMP synthetic')
+        def encrypt(command, *args, **kwargs):
+            shutil.copyfile(command[-1], command[command.index('-o') + 1])
+        course.dc = Mock(side_effect=dump)
+        with patch('scripts.g4_course.run', side_effect=encrypt):
+            result = course.backup(recipient)
+        self.assertIsNotNone(BACKUP_NAME.fullmatch(result['name']))
+        self.assertEqual(len(backup_inventory(self.bundle / 'backups', self.plan['project'])), 1)
+
     def test_retention_removes_only_verified_old_files_from_selected_project(self):
         folder = self.bundle / 'backups'
         for i in range(9):
-            name = 'backup-20261014T12000000000' + str(i) + 'Z-' + self.plan['project'] + '.tar.age'
+            name = 'backup-2026100' + str(i+1) + 'T120000000000Z-' + self.plan['project'] + '.tar.age'
             path = folder / name
             path.write_bytes(b'encrypted')
             os.chmod(path, 0o600)

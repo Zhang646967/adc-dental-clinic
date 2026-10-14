@@ -7,7 +7,10 @@ import argparse
 import hashlib
 import json
 import os
+from pathlib import Path
 import re
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--project', required=True)

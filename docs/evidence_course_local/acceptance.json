@@ -1,0 +1,161 @@
+{
+  "status": "LOCAL_PREPARATION_PASS",
+  "timestamp_utc": "2026-10-14T14:10:12.967772+00:00",
+  "scope": "Isolated amd64 images under Mac Docker Desktop emulation, private loopback HTTPS; not the selected 2 GB cloud host.",
+  "application_source_commit": "9b453a137e57d2577eb455b4e6378ce5b0704e97",
+  "operations_file_sha256": {
+    "scripts/g4_course.py": "10af83fa78172471d9eea6eeba8736abf1c0e350e9dac67be4d3402ffcb7c33e",
+    "scripts/g4_course_browser.cjs": "44a1aeab548c8dba36d58416144f5003e5b6a419cf694ffdcdc44db05e92c130",
+    "scripts/g4_course_facts.py": "05893fba0f1346c9f9a0bdf4160aa824439bd2f9c926fb8819dac9eb6627ca73",
+    "scripts/g4_course_load.py": "765a7a23ec170f8a3cbd5cb9ead3cc4cfc6bde5688d1c25425a060efe30b5d81",
+    "scripts/g4_course_observe.py": "c6841f2cf6df787cc8e876565e4a864d9a0dde1757a41d3ec2c8a065cab0661d"
+  },
+  "gateway_sha256": "f6dfdf6fe58a8a85bb8c607952e30fdb87f7f23082cb03a217e749da2acea842",
+  "architecture": "linux/amd64",
+  "postgresql_major": 17,
+  "models_and_16_migrations_changed": false,
+  "browser": {
+    "passed": true,
+    "checks": 33,
+    "role_types": 7,
+    "browser_version": "155.0.8059.79",
+    "business_patient_write": true
+  },
+  "mixed_load": {
+    "passed": true,
+    "users": 10,
+    "distinct_accounts": 10,
+    "duration_seconds": 1800,
+    "elapsed_seconds": 1800.006,
+    "rps": 5,
+    "attempted": 9000,
+    "successful": 9000,
+    "statuses": {
+      "200": 7200,
+      "302": 1800
+    },
+    "queue_dropped": 0,
+    "successful_writes": 1800,
+    "planned_writes": 1800,
+    "db_oracle": {
+      "created": 1800,
+      "distinct_names": 1800
+    },
+    "p95_ms": 106.772,
+    "cold_preflight_max_ms": 643.62,
+    "read_fraction": 0.8,
+    "write_fraction": 0.2
+  },
+  "observation": {
+    "elapsed_seconds": 1922.321,
+    "summary": {
+      "passed": true,
+      "samples": 59,
+      "services": {
+        "db": {
+          "healthy": true,
+          "oom": false,
+          "restart_unchanged": true,
+          "peak_memory_mib": 72.02
+        },
+        "web": {
+          "healthy": true,
+          "oom": false,
+          "restart_unchanged": true,
+          "peak_memory_mib": 163.3
+        },
+        "notification-worker": {
+          "healthy": true,
+          "oom": false,
+          "restart_unchanged": true,
+          "peak_memory_mib": 66.25
+        },
+        "gateway": {
+          "healthy": true,
+          "oom": false,
+          "restart_unchanged": true,
+          "peak_memory_mib": 97.56
+        }
+      },
+      "web_median_growth_mib": -0.6,
+      "max_growth_mib": 64,
+      "peak_app_connections": 3,
+      "idle_transaction_observed": false,
+      "waiting_lock_observed": false,
+      "memory_leak_absence_proven": false
+    }
+  },
+  "worker": {
+    "durable_queued_events": 1,
+    "inbox_before_start": 0,
+    "eligible_deliveries": 11,
+    "after_restart": 11,
+    "duplicate_deliveries": 0,
+    "final_event_state": "DELIVERED"
+  },
+  "encrypted_backup_and_restore": {
+    "encryption": "age X25519",
+    "dump_format": "PostgreSQL custom, no owner/ACL",
+    "business_facts_match": true,
+    "timezone_preserved": true,
+    "restore_seconds": 22.881,
+    "restored_password_and_role_login": true,
+    "wrong_key": "REFUSED",
+    "corrupted_cipher": "REFUSED",
+    "existing_database_restore": "REFUSED",
+    "existing_target_facts_unchanged": true,
+    "same_mac_only": true
+  },
+  "earlier_failures_retained": [
+    {
+      "stage": "setup",
+      "issue": "Patient form selection also matched signed logout form; selector narrowed."
+    },
+    {
+      "stage": "first_30_second_measurement",
+      "attempted": 150,
+      "successful": 119,
+      "successful_writes": 0,
+      "statuses": {
+        "0": 1,
+        "200": 149
+      },
+      "issue": "Unchecked allergy fields incorrectly submitted; facts script lacked project import path; stale idle connection retained."
+    },
+    {
+      "stage": "second_30_second_measurement",
+      "attempted": 150,
+      "successful": 149,
+      "successful_writes": 30,
+      "statuses": {
+        "0": 1,
+        "200": 119,
+        "302": 30
+      },
+      "issue": "Cold start on stale idle connection failed; fresh concurrent preflight added without request retries."
+    },
+    {
+      "stage": "first_backup",
+      "issue": "Optional access-guide loop shadowed archive filename; corrected and repeat backup/restore passed."
+    },
+    {
+      "stage": "image_preflight",
+      "issue": "Initial amd64 gateway pull received temporary Docker Hub 503; architecture guard refused before database initialization; verified retry succeeded."
+    }
+  ],
+  "not_run": [
+    "Actual Hong Kong cloud host",
+    "Trusted public DNS/TLS issuance and renewal dry-run",
+    "Pinned live SSH publication",
+    "Automatic Linux timers and Mac LaunchAgent against the cloud host",
+    "Mainland unproxied access",
+    "Mac-off independence",
+    "Whole cloud host reboot",
+    "Off-host recovery from cloud to Mac/replacement host",
+    "Full A/B browser routes on cloud",
+    "24-hour cloud/public observation"
+  ],
+  "course_online_readiness": "NOT_RUN",
+  "public_acceptance_executed": false,
+  "public_release_approved": false
+}
