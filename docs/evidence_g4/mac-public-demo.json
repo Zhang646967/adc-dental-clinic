@@ -1,6 +1,6 @@
 {
-  "status": "LOCAL_PUBLIC_DEMO_CHECKS_PASS_EXTERNAL_PENDING",
-  "recorded_at_utc": "2026-10-14T03:32:15.281329+00:00",
+  "status": "TEMPORARY_MAC_DEMO_PASS",
+  "recorded_at_utc": "2026-10-14T03:56:14.690782+00:00",
   "scope": "Temporary Mac course demo; new synthetic business-read-only data",
   "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
   "project": "adc_g4_8e25aae81918",
@@ -271,7 +271,48 @@
     "windows_recovery": "NOT_RUN"
   },
   "external_runner": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38506885360",
+    "source_commit": "78884fb6b291957e9931d83dbf9e9781e197e1f9",
+    "vantage": "GitHub-hosted Ubuntu runner outside the Mac",
+    "network": {
+      "scope": "Read-only network preflight; not full G4 acceptance",
+      "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+      "trust": "system certificate trust",
+      "dns_cutover_verified": true,
+      "results": [
+        {
+          "check": "HTTP redirects to domain HTTPS",
+          "passed": true
+        },
+        {
+          "check": "Verified TLS and login GET",
+          "passed": true
+        },
+        {
+          "check": "CSRF cookie is Secure and SameSite Lax",
+          "passed": true
+        },
+        {
+          "check": "HSTS, no-store and frame protection",
+          "passed": true
+        },
+        {
+          "check": "Collected static asset",
+          "passed": true
+        },
+        {
+          "check": "Gateway overwrites spoofed proxy scheme",
+          "passed": true
+        },
+        {
+          "check": "Foreign Host is not served",
+          "passed": true
+        }
+      ],
+      "network_checks_passed": true,
+      "public_acceptance_executed": false
+    }
   },
   "first_public_failure": {
     "reason": "Long assigned hostname exceeded Nginx default server-name hash bucket; gateway restarted after early startup status.",
@@ -281,5 +322,52 @@
   "remaining": [
     "Off-host backup/host-loss recovery",
     "Temporary-host availability/reboot and bounded-capacity checks"
-  ]
+  ],
+  "restart": {
+    "demo_web_and_gateway_restart": "PASS",
+    "loopback_after_restart": "PASS",
+    "database_volume": "preserved",
+    "old_Mac_database": "existing DB container running; no image/configuration/data replacement",
+    "whole_host_reboot": "NOT_RUN",
+    "notification_writer": "disabled in read-only demo"
+  },
+  "configuration_source_commit": "78884fb6b291957e9931d83dbf9e9781e197e1f9",
+  "network_after_restart": {
+    "scope": "Read-only network preflight; not full G4 acceptance",
+    "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+    "trust": "system certificate trust",
+    "dns_cutover_verified": true,
+    "results": [
+      {
+        "check": "HTTP redirects to domain HTTPS",
+        "passed": true
+      },
+      {
+        "check": "Verified TLS and login GET",
+        "passed": true
+      },
+      {
+        "check": "CSRF cookie is Secure and SameSite Lax",
+        "passed": true
+      },
+      {
+        "check": "HSTS, no-store and frame protection",
+        "passed": true
+      },
+      {
+        "check": "Collected static asset",
+        "passed": true
+      },
+      {
+        "check": "Gateway overwrites spoofed proxy scheme",
+        "passed": true
+      },
+      {
+        "check": "Foreign Host is not served",
+        "passed": true
+      }
+    ],
+    "network_checks_passed": true,
+    "public_acceptance_executed": false
+  }
 }

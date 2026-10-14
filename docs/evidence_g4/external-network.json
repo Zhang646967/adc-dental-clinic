@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "run": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38506885360",
+  "source_commit": "78884fb6b291957e9931d83dbf9e9781e197e1f9",
+  "vantage": "GitHub-hosted Ubuntu runner outside the Mac",
+  "network": {
+    "scope": "Read-only network preflight; not full G4 acceptance",
+    "host": "ten-unlimited-immigrants-passengers.trycloudflare.com",
+    "trust": "system certificate trust",
+    "dns_cutover_verified": true,
+    "results": [
+      {
+        "check": "HTTP redirects to domain HTTPS",
+        "passed": true
+      },
+      {
+        "check": "Verified TLS and login GET",
+        "passed": true
+      },
+      {
+        "check": "CSRF cookie is Secure and SameSite Lax",
+        "passed": true
+      },
+      {
+        "check": "HSTS, no-store and frame protection",
+        "passed": true
+      },
+      {
+        "check": "Collected static asset",
+        "passed": true
+      },
+      {
+        "check": "Gateway overwrites spoofed proxy scheme",
+        "passed": true
+      },
+      {
+        "check": "Foreign Host is not served",
+        "passed": true
+      }
+    ],
+    "network_checks_passed": true,
+    "public_acceptance_executed": false
+  }
+}

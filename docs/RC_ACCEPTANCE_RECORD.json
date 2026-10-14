@@ -43,7 +43,8 @@
   "G4_public_deployment": {
     "status": "PARTIAL",
     "evidence": [
-      "docs/evidence_g4/mac-public-demo.json"
+      "docs/evidence_g4/mac-public-demo.json",
+      "docs/evidence_g4/external-network.json"
     ],
     "preparation": {
       "status": "PREPARATION_PASS",
@@ -53,7 +54,7 @@
         "deployment/g4/MAC_TEMPORARY_DEMO.md"
       ]
     },
-    "reason": "Selected temporary Mac demonstration passes bounded checks; independent external probe, off-host recovery and availability/capacity evidence remain.",
+    "reason": "Temporary Mac course demo accepted for bounded public HTTPS/browser, service restart and same-Mac restore. Off-host loss recovery, whole-host reboot and capacity/continuous availability are not established.",
     "selected_target": {
       "kind": "temporary_mac_course_demo",
       "domain": "free provider-assigned trycloudflare.com hostname",
@@ -70,10 +71,18 @@
         "scope": "Same-Mac independent PostgreSQL restore, runtime role and normal backend login with CSRF"
       },
       "independent_external_network_probe": {
-        "status": "NOT_RUN"
+        "status": "PASS",
+        "evidence": [
+          "docs/evidence_g4/external-network.json"
+        ],
+        "scope": "7 verified HTTPS checks from the GitHub-hosted external runner"
       },
       "off_host_recovery_and_availability": {
         "status": "NOT_RUN"
+      },
+      "demo_web_and_gateway_restart": {
+        "status": "PASS",
+        "scope": "Same-Mac service restart; original volume preserved and public HTTPS rechecked"
       }
     }
   },

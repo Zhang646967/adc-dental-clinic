@@ -90,3 +90,20 @@ References checked 2026-10-13:
 - [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
 - [Cloudflare request headers](https://developers.cloudflare.com/fundamentals/reference/http-request-headers/)
 - [Official client release 2026.10.0](https://github.com/cloudflare/cloudflared/releases/tag/2026.10.0)
+
+## Recorded demonstration result
+
+The temporary demo passed 7 public HTTPS checks from both this Mac and an
+independent GitHub runner, 43 real Chrome checks across 9 seeded accounts, and
+a private restore into a different empty PostgreSQL project. Stable business
+facts remained unchanged after rejected writes. Web/gateway service restart
+also passed; the source image, business schema and data volume were preserved.
+
+Evidence: [bounded acceptance](../../docs/evidence_g4/mac-public-demo.json),
+[external runner](../../docs/evidence_g4/external-network.json) and
+[regression](../../docs/evidence_g4/mac-postgresql-gate.json). The local regression
+passed 828 source checks and 705 Django tests. Off-host recovery, whole-Mac reboot
+and measured capacity remain unexecuted; overall G4 is partial and RC1 retained.
+
+Read the active URL and private accounts in `.g4/private/DEMO_ACCESS.md` on this
+Mac. Credentials and database dumps are never committed to GitHub.
