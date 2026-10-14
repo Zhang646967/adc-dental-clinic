@@ -1,5 +1,11 @@
 {% extends 'base.html' %}{% load workspace_tags %}{% block content %}
 <div class="eyebrow">管理闭环 / 开单收入与成本</div><h1>季度财务</h1>
 <p class="lede">先确认纳入人员，再核对成本。未填成本不是零；基金测算不等于个人奖金。</p>
-<div class="panel"><h2>已有季度</h2><div class="table-scroll" tabindex="0"><table><caption>选择季度以查看完整性、明细和统计口径</caption><thead><tr><th>期间</th><th>纳入清单</th><th>操作</th></tr></thead><tbody>{% for q in quarters %}<tr><td>{{ q.year }} Q{{ q.quarter_no }}</td><td>{{ q.get_roster_status_display }}</td><td><a class="button secondary" href="{% url 'quarter_detail' pk=q.pk %}">查看季度</a></td></tr>{% empty %}<tr><td colspan="3">尚未建立季度。建立后不会自动填入金额。</td></tr>{% endfor %}</tbody></table></div></div>
+<p class="muted">完整性核对时间 {{ as_of|date:'Y-m-d H:i:s' }}（北京时间）。打开季度后重新核对当前账单与成本。</p>
+<div class="panel"><h2>已有季度与待补事项</h2><div class="table-scroll" tabindex="0"><table><caption>资料完整才可测算；期间是否结束另行显示，不代表已经关账</caption><thead><tr><th>期间</th><th>纳入清单</th><th>成本与范围完整性</th><th>操作</th></tr></thead><tbody>
+{% for q in quarters %}<tr><td>{{ q.year }} Q{{ q.number }}{% if q.in_progress %}<small>季度期间尚未结束</small>{% endif %}</td><td>{% if q.roster_confirmed %}已确认{% else %}未确认{% endif %}</td><td>
+{% if q.ready %}<strong>资料完整，可测算</strong>{% else %}<strong>待补齐，暂不发布总体利润</strong><ul>{% for reason in q.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>{% endif %}
+<small>未确认成本 {{ q.unconfirmed_costs }} 人 · 未纳入的开单牙医 {{ q.unlisted_dentists }} 人</small></td><td><a class="button secondary" href="{% url 'quarter_detail' pk=q.id %}">查看季度</a></td></tr>
+{% empty %}<tr><td colspan="4">尚未建立季度。建立后不会自动填入金额。</td></tr>{% endfor %}
+</tbody></table></div>{% include '_pagination.html' %}</div>
 {% if can_write %}<section class="panel form-panel"><div class="step-label">新建管理范围</div><h2>建立自然季度</h2><form method="post" class="management-form">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit">建立季度</button></form></section>{% else %}<p>总部账号仅查询；成本录入和确认由财务账号执行。</p>{% endif %}{% endblock %}

@@ -10,7 +10,7 @@ from django.utils import timezone
 from accounts.models import UserAccount
 from registry.models import Clinic
 from accounts.policies import has_role
-from scheduling.selectors import visible_visits
+from workspaces.worklists import workspace_worklist
 from workspaces.context import (ensure_context, available_roles, authorized_clinics,
     valid_context, attach, check_token, SESSION_KEY)
 from workspaces.models import WorkspaceContext
@@ -71,11 +71,7 @@ def home(request):
     if not valid_context(request.user,ctx):return redirect('select_role')
     if ctx.role=='PATIENT':return redirect('portal_home')
     if ctx.role in CLINIC_ROLES and ctx.clinic_id is None:return select_clinic(request)
-    visits=visible_visits(request.user)
-    data={'today_count':visits.filter(scheduled_start__date=timezone.localdate()).count(),
-          'waiting_count':visits.filter(status='CHECKED_IN').count()}
-    if ctx.role=='DENTIST':
-        data['queue']=visits.filter(status='CHECKED_IN').select_related('patient','clinic').order_by('attended_at')[:20]
+    data={'worklist':workspace_worklist(request.user)}
     return render(request,{'DENTIST':'workspaces/doctor.html','FRONT_DESK':'workspaces/frontdesk.html',
         'MANAGER':'workspaces/manager.html','HQ':'workspaces/hq.html','FINANCE':'workspaces/finance.html',
         'SYSADMIN':'workspaces/technical.html'}[ctx.role],data)

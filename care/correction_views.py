@@ -11,6 +11,17 @@ from adc_core.http_support import EXPECTED_ERRORS,add_error
 from care.models import CorrectionRequest,Invoice,TreatmentRecord
 from care.views import _own_visit
 from care.corrections import request_line_correction,review_correction
+from urllib.parse import urlencode
+
+
+class CorrectionFilterForm(forms.Form):
+    queue = forms.ChoiceField(label='办理范围', required=False)
+
+    def __init__(self, *args, finance, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['queue'].choices = [('all', '全部历史'), ('open', '待审核申请')]
+        if finance:
+            self.fields['queue'].choices.append(('review', '可由我独立审核'))
 
 class RequestForm(forms.Form):
     expected_version=forms.IntegerField(min_value=0,widget=forms.HiddenInput)
@@ -35,11 +46,23 @@ def correction_access(user,req):
 def listing(request):
     grants=bindings(request.user)
     qs=CorrectionRequest.objects.select_related('visit','requester','base_record_version').filter(kind='RECORD_CONTENT')
-    if grants.filter(role='FINANCE',scope_kind='CHAIN').exists():pass
+    finance = grants.filter(role='FINANCE',scope_kind='CHAIN').exists()
+    if finance:pass
     elif grants.filter(role='DENTIST',scope_kind='SELF_DENTIST').exists():qs=qs.filter(requester=request.user,visit__dentist_id=request.user.dentist_id)
     else:raise PermissionDenied
+    form = CorrectionFilterForm(request.GET, finance=finance)
+    valid = form.is_valid()
+    if not valid:
+        qs = qs.none()
+    elif form.cleaned_data['queue'] in ('open', 'review'):
+        qs = qs.filter(status='OPEN')
+        if form.cleaned_data['queue'] == 'review':
+            qs = qs.exclude(requester_id=request.user.pk)
     from django.core.paginator import Paginator
-    return render(request,'care/corrections.html',{'page':Paginator(qs.order_by('-requested_at'),20).get_page(request.GET.get('page'))})
+    queue = form.cleaned_data.get('queue') or 'all'
+    qs = qs.order_by('requested_at', 'pk') if queue != 'all' else qs.order_by('-requested_at', '-pk')
+    return render(request,'care/corrections.html',{'page':Paginator(qs,20).get_page(request.GET.get('page')),
+        'filter_form':form,'filters_valid':valid,'pagination_query':urlencode({'queue':queue})}, status=200 if valid else 400)
 
 @login_required
 @require_http_methods(['GET','POST'])

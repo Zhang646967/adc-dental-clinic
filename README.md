@@ -45,6 +45,9 @@ import into a separate empty instance.
 
 - Django 5.2, Python 3.13, PostgreSQL 17, Gunicorn and Nginx.
 - A modular monolith（模块化单体）with seven role workspaces and clinic scope.
+- Role-specific business follow-up（业务跟进）for overdue appointments, unclosed
+  care, coordination, patient offers and quarterly financial completeness; see
+  [the business improvement record](docs/BUSINESS_FOLLOW_UP.md).
 - Explicit appointment confirmation; waitlist suggestions never create bookings.
 - Versioned care records and invoices, independent correction review, and clear
   distinctions between billed revenue, cash and missing cost data.

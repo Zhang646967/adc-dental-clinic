@@ -15,3 +15,11 @@ html[data-display=comfortable] .role-grid{grid-template-columns:1fr}html[data-di
 /* v0.9 result checks: no business automation, long IDs wrap at narrow widths. */
 .result-check-form { margin: 1rem 0; }
 .result-identifier { overflow-wrap: anywhere; }
+
+/* Business lists remain usable without scripts, including large text mode. */
+.business-worklist h2{margin:.2rem 0}.worklist-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1rem;margin:1rem 0}
+.worklist-metric{border:1px solid #cbdcd5;border-radius:10px;padding:1rem;min-width:0}.worklist-metric h3{font-size:1.05rem;margin:0}.worklist-metric>strong{display:block;font-size:1.8rem;margin:.4rem 0}.worklist-metric p{line-height:1.6}
+.worklist-group{margin-top:1.5rem;padding-top:1rem;border-top:1px solid #cbdcd5}.worklist-group h3{margin:.3rem 0;font-size:1.15rem}.worklist-items{list-style:none;padding:0;margin:0}.worklist-items>li{display:flex;gap:1rem;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid #e2ebe6;min-width:0}.worklist-items>li>div{min-width:0}.worklist-items p{margin:.3rem 0}.worklist-items time{font-size:.9rem;color:#47685b}.worklist-items .button{flex-shrink:0}.worklist-empty{padding:1rem 0}
+.worklist-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem}.worklist-filters>div{min-width:0}.worklist-filters input,.worklist-filters select{width:100%;min-width:0}.worklist-filters .actions{grid-column:1/-1}.business-worklist p,.business-worklist strong{overflow-wrap:anywhere}
+@media(max-width:700px){.worklist-items>li{display:grid;grid-template-columns:minmax(0,1fr)}.worklist-items .button{width:100%;justify-content:center}.business-worklist .heading-row{align-items:flex-start;flex-wrap:wrap}.worklist-filters{grid-template-columns:minmax(0,1fr)}}
+html[data-display=comfortable] .worklist-items>li{display:grid;grid-template-columns:minmax(0,1fr)}

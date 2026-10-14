@@ -20,6 +20,7 @@ from patients.services import create_patient, PATIENT_FIELDS
 from scheduling.selectors import visible_visits, can_read_visit_details
 from scheduling.services import create_appointment, change_appointment, reschedule, create_slot
 from scheduling.models import Visit
+from scheduling.worklists import VisitFilterForm, filtered_visits
 
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 
@@ -87,14 +88,20 @@ def patient_create(request):
 @login_required
 @require_GET
 def visit_list(request):
-    qs = visible_visits(request.user).select_related("clinic", "dentist", "patient")
+    form = VisitFilterForm(request.GET, role=request.workspace.role)
+    valid = form.is_valid()
+    qs = filtered_visits(request.user, form.cleaned_data) if valid else Visit.objects.none()
+    has_details = request.workspace.role in ('FRONT_DESK', 'DENTIST')
+    qs = qs.select_related('clinic', 'dentist', *(['patient'] if has_details else []))
     page = Paginator(qs, 20).get_page(request.GET.get("page"))
     # Metadata-only for managers/HQ: never render patient identity or free text there.
     rows = [{"id": v.pk, "visit_no": v.visit_no, "clinic": v.clinic.name, "dentist": v.dentist.name,
              "start": v.scheduled_start, "end": v.scheduled_end, "status": v.get_status_display(),
-             "patient": v.patient.name if can_read_visit_details(request.user, v) else "受限", 
-             "has_details": can_read_visit_details(request.user, v)} for v in page]
-    return render(request, "visits.html", {"page": page, "rows": rows})
+             "patient": v.patient.name if has_details else "受限",
+             "has_details": has_details} for v in page]
+    query = {k: str(v) for k, v in form.cleaned_data.items() if v} if valid else {}
+    return render(request, "visits.html", {"page": page, "rows": rows, "filter_form": form,
+                  "pagination_query": urlencode(query), "filters_valid": valid}, status=200 if valid else 400)
 
 @login_required
 @require_http_methods(["GET", "POST"])

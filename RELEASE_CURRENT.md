@@ -40,6 +40,16 @@ deployment and all 16 migrations remain separate. See docs/COURSE_ONLINE.md.
 The server is not purchased; cloud acceptance remains NOT_RUN. The G3 status
 above records its date; current G4 is PARTIAL in docs/RC_ACCEPTANCE_RECORD.json.
 
+## Business follow-up development — 2026-10-14
+
+The user requested improvement across the business chain after deployment
+preparation. Role-specific work lists now surface overdue appointment outcomes,
+unclosed care, coordination ownership/review, patient offer deadlines and
+quarterly financial blockers. Appointment/correction filters retain pagination.
+All links return to existing permission-checked confirmation workflows; GET
+never performs a business operation. No models or migrations changed. See
+docs/BUSINESS_FOLLOW_UP.md for current local evidence, separate from G3/G4 history.
+
 ## Historical account from the supplied Windows RC archive
 
 候选源码基于完整alpha.10重建；中断目录中的图像不作为代码完成证据。运行基线仍为Windows v0.7，Mac暂停。此次不新增大型业务模块，而是整合可核对、可启动、可验收的课程候选。

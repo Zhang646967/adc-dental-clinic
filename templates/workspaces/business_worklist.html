@@ -1,0 +1,31 @@
+{% if worklist.role != 'SYSADMIN' %}
+<section class="business-worklist panel" aria-labelledby="business-worklist-heading">
+  <div class="heading-row">
+    <div><p class="eyebrow">当前身份 · 授权范围内</p><h2 id="business-worklist-heading">业务跟进清单</h2></div>
+    <a class="button secondary" href="{{ request.path }}">重新核对清单</a>
+  </div>
+  <p class="muted">读取 {{ worklist.as_of|date:'Y-m-d H:i:s' }}（北京时间）。打开记录后重新核实，再由你确认办理。</p>
+  {% if worklist.cards %}<div class="worklist-metrics">
+    {% for card in worklist.cards %}<article class="worklist-metric">
+      <h3>{{ card.label }}</h3><strong>{{ card.count }}</strong><p>{{ card.note }}</p>
+      <a href="{{ card.url }}">打开相关清单</a>
+    </article>{% endfor %}
+  </div>{% endif %}
+  {% for group in worklist.groups %}{% if group.total %}
+  <section class="worklist-group" aria-labelledby="worklist-{{ group.key }}">
+    <div class="heading-row"><h3 id="worklist-{{ group.key }}">{{ group.title }} <span class="badge">{{ group.total }}</span></h3>
+      <a href="{{ group.all_url }}">打开完整相关列表</a></div>
+    <p class="muted">{{ group.note }}</p>
+    <ol class="worklist-items">
+      {% for item in group.items %}<li>
+        <div><strong>{{ item.title }}</strong><p>{{ item.detail }}</p>
+          {% if item.when %}<time datetime="{{ item.when|date:'c' }}">{{ item.when|date:'Y-m-d H:i' }}（北京时间）</time>{% endif %}</div>
+        <a class="button secondary" href="{{ item.url }}">{{ item.action }}</a>
+      </li>{% endfor %}
+    </ol>
+    {% if group.total > group.limit %}<p class="muted">先显示 {{ group.limit }} 条，共 {{ group.total }} 条；其余记录请打开完整相关列表。</p>{% endif %}
+  </section>
+  {% endif %}{% endfor %}
+  {% if not worklist.has_items %}<p class="worklist-empty">当前没有这些清单中的待办或近期记录。可通过下面的业务入口办理新事项。</p>{% endif %}
+</section>
+{% endif %}

@@ -1,0 +1,86 @@
+{
+  "timestamp_utc": "2026-10-14T15:51:25.204397+00:00",
+  "status": "LOCAL_BUSINESS_ACCEPTANCE_PASS",
+  "scope": "Isolated synthetic Mac PostgreSQL and real Chrome; existing confirmation workflows. No cloud acceptance.",
+  "source_base_commit": "16995d384161f5ab01226a1c2cf7ad13ea59f612",
+  "runtime_files_sha256": {
+    "adc_core/views.py": "c07f704d1e694a58e4dffc7ff9bb9684a20d6d5f00c26de5aad667765c3d4f25",
+    "care/correction_views.py": "eea58aa64063ae441c4f0774571a594c9cf014206ce049476e8455473bfc7085",
+    "finance/selectors.py": "a8dbf0691b640e591befbe8b7e115019d86c98d1d7e931f273c3910b74193a5a",
+    "finance/views.py": "134d4675ff04cd7e1b6bcef69602b83b62b44445e4650e97fee6d44565b2e1c4",
+    "portal/views.py": "d4892493d3da13ead82dbde23ff0b911d0f9dc55eb038e9b8cc754ba5c84b63e",
+    "scheduling/worklists.py": "de6a673e1a3bff63ed58f6682371bc2ee441a0d04ddde1b8c24d7fe9138e89f0",
+    "workspaces/worklists.py": "98040e6fe140562d2a7fad35ff1dfdbeb28f3e95dec7acda883a6a76121609e5",
+    "workspaces/views.py": "a2f4b1a8aad264db46f2eb228351c09a28833f3d80c1f2da96c45b8f111c9f94",
+    "static/workspace.css": "d80e7107a43644c2999e7a0257aa337a854518ee8206695b3ea81db256cc9461",
+    "templates/workspaces/business_worklist.html": "47545fb3e726dcf25e91287e414843a49ba58efe6480aa7c78eb7d917c6c5b60",
+    "templates/visits.html": "1fd091b1dd6d2b044e4e2799a6b803c708d06c6a2cb135e2db921bee1400a620",
+    "templates/finance/quarters.html": "236101cc19fe2ef930b6097ecf191ed6ee2b97fe7b13bd88fa059dc27fbd975f",
+    "templates/care/corrections.html": "29ef6b3e8016adbb9a444e8397ecc38d12f7b9c001b05aa6895d17df5ebae05d",
+    "templates/_pagination.html": "31f8e5181e118eb92b1195bfecd2bcaaf427820ba639a3c962684f559e62711e"
+  },
+  "regression": {
+    "source_checks": 884,
+    "postgresql_tests": 743,
+    "new_business_cases": 38,
+    "all_passed": true,
+    "cleanup_exit": 0
+  },
+  "browser": {
+    "business_checks": 59,
+    "final_runtime_checks": 24,
+    "roles": 7,
+    "account_sessions": 9,
+    "page_errors": 0,
+    "390px_all_roles": true,
+    "frontdesk_large_text": true,
+    "passed": true,
+    "offer_confirmation_resumed_without_reset": true
+  },
+  "business_database_facts": {
+    "overdue_outcome": "NO_SHOW",
+    "care_closed": "CLOSED_NO_TREATMENT",
+    "no_treatment_amount": "0.00",
+    "current_invoice_amount": "200.00",
+    "current_invoice_revision": 2,
+    "published_prior_amount": "400.00",
+    "correction_status": "APPLIED",
+    "different_reviewer": true,
+    "quarter_ready": true,
+    "revenue": "200.00",
+    "costs": "30.00",
+    "profit": "170.00",
+    "fund": "17.00",
+    "offer_state": "ACCEPTED",
+    "offer_has_single_visit": true,
+    "coordination_state": "CLOSED",
+    "slot_still_active_and_paused": true,
+    "visits": 4,
+    "logical_invoices": 2,
+    "corrections": 1,
+    "passed": true
+  },
+  "models_or_migrations_changed": false,
+  "earlier_failures_retained": [
+    {
+      "stage": "first_regression",
+      "issue": "The scenario attempted roster confirmation after omitting an existing billed dentist; the existing guard correctly refused. The corrected scenario adds new billed activity after confirmation."
+    },
+    {
+      "stage": "first_browser",
+      "issue": "Runner targeted a heading instead of its parent section link; selector corrected."
+    },
+    {
+      "stage": "second_browser",
+      "issue": "Runner assumed offer acceptance redirects to the visit; the existing workflow returns to the result list. Database confirmed one accepted linked booking; acceptance resumed without replay/reset."
+    }
+  ],
+  "final_repairs": [
+    "Aggregate task counts suppress a false empty-state message",
+    "Appointment filters reject stale stored workspace contexts"
+  ],
+  "mac_existing_data": "Encrypted pre-update backup verified; upgrade preserves the original database and credentials",
+  "cloud_acceptance": "NOT_RUN",
+  "historical_windows_recovery": "unresolved",
+  "public_release_approved": false
+}

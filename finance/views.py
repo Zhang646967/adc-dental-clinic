@@ -10,7 +10,7 @@ from adc_core.http_support import EXPECTED_ERRORS,add_error
 from finance.models import Quarter,DentistQuarterCost
 from finance.forms import QuarterForm,MemberForm,ConfirmedForm,CostForm
 from accounts.finance_access import require_finance_read
-from finance.selectors import quarter_report
+from finance.selectors import quarter_report, quarter_worklist
 from finance.policies import safe_csv_cell
 from finance import services
 
@@ -29,7 +29,8 @@ def quarters(request):
             try: q=services.create_quarter(actor=request.user,**data)
             except EXPECTED_ERRORS as exc: add_error(form,exc)
             else: return redirect('quarter_detail',pk=q.pk)
-    return render(request,'finance/quarters.html',{'quarters':Quarter.objects.order_by('-year','-quarter_no'),'form':form,'can_write':_can_write(request.user)})
+    return render(request,'finance/quarters.html',dict(quarter_worklist(request.user,request.GET.get('page','1')),
+                  form=form,can_write=_can_write(request.user)))
 
 @login_required
 @require_http_methods(['GET','POST'])
