@@ -52,6 +52,8 @@ def _edit(request,pk=None):
     manager_clinic(request.user)
     data=equipment_detail(request.user,pk) if pk else {}
     action=request.POST.get('action','preview')
+    if pk is not None and data.get('active_maintenance') and not (request.method=='POST' and action=='confirm'):
+        return render(request,'equipment/maintenance_blocked.html',data,status=409)
     title='设备登记' if pk is None else '设备状态与保养记录'
     if request.method=='POST' and action=='confirm':
         form=ExplicitProposalForm(request.POST)
@@ -73,6 +75,8 @@ def _edit(request,pk=None):
         request.POST if request.method=='POST' else None,
         initial={'acquired_on':timezone.localdate(),'performed_on':timezone.localdate()},
         **({'state':data['asset'].state} if pk is not None else {}))
+    if pk is not None and data.get('maintenance_required'):
+        form.fields['kind'].choices=[('RETIRE','永久退役（恢复设备请办理维护工单）')]
     if request.method=='POST' and form.is_valid():
         try:
             preview=prepare_registration(actor=request.user,**form.cleaned_data) if pk is None else prepare_change(actor=request.user,asset_id=pk,**form.cleaned_data)

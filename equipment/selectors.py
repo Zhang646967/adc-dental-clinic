@@ -33,4 +33,4 @@ def equipment_detail(actor,asset_id):
         asset=scoped_assets(actor).get(pk=asset_id)
         events=list(annotate_fees(asset.events).select_related('recorded_by').order_by('-sequence')[:50])
         for event in events:event.fee_label=FEE_STATES.get(event.fee_state,'费用未登记' if event.fee_state=='UNKNOWN' else '明确零费用' if event.fee_state=='ZERO' else '')
-        return dict(asset=asset,events=events,history_limited=asset.events.count()>50,today=timezone.localdate())
+        return dict(asset=asset,events=events,active_maintenance=asset.maintenance_orders.filter(state__in=['ASSIGNED','IN_PROGRESS','READY']).first(),maintenance_required=asset.state=='MAINTENANCE' and asset.maintenance_orders.filter(maintenance_event__sequence=asset.lock_version).exists(),history_limited=asset.events.count()>50,today=timezone.localdate())

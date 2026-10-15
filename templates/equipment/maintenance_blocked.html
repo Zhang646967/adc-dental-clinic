@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<h1>请先办理当前维护工单</h1><p>{{ asset.asset_code }} 有未完成的维护工单。维修事实由负责人提交，再由另一位本店主管验收；退役时先明确取消工单。</p><p><a class="button" href="{% url 'maintenance_detail' active_maintenance.pk %}">进入当前维护工单</a></p>{% endblock %}

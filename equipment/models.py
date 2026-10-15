@@ -79,3 +79,5 @@ class EquipmentCostAmendment(models.Model):
                 Q(state__in=['APPROVED','REJECTED'],reviewed_by__isnull=False,reviewed_at__isnull=False,lock_version=1)), name='equip_cost_review_metadata'),
             models.UniqueConstraint(fields=['event'],condition=Q(state='PENDING'), name='equip_cost_one_pending'),
         ]
+
+from .maintenance_models import MaintenanceOrder,MaintenanceAction

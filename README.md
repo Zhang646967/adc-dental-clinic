@@ -111,3 +111,15 @@ Two additive migrations preserve all previous 23 migrations. See
 [Daily reconciliation](docs/DAILY_RECONCILIATION.md) and its executed evidence.
 Bank/payment channels, sealed accounting periods, independent cloud deployment and
 commercial-scale acceptance are separate outstanding work.
+
+## Maintenance responsibility — 2026-10-15
+
+Clinic managers can assign stopped-equipment work orders, follow deadlines, submit
+repair evidence and obtain another manager's acceptance. Every action is retained.
+Acceptance creates one exact service event; fee posting and scheduling changes
+remain explicit separate workflows. Cancelled managed cases cannot bypass review
+through the legacy status command. Three additive migrations preserve the prior 25.
+See [Maintenance work orders](docs/MAINTENANCE_WORK_ORDERS.md) for role boundaries,
+legacy declaration scope, verification and remaining commercial requirements.
+
+Maintenance local acceptance: 884 source / 1,042 PostgreSQL-HTTP-concurrency / 704 browser / 89 independent database assertions. All 45 model and association fingerprints match after an encrypted empty-target restore. See [maintenance evidence](docs/evidence_maintenance/acceptance.json). Cloud/commercial acceptance remains incomplete.

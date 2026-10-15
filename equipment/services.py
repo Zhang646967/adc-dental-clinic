@@ -79,10 +79,18 @@ def _change(asset,data):
         cost=cost,next_service_due=due if kind=='SERVICE' else None if kind=='RETIRE' else asset.next_service_due,
         note=_text(data['note'],500))
 
+def _no_open_maintenance(asset,kind):
+    from equipment.maintenance_models import ACTIVE
+    if kind=='SERVICE' and asset.state=='MAINTENANCE' and asset.maintenance_orders.filter(maintenance_event__sequence=asset.lock_version).exists():
+        raise RuleError('本次送修已纳入维护工单；请新建或办理工单，经独立验收后恢复设备。')
+    if asset.maintenance_orders.filter(state__in=ACTIVE).exists():
+        raise RuleError('该设备有未完成维护工单，请通过工单独立验收；取消工单后才可另行登记退役。')
+
 def prepare_change(*,actor,asset_id,**data):
     with reporting_snapshot():
         clinic=manager_clinic(actor)
         asset=EquipmentAsset.objects.get(pk=asset_id,clinic_id=clinic)
+        _no_open_maintenance(asset,data['kind'])
         clean=_change(asset,data)
         payload=dict(action='change',clinic=clinic,asset=asset.pk,version=asset.lock_version,fields=_serial(clean))
         return dict(asset=asset,fields=clean,proposal_token=proposal(actor,CONTRACT,('MANAGER',),payload),title='核对设备状态与保养记录')
@@ -120,6 +128,7 @@ def confirm_equipment(*,actor,proposal_token,confirmed,expected_action=None,expe
     elif data.get('action')=='change':
         asset=EquipmentAsset.objects.select_for_update().get(pk=data['asset'],clinic_id=clinic)
         assert_revision(asset,data['version'])
+        _no_open_maintenance(asset,data['fields']['kind'])
         fields={k:v for k,v in data['fields'].items() if k not in ('previous_state','next_state')}
         if fields['kind']!='SERVICE':
             fields['cost']=None;fields['next_service_due']=None

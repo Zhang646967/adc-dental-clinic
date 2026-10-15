@@ -18,7 +18,7 @@ commercial sizing; the rows below are ordered engineering stages.
 |---|---|---|---|
 | 1 Financial source integrity | Missing/incorrect equipment costs cannot be resolved without falsifying history | Independently reviewed supplementation, cash reversal prerequisites, immutable original and source linkage; PG/concurrency, browser and independent restore | Delivered previously; retained evidence linked below |
 | 2 Daily finance operations | Staff cannot hand over a reconciled day or explain differences by payment method | Define receipt evidence/payment channels, cutoff/timezone, preparer/reviewer responsibilities; implement daily-close versions, discrepancies and explicit reopening; retain bill/cash separation | Daily gross-total reconciliation, discrepancies, independent handover and versioned reopening implemented; payment-channel integration remains planned |
-| 3 Maintenance responsibility | Device dates/state alone do not allocate ownership or document a maintenance case | Define work orders, owner/deadlines, evidence and independent closure where required; link to existing explicit slot intake and coordination; no implied booking cancellation | Planned |
+| 3 Maintenance responsibility | Device dates/state alone do not allocate ownership or document a maintenance case | Owner/deadline, repair evidence, independent clinic-manager acceptance, retained history and exact service-event/fee linkage; explicit scheduling coordination | Locally verified and delivered with retained evidence; external vendors, parts and mandatory enrolment remain planned |
 | 4 Independent operation | Mac sleep/disconnection prevents reliable service and off-site backup download | Deploy a tested commit to the selected separate host; trusted HTTPS, worker/reboot recovery, monitored backups, recovery on a replacement environment and real access testing | Server not purchased; cloud acceptance NOT_RUN |
 | 5 Scale and isolation | Local course samples cannot establish large-clinic/chain capacity | Agree clinic/user/data-size model and service targets; generate representative histories; measure queries, indexes, lock contention, mixed valid writes, resource limits and backup/restore; test every scope under load | Not run at commercial scale |
 | 6 Controlled commercial pilot | Actual operational use has different identity, funds, privacy and support obligations | Confirm product and customer boundaries; establish access review, audit retention/export, incident ownership, release/rollback and applicable professional review; integrate external systems only with separately tested contracts | Not approved for real patient or payment data |
@@ -27,8 +27,10 @@ Stage 2 now has an explicit [daily-close contract](DAILY_RECONCILIATION.md): fou
 approved gross amounts, occurrence date in Asia/Shanghai, preparer responsibility,
 independent review and retained reopening. Late facts trigger a changed-snapshot
 warning. Payment channels, external reconciliation and sealed periods remain open.
-Stage 3 should likewise define assignment, actual service evidence and schedule
-reopening as separate responsibilities before adding screens.
+Stage 3 now defines [maintenance responsibility](MAINTENANCE_WORK_ORDERS.md), repair
+evidence and independent acceptance; fee posting and scheduling changes keep their
+own explicit commands. Existing simple declarations remain distinct from managed
+repair cases.
 
 The current database represents one clinic chain. Clinic scope is not independent
 customer/tenant isolation. Selling a multi-tenant service requires a separate
@@ -72,3 +74,5 @@ Current local execution: `evidence_commercial_foundation/acceptance.json`.
 Historical care/finance/equipment and G3/G4 results retain their original scope.
 
 Daily-operation increment: [Daily reconciliation and handover](DAILY_RECONCILIATION.md).
+
+Maintenance increment: [Work orders and acceptance](MAINTENANCE_WORK_ORDERS.md).
