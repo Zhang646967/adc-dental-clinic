@@ -1,5 +1,6 @@
 """Cash is a separate projection from billed revenue and dentist-quarter cost."""
 from decimal import Decimal
+from urllib.parse import urlencode
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count,Sum,Max,Q,OuterRef,Subquery,F,Value,DecimalField,Case,When
@@ -35,37 +36,71 @@ def posted_amount(qs,plus,minus):
 def invoice_balance(invoice):
     """Internal: caller authorizes this invoice and supplies a reporting snapshot."""
     rows=CashEntry.objects.filter(invoice_id=invoice.pk)
-    net=posted_amount(rows,'RECEIPT','REFUND')
+    values=rows.aggregate(receipts=Sum('amount',filter=Q(state='POSTED',kind='RECEIPT')),
+        refunds=Sum('amount',filter=Q(state='POSTED',kind='REFUND')),
+        pending=Count('pk',filter=Q(state='PENDING')),
+        pending_receipts=Sum('amount',filter=Q(state='PENDING',kind='RECEIPT')),
+        pending_refunds=Sum('amount',filter=Q(state='PENDING',kind='REFUND')))
+    net=(values['receipts'] or ZERO)-(values['refunds'] or ZERO)
     total=invoice.current_record_version.total_amount
     return dict(billed=total,net_received=net,remaining=max(total-net,ZERO),
-        refund_due=max(net-total,ZERO),pending=rows.filter(state='PENDING').count(),
+        refund_due=max(net-total,ZERO),pending=values['pending'],
+        pending_receipts=values['pending_receipts'] or ZERO,pending_refunds=values['pending_refunds'] or ZERO,
         current_revision=invoice.current_record_version.revision_no)
+
+def projected_balance(balance,kind,amount,decision='approve'):
+    """One candidate's effect; other pending entries are not money or promises."""
+    result=dict(balance)
+    if decision!='approve':return result
+    if kind in ('RECEIPT','REFUND'):
+        net=balance['net_received']+(amount if kind=='RECEIPT' else -amount)
+        result.update(net_received=net,remaining=max(balance['billed']-net,ZERO),
+                      refund_due=max(net-balance['billed'],ZERO))
+    else:
+        result['net_equipment_expense']=balance['net_equipment_expense']+(amount if kind=='EQUIPMENT_EXPENSE' else -amount)
+    return result
 
 def event_net(event_id):
     return posted_amount(CashEntry.objects.filter(equipment_event_id=event_id),'EQUIPMENT_EXPENSE','EXPENSE_REVERSAL')
 
-def cash_listing(actor,state='',page='1'):
+def cash_listing(actor,state='',page='1',*,kind='',invoice='',event=''):
     from adc_core.rules import RuleError
     if state not in ('','PENDING','POSTED','REJECTED'):raise RuleError('记账筛选无效。')
+    if kind not in ('','RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'):raise RuleError('记账类型无效。')
+    if invoice and event:raise RuleError('一次只能核对一个来源。')
+    for value in (invoice,event):
+        if value and (type(value) is not str or len(value)>19 or not value.isascii() or not value.isdecimal() or not 0<int(value)<2**63):
+            raise RuleError('记账来源无效。')
     with reporting_snapshot():
         qs=cash_scope(actor)
+        if invoice:qs=qs.filter(invoice_id=int(invoice))
+        if event:qs=qs.filter(equipment_event_id=int(event))
+        if kind:qs=qs.filter(kind=kind)
         totals=qs.aggregate(pending=Count('pk',filter=Q(state='PENDING')),posted=Count('pk',filter=Q(state='POSTED')),
+            pending_receipts=Sum('amount',filter=Q(state='PENDING',kind='RECEIPT')),
+            pending_refunds=Sum('amount',filter=Q(state='PENDING',kind='REFUND')),
+            pending_expenses=Sum('amount',filter=Q(state='PENDING',kind='EQUIPMENT_EXPENSE')),
+            pending_expense_reversals=Sum('amount',filter=Q(state='PENDING',kind='EXPENSE_REVERSAL')),
             receipts=Sum('amount',filter=Q(state='POSTED',kind='RECEIPT')),refunds=Sum('amount',filter=Q(state='POSTED',kind='REFUND')),
             expenses=Sum('amount',filter=Q(state='POSTED',kind='EQUIPMENT_EXPENSE')),expense_reversals=Sum('amount',filter=Q(state='POSTED',kind='EXPENSE_REVERSAL')))
-        for k in ('receipts','refunds','expenses','expense_reversals'):totals[k]=totals[k] or ZERO
+        for k in ('receipts','refunds','expenses','expense_reversals','pending_receipts','pending_refunds','pending_expenses','pending_expense_reversals'):totals[k]=totals[k] or ZERO
         totals['net_received']=totals['receipts']-totals['refunds']
         totals['net_equipment_expense']=totals['expenses']-totals['expense_reversals']
         if state:qs=qs.filter(state=state)
-        qs=qs.select_related('clinic','invoice','equipment_event__asset','prepared_by','reviewed_by').order_by('-pk')
+        qs=qs.select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','prepared_by','reviewed_by').order_by('-pk')
         page_obj=Paginator(qs,20).get_page(page)
         return dict(rows=list(page_obj.object_list),page_obj=page_obj,totals=totals,state_filter=state,
-            detail_allowed=getattr(actor,'_adc_workspace').role!='HQ')
+            detail_allowed=getattr(actor,'_adc_workspace').role!='HQ',kind_filter=kind,invoice_filter=invoice,event_filter=event,
+            page_query=urlencode(dict(state=state,kind=kind,invoice=invoice,event=event)))
 
 def cash_detail(actor,entry_id):
     with reporting_snapshot():
-        row=cash_scope(actor,detail=True).select_related('clinic','invoice__current_record_version','equipment_event__asset','prepared_by','reviewed_by','reversal_of').get(pk=entry_id)
+        row=cash_scope(actor,detail=True).select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','prepared_by','reviewed_by','reversal_of').get(pk=entry_id)
         balance=invoice_balance(row.invoice) if row.invoice_id else dict(known_cost=row.equipment_event.cost,net_equipment_expense=event_net(row.equipment_event_id))
-        return dict(entry=row,balance=balance)
+        from finance.cash_services import approval_blocker
+        blocker=approval_blocker(row) if row.state=='PENDING' else ''
+        return dict(entry=row,balance=balance,approval_blocker=blocker,
+            projected=projected_balance(balance,row.kind,row.amount) if row.state=='PENDING' and not blocker else None)
 
 def receivables(actor,state='',page='1'):
     from adc_core.rules import RuleError
@@ -84,6 +119,11 @@ def receivables(actor,state='',page='1'):
                     default=Value(ZERO),output_field=output)
         cash=CashEntry.objects.filter(invoice_id=OuterRef('pk'),state='POSTED').order_by().values('invoice_id').annotate(value=Sum(signed)).values('value')
         qs=qs.annotate(net_received=Coalesce(Subquery(cash,output_field=output),Value(ZERO),output_field=output))
+        pending=CashEntry.objects.filter(invoice_id=OuterRef('pk'),state='PENDING').order_by().values('invoice_id')
+        from django.db.models import IntegerField
+        qs=qs.annotate(pending_count=Coalesce(Subquery(pending.annotate(value=Count('pk')).values('value'),output_field=IntegerField()),Value(0)),
+            pending_receipts=Coalesce(Subquery(pending.filter(kind='RECEIPT').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)),
+            pending_refunds=Coalesce(Subquery(pending.filter(kind='REFUND').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)))
         qs=qs.annotate(remaining=Greatest(F('current_record_version__total_amount')-F('net_received'),Value(ZERO),output_field=output),
                        refund_due=Greatest(F('net_received')-F('current_record_version__total_amount'),Value(ZERO),output_field=output))
         totals=qs.aggregate(bills=Count('pk'),billed=Sum('current_record_version__total_amount'),

@@ -7,9 +7,9 @@ class EquipmentRegisterForm(forms.Form):
     name=forms.CharField(label='设备名称',max_length=120)
     category=forms.ChoiceField(label='类别',choices=CATEGORIES)
     location=forms.CharField(label='本店存放／使用位置',max_length=120)
-    acquired_on=forms.DateField(label='购置／接收日期（北京时间）',widget=forms.DateInput(attrs={'type':'date'}))
+    acquired_on=forms.DateField(label='购置／接收日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     acquisition_cost=forms.DecimalField(label='购置成本（CNY，空白表示未登记）',min_value=0,max_digits=16,decimal_places=2,required=False)
-    next_service_due=forms.DateField(label='下一次保养到期日（空白表示未登记）',required=False,widget=forms.DateInput(attrs={'type':'date'}))
+    next_service_due=forms.DateField(label='下一次保养到期日（空白表示未登记）',required=False,widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     note=forms.CharField(label='登记依据（合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':2}))
 
     def clean_acquired_on(self):
@@ -19,10 +19,17 @@ class EquipmentRegisterForm(forms.Form):
 
 class EquipmentActionForm(forms.Form):
     kind=forms.ChoiceField(label='本次操作',choices=[('MAINTENANCE','送修／停止使用'),('SERVICE','保养完成／恢复使用'),('RETIRE','永久退役')])
-    performed_on=forms.DateField(label='事实发生日期（北京时间）',widget=forms.DateInput(attrs={'type':'date'}))
+    performed_on=forms.DateField(label='事实发生日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     cost=forms.DecimalField(label='本次保养费用（空白表示未登记）',min_value=0,max_digits=16,decimal_places=2,required=False)
-    next_service_due=forms.DateField(label='完成保养后的下一到期日',required=False,widget=forms.DateInput(attrs={'type':'date'}))
+    next_service_due=forms.DateField(label='完成保养后的下一到期日',required=False,widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     note=forms.CharField(label='原因及本次事实（合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
+
+    def __init__(self,*args,state=None,**kwargs):
+        super().__init__(*args,**kwargs)
+        if state=='MAINTENANCE':
+            self.fields['kind'].choices=[('SERVICE','完成维修／恢复使用'),('RETIRE','永久退役')]
+            self.initial.setdefault('kind','SERVICE')
+        elif state=='RETIRED':self.fields['kind'].choices=[]
 
     def clean(self):
         data=super().clean()

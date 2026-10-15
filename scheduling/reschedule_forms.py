@@ -10,7 +10,7 @@ from scheduling.selectors import booking_slots
 
 
 class ReplacementSearchForm(forms.Form):
-    day = forms.DateField(label='新的预约开始日期（北京时间）', widget=forms.DateInput(attrs={'type': 'date'}))
+    day = forms.DateField(label='新的预约开始日期（北京时间）', widget=forms.DateInput(format='%Y-%m-%d',attrs={'type': 'date'}))
     dentist = forms.ModelChoiceField(label='牙医（可选，留空查本店全部）', queryset=Dentist.objects.none(), required=False)
 
     def __init__(self, *args, actor, **kwargs):

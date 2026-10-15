@@ -112,3 +112,15 @@ This business increment does not complete the pending cloud course acceptance.
 
 ## 课程报告
 R5是由已纠正字体/UML的R4.4继承并合并SU-26—38的完整整合稿。38份系统用例、1份共享子功能、19幅模型和2幅历史观察图；保留案例事实/分析假设/项目决定/验证状态的区分。不把微信通知恢复为编号[16]参考文献。实际日志和报告只是候选证据，不能称为部署认证。
+
+## Finance/equipment handoffs — 2026-10-14
+
+Receipt/refund screens now expose pending amounts and one-candidate balance effects.
+Obsolete requests are identified before review, with rejection preserving history.
+Equipment fees are reconciled from source events, including unrequested, unknown
+and explicit-zero facts; maintenance offers an explicit manager-selected path to
+existing intake, coordination and availability commands. Native date defaults use
+ISO widget values. All 20 migrations remain unchanged; no schema or role expansion.
+See `docs/FINANCE_EQUIPMENT_HANDOFFS.md` and
+`docs/evidence_finance_equipment_followup/acceptance.json`. Independent cloud
+readiness and historical Windows-data recovery retain their separate status.

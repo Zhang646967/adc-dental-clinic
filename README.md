@@ -94,3 +94,7 @@ remains NOT_RUN. Original Windows backup recovery remains unresolved.
 Keep `.env`, `.rc/`, credentials, database dumps and migration bundles private.
 The ignored `evidence/` directory contains local run output; packaged historical
 synthetic evidence remains tracked to preserve the RC1 archive.
+
+Finance/equipment refinement: pending and projected receipt/refund balances,
+source-event fee reconciliation, and explicit maintenance-to-scheduling handoffs
+are described in [the workflow guide](docs/FINANCE_EQUIPMENT_HANDOFFS.md).

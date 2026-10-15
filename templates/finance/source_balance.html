@@ -1,0 +1,7 @@
+<section class="panel"><h2>当前来源核对</h2>{% if source_type == 'invoice' %}
+<p>当前账单 V{{ balance.current_revision }} · 已审核净收 ¥ {{ balance.net_received }} · 待收 ¥ {{ balance.remaining }} · 待退 ¥ {{ balance.refund_due }}。</p>
+<p>待审核收款 ¥ {{ balance.pending_receipts }} · 待审核退款 ¥ {{ balance.pending_refunds }}（{{ balance.pending }}条）；均未计入已收，也不保证一定获批。</p>
+<p>退款按已核实净收款限制。退款后仍有开单金额时，可能重新产生待收；请在预览中核对。接诊或账单需更正时，先办理相应业务并重新读取余额。</p>
+<div class="actions"><a href="{% url 'invoice_detail' source.pk %}">核对当前结算单</a><a href="{% url 'cash_list' %}?invoice={{ source.pk }}">核对本单申请历史</a></div>
+{% else %}<p>已审核净费用 ¥ {{ balance.net_equipment_expense }} · 待审核 {{ balance.pending }}条。事件登记费用与审核后的现金分别核对。</p>
+<div class="actions"><a href="{% url 'equipment_detail' source.asset_id %}">核对设备维护历史</a><a href="{% url 'equipment_expenses' %}?asset={{ source.asset_id }}">核对此设备费用进度</a></div>{% endif %}</section>

@@ -5,6 +5,7 @@ from adc_core.snapshots import reporting_snapshot
 from adc_core.rules import RuleError
 from equipment.models import EquipmentAsset
 from equipment.policies import equipment_scope
+from equipment.fees import annotate_fees,FEE_STATES
 
 def scoped_assets(actor):
     clinic=equipment_scope(actor)
@@ -30,5 +31,6 @@ def equipment_listing(actor,state='',due='',page='1'):
 def equipment_detail(actor,asset_id):
     with reporting_snapshot():
         asset=scoped_assets(actor).get(pk=asset_id)
-        events=list(asset.events.select_related('recorded_by').order_by('-sequence')[:50])
+        events=list(annotate_fees(asset.events).select_related('recorded_by').order_by('-sequence')[:50])
+        for event in events:event.fee_label=FEE_STATES.get(event.fee_state,'费用未登记' if event.fee_state=='UNKNOWN' else '明确零费用' if event.fee_state=='ZERO' else '')
         return dict(asset=asset,events=events,history_limited=asset.events.count()>50,today=timezone.localdate())

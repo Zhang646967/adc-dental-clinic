@@ -18,7 +18,7 @@ from scheduling.coordination import lock_slots
 from equipment.models import EquipmentAsset,EquipmentEvent
 from equipment.policies import manager_clinic
 from finance.cash_models import CashEntry
-from finance.cash_selectors import cash_scope,cursor,invoice_balance,event_net
+from finance.cash_selectors import cash_scope,cursor,invoice_balance,event_net,projected_balance
 from finance.policies import money
 
 REQUEST='adc.cash.request.v1'
@@ -129,7 +129,9 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
             raise RuleError('该设备费用已有待审核申请。')
         data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,cursor=cursor(rows),
             kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id)
-        return dict(source=source,source_type=source_type,kind=kind,amount=amount,occurred_on=day,reason=reason,
+        balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.cost,net_equipment_expense=event_net(source.pk))
+        return dict(source=source,source_type=source_type,kind=kind,amount=amount,occurred_on=day,reason=reason,balance=balance,
+            projected=projected_balance(balance,kind,amount),
             proposal_token=proposal(actor,REQUEST,ROLES,data))
 
 @business_errors
@@ -168,13 +170,29 @@ def prepare_review(*,actor,entry_id,decision,reason):
         source_id=entry.invoice_id or entry.equipment_event_id
         source,clinic,rows,version=_source(source_type,source_id)
         if decision=='approve':
-            if version!=entry.based_record_version_id:raise RuleError('账单已更正，请拒绝旧申请并重新核对。')
-            _validate_review(entry,source_type,source,rows)
+            blocker=approval_blocker(entry,source_type,source,rows)
+            if blocker:raise RuleError(blocker)
         data=dict(entry=entry.pk,entry_version=entry.lock_version,source_type=source_type,source=source_id,
             version=version,cursor=cursor(rows),decision=decision,reason=_reason(reason))
         balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.cost,net_equipment_expense=event_net(source.pk))
-        return dict(entry=entry,source=source,source_type=source_type,balance=balance,decision=decision,reason=reason,
+        return dict(entry=entry,source=source,source_type=source_type,balance=balance,
+            projected=projected_balance(balance,entry.kind,entry.amount,decision),decision=decision,reason=reason,
             proposal_token=proposal(actor,REVIEW,('FINANCE',),data))
+
+def approval_blocker(entry,source_type=None,source=None,rows=None):
+    """Read-only triage; final posting still rechecks the locked facts and grants."""
+    if entry.state!='PENDING':return '该条目已经处理。'
+    source_type=source_type or ('invoice' if entry.invoice_id else 'equipment')
+    if source is None:source,clinic,rows,version=_source(source_type,entry.invoice_id or entry.equipment_event_id)
+    if source_type=='invoice' and source.current_record_version_id!=entry.based_record_version_id:
+        return '账单已更正，请拒绝旧申请并重新核对。'
+    if (not UserAccount.objects.filter(pk=entry.prepared_by_id,is_active=True).exists() or
+        not RoleAssignment.objects.filter(user_id=entry.prepared_by_id,is_active=True,
+            role='FRONT_DESK' if entry.invoice_id else 'MANAGER',scope_kind='CLINIC',clinic_id=entry.clinic_id).exists()):
+        return '原申请人授权已失效，请拒绝申请。'
+    try:_validate_review(entry,source_type,source,rows)
+    except RuleError as exc:return str(exc)
+    return ''
 
 def _validate_review(entry,source_type,source,rows):
     _validate(source_type,source,rows,entry.kind,entry.amount,entry.occurred_on,entry.reversal_of,entry.pk)

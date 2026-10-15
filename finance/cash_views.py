@@ -15,6 +15,8 @@ from equipment.policies import manager_clinic
 from equipment.forms import ExplicitProposalForm
 from finance.cash_forms import CashRequestForm,ExpenseRequestForm,CashReviewForm
 from finance.cash_selectors import cash_listing,cash_detail
+from finance.cash_selectors import invoice_balance,event_net
+from adc_core.snapshots import reporting_snapshot
 from finance.cash_selectors import receivables as receivables_read
 from finance.cash_services import prepare_cash,confirm_cash_request,prepare_review,confirm_cash_review
 
@@ -29,7 +31,8 @@ def receivables(request):
 @login_required
 @require_GET
 def listing(request):
-    try:data=cash_listing(request.user,request.GET.get('state',''),request.GET.get('page','1'))
+    try:data=cash_listing(request.user,request.GET.get('state',''),request.GET.get('page','1'),
+        kind=request.GET.get('kind',''),invoice=request.GET.get('invoice',''),event=request.GET.get('event',''))
     except EXPECTED_ERRORS:
         return render(request,'business/problem.html',{'problem':'记账筛选无效，请重新查询。'},status=400)
     return render(request,'finance/cash_list.html',data)
@@ -42,11 +45,14 @@ def detail(request,pk):
     return render(request,'finance/cash_detail.html',data)
 
 def _request(request,source_type,pk,reversal_id=None):
-    if source_type=='invoice':
-        source=get_object_or_404(Invoice.objects.select_related('visit','current_record_version'),pk=pk,visit__clinic_id__in=clinic_ids(request.user))
-    else:
-        clinic=manager_clinic(request.user)
-        source=get_object_or_404(EquipmentEvent.objects.select_related('asset'),pk=pk,asset__clinic_id=clinic)
+    with reporting_snapshot():
+        if source_type=='invoice':
+            source=get_object_or_404(Invoice.objects.select_related('visit__clinic','current_record_version'),pk=pk,visit__clinic_id__in=clinic_ids(request.user))
+            balance=invoice_balance(source)
+        else:
+            clinic=manager_clinic(request.user)
+            source=get_object_or_404(EquipmentEvent.objects.select_related('asset__clinic'),pk=pk,asset__clinic_id=clinic)
+            balance=dict(known_cost=source.cost,net_equipment_expense=event_net(source.pk),pending=source.cash_entries.filter(state='PENDING').count())
     action=request.POST.get('action','preview')
     title='申请冲回误记条目' if reversal_id else '申请模拟收款／退款' if source_type=='invoice' else '申请设备费用记账'
     if request.method=='POST' and action=='confirm':
@@ -64,7 +70,11 @@ def _request(request,source_type,pk,reversal_id=None):
         return render(request,'business/proposal.html',{'title':title,'form':form,'button':'确认提交待审核申请','recovery_route':'cash_list'},status=409)
     if request.method=='POST' and action!='preview':raise PermissionDenied
     klass=ExpenseRequestForm if source_type=='equipment' or reversal_id else CashRequestForm
-    form=klass(request.POST if request.method=='POST' else None,initial={'occurred_on':timezone.localdate()})
+    initial={'occurred_on':timezone.localdate()}
+    if source_type=='invoice' and reversal_id is None:
+        initial.update(kind='REFUND' if balance['refund_due'] else 'RECEIPT',
+            amount=balance['refund_due'] or balance['remaining'] or None)
+    form=klass(request.POST if request.method=='POST' else None,initial=initial)
     if request.method=='POST' and form.is_valid():
         values=dict(form.cleaned_data)
         values.setdefault('kind','EQUIPMENT_EXPENSE' if source_type=='equipment' else 'REFUND')
@@ -72,11 +82,22 @@ def _request(request,source_type,pk,reversal_id=None):
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:
             summary=[('类型',{'RECEIPT':'模拟收款','REFUND':'模拟退款','EQUIPMENT_EXPENSE':'设备费用','EXPENSE_REVERSAL':'设备费用冲回'}[preview['kind']]),
-                ('来源',source.invoice_no if source_type=='invoice' else source.asset.asset_code),
+                ('来源',preview['source'].invoice_no if source_type=='invoice' else preview['source'].asset.asset_code),
                 ('金额（CNY）',preview['amount']),('事实日期',preview['occurred_on']),('核对依据',preview['reason']),
                 ('提交后状态','待财务审核；尚未记账')]
+            summary.extend(_balance_summary(preview['balance'],preview['projected'],source_type))
             return render(request,'business/proposal.html',{'title':title,'summary':summary,'form':ExplicitProposalForm(initial={'proposal_token':preview['proposal_token']}),'button':'确认提交待审核申请','recovery_route':'cash_list'})
-    return render(request,'finance/cash_request.html',dict(source=source,source_type=source_type,title=title,form=form))
+    return render(request,'finance/cash_request.html',dict(source=source,source_type=source_type,title=title,form=form,balance=balance))
+
+def _balance_summary(balance,projected,source_type):
+    if source_type=='invoice':
+        return [('当前账单版本',balance['current_revision']),('当前开单金额（CNY）',balance['billed']),
+            ('当前已审核净收款（CNY）',balance['net_received']),('待审核收款金额（未计入现金）',balance['pending_receipts']),
+            ('待审核退款金额（未计入现金）',balance['pending_refunds']),
+            ('本条单独获批后净收款（CNY）',projected['net_received']),('本条单独获批后待收（CNY）',projected['remaining']),
+            ('本条单独获批后待退（CNY）',projected['refund_due'])]
+    return [('事件登记费用（CNY）',balance['known_cost']),('当前已审核净费用（CNY）',balance['net_equipment_expense']),
+            ('本条单独获批后净费用（CNY）',projected['net_equipment_expense'])]
 
 @login_required
 @sensitive_post_parameters()
@@ -118,6 +139,7 @@ def review(request,pk):
         return render(request,'business/proposal.html',{'title':title,'form':form,'button':'确认独立审核决定','recovery_route':'cash_list'},status=409)
     if request.method=='POST' and action!='preview':raise PermissionDenied
     form=CashReviewForm(request.POST if request.method=='POST' else None)
+    if data['approval_blocker']:form.fields['decision'].choices=[('reject','拒绝失效申请并保留历史')]
     if request.method=='POST' and form.is_valid():
         try:p=prepare_review(actor=request.user,entry_id=pk,**form.cleaned_data)
         except EXPECTED_ERRORS as exc:add_error(form,exc)
@@ -127,11 +149,14 @@ def review(request,pk):
                 ('来源',p['source'].invoice_no if p['source_type']=='invoice' else p['source'].asset.asset_code),
                 ('申请人',p['entry'].prepared_by.username),('决定','核实并记账' if p['decision']=='approve' else '拒绝'),
                 ('独立审核说明',p['reason'])]
-            if p['source_type']=='invoice':
+            if p['decision']=='approve':
+                summary.extend(_balance_summary(p['balance'],p['projected'],p['source_type']))
+            elif p['source_type']=='invoice':
                 summary.extend([('当前账单版本',p['balance']['current_revision']),('当前开单金额（CNY）',p['balance']['billed']),
                     ('已审核净收款（CNY）',p['balance']['net_received'])])
             else:
                 summary.extend([('事件登记费用（CNY）',p['balance']['known_cost']),
                                 ('该事件已审核净费用（CNY）',p['balance']['net_equipment_expense'])])
+            if p['decision']=='reject':summary.append(('余额影响','拒绝保留原申请；当前现金与余额保持'))
             return render(request,'business/proposal.html',{'title':title,'summary':summary,'form':ExplicitProposalForm(initial={'proposal_token':p['proposal_token']}),'button':'确认独立审核决定','recovery_route':'cash_list'})
     return render(request,'finance/cash_review.html',dict(data,form=form))
