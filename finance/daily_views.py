@@ -15,7 +15,7 @@ from adc_core.snapshots import reporting_snapshot
 from equipment.forms import ExplicitProposalForm
 from equipment.policies import manager_clinic
 from finance.cash_services import _date
-from finance.daily_facts import day_facts, comparison, KINDS, LABELS
+from finance.daily_facts import day_facts, page_day_facts, comparison, KINDS, LABELS
 from finance.daily_services import (close_scope,latest,blocker,prepare_close,confirm_close,
     prepare_close_review,confirm_close_review)
 
@@ -56,7 +56,8 @@ def listing(request):
         if day:qs=qs.filter(business_date=day)
         page=Paginator(qs.select_related('clinic','prepared_by','reviewed_by').order_by('-business_date','clinic_id'),20).get_page(request.GET.get('page','1'))
         rows=list(page.object_list)
-        for row in rows:row.changed=row.snapshot!=day_facts(row.clinic_id,row.business_date)
+        facts=page_day_facts((row.clinic_id,row.business_date) for row in rows)
+        for row in rows:row.changed=row.snapshot!=facts[(row.clinic_id,row.business_date)]
     return render(request,'finance/daily_list.html',dict(rows=rows,page_obj=page,state=state,day=day))
 
 @login_required

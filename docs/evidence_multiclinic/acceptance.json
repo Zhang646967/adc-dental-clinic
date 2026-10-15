@@ -1,0 +1,5149 @@
+{
+  "accepted_at_utc": "2026-10-15T08:54:10.304700+00:00",
+  "passed": true,
+  "scope": "Local synthetic five-clinic chain baseline; not independent customer tenancy, cloud or commercial maximum capacity",
+  "base_commit": "af70965db5b48090f2edb6a21fcb3a45b6c96db0",
+  "original_migrations_preserved": 28,
+  "schema_change": false,
+  "application_changes_sha256": {
+    "finance/daily_facts.py": "b931e50aaeedab117964f048eaf36fadd1d6fb407204c459184f2e17d901fe79",
+    "finance/daily_views.py": "3c4435a1e6e39e2b80a5fecf7ea61f2fbdf7788d33b3b6e7626c0cc3f5ea6018",
+    "patients/selectors.py": "56f461eaeb5e2ce16b236394151fb8cebf1c58073a8c079e42cb907f36df47aa"
+  },
+  "measured_driver_sha256": "154c643c14fb737c7f9f7c70a04ef9ca110df75a5907114439165a49ff58dace",
+  "regression": {
+    "source_checks": 897,
+    "postgresql_http_concurrency_tests": 1065,
+    "new_postgresql_methods": 23,
+    "new_launcher_checks": 13,
+    "cleanup_exit": 0,
+    "gate": {
+      "timestamp_utc": "2026-10-15T08:45:06.889888+00:00",
+      "python": "3.13.16",
+      "source_sha256": "3ae4e6bd0b65af76b3f29db865bac64d9579de7415fee8959291110d401de461",
+      "results": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_update.py"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "checks",
+            "-v"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/record_runtime.py"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "check"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "makemigrations",
+            "--check",
+            "--dry-run"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "migrate",
+            "--noinput"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "test",
+            "tests",
+            "--settings=config.settings.test",
+            "--noinput",
+            "--verbosity=2"
+          ],
+          "returncode": 0
+        }
+      ],
+      "all_gates_passed": true
+    }
+  },
+  "fixture": {
+    "clinics": 5,
+    "measured_distinct_accounts": 20,
+    "patient_roles_checked_separately": 5,
+    "patients_after_seed": 10004,
+    "patients_before_accepted_run": 10939,
+    "visits": 10505,
+    "invoices": 500,
+    "equipment_assets": 150,
+    "active_maintenance_cases": 5,
+    "daily_closes": 110,
+    "seed_method": "10000 synthetic historical no-shows by guarded models; 500 completed invoices/receipts, 150 assets and 110 daily closes through normal commands"
+  },
+  "runtime": {
+    "python": "3.13.16",
+    "django": "5.2.17",
+    "postgresql": 170011,
+    "machine": "aarch64",
+    "debug": false,
+    "ai_mode": "demo",
+    "application_changes_sha256": {
+      "patients/selectors.py": "56f461eaeb5e2ce16b236394151fb8cebf1c58073a8c079e42cb907f36df47aa",
+      "finance/daily_facts.py": "b931e50aaeedab117964f048eaf36fadd1d6fb407204c459184f2e17d901fe79",
+      "finance/daily_views.py": "3c4435a1e6e39e2b80a5fecf7ea61f2fbdf7788d33b3b6e7626c0cc3f5ea6018"
+    }
+  },
+  "query_comparison": {
+    "FRONT_DESK": {
+      "before_ms_median": 7.07,
+      "after_ms_median": 2.591,
+      "queries_before": 3,
+      "queries_after": 3,
+      "authorized_patients_unchanged": true,
+      "authorized_patient_count": 2002
+    },
+    "DENTIST": {
+      "before_ms_median": 5.289,
+      "after_ms_median": 2.386,
+      "queries_before": 4,
+      "queries_after": 3,
+      "authorized_patients_unchanged": true,
+      "authorized_patient_count": 301
+    },
+    "MANAGER": {
+      "before_ms_median": 26.209,
+      "after_ms_median": 10.985,
+      "queries_before": 51,
+      "queries_after": 32
+    },
+    "FINANCE": {
+      "before_ms_median": 21.557,
+      "after_ms_median": 11.732,
+      "queries_before": 49,
+      "queries_after": 30
+    }
+  },
+  "query_measurement_scope": "Instrumented local ORM/read path, seven warm repetitions; separate from real HTTP latency. An interleaved 18-warm-repetition comparison retained equivalent patient sets and selected IN membership over correlated EXISTS.",
+  "load": {
+    "project": "adc_rc1_87b99caf41fa",
+    "scope": "Local synthetic loopback HTTP; per-service resource caps are not an independent cloud host",
+    "started_utc": "2026-10-15T08:12:28.201729+00:00",
+    "arrival_mode": "waves",
+    "seconds": 1800,
+    "target_rps": 5,
+    "elapsed_seconds": 1800.008,
+    "wall_elapsed_seconds": 1800.013,
+    "max_offer_gap_seconds": 4.007,
+    "continuity_passed": true,
+    "actual_rps": 5.0,
+    "distinct_users": 20,
+    "clinics": 5,
+    "offered": 9000,
+    "dropped": [],
+    "max_in_flight": 20,
+    "summary": {
+      "requests": 9000,
+      "failures": 0,
+      "p95_seconds": 0.341,
+      "max_seconds": 1.8945
+    },
+    "reads": {
+      "requests": 7200,
+      "failures": 0,
+      "p95_seconds": 0.327,
+      "max_seconds": 1.6822
+    },
+    "writes": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.415,
+      "max_seconds": 1.8945
+    },
+    "by_role": {
+      "FRONT_DESK": {
+        "requests": 2250,
+        "failures": 0,
+        "p95_seconds": 0.365,
+        "max_seconds": 1.6621
+      },
+      "DENTIST": {
+        "requests": 2250,
+        "failures": 0,
+        "p95_seconds": 0.366,
+        "max_seconds": 1.8945
+      },
+      "MANAGER": {
+        "requests": 2250,
+        "failures": 0,
+        "p95_seconds": 0.344,
+        "max_seconds": 1.6822
+      },
+      "FINANCE": {
+        "requests": 1350,
+        "failures": 0,
+        "p95_seconds": 0.239,
+        "max_seconds": 0.5386
+      },
+      "HQ": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.252,
+        "max_seconds": 0.5579
+      }
+    },
+    "http_passed": true,
+    "write_mix": {
+      "patient_creation": 900,
+      "clinical_note_saves": 900
+    },
+    "additional_traffic": "Separate authenticated browser permission probes during load; excluded from 9000 scheduled request counts."
+  },
+  "resources": {
+    "limits": {
+      "db": {
+        "memory_limit_mib": 768,
+        "cpu_limit": 0.75
+      },
+      "web": {
+        "memory_limit_mib": 768,
+        "cpu_limit": 1.0
+      },
+      "notification-worker": {
+        "memory_limit_mib": 128,
+        "cpu_limit": 0.125
+      },
+      "gateway": {
+        "memory_limit_mib": 64,
+        "cpu_limit": 0.125
+      }
+    },
+    "samples": 152,
+    "peak_sampled_memory_mib": {
+      "db": 62.5,
+      "web": 130.8,
+      "notification-worker": 52.03,
+      "gateway": 16.4
+    },
+    "sampling_errors": [],
+    "deadlocks_before": 0,
+    "deadlocks_after": 0,
+    "restarts_during_run": {
+      "db": 0,
+      "web": 0,
+      "notification-worker": 0,
+      "gateway": 0
+    },
+    "checks": {
+      "passed": true,
+      "cgroup_memory_events_since_container_creation": {
+        "web": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "db": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "notification-worker": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        },
+        "gateway": {
+          "low": 0,
+          "high": 0,
+          "max": 0,
+          "oom": 0,
+          "oom_kill": 0,
+          "oom_group_kill": 0,
+          "sock_throttled": 0
+        }
+      },
+      "severe_log_event_counts": {
+        "web": {
+          "WORKER TIMEOUT": 0,
+          "Out of memory": 0,
+          "Internal Server Error": 0,
+          "Traceback (most recent call last)": 0,
+          "deadlock detected": 0
+        },
+        "db": {
+          "WORKER TIMEOUT": 0,
+          "Out of memory": 0,
+          "Internal Server Error": 0,
+          "Traceback (most recent call last)": 0,
+          "deadlock detected": 0
+        },
+        "notification-worker": {
+          "WORKER TIMEOUT": 0,
+          "Out of memory": 0,
+          "Internal Server Error": 0,
+          "Traceback (most recent call last)": 0,
+          "deadlock detected": 0
+        },
+        "gateway": {
+          "WORKER TIMEOUT": 0,
+          "Out of memory": 0,
+          "Internal Server Error": 0,
+          "Traceback (most recent call last)": 0,
+          "deadlock detected": 0
+        }
+      },
+      "resource_sampling_passed": true
+    }
+  },
+  "browser_assertions": 1158,
+  "browser_reports": {
+    "isolation-during": {
+      "phase": "during",
+      "scope": "Real Chrome authenticated seven-role and all ordered foreign-clinic probes; expected denials outside positive load failure denominator",
+      "checks": [
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 0",
+          "passed": true
+        },
+        {
+          "name": "Patient page 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 0",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 0",
+          "passed": true
+        },
+        {
+          "name": "multiclinic-patients accessible at 390px",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 0",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 5",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 0",
+          "passed": true
+        },
+        {
+          "name": "Daily list 0",
+          "passed": true
+        },
+        {
+          "name": "multiclinic-daily accessible at 390px",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 5",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 1",
+          "passed": true
+        },
+        {
+          "name": "Patient page 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 1",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 1",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 5",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 1",
+          "passed": true
+        },
+        {
+          "name": "Daily list 1",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 5",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 2",
+          "passed": true
+        },
+        {
+          "name": "Patient page 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 2",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 2",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 5",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 2",
+          "passed": true
+        },
+        {
+          "name": "Daily list 2",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 5",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 3",
+          "passed": true
+        },
+        {
+          "name": "Patient page 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 3",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 3",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 5",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 3",
+          "passed": true
+        },
+        {
+          "name": "Daily list 3",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 5",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 4",
+          "passed": true
+        },
+        {
+          "name": "Patient page 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 4",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 4",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 4",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 4",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 4",
+          "passed": true
+        },
+        {
+          "name": "Own start form 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 4",
+          "passed": true
+        },
+        {
+          "name": "Daily list 4",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 4",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "Current role FINANCE",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /technical/",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 1",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 1",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 2",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 2",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 3",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 3",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 4",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 4",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 5",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 5",
+          "passed": true
+        },
+        {
+          "name": "Login form HQ",
+          "passed": true
+        },
+        {
+          "name": "Current role HQ",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /technical/",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 1",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 1",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 2",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 2",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 3",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 3",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 4",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 4",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 5",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 5",
+          "passed": true
+        },
+        {
+          "name": "Login form SYSADMIN",
+          "passed": true
+        },
+        {
+          "name": "Current role SYSADMIN",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /technical/",
+          "passed": true
+        },
+        {
+          "name": "No browser JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "business_writes": false,
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    },
+    "isolation-after": {
+      "phase": "after",
+      "scope": "Real Chrome authenticated seven-role and all ordered foreign-clinic probes; expected denials outside positive load failure denominator",
+      "checks": [
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 0",
+          "passed": true
+        },
+        {
+          "name": "Patient page 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 0 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 0 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 0 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 0",
+          "passed": true
+        },
+        {
+          "name": "Scoped booking choices 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 0 5",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 0",
+          "passed": true
+        },
+        {
+          "name": "multiclinic-patients accessible at 390px",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FRONT_DESK /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 0",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 0 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 0 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 0 5",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix DENTIST /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 0 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 0 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 0 5",
+          "passed": true
+        },
+        {
+          "name": "Daily list 0",
+          "passed": true
+        },
+        {
+          "name": "multiclinic-daily accessible at 390px",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix MANAGER /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 0",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 0 5",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix PATIENT /technical/",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 1",
+          "passed": true
+        },
+        {
+          "name": "Patient page 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 1 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 1 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 1 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 1",
+          "passed": true
+        },
+        {
+          "name": "Scoped booking choices 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 1 5",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 1",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 1 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 1 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 1 5",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 1 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 1 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 1 5",
+          "passed": true
+        },
+        {
+          "name": "Daily list 1",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 1 5",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 2",
+          "passed": true
+        },
+        {
+          "name": "Patient page 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 2 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 2 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 2 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 2",
+          "passed": true
+        },
+        {
+          "name": "Scoped booking choices 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 2 5",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 2",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 2 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 2 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 2 5",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 2 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 2 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 2 5",
+          "passed": true
+        },
+        {
+          "name": "Daily list 2",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 2 5",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 3",
+          "passed": true
+        },
+        {
+          "name": "Patient page 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 3 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 3 5 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 3 5",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 3",
+          "passed": true
+        },
+        {
+          "name": "Scoped booking choices 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 3 5",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 3",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 3 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 3 5",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 3 5",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 3 5",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 3 5",
+          "passed": true
+        },
+        {
+          "name": "Own start form 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 3 5",
+          "passed": true
+        },
+        {
+          "name": "Daily list 3",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 3 5",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Current role FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Origin patient 4",
+          "passed": true
+        },
+        {
+          "name": "Patient page 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 1 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 2 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 3 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign search 4 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient 4 4 no foreign content",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign invoice 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign cash source 4 4",
+          "passed": true
+        },
+        {
+          "name": "Scoped patient form 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign clinic form validation 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign visit write 4",
+          "passed": true
+        },
+        {
+          "name": "Scoped booking choices 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot absent from booking choices 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign slot substitution rejected as choice 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign front coordination denied 4 4",
+          "passed": true
+        },
+        {
+          "name": "Front list layout 4",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Current role DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned care 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 1",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 2",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 3",
+          "passed": true
+        },
+        {
+          "name": "Unassigned care 4 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned patient 4 4",
+          "passed": true
+        },
+        {
+          "name": "Unassigned note write 4 4",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Current role MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Own maintenance 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign asset 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance 4 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign equipment schedule 4 4",
+          "passed": true
+        },
+        {
+          "name": "Own start form 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign maintenance write 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign manager availability 4 4",
+          "passed": true
+        },
+        {
+          "name": "Daily list 4",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Current role PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Own patient invoice 4",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 1",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 2",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 3",
+          "passed": true
+        },
+        {
+          "name": "Foreign patient invoice 4 4",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "Current role FINANCE",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix FINANCE /technical/",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 1",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 1",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 2",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 2",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 3",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 3",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 4",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 4",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment FINANCE 5",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege FINANCE 5",
+          "passed": true
+        },
+        {
+          "name": "Login form HQ",
+          "passed": true
+        },
+        {
+          "name": "Current role HQ",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix HQ /technical/",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 1",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 1",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 2",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 2",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 3",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 3",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 4",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 4",
+          "passed": true
+        },
+        {
+          "name": "Authorized chain equipment HQ 5",
+          "passed": true
+        },
+        {
+          "name": "Chain bill privilege HQ 5",
+          "passed": true
+        },
+        {
+          "name": "Login form SYSADMIN",
+          "passed": true
+        },
+        {
+          "name": "Current role SYSADMIN",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /patients/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /equipment/maintenance/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /finance/cash/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /finance/daily-closes/",
+          "passed": true
+        },
+        {
+          "name": "Role matrix SYSADMIN /technical/",
+          "passed": true
+        },
+        {
+          "name": "No browser JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "business_writes": false,
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    },
+    "cash-flows": {
+      "scope": "Five-clinic cash workflow: independent review and simultaneous duplicate confirms, separate from capacity write mix",
+      "checks": [
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Own stopped asset readable",
+          "passed": true
+        },
+        {
+          "name": "Acquisition payment source offered",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Late cash facts flagged for handover 1",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Own stopped asset readable",
+          "passed": true
+        },
+        {
+          "name": "Acquisition payment source offered",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Late cash facts flagged for handover 2",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Own stopped asset readable",
+          "passed": true
+        },
+        {
+          "name": "Acquisition payment source offered",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Late cash facts flagged for handover 3",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Own stopped asset readable",
+          "passed": true
+        },
+        {
+          "name": "Acquisition payment source offered",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Late cash facts flagged for handover 4",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Own stopped asset readable",
+          "passed": true
+        },
+        {
+          "name": "Acquisition payment source offered",
+          "passed": true
+        },
+        {
+          "name": "Current-clinic request source",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Cash submission explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Cash submission simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Independent reviewer form",
+          "passed": true
+        },
+        {
+          "name": "Preview status",
+          "passed": true
+        },
+        {
+          "name": "Review explicit preview",
+          "passed": true
+        },
+        {
+          "name": "Review simultaneous confirms return one result",
+          "passed": true
+        },
+        {
+          "name": "Duplicate review same entry",
+          "passed": true
+        },
+        {
+          "name": "Late cash facts flagged for handover 5",
+          "passed": true
+        },
+        {
+          "name": "Fifteen distinct business entries",
+          "passed": true
+        },
+        {
+          "name": "No browser errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    },
+    "governance-browser": {
+      "scope": "Normal UI authorization, self-review and password/session validation; resumed existing probe after reselecting a valid workspace",
+      "checks": [
+        {
+          "name": "Explicit UI submit /technical/accounts/new/",
+          "passed": true
+        },
+        {
+          "name": "Created ordinary probe account",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /technical/accounts/37/grant/",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /technical/accounts/37/grant/",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /technical/accounts/37/grant/",
+          "passed": true
+        },
+        {
+          "name": "Old clinic form cannot create after switching",
+          "passed": true
+        },
+        {
+          "name": "Old clinic no longer visible",
+          "passed": true
+        },
+        {
+          "name": "New clinic authorized",
+          "passed": true
+        },
+        {
+          "name": "Assigned front role cannot mix into finance workspace",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /invoices/1/cash-request/",
+          "passed": true
+        },
+        {
+          "name": "Explicit signed business preview",
+          "passed": true
+        },
+        {
+          "name": "Probe prepares one refund",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /finance/cash/516/review/",
+          "passed": true
+        },
+        {
+          "name": "Self review has no confirmation proposal",
+          "passed": true
+        },
+        {
+          "name": "Self review explained",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /finance/cash/516/review/",
+          "passed": true
+        },
+        {
+          "name": "Explicit signed business preview",
+          "passed": true
+        },
+        {
+          "name": "Different finance account rejects test request",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /invoices/1/cash-request/",
+          "passed": true
+        },
+        {
+          "name": "Explicit signed business preview",
+          "passed": true
+        },
+        {
+          "name": "Exact clinic grant selected for revocation",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /technical/accounts/37/revoke/",
+          "passed": true
+        },
+        {
+          "name": "Revoked grant rejects previously signed confirmation",
+          "passed": true
+        },
+        {
+          "name": "Revoked context cannot read cached patient page",
+          "passed": true
+        },
+        {
+          "name": "Old password still authenticates after stale-context refusal",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /accounts/password/",
+          "passed": true
+        },
+        {
+          "name": "Password change requires login",
+          "passed": true
+        },
+        {
+          "name": "Other old session rejected",
+          "passed": true
+        },
+        {
+          "name": "New password retains authorized clinic",
+          "passed": true
+        },
+        {
+          "name": "Revoked clinic stays revoked",
+          "passed": true
+        },
+        {
+          "name": "Explicit UI submit /technical/accounts/37/disable/",
+          "passed": true
+        },
+        {
+          "name": "Disabled account session rejected",
+          "passed": true
+        },
+        {
+          "name": "No browser errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "retained_attempt": {
+        "passed": false,
+        "phase": "Password change while prior clinic context was revoked",
+        "resolution": "Retain refusal and reselect an authorized current workspace before password change; no business permission bypass"
+      },
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    }
+  },
+  "load_database_oracle": {
+    "passed": true,
+    "assertions": 967,
+    "unchanged_models": 39,
+    "max_business_gap_seconds": 4.279223,
+    "patients_created": 900,
+    "note_saves": 900,
+    "cash_total_cny": "50000.00",
+    "bill_total_cny": "50000.00"
+  },
+  "financial_database_oracle": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "Gross receipt/refund/device totals clinic 1",
+        "passed": true
+      },
+      {
+        "name": "Gross receipt/refund/device totals clinic 2",
+        "passed": true
+      },
+      {
+        "name": "Gross receipt/refund/device totals clinic 3",
+        "passed": true
+      },
+      {
+        "name": "Gross receipt/refund/device totals clinic 4",
+        "passed": true
+      },
+      {
+        "name": "Gross receipt/refund/device totals clinic 5",
+        "passed": true
+      },
+      {
+        "name": "Exactly 516 retained cash records including 16 new submissions",
+        "passed": true
+      },
+      {
+        "name": "No unresolved posting",
+        "passed": true
+      },
+      {
+        "name": "Self review refused and independent rejection retained",
+        "passed": true
+      },
+      {
+        "name": "No self-approved cash",
+        "passed": true
+      },
+      {
+        "name": "500 published bills unchanged",
+        "passed": true
+      },
+      {
+        "name": "Five maintenance holds retained",
+        "passed": true
+      },
+      {
+        "name": "Five assigned work orders unchanged",
+        "passed": true
+      },
+      {
+        "name": "No stale or cross-clinic form created patient",
+        "passed": true
+      },
+      {
+        "name": "Probe disabled through governance",
+        "passed": true
+      },
+      {
+        "name": "Exactly five daily handovers stale from late facts",
+        "passed": true
+      }
+    ],
+    "assertions": 15,
+    "gross_receipts_cny": "50050.05",
+    "gross_refunds_cny": "50.05",
+    "net_patient_cash_cny": "50000.00",
+    "equipment_expenses_cny": "50.05",
+    "distinct_new_entries": 16
+  },
+  "full_encrypted_restore": {
+    "passed": true,
+    "source_project": "adc_rc1_87b99caf41fa",
+    "source_database_modified": false,
+    "new_empty_target": true,
+    "published_cash_and_equipment_included": true,
+    "models_and_associations_compared": 45,
+    "all_model_fingerprints_match": true,
+    "restore_and_compare_seconds": 2.641,
+    "cleanup": "temporary restore container and network removed; source volume retained"
+  },
+  "retained_attempts": [
+    {
+      "phase": "Financial oracle preparation",
+      "finding": "The private checker confused the OPEN maintenance action with the persisted ASSIGNED state",
+      "resolution": "Read the existing model contract and query the correct state; no application or database facts changed"
+    },
+    {
+      "phase": "First performance candidate",
+      "finding": "Correlated EXISTS improved doctor queries but made front-desk reads slower",
+      "resolution": "Interleaved comparison selected set membership; identical authorized patient sets"
+    },
+    {
+      "phase": "First local regression",
+      "finding": "New fixture used one-character asset codes, rejected by the existing validation rule",
+      "resolution": "Use valid EQ-A/EQ-B fixture codes; business validation unchanged; all 1065 tests pass"
+    },
+    {
+      "phase": "First capacity run",
+      "finding": "Long wall-clock traffic gap invalidated continuous observation despite a completed active-time workload",
+      "http_requests": 9000,
+      "positive_http_failures": 0,
+      "continuity_evidence": {
+        "business_writes": 1800,
+        "largest_gap_seconds": 833.296806,
+        "accepted_as_continuous": false,
+        "active_seconds": 1800.003,
+        "wall_span_to_result_seconds": 2629.674981
+      },
+      "resolution": "Retain created records and failed continuity evidence; add wall/monotonic and arrival-gap gates plus tests; repeat with temporary idle-sleep prevention"
+    },
+    {
+      "phase": "Harness preparation",
+      "finding": "Seeder import/initial-demo checks and a private snapshot field path were corrected before writes or measurement; an early target-port guard and stale rehearsal gateway were corrected before load",
+      "resolution": "Retained private logs; no acceptance claimed for those attempts"
+    }
+  ],
+  "limits": {
+    "synthetic_only": true,
+    "external_ai": false,
+    "one_chain_not_multi_tenant": true,
+    "runtime_database_identity": "RC synthetic owner account; independent cloud runtime-account deployment not measured",
+    "maximum_capacity_established": false,
+    "independent_cloud_host": false,
+    "cloud_course_ready": false,
+    "server_purchased": false,
+    "commercial_pilot_approved": false,
+    "windows_original_data_recovery": "unresolved"
+  }
+}
