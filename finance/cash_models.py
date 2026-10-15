@@ -10,6 +10,7 @@ class CashEntry(models.Model):
     invoice = models.ForeignKey('care.Invoice', on_delete=models.PROTECT, null=True, blank=True, related_name='cash_entries')
     based_record_version = models.ForeignKey('care.VisitRecordVersion', on_delete=models.PROTECT, null=True, blank=True)
     equipment_event = models.ForeignKey('equipment.EquipmentEvent', on_delete=models.PROTECT, null=True, blank=True, related_name='cash_entries')
+    equipment_cost_amendment = models.ForeignKey('equipment.EquipmentCostAmendment', on_delete=models.PROTECT, null=True, blank=True)
     reversal_of = models.ForeignKey('finance.CashEntry', on_delete=models.PROTECT, null=True, blank=True, related_name='reversal_requests')
     kind = models.CharField(max_length=24, choices=KINDS)
     amount = models.DecimalField(max_digits=16, decimal_places=2)
@@ -27,6 +28,7 @@ class CashEntry(models.Model):
         ordering = ['-pk']
         indexes = [models.Index(fields=['clinic','state','occurred_on'], name='cash_clinic_state_date_idx')]
         constraints = [
+            models.CheckConstraint(condition=Q(equipment_cost_amendment__isnull=True)|Q(equipment_event__isnull=False), name='cash_cost_requires_equipment'),
             models.CheckConstraint(condition=Q(amount__gt=0), name='cash_amount_positive'),
             models.CheckConstraint(condition=Q(kind__in=[k for k,l in KINDS]), name='cash_kind_valid'),
             models.CheckConstraint(condition=Q(state__in=['PENDING','POSTED','REJECTED']), name='cash_state_valid'),

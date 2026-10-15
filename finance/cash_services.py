@@ -44,7 +44,7 @@ def _request_payload(data):
         raise RuleError('申请来源无效。')
     if data['source_type']=='invoice' and (type(data['version']) is not int or data['version']<=0):
         raise RuleError('账单版本无效。')
-    if data['source_type']=='equipment' and data['version'] is not None:raise RuleError('设备来源版本无效。')
+    if data['source_type']=='equipment' and data['version'] is not None and (type(data['version']) is not int or data['version']<=0):raise RuleError('设备来源版本无效。')
     if (type(data['cursor']) is not list or len(data['cursor'])!=3 or
         any(type(v) is not int or v<0 for v in data['cursor'])):raise RuleError('历史校验无效。')
     if data['kind'] not in ('RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'):
@@ -80,7 +80,9 @@ def _source(source_type,source_id,lock=False):
             source=EquipmentEvent.objects.select_for_update().get(pk=source_id)
         else:source=initial
         rows=CashEntry.objects.filter(equipment_event_id=source.pk)
-        return source,source.asset.clinic_id,rows,None
+        from equipment.costs import effective_cost
+        source.effective_cost,version=effective_cost(source)
+        return source,source.asset.clinic_id,rows,version
     raise RuleError('来源类型无效。')
 
 def _validate(source_type,source,rows,kind,amount,occurred_on,reversal=None,request_id=None):
@@ -94,12 +96,15 @@ def _validate(source_type,source,rows,kind,amount,occurred_on,reversal=None,requ
         if kind=='REFUND' and amount>b['net_received']:raise RuleError('退款或冲回不能超过已核实净收款。')
         if kind=='RECEIPT' and reversal is None and amount>b['remaining']:raise RuleError('收款不能超过当前待收金额。')
     else:
-        if source.kind not in ('REGISTER','SERVICE') or source.cost is None or source.cost<=0:
+        from equipment.costs import effective_cost
+        cost,_=effective_cost(source)
+        if source.kind not in ('REGISTER','SERVICE') or cost is None or cost<=0:
             raise RuleError('该设备事件尚无大于零的已登记费用。')
         if occurred_on<source.performed_on:raise RuleError('费用事实日期不能早于设备事件。')
+        if source.cost_amendments.filter(state='PENDING').exists():raise RuleError('该事件有待审核费用更正，请先完成独立费用核对。')
         if kind not in ('EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'):raise RuleError('设备费用类型无效。')
         net=event_net(source.pk)
-        if kind=='EQUIPMENT_EXPENSE' and (amount!=source.cost or net!=0):
+        if kind=='EQUIPMENT_EXPENSE' and (amount!=cost or net!=0):
             raise RuleError('本次应核对整笔事件费用，且尚未有效记账。')
         if kind=='EXPENSE_REVERSAL' and amount>net:raise RuleError('冲回不能超过已记账设备费用。')
     if reversal is not None:
@@ -122,14 +127,14 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
                 raise RuleError('冲回来源不匹配。')
             kind={'RECEIPT':'REFUND','REFUND':'RECEIPT','EQUIPMENT_EXPENSE':'EXPENSE_REVERSAL'}.get(reversal.kind)
             amount=reversal.amount
-        amount=money(source.cost if source_type=='equipment' and reversal is None else amount)
+        amount=money(source.effective_cost if source_type=='equipment' and reversal is None else amount)
         day=_date(occurred_on);reason=_reason(reason)
         _validate(source_type,source,rows,kind,amount,day,reversal)
         if source_type=='equipment' and reversal is None and rows.filter(state='PENDING',kind=kind).exists():
             raise RuleError('该设备费用已有待审核申请。')
         data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,cursor=cursor(rows),
             kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id)
-        balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.cost,net_equipment_expense=event_net(source.pk))
+        balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.effective_cost,net_equipment_expense=event_net(source.pk))
         return dict(source=source,source_type=source_type,kind=kind,amount=amount,occurred_on=day,reason=reason,balance=balance,
             projected=projected_balance(balance,kind,amount),
             proposal_token=proposal(actor,REQUEST,ROLES,data))
@@ -153,7 +158,7 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     _validate(data['source_type'],source,rows,data['kind'],amount,day,reversal)
     if data['source_type']=='equipment' and not reversal and rows.filter(state='PENDING',kind=data['kind']).exists():
         raise RuleError('该设备费用已有待审核申请。')
-    fields=dict(invoice=source,based_record_version_id=version) if data['source_type']=='invoice' else dict(equipment_event=source)
+    fields=dict(invoice=source,based_record_version_id=version) if data['source_type']=='invoice' else dict(equipment_event=source,equipment_cost_amendment_id=reversal.equipment_cost_amendment_id if reversal else version)
     entry=CashEntry.objects.create(operation_id=payload['operation'],clinic_id=clinic,kind=data['kind'],amount=amount,
         occurred_on=day,reason=_reason(data['reason']),reversal_of=reversal,prepared_by=actor,**fields)
     emit(actor,'CASH_REQUESTED',entry,summary={'kind':entry.kind,'source_type':data['source_type']})
@@ -174,7 +179,7 @@ def prepare_review(*,actor,entry_id,decision,reason):
             if blocker:raise RuleError(blocker)
         data=dict(entry=entry.pk,entry_version=entry.lock_version,source_type=source_type,source=source_id,
             version=version,cursor=cursor(rows),decision=decision,reason=_reason(reason))
-        balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.cost,net_equipment_expense=event_net(source.pk))
+        balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.effective_cost,net_equipment_expense=event_net(source.pk))
         return dict(entry=entry,source=source,source_type=source_type,balance=balance,
             projected=projected_balance(balance,entry.kind,entry.amount,decision),decision=decision,reason=reason,
             proposal_token=proposal(actor,REVIEW,('FINANCE',),data))
@@ -184,6 +189,10 @@ def approval_blocker(entry,source_type=None,source=None,rows=None):
     if entry.state!='PENDING':return '该条目已经处理。'
     source_type=source_type or ('invoice' if entry.invoice_id else 'equipment')
     if source is None:source,clinic,rows,version=_source(source_type,entry.invoice_id or entry.equipment_event_id)
+    if source_type=='equipment':
+        from equipment.costs import effective_cost
+        if not entry.reversal_of_id and effective_cost(source)[1]!=entry.equipment_cost_amendment_id:
+            return '设备费用依据已更正，请拒绝旧申请并重新核对。'
     if source_type=='invoice' and source.current_record_version_id!=entry.based_record_version_id:
         return '账单已更正，请拒绝旧申请并重新核对。'
     if (not UserAccount.objects.filter(pk=entry.prepared_by_id,is_active=True).exists() or
@@ -229,7 +238,8 @@ def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None)
         grant=RoleAssignment.objects.select_for_update().filter(user_id=entry.prepared_by_id,is_active=True,
             role='FRONT_DESK' if entry.invoice_id else 'MANAGER',scope_kind='CLINIC',clinic_id=clinic).first()
         if not users[entry.prepared_by_id].is_active or not grant:raise RuleError('原申请人授权已失效，请拒绝申请。')
-        if version!=entry.based_record_version_id or version!=data['version'] or cursor(rows)!=data['cursor']:
+        based=entry.based_record_version_id if data['source_type']=='invoice' else entry.equipment_cost_amendment_id
+        if version!=based or version!=data['version'] or cursor(rows)!=data['cursor']:
             raise RuleError('来源账单或记账状态已变化，请重新核对。')
         _validate_review(entry,data['source_type'],source,rows)
     entry.state=target;entry.lock_version=1;entry.reviewed_by=actor;entry.reviewed_at=timezone.now();entry.review_reason=_reason(data['reason'])

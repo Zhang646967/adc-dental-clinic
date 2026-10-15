@@ -12,6 +12,7 @@ from adc_core.http_support import EXPECTED_ERRORS,add_error
 from care.models import Invoice
 from equipment.models import EquipmentEvent
 from equipment.policies import manager_clinic
+from equipment.costs import effective_cost
 from equipment.forms import ExplicitProposalForm
 from finance.cash_forms import CashRequestForm,ExpenseRequestForm,CashReviewForm
 from finance.cash_selectors import cash_listing,cash_detail
@@ -52,7 +53,7 @@ def _request(request,source_type,pk,reversal_id=None):
         else:
             clinic=manager_clinic(request.user)
             source=get_object_or_404(EquipmentEvent.objects.select_related('asset__clinic'),pk=pk,asset__clinic_id=clinic)
-            balance=dict(known_cost=source.cost,net_equipment_expense=event_net(source.pk),pending=source.cash_entries.filter(state='PENDING').count())
+            balance=dict(known_cost=effective_cost(source)[0],net_equipment_expense=event_net(source.pk),pending=source.cash_entries.filter(state='PENDING').count())
     action=request.POST.get('action','preview')
     title='申请冲回误记条目' if reversal_id else '申请模拟收款／退款' if source_type=='invoice' else '申请设备费用记账'
     if request.method=='POST' and action=='confirm':
@@ -96,7 +97,7 @@ def _balance_summary(balance,projected,source_type):
             ('待审核退款金额（未计入现金）',balance['pending_refunds']),
             ('本条单独获批后净收款（CNY）',projected['net_received']),('本条单独获批后待收（CNY）',projected['remaining']),
             ('本条单独获批后待退（CNY）',projected['refund_due'])]
-    return [('事件登记费用（CNY）',balance['known_cost']),('当前已审核净费用（CNY）',balance['net_equipment_expense']),
+    return [('当前核对费用（CNY）',balance['known_cost']),('当前已审核净费用（CNY）',balance['net_equipment_expense']),
             ('本条单独获批后净费用（CNY）',projected['net_equipment_expense'])]
 
 @login_required
@@ -155,7 +156,7 @@ def review(request,pk):
                 summary.extend([('当前账单版本',p['balance']['current_revision']),('当前开单金额（CNY）',p['balance']['billed']),
                     ('已审核净收款（CNY）',p['balance']['net_received'])])
             else:
-                summary.extend([('事件登记费用（CNY）',p['balance']['known_cost']),
+                summary.extend([('当前核对费用（CNY）',p['balance']['known_cost']),
                                 ('该事件已审核净费用（CNY）',p['balance']['net_equipment_expense'])])
             if p['decision']=='reject':summary.append(('余额影响','拒绝保留原申请；当前现金与余额保持'))
             return render(request,'business/proposal.html',{'title':title,'summary':summary,'form':ExplicitProposalForm(initial={'proposal_token':p['proposal_token']}),'button':'确认独立审核决定','recovery_route':'cash_list'})

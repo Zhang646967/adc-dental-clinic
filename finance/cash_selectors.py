@@ -96,7 +96,8 @@ def cash_listing(actor,state='',page='1',*,kind='',invoice='',event=''):
 def cash_detail(actor,entry_id):
     with reporting_snapshot():
         row=cash_scope(actor,detail=True).select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','prepared_by','reviewed_by','reversal_of').get(pk=entry_id)
-        balance=invoice_balance(row.invoice) if row.invoice_id else dict(known_cost=row.equipment_event.cost,net_equipment_expense=event_net(row.equipment_event_id))
+        from equipment.costs import effective_cost
+        balance=invoice_balance(row.invoice) if row.invoice_id else dict(known_cost=effective_cost(row.equipment_event)[0],net_equipment_expense=event_net(row.equipment_event_id))
         from finance.cash_services import approval_blocker
         blocker=approval_blocker(row) if row.state=='PENDING' else ''
         return dict(entry=row,balance=balance,approval_blocker=blocker,

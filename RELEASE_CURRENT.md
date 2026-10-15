@@ -124,3 +124,15 @@ ISO widget values. All 20 migrations remain unchanged; no schema or role expansi
 See `docs/FINANCE_EQUIPMENT_HANDOFFS.md` and
 `docs/evidence_finance_equipment_followup/acceptance.json`. Independent cloud
 readiness and historical Windows-data recovery retain their separate status.
+
+## Commercial foundation — 2026-10-14
+
+The user requested continued development toward commercial use. Equipment source
+costs can now be supplemented/corrected through a manager request and independent
+finance review, preserving original events and every decision. Pending cash must
+be resolved and posted expense reversed before a cost amendment; a pending cost
+amendment blocks new fee requests. Cash retains its exact approved cost basis.
+Three additive migrations preserve all original 20 migrations. No roles, care,
+bill or scheduling semantics expand. See docs/EQUIPMENT_COST_AMENDMENTS.md and
+docs/COMMERCIAL_DEVELOPMENT.md for responsibilities, evidence and staged gates.
+Independent cloud/course acceptance and large commercial readiness remain separate.

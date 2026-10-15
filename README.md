@@ -1,3 +1,5 @@
+Commercial foundation（商用基础）：[设备费用补正](docs/EQUIPMENT_COST_AMENDMENTS.md) · [分阶段商用路线](docs/COMMERCIAL_DEVELOPMENT.md)。当前仍为合成课程系统，云端与商用规模验收未完成。
+
 # ADC — Dental Clinic Management
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental

@@ -13,6 +13,8 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'equipment_cost_queue':{'MANAGER','FINANCE','HQ'},'equipment_cost_history':{'MANAGER','FINANCE','HQ'},
+ 'equipment_cost_request':{'MANAGER'},'equipment_cost_review':{'FINANCE'},
  'equipment_expenses':{'MANAGER','FINANCE','HQ'},'equipment_schedule':{'MANAGER'},
  'equipment_list':{'MANAGER','FINANCE','HQ'},'equipment_detail':{'MANAGER','FINANCE','HQ'},
  'equipment_register':{'MANAGER'},'equipment_change':{'MANAGER'},
