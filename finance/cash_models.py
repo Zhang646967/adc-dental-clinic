@@ -26,7 +26,7 @@ class CashEntry(models.Model):
     class Meta:
         db_table = 'adc_cash_entry'
         ordering = ['-pk']
-        indexes = [models.Index(fields=['clinic','state','occurred_on'], name='cash_clinic_state_date_idx')]
+        indexes = [models.Index(fields=["clinic","occurred_on"],name="cash_clinic_day_idx"),models.Index(fields=['clinic','state','occurred_on'], name='cash_clinic_state_date_idx')]
         constraints = [
             models.CheckConstraint(condition=Q(equipment_cost_amendment__isnull=True)|Q(equipment_event__isnull=False), name='cash_cost_requires_equipment'),
             models.CheckConstraint(condition=Q(amount__gt=0), name='cash_amount_positive'),

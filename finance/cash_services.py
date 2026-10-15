@@ -148,6 +148,8 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     if expected_source_type is not None and (data.get('source_type')!=expected_source_type or data.get('source')!=expected_source_id or data.get('reversal')!=expected_reversal_id):
         raise RuleError('确认内容不属于当前来源，请重新预览。')
     _request_scope(actor,data['source_type'],data['clinic'],lock=True)
+    from finance.daily_facts import lock_day
+    lock_day(data['clinic'],_date(data['occurred_on']))
     prior=CashEntry.objects.filter(operation_id=payload['operation'],prepared_by_id=actor.pk,clinic_id=data['clinic']).first()
     if prior:return prior,True
     source,clinic,rows,version=_source(data['source_type'],data['source'],lock=True)
@@ -223,6 +225,8 @@ def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None)
     preview=CashEntry.objects.get(pk=data['entry'])
     users={u.pk:u for u in UserAccount.objects.select_for_update().filter(pk__in=[actor.pk,preview.prepared_by_id]).order_by('pk')}
     lock_finance_write(actor)
+    from finance.daily_facts import lock_day
+    lock_day(preview.clinic_id,preview.occurred_on)
     source,clinic,rows,version=_source(data['source_type'],data['source'],lock=True)
     entry=CashEntry.objects.select_for_update().get(pk=data['entry'],clinic_id=clinic)
     if ('invoice' if entry.invoice_id else 'equipment')!=data['source_type'] or (entry.invoice_id or entry.equipment_event_id)!=data['source']:

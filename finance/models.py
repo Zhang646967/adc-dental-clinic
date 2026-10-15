@@ -37,3 +37,5 @@ class DentistQuarterCost(models.Model):
         ]
 
 from finance.cash_models import CashEntry
+
+from .daily_models import DailyClose

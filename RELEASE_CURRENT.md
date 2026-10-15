@@ -136,3 +136,14 @@ Three additive migrations preserve all original 20 migrations. No roles, care,
 bill or scheduling semantics expand. See docs/EQUIPMENT_COST_AMENDMENTS.md and
 docs/COMMERCIAL_DEVELOPMENT.md for responsibilities, evidence and staged gates.
 Independent cloud/course acceptance and large commercial readiness remain separate.
+
+## Daily reconciliation — 2026-10-15
+
+Clinic managers can prepare four-category daily cash reconciliations with explicit
+evidence and discrepancy responsibility. Independent finance review requires equal
+gross amounts, no pending cash and current facts. Rejected or reviewed days reopen
+as retained new versions; late facts never silently rewrite earlier approvals.
+Two additive migrations preserve all previous 23 migrations. See
+[Daily reconciliation](docs/DAILY_RECONCILIATION.md) and its executed evidence.
+Bank/payment channels, sealed accounting periods, independent cloud deployment and
+commercial-scale acceptance are separate outstanding work.

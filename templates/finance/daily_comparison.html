@@ -1,0 +1,1 @@
+<div class="role-grid">{% for item in comparison %}<section class="role-card"><h2>{{ item.label }}</h2><p>已审核账内总额：¥ {{ item.ledger }}</p><p>凭据核实总额：¥ {{ item.declared }}</p><p>差异（凭据 − 账内）：¥ {{ item.difference|floatformat:2 }}</p></section>{% endfor %}</div>

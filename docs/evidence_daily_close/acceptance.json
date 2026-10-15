@@ -1,0 +1,2250 @@
+{
+  "accepted_at_utc": "2026-10-15T05:34:37.170063+00:00",
+  "scope": "Local synthetic daily reconciliation increment; not independent cloud or commercial-scale acceptance",
+  "base_commit": "4597e83a0996e832a31d8d6d54dfef631e810ef9",
+  "original_migrations_preserved": 23,
+  "schema_change": true,
+  "new_migrations": [
+    "finance/migrations/0006_dailyclose.py",
+    "finance/migrations/0007_daily_history_guards.py"
+  ],
+  "new_tables": [
+    "adc_daily_close"
+  ],
+  "application_changes_sha256": {
+    "adc_core/context.py": "a9c463deb876674618b7e97ae1f4152fbc222f950d0c4027d7d59ee90ffa8590",
+    "config/urls.py": "c777c9b3d41e686d7f2878c5cd49597316fc6f200463d57e96d1ba5edc402f2d",
+    "finance/cash_models.py": "2746ab94fb99468294bee74a9dc913834c6cdeb78af3817d75edb3dfe238f000",
+    "finance/cash_services.py": "1047eb9227893b7a1ffd084da4735d570a832e9c3b67c38008ac41d71837e74b",
+    "finance/daily_facts.py": "472e17fa64c6c45fa1ee3f859c9c51162badffe5cd54c839b8e404a9eca9cfbb",
+    "finance/daily_models.py": "33cd5dd1fead0dd8682cb242088cb0eee0df84abc514961c66e8862afaca1867",
+    "finance/daily_services.py": "819620ad347f70bb7fa05eb3d81a96332bef4c423174573282116f50361f12bb",
+    "finance/daily_urls.py": "b54b18d5e204b8d54b5dbf79ae95367ef30769ab46a84a807a662355552e7211",
+    "finance/daily_views.py": "91524b77f611b00be062cca4b52311c6a1ef724eb99398198d391d001500f459",
+    "finance/migrations/0006_dailyclose.py": "2ec71498d67e2a761cce9faa10bf7c89f2594b2ef8ccdb7af5f93e835331cd71",
+    "finance/migrations/0007_daily_history_guards.py": "006d5983ba66c0be7222b97cebb3c2b6ea8b1d3934b8f276d2b4a57d084abf1f",
+    "finance/models.py": "2aff96f919722d993b6cc2ccd3afd564960ab77646e958b29278b4901aa2f0f2",
+    "templates/finance/daily_comparison.html": "108b1a9efe41cc784bf75179e94886ccd2dd91062d4f23631cdac7deb839acc8",
+    "templates/finance/daily_detail.html": "fdd04879c11140907f89d90de7c45f26f0160fef5a1ae68b14639fc52b78f4d1",
+    "templates/finance/daily_edit.html": "32bc405509297da98098437f08091e9996e3392b619f649c06d041319cefe85c",
+    "templates/finance/daily_list.html": "a668c0cc2dab273d0913bc5041f3e79a4a6d499ede39ec62909d873c7cf195d2",
+    "templates/workspaces/finance.html": "ab44adf84fa046ce0b9f50327daee45dcd68171b66379b1f0fad4aa8112723f2",
+    "templates/workspaces/manager.html": "84f98543ef2e71ca3abaf868ff0f8a20915ddf555438eac575a4ee53a6dd8c85",
+    "workspaces/middleware.py": "e23f993d8486315cf338acf47980cb6d128d06782921a7d34f1cf6b3392c6a88"
+  },
+  "regression": {
+    "source_checks": 884,
+    "postgresql_http_concurrency_tests": 994,
+    "new_test_methods": 35,
+    "cleanup_exit": 0,
+    "gate": {
+      "timestamp_utc": "2026-10-15T05:34:37.170063+00:00",
+      "python": "3.13.16",
+      "source_sha256": "b56ab7997f9a5cc3c254764d832cf91b5f893bf906afeef84cfe7b7ea0e79c59",
+      "results": [
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/verify_update.py"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "checks",
+            "-v"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "scripts/record_runtime.py"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "check"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "makemigrations",
+            "--check",
+            "--dry-run"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "migrate",
+            "--noinput"
+          ],
+          "returncode": 0
+        },
+        {
+          "command": [
+            "/usr/local/bin/python",
+            "manage.py",
+            "test",
+            "tests",
+            "--settings=config.settings.test",
+            "--noinput",
+            "--verbosity=2"
+          ],
+          "returncode": 0
+        }
+      ],
+      "all_gates_passed": true
+    }
+  },
+  "browser_successful_assertions": 444,
+  "browser_reports": {
+    "care_cash_equipment_baseline": {
+      "scope": "Isolated real Chrome care, settlement, cash and equipment acceptance",
+      "checks": [
+        {
+          "name": "front_a login",
+          "passed": true
+        },
+        {
+          "name": "front_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "doctor_a login",
+          "passed": true
+        },
+        {
+          "name": "doctor_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "finance_demo login",
+          "passed": true
+        },
+        {
+          "name": "finance_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "manager_a login",
+          "passed": true
+        },
+        {
+          "name": "manager_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /visits/1/",
+          "passed": true
+        },
+        {
+          "name": "Arrival recorded 1",
+          "passed": true
+        },
+        {
+          "name": "Care checklist shown",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /care/1/",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /care/1/",
+          "passed": true
+        },
+        {
+          "name": "Notes alone create no invoice",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /care/1/",
+          "passed": true
+        },
+        {
+          "name": "care-workspace 390px large text",
+          "passed": true
+        },
+        {
+          "name": "care-completion 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /care/1/complete/",
+          "passed": true
+        },
+        {
+          "name": "Published bill has independent expected amount",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /invoices/1/cash-request/",
+          "passed": true
+        },
+        {
+          "name": "Cash request preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /invoices/1/cash-request/",
+          "passed": true
+        },
+        {
+          "name": "Cash request replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "One pending cash request",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/1/review/",
+          "passed": true
+        },
+        {
+          "name": "cash-review 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Finance review preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/1/review/",
+          "passed": true
+        },
+        {
+          "name": "Finance review replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "Financial result posted once",
+          "passed": true
+        },
+        {
+          "name": "Receipt settles billed balance",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /care/1/correction/",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /corrections/1/",
+          "passed": true
+        },
+        {
+          "name": "Bill correction retains received cash and exposes refund balance",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /invoices/1/cash-request/",
+          "passed": true
+        },
+        {
+          "name": "Cash request preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /invoices/1/cash-request/",
+          "passed": true
+        },
+        {
+          "name": "Cash request replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "One pending cash request",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/2/review/",
+          "passed": true
+        },
+        {
+          "name": "cash-review 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Finance review preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/2/review/",
+          "passed": true
+        },
+        {
+          "name": "Finance review replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "Financial result posted once",
+          "passed": true
+        },
+        {
+          "name": "receivables 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Refund resolves corrected balance",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /visits/2/",
+          "passed": true
+        },
+        {
+          "name": "Arrival recorded 2",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /care/2/complete/",
+          "passed": true
+        },
+        {
+          "name": "No-treatment bill is zero with no invented cash",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Equipment preview creates no asset",
+          "passed": true
+        },
+        {
+          "name": "Equipment registration preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Equipment registration replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "Registration has one event and no cash expense",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/1/change/",
+          "passed": true
+        },
+        {
+          "name": "Maintenance preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/1/change/",
+          "passed": true
+        },
+        {
+          "name": "Device is in maintenance",
+          "passed": true
+        },
+        {
+          "name": "Maintenance preserves unrelated booking",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/1/change/",
+          "passed": true
+        },
+        {
+          "name": "Service completion preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/1/change/",
+          "passed": true
+        },
+        {
+          "name": "equipment-history 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Recorded service fee has explicit expense link",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/events/3/expense/",
+          "passed": true
+        },
+        {
+          "name": "Equipment fee request preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/events/3/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/3/review/",
+          "passed": true
+        },
+        {
+          "name": "cash-review 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Finance review preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/3/review/",
+          "passed": true
+        },
+        {
+          "name": "Finance review replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "Financial result posted once",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/3/reverse/",
+          "passed": true
+        },
+        {
+          "name": "Expense reversal preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/3/reverse/",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/4/review/",
+          "passed": true
+        },
+        {
+          "name": "cash-review 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Finance review preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/4/review/",
+          "passed": true
+        },
+        {
+          "name": "Finance review replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "Financial result posted once",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/events/3/expense/",
+          "passed": true
+        },
+        {
+          "name": "Corrected equipment fee preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/events/3/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/5/review/",
+          "passed": true
+        },
+        {
+          "name": "cash-review 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Finance review preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /finance/cash/5/review/",
+          "passed": true
+        },
+        {
+          "name": "Finance review replay returns same record",
+          "passed": true
+        },
+        {
+          "name": "Financial result posted once",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/1/change/",
+          "passed": true
+        },
+        {
+          "name": "Equipment retirement preview explicitly unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit form accepted: /equipment/1/change/",
+          "passed": true
+        },
+        {
+          "name": "Retirement retains all equipment and cash history",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a login",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "Patient sees own balance without clinical note or cash-write action",
+          "passed": true
+        },
+        {
+          "name": "Historical bill points cash readers to current revision",
+          "passed": true
+        },
+        {
+          "name": "front_b login",
+          "passed": true
+        },
+        {
+          "name": "front_b selected workspace",
+          "passed": true
+        },
+        {
+          "name": "front_b active role and clinic govern equipment access",
+          "passed": true
+        },
+        {
+          "name": "hq_demo login",
+          "passed": true
+        },
+        {
+          "name": "hq_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "hq_demo active role and clinic govern equipment access",
+          "passed": true
+        },
+        {
+          "name": "tech_demo login",
+          "passed": true
+        },
+        {
+          "name": "tech_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "tech_demo active role and clinic govern equipment access",
+          "passed": true
+        },
+        {
+          "name": "multi_demo login",
+          "passed": true
+        },
+        {
+          "name": "multi_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "multi_demo active role and clinic govern equipment access",
+          "passed": true
+        },
+        {
+          "name": "Multi-role manager cannot borrow front-desk cash permission",
+          "passed": true
+        },
+        {
+          "name": "No browser JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "screenshots": [
+        "care-workspace.png",
+        "care-completion.png",
+        "cash-review.png",
+        "cash-review.png",
+        "receivables.png",
+        "equipment-history.png",
+        "cash-review.png",
+        "cash-review.png",
+        "cash-review.png"
+      ],
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    },
+    "cost_supplement_correction_cash": {
+      "checks": [
+        {
+          "name": "manager_a login",
+          "passed": true
+        },
+        {
+          "name": "finance_demo login",
+          "passed": true
+        },
+        {
+          "name": "Manager home offers cost queue",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Unknown equipment registration preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Unknown equipment registration repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Original acquisition unknown",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/2/change/",
+          "passed": true
+        },
+        {
+          "name": "Retire unknown-cost device preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/2/change/",
+          "passed": true
+        },
+        {
+          "name": "Retire unknown-cost device repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Source history preserved in preview",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cost request pending only",
+          "passed": true
+        },
+        {
+          "name": "Pending supplement leaves cash empty",
+          "passed": true
+        },
+        {
+          "name": "Finance queue exposes pending source",
+          "passed": true
+        },
+        {
+          "name": "cost-review-queue 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/1/",
+          "passed": true
+        },
+        {
+          "name": "Cost review is separate from posting",
+          "passed": true
+        },
+        {
+          "name": "Cost review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/1/",
+          "passed": true
+        },
+        {
+          "name": "Cost review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Independent decision retained",
+          "passed": true
+        },
+        {
+          "name": "Rejected supplement keeps original unknown",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Source history preserved in preview",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cost request pending only",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/2/",
+          "passed": true
+        },
+        {
+          "name": "Cost review is separate from posting",
+          "passed": true
+        },
+        {
+          "name": "Cost review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/2/",
+          "passed": true
+        },
+        {
+          "name": "Cost review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Independent decision retained",
+          "passed": true
+        },
+        {
+          "name": "Approval changes no cash",
+          "passed": true
+        },
+        {
+          "name": "cost-supplement-history 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Approved supplement offers explicit expense link",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cash retains approved supplement basis",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/6/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/6/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cash posted only through separate review",
+          "passed": true
+        },
+        {
+          "name": "Posted fees require reversal",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/6/reverse/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/6/reverse/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/7/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/7/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cash posted only through separate review",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Source history preserved in preview",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cost request pending only",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/3/",
+          "passed": true
+        },
+        {
+          "name": "Cost review is separate from posting",
+          "passed": true
+        },
+        {
+          "name": "Cost review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/3/",
+          "passed": true
+        },
+        {
+          "name": "Cost review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Independent decision retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/5/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/8/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/8/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cash posted only through separate review",
+          "passed": true
+        },
+        {
+          "name": "cost-correction-after-reversal 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Retired device remains retired",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Unknown equipment registration preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Unknown equipment registration repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Original acquisition unknown",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/7/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Source history preserved in preview",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/7/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cost request pending only",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/4/",
+          "passed": true
+        },
+        {
+          "name": "Cost review is separate from posting",
+          "passed": true
+        },
+        {
+          "name": "Cost review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/4/",
+          "passed": true
+        },
+        {
+          "name": "Cost review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Independent decision retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit zero has no expense action",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/3/change/",
+          "passed": true
+        },
+        {
+          "name": "Service completion preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/3/change/",
+          "passed": true
+        },
+        {
+          "name": "Service completion repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/8/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Source history preserved in preview",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/8/costs/request/",
+          "passed": true
+        },
+        {
+          "name": "Cost amendment request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cost request pending only",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/5/",
+          "passed": true
+        },
+        {
+          "name": "Cost review is separate from posting",
+          "passed": true
+        },
+        {
+          "name": "Cost review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/cost-reviews/5/",
+          "passed": true
+        },
+        {
+          "name": "Cost review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Independent decision retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/8/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/8/expense/",
+          "passed": true
+        },
+        {
+          "name": "Explicit expense request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/9/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/9/review/",
+          "passed": true
+        },
+        {
+          "name": "Independent cash review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Cash posted only through separate review",
+          "passed": true
+        },
+        {
+          "name": "current-effective-fee-reconciliation 390px large text",
+          "passed": true
+        },
+        {
+          "name": "front_a login",
+          "passed": true
+        },
+        {
+          "name": "front_a cost history scope",
+          "passed": true
+        },
+        {
+          "name": "front_a cost review boundary",
+          "passed": true
+        },
+        {
+          "name": "doctor_a login",
+          "passed": true
+        },
+        {
+          "name": "doctor_a cost history scope",
+          "passed": true
+        },
+        {
+          "name": "doctor_a cost review boundary",
+          "passed": true
+        },
+        {
+          "name": "hq_demo login",
+          "passed": true
+        },
+        {
+          "name": "hq_demo cost history scope",
+          "passed": true
+        },
+        {
+          "name": "hq_demo cost review boundary",
+          "passed": true
+        },
+        {
+          "name": "tech_demo login",
+          "passed": true
+        },
+        {
+          "name": "tech_demo cost history scope",
+          "passed": true
+        },
+        {
+          "name": "tech_demo cost review boundary",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a login",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a cost history scope",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a cost review boundary",
+          "passed": true
+        },
+        {
+          "name": "multi_demo login",
+          "passed": true
+        },
+        {
+          "name": "multi_demo cost history scope",
+          "passed": true
+        },
+        {
+          "name": "multi_demo cost review boundary",
+          "passed": true
+        },
+        {
+          "name": "Existing care and invoices preserved",
+          "passed": true
+        },
+        {
+          "name": "All decisions separate applicant/reviewer",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "screenshots": [
+        "cost-review-queue.png",
+        "cost-supplement-history.png",
+        "cost-correction-after-reversal.png",
+        "current-effective-fee-reconciliation.png"
+      ],
+      "scope": "Synthetic isolated equipment source-cost and cash lifecycle",
+      "browser_version": "155.0.8059.79",
+      "expense_route": "/equipment/events/5/expense/",
+      "passed": true
+    },
+    "seven_role_matrix": {
+      "scope": "Isolated real Chrome care, settlement, cash and equipment acceptance",
+      "checks": [
+        {
+          "name": "front_a login",
+          "passed": true
+        },
+        {
+          "name": "front_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "front_a equipment read role",
+          "passed": true
+        },
+        {
+          "name": "front_a equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "front_a cash list role",
+          "passed": true
+        },
+        {
+          "name": "front_a equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "front_a equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "front_a invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "doctor_a login",
+          "passed": true
+        },
+        {
+          "name": "doctor_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "doctor_a equipment read role",
+          "passed": true
+        },
+        {
+          "name": "doctor_a equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "doctor_a cash list role",
+          "passed": true
+        },
+        {
+          "name": "doctor_a equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "doctor_a equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "doctor_a invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "finance_demo login",
+          "passed": true
+        },
+        {
+          "name": "finance_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "finance_demo equipment read role",
+          "passed": true
+        },
+        {
+          "name": "finance_demo equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "finance_demo cash list role",
+          "passed": true
+        },
+        {
+          "name": "finance_demo equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "finance_demo equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "finance_demo invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "manager_a login",
+          "passed": true
+        },
+        {
+          "name": "manager_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "manager_a equipment read role",
+          "passed": true
+        },
+        {
+          "name": "manager_a equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "manager_a cash list role",
+          "passed": true
+        },
+        {
+          "name": "manager_a equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "manager_a equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "manager_a invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "front_b login",
+          "passed": true
+        },
+        {
+          "name": "front_b selected workspace",
+          "passed": true
+        },
+        {
+          "name": "front_b equipment read role",
+          "passed": true
+        },
+        {
+          "name": "front_b equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "front_b cash list role",
+          "passed": true
+        },
+        {
+          "name": "front_b equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "front_b equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "front_b invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "hq_demo login",
+          "passed": true
+        },
+        {
+          "name": "hq_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "hq_demo equipment read role",
+          "passed": true
+        },
+        {
+          "name": "hq_demo equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "hq_demo cash list role",
+          "passed": true
+        },
+        {
+          "name": "hq_demo equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "hq_demo equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "hq_demo invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "tech_demo login",
+          "passed": true
+        },
+        {
+          "name": "tech_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "tech_demo equipment read role",
+          "passed": true
+        },
+        {
+          "name": "tech_demo equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "tech_demo cash list role",
+          "passed": true
+        },
+        {
+          "name": "tech_demo equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "tech_demo equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "tech_demo invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a login",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a selected workspace",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a equipment read role",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a cash list role",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "multi_demo login",
+          "passed": true
+        },
+        {
+          "name": "multi_demo selected workspace",
+          "passed": true
+        },
+        {
+          "name": "multi_demo equipment read role",
+          "passed": true
+        },
+        {
+          "name": "multi_demo equipment registration role",
+          "passed": true
+        },
+        {
+          "name": "multi_demo cash list role",
+          "passed": true
+        },
+        {
+          "name": "multi_demo equipment fee reconciliation role",
+          "passed": true
+        },
+        {
+          "name": "multi_demo equipment schedule handoff role",
+          "passed": true
+        },
+        {
+          "name": "multi_demo invoice cash request scope",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "screenshots": [],
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    },
+    "closed_care": {
+      "checks": [
+        {
+          "name": "Closed care review remains readable",
+          "passed": true
+        },
+        {
+          "name": "Published facts show actual treatment",
+          "passed": true
+        },
+        {
+          "name": "Closed heading identifies published review",
+          "passed": true
+        },
+        {
+          "name": "Closed review avoids false missing-allergy warning",
+          "passed": true
+        },
+        {
+          "name": "Published facts keep synthetic note",
+          "passed": true
+        },
+        {
+          "name": "Closed form cannot propose another outcome",
+          "passed": true
+        },
+        {
+          "name": "Existing published invoice is the continuation",
+          "passed": true
+        },
+        {
+          "name": "Closed care 390px large text",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "business_writes": false,
+      "passed": true
+    },
+    "daily_reconciliation": {
+      "checks": [
+        {
+          "name": "manager_a login",
+          "passed": true
+        },
+        {
+          "name": "finance_demo login",
+          "passed": true
+        },
+        {
+          "name": "No earlier daily cases",
+          "passed": true
+        },
+        {
+          "name": "Native fact date retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Preview creates no daily history",
+          "passed": true
+        },
+        {
+          "name": "Daily close preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Daily close repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Daily submission pending and unique",
+          "passed": true
+        },
+        {
+          "name": "daily-discrepancy 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Difference permits rejection only",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/1/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/1/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Separate daily reviewer",
+          "passed": true
+        },
+        {
+          "name": "Daily decision retained",
+          "passed": true
+        },
+        {
+          "name": "Native fact date retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Preview creates no daily history",
+          "passed": true
+        },
+        {
+          "name": "Daily close preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Daily close repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Daily submission pending and unique",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/2/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/2/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Separate daily reviewer",
+          "passed": true
+        },
+        {
+          "name": "Daily decision retained",
+          "passed": true
+        },
+        {
+          "name": "Version two links rejected original",
+          "passed": true
+        },
+        {
+          "name": "daily-reviewed 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Late equipment preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/register/",
+          "passed": true
+        },
+        {
+          "name": "Late equipment repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Late expense source exists",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/9/expense/",
+          "passed": true
+        },
+        {
+          "name": "Late expense request preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /equipment/events/9/expense/",
+          "passed": true
+        },
+        {
+          "name": "Late expense request repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Late cash initially pending",
+          "passed": true
+        },
+        {
+          "name": "Reviewed snapshot warns after late request",
+          "passed": true
+        },
+        {
+          "name": "daily-late-fact 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/10/review/",
+          "passed": true
+        },
+        {
+          "name": "Late cash review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/cash/10/review/",
+          "passed": true
+        },
+        {
+          "name": "Late cash review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Late posting exact seven yuan twenty three",
+          "passed": true
+        },
+        {
+          "name": "Native fact date retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Preview creates no daily history",
+          "passed": true
+        },
+        {
+          "name": "Daily close preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Daily close repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Daily submission pending and unique",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/3/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/3/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Separate daily reviewer",
+          "passed": true
+        },
+        {
+          "name": "Daily decision retained",
+          "passed": true
+        },
+        {
+          "name": "Reopening retains prior approval",
+          "passed": true
+        },
+        {
+          "name": "Latest version per day",
+          "passed": true
+        },
+        {
+          "name": "daily-latest-queue 390px large text",
+          "passed": true
+        },
+        {
+          "name": "Native fact date retained",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Preview creates no daily history",
+          "passed": true
+        },
+        {
+          "name": "Daily close preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/new/",
+          "passed": true
+        },
+        {
+          "name": "Daily close repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Daily submission pending and unique",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/4/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review preview unsaved",
+          "passed": true
+        },
+        {
+          "name": "Explicit POST /finance/daily-closes/4/review/",
+          "passed": true
+        },
+        {
+          "name": "Daily independent review repeat same result",
+          "passed": true
+        },
+        {
+          "name": "Separate daily reviewer",
+          "passed": true
+        },
+        {
+          "name": "Daily decision retained",
+          "passed": true
+        },
+        {
+          "name": "hq_demo login",
+          "passed": true
+        },
+        {
+          "name": "HQ aggregate daily detail",
+          "passed": true
+        },
+        {
+          "name": "HQ cannot prepare",
+          "passed": true
+        },
+        {
+          "name": "multi_demo login",
+          "passed": true
+        },
+        {
+          "name": "Cross clinic close rejected",
+          "passed": true
+        },
+        {
+          "name": "front_a login",
+          "passed": true
+        },
+        {
+          "name": "front_a no daily access",
+          "passed": true
+        },
+        {
+          "name": "doctor_a login",
+          "passed": true
+        },
+        {
+          "name": "doctor_a no daily access",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a login",
+          "passed": true
+        },
+        {
+          "name": "patient_demo_a no daily access",
+          "passed": true
+        },
+        {
+          "name": "tech_demo login",
+          "passed": true
+        },
+        {
+          "name": "tech_demo no daily access",
+          "passed": true
+        },
+        {
+          "name": "No independent close modifies old cash",
+          "passed": true
+        },
+        {
+          "name": "Four retained close versions",
+          "passed": true
+        },
+        {
+          "name": "No browser errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "screenshots": [
+        "daily-discrepancy.png",
+        "daily-reviewed.png",
+        "daily-late-fact.png",
+        "daily-latest-queue.png"
+      ],
+      "scope": "Synthetic daily reconciliation, discrepancy, independent handover and late-posting reopening",
+      "browser_version": "155.0.8059.79",
+      "passed": true
+    }
+  },
+  "independent_database_oracles": [
+    {
+      "passed": true,
+      "scope": "Independent raw SQL and Decimal facts; no production financial selectors",
+      "checks": [
+        {
+          "name": "Three equipment assets retained",
+          "passed": true
+        },
+        {
+          "name": "Eight lifecycle events retained",
+          "passed": true
+        },
+        {
+          "name": "Original acquisition costs are never overwritten",
+          "passed": true
+        },
+        {
+          "name": "Retired asset remains retired",
+          "passed": true
+        },
+        {
+          "name": "Original event unknown fact retained",
+          "passed": true
+        },
+        {
+          "name": "Three source requests retained",
+          "passed": true
+        },
+        {
+          "name": "First rejected request has no accepted amount",
+          "passed": true
+        },
+        {
+          "name": "Unknown to120.01 independently approved",
+          "passed": true
+        },
+        {
+          "name": "120.01 to80 amendment preserves prior reference",
+          "passed": true
+        },
+        {
+          "name": "Different applicant and reviewer for every decision",
+          "passed": true
+        },
+        {
+          "name": "All three cash entries retained",
+          "passed": true
+        },
+        {
+          "name": "Original expense120.01 uses first approved basis",
+          "passed": true
+        },
+        {
+          "name": "Original amount reversal retains lineage and basis",
+          "passed": true
+        },
+        {
+          "name": "Replacement expense80 uses second approved basis",
+          "passed": true
+        },
+        {
+          "name": "Primary source net expense80",
+          "passed": true
+        },
+        {
+          "name": "Five cost requests total",
+          "passed": true
+        },
+        {
+          "name": "Four approvals and one rejection",
+          "passed": true
+        },
+        {
+          "name": "Explicit zero remains different from original unknown",
+          "passed": true
+        },
+        {
+          "name": "No expense created for confirmed zero",
+          "passed": true
+        },
+        {
+          "name": "Service unknown supplemented30 without rewriting event",
+          "passed": true
+        },
+        {
+          "name": "Service30 has separate posted expense",
+          "passed": true
+        },
+        {
+          "name": "All nine cash rows independently posted",
+          "passed": true
+        },
+        {
+          "name": "Equipment net expense160 including retained50",
+          "passed": true
+        },
+        {
+          "name": "Source event costs counted once total1160",
+          "passed": true
+        },
+        {
+          "name": "Three original visit statuses preserved",
+          "passed": true
+        },
+        {
+          "name": "Two logical invoices retained",
+          "passed": true
+        },
+        {
+          "name": "Original current bills200 match net receipts200",
+          "passed": true
+        },
+        {
+          "name": "No pending cost or cash remains",
+          "passed": true
+        },
+        {
+          "name": "All posted cash points at approved same-event cost",
+          "passed": true
+        },
+        {
+          "name": "Cost source guard retained",
+          "passed": true
+        },
+        {
+          "name": "Cash and original lifecycle guards retained",
+          "passed": true
+        }
+      ],
+      "current_equipment_cost": "1160.00",
+      "posted_equipment_expense": "160.00",
+      "current_billed": "200.00",
+      "net_receipts": "200.00"
+    },
+    {
+      "passed": true,
+      "scope": "Independent raw SQL plus Decimal, no application daily/financial projections",
+      "checks": [
+        {
+          "name": "Four retained close records",
+          "passed": true
+        },
+        {
+          "name": "Latest day complete version chain",
+          "passed": true
+        },
+        {
+          "name": "Rejected discrepancy and both approvals retained",
+          "passed": true
+        },
+        {
+          "name": "Different preparer and reviewer on every version",
+          "passed": true
+        },
+        {
+          "name": "Review after preparation",
+          "passed": true
+        },
+        {
+          "name": "Initial one yuan refund discrepancy retained",
+          "passed": true
+        },
+        {
+          "name": "First two versions share unchanged ledger snapshot",
+          "passed": true
+        },
+        {
+          "name": "Second version four evidence totals match snapshot",
+          "passed": true
+        },
+        {
+          "name": "Independent exact decimal four-category totals",
+          "passed": true
+        },
+        {
+          "name": "Latest declaration matches independently summed money",
+          "passed": true
+        },
+        {
+          "name": "Latest retained snapshot matches raw sums",
+          "passed": true
+        },
+        {
+          "name": "Late expense distinct seven yuan twenty three",
+          "passed": true
+        },
+        {
+          "name": "Old reviewed cursor9 and new cursor10",
+          "passed": true
+        },
+        {
+          "name": "No pending applications remain",
+          "passed": true
+        },
+        {
+          "name": "Zero-date is distinct and earlier",
+          "passed": true
+        },
+        {
+          "name": "Zero-date contains no cash",
+          "passed": true
+        },
+        {
+          "name": "Zero is explicit in all four categories",
+          "passed": true
+        },
+        {
+          "name": "One latest record per day",
+          "passed": true
+        },
+        {
+          "name": "All cash remains independently posted",
+          "passed": true
+        },
+        {
+          "name": "No duplicate operation identities",
+          "passed": true
+        },
+        {
+          "name": "Four audited preparations",
+          "passed": true
+        },
+        {
+          "name": "Four audited review decisions",
+          "passed": true
+        },
+        {
+          "name": "Business visit statuses preserved",
+          "passed": true
+        },
+        {
+          "name": "Current billed income remains200",
+          "passed": true
+        },
+        {
+          "name": "Cash date and history triggers installed",
+          "passed": true
+        },
+        {
+          "name": "Independent fact-date index installed",
+          "passed": true
+        }
+      ],
+      "final_totals": {
+        "RECEIPT": "400",
+        "REFUND": "200",
+        "EQUIPMENT_EXPENSE": "337.24",
+        "EXPENSE_REVERSAL": "170.01"
+      }
+    }
+  ],
+  "full_encrypted_restore": {
+    "passed": true,
+    "source_project": "adc_rc1_5bafc9369bc0",
+    "source_database_modified": false,
+    "new_empty_target": true,
+    "published_cash_and_equipment_included": true,
+    "models_and_associations_compared": 43,
+    "all_model_fingerprints_match": true,
+    "restore_and_compare_seconds": 1.904,
+    "cleanup": "temporary restore container and network removed; source volume retained"
+  },
+  "retained_failed_attempts": [
+    {
+      "phase": "independent raw SQL assertion harness",
+      "problem": "Driver returned JSONB as strings; explicit decoding was missing",
+      "database_effect": "Read-only; no business changes or recovery started",
+      "resolution": "Decode both JSON columns explicitly; 26 daily checks then full independent encrypted restore passed; failed harness and metadata retained privately"
+    }
+  ],
+  "business_controls": [
+    "Asia/Shanghai occurrence date, four separate POSTED gross totals, pending separately",
+    "Manager preparer owns discrepancies; different Finance reviewer requires current facts, equal evidence and no pending cash",
+    "Terminal history immutable; new versions reference latest terminal predecessor, one pending per clinic/day",
+    "Late cash changes produce stale warnings, without editing earlier approvals",
+    "Cash and close commands share clinic/date lock; signed proposal, fresh authorization, audit rollback and idempotency",
+    "Manager summary does not expose patient or invoice identifiers; seven-role boundaries retained"
+  ],
+  "limits": {
+    "synthetic_only": true,
+    "real_payments": false,
+    "external_ai": false,
+    "payment_channels_or_bank_imports": false,
+    "sealed_accounting_periods": false,
+    "daily_notifications": false,
+    "maintenance_work_orders": false,
+    "multi_tenant_isolation": false,
+    "commercial_scale_acceptance": false,
+    "cloud_course_ready": false,
+    "server_purchased": false,
+    "windows_original_data_recovery": "unresolved"
+  }
+}
