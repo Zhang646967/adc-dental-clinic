@@ -35,3 +35,5 @@ class DentistQuarterCost(models.Model):
             models.CheckConstraint(condition=(Q(cost_status="CONFIRMED", supply_cost__isnull=False, operating_expense__isnull=False, confirmed_by__isnull=False, confirmed_at__isnull=False) | (~Q(cost_status="CONFIRMED") & Q(confirmed_by__isnull=True, confirmed_at__isnull=True))), name="cost_confirmation_valid"),
             models.CheckConstraint(condition=~Q(cost_status="MISSING") | Q(supply_cost__isnull=True, operating_expense__isnull=True), name="missing_cost_is_null"),
         ]
+
+from finance.cash_models import CashEntry

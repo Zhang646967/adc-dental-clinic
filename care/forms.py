@@ -5,6 +5,11 @@ from registry.models import Allergy, TreatmentType
 class VersionForm(forms.Form):
     expected_version=forms.IntegerField(min_value=0,widget=forms.HiddenInput)
 
+class ClinicalNoteForm(VersionForm):
+    clinical_note=forms.CharField(label="本次接诊记录（草稿）",max_length=4000,required=False,
+        widget=forms.Textarea(attrs={"rows":5}),help_text="仅记录合成案例的接诊事实；保存不会确认治疗、关闭接诊或收款。")
+    confirmed=forms.BooleanField(label="我已核对这份草稿内容。")
+
 class AllergyReviewForm(VersionForm):
     patient_version=forms.IntegerField(min_value=1,widget=forms.HiddenInput)
     status=forms.ChoiceField(label="本次询问结果",choices=[("UNKNOWN","仍然未知"),("NO_KNOWN","已确认无已知过敏"),("KNOWN","已知过敏")])

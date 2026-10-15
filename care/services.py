@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.utils import timezone
+from django.views.decorators.debug import sensitive_variables
 from accounts.models import RoleAssignment, UserAccount
 from accounts.policies import require_writable
 from adc_core.rules import RuleError, CLOSED_STATUSES, line_amount, total_amount, validate_allergies
@@ -43,6 +44,20 @@ def _draft(actor,visit):
 def _bump(v):
     v.lock_version+=1
     v.save(update_fields=["lock_version"])
+
+
+@business_errors
+@transaction.atomic
+@sensitive_variables('clinical_note')
+def save_clinical_note(*,actor,visit_id,expected_version,clinical_note):
+    if not isinstance(clinical_note,str) or len(clinical_note)>4000:
+        raise RuleError("接诊草稿最多4000字。")
+    v=_lock_care(actor,visit_id);_assert_current(v,expected_version)
+    draft=_draft(actor,v)
+    draft.clinical_note=clinical_note.strip()
+    draft.save(update_fields=["clinical_note"]);_bump(v)
+    emit(actor,"CARE_NOTE_SAVED",draft,visit=v,summary={"revision":draft.revision_no})
+    return draft
 
 
 @business_errors

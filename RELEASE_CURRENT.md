@@ -64,6 +64,24 @@ plus an independent database oracle. See docs/RESCHEDULING_OPTIMIZATION.md.
 These are local development results; historical G3/G4 and Windows recovery
 statuses remain separate.
 
+## Care, finance and equipment development — 2026-10-14
+
+The user authorised business-process refinement and the addition of finance and
+equipment functions. The assigned dentist can save draft care facts and check
+completion blockers. Closed-care review shows the published treatment record and
+existing bill. Receipts/refunds and equipment-fee requests require a different
+finance account to approve or reject; pending requests never count as received
+money. Current receivables retain the distinction between billed revenue, posted
+cash and a refund balance after bill correction.
+
+Current-clinic managers can register equipment and retain maintenance, service and
+retirement history. Device changes do not automatically change appointments or
+post costs. Four additive migrations create three tables and source/history
+guards; the original 16 migration files remain unchanged. The existing seven
+roles and quarterly cost/income policy remain intact. See
+docs/CARE_FINANCE_EQUIPMENT_WORKFLOWS.md and its separate local execution evidence.
+This business increment does not complete the pending cloud course acceptance.
+
 ## Historical account from the supplied Windows RC archive
 
 候选源码基于完整alpha.10重建；中断目录中的图像不作为代码完成证据。运行基线仍为Windows v0.7，Mac暂停。此次不新增大型业务模块，而是整合可核对、可启动、可验收的课程候选。

@@ -10,6 +10,8 @@ from operations import views as operations_views
 from care import correction_views
 
 urlpatterns = [
+    path("", include("equipment.urls")),
+    path("", include("finance.cash_urls")),
     path("", include("notifications.urls")),
     path("", include("coordination.task_urls")),
     path("", include("scheduling.front_coordination_urls")),

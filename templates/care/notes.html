@@ -1,0 +1,1 @@
+{% load workspace_tags %}<section class="panel"><h2>接诊事实草稿</h2><p>仅由本次负责牙医填写；保存草稿不会确认治疗、关闭接诊或记账。发布后保留本版本。</p><form method="post">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="note">{{ note_form.as_div }}<button type="submit"{% if adc_read_only %} disabled{% endif %}>保存接诊事实草稿</button></form></section>

@@ -45,6 +45,9 @@ import into a separate empty instance.
 
 - Django 5.2, Python 3.13, PostgreSQL 17, Gunicorn and Nginx.
 - A modular monolith（模块化单体）with seven role workspaces and clinic scope.
+- Care completeness（接诊完整性）, editable own-care drafts, independently reviewed
+  receipt/refund requests, current receivables and clinic equipment lifecycle
+  management. See [the detailed workflows and role boundaries](docs/CARE_FINANCE_EQUIPMENT_WORKFLOWS.md).
 - Role-specific business follow-up（业务跟进）for overdue appointments, unclosed
   care, coordination, patient offers and quarterly financial completeness; see
   [the business improvement record](docs/BUSINESS_FOLLOW_UP.md).

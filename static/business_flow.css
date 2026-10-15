@@ -1,0 +1,10 @@
+/* Shared business forms fit native controls and long identifiers in large text. */
+.business-flow{min-width:0;overflow-wrap:anywhere}
+.business-flow input,.business-flow select,.business-flow textarea{min-width:0;max-width:100%}
+.business-flow .actions>*{min-width:0;max-width:100%;white-space:normal}
+.business-flow .errorlist{overflow-wrap:anywhere}
+.care-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem;list-style:none;padding:0}
+.care-steps>li{border:1px solid #cbdcd5;border-radius:10px;background:white;padding:1rem;min-width:0}
+.care-steps p{margin:.5rem 0}.care-steps strong{display:block}
+.care-notes{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:650px){.business-flow .actions{align-items:stretch}.business-flow .actions>*{width:100%}.business-flow .care-grid{grid-template-columns:minmax(0,1fr)}}

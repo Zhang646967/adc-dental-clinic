@@ -3,11 +3,16 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect,get_object_or_404
 from django.views.decorators.http import require_GET,require_http_methods
+from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.cache import never_cache
 from accounts.policies import bindings
 from adc_core.http_support import EXPECTED_ERRORS,add_error
-from care.forms import AllergyReviewForm,TreatmentForm,CompletionForm,RemoveLineForm
+from care.forms import AllergyReviewForm,TreatmentForm,CompletionForm,RemoveLineForm,ClinicalNoteForm
 from care.models import VisitRecordVersion,Invoice
-from care.services import review_allergies,add_treatment,complete_visit,remove_treatment
+from care.services import review_allergies,add_treatment,complete_visit,remove_treatment,save_clinical_note
+from care.progress import care_progress
+from adc_core.snapshots import reporting_snapshot
+from finance.cash_selectors import invoice_balance
 from scheduling.models import Visit
 from scheduling.selectors import visible_visits,can_read_visit_details
 
@@ -18,10 +23,13 @@ def _own_visit(user,pk):
     return v
 
 @login_required
+@never_cache
+@sensitive_post_parameters()
 @require_http_methods(["GET","POST"])
 def workspace(request,pk):
-    v=_own_visit(request.user,pk)
-    version=v.record_versions.filter(state="DRAFT").first()
+    _own_visit(request.user,pk)
+    progress=care_progress(request.user,pk)
+    v=progress['visit'];version=progress['record']
     initial={"expected_version":v.lock_version,"patient_version":v.patient.allergy_info_version,
              "status":v.patient.allergy_status,"allergy_ids":list(v.patient.allergy_links.filter(is_active=True).values_list("allergy_id",flat=True))}
     action=request.POST.get("action") if request.method=="POST" else None
@@ -30,7 +38,9 @@ def workspace(request,pk):
     allergy_form=AllergyReviewForm(request.POST if action=="review" else None,initial=initial,auto_id="id_allergy_%s")
     treatment_form=TreatmentForm(request.POST if action=="add" else None,initial=initial,auto_id="id_treatment_%s")
     removal_form=RemoveLineForm(request.POST if action=="remove" else None,initial=initial,auto_id="id_removal_%s")
-    active={"review":allergy_form,"add":treatment_form,"remove":removal_form}.get(action)
+    note_form=ClinicalNoteForm(request.POST if action=="note" else None,
+        initial=dict(initial,clinical_note=progress['clinical_note']),auto_id="id_note_%s")
+    active={"review":allergy_form,"add":treatment_form,"remove":removal_form,"note":note_form}.get(action)
     if request.method=="POST":
         if active is None: raise PermissionDenied("未知接诊操作。")
         if active.is_valid():
@@ -42,21 +52,24 @@ def workspace(request,pk):
                 elif action=="add":
                     data["treatment_id"]=data["treatment_id"].pk
                     add_treatment(actor=request.user,visit_id=v.pk,**data)
+                elif action=="note":save_clinical_note(actor=request.user,visit_id=v.pk,**data)
                 else: remove_treatment(actor=request.user,visit_id=v.pk,**data)
             except EXPECTED_ERRORS as exc: add_error(active,exc)
             else:
                 messages.success(request,"已保存并记录操作历史。")
                 return redirect("care_workspace",pk=v.pk)
-    return render(request,"care/workspace.html",{"visit":v,"record":version,
-        "lines":list(version.treatment_lines.all()) if version else [],
-        "allergy_form":allergy_form,"treatment_form":treatment_form,"removal_form":removal_form})
+    return render(request,"care/workspace.html",dict(progress,
+        allergy_form=allergy_form,treatment_form=treatment_form,removal_form=removal_form,note_form=note_form))
 
 @login_required
+@never_cache
+@sensitive_post_parameters()
 @require_http_methods(["GET","POST"])
 def complete(request,pk):
-    v=_own_visit(request.user,pk)
-    form=CompletionForm(request.POST or None,initial={"expected_version":v.lock_version})
-    record=v.record_versions.filter(state="DRAFT").first()
+    _own_visit(request.user,pk)
+    progress=care_progress(request.user,pk);v=progress['visit']
+    form=CompletionForm(request.POST or None,initial={"expected_version":v.lock_version,
+        "outcome":"TREATED" if progress['lines'] else "NO_TREATMENT"})
     if request.method=="POST" and form.is_valid():
         data=dict(form.cleaned_data);data.pop("confirmed")
         try: invoice=complete_visit(actor=request.user,visit_id=v.pk,**data)
@@ -64,10 +77,15 @@ def complete(request,pk):
         else:
             messages.success(request,"本次接诊已关闭并生成唯一结算单。该金额为开单金额，不是实收款。")
             return redirect("invoice_detail",pk=invoice.pk)
-    return render(request,"care/complete.html",{"visit":v,"record":record,"form":form})
+    return render(request,"care/complete.html",dict(progress,form=form))
 
 
 def invoice_context(invoice,request,*,portal=False):
+    with reporting_snapshot():
+        current=Invoice.objects.select_related('visit','current_record_version').get(pk=invoice.pk)
+        return _invoice_context(current,request,portal=portal)
+
+def _invoice_context(invoice,request,*,portal=False):
     from django.http import Http404
     record=invoice.current_record_version
     requested=request.GET.get('revision')
@@ -86,7 +104,10 @@ def invoice_context(invoice,request,*,portal=False):
         "is_current":record.pk==invoice.current_record_version_id,
         "published_at":record.published_at,
         "revisions":tuple(VisitRecordVersion.objects.filter(visit_id=invoice.visit_id,state='PUBLISHED').order_by('-revision_no').values('revision_no','published_at')),
-        "may_correct":not portal and invoice.visit.status=='COMPLETED' and bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists()}
+        "may_correct":not portal and invoice.visit.status=='COMPLETED' and bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists(),
+        "invoice_id":invoice.pk,
+        "cash_balance":invoice_balance(invoice),
+        "can_request_cash":not portal and bindings(request.user).filter(role='FRONT_DESK',scope_kind='CLINIC',clinic_id=invoice.visit.clinic_id).exists()}
 
 @login_required
 @require_GET
