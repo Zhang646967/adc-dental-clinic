@@ -118,7 +118,7 @@ class CostAmendmentTests(CFEFixture,TransactionTestCase):
             with self.assertRaises(RuleError):self.preview(reason=reason)
     def test_pending_cost_blocks_new_expense_and_stale_cash_preview(self):
         a=self.asset(asset_code='KNOWN');self.event=a.events.get(sequence=0)
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成',**self.evidence())
         self.request(proposed_cost=D('450'))
         with self.assertRaises(RuleError):confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)
         with self.assertRaises(RuleError):self.expense(a)
@@ -128,7 +128,7 @@ class CostAmendmentTests(CFEFixture,TransactionTestCase):
     def test_posted_fee_requires_reviewed_reversal_before_amendment(self):
         first=self.decide(self.request());expense=self.approve(self.expense(self.a1))
         with self.assertRaises(RuleError):self.preview(proposed_cost=D('80'))
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EXPENSE_REVERSAL',reversal_id=expense.pk,occurred_on=self.today,reason='合成费用错误冲回')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EXPENSE_REVERSAL',reversal_id=expense.pk,occurred_on=self.today,reason='合成费用错误冲回',**self.evidence())
         reverse_entry=confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0]
         self.assertEqual(reverse_entry.equipment_cost_amendment_id,first.pk)
         with self.assertRaises(RuleError):self.preview(proposed_cost=D('80'))
@@ -138,7 +138,7 @@ class CostAmendmentTests(CFEFixture,TransactionTestCase):
         totals=fee_worklist(self.fin)['totals'];self.assertEqual((totals['events'],totals['recorded_cost'],totals['net_expense']),(1,D('80'),D('80')))
     def test_amendment_changes_invalidate_old_expense_preview(self):
         a=self.asset(asset_code='KNOWN');self.event=a.events.get(sequence=0)
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成',**self.evidence())
         self.decide(self.request(proposed_cost=D('350')))
         with self.assertRaises(RuleError):confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)
     def test_audit_failure_rolls_back_request_and_review(self):
@@ -218,7 +218,7 @@ class CostAmendmentTests(CFEFixture,TransactionTestCase):
     def test_cash_and_cost_competition_has_only_one_pending_workflow(self):
         a=self.asset(asset_code='KNOWN');self.event=a.events.get(sequence=0)
         other=UserAccount.objects.create_user(username='cost_race_manager');RoleAssignment.objects.create(user=other,role='MANAGER',scope_kind='CLINIC',clinic=self.a);activate(other,'MANAGER',self.a)
-        cash=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成竞争记账')
+        cash=prepare_cash(actor=self.manager,source_type='equipment',source_id=self.event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成竞争记账',**self.evidence())
         cost=self.preview(actor=other)
         def run(i):
             try:

@@ -36,6 +36,7 @@ def main():
     from equipment.services import prepare_registration,confirm_equipment,prepare_change
     from equipment.maintenance_services import prepare_maintenance,confirm_maintenance
     from finance.cash_models import CashEntry
+    from finance.payment_account_services import prepare_account,confirm_account
     from finance.cash_services import prepare_cash,confirm_cash_request,prepare_review,confirm_cash_review
     from finance.daily_services import prepare_close,confirm_close,prepare_close_review,confirm_close_review
     from finance.daily_facts import day_facts
@@ -68,6 +69,7 @@ def main():
     treatment=TreatmentType.objects.create(code='CAP-T',name='合成容量治疗',unit_definition='一次',standard_unit_price=D('100.00'))
     for i in range(5):
         clinic=Clinic.objects.get(clinic_code='DEMO-'+str(i+1)) if i<2 else Clinic.objects.create(clinic_code='CAP-'+str(i+1),name='合成容量诊所'+str(i+1),postal_address='合成地址',supervisor_name='合成主管',phone='000',email='capacity@example.invalid',area_sqm=120)
+        account=confirm_account(actor=finance,proposal_token=prepare_account(actor=finance,clinic_id=clinic.pk,code='CAP-CASH',method='CASH')['proposal_token'],confirmed=True)[0]
         front=actor('capacity_front_'+str(i),'FRONT_DESK',clinic)
         manager=actor('capacity_manager_'+str(i),'MANAGER',clinic)
         dentists=[Dentist.objects.create(employee_no=f'CAP-D{i}-{j}',name=f'合成牙医{i}-{j}',date_of_birth=date(1990,1,1),home_address='合成地址',phone='000',email='capacity@example.invalid') for j in range(2)]
@@ -96,7 +98,7 @@ def main():
             visit.refresh_from_db();add_treatment(actor=doctor,visit_id=visit.pk,expected_version=visit.lock_version,treatment_id=treatment.pk,quantity=D('1'))
             visit.refresh_from_db();bill=complete_visit(actor=doctor,visit_id=visit.pk,expected_version=visit.lock_version,outcome='TREATED')
             first_invoice=first_invoice or bill
-            v=prepare_cash(actor=front,source_type='invoice',source_id=bill.pk,kind='RECEIPT',amount=D('100.00'),occurred_on=today,reason='合成容量收款')
+            v=prepare_cash(actor=front,source_type='invoice',source_id=bill.pk,kind='RECEIPT',amount=D('100.00'),occurred_on=today,reason='合成容量收款',payment_account_id=account.pk,reference=f'CAP-C{i}-{j}')
             entry=confirm_cash_request(actor=front,proposal_token=v['proposal_token'],confirmed=True)[0]
             v=prepare_review(actor=finance,entry_id=entry.pk,decision='approve',reason='合成独立财务复核');confirm_cash_review(actor=finance,proposal_token=v['proposal_token'],confirmed=True)
         # A separate editable visit is used only for signed HTTP note saves.
@@ -112,7 +114,7 @@ def main():
             close=confirm_close(actor=manager,proposal_token=v['proposal_token'],confirmed=True)[0]
             v=prepare_close_review(actor=finance,close_id=close.pk,decision='approve',reason='合成独立核对');confirm_close_review(actor=finance,proposal_token=v['proposal_token'],confirmed=True)
         patient_actor=actor('capacity_patient_'+str(i),'PATIENT',patient=first_invoice.visit.patient,measured=False)
-        cases.append(dict(clinic=clinic.pk,front=front.username,manager=manager.username,doctor=doctor.username,patient=patient_actor.username,patient_id=first_invoice.visit.patient_id,patient_no=first_invoice.visit.patient.patient_no,private_patient=patients[1500].pk,private_name=patients[1500].name,visit=first_invoice.visit_id,editable=editable.pk,invoice=first_invoice.pk,asset=assets[0].pk,maintenance=order.pk,slot=future.pk,first_patient=patients[0].pk))
+        cases.append(dict(clinic=clinic.pk,account=account.pk,front=front.username,manager=manager.username,doctor=doctor.username,patient=patient_actor.username,patient_id=first_invoice.visit.patient_id,patient_no=first_invoice.visit.patient.patient_no,private_patient=patients[1500].pk,private_name=patients[1500].name,visit=first_invoice.visit_id,editable=editable.pk,invoice=first_invoice.pk,asset=assets[0].pk,maintenance=order.pk,slot=future.pk,first_patient=patients[0].pk))
         print('Seeded clinic '+str(i+1),file=sys.stderr,flush=True)
     # Preserve IDs privately. No credential or raw clinical details in public evidence.
     with connection.cursor() as c:c.execute('ANALYZE')

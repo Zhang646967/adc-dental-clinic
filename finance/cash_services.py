@@ -21,8 +21,8 @@ from finance.cash_models import CashEntry
 from finance.cash_selectors import cash_scope,cursor,invoice_balance,event_net,projected_balance
 from finance.policies import money
 
-REQUEST='adc.cash.request.v1'
-REVIEW='adc.cash.review.v1'
+REQUEST='adc.cash.request.v2'
+REVIEW='adc.cash.review.v2'
 ROLES=('FRONT_DESK','MANAGER')
 
 def _date(value):
@@ -37,7 +37,7 @@ def _reason(value):
     return value.strip()
 
 def _request_payload(data):
-    keys={'source_type','source','clinic','version','cursor','kind','amount','occurred_on','reason','reversal'}
+    keys={'source_type','source','clinic','version','cursor','kind','amount','occurred_on','reason','reversal','account','account_version','reference'}
     if set(data)!=keys or data['source_type'] not in ('invoice','equipment'):
         raise RuleError('申请确认内容无效。')
     if any(type(data[k]) is not int or not 0<data[k]<2**63 for k in ('source','clinic')):
@@ -52,6 +52,8 @@ def _request_payload(data):
     if type(data['amount']) is not str or len(data['amount'])>20:raise RuleError('金额无效。')
     if data['reversal'] is not None and (type(data['reversal']) is not int or data['reversal']<=0):
         raise RuleError('冲回来源无效。')
+    if type(data['account']) is not int or data['account']<=0 or type(data['account_version']) is not int or data['account_version']<0:
+        raise RuleError('渠道账户版本无效。')
 
 def _request_scope(actor,source_type,clinic_id,lock=False):
     role='FRONT_DESK' if source_type=='invoice' else 'MANAGER'
@@ -116,7 +118,7 @@ def _validate(source_type,source,rows,kind,amount,occurred_on,reversal=None,requ
             raise RuleError('该条目已有待审核或已记账冲回。')
         if occurred_on<reversal.occurred_on:raise RuleError('冲回日期不能早于原条目。')
 
-def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reason,reversal_id=None):
+def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reason,reversal_id=None,payment_account_id=None,reference=None):
     with reporting_snapshot():
         source,clinic,rows,version=_source(source_type,source_id)
         _request_scope(actor,source_type,clinic)
@@ -130,12 +132,15 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
         amount=money(source.effective_cost if source_type=='equipment' and reversal is None else amount)
         day=_date(occurred_on);reason=_reason(reason)
         _validate(source_type,source,rows,kind,amount,day,reversal)
+        from finance.cash_evidence_services import checked_account
+        account,reference=checked_account(payment_account_id,clinic,reference)
         if source_type=='equipment' and reversal is None and rows.filter(state='PENDING',kind=kind).exists():
             raise RuleError('该设备费用已有待审核申请。')
         data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,cursor=cursor(rows),
-            kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id)
+            kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id,
+            account=account.pk,account_version=account.lock_version,reference=reference)
         balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.effective_cost,net_equipment_expense=event_net(source.pk))
-        return dict(source=source,source_type=source_type,kind=kind,amount=amount,occurred_on=day,reason=reason,balance=balance,
+        return dict(source=source,source_type=source_type,kind=kind,amount=amount,occurred_on=day,reason=reason,balance=balance,account=account,reference=reference,
             projected=projected_balance(balance,kind,amount),
             proposal_token=proposal(actor,REQUEST,ROLES,data))
 
@@ -158,11 +163,15 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     reversal=rows.get(pk=data['reversal']) if data['reversal'] else None
     amount=money(data['amount']);day=_date(data['occurred_on'])
     _validate(data['source_type'],source,rows,data['kind'],amount,day,reversal)
+    from finance.cash_evidence_services import checked_account,create_initial
+    account,reference=checked_account(data['account'],clinic,data['reference'],lock=True)
+    if account.lock_version!=data['account_version']:raise RuleError('渠道账户已变化，请重新预览。')
     if data['source_type']=='equipment' and not reversal and rows.filter(state='PENDING',kind=data['kind']).exists():
         raise RuleError('该设备费用已有待审核申请。')
     fields=dict(invoice=source,based_record_version_id=version) if data['source_type']=='invoice' else dict(equipment_event=source,equipment_cost_amendment_id=reversal.equipment_cost_amendment_id if reversal else version)
     entry=CashEntry.objects.create(operation_id=payload['operation'],clinic_id=clinic,kind=data['kind'],amount=amount,
         occurred_on=day,reason=_reason(data['reason']),reversal_of=reversal,prepared_by=actor,**fields)
+    create_initial(entry=entry,account_id=account.pk,reference=reference,actor=actor)
     emit(actor,'CASH_REQUESTED',entry,summary={'kind':entry.kind,'source_type':data['source_type']})
     return entry,False
 
@@ -248,6 +257,8 @@ def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None)
         _validate_review(entry,data['source_type'],source,rows)
     entry.state=target;entry.lock_version=1;entry.reviewed_by=actor;entry.reviewed_at=timezone.now();entry.review_reason=_reason(data['reason'])
     entry.save(update_fields=['state','lock_version','reviewed_by','reviewed_at','review_reason'])
+    from finance.cash_evidence_services import review_initial
+    review_initial(entry=entry,actor=actor)
     emit(actor,'CASH_POSTED' if target=='POSTED' else 'CASH_REJECTED',entry,
         summary={'kind':entry.kind,'request_id':entry.pk})
     return entry,False

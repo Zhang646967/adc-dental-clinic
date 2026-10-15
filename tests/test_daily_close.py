@@ -40,7 +40,7 @@ class DailyCloseTests(CFEFixture,TransactionTestCase):
     def test_four_legs_use_posted_facts_not_bills_or_pending(self):
         v,invoice=self.billed();self.approve(self.cash(invoice,amount='100.01'));self.approve(self.cash(invoice,kind='REFUND',amount='20.01'))
         a=self.asset(acquisition_cost='9.99');expense=self.approve(self.expense(a))
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=expense.equipment_event_id,kind='EXPENSE_REVERSAL',reversal_id=expense.pk,occurred_on=self.today,reason='合成冲回')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=expense.equipment_event_id,kind='EXPENSE_REVERSAL',reversal_id=expense.pk,occurred_on=self.today,reason='合成冲回',**self.evidence())
         self.approve(confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0])
         row=self.decide(self.submit());self.assertEqual(row.snapshot['totals'],dict(zip(KINDS,['100.01','20.01','9.99','9.99'])));self.assertEqual(row.state,'APPROVED')
     def test_pending_blocks_approval_and_is_not_posted_total(self):
@@ -64,7 +64,7 @@ class DailyCloseTests(CFEFixture,TransactionTestCase):
         new=self.decide(self.submit(reason='晚到设备付款重新核对'));self.assertEqual(new.previous_id,old.pk)
     def test_occurred_date_instead_of_approval_date(self):
         day=self.today-timedelta(days=1);a=self.asset();event=a.events.get(sequence=0)
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=day,reason='合成晚到付款')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=day,reason='合成晚到付款',**self.evidence())
         self.approve(confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0])
         self.assertEqual(day_facts(self.a.pk,day)['totals']['EQUIPMENT_EXPENSE'],'500.00');self.assertEqual(day_facts(self.a.pk,self.today)['posted_count'],0)
     def test_stale_request_and_stale_review_fail(self):
@@ -172,7 +172,7 @@ class DailyCloseTests(CFEFixture,TransactionTestCase):
         self.assertEqual(sorted(r[1] for r in results),[False,True])
     def test_concurrent_cash_submission_and_close_review(self):
         row=self.submit();p=self.decision_preview(row);asset=self.asset();event=asset.events.get(sequence=0)
-        cash=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成并发付款')
+        cash=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成并发付款',**self.evidence())
         def run(i):
             try:
                 if i:return confirm_cash_request(actor=self.actor_copy(self.manager),proposal_token=cash['proposal_token'],confirmed=True)[0].state

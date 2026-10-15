@@ -122,7 +122,7 @@ class EquipmentFeeFollowupTests(CFEFixture,TransactionTestCase):
         a=self.asset();e=self.expense(a);self.approve(e)
         from finance.cash_services import prepare_cash,confirm_cash_request
         p=prepare_cash(actor=self.manager,source_type='equipment',source_id=e.equipment_event_id,kind='EXPENSE_REVERSAL',
-            occurred_on=self.today,reason='合成冲回原笔误记',reversal_id=e.pk)
+            occurred_on=self.today,reason='合成冲回原笔误记',reversal_id=e.pk,**self.evidence())
         reversal=confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0]
         d=fee_worklist(self.fin);self.assertEqual((d['rows'][0].fee_state,d['rows'][0].net_expense),('PENDING',D('500')))
         self.approve(reversal);self.assertEqual(fee_worklist(self.fin)['rows'][0].fee_state,'REVERSED')

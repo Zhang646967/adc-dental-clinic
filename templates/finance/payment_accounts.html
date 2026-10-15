@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}
+<div class="workspace-heading"><p class="eyebrow">资金凭据</p><h1>收付款渠道账户</h1><p>用本店渠道代码区分现金、银行卡、转账等合成凭据。代码与方式保留；停用后历史仍可对账。</p></div>
+{% if workspace_role == 'FINANCE' %}<p><a class="button" href="{% url 'payment_account_new' %}">建立渠道账户</a></p>{% endif %}
+<div class="role-grid">{% for row in page %}<section class="role-card"><h2>{{ row.clinic.name }} · {{ row.code }}</h2><p>{{ row.get_method_display }} · {% if row.is_active %}已启用{% else %}已停用，历史保留{% endif %}</p>{% if workspace_role == 'FINANCE' %}<a href="{% url 'payment_account_state' row.pk %}">启用／停用</a>{% endif %}</section>{% empty %}<p>尚无渠道账户，请由财务建立本店合成渠道后，再提交收付款凭据。</p>{% endfor %}</div>
+{% include 'finance/reconciliation_pagination.html' %}<p><a href="{% url 'reconciliation_home' %}">渠道对账工作台</a></p>{% endblock %}

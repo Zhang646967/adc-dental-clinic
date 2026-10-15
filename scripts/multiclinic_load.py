@@ -65,9 +65,9 @@ class Client:
 READS={
  'FRONT_DESK':('/patients/','/visits/','/finance/receivables/','/frontdesk/'),
  'DENTIST':('/doctor/','/visits/','/patients/'),
- 'MANAGER':('/equipment/maintenance/','/equipment/expenses/','/finance/daily-closes/','/manager/'),
- 'FINANCE':('/finance/cash/','/finance/receivables/','/equipment/expenses/','/finance/daily-closes/'),
- 'HQ':('/headquarters/','/finance/cash/','/finance/daily-closes/','/equipment/')}
+ 'MANAGER':('/finance/reconciliation/','/finance/payment-accounts/','/equipment/maintenance/','/equipment/expenses/','/finance/daily-closes/','/manager/'),
+ 'FINANCE':('/finance/reconciliation/','/finance/payment-accounts/','/finance/cash/','/finance/receivables/','/equipment/expenses/','/finance/daily-closes/'),
+ 'HQ':('/finance/reconciliation/','/headquarters/','/finance/cash/','/finance/daily-closes/','/equipment/')}
 
 def checked_target(root,project,port,docker):
     if not re.fullmatch('adc_rc1_[0-9a-f]{12}',project) or (root/'.rc/project.txt').read_text().strip()!=project:raise ValueError('Pin an existing explicit rehearsal project')

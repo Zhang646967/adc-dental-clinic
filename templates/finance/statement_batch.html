@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}<h1>流水批次 #{{ batch.pk }}</h1><p>{{ batch.account.clinic.name }} · {{ batch.account.code }} · {{ batch.get_state_display }} · 经办／差异跟进人：{{ batch.created_by.username }}</p>
+<p>原始 {{ batch.normalized_rows|length }} 行；已接受新流水 {{ batch.new_count }} 笔，完全相同的重复 {{ batch.skipped_count }} 行。原始CSV和规范化明细保留；导入未产生资金变动。</p>
+{% if batch.state == 'DRAFT' %}<p class="notice">这份草稿尚未接受；若原预览已失效，请用原文件重新上传预览。</p>{% endif %}
+<p><a href="?unmatched=1">查看尚无待审／已复核匹配的流水</a> · <a href="?">查看全部新流水</a></p>
+<div class="role-grid">{% for row in page %}<section class="role-card"><h2>{{ row.transaction_id }}</h2><p>{{ row.booked_on|date:'Y-m-d' }} · {{ row.get_direction_display }} {{ row.amount }} {{ row.currency }}</p><p>凭据编号：{{ row.reference|default:'未提供' }}</p><p>{% if row.active %}已有待审／已复核匹配，打开查阅决定。{% else %}尚无有效匹配申请，待跟进差异。{% endif %}</p><a href="{% url 'statement_match' row.pk %}">查阅凭据候选与匹配</a></section>{% empty %}<p>没有符合条件的新流水。完全重复的导入不会新增条目。</p>{% endfor %}</div>
+{% include 'finance/reconciliation_pagination.html' %}<p><a href="{% url 'reconciliation_home' %}">返回渠道对账</a></p>{% endblock %}

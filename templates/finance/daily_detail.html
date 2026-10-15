@@ -3,6 +3,7 @@
 {% if latest.pk != row.pk %}<p><a href="{% url 'daily_close_detail' latest.pk %}">查阅最新第 {{ latest.version }} 版</a></p>{% endif %}
 <p>提交时已审核 {{ row.snapshot.posted_count }} 笔，待审核 {{ row.snapshot.pending }} 笔。各类金额分别比较，差异不能相互抵销。</p>
 {% include 'finance/daily_comparison.html' %}
+<section class="panel"><h2>渠道对账状态（当前事实，单独核对）</h2><p>本营业日已记账 {{ channel_summary.posted }} 笔 · 已有核实凭据 {{ channel_summary.evidenced }} 笔 · 渠道匹配已复核 {{ channel_summary.matched }} 笔。</p><p>账内交接复核与渠道到账分别保留。次日到账可继续待对账；日结通过不表示渠道已核清。</p><a href="{% url 'reconciliation_home' %}">查阅渠道对账与差异</a></section>
 <section class="panel"><h2>责任与交接依据</h2><p>经办／差异责任人：{{ row.prepared_by.username }} · {{ row.prepared_at|date:'Y-m-d H:i:s' }}（北京时间）</p><p>凭据范围：{{ row.evidence }}</p><p>交接／重开依据：{{ row.reason }}</p>{% if row.reviewed_by %}<p>独立复核人：{{ row.reviewed_by.username }} · {{ row.reviewed_at|date:'Y-m-d H:i:s' }}（北京时间）</p><p>复核说明：{{ row.review_reason }}</p>{% else %}<p>等待不同账号的财务人员独立复核；尚未完成交接。</p>{% endif %}</section>
 {% if blocker %}<p class="notice">{{ blocker }}</p>{% endif %}
 {% if workspace_role == 'FINANCE' and row.state == 'PENDING' %}<p><a class="button" href="{% url 'daily_close_review' row.pk %}">独立复核／退回</a></p>{% endif %}

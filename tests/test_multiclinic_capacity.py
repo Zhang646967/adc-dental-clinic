@@ -107,7 +107,7 @@ class MultiClinicDailyTests(CFEFixture,TransactionTestCase):
         for clinic,day,code in [(self.a,previous,'EQ-A'),(self.b,self.today,'EQ-B')]:
             if clinic==self.b:RoleAssignment.objects.create(user=self.manager,role='MANAGER',scope_kind='CLINIC',clinic=self.b)
             activate(self.manager,'MANAGER',clinic);asset=self.asset(asset_code=code);event=asset.events.get(sequence=0)
-            p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=day,reason='Synthetic date isolation')
+            p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',occurred_on=day,reason='Synthetic date isolation',**self.evidence())
             self.approve(confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0])
         pairs=[(self.a.pk,self.today),(self.b.pk,previous)]
         got=page_day_facts(pairs);self.assertEqual(set(got),set(pairs))

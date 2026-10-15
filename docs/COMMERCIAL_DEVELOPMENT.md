@@ -78,3 +78,9 @@ Daily-operation increment: [Daily reconciliation and handover](DAILY_RECONCILIAT
 Maintenance increment: [Work orders and acceptance](MAINTENANCE_WORK_ORDERS.md).
 
 Multi-clinic increment: [Capacity and permission scope](MULTICLINIC_CAPACITY.md).
+
+The agreed next sequence and reference capabilities are in
+[Mature systems study](MATURE_SYSTEM_STUDY.md). R1 implements
+[payment evidence and transaction reconciliation](FINANCIAL_EVIDENCE_RECONCILIATION.md),
+retaining independent posting review, synthetic CSV input and separate internal
+daily handover versus channel matching. R2–R5 remain ordered future contracts.

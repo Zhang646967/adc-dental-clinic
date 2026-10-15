@@ -1,0 +1,1 @@
+<nav aria-label="分页">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}{% if unmatched %}&amp;unmatched=1{% endif %}">上一页</a>{% endif %}<p>第 {{ page.number }} / {{ page.paginator.num_pages }} 页</p>{% if page.has_next %}<a href="?page={{ page.next_page_number }}{% if unmatched %}&amp;unmatched=1{% endif %}">下一页</a>{% endif %}</nav>

@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import DatabaseError
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404,render,redirect
 from django.utils import timezone
@@ -43,6 +44,7 @@ def listing(request):
 def detail(request,pk):
     try:data=cash_detail(request.user,pk)
     except EXPECTED_ERRORS:raise Http404
+    data['evidence_page']=Paginator(data['entry'].evidence_versions.select_related('account','prepared_by','reviewed_by').order_by('-version'),20).get_page(request.GET.get('evidence_page','1'))
     return render(request,'finance/cash_detail.html',data)
 
 def _request(request,source_type,pk,reversal_id=None):
@@ -75,7 +77,7 @@ def _request(request,source_type,pk,reversal_id=None):
     if source_type=='invoice' and reversal_id is None:
         initial.update(kind='REFUND' if balance['refund_due'] else 'RECEIPT',
             amount=balance['refund_due'] or balance['remaining'] or None)
-    form=klass(request.POST if request.method=='POST' else None,initial=initial)
+    form=klass(request.POST if request.method=='POST' else None,initial=initial,actor=request.user)
     if request.method=='POST' and form.is_valid():
         values=dict(form.cleaned_data)
         values.setdefault('kind','EQUIPMENT_EXPENSE' if source_type=='equipment' else 'REFUND')
@@ -85,6 +87,7 @@ def _request(request,source_type,pk,reversal_id=None):
             summary=[('类型',{'RECEIPT':'模拟收款','REFUND':'模拟退款','EQUIPMENT_EXPENSE':'设备费用','EXPENSE_REVERSAL':'设备费用冲回'}[preview['kind']]),
                 ('来源',preview['source'].invoice_no if source_type=='invoice' else preview['source'].asset.asset_code),
                 ('金额（CNY）',preview['amount']),('事实日期',preview['occurred_on']),('核对依据',preview['reason']),
+                ('渠道账户',str(preview['account'])),('凭据编号',preview['reference']),
                 ('提交后状态','待财务审核；尚未记账')]
             summary.extend(_balance_summary(preview['balance'],preview['projected'],source_type))
             return render(request,'business/proposal.html',{'title':title,'summary':summary,'form':ExplicitProposalForm(initial={'proposal_token':preview['proposal_token']}),'button':'确认提交待审核申请','recovery_route':'cash_list'})

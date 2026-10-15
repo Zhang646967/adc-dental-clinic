@@ -122,10 +122,10 @@ class MaintenanceTests(CFEFixture,TransactionTestCase):
         self.assertIsNone(row.service_event.cost);self.assertIsNone(row.service_event.next_service_due)
     def test_zero_cost_is_explicit_and_cannot_post_positive_fee(self):
         row=self.act(self.ready(cost='0.00'),'APPROVE',actor=self.reviewer);self.assertEqual(row.service_event.cost,D('0'))
-        with self.assertRaises(RuleError):prepare_cash(actor=self.manager,source_type='equipment',source_id=row.service_event_id,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成')
+        with self.assertRaises(RuleError):prepare_cash(actor=self.manager,source_type='equipment',source_id=row.service_event_id,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成',**self.evidence())
     def test_cost_requires_separate_cash_request_and_finance_approval(self):
         row=self.act(self.ready(),'APPROVE',actor=self.reviewer);self.assertFalse(CashEntry.objects.exists())
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=row.service_event_id,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成维修费凭据')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=row.service_event_id,kind='EQUIPMENT_EXPENSE',occurred_on=self.today,reason='合成维修费凭据',**self.evidence())
         entry=confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0]
         self.assertEqual(entry.state,'PENDING');self.approve(entry);entry.refresh_from_db();self.assertEqual(entry.amount,D('20.01'));self.assertEqual(entry.state,'POSTED')
     def test_cancel_leaves_asset_stopped_and_cannot_bypass_acceptance(self):

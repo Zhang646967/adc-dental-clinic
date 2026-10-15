@@ -41,6 +41,13 @@ class CFEFixture(V05Fixture):
                 (self.manager,'MANAGER',self.a),(self.doctor,'DENTIST',None),(self.fin,'FINANCE',None),
                 (self.hq,'HQ',None),(self.pa,'PATIENT',None),(self.tech,'SYSADMIN',None)]:
             activate(actor,role,clinic)
+    def evidence(self,clinic_id=None):
+        from finance.reconciliation_models import PaymentAccount
+        from uuid import uuid4
+        clinic_id=clinic_id or self.manager._adc_workspace.clinic_id
+        operation=uuid4()
+        account,_=PaymentAccount.objects.get_or_create(clinic_id=clinic_id,code='SYNTH-ACCOUNT',defaults=dict(method='CASH',created_by=self.fin,operation_id=operation,last_operation_id=operation))
+        return dict(payment_account_id=account.pk,reference='SYNTH-'+uuid4().hex)
     def register_preview(self,**kwargs):
         data=dict(actor=self.manager,asset_code='EQ-1',name='合成牙椅',category='CHAIR',location='演示一区',
             acquired_on=self.today-timedelta(days=30),acquisition_cost=D('500'),next_service_due=self.today,note='合成设备接收依据')
@@ -55,7 +62,7 @@ class CFEFixture(V05Fixture):
         return confirm_equipment(actor=kwargs.get('actor',self.manager),proposal_token=p['proposal_token'],confirmed=True)[0]
     def cash_preview(self,invoice,**kwargs):
         data=dict(actor=self.front,source_type='invoice',source_id=invoice.pk,kind='RECEIPT',amount=D('100'),
-                  occurred_on=self.today,reason='合成收款核对')
+                  occurred_on=self.today,reason='合成收款核对',**self.evidence(invoice.visit.clinic_id))
         data.update(kwargs);return prepare_cash(**data)
     def cash(self,invoice,**kwargs):
         p=self.cash_preview(invoice,**kwargs)
@@ -67,7 +74,7 @@ class CFEFixture(V05Fixture):
     def expense(self,asset):
         event=asset.events.get(sequence=0)
         p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EQUIPMENT_EXPENSE',
-            occurred_on=self.today,reason='合成设备费用依据')
+            occurred_on=self.today,reason='合成设备费用依据',**self.evidence())
         return confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0]
     def balance(self,invoice):
         invoice.refresh_from_db()
@@ -379,7 +386,7 @@ class CashManagementTests(CFEFixture,TransactionTestCase):
         with self.assertRaises(RuleError):self.expense(a)
     def test_equipment_expense_reversal_retains_source_and_can_repost_after_void(self):
         a=self.asset();entry=self.expense(a);self.approve(entry);event=a.events.get(sequence=0)
-        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EXPENSE_REVERSAL',reversal_id=entry.pk,occurred_on=self.today,reason='合成误记冲回')
+        p=prepare_cash(actor=self.manager,source_type='equipment',source_id=event.pk,kind='EXPENSE_REVERSAL',reversal_id=entry.pk,occurred_on=self.today,reason='合成误记冲回',**self.evidence())
         reverse=confirm_cash_request(actor=self.manager,proposal_token=p['proposal_token'],confirmed=True)[0];self.approve(reverse)
         self.assertEqual(event_net(event.pk),D('0'))
         replacement=self.expense(a);self.approve(replacement);self.assertEqual(event_net(event.pk),D('500'))
@@ -484,7 +491,7 @@ class CFEHTTPTests(CFEFixture,TransactionTestCase):
         self.assertEqual(self.client.post(reverse('equipment_register'),{}).status_code,403)
     def test_cash_http_two_person_flow(self):
         v,invoice=self.billed();self.client.force_login(self.front)
-        r=self.client.post(reverse('cash_invoice_request',args=[invoice.pk]),{'action':'preview','kind':'RECEIPT','amount':'100','occurred_on':self.today.isoformat(),'reason':'合成网页收款'})
+        r=self.client.post(reverse('cash_invoice_request',args=[invoice.pk]),{'action':'preview','kind':'RECEIPT','amount':'100','occurred_on':self.today.isoformat(),'reason':'合成网页收款',**self.evidence(self.a.pk)})
         self.assertEqual(r.status_code,200);self.assertFalse(CashEntry.objects.exists())
         r=self.client.post(reverse('cash_invoice_request',args=[invoice.pk]),{'action':'confirm','proposal_token':r.context['form'].initial['proposal_token'],'confirmed':'on'})
         self.assertEqual(r.status_code,302);entry=CashEntry.objects.get()
