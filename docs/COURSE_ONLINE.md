@@ -238,3 +238,6 @@ Primary references:
 [PostgreSQL dump](https://www.postgresql.org/docs/17/app-pgdump.html),
 [PostgreSQL restore](https://www.postgresql.org/docs/17/app-pgrestore.html),
 [age](https://github.com/FiloSottile/age).
+
+
+R2.3 format-2 backups add shared-snapshot table facts and encrypted private observation history. The formal restore refuses nonempty targets/live writers, compares all facts before starting runtime, and records a source-cipher/key/target-bound receipt on the Mac. Legacy archives remain readable without fabricated verification. [Recovery contract and private commands](R23_RECOVERY_FRESHNESS.md) · [executed local scope](evidence_r23/restore_acceptance.json). Real SSH, public HTTPS and off-host protection remain pending an actual server.

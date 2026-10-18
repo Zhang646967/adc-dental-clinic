@@ -5,8 +5,8 @@ synthetic demo → continue development on `main`.
 
 Current documentation, 2026-10-18: [当前课程格式报告](../课程报告/README.md).
 The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
-evidence. [Mac delivery](evidence_r21/delivery.json) verifies original data and
-configuration. R2.3 recovery freshness is next in [the R2 contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
+evidence. [Mac application delivery](evidence_r22/delivery.json) verifies original data and
+configuration. R2.3 independent recovery tools are delivered separately; [R2.4 local operational acceptance](R24_ACCEPTANCE_PLAN.md) is next.
 The migration instructions and dated evidence below retain their original scope.
 
 ## Source baseline
@@ -130,4 +130,4 @@ a separate encrypted delivery snapshot and are not included automatically in the
 existing database-only daily backup. All backup keys/credentials stay private.
 
 
-R2.3 first-increment host backup tools are delivered separately from the R2.2 business image. See [recovery-point states and commands](R23_RECOVERY_FRESHNESS.md) and [delivery evidence](evidence_r23/delivery.json). No independent course-backup receipt is fabricated for the RC demo: missing facts remain UNKNOWN. The existing six service conditions keep their original meaning.
+R2.3 host backup/restore tools are delivered separately from the R2.2 business image. See [recovery-point states and commands](R23_RECOVERY_FRESHNESS.md) and [delivery evidence](evidence_r23/restore_delivery.json). No independent course-backup receipt is fabricated for the RC demo: missing facts remain UNKNOWN. The existing six service conditions keep their original meaning.

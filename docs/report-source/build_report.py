@@ -70,7 +70,7 @@ def build(folder,repo,output=None):
   pf=D.styles[name].paragraph_format;pf.first_line_indent=Pt(0);pf.line_spacing=1.25;pf.space_before=Pt(12);pf.space_after=Pt(8);pf.keep_with_next=True;pf.page_break_before=False
  D.styles['Heading 1'].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
  D.styles['Caption'].paragraph_format.first_line_indent=Pt(0)
- D.core_properties.title=source['title'];D.core_properties.subject=source['version'];D.core_properties.author=source['author']['name'];D.core_properties.keywords='系统分析与设计 R2.2 财务 设备 通知监测 合成数据'
+ D.core_properties.title=source['title'];D.core_properties.subject=source['version'];D.core_properties.author=source['author']['name'];D.core_properties.keywords='系统分析与设计 财务 设备 通知监测 独立恢复 合成数据'
  next_page=[False]
  toc=[];markdown=['# '+source['title'],'',source['version']+' '+source['date'],'']
  def p(text='',size=12,bold=False,center=False,indent=True,space=0):

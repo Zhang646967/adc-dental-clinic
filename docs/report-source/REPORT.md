@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统分析与设计
 
-R2.3 首批工具阶段报告 2026年10月18日
+R2.3 独立恢复阶段报告 2026年10月18日
 
 
 
@@ -26,7 +26,7 @@ COURSE PROJECT PROGRESS REPORT
 
 专业班级  信管 T2401
 
-R2.3 首批工具阶段报告
+R2.3 独立恢复阶段报告
 
 2026年10月18日
 
@@ -38,7 +38,7 @@ R2.3 首批工具阶段报告
 
 报告保留项目愿景、业务用例、现状与改进后的业务序列、系统用例、领域与状态模型，以及 SU-01—38 和 SF-01 的完整规约。在原有接诊与结算基础上，财务流程加入渠道账户、分次收退款凭据、独立审核、私有 CSV 导入和逐笔对账；设备流程保留责任维护、独立验收及费用来源，避免把排班协商或会计核对等同于自动业务变更。
 
-本阶段先完成R2.1请求追踪和安全日志、R2.2通知心跳、积压与监测失效识别；R2.3首批继续记录备份生成与下载验证，保留原始恢复点，通过整批校验保护旧备份。独立恢复凭据尚未接入。执行证据与准确版本见第5章，历史R1容量保留原日期，完整R2、独立公网和商业化验收仍待完成。
+本阶段完成R2.1请求追踪和安全日志、R2.2通知心跳、积压与监测失效识别；本轮进一步接入快照一致的加密备份、独立空库恢复及全业务事实比对。恢复凭据绑定原始时点、密文、应用和目标身份，历史观测不作为新环境健康证明。第5章区分当前与历史证据，完整R2、独立公网和商业化验收仍待完成。
 
 关键词  系统分析与设计；连锁诊所；业务范围；财务证据；通知监测；可验证性
 
@@ -50,7 +50,7 @@ This course project develops a connected operations system for one dental chain.
 
 The report retains the project vision, business and system use cases, current and improved business sequences, domain and state models, and all original SU-01 to SU-38 and SF-01 specifications. Financial evidence and one-to-one statement reconciliation retain independent review. Equipment records connect maintenance responsibility, separate acceptance and supported expenses without silently rescheduling clinical commitments.
 
-R2.1 provides safe request tracing and R2.2 observes notification progress and monitoring failures. The first R2.3 tool increment records backup creation and verified downloads separately. Complete batches are checked before publication or retention pruning; repeated downloads retain the original recovery point. Independent restore receipts remain pending. Chapter 5 identifies executed versions and evidence. R1 capacity evidence remains historical. Full R2, independent hosting and commercial readiness remain unverified.
+R2.1 provides safe request tracing and R2.2 observes notification progress and monitoring failures. R2.3 adds snapshot-consistent encrypted backups and verified restoration into an independent empty database. All business facts and associations are compared before runtime startup. Receipts bind the original recovery point, ciphertext, application and target identities; historical observations do not establish current health. Chapter 5 separates executed and historical evidence. Full R2, independent hosting and commercial readiness remain unverified.
 
 Key words  systems analysis and design; dental chain; financial evidence; notification monitoring; verifiability
 
@@ -542,19 +542,19 @@ R2.2更新前已验证数据库和原配置的加密备份，准确应用提交C
 
 更新后48个原有持久模型及关联摘要、70份原私有配置、原数据库卷及RC标签均保持一致。瞬时登录会话、工作上下文和last_login按只读验收需要排除，不能将此比较表述成整个数据库每个字节不变。
 
-数据库更新后加密归档已再次解密检查；新运行观测另有加密快照并验证解密，原配置摘要再次比较。六项私有运行条件均为健康，目录0700、文件0600及各容器读写挂载方向已验证。现有数据库日备份不会自动包括新增运行文件。
+R2.2数据库备份与运行观测另存；R2.3新格式增加私有观测历史，恢复时不把旧心跳、时钟或身份写入新环境实时卷。原配置、六项服务条件及0700目录、0600文件另行核对。
 
-独立恢复在全新的空PostgreSQL完成，比较账户、授权、全部业务和关联、凭据版本、CSV原字节和对账历史；临时恢复容器与网络已清理，源库不变。课程报告随后经独立文档提交CI同步，不为文档重启服务。独立公网及原Windows数据恢复仍未完成。
+R2.2历史空库恢复比对账户、授权、全部业务、凭据版本、CSV字节及对账历史，源库不变。R2.3正式恢复见5.6节。文档经独立CI同步，不为报告重启服务；公网与Windows原始数据恢复未完成。
 
 ### 5.6 需求追踪
 
-R2-04—06连接到R2-A03/04/05/06/09及新增规则、真实PostgreSQL和隔离进程验证；R2-A10/12继续保护权限及原Mac交付。R2-A11的等价容量重复与24小时观察留在R2.4，R2-A07的生成与下载部分进入R2.3首批，R2-A08独立恢复凭据仍待接入。
+R2-04—06对应心跳、积压及监测失效的规则、PostgreSQL和进程验证；R2-A10/12保护权限与Mac交付。R2.3第二批完成R2-A07/08本地恢复闭环；R2-A11容量与24小时观察留在R2.4。
 
-R2.3首批工具提交6211421：1,000项规则检查、1,146项真实PostgreSQL/HTTP/并发回归、10项真实age加密及认证解密检查通过。传输在本地模拟，归档内数据库是标记数据，不作为恢复证明；独立恢复状态保持UNKNOWN。报告与验收材料分目录，首页可直接打开按姓名和学号命名的Word/PDF。准确CI与Mac交付见docs/evidence_r23/delivery.json。
+首批6211421的1,000项规则、1,146项PostgreSQL及10项age检查为历史结果；数据库标记不作恢复证明。原预约时刻修正与Mac时钟异常后的观测归档、显式恢复保留记录，不证明连续运行。
 
-本轮首次CI暴露另一处旧预约测试的运行时刻依赖；后续固定营业时段，保留原断言，并新增午夜后过期候选只属于次日搜索的边界测试。此修正不改变生产业务逻辑。
+第二批20961ba通过1,016项规则、1,152项PostgreSQL/HTTP/并发及24项真实age/PG恢复检查。空库比对51表、29,144行，恢复、比对及启动15.868秒；含五店资金凭据、CSV及匹配历史。本地传输模拟不证明云端SSH。
 
-Mac私有监测曾因时钟不一致退出；本轮先加密保留旧观测，再按显式维护流程重置并以新样本恢复，网页、通知与数据库服务未重启。此恢复不等于24小时连续运行验收。
+同快照导出与清单在启动前比对全表、结构及真实字节；错误事实阻止上线，截断导出回滚。缺失凭据为UNKNOWN，超八天或较新下载未恢复为WARNING。准确CI、本机保护交付及需求追踪见仓库R2.3恢复验收记录。
 
 表5-2 需求至验收追踪
 
@@ -565,9 +565,9 @@ Mac私有监测曾因时钟不一致退出；本轮先加密保留旧观测，�
 | R2-04 心跳 | worker受控循环及私有文件；空闲、停机、提交前回滚和提交后回执丢失。 |
 | R2-05 积压 | 只读可重复读查询；到期和未来重试分开、终态失败及无收件人分开。 |
 | R2-06 状态 | 六条件、四状态、有界历史、幂等确认、两次新成功恢复、独立读取。 |
-| R2-A10 权限 | 保留七工作台；主管只能看本店业务概况；无公共监测地址。 |
-| R2-A12 交付 | 准确应用提交CI、加密保护、数据/配置比较、原Mac只读验收。 |
-| 后续门槛 | R2.3独立恢复与全事实比对、R2.4长时容量与故障/安全演练另行执行。 |
+| R2-A07/08 恢复 | 同快照、空库全事实及原字节比较；密文、密钥和目标绑定；八天及新下载门槛。 |
+| R2-A10/12 交付 | 七角色不变；准确CI、加密保护、48项业务及70份配置核对，业务不重启。 |
+| 后续门槛 | R2.4负载、24小时及安全；R2.5真实公网另行验收。 |
 
 思维导图  测试目标 → 隔离正常/异常场景 → PostgreSQL/进程/浏览器 → 独立业务核算 → 加密恢复 → 准确版本CI → 原Mac受保护更新。
 
@@ -575,13 +575,13 @@ Mac私有监测曾因时钟不一致退出；本轮先加密保留旧观测，�
 
 ### 6.1 阶段工作总结
 
-系统在原预约、接诊和结算基础上，已形成受控资金证据、逐笔对账、设备维护与通知协调的衔接。R2.1使失败请求可以被安全定位；R2.2进一步明确通知进度、到期积压和监测自身失效，使“没有消息”和“后台不工作”能够被区分。R2.3首批进一步区分备份时点与下载验证时间，失败批次不推进恢复点或清理旧备份。
+系统在预约、接诊与结算基础上，已形成资金证据、逐笔对账、设备维护及通知协调的衔接。R2.1使失败请求可被安全定位，R2.2区分通知积压与监测失效。R2.3完成本地快照一致备份与独立恢复闭环：保留原始时点，比对完整业务事实，并将旧观测与当前健康分开。
 
 需求分析把业务问题转为可观察的不变量；模块合同把财务、诊疗、排班与运行状态的责任分开；数据库与浏览器证据检查实际结果，独立恢复检查保留下来的事实。测试数量不代表覆盖率、临床有效性或大型商业部署能力。
 
 ### 6.2 不足与后续工作
 
-下一批将独立空库恢复及全业务事实比对接入R2.3，再推进R2.4本地运行保障和R2.5公网验收；之后依次细化R3多次治疗连续性、R4椅位/房间/设备资源协调、R5二十诊所代表性负载。云端仍等待服务器资料，不以Mac演示或自签名证书代替实际公网验收。
+下一阶段进入R2.4本地运行保障，先细化监测覆盖、主机事件、故障处置和安全差距，再执行等价负载与24小时观察；R2.5公网验收等待服务器资料。之后依次细化R3跨次治疗与随访、R4维护与多资源排班、R5二十诊所代表性容量。Mac演示或自签名证书不代替独立公网验收。
 
 表6-1 后续工作与验收门槛
 
@@ -589,7 +589,7 @@ Mac私有监测曾因时钟不一致退出；本轮先加密保留旧观测，�
 
 | 项目 | 要求与结果 |
 | --- | --- |
-| R2.3 | 已实现生成/下载凭据与整批验证；待完成独立恢复凭据和全业务比对，原始时点及UTC保留规则不变。 |
+| R2.3 | 本地生成、下载、独立恢复及全业务比对通过；准确工具CI与Mac保护交付分别留证，原始时点及UTC保留规则不变。 |
 | R2.4 | 完成安全差距复核、主机侧事件采集、故障手册、等价负载及24小时本地观察。 |
 | R2.5 | 独立HTTPS主机、国内无代理访问、Mac离线、服务器/worker重启、证书续期与云端恢复。 |
 | R3—R5 | 跨次治疗计划与随访；维护和多资源排班；二十诊所代表性容量与独立运行界限。 |

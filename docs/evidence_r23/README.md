@@ -6,7 +6,7 @@
 - [第二批需求至测试](restore_requirement_trace.json)
 - [恢复合同与命令](../R23_RECOVERY_FRESHNESS.md)
 
-第二批准确提交CI、Mac保护更新和报告交付另行记录。R2.4容量/24小时观察、真实云端及Windows原始数据恢复仍未完成。
+[第二批准确提交CI与Mac保护交付](restore_delivery.json) 已完成：48项原业务摘要、70份原配置、原卷/RC标签与5个服务身份保持，6项服务条件健康。报告随独立文档版本同步。R2.4容量/24小时观察、真实云端及Windows原始数据恢复仍未完成。
 
 ## 第一批历史记录
 

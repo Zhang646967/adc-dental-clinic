@@ -5,12 +5,15 @@ evidence → protected delivery. Date: **2026-10-18**. Business runtime **`02a9d
 [exact application CI passed](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755).
 
 
-R2.3 first-increment host tools **`62114210b8ffc1135adf661f2cc97e0b44a55ccc`** passed [exact tool CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39141545342) and protected Mac synchronization. The report records 1,000 source/rule checks, 1,146 real PostgreSQL/HTTP/concurrency regressions and 10 real-age checks using simulated local transport. Independent restore receipts are still UNKNOWN/pending; this does not complete R2.3.
+R2.3 independent-recovery host tools **`20961babacf909810bc3149fb92994fb408e8b8c`** passed [exact tool CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39145021878) and protected Mac synchronization. The report records 1,016 source/rule checks, 1,152 real PostgreSQL/HTTP/concurrency tests and 24 real-age/PG restore success/refusal checks. A separate empty target matched 51 tables and 29,144 rows; recovery, comparison and startup took 15.868 seconds. Transport was simulated locally. The original R2.3 first-increment evidence remains historical.
 
 - [Word report](../../课程报告/课程报告_张加良_8210241102.docx)
 - [PDF report](../../课程报告/课程报告_张加良_8210241102.pdf)
 - [Readable Markdown report](REPORT.md)
 - [Format reference and retained scope](FORMAT_REFERENCE.md)
+- [R2.3 independent recovery and executed delivery](../evidence_r23/README.md)
+- [R2.3 requirement-to-test trace](../evidence_r23/restore_requirement_trace.json)
+- [R2.4 next-step acceptance plan](../R24_ACCEPTANCE_PLAN.md)
 - [R2.2 implementation and executed delivery](../evidence_r22/README.md)
 - [Requirement-to-test trace](../evidence_r22/requirement_trace.json)
 - [R2 next-stage plan](../R2_OPERATIONAL_ASSURANCE_PLAN.md) and
@@ -48,10 +51,9 @@ relationship and the initial CI failure are retained in the evidence.
 
 R1 capacity results remain dated **2026-10-15**: five clinics, twenty accounts and
 thirty minutes. They do not establish the new full-R2 or twenty-clinic envelope.
-R2.3 independent restore integration, R2.4 equivalent capacity/24-hour/security work, and cloud
+R2.4 equivalent capacity/24-hour/security work and cloud
 acceptance remain pending. The server has not been purchased. Original Windows-data
-recovery remains unresolved. Operational files have a separate encrypted delivery
-snapshot; database-only daily backups do not automatically contain them.
+recovery remains unresolved. R2.2 operational files have a separate encrypted delivery snapshot. R2.3 format-2 backups include bounded private observation history, restored as historical bytes rather than live health.
 
 This report replaces the current companion; the [frozen 63-page R5/RC1 report](../release_report/README.md),
 original models, 30 migration files and RC tag preserve their historical bytes.
@@ -59,7 +61,7 @@ R2.2 adds no migration or business role.
 
 ## Sources and reproduction
 
-`report_source.json` is editable text; `baseline.json` separately records R1/R2.1/R2.2 evidence and the R2.3 first tool increment/digests. `build_report.py` reads the frozen
+`report_source.json` is editable text; `baseline.json` separately records R1/R2.1/R2.2 evidence and both R2.3 tool increments/digests. `build_report.py` reads the frozen
 Word source only to retain models and full specifications, then generates Word in `课程报告/` and Markdown in this source directory. It needs Python with `python-docx`; it never accesses a database
 or host credentials:
 

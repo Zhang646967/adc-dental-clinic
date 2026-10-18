@@ -17,7 +17,7 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2.3 first backup-tool increment delivered; independent restore integration remains pending. [R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md) · [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/report-source/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
+Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2.3 snapshot-consistent backup and independently compared restore tools delivered. [R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md) · [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](课程报告/README.md) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating
@@ -93,7 +93,7 @@ import into a separate empty instance.
 ## Validation and project records
 
 `./RC_MACOS.sh verify` uses a new temporary PostgreSQL database and writes
-results under `evidence/verification/`. Latest host-tool regression: [R2.3 first increment](docs/evidence_r23/README.md), 1,000 source/rule checks, 1,146 real PostgreSQL/HTTP/concurrency tests and 10 real-age checks with locally simulated transport. Independent restore receipts remain pending.
+results under `evidence/verification/`. Latest host-tool regression: [R2.3 independent recovery](docs/evidence_r23/README.md), 1,016 source/rule checks, 1,152 real PostgreSQL/HTTP/concurrency tests and 24 real-age/PG restore success/refusal checks. Full-table restore compared 51 tables and 29,144 rows in 15.868 seconds including startup; transport was locally simulated.
 
 Earlier service/browser execution:
 [R2.2 progress/backlog/observer acceptance](docs/evidence_r22/README.md): 978 source checks,
@@ -166,7 +166,7 @@ Maintenance local acceptance: 884 source / 1,042 PostgreSQL-HTTP-concurrency / 7
 ## Next stage — 2026-10-18
 
 R2.1 safe request correlation/logging and R2.2 worker/backlog/observer monitoring
-are delivered. R2.3 first-increment tools now record creation/download freshness and validate a complete batch before publishing it; independent restore integration remains pending. See [the R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md).
+are delivered. R2.3 tools record original creation/download points and independently verified restore receipts, with shared-snapshot full-table facts and historical observation recovery. R2.4 capacity/24-hour/security acceptance remains next. See [the R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md).
 [The detailed plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md) defines ownership,
 failure response and R2-A01–A12. Executed increments remain separate from pending full-R2
 observation and service targets, with local and cloud acceptance kept separate.

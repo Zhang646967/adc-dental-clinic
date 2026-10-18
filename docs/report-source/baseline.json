@@ -1,5 +1,5 @@
 {
-  "format": 4,
+  "format": 5,
   "report_date": "2026-10-18",
   "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
   "R1_historical": {
@@ -89,7 +89,7 @@
     "R21": "HISTORICAL_DELIVERED",
     "R22": "DELIVERED_ON_MAC",
     "R2": "IN_PROGRESS",
-    "R23": "FIRST_TOOL_INCREMENT_DELIVERED",
+    "R23": "LOCAL_RECOVERY_TOOLS_DELIVERED",
     "cloud_acceptance": "NOT_RUN",
     "windows_original_data_recovery": "unresolved"
   },
@@ -139,7 +139,7 @@
     "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755",
     "status": "DELIVERED_ON_MAC"
   },
-  "tool_commit": "62114210b8ffc1135adf661f2cc97e0b44a55ccc",
+  "tool_commit": "20961babacf909810bc3149fb92994fb408e8b8c",
   "R23_first_increment": {
     "evidence_path": "docs/evidence_r23/acceptance.json",
     "evidence_sha256": "a85d90049c820669e32fa4506240e57ed4c2f64a0906a75606145912d4e80d33",
@@ -158,6 +158,31 @@
     "transport": "LOCAL_SIMULATION",
     "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39141545342",
     "independent_restore_receipts": "PENDING",
+    "business_runtime_restarted": false,
+    "original_business_fingerprints_preserved": 48,
+    "original_private_configurations_preserved": 70
+  },
+  "R23_second_increment": {
+    "evidence_path": "docs/evidence_r23/restore_acceptance.json",
+    "evidence_sha256": "9be41ef6035f08858b29c58efaa02eb3f7ccf7a625f7cc49d6f2c4def88a9321",
+    "delivery_path": "docs/evidence_r23/restore_delivery.json",
+    "delivery_sha256": "2082984a0e9099f587359d2c8876fa47d7bfdb634bf82ade8afb54a70d3fdbe9",
+    "regression": {
+      "source_rule_checks": 1016,
+      "postgresql_http_concurrency_tests": 1152,
+      "new_rule_tests": 16,
+      "new_postgresql_snapshot_tests": 6,
+      "all_passed": true,
+      "isolated_cleanup_exit": 0
+    },
+    "real_recovery_checks": 24,
+    "table_count": 51,
+    "row_count": 29144,
+    "restore_seconds": 15.868,
+    "transport": "SIMULATED_LOCAL_COPY_NOT_SSH",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39145021878",
+    "independent_restore_receipts": "VERIFIED_IN_ISOLATED_REHEARSAL",
+    "original_rc_receipts": "UNKNOWN_EXPECTED",
     "business_runtime_restarted": false,
     "original_business_fingerprints_preserved": 48,
     "original_private_configurations_preserved": 70

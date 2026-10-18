@@ -1,6 +1,26 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
-## R2.3 first recovery-tool increment — 2026-10-18
+## R2.3 independent recovery tools — 2026-10-18
+
+Host tool `20961ba` adds a shared PostgreSQL snapshot for dump/facts, full-table
+comparison before runtime startup, and authenticated restore receipts bound to
+source ciphertext, original point, application, key and distinct target storage.
+Encrypted monitoring history is retained as history; it never becomes current
+health. Older archives remain readable without invented verification.
+
+[Executed evidence](docs/evidence_r23/restore_acceptance.json) records 1,016 rule
+checks, 1,152 PostgreSQL/HTTP/concurrency regressions and 24 real-age/PG restore
+success/refusal checks. An independent empty target matched 51 tables/29,144 rows;
+restore, comparison and startup took 15.868 seconds after replacement readiness.
+Transport was simulated locally, not SSH/cloud protection. Exact tool CI and
+protected Mac delivery are recorded [separately](docs/evidence_r23/restore_delivery.json).
+The current [78-page course report](课程报告/README.md) preserves its stable name,
+complete specifications and university format. All 30 migrations and business
+runtime `02a9dbc` remain unchanged. [R2.4 local operational acceptance](docs/R24_ACCEPTANCE_PLAN.md)
+is next; capacity/24-hour/security and real cloud readiness remain unverified.
+
+
+## R2.3 first recovery-tool increment historical record — 2026-10-18
 
 Repository navigation now separates the current [course report](课程报告/README.md),
 editable report sources, business/operations documentation and historical evidence.

@@ -38,6 +38,8 @@ python scripts/recovery_receipts.py --directory /private/mac-backups/recovery --
 
 新归档为格式2，旧格式1仍可读取/恢复，缺少快照事实的旧包不补造已验证凭据。`recovery_facts.py` 在只读、可重复读事务中保护表定义、逐表生成行数、内容和结构摘要，并保持导出的快照存活；`pg_dump --snapshot` 使用同一快照。因此并发提交不会使导出与清单看到不同业务事实。[PostgreSQL快照合同](https://www.postgresql.org/docs/17/functions-admin.html#FUNCTIONS-SNAPSHOT-SYNCHRONIZATION)、[pg_dump](https://www.postgresql.org/docs/17/app-pgdump.html)。
 
+解密后只接受未压缩tar、最多14个平面常规文件；读取目录项时即执行数量上限，拒绝压缩封装、重复名称、链接及越界路径，不先加载不受限的完整目录列表。
+
 比对覆盖所有public业务表、Django关联表、迁移记录及会话；账号、诊所授权、金额、凭据版本、CSV原字节、标准化流水和匹配历史均参与内容摘要。bytea按数据库真实字节编码进入摘要，重复行也影响结果，不使用Python对象地址。表结构包含列、缺省值、约束和索引；出现不支持的业务schema、分区/外部表或超出256表/单表100万行边界时拒绝部分验收。此边界是课程工具保护限制，不是大型系统容量证明。
 
 恢复同时验证匹配的应用提交/镜像、PG17、显式本地Unix Docker端点、目标容器/卷的项目标签。源与目标必须是不同实例和不同卷；目标已有表或任一应用进程运行即拒绝。单事务导入后运行维护检查，再用同一版本的读器比对；通过前不启动网站、worker或监测进程。环境就绪后的恢复、比对和启动计时须在30分钟内。
