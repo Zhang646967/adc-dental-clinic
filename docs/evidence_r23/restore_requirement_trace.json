@@ -1,0 +1,77 @@
+{
+  "format": 1,
+  "scope": "R23_SECOND_INCREMENT",
+  "trace": [
+    {
+      "requirement": "R2-A07 original point and current key",
+      "actor": "Mac operator",
+      "behavior": "New-format archives preserve original point and authenticate every copy with the current key before publication.",
+      "invariant": "Download or restoration cannot make an old data point new.",
+      "failure": "UNKNOWN or refused batch; valid receipts/cipher unchanged.",
+      "tests": [
+        "checks.test_recovery_receipts.SyncVerificationTests",
+        "checks.test_recovery_restore.VerifiedRestoreReceiptTests",
+        "real-age wrong-key acceptance"
+      ]
+    },
+    {
+      "requirement": "R2-A08 snapshot-consistent facts",
+      "actor": "Backup operator",
+      "behavior": "Full public-table facts and pg_dump share one exported read-only repeatable-read snapshot.",
+      "invariant": "Concurrent commits cannot split the compared data view.",
+      "failure": "Unsupported relation, size bound or reader/dump failure refuses publication.",
+      "tests": [
+        "tests.test_recovery_facts.DatabaseRecoveryFactsTests.test_exported_snapshot_excludes_concurrent_commit_but_current_read_sees_it",
+        "formal real PG17 backup and restore"
+      ]
+    },
+    {
+      "requirement": "R2-A08 independent empty target",
+      "actor": "Recovery operator",
+      "behavior": "Pin Unix engine, container and project-owned volume; refuse live writers and existing tables.",
+      "invariant": "Never restore into the source instance or original Mac database.",
+      "failure": "Stop before import or runtime startup; no accepted receipt.",
+      "tests": [
+        "checks.test_recovery_restore.IndependentRestoreGateTests.test_running_worker_blocks_even_if_web_stopped",
+        "real nonempty target refusal",
+        "real false-facts and truncated-dump refusals"
+      ]
+    },
+    {
+      "requirement": "R2-A08 full business comparison",
+      "actor": "Recovery operator",
+      "behavior": "Compare every row, duplicate multiplicity, binary content, columns, defaults, constraints and indexes.",
+      "invariant": "Accounts/grants/money/evidence versions/raw CSV/normalized rows/matching history remain equal.",
+      "failure": "Mismatch prevents runtime startup and accepted proof.",
+      "tests": [
+        "tests.test_recovery_facts.DatabaseRecoveryFactsTests",
+        "real 51-table 29144-row comparison",
+        "real cash-evidence facts mismatch"
+      ]
+    },
+    {
+      "requirement": "R2-A08 receipt and freshness",
+      "actor": "Mac operator",
+      "behavior": "Bind source cipher/key/app/point to compared target and measured duration; warn after eight days or a newer un-restored download.",
+      "invariant": "No success from a plain dump, missing proof, stale application, replaced key or old rehearsal.",
+      "failure": "No receipt or UNKNOWN/WARNING with distinct reason.",
+      "tests": [
+        "checks.test_recovery_restore.VerifiedRestoreReceiptTests",
+        "checks.test_recovery_restore.IndependentRestoreGateTests.test_valid_facts_and_history_precede_start_and_plain_dump_never_stamps_receipt",
+        "formal accepted restore receipt within 15786 ms"
+      ]
+    },
+    {
+      "requirement": "R2-A08 monitoring history",
+      "actor": "Recovery operator",
+      "behavior": "Encrypt bounded private worker/monitor history and restore it as historical bytes with missing files explicit.",
+      "invariant": "Old identity/clock/heartbeat never establishes current target health.",
+      "failure": "Malformed/checksum/path failures refuse archive; new target needs fresh observations.",
+      "tests": [
+        "checks.test_recovery_restore.IndependentRestoreGateTests.test_historical_files_are_content_bound_and_missing_is_explicit",
+        "checks.test_recovery_restore.IndependentRestoreGateTests.test_history_symlink_refused",
+        "formal historical byte recovery"
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@ Archive tests replace the encryption executable to test parsing/refusal only.
 Actual age and PostgreSQL restore belong to the isolated runtime rehearsal.
 """
 import io
+from contextlib import nullcontext
 import json
 import os
 from pathlib import Path
@@ -199,7 +200,11 @@ class CourseSafetyTests(unittest.TestCase):
         def encrypt(command, *args, **kwargs):
             shutil.copyfile(command[-1], command[command.index('-o') + 1])
         course.dc = Mock(side_effect=dump)
-        with patch('scripts.g4_course.run', side_effect=encrypt):
+        course.database_identity = Mock(return_value={})
+        course.observations = Mock(return_value={})
+        facts = {'v': 1, 'method': 'PG17_JSONB_SHA256_V1', 'tables': {}}
+        with patch('scripts.g4_course.run', side_effect=encrypt), patch(
+                'scripts.g4_course.snapshot', return_value=nullcontext({'snapshot': '0001-0001-1', 'facts': facts})):
             result = course.backup(recipient)
         self.assertIsNotNone(BACKUP_NAME.fullmatch(result['name']))
         self.assertEqual(len(backup_inventory(self.bundle / 'backups', self.plan['project'])), 1)

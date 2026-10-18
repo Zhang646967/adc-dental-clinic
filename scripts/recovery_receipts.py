@@ -1,7 +1,7 @@
 """Private recovery observations. A receipt checksum is not publisher authentication.
 
 No write/import CLI: only the backup/sync operations may record verified facts.
-Independent restore remains UNKNOWN until a separate comparison is integrated.
+Only authenticated restore plus an empty-target comparison records a restore.
 Recovery-point time is immutable; checking/downloading a copy never refreshes it.
 """
 import argparse
@@ -21,7 +21,7 @@ CODES = {'HEALTHY': 0, 'WARNING': 1, 'CRITICAL': 2, 'UNKNOWN': 3}
 PROJECT = re.compile(r'adc_(?:g4|rc1)_[0-9a-f]{12}')
 BACKUP = re.compile(r'backup-([0-9]{8}T[0-9]{12}Z)-(adc_(?:g4|rc1)_[0-9a-f]{12})\.tar\.age')
 HEX = re.compile(r'[0-9a-f]{64}')
-MAX_ARCHIVE = 514 * 1024 * 1024
+MAX_ARCHIVE = 522 * 1024 * 1024
 
 
 def utc_now():
@@ -99,10 +99,13 @@ def validate_artifact(value):
 
 
 def validate_receipt(value, instance):
-    if not isinstance(value, dict) or set(value) != {'kind', 'artifact', 'verified_at', 'key_sha256'}:
+    if not isinstance(value, dict):
         raise ValueError('Invalid recovery receipt fields.')
-    if value['kind'] not in ('created', 'downloaded'):
-        raise ValueError('No independently compared restore receipt is implemented yet.')
+    expected = {'kind', 'artifact', 'verified_at', 'key_sha256'}
+    if value.get('kind') == 'restored':
+        expected.add('restore')
+    if set(value) != expected or value['kind'] not in KINDS:
+        raise ValueError('Invalid recovery receipt fields.')
     validate_artifact(value['artifact'])
     if value['artifact']['project'] != instance:
         raise ValueError('Foreign recovery instance.')
@@ -111,8 +114,43 @@ def validate_receipt(value, instance):
         raise ValueError('Verification precedes the recovery point.')
     key = value['key_sha256']
     if (value['kind'] == 'created' and key is not None or
-            value['kind'] == 'downloaded' and (not isinstance(key, str) or not HEX.fullmatch(key))):
+            value['kind'] in ('downloaded', 'restored') and (not isinstance(key, str) or not HEX.fullmatch(key))):
         raise ValueError('Invalid recovery key evidence.')
+    if value['kind'] == 'restored':
+        validate_restore(value['restore'], instance)
+        if not instant(value['artifact']['created_at']) <= instant(value['restore']['completed_at']) <= instant(value['verified_at']):
+            raise ValueError('Restore verification times differ.')
+
+
+def validate_target(target):
+    if (not isinstance(target, dict) or set(target) != {
+            'project', 'container_id', 'volume', 'engine_sha256', 'volume_created_at'} or
+            not isinstance(target['project'], str) or not PROJECT.fullmatch(target['project']) or
+            not isinstance(target['container_id'], str) or not HEX.fullmatch(target['container_id']) or
+            not isinstance(target['engine_sha256'], str) or not HEX.fullmatch(target['engine_sha256']) or
+            target['volume'] != target['project'] + '_data'):
+        raise ValueError('Invalid recovery database identity.')
+    instant(target['volume_created_at'])
+
+
+def validate_restore(proof, source_project):
+    from scripts.recovery_facts import METHOD
+    if (not isinstance(proof, dict) or set(proof) != {
+            'v', 'target', 'comparison', 'elapsed_ms', 'completed_at'} or
+            type(proof['v']) is not int or proof['v'] != 1 or
+            type(proof['elapsed_ms']) is not int or not 0 <= proof['elapsed_ms'] <= 1800000):
+        raise ValueError('Restore proof format or thirty-minute target differs.')
+    validate_target(proof['target'])
+    if proof['target']['project'] == source_project:
+        raise ValueError('Restore target must be independent.')
+    instant(proof['completed_at'])
+    comparison = proof['comparison']
+    if (not isinstance(comparison, dict) or set(comparison) != {'method', 'tables', 'rows', 'facts_sha256'} or
+            comparison['method'] != METHOD or type(comparison['tables']) is not int or
+            not 1 <= comparison['tables'] <= 256 or type(comparison['rows']) is not int or
+            not 0 <= comparison['rows'] <= 256000000 or
+            not isinstance(comparison['facts_sha256'], str) or not HEX.fullmatch(comparison['facts_sha256'])):
+        raise ValueError('Restore comparison proof differs.')
 
 
 class ReceiptBook:
@@ -145,10 +183,12 @@ class ReceiptBook:
             validate_receipt(receipt, self.instance)
         return state
 
-    def record(self, kind, fact, *, key_sha256=None, now=None):
+    def record(self, kind, fact, *, key_sha256=None, restore=None, now=None):
         now = now or utc_now()
         receipt = {'kind': kind, 'artifact': fact, 'verified_at': now.isoformat(),
                    'key_sha256': key_sha256}
+        if kind == 'restored':
+            receipt['restore'] = restore
         validate_receipt(receipt, self.instance)
         age(fact['created_at'], now)
         with self.store.lock('receipts.lock'):
@@ -175,7 +215,7 @@ class ReceiptBook:
         """No database, SSH, decryption, permission or business change here."""
         now = now or utc_now()
         result = {'v': 1, 'instance': self.instance, 'scope': 'PRIVATE_RECOVERY_OBSERVATIONS',
-                  'conditions': {}, 'restore_acceptance': 'PENDING_R23_SECOND_INCREMENT',
+                  'conditions': {}, 'restore_acceptance': 'NO_VERIFIED_RESTORE',
                   'off_host_protection': 'last_verified_download; a sleeping Mac cannot guarantee daily copies'}
         if mode not in ('server', 'mac') or not re.fullmatch(r'[0-9a-f]{40}', source) or not re.fullmatch(r'sha256:[0-9a-f]{64}', image):
             raise ValueError('Specify the reviewed application and observation location.')
@@ -200,10 +240,18 @@ class ReceiptBook:
                     path = Path(archive_directory) / fact['name']
                     if file_digest(path) != fact['sha256'] or path.stat().st_size != fact['size']:
                         raise ValueError('Recovery archive differs.')
-                    if kind == 'downloaded' and (identity_file is None or file_digest(identity_file) != receipt['key_sha256']):
+                    if kind in ('downloaded', 'restored') and (identity_file is None or file_digest(identity_file) != receipt['key_sha256']):
                         raise ValueError('Current decryption key differs or was not checked.')
-                    condition.update(state='WARNING' if seconds > 26 * 3600 else 'HEALTHY',
-                                     reason='RECOVERY_POINT_OLD' if seconds > 26 * 3600 else 'RECOVERY_POINT_CURRENT')
+                    threshold = 8 * 86400 if kind == 'restored' else 26 * 3600
+                    condition.update(state='WARNING' if seconds > threshold else 'HEALTHY',
+                                     reason='RECOVERY_POINT_OLD' if seconds > threshold else 'RECOVERY_POINT_CURRENT')
+                    if kind == 'restored':
+                        result['restore_acceptance'] = 'VERIFIED_EMPTY_TARGET_COMPARISON'
+                        condition.update(target=receipt['restore']['target']['project'],
+                                         elapsed_ms=receipt['restore']['elapsed_ms'])
+                        downloaded = state['latest']['downloaded']
+                        if downloaded and instant(downloaded['artifact']['created_at']) > instant(fact['created_at']):
+                            condition.update(state='WARNING', reason='NEWER_DOWNLOAD_NOT_RESTORED')
                     if kind == 'created' and mode == 'mac' and verification_age > 90:
                         condition.update(state='UNKNOWN', reason='SERVER_OBSERVATION_STALE')
                 except (OSError, ValueError, TypeError, KeyError, OverflowError):

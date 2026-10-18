@@ -29,7 +29,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.g4_prepare import inspect_bundle, read_env
 from scripts.g4_mac_demo import atomic_text
-from scripts.recovery_receipts import ReceiptBook, artifact
+from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, validate_target, validate_restore
+from scripts.recovery_facts import compare, validate as validate_facts, canonical, fingerprint
+from scripts.recovery_snapshot import snapshot
+from scripts.recovery_observations import validate as validate_observations, MAX_BYTES as MAX_OBSERVATIONS
 
 BACKUP_NAME = re.compile(r'backup-[0-9]{8}T[0-9]{12}Z-adc_g4_[0-9a-f]{12}\.tar\.age')
 RECIPIENT = re.compile(r'age1[0-9a-z]{58}')
@@ -300,14 +303,21 @@ class Course:
             name = 'backup-' + started.strftime('%Y%m%dT%H%M%S%fZ') + '-' + self.plan['project'] + '.tar.age'
             temporary = Path(temporary)
             dump = temporary / 'database.dump'
-            with dump.open('xb') as stream:
-                os.fchmod(stream.fileno(), 0o600)
-                self.dc('exec', '-T', 'db', 'sh', '-c',
-                        'PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_dump -h 127.0.0.1 -U adc_g4_owner '
-                        '-d adc_rc_demo -Fc --no-owner --no-privileges', output_file=stream, timeout=600)
+            database_identity = self.database_identity()
+            with snapshot(self.reader_command(), self.log) as captured:
+                with dump.open('xb') as stream:
+                    os.fchmod(stream.fileno(), 0o600)
+                    self.dc('exec', '-T', 'db', 'sh', '-c',
+                            'PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_dump -h 127.0.0.1 -U adc_g4_owner '
+                            '-d adc_rc_demo -Fc --no-owner --no-privileges --snapshot="$1"',
+                            'recovery-dump', captured['snapshot'], output_file=stream, timeout=600)
+                atomic_text(temporary / 'facts.json', canonical(captured['facts']).decode() + '\n')
+            observations = self.observations()
+            atomic_text(temporary / 'observations.json', canonical(observations).decode() + '\n')
             if dump.stat().st_size > MAX_BACKUP_BYTES:
                 raise ValueError('Backup exceeds the bounded course dataset; preserve state and review capacity.')
-            files = {'database.dump': dump, 'plan.json': self.bundle / 'plan.json',
+            files = {'database.dump': dump, 'facts.json': temporary / 'facts.json',
+                     'observations.json': temporary / 'observations.json', 'plan.json': self.bundle / 'plan.json',
                      'runtime.env': self.bundle / 'private/runtime.env',
                      'maintenance.env': self.bundle / 'private/maintenance.env',
                      'database.env': self.bundle / 'private/database.env',
@@ -317,8 +327,11 @@ class Course:
                 path = self.bundle / 'private' / private_name
                 if path.exists():
                     files[private_name] = private_file(path)
-            meta = {'format': 1, 'project': self.plan['project'], 'server_major': 17,
+            meta = {'format': 2, 'project': self.plan['project'], 'server_major': 17,
                     'source_commit': self.plan['requested_source_commit'], 'images': self.plan['images'],
+                    'database_identity': database_identity,
+                    'facts_sha256': fingerprint(captured['facts']),
+                    'snapshot_method': 'EXPORTED_REPEATABLE_READ',
                     # The dump snapshot begins after this instant; using the start
                     # gives a conservative age, never an artificially recent RPO.
                     'created_at': started.isoformat(),
@@ -353,12 +366,67 @@ class Course:
         encrypted, identity = private_file(encrypted), private_file(identity)
         with exclusive(self.bundle / 'private/restore.lock'), tempfile.TemporaryDirectory(dir=self.bundle / 'private') as temporary:
             temporary = Path(temporary)
+            cipher_sha, key_sha = file_digest(encrypted), file_digest(identity)
             meta = decrypt_backup(encrypted, identity, temporary, self.log, age)
             if meta['project'] == self.plan['project']:
                 raise ValueError('Restore requires a different project.')
             if meta['source_commit'] != self.plan['requested_source_commit'] or meta['images']['app'] != self.plan['images']['app']:
                 raise ValueError('Restore only into the matching reviewed application image/schema.')
-            return self.restore_decrypted(temporary / 'database.dump', meta)
+            fact, book = None, None
+            if meta.get('format') == 2:
+                row = dict(name=encrypted.name, project=meta['project'], created_at=meta['created_at'],
+                           size=encrypted.stat().st_size, sha256=cipher_sha)
+                fact = artifact(meta, row)
+                book = ReceiptBook(encrypted.parent / 'recovery', meta['project'])
+                book.load()
+            if file_digest(encrypted) != cipher_sha or file_digest(identity) != key_sha:
+                raise ValueError('Recovery archive or key changed during authentication.')
+            result = self.restore_decrypted(temporary / 'database.dump', meta)
+            if result['business_comparison'] == 'PASSED':
+                if file_digest(encrypted) != cipher_sha or file_digest(identity) != key_sha:
+                    raise ValueError('Recovery archive or current key changed during restoration.')
+                book.record('restored', fact, key_sha256=key_sha, restore=result['restore'])
+            return result
+
+    def reader_command(self):
+        return self.command + ['--profile', 'maintenance', 'run', '--rm', '-T', '--no-deps', 'schema']
+
+    def database_identity(self):
+        identifier = self.dc('ps', '-q', 'db').decode().strip()
+        if not re.fullmatch(r'[0-9a-f]{12,64}', identifier):
+            raise ValueError('Identify one running target database.')
+        obj = json.loads(run(self.docker + ['inspect', identifier], self.log))[0]
+        if (not obj['State']['Running'] or obj['Config']['Labels'].get('com.docker.compose.project') != self.plan['project'] or
+                obj['Config']['Labels'].get('com.docker.compose.service') != 'db'):
+            raise ValueError('Database container identity differs.')
+        mounts = [m for m in obj['Mounts'] if m['Destination'] == '/var/lib/postgresql/data']
+        if len(mounts) != 1 or mounts[0]['Type'] != 'volume' or mounts[0]['Name'] != self.plan['project'] + '_data':
+            raise ValueError('Database must use its own identified project volume.')
+        volume = json.loads(run(self.docker + ['volume', 'inspect', mounts[0]['Name']], self.log))[0]
+        if (volume.get('Labels') or {}).get('com.docker.compose.project') != self.plan['project']:
+            raise ValueError('Database volume ownership differs.')
+        engine = run(self.docker + ['info', '--format', '{{.ID}}'], self.log).strip()
+        if not engine:
+            raise ValueError('Docker engine identity is required.')
+        result = dict(project=self.plan['project'], container_id=obj['Id'], volume=mounts[0]['Name'],
+                      engine_sha256=hashlib.sha256(engine).hexdigest(), volume_created_at=volume['CreatedAt'])
+        validate_target(result)
+        return result
+
+    def observations(self):
+        mounts = []
+        for volume, directory in (('monitor_observation', 'monitor'), ('worker_observation', 'worker')):
+            name = self.plan['project'] + '_' + volume
+            obj = json.loads(run(self.docker + ['volume', 'inspect', name], self.log))[0]
+            if (obj.get('Labels') or {}).get('com.docker.compose.project') != self.plan['project']:
+                raise ValueError('Operational volume identity differs.')
+            mounts += ['-v', name + ':/snapshot/' + directory + ':ro']
+        code = Path(__file__).with_name('recovery_observations.py').read_text()
+        raw = self.dc('--profile', 'maintenance', 'run', '--rm', '-T', '--no-deps',
+                      *mounts, 'schema', 'python', '-c', code, timeout=60)
+        if len(raw) > MAX_OBSERVATIONS:
+            raise ValueError('Operational observations exceed the backup bound.')
+        return validate_observations(json.loads(raw))
 
     def restore_decrypted(self, dump, meta):
         # A Mac operator can transfer a verified dump through pinned SSH without
@@ -372,20 +440,55 @@ class Course:
                 meta['files']['database.dump']['size'] != dump.stat().st_size):
             raise ValueError('Verified recovery dump does not match the target contract.')
         self.start_database()
-        if self.tables() or self.dc('ps', '--status', 'running', '-q', 'web').strip():
-            raise ValueError('Restore requires an empty target; existing tables or live web are refused.')
+        started = time.monotonic()  # Replacement database/image environment is now ready.
+        if self.tables() or set(self.dc('ps', '--status', 'running', '--services').decode().split()) - {'db'}:
+            raise ValueError('Restore requires an empty target and stopped application writers.')
+        target = self.database_identity()
+        expected = None
+        if meta.get('format') == 2:
+            validate_target(meta['database_identity'])
+            if (meta['database_identity']['project'] != meta['project'] or
+                    (meta['database_identity']['engine_sha256'], meta['database_identity']['volume']) ==
+                    (target['engine_sha256'], target['volume'])):
+                raise ValueError('Restore source and target storage must be independent.')
+            for name in ('facts.json', 'observations.json'):
+                path = private_file(dump.parent / name)
+                if path.stat().st_size != meta['files'][name]['size'] or digest(path) != meta['files'][name]['sha256']:
+                    raise ValueError('Recovery comparison material differs.')
+            expected = validate_facts(json.loads((dump.parent / 'facts.json').read_text()))
+            if fingerprint(expected) != meta['facts_sha256'] or meta['snapshot_method'] != 'EXPORTED_REPEATABLE_READ':
+                raise ValueError('Recovery facts do not bind an exported snapshot.')
+            observations = validate_observations(json.loads((dump.parent / 'observations.json').read_text()))
         with dump.open('rb') as stream:
             self.dc('exec', '-T', 'db', 'sh', '-c',
                     'PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_restore -h 127.0.0.1 -U adc_g4_owner '
                     '-d adc_rc_demo --no-owner --no-privileges --single-transaction --exit-on-error',
                     input_file=stream, timeout=600)
         self.dc('--profile', 'maintenance', 'run', '--rm', 'schema', timeout=300)
+        proof = None
+        if expected is not None:
+            code = Path(__file__).with_name('recovery_facts.py').read_text()
+            actual = json.loads(run(self.reader_command() + ['python', '-c', code], self.log, timeout=180))['facts']
+            comparison = compare(expected, actual)
+            proof = {'v': 1, 'target': target, 'comparison': comparison,
+                     'elapsed_ms': round((time.monotonic() - started) * 1000),
+                     'completed_at': datetime.now(timezone.utc).isoformat()}
+            validate_restore(proof, meta['project'])
+            # Historical source observations must not overwrite a new instance's
+            # heartbeat/clock/identity or make the new collector look healthy.
+            atomic_text(self.bundle / 'private/recovered-observations.json', canonical(observations).decode() + '\n')
         self.start_runtime()
+        if proof is not None:
+            proof.update(elapsed_ms=round((time.monotonic() - started) * 1000),
+                         completed_at=datetime.now(timezone.utc).isoformat())
+            validate_restore(proof, meta['project'])
+            atomic_text(self.bundle / 'private/restore-comparison.json', json.dumps(proof, indent=2) + '\n')
         atomic_text(self.bundle / 'private/deployed.json', json.dumps({
             'project': self.plan['project'], 'source_commit': self.plan['requested_source_commit'],
             'fresh_seed': False, 'restored_from': meta['project']}) + '\n')
         return {'status': 'INDEPENDENT_RESTORE_COMPLETED', 'source_project': meta['project'],
-                'target_project': self.plan['project'], 'business_comparison': 'REQUIRED',
+                'target_project': self.plan['project'], 'business_comparison': 'PASSED' if proof else 'REQUIRED',
+                'restore': proof, 'historical_observations': 'RETAINED_NOT_REPLAYED' if proof else 'NOT_IN_LEGACY_ARCHIVE',
                 'public_acceptance_executed': False}
 
     def tls(self, public_ip, certbot='certbot'):
@@ -526,8 +629,8 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
     with tarfile.open(archive_path) as archive:
         members = archive.getmembers()
         names = [m.name for m in members]
-        if (len(names) != len(set(names)) or len(names) > 12 or
-                sum(m.size for m in members) > MAX_BACKUP_BYTES + 1024 * 1024 or
+        if (len(names) != len(set(names)) or len(names) > 14 or
+                sum(m.size for m in members) > MAX_BACKUP_BYTES + 8 * 1024 * 1024 or
                 any(not m.isfile() or m.size < 0 or m.name != PurePosixPath(m.name).name for m in members) or
                 'archive.json' not in names):
             raise ValueError('Unsafe backup archive refused.')
@@ -543,12 +646,17 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
         meta = json.load(archive.extractfile('archive.json'), object_pairs_hook=fields,
                          parse_constant=lambda _: (_ for _ in ()).throw(ValueError('Invalid manifest number.')))
         if (not isinstance(meta, dict) or type(meta.get('format')) is not int or
-                meta.get('format') != 1 or type(meta.get('server_major')) is not int or meta.get('server_major') != 17 or
+                meta.get('format') not in (1, 2) or type(meta.get('server_major')) is not int or meta.get('server_major') != 17 or
                 not re.fullmatch(r'adc_g4_[0-9a-f]{12}', meta.get('project', '')) or
                 not re.fullmatch(r'[0-9a-f]{40}', meta.get('source_commit', '')) or
                 set(names) != set(meta['files']) | {'archive.json'} or
                 'database.dump' not in meta['files']):
             raise ValueError('Backup format or provenance differs.')
+        if meta['format'] == 2 and not {'facts.json', 'observations.json'} <= set(names):
+            raise ValueError('New backups require snapshot facts and operational history.')
+        limits = {'facts.json': 1024 * 1024, 'observations.json': MAX_OBSERVATIONS}
+        if any(m.size > limits[m.name] for m in members if m.name in limits):
+            raise ValueError('Recovery comparison material exceeds its bound.')
         for member in members:
             destination = Path(target) / member.name
             with destination.open('xb') as stream:
@@ -558,6 +666,13 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
                 fact = meta['files'][member.name]
                 if type(fact['size']) is not int or fact['size'] != destination.stat().st_size or fact['sha256'] != digest(destination):
                     raise ValueError('Decrypted backup checksum differs.')
+        if meta['format'] == 2:
+            facts = validate_facts(json.loads((Path(target) / 'facts.json').read_text()))
+            validate_observations(json.loads((Path(target) / 'observations.json').read_text()))
+            validate_target(meta['database_identity'])
+            if (meta['database_identity']['project'] != meta['project'] or
+                    fingerprint(facts) != meta['facts_sha256'] or meta['snapshot_method'] != 'EXPORTED_REPEATABLE_READ'):
+                raise ValueError('Exported snapshot identity differs.')
     return meta
 
 
@@ -617,7 +732,8 @@ def main():
         elif args.action == 'restore':
             result = course.restore(args.backup_file, args.identity_file, args.age)
         elif args.action == 'restore-verified-dump':
-            result = course.restore_decrypted(args.dump_file, json.loads(private_file(args.manifest_file).read_text()))
+            with exclusive(course.bundle / 'private/restore.lock'):
+                result = course.restore_decrypted(args.dump_file, json.loads(private_file(args.manifest_file).read_text()))
         elif args.action == 'issue-tls':
             result = course.tls(args.public_ip, args.certbot)
         elif args.action == 'renew-tls':

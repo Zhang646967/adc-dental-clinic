@@ -26,7 +26,7 @@ from scripts.g4_course import (BACKUP_NAME, MAX_BACKUP_BYTES, RECIPIENT, backup_
                               private_file, prune_backups, run)
 from scripts.g4_prepare import inspect_bundle
 from scripts.g4_mac_demo import atomic_text
-from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instant, age as recovery_age, utc_now
+from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instant, age as recovery_age, utc_now, validate_restore, MAX_ARCHIVE
 
 
 class Remote:
@@ -100,6 +100,7 @@ class Remote:
         if restore_backup:
             if not identity_file:
                 raise ValueError('Recovery requires the Mac key.')
+            cipher_sha, key_sha = file_digest(restore_backup), file_digest(identity_file)
             with tempfile.TemporaryDirectory(dir=self.bundle / 'private') as folder:
                 meta = decrypt_backup(private_file(restore_backup), private_file(identity_file),
                                       Path(folder), self.log, age)
@@ -107,6 +108,13 @@ class Remote:
                         meta['source_commit'] != self.plan['requested_source_commit'] or
                         meta['images']['app'] != self.plan['images']['app']):
                     raise ValueError('Recovery backup must match the image/source and use a new project.')
+                if meta.get('format') == 2:
+                    restore_fact = artifact(meta, dict(name=Path(restore_backup).name, project=meta['project'],
+                        created_at=meta['created_at'], size=Path(restore_backup).stat().st_size, sha256=cipher_sha))
+                    restore_book = ReceiptBook(Path(restore_backup).parent / 'recovery', meta['project'])
+                    restore_book.load()
+            if file_digest(restore_backup) != cipher_sha or file_digest(identity_file) != key_sha:
+                raise ValueError('Recovery archive or key changed during authentication.')
         # An existing directory is never overwritten: status and sync are the
         # recovery operations after an interrupted publish.
         setup = ("from pathlib import Path; import os,pwd; "
@@ -153,12 +161,17 @@ class Remote:
             with tempfile.TemporaryDirectory(dir=self.bundle / 'private') as folder:
                 folder = Path(folder)
                 meta = decrypt_backup(private_file(restore_backup), private_file(identity_file), folder, self.log, age)
+                if file_digest(restore_backup) != cipher_sha or file_digest(identity_file) != key_sha:
+                    raise ValueError('Recovery archive or key changed before verified transfer.')
                 if (meta['project'] == self.plan['project'] or
                         meta['source_commit'] != self.plan['requested_source_commit'] or
                         meta['images']['app'] != self.plan['images']['app']):
                     raise ValueError('Recovery requires an independent project and the matching application.')
                 # Transfer the verified data through SSH; keep the key on Mac.
-                for name in ('database.dump', 'archive.json'):
+                recovery_files = ['database.dump', 'archive.json']
+                if meta.get('format') == 2:
+                    recovery_files += ['facts.json', 'observations.json']
+                for name in recovery_files:
                     self.copy(folder / name, self.folder + '/recovery-' + name)
                     move = ("from pathlib import Path; import os; p=Path(" + repr(self.folder) + "); "
                             "(p/" + repr('recovery-' + name) + ").replace(p/'.g4/private'/" + repr(name) + "); "
@@ -174,8 +187,17 @@ class Remote:
                 '--dump-file', self.remote_bundle + '/private/database.dump',
                 '--manifest-file', self.remote_bundle + '/private/archive.json',
                 '--trusted-synthetic-copy'])
+            if meta.get('format') == 2:
+                proof = result.get('restore')
+                validate_restore(proof, meta['project'])
+                if (result.get('business_comparison') != 'PASSED' or
+                        proof['target']['project'] != self.plan['project'] or
+                        proof['comparison']['facts_sha256'] != meta['facts_sha256'] or
+                        file_digest(restore_backup) != cipher_sha or file_digest(identity_file) != key_sha):
+                    raise ValueError('Remote restoration does not bind the authenticated Mac archive.')
+                restore_book.record('restored', restore_fact, key_sha256=key_sha, restore=proof)
             self.ssh(['python3', '-c', 'from pathlib import Path; p=Path(' + repr(self.remote_bundle) + '); '
-                      "(p/'private/database.dump').unlink(); (p/'private/archive.json').unlink()"])
+                      '[ (p/"private"/n).unlink() for n in ' + repr(recovery_files) + ']'])
         else:
             result = self.operation('deploy')
             self.copy(self.bundle / 'private/demo-credentials.txt',
@@ -209,7 +231,7 @@ class Remote:
                 staging = Path(staging)
                 for index, row in enumerate(rows):
                     if (row['project'] != self.plan['project'] or not BACKUP_NAME.fullmatch(row['name']) or
-                            type(row['size']) is not int or not 0 < row['size'] < MAX_BACKUP_BYTES + 2 * 1024 * 1024 or
+                            type(row['size']) is not int or not 0 < row['size'] < MAX_ARCHIVE or
                             not re.fullmatch('[0-9a-f]{64}', row['sha256']) or row['name'] in seen):
                         raise ValueError('Invalid or repeated remote backup metadata.')
                     seen.add(row['name'])
