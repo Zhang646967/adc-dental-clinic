@@ -1,0 +1,53 @@
+{
+  "format": 1,
+  "report_date": "2026-10-18",
+  "application_baseline": "6a06f356a0c4697f5b8afe2736ed62d427512806",
+  "scope": "Documentation and planning only; R1 observations remain dated 2026-10-15. R2 implementation/cloud tests not executed.",
+  "passed": true,
+  "artifact_checks": {
+    "pdf_pages": 10,
+    "pages_visually_inspected": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "visual_result": "Readable English/Chinese text, tables and page numbers; no clipping, blank pages, split rows or decorative paragraph rules.",
+    "word_sections": 10,
+    "word_tables": 9,
+    "mind_maps": 10,
+    "reference_links_preserved": true,
+    "source_and_pdf_facts_checked": true
+  },
+  "provenance_checks": {
+    "acceptance_sha256_matches": true,
+    "aggregate_regression_load_restore_facts_match": true,
+    "application_baseline": "6a06f356a0c4697f5b8afe2736ed62d427512806",
+    "new_business_tests_claimed": false
+  },
+  "repository_checks": {
+    "existing_source_checks_passed": 908,
+    "historical_25_use_case_link_check": "PASS",
+    "modified_markdown_local_links_resolved": 76,
+    "original_project_migration_files_preserved": 30,
+    "frozen_rc1_word_pdf_preserved": true
+  },
+  "runtime_tests_this_revision": "NOT_RUN locally; documentation-only change. Exact revision CI is available through GitHub Actions.",
+  "sources_and_outputs_sha256": {
+    "report_source.json": "dee16e5070d64f0536e0a346aad89b4b3abfa70756cdd23be62f35188ad3f715",
+    "baseline.json": "ef177e9c71e5dba555e0a5db942e912f53dc74a2b0486fdfbc149529a88ade70",
+    "build_report.py": "7344c4dac21b46341b54980d0181e492f08952fa4b4179ba4b5ba3398ad75998",
+    "REPORT.md": "95ec4ce50032747adc914738f95ad9f2b0e7f5e5a05fa852efa6f97f0f499443",
+    "ADC_Current_System_Report_20261018.docx": "1ae790bd084c6f286c2282d7f3bb95546c91ed39beda7e9ab9f6176a68b24d7b",
+    "ADC_Current_System_Report_20261018.pdf": "eaec2656bab76b9c2e79aa0df11015d93eec27060db205b33dbabc0d62793e91"
+  },
+  "R2": "PLANNED",
+  "cloud_acceptance": "NOT_RUN",
+  "windows_original_data_recovery": "unresolved"
+}

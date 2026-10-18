@@ -1,4 +1,12 @@
-# 1.0.0-rc.1：批次A／B实际开发检查记录
+# Historical RC1 test report 历史测试报告
+
+Current application acceptance: [R1 financial evidence, 2026-10-15](evidence_financial_evidence/README.md).
+Current report and future work: [Word/PDF/Markdown report](current_report/README.md)
+and [R2 plan](R2_OPERATIONAL_ASSURANCE_PLAN.md), updated 2026-10-18.
+The RC1 record below remains historical: its unexecuted Mac/PostgreSQL statements
+describe that original environment, not the current R1 delivery.
+
+## 1.0.0-rc.1：批次A／B实际开发检查记录
 
 父版：完整0.9.0-alpha.10。本轮从已取得的源码重建；上次中断目录的图像未被当作已保存代码。
 候选编码与文档冻结，不等于正式发布。Windows运行实例最后确认为v0.7；未被访问。Mac迁移暂停。

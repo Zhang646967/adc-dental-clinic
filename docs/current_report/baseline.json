@@ -1,0 +1,83 @@
+{
+  "format": 1,
+  "report_date": "2026-10-18",
+  "application_commit": "6a06f356a0c4697f5b8afe2736ed62d427512806",
+  "evidence_date_utc": "2026-10-15",
+  "evidence_path": "docs/evidence_financial_evidence/acceptance.json",
+  "evidence_sha256": "55e3088d05cefa1a3e24e24a67b1c1f1adc3367a58cfdd09cc1221e485d550c8",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38728944434",
+  "regression": {
+    "source_checks": 908,
+    "postgresql_http_concurrency_tests": 1106,
+    "new_postgresql_methods": 41,
+    "new_csv_source_checks": 11
+  },
+  "browser_assertions": 2423,
+  "mac_browser_assertions": 205,
+  "load": {
+    "clinics": 5,
+    "distinct_users": 20,
+    "seconds": 1800,
+    "offered": 9000,
+    "reads": {
+      "requests": 7200,
+      "failures": 0,
+      "p95_seconds": 0.329,
+      "max_seconds": 0.7315
+    },
+    "writes": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.358,
+      "max_seconds": 0.692
+    },
+    "summary": {
+      "requests": 9000,
+      "failures": 0,
+      "p95_seconds": 0.337,
+      "max_seconds": 0.7315
+    },
+    "continuity_passed": true,
+    "write_mix": {
+      "patient_creation": 900,
+      "clinical_note_saves": 900
+    }
+  },
+  "resource_limits": {
+    "db": {
+      "memory_limit_mib": 768,
+      "cpu_limit": 0.75
+    },
+    "web": {
+      "memory_limit_mib": 768,
+      "cpu_limit": 1.0
+    },
+    "notification-worker": {
+      "memory_limit_mib": 128,
+      "cpu_limit": 0.125
+    },
+    "gateway": {
+      "memory_limit_mib": 64,
+      "cpu_limit": 0.125
+    }
+  },
+  "restore": {
+    "models_and_associations_compared": 50,
+    "restore_and_compare_seconds": 2.556,
+    "all_model_fingerprints_match": true,
+    "source_database_modified": false
+  },
+  "mac_preservation": {
+    "original_business_models_preserved": 43,
+    "private_files_preserved": 70,
+    "original_volume_and_rc_tag_preserved": true,
+    "before_after_encrypted_backups_verified": true
+  },
+  "status": {
+    "R1": "LOCAL_ACCEPTED_AND_DELIVERED",
+    "R2": "PLANNED",
+    "cloud_acceptance": "NOT_RUN",
+    "windows_original_data_recovery": "unresolved"
+  },
+  "scope": "Aggregate synthetic R1 evidence; this report revision does not rerun acceptance or implement R2."
+}

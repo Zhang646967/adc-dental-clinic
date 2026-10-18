@@ -3,6 +3,11 @@
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh
 synthetic demo → continue development on `main`.
 
+Current documentation, 2026-10-18: [R1 delivery and R2 development report](current_report/README.md).
+The application remains the verified R1 financial-evidence baseline; R2 is
+planned in [the next-stage contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
+The migration instructions and dated evidence below retain their original scope.
+
 ## Source baseline
 
 Migration was resumed on **2026-10-12**. The supplied

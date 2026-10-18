@@ -1,5 +1,15 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
+## Current planning update — 2026-10-18
+
+The application baseline is delivered R1 financial evidence at `6a06f35`.
+[Current report: Word/PDF/Markdown](docs/current_report/README.md) records its
+executed local acceptance and the next [R2 operational assurance plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md).
+The first coding batch is safe request correlation and structured operational
+logging, followed by worker/backlog and backup/download/restore freshness.
+This update changes documentation only. R2 implementation and cloud acceptance
+remain pending; dated sections below retain their historical scope.
+
 ## macOS development — 2026-10-12
 
 Source migration was resumed by the user. `v1.0.0-rc.1` preserves the supplied

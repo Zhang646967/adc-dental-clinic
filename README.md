@@ -1,4 +1,4 @@
-Commercial foundation（商用基础）：[设备费用补正](docs/EQUIPMENT_COST_AMENDMENTS.md) · [分阶段商用路线](docs/COMMERCIAL_DEVELOPMENT.md)。当前仍为合成课程系统，云端与商用规模验收未完成。
+Current development（当前进展）：R1 financial evidence delivered; R2 operational assurance planned. [Current Word/PDF report](docs/current_report/) · [R2 development plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md) · [Commercial roadmap](docs/COMMERCIAL_DEVELOPMENT.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 # ADC — Dental Clinic Management
 
@@ -47,6 +47,9 @@ import into a separate empty instance.
 
 - Django 5.2, Python 3.13, PostgreSQL 17, Gunicorn and Nginx.
 - A modular monolith（模块化单体）with seven role workspaces and clinic scope.
+- Clinic payment-channel accounts, versioned cash evidence, private CSV statements
+  and independently reviewed one-to-one matching. See
+  [the R1 financial evidence contract](docs/FINANCIAL_EVIDENCE_RECONCILIATION.md).
 - Care completeness（接诊完整性）, editable own-care drafts, independently reviewed
   receipt/refund requests, current receivables and clinic equipment lifecycle
   management. See [the detailed workflows and role boundaries](docs/CARE_FINANCE_EQUIPMENT_WORKFLOWS.md).
@@ -68,9 +71,14 @@ import into a separate empty instance.
 ## Validation and project records
 
 `./RC_MACOS.sh verify` uses a new temporary PostgreSQL database and writes
-results under `evidence/verification/`. Current Mac validation is summarized in
-[docs/evidence_macos](docs/evidence_macos/) and the latest
-[latest G4 PostgreSQL gate](docs/evidence_g4/http2-postgresql-gate.json).
+results under `evidence/verification/`. The latest application acceptance is
+[R1 financial evidence, 2026-10-15](docs/evidence_financial_evidence/README.md):
+908 source checks, 1,106 PostgreSQL/HTTP/concurrency tests, 2,423 isolated browser
+assertions and a five-clinic/twenty-account/thirty-minute local workload.
+[The current report](docs/current_report/) separates these executed results from
+the planned R2 work. Earlier [Mac migration](docs/evidence_macos/) and
+[G4 PostgreSQL](docs/evidence_g4/http2-postgresql-gate.json) records retain their
+historical scope.
 
 Database regression, browser interaction, backup recovery and public deployment
 are separate checks. A public **source repository** does not make the local
@@ -88,7 +96,10 @@ remains NOT_RUN. Original Windows backup recovery remains unresolved.
 
 - [Release scope and history](RELEASE_CURRENT.md)
 - [Two business demonstration routes](docs/DEMO_ROUTES_RC1.md)
-- [R5 course report and UML models](docs/release_report/)
+- [Current development report: Word, PDF and Markdown](docs/current_report/)
+- [R2 operational assurance requirements and acceptance](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md)
+- [ASVS 5.0.0 security gap register](docs/SECURITY_ASVS_GAP_REGISTER.md)
+- [Historical R5/RC1 course report and UML models](docs/release_report/)
 - [Historical Windows instructions](docs/history/README_RC1_WINDOWS.md)
 - [Production configuration candidates](deployment/README.md)
 - [G4 deployment preparation and required server/domain details](deployment/g4/README.md)
@@ -109,8 +120,10 @@ gross amounts, no pending cash and current facts. Rejected or reviewed days reop
 as retained new versions; late facts never silently rewrite earlier approvals.
 Two additive migrations preserve all previous 23 migrations. See
 [Daily reconciliation](docs/DAILY_RECONCILIATION.md) and its executed evidence.
-Bank/payment channels, sealed accounting periods, independent cloud deployment and
-commercial-scale acceptance are separate outstanding work.
+R1 subsequently added payment-channel accounts, evidence and exact statement
+matching; internal daily handover remains separate from channel settlement.
+Sealed accounting periods, independent cloud deployment and commercial-scale
+acceptance remain outstanding work.
 
 ## Maintenance responsibility — 2026-10-15
 
@@ -123,3 +136,13 @@ See [Maintenance work orders](docs/MAINTENANCE_WORK_ORDERS.md) for role boundari
 legacy declaration scope, verification and remaining commercial requirements.
 
 Maintenance local acceptance: 884 source / 1,042 PostgreSQL-HTTP-concurrency / 704 browser / 89 independent database assertions. All 45 model and association fingerprints match after an encrypted empty-target restore. See [maintenance evidence](docs/evidence_maintenance/acceptance.json). Cloud/commercial acceptance remains incomplete.
+
+## Next stage — 2026-10-18
+
+R2 starts with safe request correlation and structured operational logs, then
+worker/backlog observation and separate backup/download/restore freshness.
+[The detailed plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md) defines ownership,
+failure response and R2-A01–A12. The report update implements documentation only;
+R2 capabilities and service targets are planned, with local and cloud acceptance
+kept separate. R3 treatment continuity, R4 resource coordination and R5 measured
+twenty-clinic expansion follow in that order.

@@ -5,6 +5,13 @@ quality → measured expansion. The selected target is one chain with 5–20 cli
 International workflows inform the design; the present implementation continues
 with synthetic CNY data and Asia/Shanghai business dates.
 
+Planning update 2026-10-18: R1 is delivered at `6a06f35`, with
+[executed evidence](evidence_financial_evidence/README.md). The next implementation
+is the [detailed R2 operational assurance plan](R2_OPERATIONAL_ASSURANCE_PLAN.md),
+starting with safe request correlation/logging. See the
+[current Word/PDF development report](current_report/README.md) and
+[ASVS 5.0.0 scoped gap register](SECURITY_ASVS_GAP_REGISTER.md).
+
 ## Learning from the course notes
 
 The supplied `note__3.pdf` separates requirements from design and connects goals
@@ -61,7 +68,7 @@ resources → schedule/maintenance; operation → service objectives/security/re
 | Increment | Intended result | Gate |
 |---|---|---|
 | R1 financial evidence | Retained payment references, import evidence, exact correspondence and differences | [R1 contract](FINANCIAL_EVIDENCE_RECONCILIATION.md), full regression, browser/load/oracles, recovery and protected Mac update |
-| R2 operational assurance | Diagnose affected workflows, monitor worker/backup freshness and recover a known version | Fault exercises and security gap register; actual host acceptance after server provisioning |
+| R2 operational assurance | Diagnose affected workflows, monitor worker/backup freshness and recover a known version | Detailed R2-01–08 and R2-A01–12 contracts; local faults/load/recovery and exact-commit CI; actual cloud acceptance after server provisioning |
 | R3 treatment continuity | Plan revisions, recorded patient acceptance, actual multi-visit execution and follow-up | Synthetic multi-visit scenario; bills only from completed actual treatments |
 | R4 resource coordination | Preventive maintenance with explicit chair/room/equipment scheduling | Concurrent reservation/maintenance cases preserve protected appointments |
 | R5 expansion validation | Measured envelope for twenty clinics | Representative clinical/financial/scheduling contention and independent-host recovery |
@@ -71,8 +78,9 @@ module contracts. Revisit service extraction when a measured scaling, independen
 deployment or ownership need justifies its distributed consistency and operational
 costs. [Microservice trade-offs](https://martinfowler.com/articles/microservice-trade-offs.html)
 
-R1 is the implemented increment; R2–R5 require their own detailed business
-contracts before implementation. Twenty-clinic operation, separate customer
+R1 is the delivered increment. R2 has a detailed plan; implementation and
+acceptance remain pending. R3–R5 require detailed business contracts before
+implementation. Twenty-clinic operation, separate customer
 tenancy, international currency/timezone deployment, real payment/insurance
 integration and real patient use are separate acceptance targets. The five-clinic
 local baseline remains a bounded workload result. Cloud hosting still awaits a
