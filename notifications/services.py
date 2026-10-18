@@ -1,6 +1,7 @@
 """Current-role/current-clinic inbox and scoped dispatch status. No business actions."""
 from django.db import transaction
-from django.db.models import F, Count
+from django.db.models import F, Count, Min, Q
+from django.db.models.functions import Greatest
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from accounts.policies import lock_clinic_grant
@@ -65,7 +66,11 @@ def delivery_status(*, actor, page='1'):
     identity=_identity(actor)
     if identity[1]!='MANAGER': raise PermissionDenied('请以当前店主管身份核对通知派发。')
     qs=NotificationOutbox.objects.filter(clinic_id=identity[2],task__slot__clinic_id=identity[2])
-    counts={row['state']:row['n'] for row in qs.values('state').annotate(n=Count('pk'))}
+    now=timezone.now()
+    due_filter=Q(state='PENDING',next_attempt_at__lte=now)
+    overview=qs.aggregate(**{s:Count('pk',filter=Q(state=s)) for s in ('PENDING','FAILED','NO_RECIPIENTS','DELIVERED')},
+        due=Count('pk',filter=due_filter),oldest_due=Min(Greatest('occurred_at','next_attempt_at'),filter=due_filter))
+    counts={s:overview[s] for s in ('PENDING','FAILED','NO_RECIPIENTS','DELIVERED')}
     total=qs.count();number,start,pages=safe_page(page,total)
     rows=[]
     for e in qs.select_related('task').order_by('-occurred_at','-pk')[start:start+20]:
@@ -76,10 +81,12 @@ def delivery_status(*, actor, page='1'):
             attempts=e.attempts,retry_round=e.retry_round,delivered=e.delivered_count,
             suppressed=e.suppressed_count,error=ERROR_LABELS.get(e.error_code,'需受控核对'),can_retry=e.state=='FAILED'))
     if identity!=_identity(actor): raise PermissionDenied('工作上下文已变化。')
-    oldest=qs.filter(state='PENDING').order_by('occurred_at').values_list('occurred_at',flat=True).first()
+    oldest=overview['oldest_due']
     return dict(rows=rows,total=total,counts=counts,number=number,pages=pages,
         pending=counts.get('PENDING',0),failed=counts.get('FAILED',0),no_recipients=counts.get('NO_RECIPIENTS',0),
-        oldest=display_time(oldest) if oldest else '',observed_at=display_time(timezone.now()))
+        due=overview['due'],scheduled_retry=counts['PENDING']-overview['due'],
+        oldest_due_seconds=max(0,int((now-oldest).total_seconds())) if oldest else 0,
+        oldest=display_time(oldest) if oldest else '',observed_at=display_time(now))
 
 
 @transaction.atomic

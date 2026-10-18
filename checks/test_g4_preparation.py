@@ -108,9 +108,9 @@ class G4PreparationTests(unittest.TestCase):
     def test_rendered_public_database_port_refused(self):
         plan = prepare(self.folder, **self.inputs)
         runtime = read_env(self.folder / 'private/runtime.env')
-        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway')},
+        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway', 'operations')},
                'networks': {'private': {'internal': True}, 'edge': {}}}
-        for name in ('web', 'notification-worker'):
+        for name in ('web', 'notification-worker', 'operations'):
             doc['services'][name] = {'environment': runtime, 'image': plan['images']['app']}
         doc['services']['gateway']['ports'] = [{'target': 80, 'host_ip': '127.0.0.1'},
                                                {'target': 443, 'host_ip': '127.0.0.1'}]
@@ -126,7 +126,7 @@ class G4PreparationTests(unittest.TestCase):
     def test_rendered_external_network_refused(self):
         prepare(self.folder, **self.inputs)
         rendered = self.folder / 'private/rendered.json'
-        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway')},
+        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway', 'operations')},
                'networks': {'private': {'internal': True, 'external': True}}}
         rendered.write_text(json.dumps(doc))
         with self.assertRaises(ValueError):
@@ -155,9 +155,9 @@ class G4PreparationTests(unittest.TestCase):
         plan = prepare(self.folder, **(self.inputs | dict(host='course-demo.trycloudflare.com',
                        http_port=18020, mode='mac_tunnel')))
         runtime = read_env(self.folder / 'private/runtime.env')
-        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway')},
+        doc = {'services': {name: {} for name in ('db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway', 'operations')},
                'networks': {'private': {'internal': True}, 'edge': {}}}
-        for name in ('web', 'notification-worker'):
+        for name in ('web', 'notification-worker', 'operations'):
             doc['services'][name] = {'environment': runtime, 'image': plan['images']['app']}
         doc['services']['gateway']['ports'] = [{'target': 80, 'published': '18020', 'host_ip': '127.0.0.1'}]
         rendered = self.folder / 'private/rendered.json'

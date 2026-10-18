@@ -7,7 +7,7 @@ cd "$ROOT"
 
 usage() {
   echo 'RC_MACOS.sh verify | prepare | new-demo --synthetic-empty-only'
-  echo 'RC_MACOS.sh import-copy --trusted-synthetic-copy | start | stop | status'
+  echo 'RC_MACOS.sh import-copy --trusted-synthetic-copy | start | stop | status | operations'
 }
 die() { printf 'STOP: %s\n' "$*" >&2; exit 2; }
 ACTION="${1:-}"
@@ -21,7 +21,7 @@ case "$ACTION" in
   -h|--help|help) usage; exit 0 ;;
   new-demo) [ "$#" = 2 ] && [ "$2" = --synthetic-empty-only ] || { usage; exit 2; } ;;
   import-copy) [ "$#" = 2 ] && [ "$2" = --trusted-synthetic-copy ] || { usage; exit 2; } ;;
-  verify|prepare|start|stop|status) [ "$#" = 1 ] || { usage; exit 2; } ;;
+  verify|prepare|start|stop|status|operations) [ "$#" = 1 ] || { usage; exit 2; } ;;
   *) usage; exit 2 ;;
 esac
 
@@ -97,13 +97,14 @@ case "$ACTION" in
     # Build the current checkout before stopping the previous runtime. A failed
     # build leaves that runtime available; schema uses the newly built image.
     "${DC[@]}" build --build-arg "ADC_SOURCE_COMMIT=$ADC_SOURCE_COMMIT"
-    "${DC[@]}" --profile worker stop gateway web notification-worker
+    "${DC[@]}" --profile worker stop operations gateway web notification-worker
     "${DC[@]}" run --rm schema
-    "${DC[@]}" --profile worker up -d web gateway notification-worker
+    "${DC[@]}" --profile worker up -d web gateway notification-worker operations
     "${DC[@]}" --profile worker ps
     PORT="$(awk -F= '$1 == "RC_WEB_PORT" {print $2}' .rc/compose.env)"
     printf 'Local course demo: http://127.0.0.1:%s\n' "$PORT"
     ;;
-  stop) "${DC[@]}" --profile worker stop gateway web notification-worker db ;;
+  stop) "${DC[@]}" --profile worker stop operations gateway web notification-worker db ;;
   status) "${DC[@]}" --profile worker ps ;;
+  operations) "${DC[@]}" exec -T web python manage.py operations_status ;;
 esac

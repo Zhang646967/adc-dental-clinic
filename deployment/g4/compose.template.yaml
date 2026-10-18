@@ -47,6 +47,7 @@ services:
     restart: "no"
   web:
     <<: *app
+    volumes: ["monitor_observation:/app/operations/monitor:ro"]
     depends_on: {db: {condition: service_healthy}}
     command: [sh, -c, "python manage.py check_runtime_role && python manage.py migrate --check && exec gunicorn config.wsgi:application --config deployment/gunicorn.conf.py"]
     healthcheck:
@@ -59,11 +60,21 @@ services:
     stop_grace_period: 30s
   notification-worker:
     <<: *app
+    volumes: ["worker_observation:/app/operations/worker"]
     profiles: [writer]
     depends_on: {web: {condition: service_healthy}}
     command: [python, scripts/g4_worker.py]
     restart: "on-failure:5"
     stop_grace_period: 30s
+  operations:
+    <<: *app
+    depends_on: {web: {condition: service_healthy}}
+    command: [python, manage.py, observe_operations, --watch]
+    volumes:
+      - worker_observation:/app/operations/worker:ro
+      - monitor_observation:/app/operations/monitor
+    restart: unless-stopped
+    stop_grace_period: 20s
   gateway:
     entrypoint: [nginx]
     command: [-g, "daemon off;", -e, /dev/null]
@@ -90,6 +101,8 @@ services:
 volumes:
   data: {}
   static: {}
+  worker_observation: {}
+  monitor_observation: {}
 networks:
   private: {internal: true}
   edge: {driver: bridge}

@@ -2,7 +2,7 @@
 <div class="notice-board"><p class="eyebrow">诊所主管 · 当前诊所</p><h1>通知派发状态</h1>
 <p>仅核对协调任务通知，不发送患者短信、邮件或推送。站内消息生成不等于对方已查看、受理或完成业务。</p>
 <div class="notice-links"><a href="{% url 'notification_inbox' %}">返回本人消息</a><a href="{% url 'coordination_task_list' %}">查看协调任务</a></div>
-<section class="panel"><h2>本店待处理概况</h2><p>待派发 {{ result.pending }} 条 · 失败待处理 {{ result.failed }} 条 · 无符合条件收件人 {{ result.no_recipients }} 条</p>{% if result.oldest %}<p>最早等待事件：{{ result.oldest }}</p>{% endif %}<p>读取时点 {{ result.observed_at }}（北京时间）。长时间等待时，请由技术维护人员核对后台进程；本页不能证明进程健康，也不会自行派发。</p></section>
+<section class="panel"><h2>本店待处理概况</h2><p>待派发 {{ result.pending }} 条 · 已到处理时间 {{ result.due }} 条 · 尚在等待重试时间 {{ result.scheduled_retry }} 条</p><p>失败待处理 {{ result.failed }} 条 · 无符合条件收件人 {{ result.no_recipients }} 条</p>{% if result.oldest %}<p>最早到期时点：{{ result.oldest }} · 已等待 {{ result.oldest_due_seconds }} 秒</p>{% endif %}<p>读取时点 {{ result.observed_at }}（北京时间）。未来重试不计入到期积压。长时间等待时，请由技术维护人员核对后台进程；本页不能证明进程健康，也不会自行派发。</p></section>
 {% if read_only %}<p class="notice">当前实例只读，不允许重试写入。</p>{% endif %}
 <div class="notice-grid">{% for row in result.rows %}<section class="panel notice-card"><span class="status">{{ row.status }}</span><h2>{{ row.title }}</h2><p>任务 #{{ row.task_id }} · 出诊 #{{ row.slot_id }} · 通知事件 #{{ row.id }}</p>
 <dl><dt>事件发生于</dt><dd>{{ row.occurred_at }}</dd><dt>本轮尝试次数</dt><dd>{{ row.attempts }} / 5 · 人工重试轮次 {{ row.retry_round }}</dd><dt>站内消息生成数</dt><dd>{{ row.delivered }} · 授权变化跳过 {{ row.suppressed }}</dd>{% if row.next_attempt_at %}<dt>下次可尝试于</dt><dd>{{ row.next_attempt_at }}</dd>{% endif %}{% if row.completed_at %}<dt>本轮处理结束于</dt><dd>{{ row.completed_at }}</dd>{% endif %}</dl>

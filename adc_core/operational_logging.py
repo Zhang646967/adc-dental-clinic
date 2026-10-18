@@ -30,6 +30,7 @@ EVENTS = frozenset((
     'auth.login_success', 'auth.login_failed', 'auth.logout',
     'framework.request', 'framework.security', 'framework.database', 'framework.notice',
     'server.access', 'server.notice', 'runtime.notice', 'command.failed', 'command.notice',
+    'operations.heartbeat_failed',
 ))
 LOGGER_EVENTS = {'django.request': 'framework.request', 'django.server': 'framework.request',
                  'django.db.backends': 'framework.database', 'gunicorn.access': 'server.access',
@@ -163,7 +164,7 @@ def emit_event(event, *, status=None, duration_ms=None):
     try:
         if event not in EVENTS:
             return
-        level = logging.ERROR if event in ('http.failed', 'command.failed') else logging.INFO
+        level = logging.ERROR if event in ('http.failed', 'command.failed', 'operations.heartbeat_failed') else logging.INFO
         logging.getLogger('adc.operations').log(level, 'operational event', extra={
             'adc_event': event, 'adc_status': status, 'adc_duration_ms': duration_ms})
     except Exception:

@@ -11,7 +11,8 @@ if __name__ == "__main__":
     try:
         execute_from_command_line(sys.argv)
     except SystemExit as exc:
-        if runtime and exc.code not in (None, 0):
+        expected_condition = len(sys.argv) > 1 and sys.argv[1] == 'operations_status' and exc.code in (1, 2, 3)
+        if runtime and exc.code not in (None, 0) and not expected_condition:
             sys.stderr.event('command.failed')
         raise
     except Exception:

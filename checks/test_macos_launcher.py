@@ -119,9 +119,9 @@ class MacLauncherTests(unittest.TestCase):
         self.assertEqual(self.invoke('start').returncode, 0)
         commands = [x['args'] for x in self.calls() if 'compose' in x['args']]
         build = next(i for i,x in enumerate(commands) if 'build' in x)
-        stop = next(i for i,x in enumerate(commands) if x[-4:] == ['stop','gateway','web','notification-worker'])
+        stop = next(i for i,x in enumerate(commands) if x[-5:] == ['stop','operations','gateway','web','notification-worker'])
         schema = next(i for i,x in enumerate(commands) if x[-3:] == ['run','--rm','schema'])
-        start = next(i for i,x in enumerate(commands) if x[-5:] == ['up','-d','web','gateway','notification-worker'])
+        start = next(i for i,x in enumerate(commands) if x[-6:] == ['up','-d','web','gateway','notification-worker','operations'])
         self.assertLess(build, stop)
         self.assertLess(schema, start)
         self.assertFalse(any('bootstrap_release_demo' in x for x in commands))
@@ -140,7 +140,7 @@ class MacLauncherTests(unittest.TestCase):
         self.prepare()
         self.assertEqual(self.invoke('stop').returncode, 0)
         commands = [x['args'] for x in self.calls() if 'compose' in x['args']]
-        self.assertEqual(commands[-1][-5:], ['stop','gateway','web','notification-worker','db'])
+        self.assertEqual(commands[-1][-6:], ['stop','operations','gateway','web','notification-worker','db'])
         self.assertFalse(any('down' in x or '--volumes' in x for x in commands))
 
     def test_verify_delegates_with_the_selected_local_context(self):

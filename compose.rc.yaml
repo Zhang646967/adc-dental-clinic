@@ -18,7 +18,8 @@
       "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
       "AI_MODE": "demo",
       "AI_API_KEY": "",
-      "OPENAI_API_KEY": ""
+      "OPENAI_API_KEY": "",
+      "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
     },
     "networks": [
       "private"
@@ -79,7 +80,8 @@
         "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
         "AI_MODE": "demo",
         "AI_API_KEY": "",
-        "OPENAI_API_KEY": ""
+        "OPENAI_API_KEY": "",
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
       },
       "networks": [
         "private"
@@ -126,7 +128,8 @@
         "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
         "AI_MODE": "demo",
         "AI_API_KEY": "",
-        "OPENAI_API_KEY": ""
+        "OPENAI_API_KEY": "",
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
       },
       "networks": [
         "private"
@@ -150,7 +153,10 @@
           "max-file": "3",
           "compress": "true"
         }
-      }
+      },
+      "volumes": [
+        "rc_monitor_observation:/app/operations/monitor:ro"
+      ]
     },
     "notification-worker": {
       "build": {
@@ -171,7 +177,8 @@
         "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
         "AI_MODE": "demo",
         "AI_API_KEY": "",
-        "OPENAI_API_KEY": ""
+        "OPENAI_API_KEY": "",
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
       },
       "networks": [
         "private"
@@ -197,7 +204,10 @@
           "max-file": "3",
           "compress": "true"
         }
-      }
+      },
+      "volumes": [
+        "rc_worker_observation:/app/operations/worker"
+      ]
     },
     "gateway": {
       "image": "nginx:stable-alpine",
@@ -258,7 +268,8 @@
         "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
         "AI_MODE": "demo",
         "AI_API_KEY": "",
-        "OPENAI_API_KEY": ""
+        "OPENAI_API_KEY": "",
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
       },
       "networks": [
         "private"
@@ -275,11 +286,64 @@
       "profiles": [
         "maintenance"
       ]
+    },
+    "operations": {
+      "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile.production"
+      },
+      "image": "${RC_PROJECT:?Prepare RC configuration}-app:1.0.0-rc.1",
+      "environment": {
+        "ADC_RC_SYNTHETIC": "1",
+        "ADC_RC_INSTANCE": "${RC_PROJECT:?}",
+        "DJANGO_SETTINGS_MODULE": "config.settings.course_demo",
+        "DJANGO_SECRET_KEY": "${RC_APP_SECRET:?}",
+        "POSTGRES_DB": "adc_rc_demo",
+        "POSTGRES_USER": "adc_rc_owner",
+        "POSTGRES_PASSWORD": "${RC_DB_PASSWORD:?}",
+        "DB_HOST": "db",
+        "DB_PORT": "5432",
+        "ADC_READ_ONLY": "${RC_READ_ONLY:-0}",
+        "AI_MODE": "demo",
+        "AI_API_KEY": "",
+        "OPENAI_API_KEY": "",
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+      },
+      "networks": [
+        "private"
+      ],
+      "depends_on": {
+        "schema": {
+          "condition": "service_completed_successfully"
+        }
+      },
+      "command": [
+        "python",
+        "manage.py",
+        "observe_operations",
+        "--watch"
+      ],
+      "restart": "on-failure:3",
+      "logging": {
+        "driver": "local",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3",
+          "compress": "true"
+        }
+      },
+      "volumes": [
+        "rc_worker_observation:/app/operations/worker:ro",
+        "rc_monitor_observation:/app/operations/monitor"
+      ],
+      "stop_grace_period": "20s"
     }
   },
   "volumes": {
     "rc_data": {},
-    "rc_static": {}
+    "rc_static": {},
+    "rc_worker_observation": {},
+    "rc_monitor_observation": {}
   },
   "networks": {
     "private": {

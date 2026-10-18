@@ -85,6 +85,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'ADC_DATABASE_OWNER': 'adc_g4_owner', 'DB_HOST': 'db', 'DB_PORT': '5432',
         'ADC_DB_SSLMODE': 'disable', 'ADC_PRIVATE_DB_NETWORK_ACK': '1',
         'ADC_TRUST_PROXY_HEADERS': '1', 'ADC_READ_ONLY': '0' if writable else '1',
+        'ADC_OPERATIONS_INSTANCE': project,
         'AI_MODE': 'disabled', 'AI_API_KEY': '', 'OPENAI_API_KEY': '',
     }
     checked = validate_production_inputs(runtime)
@@ -138,6 +139,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     (output / 'nginx.conf').write_text(nginx)
     plan = {
         'status': 'PREPARED_NOT_DEPLOYED', 'project': project, 'host': checked.host,
+        'operations_schema': 1,
         'mode': mode,
         'requested_source_commit': source_commit, 'read_only': not writable,
         'access_mode': access_mode,
@@ -203,7 +205,10 @@ def inspect_bundle(output, rendered=None):
     if rendered:
         doc = json.loads(Path(rendered).read_text())
         services = doc['services']
-        if set(services) != {'db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway'}:
+        expected_services = {'db', 'schema', 'bootstrap', 'web', 'notification-worker', 'gateway'}
+        if plan.get('operations_schema') == 1:
+            expected_services.add('operations')
+        if set(services) != expected_services:
             raise ValueError('Unexpected deployment services.')
         if not doc['networks']['private'].get('internal') or any(n.get('external') for n in doc['networks'].values()):
             raise ValueError('G4 database network must remain private and self-contained.')
@@ -212,7 +217,7 @@ def inspect_bundle(output, rendered=None):
                 raise ValueError('Unsafe deployment service option.')
             if name != 'gateway' and service.get('ports'):
                 raise ValueError('Only the HTTPS gateway may publish ports.')
-        for name in ('web', 'notification-worker'):
+        for name in (('web', 'notification-worker', 'operations') if plan.get('operations_schema') == 1 else ('web', 'notification-worker')):
             if services[name]['environment'] != runtime or services[name]['image'] != plan['images']['app']:
                 raise ValueError('Runtime service configuration does not match the reviewed bundle.')
         worker = services['notification-worker']

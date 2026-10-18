@@ -60,12 +60,12 @@ def digest(path):
     return h.hexdigest()
 
 
-def run(command, log, *, input_file=None, output_file=None, timeout=180):
+def run(command, log, *, input_file=None, output_file=None, timeout=180, allowed_codes=(0,)):
     """Commands are argument arrays; diagnostics stay in a mode-600 private log."""
     result = subprocess.run(command, stdin=None if isinstance(input_file, bytes) else input_file,
                             input=input_file if isinstance(input_file, bytes) else None,
                             stdout=output_file or subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
-    if result.returncode:
+    if result.returncode not in allowed_codes:
         with Path(log).open('ab') as stream:
             os.chmod(log, 0o600)
             stream.write(result.stderr)
@@ -231,7 +231,7 @@ class Course:
 
     def start_runtime(self):
         self.dc('up', '-d', '--wait', '--wait-timeout', '120',
-                'web', 'notification-worker', 'gateway', timeout=180)
+                'web', 'notification-worker', 'gateway', *(['operations'] if self.plan.get('operations_schema') == 1 else []), timeout=180)
         if self.dc('exec', '-T', 'web', 'id', '-u').strip() != b'10001':
             raise ValueError('Runtime application must use UID 10001.')
         self.dc('exec', '-T', 'web', 'python', 'manage.py', 'check_runtime_role')
@@ -276,6 +276,16 @@ class Course:
                 'rehearsal': self.rehearsal, 'read_only': False, 'services': states,
                 'origin_trusted_https': tls, 'public_acceptance_executed': False,
                 'course_online_readiness': 'NOT_RUN', 'last_server_backup': copies[-1]['created_at'] if copies else None}
+
+    def operations(self):
+        if self.plan.get('operations_schema') != 1:
+            return {'v':1,'state':'UNKNOWN','code':3,'reason':'OBSERVATION_NOT_INSTALLED'}
+        raw = run(self.command + ['exec','-T','web','python','manage.py','operations_status'],
+                  self.log, timeout=20, allowed_codes=(0,1,2,3))
+        result = json.loads(raw)
+        if result.get('state') not in ('HEALTHY','WARNING','CRITICAL','UNKNOWN'):
+            raise ValueError('Invalid private condition result.')
+        return result
 
     def backup(self, recipient_file, age='age'):
         recipient = private_file(recipient_file).read_text().strip()
@@ -537,7 +547,7 @@ def main():
     sub = parser.add_subparsers(dest='action', required=True)
     build_parser = sub.add_parser('build')
     build_parser.add_argument('--artifacts', required=True)
-    for name in ('deploy', 'status', 'list-backups'):
+    for name in ('deploy', 'status', 'list-backups', 'operations-status'):
         sub.add_parser(name)
     backup = sub.add_parser('backup')
     backup.add_argument('--recipient-file', required=True)
@@ -573,6 +583,8 @@ def main():
             result = course.deploy()
         elif args.action == 'status':
             result = course.status()
+        elif args.action == 'operations-status':
+            result = course.operations()
         elif args.action == 'backup':
             result = course.backup(args.recipient_file, args.age)
         elif args.action == 'restore':
@@ -589,6 +601,8 @@ def main():
             result = {'project': course.plan['project'],
                       'backups': backup_inventory(course.bundle / 'backups', course.plan['project'])}
     print(json.dumps(result, indent=2))
+    if args.action == 'operations-status' and result.get('code') in (1,2,3):
+        raise SystemExit(result['code'])
 
 
 if __name__ == '__main__':

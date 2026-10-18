@@ -7,5 +7,6 @@ COPY requirements.txt requirements-production.txt ./
 RUN pip install --no-cache-dir -r requirements-production.txt && useradd --create-home --uid 10001 app
 COPY --chown=app:app . .
 RUN mkdir -p /app/staticfiles && chown app:app /app/staticfiles
+RUN mkdir -p /app/operations/worker /app/operations/monitor && chown -R app:app /app/operations && chmod 700 /app/operations /app/operations/worker /app/operations/monitor
 USER app
 CMD ["gunicorn", "config.wsgi:application", "--config", "deployment/gunicorn.conf.py"]
