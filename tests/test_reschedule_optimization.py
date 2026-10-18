@@ -28,7 +28,12 @@ from workspaces.models import WorkspaceContext
 
 class MoveFixture(V07Fixture):
     def setup_move(self):
-        self.setup07()
+        # Search scenarios use a full business day. The shared legacy fixture
+        # adds one day to its clock; a late-night runner otherwise pushes the
+        # expected t+1h candidate outside the selected date.
+        morning = timezone.make_aware(datetime.combine(timezone.localdate(), calendar_time(9)), BUSINESS_TZ)
+        with patch('tests.fixtures.timezone.now', return_value=morning):
+            self.setup07()
         self.old = self.book()
         self.front._adc_workspace = WorkspaceContext.objects.create(user=self.front, role='FRONT_DESK', clinic=self.a)
         self.front2._adc_workspace = WorkspaceContext.objects.create(user=self.front2, role='FRONT_DESK', clinic=self.a)
@@ -180,6 +185,27 @@ class ReplacementSearchTests(MoveFixture, TransactionTestCase):
         self.assertEqual([row['start'] for row in result['rows']], [late])
         self.assertEqual(result['rows'][0]['slot_id'], slot.pk)
         self.assertFalse(result['limited'])
+        self.unchanged()
+
+    def test_expired_offer_after_midnight_belongs_to_the_next_search_day(self):
+        day = timezone.localdate() + timedelta(days=1)
+        late = timezone.make_aware(datetime.combine(day, calendar_time(23, 30)), BUSINESS_TZ)
+        doctor, slot = self.another_dentist(91, start=late)
+        start = late + timedelta(minutes=30)
+        entry = WaitRequest.objects.create(patient=self.p2, clinic=self.a,
+            earliest=late, latest=late+timedelta(hours=3), state='OFFERED', created_by=self.front2)
+        plan = SchedulePlan.objects.create(clinic=self.a, created_by=self.manager,
+            state='PUBLISHED', published_at=timezone.now())
+        offer = WaitOffer.objects.create(request=entry, plan=plan, slot=slot,
+            starts_at=start, ends_at=start+timedelta(minutes=30),
+            expires_at=timezone.now()-timedelta(seconds=1))
+        today = replacement_options(actor=self.front, visit_id=self.old.pk, day=day, dentist_id=doctor.pk)
+        tomorrow = replacement_options(actor=self.front, visit_id=self.old.pk,
+            day=day+timedelta(days=1), dentist_id=doctor.pk)
+        self.assertNotIn(start, {row['start'] for row in today['rows']})
+        self.assertIn(start, {row['start'] for row in tomorrow['rows']})
+        offer.refresh_from_db()
+        self.assertEqual(offer.state, 'PENDING')
         self.unchanged()
 
     def test_large_relation_set_fails_closed_without_claiming_no_capacity(self):

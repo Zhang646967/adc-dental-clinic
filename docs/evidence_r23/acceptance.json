@@ -7,11 +7,12 @@
   "source_identity": "Exact tool revision is identified by the enclosing Git commit and separate CI/delivery record. Running Mac application remains 02a9dbc.",
   "regression": {
     "source_rule_checks": 1000,
-    "postgresql_http_concurrency_tests": 1145,
+    "postgresql_http_concurrency_tests": 1146,
     "new_source_check_methods": 22,
-    "new_postgresql_tests": 0,
+    "new_postgresql_tests": 1,
     "gate_exit": 0,
-    "cleanup_exit": 0
+    "cleanup_exit": 0,
+    "test_clock_fix": "MoveFixture uses tomorrow 09:00; explicit expired-offer next-day search retains date boundary and unchanged offer state."
   },
   "crypto": {
     "passed": true,
@@ -38,7 +39,8 @@
     "scripts/g4_course.py": "9915fc9800a07d478af5015933ed4093fd8787db5161d95a1ff983df70fade24",
     "scripts/g4_remote.py": "594173b001bce0312fddb9f28b8236f3b397bb7cdb9c153dfde1c0f26c40e344",
     "checks/test_recovery_receipts.py": "89f9fbeb5eb049155924e4c49cfa1c163d926912323c1de219d61eb1028842ca",
-    "checks/test_g4_course.py": "79c18108b26f218f6089e1dc6cf10f09ef469c7e63aa2ba54262020c94c47c83"
+    "checks/test_g4_course.py": "79c18108b26f218f6089e1dc6cf10f09ef469c7e63aa2ba54262020c94c47c83",
+    "tests/test_reschedule_optimization.py": "adc445d37553d961f968d260872540660e4b4027defeac22e1be0845b2da69db"
   },
   "fault_injection_into_original_mac": false,
   "independent_restore_receipt": "NOT_IMPLEMENTED_NEXT_INCREMENT",
@@ -52,6 +54,13 @@
     "reason": "Changed source manifest had not yet been refreshed; corrected before successful second full gate.",
     "cleanup_exit": 0
   },
-  "ci": "PENDING_EXACT_COMMIT",
-  "Mac": "PENDING_EXACT_CI"
+  "ci": "PENDING_CORRECTED_EXACT_COMMIT",
+  "Mac": "PENDING_EXACT_CI",
+  "failed_ci": {
+    "commit": "a25c8bd2ab57da482c9e971c21b2dd7abfb7bad7",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39138479746",
+    "result": "failure",
+    "test": "ReplacementSearchTests.test_expired_pending_offer_does_not_block_or_recycle",
+    "cause": "Legacy shared fixture used runner time; t+1h could cross selected business date. Assertions and production behavior preserved."
+  }
 }
