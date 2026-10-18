@@ -155,6 +155,30 @@ class CourseSafetyTests(unittest.TestCase):
             shutil.rmtree(self.root / 'extracted')
         self.assertFalse((self.root / 'escape').exists())
 
+    def test_member_limit_stops_before_loading_remaining_archive_headers(self):
+        plain = self.archive()
+        with tarfile.open(plain, 'a') as archive:
+            for i in range(100):
+                member = tarfile.TarInfo('extra-' + str(i))
+                archive.addfile(member)
+        real_next = tarfile.TarFile.next
+        count = []
+        def bounded_next(archive):
+            count.append(1)
+            if len(count) > 16:  # tarfile's constructor may read its first header.
+                raise AssertionError('Parser continued after the accepted bound.')
+            return real_next(archive)
+        with patch.object(tarfile.TarFile, 'next', bounded_next), self.assertRaises(ValueError):
+            self.decrypt(plain)
+        self.assertLessEqual(len(count), 16)
+
+    def test_compressed_wrapper_is_not_accepted_as_the_plain_backup_format(self):
+        import gzip
+        plain = self.archive()
+        data = plain.read_bytes()
+        plain.write_bytes(gzip.compress(data))
+        with self.assertRaises(tarfile.ReadError): self.decrypt(plain)
+
     def test_restore_existing_target_never_imports_or_starts_web(self):
         course = self.course()
         course.start_database = Mock()

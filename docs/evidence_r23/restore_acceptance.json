@@ -4,7 +4,7 @@
   "status": "SECOND_INCREMENT_LOCAL_RESTORE_PASSED",
   "tool_commit": "The enclosing Git commit identifies these source digests; exact CI and Mac delivery follow separately.",
   "application_source": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
-  "course_rehearsal_image": "sha256:4f35c5656c030f98ee279f678d55c6918f87453f55004c475587f273d9ae2d5d",
+  "course_rehearsal_image": "sha256:3e5b506dc1c2b4aa918f7be5429496ba8064a6f9ac0337fd7f3bf3f7a65721d2",
   "image_provenance": {
     "passed": true,
     "rehearsal_image_changes": "OCI revision label only",
@@ -12,9 +12,9 @@
     "runtime_source": "02a9dbc90583fbcad47567e64ae77ae810eca33f"
   },
   "regression": {
-    "source_rule_checks": 1014,
+    "source_rule_checks": 1016,
     "postgresql_http_concurrency_tests": 1152,
-    "new_rule_tests": 14,
+    "new_rule_tests": 16,
     "new_postgresql_snapshot_tests": 6,
     "all_passed": true,
     "isolated_cleanup_exit": 0
@@ -54,7 +54,7 @@
     "tables_including_associations_and_migrations": 51,
     "rows_compared": 29144,
     "facts_sha256": "8338ffad9bcf80f3bcfcb0b8fc960387cff87db1873e94b81a8e800b50f2528f",
-    "restore_and_compare_and_start_ms": 15786,
+    "restore_and_compare_and_start_ms": 15868,
     "measurement_start": "replacement database and matching images ready",
     "less_than_thirty_minutes": true,
     "independent_empty_target": true,
@@ -78,16 +78,18 @@
       "adc_reconciliation_match": 25,
       "adc_cash_entry": 525
     },
-    "facts_digest_verified": true
+    "facts_digest_verified": true,
+    "facts_sha256": "8338ffad9bcf80f3bcfcb0b8fc960387cff87db1873e94b81a8e800b50f2528f",
+    "source_cipher_sha256": "d8ba1752004efc6c0c3d3481389160666114b8af36f7bd5761307faf09bc3537"
   },
   "source_changes_sha256": {
-    "scripts/g4_course.py": "bf2ba2e60848ab21d5a9fb0931778fa8ea0d787c787ed28615265656f5f7ba87",
+    "scripts/g4_course.py": "4b6ed1b7d38f683b24df5401373048c9fc6dafd7e381275c6501dfdffd1dbf46",
     "scripts/g4_remote.py": "4571438e2ac3688837aaa1b9afa23884afab0e42b6c29ebb8d606ab0475f9747",
     "scripts/recovery_receipts.py": "8e3be4708565feb8befb6e3f6a85a998c877c9c2c685c8484d7dbdfcfc5daedc",
     "scripts/recovery_facts.py": "0ec13d50f481d062e729d60ddfd5b7e09aa4befd495a841350be6d92812f07d3",
     "scripts/recovery_observations.py": "9514909f3753f44c2671b95496ceb129a450d365b5a041967eec3495dba430cb",
     "scripts/recovery_snapshot.py": "692f61106d2bb8de1de4984f0f0e595a2fd53e8fe585186411b55eff70feb675",
-    "checks/test_g4_course.py": "a7b92d10bfcdb29eabffe30a7019fb5c38d54ebe388a7910ba12b84bb9b9871b",
+    "checks/test_g4_course.py": "e4ef9b1157f0d201e7a1a1705794f48d4527ea066cea7b3485dd5b4bf4049f58",
     "checks/test_recovery_restore.py": "96e25e48ec8c294d0f9e077e1dcc91fbb4872209d42eeae521cf96acf59e6992",
     "tests/test_recovery_facts.py": "42c5fcfc5fc7368b0f14b5ff57da48b898e9382da845e0cc03483377e0f6a77e"
   },
@@ -105,5 +107,15 @@
   "R2": "IN_PROGRESS",
   "R24_capacity_and_24h_observation": "NOT_RUN",
   "cloud_acceptance": "NOT_RUN_NO_SERVER",
-  "windows_original_data_recovery": "UNRESOLVED"
+  "windows_original_data_recovery": "UNRESOLVED",
+  "archive_parser_follow_up": {
+    "initial_tool_commit": "f103cce1da0ec1dc12e207a0523713321b82f54b",
+    "initial_tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39144348228",
+    "initial_tool_ci_conclusion": "success",
+    "bounded_header_scan_before_complete_listing": true,
+    "compression_wrapper_refused": true,
+    "extra_rule_tests": 2,
+    "full_gate_repeated": true,
+    "real_restore_and_faults_repeated": true
+  }
 }

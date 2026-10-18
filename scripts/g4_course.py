@@ -626,8 +626,17 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
     archive_path = Path(target) / 'backup.tar'
     run([age, '-d', '-i', str(identity), '-o', str(archive_path), str(encrypted)], log, timeout=120)
     os.chmod(archive_path, 0o600)
-    with tarfile.open(archive_path) as archive:
-        members = archive.getmembers()
+    # Our writer emits plain tar. Refuse compression wrappers and stop scanning
+    # at the bound, instead of allocating an unbounded getmembers() list first.
+    with tarfile.open(archive_path, mode='r:') as archive:
+        members = []
+        for _ in range(15):
+            member = archive.next()
+            if member is None:
+                break
+            members.append(member)
+        if len(members) > 14:
+            raise ValueError('Backup member count exceeds its bound.')
         names = [m.name for m in members]
         if (len(names) != len(set(names)) or len(names) > 14 or
                 sum(m.size for m in members) > MAX_BACKUP_BYTES + 8 * 1024 * 1024 or
