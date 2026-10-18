@@ -1,0 +1,57 @@
+{
+  "format": 1,
+  "date_utc": "2026-10-18",
+  "status": "FIRST_TOOL_INCREMENT_LOCAL_VERIFIED",
+  "R23": "IN_PROGRESS",
+  "R2": "IN_PROGRESS",
+  "source_identity": "Exact tool revision is identified by the enclosing Git commit and separate CI/delivery record. Running Mac application remains 02a9dbc.",
+  "regression": {
+    "source_rule_checks": 1000,
+    "postgresql_http_concurrency_tests": 1145,
+    "new_source_check_methods": 22,
+    "new_postgresql_tests": 0,
+    "gate_exit": 0,
+    "cleanup_exit": 0
+  },
+  "crypto": {
+    "passed": true,
+    "scope": "real age encryption/authenticated decryption and simulated local transport only",
+    "checks": [
+      "authenticated_download_and_internal_checks",
+      "cached_archive_decrypted_with_current_key",
+      "separate_creation_download_restore",
+      "old_recovery_point_and_stale_server_remain_visible",
+      "wrong_real_age_key_preserves_prior_state",
+      "authentication_failure_after_outer_checksum_passes",
+      "interrupted_transfer_preserves_last_valid_point",
+      "forged_sidecar_time_cannot_refresh_point",
+      "wrong_application_image_cannot_be_accepted",
+      "corrupt_receipts_report_unknown"
+    ],
+    "independent_restore": "NOT_RUN_R23_FIRST_INCREMENT",
+    "cloud_ssh_acceptance": "NOT_RUN",
+    "database_fixture": "synthetic PGDMP marker, not a PostgreSQL restoration claim",
+    "temporary_keys_removed": true
+  },
+  "source_changes_sha256": {
+    "scripts/recovery_receipts.py": "bab966bee26036c59d3619d2e9bed7335dc7c222c58d0a4823e1e8f35dcf51e9",
+    "scripts/g4_course.py": "9915fc9800a07d478af5015933ed4093fd8787db5161d95a1ff983df70fade24",
+    "scripts/g4_remote.py": "594173b001bce0312fddb9f28b8236f3b397bb7cdb9c153dfde1c0f26c40e344",
+    "checks/test_recovery_receipts.py": "89f9fbeb5eb049155924e4c49cfa1c163d926912323c1de219d61eb1028842ca",
+    "checks/test_g4_course.py": "79c18108b26f218f6089e1dc6cf10f09ef469c7e63aa2ba54262020c94c47c83"
+  },
+  "fault_injection_into_original_mac": false,
+  "independent_restore_receipt": "NOT_IMPLEMENTED_NEXT_INCREMENT",
+  "full_R23_restore_acceptance": "NOT_RUN",
+  "new_browser_workflow_or_capacity_test": "NOT_RUN",
+  "cloud_ssh_acceptance": "NOT_RUN",
+  "Windows_original_data_recovery": "unresolved",
+  "first_attempt": {
+    "scope": "integrity preflight only",
+    "exit": 1,
+    "reason": "Changed source manifest had not yet been refreshed; corrected before successful second full gate.",
+    "cleanup_exit": 0
+  },
+  "ci": "PENDING_EXACT_COMMIT",
+  "Mac": "PENDING_EXACT_CI"
+}

@@ -1,5 +1,22 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
+## R2.3 first recovery-tool increment — 2026-10-18
+
+Repository navigation now separates the current [course report](课程报告/README.md),
+editable report sources, business/operations documentation and historical evidence.
+The teacher-facing PDF and Word use stable student-name/number filenames.
+
+[Recovery tools](docs/R23_RECOVERY_FRESHNESS.md) now record created and
+current-key-verified downloaded copies separately; complete batches are checked
+before publication/pruning. Recovery age uses the original source point, and
+stale server observations remain UNKNOWN. Independent restore receipts are still
+unimplemented/UNKNOWN. This first tool increment does not complete R2.3 or R2.
+[Executed scope](docs/evidence_r23/README.md) distinguishes synthetic real-age
+checks from PostgreSQL regression and the pending restore/cloud gates.
+
+No business migration, UI change, new grant or runtime restart is required for
+this host-tool update. Running Mac application remains the accepted R2.2 image.
+
 ## R2.2 progress and condition observation — 2026-10-18
 
 Application `02a9dbc` adds private worker/collector state and independent

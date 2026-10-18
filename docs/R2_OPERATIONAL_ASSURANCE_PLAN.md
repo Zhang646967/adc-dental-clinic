@@ -7,7 +7,7 @@ tracing and safe operational logging are implemented and locally verified** in
 [the R2.1 contract](R21_SAFE_DIAGNOSTICS.md) and [executed evidence](evidence_r21/README.md).
 Application `ccdcdcd` passed exact-commit CI and [protected Mac delivery](evidence_r21/delivery.json).
 R2.2 worker/backlog/observer conditions are also implemented and [delivered on Mac](evidence_r22/README.md)
-at `02a9dbc`; the next coding batch is R2.3 recovery freshness.
+at `02a9dbc`; R2.3 recovery freshness is now in its first tool increment; independent restore integration remains next.
 Remaining full-R2 observation/security and cloud gates are pending.
 
 The target remains one dental chain with approximately 5–20 clinics. The next
@@ -248,7 +248,7 @@ functional truth + service indicators → bounded local acceptance.
 | R2.4 Local release | Security gap assessment, fault runbooks, browser/load and 24-hour observation | R2-A10/A11/A12; exact-commit CI and Mac preservation | Earlier increments |
 | R2.5 Cloud release | Apply tested version to independent HTTPS host and repeat public gates | Mainland access, Mac offline, reboot/worker, renewal, backups, restore and 24-hour observation | Private server/DNS inputs |
 
-The **next coding batch is R2.3** after protected R2.2 delivery.
+**R2.3 第一批** adds creation/download receipts and batch-before-publish verification; see [the increment contract](R23_RECOVERY_FRESHNESS.md). Independent empty-target restore receipts remain the next coding batch.
 R2.1 request/logging and R2.2 progress/backlog/incident contracts are delivered;
 their exact controls and evidence remain in their linked contracts. Backup
 freshness, external alert delivery and the full R2 observation window remain open.

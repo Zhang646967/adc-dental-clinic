@@ -137,6 +137,12 @@ class CourseSafetyTests(unittest.TestCase):
                     self.decrypt(self.archive(update))
                 shutil.rmtree(self.root / 'extracted')
 
+    def test_boolean_manifest_versions_are_not_integer_versions(self):
+        for field in ('format','server_major'):
+            with self.subTest(field=field),self.assertRaises(ValueError):
+                self.decrypt(self.archive(lambda m:m.update({field:True})))
+            shutil.rmtree(self.root/'extracted')
+
     def test_traversal_duplicate_and_symlink_archives_refused(self):
         for name, kind in (('../escape', tarfile.REGTYPE), ('database.dump', tarfile.REGTYPE),
                            ('alias', tarfile.SYMTYPE)):

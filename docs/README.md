@@ -24,14 +24,15 @@
 ## 部署与运行保障
 
 - [Mac 使用与数据保护](MACOS.md)、[课程上线与备份恢复](COURSE_ONLINE.md)、[部署配置](../deployment/README.md)。
-- [R2 阶段规划](R2_OPERATIONAL_ASSURANCE_PLAN.md)、[R2.1 请求编号和安全日志](R21_SAFE_DIAGNOSTICS.md)、[R2.2 通知与监测](R22_OPERATIONS_OBSERVATION.md)。
+- [R2 阶段规划](R2_OPERATIONAL_ASSURANCE_PLAN.md)、[R2.1 请求编号和安全日志](R21_SAFE_DIAGNOSTICS.md)、[R2.2 通知与监测](R22_OPERATIONS_OBSERVATION.md)、[R2.3 恢复点新鲜度](R23_RECOVERY_FRESHNESS.md)。
 - [安全差距登记](SECURITY_ASVS_GAP_REGISTER.md)、[通知进程运维](WORKER_PROCESS_ACCEPTANCE.md)。
 
 ## 测试与验收
 
 | 验证范围 | 实际记录 |
 |---|---|
-| 当前 R2.2 心跳、积压与监测失效 | [证据说明](evidence_r22/README.md)、[需求到测试](evidence_r22/requirement_trace.json)、[Mac 交付](evidence_r22/delivery.json) |
+| R2.3 第一批备份凭据工具 | [记录与范围](evidence_r23/README.md) |
+| R2.2 心跳、积压与监测失效 | [证据说明](evidence_r22/README.md)、[需求到测试](evidence_r22/requirement_trace.json)、[Mac 交付](evidence_r22/delivery.json) |
 | R2.1 请求追踪与安全日志 | [证据目录](evidence_r21/README.md) |
 | R1 财务闭环及加密恢复 | [证据目录](evidence_financial_evidence/README.md) |
 | 多诊所隔离与容量 | [历史容量基线](evidence_multiclinic/README.md)、[范围说明](MULTICLINIC_CAPACITY.md) |

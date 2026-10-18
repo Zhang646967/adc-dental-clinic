@@ -17,7 +17,7 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2 operational assurance in progress. [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/report-source/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
+Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2.3 first backup-tool increment in progress. [R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md) · [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/report-source/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating
@@ -164,7 +164,7 @@ Maintenance local acceptance: 884 source / 1,042 PostgreSQL-HTTP-concurrency / 7
 ## Next stage — 2026-10-18
 
 R2.1 safe request correlation/logging and R2.2 worker/backlog/observer monitoring
-are delivered. Next is R2.3 separate backup/download/restore freshness.
+are delivered. R2.3 first-increment tools now record creation/download freshness and validate a complete batch before publishing it; independent restore integration remains pending. See [the R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md).
 [The detailed plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md) defines ownership,
 failure response and R2-A01–A12. Executed increments remain separate from pending full-R2
 observation and service targets, with local and cloud acceptance kept separate.

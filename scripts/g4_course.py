@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.g4_prepare import inspect_bundle, read_env
 from scripts.g4_mac_demo import atomic_text
+from scripts.recovery_receipts import ReceiptBook, artifact
 
 BACKUP_NAME = re.compile(r'backup-[0-9]{8}T[0-9]{12}Z-adc_g4_[0-9a-f]{12}\.tar\.age')
 RECIPIENT = re.compile(r'age1[0-9a-z]{58}')
@@ -291,9 +292,12 @@ class Course:
         recipient = private_file(recipient_file).read_text().strip()
         if not RECIPIENT.fullmatch(recipient):
             raise ValueError('Use one age X25519 public recipient; private keys stay on the Mac.')
-        name = 'backup-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '-' + self.plan['project'] + '.tar.age'
         folder = private_directory(self.bundle / 'backups')
         with exclusive(folder / '.backup.lock'), tempfile.TemporaryDirectory(dir=folder) as temporary:
+            book = ReceiptBook(folder / 'recovery', self.plan['project'])
+            book.load()  # Refuse corrupt/foreign receipts before changing any archive.
+            started = datetime.now(timezone.utc)
+            name = 'backup-' + started.strftime('%Y%m%dT%H%M%S%fZ') + '-' + self.plan['project'] + '.tar.age'
             temporary = Path(temporary)
             dump = temporary / 'database.dump'
             with dump.open('xb') as stream:
@@ -315,7 +319,11 @@ class Course:
                     files[private_name] = private_file(path)
             meta = {'format': 1, 'project': self.plan['project'], 'server_major': 17,
                     'source_commit': self.plan['requested_source_commit'], 'images': self.plan['images'],
-                    'created_at': datetime.now(timezone.utc).isoformat(),
+                    # The dump snapshot begins after this instant; using the start
+                    # gives a conservative age, never an artificially recent RPO.
+                    'created_at': started.isoformat(),
+                    'recovery_point_basis': 'BACKUP_START_CONSERVATIVE',
+                    'completed_at': datetime.now(timezone.utc).isoformat(),
                     'files': {key: {'sha256': digest(value), 'size': value.stat().st_size}
                               for key, value in files.items()}}
             atomic_text(temporary / 'archive.json', json.dumps(meta, indent=2) + '\n')
@@ -331,9 +339,15 @@ class Course:
             record = {'name': name, 'project': self.plan['project'], 'created_at': meta['created_at'],
                       'size': (folder / name).stat().st_size, 'sha256': digest(folder / name)}
             atomic_text(folder / (name + '.json'), json.dumps(record) + '\n')
+            book.record('created', artifact(meta, record))
             prune_backups(folder, self.plan['project'], 7)
         return {'status': 'SERVER_BACKUP_CREATED', 'name': name, 'sha256': record['sha256'],
                 'off_host_copy': 'NOT_CHECKED'}
+
+    def recovery_status(self):
+        folder = self.bundle / 'backups'
+        return ReceiptBook(folder / 'recovery', self.plan['project']).status(
+            self.plan['requested_source_commit'], self.plan['images']['app'], folder, mode='server')
 
     def restore(self, encrypted, identity, age='age'):
         encrypted, identity = private_file(encrypted), private_file(identity)
@@ -514,11 +528,22 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
         names = [m.name for m in members]
         if (len(names) != len(set(names)) or len(names) > 12 or
                 sum(m.size for m in members) > MAX_BACKUP_BYTES + 1024 * 1024 or
-                any(not m.isfile() or m.name != PurePosixPath(m.name).name for m in members) or
+                any(not m.isfile() or m.size < 0 or m.name != PurePosixPath(m.name).name for m in members) or
                 'archive.json' not in names):
             raise ValueError('Unsafe backup archive refused.')
-        meta = json.load(archive.extractfile('archive.json'))
-        if (meta.get('format') != 1 or meta.get('server_major') != 17 or
+        if archive.getmember('archive.json').size > 128 * 1024:
+            raise ValueError('Backup manifest exceeds its bound.')
+        def fields(pairs):
+            value = {}
+            for key, item in pairs:
+                if key in value:
+                    raise ValueError('Duplicate backup manifest field.')
+                value[key] = item
+            return value
+        meta = json.load(archive.extractfile('archive.json'), object_pairs_hook=fields,
+                         parse_constant=lambda _: (_ for _ in ()).throw(ValueError('Invalid manifest number.')))
+        if (not isinstance(meta, dict) or type(meta.get('format')) is not int or
+                meta.get('format') != 1 or type(meta.get('server_major')) is not int or meta.get('server_major') != 17 or
                 not re.fullmatch(r'adc_g4_[0-9a-f]{12}', meta.get('project', '')) or
                 not re.fullmatch(r'[0-9a-f]{40}', meta.get('source_commit', '')) or
                 set(names) != set(meta['files']) | {'archive.json'} or
@@ -531,7 +556,7 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
                 shutil.copyfileobj(archive.extractfile(member), stream)
             if member.name != 'archive.json':
                 fact = meta['files'][member.name]
-                if fact['size'] != destination.stat().st_size or fact['sha256'] != digest(destination):
+                if type(fact['size']) is not int or fact['size'] != destination.stat().st_size or fact['sha256'] != digest(destination):
                     raise ValueError('Decrypted backup checksum differs.')
     return meta
 
@@ -547,7 +572,7 @@ def main():
     sub = parser.add_subparsers(dest='action', required=True)
     build_parser = sub.add_parser('build')
     build_parser.add_argument('--artifacts', required=True)
-    for name in ('deploy', 'status', 'list-backups', 'operations-status'):
+    for name in ('deploy', 'status', 'list-backups', 'operations-status', 'recovery-status'):
         sub.add_parser(name)
     backup = sub.add_parser('backup')
     backup.add_argument('--recipient-file', required=True)
@@ -585,6 +610,8 @@ def main():
             result = course.status()
         elif args.action == 'operations-status':
             result = course.operations()
+        elif args.action == 'recovery-status':
+            result = course.recovery_status()
         elif args.action == 'backup':
             result = course.backup(args.recipient_file, args.age)
         elif args.action == 'restore':
@@ -601,12 +628,12 @@ def main():
             result = {'project': course.plan['project'],
                       'backups': backup_inventory(course.bundle / 'backups', course.plan['project'])}
     print(json.dumps(result, indent=2))
-    if args.action == 'operations-status' and result.get('code') in (1,2,3):
+    if args.action in ('operations-status', 'recovery-status') and result.get('code') in (1,2,3):
         raise SystemExit(result['code'])
 
 
 if __name__ == '__main__':
     try:
         main()
-    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError, tarfile.TarError):
+    except (OSError, ValueError, TypeError, KeyError, OverflowError, RecursionError, RuntimeError, subprocess.SubprocessError, tarfile.TarError):
         raise SystemExit('Course operation stopped. Preserve state and inspect private diagnostics; no cloud acceptance granted.') from None

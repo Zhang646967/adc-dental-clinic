@@ -26,6 +26,7 @@ from scripts.g4_course import (BACKUP_NAME, MAX_BACKUP_BYTES, RECIPIENT, backup_
                               private_file, prune_backups, run)
 from scripts.g4_prepare import inspect_bundle
 from scripts.g4_mac_demo import atomic_text
+from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instant, age as recovery_age, utc_now
 
 
 class Remote:
@@ -193,35 +194,65 @@ class Remote:
             listing = self.operation('list-backups')
             if listing['project'] != self.plan['project'] or not listing['backups']:
                 raise ValueError('No complete backup for the explicitly selected project.')
-            for row in listing['backups']:
-                if (row['project'] != self.plan['project'] or not BACKUP_NAME.fullmatch(row['name']) or
-                        type(row['size']) is not int or not 0 < row['size'] < MAX_BACKUP_BYTES + 2 * 1024 * 1024 or
-                        not re.fullmatch('[0-9a-f]{64}', row['sha256'])):
-                    raise ValueError('Invalid remote backup metadata.')
-                target = destination / row['name']
-                if target.exists():
-                    private_file(target)
-                    if digest(target) != row['sha256']:
-                        raise ValueError('Existing Mac backup differs; preserve it.')
-                else:
-                    with tempfile.TemporaryDirectory(dir=destination) as folder:
-                        folder = Path(folder)
-                        pending = folder / row['name']
+            rows = listing['backups']
+            if not isinstance(rows, list) or len(rows) > 32:
+                raise ValueError('Remote inventory exceeds the bounded retention contract.')
+            book = ReceiptBook(destination / 'recovery', self.plan['project'])
+            book.load()
+            backup_inventory(destination, self.plan['project'])
+            key_sha256 = file_digest(identity)
+            verified = []
+            seen = set()
+            # Validate every current/cached copy with the CURRENT key before
+            # installing any sidecar, advancing receipts, or pruning old points.
+            with tempfile.TemporaryDirectory(dir=destination) as staging:
+                staging = Path(staging)
+                for index, row in enumerate(rows):
+                    if (row['project'] != self.plan['project'] or not BACKUP_NAME.fullmatch(row['name']) or
+                            type(row['size']) is not int or not 0 < row['size'] < MAX_BACKUP_BYTES + 2 * 1024 * 1024 or
+                            not re.fullmatch('[0-9a-f]{64}', row['sha256']) or row['name'] in seen):
+                        raise ValueError('Invalid or repeated remote backup metadata.')
+                    seen.add(row['name'])
+                    target = destination / row['name']
+                    work = staging / str(index)
+                    work.mkdir(mode=0o700)
+                    pending = work / row['name']
+                    cached = target.exists() or target.is_symlink()
+                    if cached:
+                        private_file(target)
+                        encrypted = target
+                    else:
                         self.copy(pending, self.remote_bundle + '/backups/' + row['name'], download=True)
-                        if pending.stat().st_size != row['size'] or digest(pending) != row['sha256']:
-                            raise ValueError('Downloaded backup checksum differs.')
-                        meta = decrypt_backup(pending, identity, folder, self.log, age)
-                        if meta['project'] != self.plan['project'] or meta['source_commit'] != self.plan['requested_source_commit']:
-                            raise ValueError('Downloaded backup provenance differs.')
+                        encrypted = pending
+                    if encrypted.stat().st_size != row['size'] or file_digest(encrypted) != row['sha256']:
+                        raise ValueError('Downloaded/cached backup checksum differs.')
+                    meta = decrypt_backup(encrypted, identity, work, self.log, age)
+                    fact = artifact(meta, row)
+                    if (fact['project'] != self.plan['project'] or
+                            fact['source_commit'] != self.plan['requested_source_commit'] or
+                            fact['app_image'] != self.plan['images']['app']):
+                        raise ValueError('Downloaded/cached recovery provenance differs.')
+                    # Validate clocks/schema before publishing any of the batch.
+                    recovery_age(fact['created_at'], utc_now())
+                    verified.append((fact, row, None if cached else pending, target))
+                if file_digest(identity) != key_sha256:
+                    raise ValueError('The current recovery key changed during synchronization.')
+                verified.sort(key=lambda item: instant(item[0]['created_at']))
+                last_fact, last, _, _ = verified[-1]
+                # Preflight receipt conflicts before installing bytes. Receipts
+                # are still untouched if a later item in the batch was invalid.
+                state = book.load()
+                for kind in ('created', 'downloaded'):
+                    previous = state['latest'][kind]
+                    if previous and instant(previous['artifact']['created_at']) == instant(last_fact['created_at']) and previous['artifact'] != last_fact:
+                        raise ValueError('Conflicting recovery archive at the latest point.')
+                for fact, row, pending, target in verified:
+                    if pending is not None:
                         os.replace(pending, target)
-                atomic_text(destination / (row['name'] + '.json'), json.dumps(row) + '\n')
-            last = listing['backups'][-1]
-            # Also validate cached copies with the CURRENT key; otherwise a
-            # lost/replaced key could make an unusable cache look recoverable.
-            with tempfile.TemporaryDirectory(dir=destination) as folder:
-                meta = decrypt_backup(destination / last['name'], identity, Path(folder), self.log, age)
-                if meta['project'] != self.plan['project'] or meta['source_commit'] != self.plan['requested_source_commit']:
-                    raise ValueError('Cached recovery copy provenance differs.')
+                    atomic_text(destination / (row['name'] + '.json'), json.dumps(row) + '\n')
+                # Fresh observations are distinct from the original backup time.
+                book.record('created', last_fact)
+                book.record('downloaded', last_fact, key_sha256=key_sha256)
             prune_backups(destination, self.plan['project'], 30)
             result = {'status': 'MAC_BACKUP_VERIFIED', 'project': self.plan['project'],
                       'last_off_host_backup': last['created_at'], 'sha256': last['sha256'],
@@ -299,6 +330,9 @@ def main():
         command.add_argument('--destination', required=True)
         command.add_argument('--identity-file', required=True)
         command.add_argument('--age', default='age')
+    status = sub.add_parser('recovery-status')
+    status.add_argument('--destination', required=True)
+    status.add_argument('--identity-file', required=True)
     sub.add_parser('status')
     args = parser.parse_args()
     if args.action == 'generate-backup-key':
@@ -314,15 +348,22 @@ def main():
                                     args.restore_backup, args.identity_file, args.age)
         elif args.action == 'sync':
             result = remote.sync(args.destination, args.identity_file, args.age)
+        elif args.action == 'recovery-status':
+            folder = private_directory(args.destination)
+            result = ReceiptBook(folder / 'recovery', remote.plan['project']).status(
+                remote.plan['requested_source_commit'], remote.plan['images']['app'], folder,
+                mode='mac', identity_file=args.identity_file)
         elif args.action == 'install-mac-job':
             result = remote.install_mac_job(args.destination, args.identity_file, args.age)
         else:
             result = remote.operation('status')
     print(json.dumps(result, indent=2))
+    if args.action == 'recovery-status' and result.get('code') in (1,2,3):
+        raise SystemExit(result['code'])
 
 
 if __name__ == '__main__':
     try:
         main()
-    except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError, tarfile.TarError):
+    except (OSError, ValueError, TypeError, KeyError, OverflowError, RecursionError, RuntimeError, subprocess.SubprocessError, tarfile.TarError):
         raise SystemExit('Remote operation stopped. Preserve private state and diagnostics; no cloud acceptance granted.') from None
