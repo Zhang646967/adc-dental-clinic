@@ -923,7 +923,7 @@
     "tests/test_operations_observation.py": "1d010e82e82276ef9d2b4cce3fa30abaa5f38ce1deb5859abf615c207d08505b",
     "tests/test_release_chains.py": "d0d52c597796164fef559143ca5a72a4b1e140c078f3289741e75820a749ef72",
     "tests/test_request_tracing.py": "e917860e21c477aae3578d33d21ca4927262f72543406d1e3e87d8eebda026f2",
-    "tests/test_reschedule_optimization.py": "c37ff5bd0ecfd2cae3fb4a5f2dad2dc33783e2acf4cfe4d668ac63bfc7de5891",
+    "tests/test_reschedule_optimization.py": "210fb1edc978d10b837249577e6b6c3308a1f9ef4ed488779b72f83866ab392b",
     "tests/test_v04.py": "db8ad7a3eb009d4972f5763acdee501964747e8f7d4b8555113ad0b9faff5c0d",
     "tests/test_v04_concurrency.py": "b1bb776c6ef14251bfaf77e38774558bcae7577d7163ecc6e118a56b360b73f1",
     "tests/test_v05.py": "975bcbe8cbfdf415eae859a85f2d582c27ee073527d88bd668649b2083957f03",

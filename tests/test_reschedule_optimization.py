@@ -1,6 +1,6 @@
 """Real PostgreSQL/HTTP acceptance for replacement search and confirmed moves."""
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, time as calendar_time
 from threading import Barrier
 from unittest.mock import patch
 import time
@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import UserAccount, RoleAssignment
-from adc_core.rules import RuleError
+from adc_core.rules import BUSINESS_TZ, RuleError
 from care.models import AuditEvent
 from coordination.models import WaitRequest, WaitOffer, SchedulePlan
 from registry.models import Dentist
@@ -63,10 +63,11 @@ class MoveFixture(V07Fixture):
             starts_at=self.t+timedelta(hours=1), ends_at=self.t+timedelta(hours=1, minutes=30),
             expires_at=expires or timezone.now()+timedelta(minutes=10))
 
-    def another_dentist(self, number=3):
+    def another_dentist(self, number=3, *, start=None):
+        start = start or self.t
         doctor = Dentist.objects.create(employee_no=f'MOVE-{number}', name=f'合成替代牙医{number}',
             date_of_birth=date(1990, 1, 1), home_address='虚构地址', phone='000', email=f'd{number}@example.invalid')
-        slot = AvailabilitySlot.objects.create(clinic=self.a, dentist=doctor, starts_at=self.t, ends_at=self.t+timedelta(hours=4))
+        slot = AvailabilitySlot.objects.create(clinic=self.a, dentist=doctor, starts_at=start, ends_at=start+timedelta(hours=4))
         return doctor, slot
 
 
@@ -162,10 +163,24 @@ class ReplacementSearchTests(MoveFixture, TransactionTestCase):
         with self.assertRaises(RuleError): self.options()
 
     def test_option_count_and_incomplete_flag_are_explicit(self):
-        for n in range(3, 9): self.another_dentist(n)
-        result = self.options()
+        # This tests the row cap, independently of the runner's time of day.
+        day = timezone.localdate() + timedelta(days=1)
+        morning = timezone.make_aware(datetime.combine(day, calendar_time(9)), BUSINESS_TZ)
+        for n in range(3, 9): self.another_dentist(n, start=morning)
+        result = replacement_options(actor=self.front, visit_id=self.old.pk, day=day)
         self.assertEqual(len(result['rows']), 30)
         self.assertTrue(result['limited'])
+
+    def test_selected_day_near_midnight_keeps_only_that_days_start_times(self):
+        day = timezone.localdate() + timedelta(days=1)
+        late = timezone.make_aware(datetime.combine(day, calendar_time(23, 30)), BUSINESS_TZ)
+        doctor, slot = self.another_dentist(90, start=late)
+        result = replacement_options(actor=self.front, visit_id=self.old.pk, day=day,
+                                     dentist_id=doctor.pk)
+        self.assertEqual([row['start'] for row in result['rows']], [late])
+        self.assertEqual(result['rows'][0]['slot_id'], slot.pk)
+        self.assertFalse(result['limited'])
+        self.unchanged()
 
     def test_large_relation_set_fails_closed_without_claiming_no_capacity(self):
         start = self.t+timedelta(hours=1)
