@@ -29,7 +29,7 @@ Application `ccdcdcd` preserves 48 durable fingerprints and 70 private files;
 ## Historical planning update — 2026-10-18
 
 The application baseline is delivered R1 financial evidence at `6a06f35`.
-[Current report: Word/PDF/Markdown](docs/current_report/README.md) records its
+[Current report: Word/PDF/Markdown](docs/report-source/README.md) records its
 executed local acceptance and the next [R2 operational assurance plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md).
 The first coding batch is safe request correlation and structured operational
 logging, followed by worker/backlog and backup/download/restore freshness.

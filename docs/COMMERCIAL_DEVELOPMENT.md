@@ -11,7 +11,7 @@ Requirements, design choices and executed evidence stay distinct, following the
 uploaded requirements/design note. The agreed target is one dental chain with
 approximately 5–20 clinics. Data volume, support model and service commitments
 still require validation before commercial sizing; the rows below are ordered
-engineering stages. The [current report](current_report/README.md) records the
+engineering stages. The [current report](report-source/README.md) records the
 delivered R1 baseline and the next [R2 plan](R2_OPERATIONAL_ASSURANCE_PLAN.md).
 
 ## Delivery stages 交付阶段

@@ -3,7 +3,7 @@
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh
 synthetic demo → continue development on `main`.
 
-Current documentation, 2026-10-18: [R2.2 delivery and course-format report](current_report/README.md).
+Current documentation, 2026-10-18: [R2.2 delivery and course-format report](report-source/README.md).
 The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
 evidence. [Mac delivery](evidence_r21/delivery.json) verifies original data and
 configuration. R2.3 recovery freshness is next in [the R2 contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).

@@ -1,6 +1,23 @@
-Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2 operational assurance in progress. [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/current_report/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
-
 # ADC — Dental Clinic Management
+
+**系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
+
+📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
+
+教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
+
+## 仓库分类
+
+| 分类 | 入口 | 内容 |
+|---|---|---|
+| 课程交付 | [课程报告/](课程报告/) | 当前 PDF 和 Word，便于直接下载 |
+| 项目文档 | [docs/](docs/README.md) | 业务流程、系统设计、部署运维、验收和历史导航 |
+| 系统源码 | [源码结构](docs/README.md#源码与资源) | 按接诊、财务、设备、排班、通知等业务模块组织 |
+| 验证 | [tests/](tests/)、[checks/](checks/) | PostgreSQL/业务回归与源代码规则检查 |
+| 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
+| 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
+
+Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2 operational assurance in progress. [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/report-source/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating
@@ -82,7 +99,7 @@ results under `evidence/verification/`. Latest local execution:
 [R1 financial evidence, 2026-10-15](docs/evidence_financial_evidence/README.md):
 908 source checks, 1,106 PostgreSQL/HTTP/concurrency tests, 2,423 isolated browser
 assertions and a five-clinic/twenty-account/thirty-minute local workload.
-[The current report](docs/current_report/) separates these executed results from
+[The current report](docs/report-source/) separates these executed results from
 the planned R2 work. Earlier [Mac migration](docs/evidence_macos/) and
 [G4 PostgreSQL](docs/evidence_g4/http2-postgresql-gate.json) records retain their
 historical scope.
@@ -103,7 +120,7 @@ remains NOT_RUN. Original Windows backup recovery remains unresolved.
 
 - [Release scope and history](RELEASE_CURRENT.md)
 - [Two business demonstration routes](docs/DEMO_ROUTES_RC1.md)
-- [Current development report: Word, PDF and Markdown](docs/current_report/)
+- [Current development report: Word, PDF and Markdown](docs/report-source/)
 - [R2 operational assurance requirements and acceptance](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md)
 - [ASVS 5.0.0 security gap register](docs/SECURITY_ASVS_GAP_REGISTER.md)
 - [Historical R5/RC1 course report and UML models](docs/release_report/)
@@ -155,6 +172,6 @@ R3 treatment continuity, R4 resource coordination and R5 measured
 twenty-clinic expansion follow in that order.
 
 R2.1 application delivery: [protected Mac record](docs/evidence_r21/delivery.json)
-and [updated current report](docs/current_report/README.md). Application commit
+and [updated current report](docs/report-source/README.md). Application commit
 `ccdcdcd` passed exact-version CI; 48 durable fingerprints and 70 private files
 remain unchanged, with 410 Mac browser assertions.

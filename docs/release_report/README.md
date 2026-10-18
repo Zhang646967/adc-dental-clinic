@@ -1,8 +1,8 @@
 # R5 / RC1 课程报告
 
 Historical frozen report（历史冻结报告）. The current development and planning
-companion is [ADC current report: Word/PDF/Markdown](../current_report/README.md),
-dated 2026-10-18, with delivered R1 evidence and planned R2 contracts. The DOCX,
+companion is [当前课程报告：Word/PDF](../../课程报告/README.md),
+dated 2026-10-18, with delivered R1/R2.1/R2.2 evidence and the remaining R2 plan. The DOCX,
 PDF, UML and acceptance statements below retain their original RC1 scope.
 
 从已修订R4.4继承14幅模型和原SU-01—25/SF-01，新增B07/S04/S05/D02/M02及SU-26—38。完整PDF/DOCX为冻结输出，63页、38份系统用例、1份共享子功能、19幅模型、2幅旧v0.7人工观察图。

@@ -1,7 +1,7 @@
 # System reports 系统报告入口
 
 Current development report（2026-10-18）:
-[Word / PDF / Markdown](current_report/README.md). It records the delivered R1
+[Word / PDF / Markdown](report-source/README.md). It records the delivered R1
 financial-evidence baseline and planned R2 operational assurance, separating
 executed local evidence from cloud tests and future development.
 

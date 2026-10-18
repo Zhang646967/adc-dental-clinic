@@ -1,11 +1,11 @@
-# Current course report 当前课程报告
+# 报告源文件与复现说明
 
 Case and notes → business/system models → explicit responsibilities → executed
 evidence → protected delivery. Date: **2026-10-18**. Application **`02a9dbc90583fbcad47567e64ae77ae810eca33f`**;
 [exact application CI passed](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755).
 
-- [Word report](ADC_Current_System_Report_20261018.docx)
-- [PDF report](ADC_Current_System_Report_20261018.pdf)
+- [Word report](../../课程报告/课程报告_张加良_8210241102.docx)
+- [PDF report](../../课程报告/课程报告_张加良_8210241102.pdf)
 - [Readable Markdown report](REPORT.md)
 - [Format reference and retained scope](FORMAT_REFERENCE.md)
 - [R2.2 implementation and executed delivery](../evidence_r22/README.md)
@@ -58,12 +58,11 @@ R2.2 adds no migration or business role.
 
 `report_source.json` is editable text; `baseline.json` separately records historical
 R1/R2.1 and current R2.2 evidence/digests. `build_report.py` reads the frozen
-Word source only to retain models and full specifications, then generates Word
-and Markdown. It needs Python with `python-docx`; it never accesses a database
+Word source only to retain models and full specifications, then generates Word in `课程报告/` and Markdown in this source directory. It needs Python with `python-docx`; it never accesses a database
 or host credentials:
 
 ```sh
-python docs/current_report/build_report.py
+python docs/report-source/build_report.py
 ```
 
 The responsibility-view PNG has a reproducible Pillow source in
@@ -71,7 +70,7 @@ The responsibility-view PNG has a reproducible Pillow source in
 capture is the sanitized current-clinic panel only. No private account guide,
 CSV payload, dump, key or raw operational state is included.
 
-PDF export uses LibreOffice and Poppler. Fonts are Noto Serif CJK SC,
+Use `--output /absolute/output/folder` for an isolated draft. PDF export uses LibreOffice and Poppler. Fonts are Noto Serif CJK SC,
 Noto Sans CJK SC and Liberation Serif; the PDF embeds its fonts.
 [Official Noto CJK sources](https://github.com/notofonts/noto-cjk).
 An editable Word rendering needs compatible fonts. After a new export, recheck

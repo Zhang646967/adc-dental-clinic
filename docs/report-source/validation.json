@@ -139,22 +139,28 @@
     "reference_pdf_sha256": "ba3164113b097daa7be79251f540513fe181687e539e82821506a1671078e248"
   },
   "sources_and_outputs_sha256": {
-    "report_source.json": "f65a01930b4d949fe84646c38eec02c7a64be6199960bba51e0dac0c60d1ad78",
+    "report_source.json": "3c6f0427a4533d48aeecfbb4c0b42dbbf9536ee8550b17ea48bf120020d72c7c",
     "baseline.json": "a0ea9e441e045b4dcc21f9eed95696c10274b441c4de52653382a86e59cbdaf2",
-    "build_report.py": "c7edfb15afc84bc1660ebe8f18a05fed0db89797868905febc86c87613c160e6",
+    "build_report.py": "9db3f9e8f251f74930384534dded861ff2bbc022b0a83bee812793a2b57fed82",
     "draw_operations_flow.py": "c371b28adc131c1143fda5a53320b31b6979972cf1aaa11090c0b9880d07f393",
     "REPORT.md": "fd1d7e7216c8ba4e06d9ebbd945c4eef0da90ed9fff921f2774ca342ce7d3d9b",
-    "README.md": "a26065e96d95c5846fb4fd9788ceffae1538c21a8503847a9b5e056fba76ace8",
+    "README.md": "32337960528dc8f5c22fef9c2afd0b20df5d0e2490ea501e4290422bdeb92afe",
     "FORMAT_REFERENCE.md": "51af313ec455576fa01435c3527f7f14a501788287c86a962b90465ecc78c3d4",
     "toc_entries.json": "584e1b3d4e1a715b208cfed2374f2f9c42c6130f7ec617b89a023557e998f662",
     "toc_pages.json": "335e9a1ffbaa1fa1d9863f2e170e200ead6605e320c2a277a9e150b9af511bab",
     "operations-flow.png": "f2e55fe04bead53a2a578239dfb2b8a489321c3a281baeefdc6e6126130c8227",
     "notification-overview.png": "37560d40294c8b462dd4687a2476509d5f35e805302e91dbd70b1d378117c271",
-    "ADC_Current_System_Report_20261018.docx": "5ee642588da9630862f7328bef2f00a5bef2a5b5b103aa02993334d56e4cdebc",
-    "ADC_Current_System_Report_20261018.pdf": "cebaa94edb7d140f9d2e96f42fa947dff87233989fb1481adcf83a105c99c4c5"
+    "../../课程报告/课程报告_张加良_8210241102.pdf": "cebaa94edb7d140f9d2e96f42fa947dff87233989fb1481adcf83a105c99c4c5",
+    "../../课程报告/课程报告_张加良_8210241102.docx": "5ee642588da9630862f7328bef2f00a5bef2a5b5b103aa02993334d56e4cdebc"
   },
   "R22": "DELIVERED_ON_MAC",
   "R2": "IN_PROGRESS",
   "cloud_acceptance": "NOT_RUN",
-  "windows_original_data_recovery": "unresolved"
+  "windows_original_data_recovery": "unresolved",
+  "repository_organization": {
+    "artifacts_renamed_only": true,
+    "rendered_bytes_preserved": true,
+    "report_directory": "课程报告",
+    "source_directory": "docs/report-source"
+  }
 }

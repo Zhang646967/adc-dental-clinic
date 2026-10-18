@@ -33,7 +33,8 @@ def style(st,size,bold=False,family=SERIF):
  for key,val in [('eastAsia',family),('ascii',LATIN),('hAnsi',LATIN)]:f.set(qn('w:'+key),val)
 
 
-def build(folder,repo):
+def build(folder,repo,output=None):
+ output=output or repo/'课程报告';output.mkdir(parents=True,exist_ok=True)
  source=json.loads((folder/'report_source.json').read_text());base=repo/'docs/release_report/Report_R5_RC1.docx'
  assert hashlib.sha256(base.read_bytes()).hexdigest()==source['frozen_docx_sha256']
  D=Document(base);paras=list(D.paragraphs);children=list(D._element.body);positions={id(p._p):children.index(p._p) for p in paras}
@@ -317,9 +318,9 @@ def build(folder,repo):
   font(x.add_run(text+'\t'+str(pages.get(text,'待校核'))),10.5,level==1)
   toc_anchor._p.addprevious(x._p)
  toc_anchor._p.getparent().remove(toc_anchor._p)
- stem=source['file_stem'];D.save(folder/(stem+'.docx'));(folder/'REPORT.md').write_text('\n'.join(markdown).rstrip()+'\n')
+ stem=source['file_stem'];D.save(output/(stem+'.docx'));(folder/'REPORT.md').write_text('\n'.join(markdown).rstrip()+'\n')
  (folder/'toc_entries.json').write_text(json.dumps(toc,ensure_ascii=False,indent=2)+'\n')
  print(json.dumps({'docx':stem+'.docx','use_cases_retained':len(uc),'tables':len(D.tables),'images':len(D.inline_shapes),'toc_entries':len(toc)},ensure_ascii=False))
 
 if __name__=='__main__':
- parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--folder',type=Path,default=Path(__file__).resolve().parent);parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[2]);a=parser.parse_args();build(a.folder.resolve(),a.repo.resolve())
+ parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--folder',type=Path,default=Path(__file__).resolve().parent);parser.add_argument('--output',type=Path);parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[2]);a=parser.parse_args();build(a.folder.resolve(),a.repo.resolve(),a.output.resolve() if a.output else None)

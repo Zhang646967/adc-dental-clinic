@@ -9,7 +9,7 @@ Development update 2026-10-18: R1 is delivered at `6a06f35`, with
 [executed evidence](evidence_financial_evidence/README.md). R2.1 now implements [safe request correlation/logging](R21_SAFE_DIAGNOSTICS.md),
 with [executed local evidence](evidence_r21/README.md). Next is R2.2 worker/backlog
 observation in [the R2 plan](R2_OPERATIONAL_ASSURANCE_PLAN.md). See the
-[current Word/PDF development report](current_report/README.md) and
+[current Word/PDF development report](report-source/README.md) and
 [ASVS 5.0.0 scoped gap register](SECURITY_ASVS_GAP_REGISTER.md).
 
 ## Learning from the course notes
