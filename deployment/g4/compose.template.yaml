@@ -8,7 +8,7 @@ x-app: &app
   security_opt: [no-new-privileges:true]
   cap_drop: [ALL]
   logging: &logs
-    driver: json-file
+    driver: local
     options: {max-size: "10m", max-file: "3"}
 services:
   db:
@@ -18,7 +18,7 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
       - ./init-db.sh:/docker-entrypoint-initdb.d/10-adc-g4.sh:ro
-    command: [postgres, -c, log_min_error_statement=panic]
+    command: [postgres, -c, log_min_error_statement=panic, -c, log_error_verbosity=terse, -c, log_min_messages=panic]
     healthcheck:
       test: [CMD-SHELL, "pg_isready -U adc_g4_admin -d adc_rc_demo"]
       interval: 5s
@@ -26,7 +26,7 @@ services:
       retries: 30
     restart: unless-stopped
     stop_grace_period: 30s
-    logging: *logs
+    logging: {driver: none}
   schema:
     <<: *app
     profiles: [maintenance]
@@ -65,6 +65,8 @@ services:
     restart: "on-failure:5"
     stop_grace_period: 30s
   gateway:
+    entrypoint: [nginx]
+    command: [-g, "daemon off;", -e, /dev/null]
     image: ${G4_NGINX_IMAGE:?Pinned Nginx image required}
     healthcheck:
       test: [CMD, nginx, -t]

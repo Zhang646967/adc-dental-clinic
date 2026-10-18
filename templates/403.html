@@ -26,6 +26,7 @@
     <p>切换身份或诊所后，请重新打开业务页面；授权变化后，请重新登录。</p>
     {% endif %}
     <p>如果刚才提交的结果不确定，请先在工作台核对已保存记录，再决定是否重新办理。</p>
+    {% include 'release/request_reference.html' %}
     <a class="button" href="{% url 'dashboard' %}">返回当前工作台</a>
   </main>
 </body>

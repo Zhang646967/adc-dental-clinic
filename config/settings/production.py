@@ -27,9 +27,3 @@ SECURE_HSTS_PRELOAD = False
 SECURE_REFERRER_POLICY = 'same-origin'
 DATABASES['default']['OPTIONS']['sslmode'] = _deployment.sslmode
 DATABASES['default']['OPTIONS']['options'] = '-c statement_timeout=15000 -c lock_timeout=5000'
-LOGGING = {
-    'version':1, 'disable_existing_loggers':False,
-    'formatters':{'minimal':{'format':'{asctime} {levelname} {name}: {message}','style':'{'}},
-    'handlers':{'console':{'class':'logging.StreamHandler','formatter':'minimal'}},
-    'root':{'handlers':['console'],'level':'WARNING'},
-}

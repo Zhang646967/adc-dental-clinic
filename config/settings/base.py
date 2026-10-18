@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment",
 ]
 MIDDLEWARE = [
+    "adc_core.request_trace.RequestTraceMiddleware",
     "django.middleware.security.SecurityMiddleware", "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware", "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware", "django.contrib.messages.middleware.MessageMiddleware",
@@ -23,7 +24,7 @@ MIDDLEWARE = [
 ]
 ROOT_URLCONF = "config.urls"
 TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates", "DIRS": [BASE_DIR / "templates"], "APP_DIRS": True,
-              "OPTIONS": {"context_processors": ["django.template.context_processors.request", "django.contrib.auth.context_processors.auth", "django.contrib.messages.context_processors.messages", "adc_core.context.navigation", "guidance.context.guide_context"]}}]
+              "OPTIONS": {"context_processors": ["django.template.context_processors.request", "django.contrib.auth.context_processors.auth", "django.contrib.messages.context_processors.messages", "adc_core.context.navigation", "guidance.context.guide_context", "adc_core.request_trace.support_context"]}}]
 WSGI_APPLICATION = "config.wsgi.application"
 AUTH_USER_MODEL = "accounts.UserAccount"
 DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql", "NAME": os.environ.get("POSTGRES_DB", "adc_local"),
@@ -57,6 +58,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
 ADC_READ_ONLY = os.environ.get("ADC_READ_ONLY", "0") == "1"
 ADC_VERSION = "1.0.0-rc.1"
+from adc_core.operational_logging import logging_config
+LOGGING = logging_config()
+CSRF_FAILURE_VIEW = 'adc_core.request_trace.csrf_failure'
 
 # AI is a server-side intent classifier, not a clinical or autonomous agent.
 AI_MODE = os.environ.get("AI_MODE", "demo")

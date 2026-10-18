@@ -1,4 +1,6 @@
 FROM python:3.13-slim
+ARG ADC_SOURCE_COMMIT=unknown
+ENV ADC_SOURCE_COMMIT=$ADC_SOURCE_COMMIT
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DJANGO_SETTINGS_MODULE=config.settings.production
 WORKDIR /app
 COPY requirements.txt requirements-production.txt ./

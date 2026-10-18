@@ -113,6 +113,7 @@ def build(artifacts, docker, context, architecture):
             archive.extractall(folder, filter='data')
         image_file = artifacts / 'image.id'
         run(base + ['build', '--platform', 'linux/' + architecture,
+                    '--build-arg', 'ADC_SOURCE_COMMIT=' + revision,
                     '--label', 'org.opencontainers.image.revision=' + revision,
                     '--iidfile', str(image_file), '-f', str(Path(folder) / 'Dockerfile.production'),
                     folder], log, timeout=1800)

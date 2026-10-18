@@ -15,3 +15,5 @@ accesslog='-'
 access_log_format='%(m)s %(s)s %(L)s'
 errorlog='-'
 loglevel='warning'
+from adc_core.operational_logging import logging_config
+logconfig_dict = logging_config()

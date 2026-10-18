@@ -1,6 +1,14 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
-## Current planning update — 2026-10-18
+## R2.1 diagnosis and logging — 2026-10-18
+
+Server request IDs, safe errors/logs and measured size rotation are implemented.
+[R2.1 contract](docs/R21_SAFE_DIAGNOSTICS.md) and
+[local acceptance](docs/evidence_r21/README.md) record unchanged permissions,
+independent financial facts and encrypted restoration. Exact-commit CI and
+protected Mac rollout are recorded separately. No migrations are added.
+
+## Historical planning update — 2026-10-18
 
 The application baseline is delivered R1 financial evidence at `6a06f35`.
 [Current report: Word/PDF/Markdown](docs/current_report/README.md) records its

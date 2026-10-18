@@ -1,6 +1,7 @@
 # Historical RC1 test report 历史测试报告
 
-Current application acceptance: [R1 financial evidence, 2026-10-15](evidence_financial_evidence/README.md).
+Current local application acceptance: [R2.1 diagnosis/logging, 2026-10-18](evidence_r21/README.md).
+Previous acceptance: [R1 financial evidence, 2026-10-15](evidence_financial_evidence/README.md).
 Current report and future work: [Word/PDF/Markdown report](current_report/README.md)
 and [R2 plan](R2_OPERATIONAL_ASSURANCE_PLAN.md), updated 2026-10-18.
 The RC1 record below remains historical: its unexecuted Mac/PostgreSQL statements

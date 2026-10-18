@@ -5,10 +5,10 @@ quality → measured expansion. The selected target is one chain with 5–20 cli
 International workflows inform the design; the present implementation continues
 with synthetic CNY data and Asia/Shanghai business dates.
 
-Planning update 2026-10-18: R1 is delivered at `6a06f35`, with
-[executed evidence](evidence_financial_evidence/README.md). The next implementation
-is the [detailed R2 operational assurance plan](R2_OPERATIONAL_ASSURANCE_PLAN.md),
-starting with safe request correlation/logging. See the
+Development update 2026-10-18: R1 is delivered at `6a06f35`, with
+[executed evidence](evidence_financial_evidence/README.md). R2.1 now implements [safe request correlation/logging](R21_SAFE_DIAGNOSTICS.md),
+with [executed local evidence](evidence_r21/README.md). Next is R2.2 worker/backlog
+observation in [the R2 plan](R2_OPERATIONAL_ASSURANCE_PLAN.md). See the
 [current Word/PDF development report](current_report/README.md) and
 [ASVS 5.0.0 scoped gap register](SECURITY_ASVS_GAP_REGISTER.md).
 
@@ -78,8 +78,8 @@ module contracts. Revisit service extraction when a measured scaling, independen
 deployment or ownership need justifies its distributed consistency and operational
 costs. [Microservice trade-offs](https://martinfowler.com/articles/microservice-trade-offs.html)
 
-R1 is the delivered increment. R2 has a detailed plan; implementation and
-acceptance remain pending. R3–R5 require detailed business contracts before
+R1 is delivered. R2 is in progress: R2.1 diagnosis/logging is locally verified;
+R2.2 observation, later recovery freshness and complete R2 acceptance are pending. R3–R5 require detailed business contracts before
 implementation. Twenty-clinic operation, separate customer
 tenancy, international currency/timezone deployment, real payment/insurance
 integration and real patient use are separate acceptance targets. The five-clinic

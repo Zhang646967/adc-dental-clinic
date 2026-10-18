@@ -1,4 +1,4 @@
-Current development（当前进展）：R1 financial evidence delivered; R2 operational assurance planned. [Current Word/PDF report](docs/current_report/) · [R2 development plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md) · [Commercial roadmap](docs/COMMERCIAL_DEVELOPMENT.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
+Current development（当前进展）：R2.1 request tracing and safe logs locally verified; R2 operational assurance in progress. [R2.1 contract and evidence](docs/R21_SAFE_DIAGNOSTICS.md) · [Current Word/PDF report](docs/current_report/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 # ADC — Dental Clinic Management
 
@@ -47,6 +47,8 @@ import into a separate empty instance.
 
 - Django 5.2, Python 3.13, PostgreSQL 17, Gunicorn and Nginx.
 - A modular monolith（模块化单体）with seven role workspaces and clinic scope.
+- Server-generated request references, safe error pages, allowlisted operational
+  logs and measured size rotation; [R2.1 operator guide](docs/R21_SAFE_DIAGNOSTICS.md).
 - Clinic payment-channel accounts, versioned cash evidence, private CSV statements
   and independently reviewed one-to-one matching. See
   [the R1 financial evidence contract](docs/FINANCIAL_EVIDENCE_RECONCILIATION.md).
@@ -71,7 +73,8 @@ import into a separate empty instance.
 ## Validation and project records
 
 `./RC_MACOS.sh verify` uses a new temporary PostgreSQL database and writes
-results under `evidence/verification/`. The latest application acceptance is
+results under `evidence/verification/`. Latest local execution:
+[R2.1 diagnosis and logging](docs/evidence_r21/README.md). Previous acceptance is
 [R1 financial evidence, 2026-10-15](docs/evidence_financial_evidence/README.md):
 908 source checks, 1,106 PostgreSQL/HTTP/concurrency tests, 2,423 isolated browser
 assertions and a five-clinic/twenty-account/thirty-minute local workload.
@@ -139,10 +142,10 @@ Maintenance local acceptance: 884 source / 1,042 PostgreSQL-HTTP-concurrency / 7
 
 ## Next stage — 2026-10-18
 
-R2 starts with safe request correlation and structured operational logs, then
-worker/backlog observation and separate backup/download/restore freshness.
+R2.1 implements safe request correlation and structured operational logs. Next
+is R2.2 worker/backlog observation, then separate backup/download/restore freshness.
 [The detailed plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md) defines ownership,
-failure response and R2-A01–A12. The report update implements documentation only;
-R2 capabilities and service targets are planned, with local and cloud acceptance
-kept separate. R3 treatment continuity, R4 resource coordination and R5 measured
+failure response and R2-A01–A12. R2.1 execution is separate from future R2 monitoring
+and service targets, with local and cloud acceptance kept separate.
+R3 treatment continuity, R4 resource coordination and R5 measured
 twenty-clinic expansion follow in that order.

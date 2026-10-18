@@ -1,0 +1,297 @@
+{
+  "accepted_at_utc": "2026-10-18T12:28:51.582790+00:00",
+  "passed": true,
+  "base_commit": "08510fbfca21d5c4637382b83f137cfa5fb74814",
+  "scope": "R2.1 local synthetic implementation acceptance; complete R2, cloud and commercial acceptance remain pending.",
+  "application_changes_sha256": {
+    "Dockerfile.production": "6e2c512b3702e41d1e24f7010eb5baab7b7c6f8fef8efbe3f06c246e11b160e6",
+    "RC_MACOS.sh": "903885ead5455494a953c1d6f8744012c749dc0a6e7813e498ad58318dd30df8",
+    "accounts/apps.py": "d79046758c7421ed31cce4854529cf1dd5185cf39f65f2539a8e43844527e0d1",
+    "adc_core/operational_logging.py": "aca222aef1a5f7f4311e2f58e9febf5071d85c77832b3a9a473cad386db86fa4",
+    "adc_core/request_trace.py": "eed66f7ad8d2602a14736026a2f7674917343445b80fb452558398bd906be3b6",
+    "checks/test_macos_launcher.py": "66d6ee709fe9b78078b00f971c8b49934cde7f3b3b26e0548e7400891c815679",
+    "checks/test_operational_logs.py": "0a563fe589ed01260e717f612c51a8ea6706676fec6274251457f581a74489da",
+    "compose.rc.yaml": "495ce00ac87e07afd79b481f5a53a9de413cad6354f83ef47d8b9100acf4d0c4",
+    "config/settings/base.py": "0b67473ba7c819174e880009de5510ad096a6f82204eae40e8341738f5833203",
+    "config/settings/production.py": "dd6773c92311f2ed44781907e84ce65168a456e395bec5010b37f27b01ca0632",
+    "config/urls.py": "38c7649f2fabf3651fa24479a1d4b32505f77edb171d5b88995d859782f76ccd",
+    "deployment/g4/compose.template.yaml": "70e61397268497d60155f9633f6ae6d612377c0f36f29f34a1dc1c66fdf70076",
+    "deployment/g4/nginx.mac-tunnel.template.conf": "5fb4685742f93e088ca425a5530391586d3b847bd1264e8c643c9670330fdb3b",
+    "deployment/g4/nginx.template.conf": "2c14cb5b208f7cc6c638146207e7e8b57e9553c2e074abf6517a4144a1ffcfc3",
+    "deployment/gunicorn.conf.py": "57debadaa4dbf5cef1680f427c9faefb03fcc0601dca088df0a3432ebf9a797e",
+    "deployment/nginx.course.conf": "c8c38a0f7df667fe176df80b87fe96f6a88c6d0cd1d23315af4db4367701bb82",
+    "manage.py": "7fbcf76e97ca02babbc0020d2c726b343d5e7c758750a32e64bd41ddd76df550",
+    "scripts/g4_course.py": "17520bdf10f14e06d833190e7a21e852bdca68e1bb32651c26a0f0da2359f372",
+    "static/experience.css": "555b172b9f52b0f6d2cb2d03efbe860edb272140230a2c1754da8fe133e0e331",
+    "templates/403.html": "ac0641941761b73acefe960d58d919e38d738e96d4c842850ddffe7b936088d9",
+    "templates/500.html": "af17f6937929f86b45df9b82653467bf5e7ae49703c371210f27d9f8858683c0",
+    "templates/business/problem.html": "95b19af42106de0c3d996479f2f58cf7f1d2c0f415c10f73a59e4fefbd2c52e6",
+    "templates/business/proposal.html": "423e30fe5143d9fed3aad4ab1c7f3782c3dd2377fbceae2e83605162367c028a",
+    "templates/release/request_reference.html": "4a1baa47f8a1c225ed8a02adda97c4b33cccc5e24a1de45d1cdd6ca76d61bf23",
+    "templates/workspaces/error.html": "b1d01e6ed0af1da4df5c72d88c38af5bead7f7941cb33cbd6718673e437235e5",
+    "tests/test_request_tracing.py": "e917860e21c477aae3578d33d21ca4927262f72543406d1e3e87d8eebda026f2"
+  },
+  "project_migrations_preserved": 30,
+  "new_migrations": 0,
+  "regression": {
+    "source_checks": 918,
+    "postgresql_http_concurrency_tests": 1119,
+    "new_serialization_methods": 10,
+    "new_postgresql_http_methods": 13,
+    "full_isolated_gate_exit": 0,
+    "cleanup_exit": 0
+  },
+  "browser": {
+    "business": {
+      "passed": true,
+      "assertions": 568
+    },
+    "isolation": {
+      "passed": true,
+      "assertions": 248
+    },
+    "diagnostics": {
+      "passed": true,
+      "assertions": 78
+    }
+  },
+  "browser_assertions": 894,
+  "runtime_privacy": {
+    "passed": true,
+    "services": {
+      "web": {
+        "log_driver": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "parsed_events": 199,
+        "private_marker_found": false,
+        "OOM": false
+      },
+      "gateway": {
+        "log_driver": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "parsed_events": 1463,
+        "private_marker_found": false,
+        "OOM": false
+      },
+      "notification-worker": {
+        "log_driver": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "parsed_events": 105,
+        "private_marker_found": false,
+        "OOM": false
+      },
+      "db": {
+        "log_driver": {
+          "Type": "none",
+          "Config": {}
+        },
+        "parsed_events": 0,
+        "private_marker_found": false,
+        "OOM": false
+      }
+    },
+    "correlated_browser_requests": 28,
+    "each_correlated_across_application_gunicorn_gateway": true,
+    "credential_patient_reference_markers_checked": 63,
+    "runtime_command_exception_sanitized": true,
+    "worker_connection_failure_sanitized": true,
+    "database_native_capture_disabled": true,
+    "business_financial_oracle": "separate database check",
+    "operational_log_payload_sha256": "fbc4a63da86e31e1dc25b556ad4156a7f8945e07935efbbd5280e2ee9219c64d",
+    "scope": "Identified independent local synthetic rehearsal; private fault routes are not repository or Mac application routes."
+  },
+  "runtime_cli_positive_controls": {
+    "passed": true,
+    "real_shell_body_reached_before_exception": true,
+    "exception_exit": 1,
+    "worker_unavailable_db_exit": 1,
+    "private_values_not_printed": true
+  },
+  "log_rotation": {
+    "passed": true,
+    "production_options": {
+      "Type": "local",
+      "Config": {
+        "compress": "true",
+        "max-file": "3",
+        "max-size": "10m"
+      }
+    },
+    "generated_records": 250000,
+    "retained_records": 143591,
+    "earlier_records_rotated_out": 106409,
+    "last_record_preserved": true,
+    "retained_log_payload_bytes": 23118151,
+    "OOM": false,
+    "scope": "Dedicated no-network disposable container; no disk-pressure injection or original business mutation. Size-based retention, no time-expiry claim."
+  },
+  "local_candidate_gateway": {
+    "passed": true,
+    "scope": "Local candidate direct-HTTPS gateway using a private self-signed localhost certificate; not cloud/certificate-issuance acceptance.",
+    "login_GETs_without_login_budget_charge": 15,
+    "POSTs": 18,
+    "POST_statuses": {
+      "403": 11,
+      "429": 7
+    },
+    "burst_GETs": 100,
+    "burst_statuses": {
+      "200": 40,
+      "429": 60
+    },
+    "unique_server_ids": 133,
+    "each_response_has_matching_safe_gateway_log": true,
+    "private_marker_found": false,
+    "original_mac_traffic": false
+  },
+  "business_oracle": {
+    "passed": true,
+    "assertions": 20,
+    "checks": [
+      {
+        "name": "Four exact independent cash legs clinic 1",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 2",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 3",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 4",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 5",
+        "passed": true
+      },
+      {
+        "name": "No pending or self-reviewed money",
+        "passed": true
+      },
+      {
+        "name": "Invoice facts unchanged",
+        "passed": true
+      },
+      {
+        "name": "Matching and stale history retained",
+        "passed": true
+      },
+      {
+        "name": "No self-reviewed match",
+        "passed": true
+      },
+      {
+        "name": "Original and appended evidence retained",
+        "passed": true
+      },
+      {
+        "name": "Malformed CSV creates no accepted lines",
+        "passed": true
+      },
+      {
+        "name": "Internal handover remains separately stale",
+        "passed": true
+      },
+      {
+        "name": "Maintenance ownership retained",
+        "passed": true
+      },
+      {
+        "name": "Equipment state retained",
+        "passed": true
+      },
+      {
+        "name": "No cross-account source rows",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 1",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 2",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 3",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 4",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 5",
+        "passed": true
+      }
+    ],
+    "gross_receipts_cny": "50100.10",
+    "gross_refunds_cny": "100.10",
+    "net_patient_cash_cny": "50000.00",
+    "equipment_expenses_cny": "50.05",
+    "equipment_reversals_cny": "50.05",
+    "new_posted_cash": 25,
+    "confirmed_matches": 24,
+    "stale_matches": 1,
+    "accepted_statement_lines": 30
+  },
+  "encrypted_empty_target_restore": {
+    "passed": true,
+    "source_database_modified": false,
+    "new_empty_target": true,
+    "published_cash_and_equipment_included": true,
+    "raw_csv_and_normalized_rows_included": true,
+    "source_images_pinned_by_id": true,
+    "models_and_associations_compared": 50,
+    "all_model_fingerprints_match": true,
+    "restore_and_compare_seconds": 2.452,
+    "cleanup": "temporary restore container and network removed; source volume retained"
+  },
+  "retained_attempts": [
+    "Initial source checks exposed a mock that did not recognize the new build argument; the failure-order assertions were preserved and updated.",
+    "Initial 1118-method gate had three fixture/assertion defects: selected clinic, log keys versus route names, and a preview bound before a new login workspace. Fixed without weakening the business checks; 13 final methods pass.",
+    "An initial browser helper omitted the required clinical confirmation checkbox; the browser correctly prevented submission. Helper fixed; the failed record retained.",
+    "Implemented fixes also cover delayed framework logging context, inherited gateway default-server access formats, native PostgreSQL value leakage and credential-bootstrap log capture."
+  ],
+  "rollout": {
+    "exact_commit_CI_required_before_Mac_update": true,
+    "Mac_encrypted_database_configuration_backups_verified": true,
+    "Mac_durable_models_snapshotted": 48,
+    "Mac_private_configuration_files_snapshotted": 70,
+    "Mac_delivery": "PENDING_EXACT_COMMIT_CI"
+  },
+  "limits": {
+    "R2": "IN_PROGRESS",
+    "R2_2_monitoring": "NOT_IMPLEMENTED",
+    "thirty_minute_capacity_repeat": "DEFERRED_TO_R2_4",
+    "twenty_four_hour_observation": "DEFERRED_TO_R2_4",
+    "time_based_log_expiry": "NOT_IMPLEMENTED; native size-based rotation is the documented policy",
+    "separate_protected_log_collection": "GAP",
+    "ASVS_conformity": "NOT_CLAIMED",
+    "cloud_acceptance": "NOT_RUN",
+    "Windows_original_data_recovery": "unresolved",
+    "data": "synthetic; CNY; Asia/Shanghai; external AI unused"
+  }
+}

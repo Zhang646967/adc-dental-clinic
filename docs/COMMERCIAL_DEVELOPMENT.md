@@ -21,7 +21,7 @@ delivered R1 baseline and the next [R2 plan](R2_OPERATIONAL_ASSURANCE_PLAN.md).
 | 1 Financial source integrity | Missing/incorrect equipment costs cannot be resolved without falsifying history | Independently reviewed supplementation, cash reversal prerequisites, immutable original and source linkage; PG/concurrency, browser and independent restore | Delivered previously; retained evidence linked below |
 | 2 Daily finance operations | Staff cannot hand over a reconciled day or explain differences by payment method | Receipt evidence/payment channels, cutoff/timezone, preparer/reviewer responsibilities, daily-close versions, discrepancies and explicit reopening; retain bill/cash separation | R1 accounts/evidence/private statement matching delivered with independent review; unsupported allocations and sealed periods remain future work |
 | 3 Maintenance responsibility | Device dates/state alone do not allocate ownership or document a maintenance case | Owner/deadline, repair evidence, independent clinic-manager acceptance, retained history and exact service-event/fee linkage; explicit scheduling coordination | Locally verified and delivered with retained evidence; external vendors, parts and mandatory enrolment remain planned |
-| 4 Independent operation | Mac sleep/disconnection prevents reliable service and off-site backup download | R2 safe diagnosis, worker/backup observation and fault exercises; then separate HTTPS host, reboot/recovery and actual access tests | R2 detailed plan ready; implementation/acceptance pending. Server not purchased; cloud NOT_RUN |
+| 4 Independent operation | Mac sleep/disconnection prevents reliable service and off-site backup download | R2 safe diagnosis, worker/backup observation and fault exercises; then separate HTTPS host, reboot/recovery and actual access tests | R2.1 diagnosis/logging locally verified; R2.2 and full R2 acceptance pending. Server not purchased; cloud NOT_RUN |
 | 5 Scale and isolation | Local course samples cannot establish large-clinic/chain capacity | Define representative histories; measure queries, indexes, locks, mixed valid writes, resources and recovery; test every scope under load | R1 five-clinic/twenty-account/30-minute local baseline passed; twenty-clinic expansion and commercial sizing remain future gates |
 | 6 Controlled commercial pilot | Actual operational use has different identity, funds, privacy and support obligations | Confirm product and customer boundaries; establish access review, audit retention/export, incident ownership, release/rollback and applicable professional review; integrate external systems only with separately tested contracts | Not approved for real patient or payment data |
 
@@ -75,8 +75,8 @@ real-data onboarding are separate decisions and have not occurred.
 
 Current application increment: [R1 payment evidence](FINANCIAL_EVIDENCE_RECONCILIATION.md).
 Current local execution: [R1 acceptance](evidence_financial_evidence/README.md),
-2026-10-15 at `6a06f35`. Next implementation:
-[R2 operational assurance](R2_OPERATIONAL_ASSURANCE_PLAN.md), planned 2026-10-18.
+2026-10-15 at `6a06f35`. Current operational increment: [R2.1 safe diagnosis](R21_SAFE_DIAGNOSTICS.md),
+locally verified 2026-10-18; next is R2.2 observation.
 Earlier [equipment supplementation](EQUIPMENT_COST_AMENDMENTS.md) and
 `evidence_commercial_foundation/acceptance.json` retain their historical scope.
 Historical care/finance/equipment and G3/G4 results retain their original scope.
@@ -92,5 +92,5 @@ The agreed next sequence and reference capabilities are in
 [payment evidence and transaction reconciliation](FINANCIAL_EVIDENCE_RECONCILIATION.md),
 retaining independent posting review, synthetic CSV input and separate internal
 daily handover versus channel matching. R2 now has a detailed implementation plan
-and [versioned security gap register](SECURITY_ASVS_GAP_REGISTER.md); its capabilities
-are not yet implemented. R3–R5 remain the ordered roadmap.
+and [versioned security gap register](SECURITY_ASVS_GAP_REGISTER.md); R2.1 now has [safe diagnosis and executed evidence](R21_SAFE_DIAGNOSTICS.md).
+R2.2 and complete R2 acceptance remain pending. R3–R5 remain the ordered roadmap.

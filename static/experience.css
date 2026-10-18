@@ -10,3 +10,6 @@ input:not([type=checkbox]):not([type=hidden]),select,textarea{width:100%;min-hei
 
 /* Avoid vertical one-character action labels on narrow/large-text displays. */
 @media(max-width:650px){.assistant-form .actions{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}.assistant-form .actions button{width:100%;min-width:0;padding:.7rem .5rem}html[data-display="comfortable"] .assistant-form .actions{grid-template-columns:1fr}}
+
+/* Support references remain readable in narrow and large-text error screens. */
+.request-reference code { overflow-wrap: anywhere; word-break: break-all; }

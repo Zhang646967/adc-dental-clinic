@@ -1,1 +1,1 @@
-{% extends 'base.html' %}{% block content %}<div class="business-flow"><h1>先核对当前记录</h1><p class="notice" role="alert">{{ problem }}</p><a class="button secondary" href="{{ workspace_home }}">返回当前工作台</a></div>{% endblock %}
+{% extends 'base.html' %}{% block content %}<div class="business-flow"><h1>先核对当前记录</h1><p class="notice" role="alert">{{ problem }}</p>{% include 'release/request_reference.html' %}<a class="button secondary" href="{{ workspace_home }}">返回当前工作台</a></div>{% endblock %}

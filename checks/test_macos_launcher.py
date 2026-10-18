@@ -27,7 +27,7 @@ elif args[:2] == ['volume','ls']:
     if os.environ.get('MOCK_VOLUME_ERROR'): sys.exit(7)
     if os.environ.get('MOCK_VOLUME_EXISTS'): print('existing_rc_data')
 elif args[:1] == ['compose']:
-    if args[-1:] == ['build'] and os.environ.get('MOCK_BUILD_ERROR'): sys.exit(7)
+    if 'build' in args and os.environ.get('MOCK_BUILD_ERROR'): sys.exit(7)
     if args[-3:] == ['run','--rm','schema'] and os.environ.get('MOCK_SCHEMA_ERROR'): sys.exit(7)
     if args[-1:] == ['bootstrap_release_demo']: print('mock-credentials-only')
 else: sys.exit(9)
@@ -118,7 +118,7 @@ class MacLauncherTests(unittest.TestCase):
         (self.root / '.rc/READY').write_text('synthetic-demo\n')
         self.assertEqual(self.invoke('start').returncode, 0)
         commands = [x['args'] for x in self.calls() if 'compose' in x['args']]
-        build = next(i for i,x in enumerate(commands) if x[-1:] == ['build'])
+        build = next(i for i,x in enumerate(commands) if 'build' in x)
         stop = next(i for i,x in enumerate(commands) if x[-4:] == ['stop','gateway','web','notification-worker'])
         schema = next(i for i,x in enumerate(commands) if x[-3:] == ['run','--rm','schema'])
         start = next(i for i,x in enumerate(commands) if x[-5:] == ['up','-d','web','gateway','notification-worker'])
@@ -132,7 +132,9 @@ class MacLauncherTests(unittest.TestCase):
         self.assertNotEqual(self.invoke('start', MOCK_BUILD_ERROR='1').returncode, 0)
         commands = [x['args'] for x in self.calls() if 'compose' in x['args']]
         self.assertEqual(len(commands), 1)
-        self.assertEqual(commands[0][-1], 'build')
+        self.assertIn('build', commands[0])
+        self.assertIn('--build-arg', commands[0])
+        self.assertEqual(commands[0][-1], 'ADC_SOURCE_COMMIT=unknown')
 
     def test_stop_preserves_database_volumes(self):
         self.prepare()

@@ -2,8 +2,10 @@
 
 R1 evidence → observable failures → responsible response → verified recovery →
 independent hosting. Planning baseline: **2026-10-18**, application commit
-`6a06f356a0c4697f5b8afe2736ed62d427512806`. **R2 is PLANNED; its capabilities and
-targets below are not implemented or accepted by this documentation update.**
+`6a06f356a0c4697f5b8afe2736ed62d427512806`. **R2 is IN_PROGRESS. R2.1 request
+tracing and safe operational logging are implemented and locally verified** in
+[the R2.1 contract](R21_SAFE_DIAGNOSTICS.md) and [executed evidence](evidence_r21/README.md).
+The remaining R2 capabilities, observation windows and cloud gates are pending.
 
 The target remains one dental chain with approximately 5–20 clinics. The next
 release should make failed reception, treatment, settlement, notification and
@@ -24,7 +26,7 @@ OOM, restart or deadlock. Encrypted recovery matched 50 models/associations in a
 separate empty database. These are **2026-10-15 observations**, not new R2 tests or
 a twenty-clinic/public-host capacity claim.
 
-| Current source boundary | Existing behavior | Business problem for R2 |
+| R1 source boundary at planning | Existing R1 behavior | Business problem for R2 |
 |---|---|---|
 | `adc_core/views.py:health` | Checks database connectivity; returns status and application version | A healthy web check does not prove worker progress or backup usability |
 | `config/settings/production.py` | Minimal WARNING-level console logging | A failed settlement request lacks a consistent safe correlation record |
@@ -98,15 +100,15 @@ failure pages may show the request ID, never internal details. Verify framework,
 Gunicorn, gateway and command error paths, not just the new formatter.
 [Django logging](https://docs.djangoproject.com/en/5.2/howto/logging/)
 
-**R2-03 Bounded storage.** Proposed course defaults are 10 MiB × 3 rotated files
-per container, plus a separately bounded private operator history. Operational
-logs expire after at most seven days and may rotate earlier at the size limit;
-report truncation rather than promise a full seven-day history. Financial audit,
-cash evidence and statement history retain their existing database rules.
-Configure rotation explicitly; do not depend on Docker's unbounded default
-`json-file` behavior. Size, retention, read permissions and destinations belong in
-the versioned inventory. Independent tamper-resistant storage remains a separate
-security gap until its actual deployment is verified.
+**R2-03 Bounded storage.** R2.1 implements Docker `local` size rotation with
+10 MiB × 3 files per captured service; database and credential-bootstrap native
+capture are disabled. The earlier seven-day maximum was a proposed default;
+the native driver has size controls rather than time expiry. R2.1 does not claim
+seven-day deletion. A stricter time-retention/export contract remains follow-up
+work. Report truncation rather than promise a complete history. Financial audit,
+cash evidence, statements and seven/thirty-day encrypted backup retention keep
+their existing rules. The R2.1 inventory documents each destination and reduced
+native forensic detail. Independent protected collection remains a separate gap.
 [Docker log configuration](https://docs.docker.com/engine/logging/configure/)
 
 Mind map: server ID → allowlisted event → safe error → bounded private storage;
@@ -237,26 +239,26 @@ functional truth + service indicators → bounded local acceptance.
 
 | Increment | Deliverable | Completion gate | Dependency |
 |---|---|---|---|
-| R2.1 Safe diagnosis | Request context, JSON event vocabulary, error reference and logging inventory/rotation | R2-A01/A02/A10; existing financial audit and permissions unchanged | Start next; no server required |
+| R2.1 Safe diagnosis | Request context, JSON event vocabulary, error reference and logging inventory/size rotation | R2-A01/A02/A10 and local runtime/restore evidence passed; exact-commit CI and protected Mac delivery recorded separately | Implemented; see R2.1 evidence |
 | R2.2 Worker and condition monitor | Private heartbeat/status collector, due-age calculation and incident state | R2-A03/A04/A05/A06/A09; prove the observer can fail visibly | R2.1; no server required |
 | R2.3 Recovery freshness | Separate creation/download/restore receipts and empty-target comparison | R2-A07/A08; current key and original UTC retention rules | R2.2; local simulation first |
 | R2.4 Local release | Security gap assessment, fault runbooks, browser/load and 24-hour observation | R2-A10/A11/A12; exact-commit CI and Mac preservation | Earlier increments |
 | R2.5 Cloud release | Apply tested version to independent HTTPS host and repeat public gates | Mainland access, Mac offline, reboot/worker, renewal, backups, restore and 24-hour observation | Private server/DNS inputs |
 
-The **next coding batch is R2.1**. Suggested source boundaries are a request
+The **next coding batch is R2.2** after protected R2.1 delivery. R2.1 uses a request
 context module and middleware under `adc_core/`, a separate safe logging module,
 explicit configuration in the existing settings and bounded container log
 options. Preserve middleware security ordering: the observer records the result
 of existing checks and cannot activate a role or bypass them. Add targeted
 PostgreSQL/HTTP tests for normal, denied, exceptional and concurrent requests;
 exercise login, settlement, evidence/import and equipment error paths in Chrome.
-No business data/schema migration, autonomous business action, new account grant,
-external AI or external monitoring service is part of that first batch.
+No business schema migration, autonomous business action, new account grant,
+external AI or external monitoring service is part of R2.1.
 
 Before changing runtime, back up the existing Mac, require exact-commit CI,
 stop old writers where required, update and compare original data/configuration.
-Keep report-only commits distinct from application delivery. No system runtime
-restart is needed for this planning/report update.
+Keep report-only commits distinct from application delivery. R2.1 needs its
+controlled build/restart; subsequent report-only updates do not restart services.
 
 After R2, preserve the agreed order: **R3 treatment continuity** (versioned plans,
 acceptance, actual completion and follow-up), **R4 resource coordination**

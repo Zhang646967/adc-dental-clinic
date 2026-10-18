@@ -11,6 +11,12 @@ usage() {
 }
 die() { printf 'STOP: %s\n' "$*" >&2; exit 2; }
 ACTION="${1:-}"
+# An uncommitted/archive checkout cannot claim an identified application commit.
+ADC_SOURCE_COMMIT=unknown
+if command -v git >/dev/null 2>&1 && [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+  ADC_SOURCE_COMMIT="$(git rev-parse --verify HEAD 2>/dev/null || printf unknown)"
+fi
+
 case "$ACTION" in
   -h|--help|help) usage; exit 0 ;;
   new-demo) [ "$#" = 2 ] && [ "$2" = --synthetic-empty-only ] || { usage; exit 2; } ;;
@@ -60,10 +66,10 @@ fresh() {
 case "$ACTION" in
   new-demo)
     fresh
-    "${DC[@]}" build
+    "${DC[@]}" build --build-arg "ADC_SOURCE_COMMIT=$ADC_SOURCE_COMMIT"
     "${DC[@]}" up -d --wait db
     "${DC[@]}" run --rm schema
-    "${DC[@]}" run --rm --no-deps web python manage.py bootstrap_release_demo > .rc/private/demo-credentials.txt
+    "${DC[@]}" run --rm --no-deps bootstrap python manage.py bootstrap_release_demo > .rc/private/demo-credentials.txt
     printf 'synthetic-demo\n' > .rc/READY
     printf 'fresh-demo\n' > .rc/SOURCE_MODE
     echo 'Synthetic demo prepared. Credentials are in .rc/private/demo-credentials.txt.'
@@ -72,7 +78,7 @@ case "$ACTION" in
   import-copy)
     [ -f .rc/private/source.dump ] || die 'Missing the trusted synthetic backup at .rc/private/source.dump.'
     fresh
-    "${DC[@]}" build
+    "${DC[@]}" build --build-arg "ADC_SOURCE_COMMIT=$ADC_SOURCE_COMMIT"
     "${DC[@]}" up -d --wait db
     "${DC[@]}" run --rm --no-deps web python scripts/rc_database_guard.py
     "${DC[@]}" exec -T db pg_restore --list < .rc/private/source.dump > .rc/private/restore-contents.txt
@@ -90,7 +96,7 @@ case "$ACTION" in
     [ -f .rc/READY ] || die 'Initialize a new demo or a trusted backup copy before starting.'
     # Build the current checkout before stopping the previous runtime. A failed
     # build leaves that runtime available; schema uses the newly built image.
-    "${DC[@]}" build
+    "${DC[@]}" build --build-arg "ADC_SOURCE_COMMIT=$ADC_SOURCE_COMMIT"
     "${DC[@]}" --profile worker stop gateway web notification-worker
     "${DC[@]}" run --rm schema
     "${DC[@]}" --profile worker up -d web gateway notification-worker
