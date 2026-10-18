@@ -1,4 +1,4 @@
-Current development（当前进展）：R2.1 request tracing and safe logs locally verified; R2 operational assurance in progress. [R2.1 contract and evidence](docs/R21_SAFE_DIAGNOSTICS.md) · [Current Word/PDF report](docs/current_report/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
+Current development（当前进展）：R2.1 request tracing and safe logs delivered on Mac; R2 operational assurance in progress. [R2.1 contract and evidence](docs/R21_SAFE_DIAGNOSTICS.md) · [Current Word/PDF report](docs/current_report/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 # ADC — Dental Clinic Management
 
@@ -149,3 +149,8 @@ failure response and R2-A01–A12. R2.1 execution is separate from future R2 mon
 and service targets, with local and cloud acceptance kept separate.
 R3 treatment continuity, R4 resource coordination and R5 measured
 twenty-clinic expansion follow in that order.
+
+R2.1 application delivery: [protected Mac record](docs/evidence_r21/delivery.json)
+and [updated current report](docs/current_report/README.md). Application commit
+`ccdcdcd` passed exact-version CI; 48 durable fingerprints and 70 private files
+remain unchanged, with 410 Mac browser assertions.

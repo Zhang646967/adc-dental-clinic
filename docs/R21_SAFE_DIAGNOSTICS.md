@@ -78,7 +78,7 @@ overhead and compression behavior. Bootstrap and database capture are disabled.
 Rotation was exercised in a dedicated disposable container; truncation is an
 expected storage bound, not a promise of complete history.
 
-The earlier seven-day maximum was a **proposed** default. Docker's native driver
+The earlier seven-day maximum was a **proposed** default. Docker's [native local driver](https://docs.docker.com/engine/logging/drivers/local/)
 offers size rotation, not a time-expiry option. This increment explicitly adopts
 size-based retention and does **not** claim seven-day deletion. A strict time
 policy/export design remains a recorded R2 follow-up. Seven/thirty-day encrypted

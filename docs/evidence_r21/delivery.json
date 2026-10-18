@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "application_commit": "ccdcdcd1f612d490ec144d70ee5e5a9395959c75",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480",
+  "original_durable_models_compared": 48,
+  "all_original_durable_fingerprints_match": true,
+  "comparison_exclusions": "Transient sessions/workspaces and last_login; browser only performs login/workspace setup and authorized reads.",
+  "private_configuration_files_preserved": 70,
+  "original_database_volume_preserved": true,
+  "rc_tag_preserved": true,
+  "mac_browser_assertions": 410,
+  "test_business_records_injected_into_original": false,
+  "private_fault_routes_on_original": false,
+  "source_commit_metadata_matches_image": true,
+  "delivered_at_utc": "2026-10-18T12:43:13.936415+00:00",
+  "application_ci_conclusion": "success",
+  "before_after_encrypted_database_backups_verified": true,
+  "before_after_encrypted_configuration_backups_verified": true,
+  "external_ai": "unused; local rule/demo mode only",
+  "cloud_acceptance": "NOT_RUN",
+  "windows_original_data_recovery": "unresolved",
+  "documentation_revision": "Report companion is synchronized separately; runtime application files remain those of the identified application commit."
+}

@@ -1,83 +1,117 @@
 {
-  "format": 1,
+  "format": 2,
   "report_date": "2026-10-18",
-  "application_commit": "6a06f356a0c4697f5b8afe2736ed62d427512806",
-  "evidence_date_utc": "2026-10-15",
-  "evidence_path": "docs/evidence_financial_evidence/acceptance.json",
-  "evidence_sha256": "55e3088d05cefa1a3e24e24a67b1c1f1adc3367a58cfdd09cc1221e485d550c8",
-  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38728944434",
-  "regression": {
-    "source_checks": 908,
-    "postgresql_http_concurrency_tests": 1106,
-    "new_postgresql_methods": 41,
-    "new_csv_source_checks": 11
+  "application_commit": "ccdcdcd1f612d490ec144d70ee5e5a9395959c75",
+  "R1_historical": {
+    "format": 1,
+    "report_date": "2026-10-18",
+    "application_commit": "6a06f356a0c4697f5b8afe2736ed62d427512806",
+    "evidence_date_utc": "2026-10-15",
+    "evidence_path": "docs/evidence_financial_evidence/acceptance.json",
+    "evidence_sha256": "55e3088d05cefa1a3e24e24a67b1c1f1adc3367a58cfdd09cc1221e485d550c8",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38728944434",
+    "regression": {
+      "source_checks": 908,
+      "postgresql_http_concurrency_tests": 1106,
+      "new_postgresql_methods": 41,
+      "new_csv_source_checks": 11
+    },
+    "browser_assertions": 2423,
+    "mac_browser_assertions": 205,
+    "load": {
+      "clinics": 5,
+      "distinct_users": 20,
+      "seconds": 1800,
+      "offered": 9000,
+      "reads": {
+        "requests": 7200,
+        "failures": 0,
+        "p95_seconds": 0.329,
+        "max_seconds": 0.7315
+      },
+      "writes": {
+        "requests": 1800,
+        "failures": 0,
+        "p95_seconds": 0.358,
+        "max_seconds": 0.692
+      },
+      "summary": {
+        "requests": 9000,
+        "failures": 0,
+        "p95_seconds": 0.337,
+        "max_seconds": 0.7315
+      },
+      "continuity_passed": true,
+      "write_mix": {
+        "patient_creation": 900,
+        "clinical_note_saves": 900
+      }
+    },
+    "resource_limits": {
+      "db": {
+        "memory_limit_mib": 768,
+        "cpu_limit": 0.75
+      },
+      "web": {
+        "memory_limit_mib": 768,
+        "cpu_limit": 1.0
+      },
+      "notification-worker": {
+        "memory_limit_mib": 128,
+        "cpu_limit": 0.125
+      },
+      "gateway": {
+        "memory_limit_mib": 64,
+        "cpu_limit": 0.125
+      }
+    },
+    "restore": {
+      "models_and_associations_compared": 50,
+      "restore_and_compare_seconds": 2.556,
+      "all_model_fingerprints_match": true,
+      "source_database_modified": false
+    },
+    "mac_preservation": {
+      "original_business_models_preserved": 43,
+      "private_files_preserved": 70,
+      "original_volume_and_rc_tag_preserved": true,
+      "before_after_encrypted_backups_verified": true
+    },
+    "status": {
+      "R1": "LOCAL_ACCEPTED_AND_DELIVERED",
+      "R2": "PLANNED",
+      "cloud_acceptance": "NOT_RUN",
+      "windows_original_data_recovery": "unresolved"
+    },
+    "scope": "Aggregate synthetic R1 evidence; this report revision does not rerun acceptance or implement R2."
   },
-  "browser_assertions": 2423,
-  "mac_browser_assertions": 205,
-  "load": {
-    "clinics": 5,
-    "distinct_users": 20,
-    "seconds": 1800,
-    "offered": 9000,
-    "reads": {
-      "requests": 7200,
-      "failures": 0,
-      "p95_seconds": 0.329,
-      "max_seconds": 0.7315
+  "R21": {
+    "evidence_path": "docs/evidence_r21/acceptance.json",
+    "evidence_sha256": "3a417137af78a0441c10bb9429b7fb19c0de6757b38c2b51c9ecea787d01e780",
+    "delivery_path": "docs/evidence_r21/delivery.json",
+    "delivery_sha256": "04eec75e5623be4b11b535c7f5022c4835d17b1415098f9f93e896e6634f2546",
+    "regression": {
+      "source_checks": 918,
+      "postgresql_http_concurrency_tests": 1119,
+      "new_serialization_methods": 10,
+      "new_postgresql_http_methods": 13,
+      "full_isolated_gate_exit": 0,
+      "cleanup_exit": 0
     },
-    "writes": {
-      "requests": 1800,
-      "failures": 0,
-      "p95_seconds": 0.358,
-      "max_seconds": 0.692
-    },
-    "summary": {
-      "requests": 9000,
-      "failures": 0,
-      "p95_seconds": 0.337,
-      "max_seconds": 0.7315
-    },
-    "continuity_passed": true,
-    "write_mix": {
-      "patient_creation": 900,
-      "clinical_note_saves": 900
-    }
-  },
-  "resource_limits": {
-    "db": {
-      "memory_limit_mib": 768,
-      "cpu_limit": 0.75
-    },
-    "web": {
-      "memory_limit_mib": 768,
-      "cpu_limit": 1.0
-    },
-    "notification-worker": {
-      "memory_limit_mib": 128,
-      "cpu_limit": 0.125
-    },
-    "gateway": {
-      "memory_limit_mib": 64,
-      "cpu_limit": 0.125
-    }
-  },
-  "restore": {
-    "models_and_associations_compared": 50,
-    "restore_and_compare_seconds": 2.556,
-    "all_model_fingerprints_match": true,
-    "source_database_modified": false
-  },
-  "mac_preservation": {
-    "original_business_models_preserved": 43,
-    "private_files_preserved": 70,
-    "original_volume_and_rc_tag_preserved": true,
-    "before_after_encrypted_backups_verified": true
+    "browser_assertions": 894,
+    "mac_browser_assertions": 410,
+    "restored_model_association_fingerprints": 50,
+    "restore_local_seconds": 2.452,
+    "mac_original_durable_fingerprints_preserved": 48,
+    "private_configurations_preserved": 70,
+    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480",
+    "status": "DELIVERED_ON_MAC"
   },
   "status": {
-    "R1": "LOCAL_ACCEPTED_AND_DELIVERED",
-    "R2": "PLANNED",
+    "R21": "DELIVERED_ON_MAC",
+    "R2": "IN_PROGRESS",
+    "R22": "NEXT_IMPLEMENTATION",
     "cloud_acceptance": "NOT_RUN",
     "windows_original_data_recovery": "unresolved"
-  },
-  "scope": "Aggregate synthetic R1 evidence; this report revision does not rerun acceptance or implement R2."
+  }
 }

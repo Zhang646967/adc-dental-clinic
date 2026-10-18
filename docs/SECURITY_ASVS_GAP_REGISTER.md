@@ -2,7 +2,7 @@
 
 Business permissions → security requirements → evidence review → targeted repair
 → independent assessment. Baseline date: **2026-10-18**; application commit
-`6a06f356a0c4697f5b8afe2736ed62d427512806`.
+`ccdcdcd1f612d490ec144d70ee5e5a9395959c75` (R2.1; the earlier R1 planning baseline is retained in history).
 
 This is a scoped planning register against **OWASP ASVS 5.0.0**, not a completed
 assessment or Level 2 conformity claim. Requirement identifiers are pinned to

@@ -6,7 +6,9 @@ Server request IDs, safe errors/logs and measured size rotation are implemented.
 [R2.1 contract](docs/R21_SAFE_DIAGNOSTICS.md) and
 [local acceptance](docs/evidence_r21/README.md) record unchanged permissions,
 independent financial facts and encrypted restoration. Exact-commit CI and
-protected Mac rollout are recorded separately. No migrations are added.
+protected Mac rollout are completed in [the delivery record](docs/evidence_r21/delivery.json).
+Application `ccdcdcd` preserves 48 durable fingerprints and 70 private files;
+410 Mac browser assertions pass. No migrations are added.
 
 ## Historical planning update — 2026-10-18
 

@@ -3,9 +3,10 @@
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh
 synthetic demo → continue development on `main`.
 
-Current documentation, 2026-10-18: [R1 delivery and R2 development report](current_report/README.md).
-The application remains the verified R1 financial-evidence baseline; R2 is
-planned in [the next-stage contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
+Current documentation, 2026-10-18: [R2.1 delivery and next-stage report](current_report/README.md).
+The application is now R2.1 safe diagnosis at `ccdcdcd`, retaining R1 financial
+evidence. [Mac delivery](evidence_r21/delivery.json) verifies original data and
+configuration. R2.2 observation is next in [the R2 contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
 The migration instructions and dated evidence below retain their original scope.
 
 ## Source baseline

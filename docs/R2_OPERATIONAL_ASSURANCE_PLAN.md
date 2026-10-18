@@ -5,6 +5,7 @@ independent hosting. Planning baseline: **2026-10-18**, application commit
 `6a06f356a0c4697f5b8afe2736ed62d427512806`. **R2 is IN_PROGRESS. R2.1 request
 tracing and safe operational logging are implemented and locally verified** in
 [the R2.1 contract](R21_SAFE_DIAGNOSTICS.md) and [executed evidence](evidence_r21/README.md).
+Application `ccdcdcd` passed exact-commit CI and [protected Mac delivery](evidence_r21/delivery.json).
 The remaining R2 capabilities, observation windows and cloud gates are pending.
 
 The target remains one dental chain with approximately 5–20 clinics. The next

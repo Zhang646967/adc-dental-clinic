@@ -1,9 +1,9 @@
 {
-  "format": 1,
+  "format": 2,
   "report_date": "2026-10-18",
-  "application_baseline": "6a06f356a0c4697f5b8afe2736ed62d427512806",
-  "scope": "Documentation and planning only; R1 observations remain dated 2026-10-15. R2 implementation/cloud tests not executed.",
+  "application_commit": "ccdcdcd1f612d490ec144d70ee5e5a9395959c75",
   "passed": true,
+  "scope": "R2.1 delivered application and protected Mac results; R1 capacity remains historical; later R2 and cloud tests pending.",
   "artifact_checks": {
     "pdf_pages": 10,
     "pages_visually_inspected": [
@@ -18,36 +18,28 @@
       9,
       10
     ],
-    "visual_result": "Readable English/Chinese text, tables and page numbers; no clipping, blank pages, split rows or decorative paragraph rules.",
     "word_sections": 10,
     "word_tables": 9,
     "mind_maps": 10,
-    "reference_links_preserved": true,
-    "source_and_pdf_facts_checked": true
+    "visual_result": "Readable English/Chinese text, references, tables and page numbers; no clipping, split rows or decorative paragraph rules."
   },
   "provenance_checks": {
-    "acceptance_sha256_matches": true,
-    "aggregate_regression_load_restore_facts_match": true,
-    "application_baseline": "6a06f356a0c4697f5b8afe2736ed62d427512806",
-    "new_business_tests_claimed": false
+    "R1_historical_acceptance_digest_matches": true,
+    "R21_acceptance_and_delivery_digests_match": true,
+    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480",
+    "private_data_not_in_report": true,
+    "frozen_RC1_word_pdf_unchanged": true
   },
-  "repository_checks": {
-    "existing_source_checks_passed": 908,
-    "historical_25_use_case_link_check": "PASS",
-    "modified_markdown_local_links_resolved": 76,
-    "original_project_migration_files_preserved": 30,
-    "frozen_rc1_word_pdf_preserved": true
-  },
-  "runtime_tests_this_revision": "NOT_RUN locally; documentation-only change. Exact revision CI is available through GitHub Actions.",
   "sources_and_outputs_sha256": {
-    "report_source.json": "dee16e5070d64f0536e0a346aad89b4b3abfa70756cdd23be62f35188ad3f715",
-    "baseline.json": "ef177e9c71e5dba555e0a5db942e912f53dc74a2b0486fdfbc149529a88ade70",
+    "report_source.json": "8b842bf671477135a704d94ab44db417d12fe6de9a4a27f32a87e728449fe08e",
+    "baseline.json": "0526c1517b93dfa661b8ea59be8bfb98c910d527734314d2753b3a0091acd299",
     "build_report.py": "7344c4dac21b46341b54980d0181e492f08952fa4b4179ba4b5ba3398ad75998",
-    "REPORT.md": "95ec4ce50032747adc914738f95ad9f2b0e7f5e5a05fa852efa6f97f0f499443",
-    "ADC_Current_System_Report_20261018.docx": "1ae790bd084c6f286c2282d7f3bb95546c91ed39beda7e9ab9f6176a68b24d7b",
-    "ADC_Current_System_Report_20261018.pdf": "eaec2656bab76b9c2e79aa0df11015d93eec27060db205b33dbabc0d62793e91"
+    "REPORT.md": "84f657523186fc90248adb8b69b64e256c163cd314d067827b38c94f586d4e8b",
+    "ADC_Current_System_Report_20261018.docx": "ba2cb3b4f27318aa585f5935b955156eb53fc63c03fae93363101865d3a39dfe",
+    "ADC_Current_System_Report_20261018.pdf": "5853afd83368071ddf384ae41fbc4a7eb7ab7c04c1803db9ef4fb29ba0a30978"
   },
-  "R2": "PLANNED",
+  "R21": "DELIVERED_ON_MAC",
+  "R2": "IN_PROGRESS",
   "cloud_acceptance": "NOT_RUN",
   "windows_original_data_recovery": "unresolved"
 }

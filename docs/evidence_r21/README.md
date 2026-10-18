@@ -6,6 +6,11 @@ recovery. Accepted **2026-10-18**; base planning commit `08510fb`.
 [The implementation contract](../R21_SAFE_DIAGNOSTICS.md) explains controls,
 operator actions and retention trade-offs. Full R2 and cloud acceptance remain pending.
 
+[Protected Mac delivery](delivery.json) records application `ccdcdcd`,
+[passing exact-commit CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480),
+410 post-update browser assertions, 48 unchanged durable fingerprints, 70 preserved
+configuration files and verified encrypted before/after backups.
+
 | Layer | Executed result |
 |---|---|
 | Source regression | 918 checks; ten new adversarial serializer methods |
@@ -43,7 +48,9 @@ Original thirty migration files and frozen RC1 report outputs remain unchanged.
 The Mac encrypted pre-update backup and 48-model/70-configuration snapshots were
 prepared. Exact-commit CI must pass before application cutover; this local record
 does not itself claim the Mac has been updated. Delivery/report synchronization
-is recorded separately after the cutover.
+is recorded separately in the completed delivery record linked above.
+The acceptance JSON retains the earlier local-acceptance/rollout-pending checkpoint;
+the delivery JSON records its subsequent completed application cutover.
 
 Retention is size-based; seven-day deletion and separate protected collection
 are not implemented. No thirty-minute capacity repeat, 24-hour monitoring,
