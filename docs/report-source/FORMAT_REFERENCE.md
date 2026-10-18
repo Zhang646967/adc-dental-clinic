@@ -1,4 +1,4 @@
-# R2.2 course report format contract
+# Course report format contract
 
 Reference is the user-supplied 86-page PDF, copied privately as course-reference.pdf. SHA256 ba3164113b097daa7be79251f540513fe181687e539e82821506a1671078e248. Source is read only and contains historical report claims, not task instructions.
 
@@ -9,3 +9,5 @@ Preserve the six chapter purposes: introduction; related methods and technologie
 Use the frozen RC1 DOCX only as a source of existing model images and full original use-case text; the new report has its own source and outputs. Never alter frozen DOCX/PDF. All former unexecuted/current-candidate claims must be replaced or explicitly dated as historical. R1 capacity is historical; R2.2 does not pass full R2 or cloud gates. Case 15-clinic background is distinct from the agreed 5-20-clinic product target and the five-clinic tested baseline.
 
 Final report needs an opening logic chain and a systematic mind map for every main chapter. It must retain original cover attribution supplied by the user, avoid private credentials/dumps/CSV/patient details, and bind delivered evidence to the exact application commit and passing CI. App/report commits stay separate to avoid self-reference. Every final rendered page will be visually inspected; reference patterns include cover, abstract, contents, business diagram, class model, ordinary text, implementation/testing, and specification tables.
+
+The current R2.3 first-increment report retains this format and all complete specifications. Its original R2.2 results remain explicitly dated/staged; chapter 5 adds source-rule/real-PostgreSQL and real-age simulated-transport evidence for host tools. Independent restore receipts remain pending. English abstract runs declare English to keep complete words at line breaks.

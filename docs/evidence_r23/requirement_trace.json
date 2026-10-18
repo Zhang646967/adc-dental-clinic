@@ -1,0 +1,90 @@
+{
+  "format": 1,
+  "scope": "R2.3 first tool increment; R2-A08 restoration still pending",
+  "requirements": [
+    {
+      "id": "R2-07a",
+      "actor": "private platform operator",
+      "behavior": "Retain source recovery-point time separately from repeated verification time.",
+      "invariant": "Downloading again cannot make an old source point fresh.",
+      "failure": "WARNING for a verified point older than 26 hours; invalid or missing evidence is UNKNOWN.",
+      "status": "FIRST_INCREMENT_VERIFIED",
+      "tests": [
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_redownload_does_not_refresh_old_recovery_point",
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_older_upload_cannot_replace_a_newer_accepted_point"
+      ]
+    },
+    {
+      "id": "R2-07b",
+      "actor": "private Mac operator",
+      "behavior": "Check the entire listed batch, including cached archives, with the current key before publication or pruning.",
+      "invariant": "A later bad item or interrupted transfer cannot advance accepted receipts or prune the prior valid archive.",
+      "failure": "Stop with private diagnostics; retain the previous accepted recovery point.",
+      "status": "FIRST_INCREMENT_VERIFIED",
+      "tests": [
+        "checks/test_recovery_receipts.py:SyncVerificationTests.test_later_corrupt_item_leaves_entire_batch_and_prior_receipts_unchanged",
+        "checks/test_recovery_receipts.py:SyncVerificationTests.test_wrong_current_key_on_cache_does_not_advance_or_prune",
+        "checks/test_recovery_receipts.py:SyncVerificationTests.test_interrupted_transfer_does_not_replace_valid_archive"
+      ],
+      "runtime": "10 real-age checks; locally simulated transport; no cloud SSH or database-restore claim."
+    },
+    {
+      "id": "R2-07c",
+      "actor": "private operator",
+      "behavior": "Bind sidecar facts to authenticated archive metadata and the selected instance/source/image.",
+      "invariant": "A rewritten sidecar time or foreign source cannot establish a fresh point.",
+      "failure": "Refuse conflicting/foreign facts; UNKNOWN on changed keys, absent archives, invalid receipts or stale server observations.",
+      "status": "FIRST_INCREMENT_VERIFIED",
+      "tests": [
+        "checks/test_recovery_receipts.py:SyncVerificationTests.test_forged_sidecar_time_never_advances_receipt",
+        "checks/test_recovery_receipts.py:SyncVerificationTests.test_duplicate_inventory_wrong_source_image_and_future_time_refused",
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_stale_server_observation_is_independent_from_mac_copy",
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_new_key_corrupt_archive_and_absent_archive_do_not_establish_health"
+      ]
+    },
+    {
+      "id": "R2-08a",
+      "actor": "backup/synchronization commands",
+      "behavior": "Retain seven server and thirty Mac UTC-day copies, selecting the last complete copy per day.",
+      "invariant": "Pruning follows complete verification; unrelated files are retained.",
+      "failure": "Corrupt inventory prevents pruning.",
+      "status": "FIRST_INCREMENT_VERIFIED",
+      "tests": [
+        "checks/test_g4_course.py:CourseSafetyTests.test_retention_removes_only_verified_old_files_from_selected_project",
+        "checks/test_g4_course.py:CourseSafetyTests.test_corrupt_backup_blocks_pruning",
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_thirty_utc_daily_copies_keep_latest_per_day"
+      ]
+    },
+    {
+      "id": "R2-07d",
+      "actor": "private status reader",
+      "behavior": "Expose independent restore as a separate unresolved fact.",
+      "invariant": "Creation/decryption alone cannot imply successful independent database restoration.",
+      "failure": "Restored remains UNKNOWN; whole recovery observation exits 3.",
+      "status": "HONEST_UNIMPLEMENTED_RESTORE_GATE",
+      "tests": [
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_fresh_separate_facts_never_invent_independent_restore",
+        "checks/test_recovery_receipts.py:RecoveryReceiptTests.test_missing_receipts_and_unverified_restore_stay_unknown"
+      ]
+    },
+    {
+      "id": "R2-A08",
+      "actor": "private recovery operator and independent business reviewer",
+      "behavior": "Restore a downloaded archive into a distinct empty PostgreSQL target and compare all business/association facts.",
+      "invariant": "Do not stamp a restore receipt until image/schema, original point, target identity, all facts and elapsed time are verified.",
+      "failure": "Retain UNKNOWN and the previous source; never restore over the Mac.",
+      "status": "PENDING_SECOND_INCREMENT",
+      "tests": []
+    },
+    {
+      "id": "R2-A12-course-navigation",
+      "actor": "teacher",
+      "behavior": "Open current Word/PDF directly from the repository landing page.",
+      "invariant": "One visible current-report directory with fixed student-name/number filenames; dated historical reports retain their bytes.",
+      "failure": "Broken links or digest differences fail documentation delivery.",
+      "status": "EXECUTED_LOCAL_AND_GITHUB_ENTRY_CHECKS",
+      "tests": [],
+      "evidence": "143 initial local navigation links, complete checksums, exact renamed binary digests and five public GitHub file metadata checks; final document evidence is recorded separately."
+    }
+  ]
+}

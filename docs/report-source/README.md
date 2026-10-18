@@ -1,8 +1,11 @@
 # 报告源文件与复现说明
 
 Case and notes → business/system models → explicit responsibilities → executed
-evidence → protected delivery. Date: **2026-10-18**. Application **`02a9dbc90583fbcad47567e64ae77ae810eca33f`**;
+evidence → protected delivery. Date: **2026-10-18**. Business runtime **`02a9dbc90583fbcad47567e64ae77ae810eca33f`**;
 [exact application CI passed](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755).
+
+
+R2.3 first-increment host tools **`62114210b8ffc1135adf661f2cc97e0b44a55ccc`** passed [exact tool CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39141545342) and protected Mac synchronization. The report records 1,000 source/rule checks, 1,146 real PostgreSQL/HTTP/concurrency regressions and 10 real-age checks using simulated local transport. Independent restore receipts are still UNKNOWN/pending; this does not complete R2.3.
 
 - [Word report](../../课程报告/课程报告_张加良_8210241102.docx)
 - [PDF report](../../课程报告/课程报告_张加良_8210241102.pdf)
@@ -45,7 +48,7 @@ relationship and the initial CI failure are retained in the evidence.
 
 R1 capacity results remain dated **2026-10-15**: five clinics, twenty accounts and
 thirty minutes. They do not establish the new full-R2 or twenty-clinic envelope.
-R2.3 backup freshness, R2.4 equivalent capacity/24-hour/security work, and cloud
+R2.3 independent restore integration, R2.4 equivalent capacity/24-hour/security work, and cloud
 acceptance remain pending. The server has not been purchased. Original Windows-data
 recovery remains unresolved. Operational files have a separate encrypted delivery
 snapshot; database-only daily backups do not automatically contain them.
@@ -56,8 +59,7 @@ R2.2 adds no migration or business role.
 
 ## Sources and reproduction
 
-`report_source.json` is editable text; `baseline.json` separately records historical
-R1/R2.1 and current R2.2 evidence/digests. `build_report.py` reads the frozen
+`report_source.json` is editable text; `baseline.json` separately records R1/R2.1/R2.2 evidence and the R2.3 first tool increment/digests. `build_report.py` reads the frozen
 Word source only to retain models and full specifications, then generates Word in `课程报告/` and Markdown in this source directory. It needs Python with `python-docx`; it never accesses a database
 or host credentials:
 

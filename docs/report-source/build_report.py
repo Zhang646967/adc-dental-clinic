@@ -232,7 +232,11 @@ def build(folder,repo,output=None):
  for text in source['abstract_cn']:p(text)
  p('关键词  系统分析与设计；连锁诊所；业务范围；财务证据；通知监测；可验证性',10.5,True,False,False)
  page();heading('Analysis and Design of the ADC Dental Chain Operations Management System',1,False);heading('ABSTRACT',1,False)
- for text in source['abstract_en']:p(text)
+ for text in source['abstract_en']:
+  x=p(text)
+  # English uses word boundaries rather than inherited CJK character breaks.
+  for run in x.runs:
+   lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');run._element.get_or_add_rPr().append(lang)
  p('Key words  systems analysis and design; dental chain; financial evidence; notification monitoring; verifiability',10.5,False,False,False)
  page();heading('目　录',1,False);toc_anchor=D.add_paragraph()
  main=D.add_section(WD_SECTION_START.NEW_PAGE);furniture(main)

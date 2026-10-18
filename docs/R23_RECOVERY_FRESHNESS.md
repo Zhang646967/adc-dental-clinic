@@ -40,4 +40,4 @@ R2.3第二批将把独立空数据库恢复和全业务事实比对接入正式�
 
 本轮未重复R2.2业务浏览器演练、30分钟容量或24小时观察；未在云端执行SSH和异地保护。服务器尚未购买，Windows原始数据恢复仍未解决。Mac睡眠或离线时，异地恢复点仍只能取最后一次验证通过的下载。
 
-[第一批执行证据](evidence_r23/README.md) · [R2完整计划](R2_OPERATIONAL_ASSURANCE_PLAN.md) · [课程报告](../课程报告/README.md)
+[第一批执行证据](evidence_r23/README.md) · [需求至测试](evidence_r23/requirement_trace.json) · [R2完整计划](R2_OPERATIONAL_ASSURANCE_PLAN.md) · [课程报告](../课程报告/README.md)

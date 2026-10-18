@@ -1,5 +1,5 @@
 {
-  "format": 3,
+  "format": 4,
   "report_date": "2026-10-18",
   "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
   "R1_historical": {
@@ -89,7 +89,7 @@
     "R21": "HISTORICAL_DELIVERED",
     "R22": "DELIVERED_ON_MAC",
     "R2": "IN_PROGRESS",
-    "R23": "NEXT_IMPLEMENTATION",
+    "R23": "FIRST_TOOL_INCREMENT_DELIVERED",
     "cloud_acceptance": "NOT_RUN",
     "windows_original_data_recovery": "unresolved"
   },
@@ -138,5 +138,28 @@
     "private_configurations_preserved": 70,
     "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755",
     "status": "DELIVERED_ON_MAC"
+  },
+  "tool_commit": "62114210b8ffc1135adf661f2cc97e0b44a55ccc",
+  "R23_first_increment": {
+    "evidence_path": "docs/evidence_r23/acceptance.json",
+    "evidence_sha256": "a85d90049c820669e32fa4506240e57ed4c2f64a0906a75606145912d4e80d33",
+    "delivery_path": "docs/evidence_r23/delivery.json",
+    "delivery_sha256": "424d8343d7481baa63d1d220dd1b03924f0d60fef884011e243bf19047ce31e2",
+    "regression": {
+      "source_rule_checks": 1000,
+      "postgresql_http_concurrency_tests": 1146,
+      "new_source_check_methods": 22,
+      "new_postgresql_tests": 1,
+      "gate_exit": 0,
+      "cleanup_exit": 0,
+      "test_clock_fix": "MoveFixture uses tomorrow 09:00; explicit expired-offer next-day search retains date boundary and unchanged offer state."
+    },
+    "real_age_checks": 10,
+    "transport": "LOCAL_SIMULATION",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39141545342",
+    "independent_restore_receipts": "PENDING",
+    "business_runtime_restarted": false,
+    "original_business_fingerprints_preserved": 48,
+    "original_private_configurations_preserved": 70
   }
 }

@@ -3,7 +3,7 @@
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh
 synthetic demo → continue development on `main`.
 
-Current documentation, 2026-10-18: [R2.2 delivery and course-format report](report-source/README.md).
+Current documentation, 2026-10-18: [当前课程格式报告](../课程报告/README.md).
 The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
 evidence. [Mac delivery](evidence_r21/delivery.json) verifies original data and
 configuration. R2.3 recovery freshness is next in [the R2 contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
@@ -128,3 +128,6 @@ follow the explicit archive/reset procedure, then require fresh samples. Preserv
 known faults; do not copy old observations as current health. Operations files have
 a separate encrypted delivery snapshot and are not included automatically in the
 existing database-only daily backup. All backup keys/credentials stay private.
+
+
+R2.3 first-increment host backup tools are delivered separately from the R2.2 business image. See [recovery-point states and commands](R23_RECOVERY_FRESHNESS.md) and [delivery evidence](evidence_r23/delivery.json). No independent course-backup receipt is fabricated for the RC demo: missing facts remain UNKNOWN. The existing six service conditions keep their original meaning.

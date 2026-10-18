@@ -17,7 +17,7 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2.3 first backup-tool increment in progress. [R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md) · [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/report-source/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
+Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2.3 first backup-tool increment delivered; independent restore integration remains pending. [R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md) · [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](docs/report-source/) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating
@@ -93,7 +93,9 @@ import into a separate empty instance.
 ## Validation and project records
 
 `./RC_MACOS.sh verify` uses a new temporary PostgreSQL database and writes
-results under `evidence/verification/`. Latest local execution:
+results under `evidence/verification/`. Latest host-tool regression: [R2.3 first increment](docs/evidence_r23/README.md), 1,000 source/rule checks, 1,146 real PostgreSQL/HTTP/concurrency tests and 10 real-age checks with locally simulated transport. Independent restore receipts remain pending.
+
+Earlier service/browser execution:
 [R2.2 progress/backlog/observer acceptance](docs/evidence_r22/README.md): 978 source checks,
 1,145 PostgreSQL/HTTP/concurrency tests, 869 isolated Chrome assertions and 32 runtime fault checks. Previous acceptance is
 [R1 financial evidence, 2026-10-15](docs/evidence_financial_evidence/README.md):
