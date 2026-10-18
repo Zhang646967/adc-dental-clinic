@@ -1,222 +1,1362 @@
-# ADC System Development Report
+# ADC 牙科连锁运营管理系统分析与设计
 
-R2.1 delivery and next operational stage 系统开发进展与运行保障
+R2.2 课程阶段报告 2026年10月18日
 
-Report date 2026-10-18   Application ccdcdcd   R2.1 DELIVERED   R2 IN PROGRESS
 
-## 1 Current release and next decision 当前版本与下一步
 
-R2.1 request tracing and safe operational logs（请求追踪与安全运行日志）are delivered on the Mac and in GitHub. Failed operations now have a server reference that connects safe application, server and gateway events. Existing financial approval, clinical permissions and business history remain intact. The next implementation is R2.2 worker and backlog observation.
+中 南 大 学
 
-The agreed product remains one dental chain with approximately 5-20 clinics. Data is synthetic（合成数据）, business currency/time are CNY and Asia/Shanghai, and external AI remains unused. Twenty-clinic capacity, independent hosting and commercial readiness remain separate acceptance targets.
+CENTRAL SOUTH UNIVERSITY
 
-This revision records R2.1 execution on 18 October 2026 at application commit ccdcdcd [11-13]. R1 results dated 15 October 2026 remain historical [3-4]. Future R2 monitoring thresholds, thirty-minute capacity repetition and twenty-four-hour observation have not been accepted by this release.
+系统分析与设计
 
-| Area | Current position |
+课 程 阶 段 报 告
+
+COURSE PROJECT PROGRESS REPORT
+
+题　目  ADC 牙科连锁运营管理系统分析与设计
+
+学生姓名  张加良
+
+学　　号  8210241102
+
+指导教师  毕文杰教授
+
+学　　院  商学院
+
+专业班级  信管 T2401
+
+R2.2 课程阶段报告
+
+2026年10月18日
+
+## ADC 牙科连锁运营管理系统分析与设计
+
+## 摘　要
+
+本项目以 Andrew’s Dental Chain（ADC）课程案例为背景，围绕连锁诊所分散运营、跨店协作、连续交接与经营核对，建立患者资料、预约到诊、实际治疗、版本化结算、收退款、设备维护和运营分析相互衔接的信息系统。系统采用患者、牙医、前台、诊所主管、总部、财务和技术管理七类工作台，将账号、当前身份及诊所范围分别表达。
+
+报告保留项目愿景、业务用例、现状与改进后的业务序列、系统用例、领域与状态模型，以及 SU-01—38 和 SF-01 的完整规约。在原有接诊与结算基础上，财务流程加入渠道账户、分次收退款凭据、独立审核、私有 CSV 导入和逐笔对账；设备流程保留责任维护、独立验收及费用来源，避免把排班协商或会计核对等同于自动业务变更。
+
+本阶段继续完善运行保障：R2.1 提供请求追踪编号和安全日志；R2.2 分开记录通知轮询、数据库成功和实际投递，按真实到期时点监测积压，并通过独立读取识别监测缺失、过期、损坏和来源不符。故障确认仅分配责任，不能清除故障、重做任务或代替财务审核。实现与验证结果在第5章绑定具体版本；R1容量结果保留原日期，完整R2、独立公网与商业化验收仍为后续门槛。
+
+关键词  系统分析与设计；连锁诊所；业务范围；财务证据；通知监测；可验证性
+
+## Analysis and Design of the ADC Dental Chain Operations Management System
+
+## ABSTRACT
+
+This course project develops a connected operations system for one dental chain. Patient records, appointments, attendance, actual treatment, versioned billing, receipts and refunds, equipment maintenance and operational review share protected business facts. Seven role-specific workspaces distinguish account ownership, the active role and the current clinic scope.
+
+The report retains the project vision, business and system use cases, current and improved business sequences, domain and state models, and all original SU-01 to SU-38 and SF-01 specifications. Financial evidence and one-to-one statement reconciliation retain independent review. Equipment records connect maintenance responsibility, separate acceptance and supported expenses without silently rescheduling clinical commitments.
+
+The R2.2 increment observes notification processing without taking business decisions. Loop observation, successful database progress and actual delivery remain separate. Only eligible due events contribute to backlog age. A private collector and an independent reader distinguish healthy, warning, critical and unknown conditions; acknowledgement does not erase an active fault. Executed results and protected Mac delivery are identified in Chapter 5. Historical R1 capacity evidence does not establish full R2 completion, independent public hosting or commercial readiness.
+
+Key words  systems analysis and design; dental chain; financial evidence; notification monitoring; verifiability
+
+## 目　录
+
+## 第1章 绪论
+
+逻辑链  案例需求 → 业务与系统模型 → 模块合同 → 可运行实现 → 分层验证 → 受保护交付。
+
+### 1.1 项目背景与实践意义
+
+ADC案例描述广东地区15家牙科诊所及三年内数量翻倍的扩张计划。现有管理情境以相对独立的诊所和总部人工监督为特征，管理者关注跨店治疗标准、患者取消情况、牙医技能组合和个人创造的价值。案例提出以标准化、高质量数据支撑信息系统，而非仅建立一个预约页面。[1]
+
+本项目将问题界定为：不同岗位能否围绕同一份业务事实协作，以及使用者能否正确理解当前身份、业务范围、办理状态和管理口径。候补排程与操作引导属于经用户确认的扩展需求，并非案例原文逐项规定的功能。
+
+案例中的15家诊所与扩张计划是原始问题背景；当前产品目标是一家拥有约5至20家诊所的连锁，已执行容量基线仅覆盖五家。不能把业务愿景、已实现功能和已测规模视为同一结论。
+
+### 1.2 案例依据与研究方法
+
+以课程提供案例及note讲义为核心，结合现有代码、受控业务规约和实际验收证据开展迭代。note 3要求区分需求与设计并使需求可测试；note 5要求关注点分离、简单性和受限可见性。对标成熟系统只借鉴工作流，不以厂商文档推导比较性能或安全结论。
+
+### 1.3 项目愿景与主要工作
+
+建设一套以统一业务记录为基础、以岗位任务为入口的连锁运营系统，使患者能够明确安排服务，工作人员能够在正确身份和诊所范围内办理业务，管理者能够核查结果来源、缺失情况及计算口径。系统不替代专业诊疗判断，也不以自动化程度替代人工责任。
+
+当前主要工作包括完整接诊链、独立资金审核、设备维护责任、跨店权限隔离、资金凭据与逐笔核对，以及安全诊断和通知处理观察。后续持续治疗、椅位/房间等共享资源及长期独立运行分别建模和验收。
+
+表1-1 项目目标与可观察结果
+
+| 目标 | 预期结果 | 主要核验对象 |
+| --- | --- | --- |
+| G1　资料一致 | 跨店复用患者编号，分别记录多过敏与多资格 | 档案关系与跨店查询 |
+| G2　业务闭环 | 预约、到诊、实际治疗、结算及更正可以关联核对 | 状态、账单与历史版本 |
+| G3　操作可理解 | 身份入口分离，唯一身份直达，手动引导不扩权 | 工作上下文与任务路径 |
+| G4　结果可解释 | 缺失不等于零，指标带分母，收入只计当前版本 | 统计粒度与季度核对 |
+| G5　协作可控 | 承诺、接收控制、任务与消息分开；已有安排不会被隐式撤销 | 候补、权限与异常响应 |
+
+### 1.4 报告范围与组织结构
+
+本报告沿用上一版课程阶段报告的中英摘要、目录、六章正文及完整规约附录。第3章描述业务和系统需求，第4章说明设计责任，第5章记录实际证据与限制。原RC标签、冻结报告与历史证据不被本报告覆盖。
+
+仅供合成数据课程演示，不含真实患者、真实支付接口、保险申报或临床资格自动认证。账单不是税务发票，通知投递不是人已阅读，技术管理身份不扩大临床权限。
+
+思维导图  案例事实 → 连锁协作问题 → 统一业务事实 → 岗位与范围 → 可观察目标 → 合成数据与验收边界。
+
+## 第2章 相关方法与技术
+
+### 2.1 UML 与用例驱动分析
+
+业务用例说明岗位协作的业务成果，系统用例说明软件对外提供的目标服务；序列模型表达协作，状态模型表达一个对象的合法变化。模型不能替代业务规则和异常规约，图中 include 也不表示先后点击顺序。原始系统用例编号保持稳定。
+
+### 2.2 B/S 结构与模块化单体
+
+浏览器呈现工作台与表单，Django 组织身份、授权和业务操作，PostgreSQL 保存约束、事务和历史，独立 worker 处理已经提交的站内通知意图。继续采用模块化单体，先明确数据责任和受控操作，再根据实际部署或扩展瓶颈判断是否拆分服务。
+
+### 2.3 需求可测试性与信息隐藏
+
+note 3 将需求与设计区分，并要求可观察、可验证的需求；note 5 强调关注点分离、简单性和受限可见性。本项目把每个问题连接到执行者、行为、不变量、失败响应和验收案例。监测模块只获得聚合事实，不直接改写通知任务、预约、资金或授权。
+
+### 2.4 数据库事务与独立观察
+
+关键业务写入保留原有事务和独立审核。R2.2 对数据库使用单独的只读可重复读事务，设置本事务内的语句和锁等待上限，只查询通知状态计数和到期时间；观察失败返回未知，不以零积压代替查询失败。[18-19]
+
+### 2.5 运行证据与课程边界
+
+纯规则、源码检查、真实 PostgreSQL、浏览器业务、独立恢复与云端验证分别取证。Google SRE 强调可用于采取行动的监测，并验证告警路径。[16] 本项目目前仅使用合成资料与站内消息，外部AI保持关闭或本地演示模式；未接入真实支付、短信邮件或医学判断。
+
+思维导图  需求可追踪 → 用例与模型 → 模块化单体 → 事务与信息隐藏 → 只读观察 → 分层证据与可恢复性。
+
+## 第3章 系统需求分析
+
+### 3.1 业务范围与现状分析
+
+#### 3.1.1 业务边界与业务用例
+
+业务边界仍取R4.2的“诊所服务与运营核对业务域”。患者和总部管理是该责任域的外部业务执行者；总部不因此成为ADC组织之外的机构。前台、牙医与财务是域内业务工人，既有载体及ADC系统按业务实体表达。业务用例描述对外价值，不表示菜单或操作顺序。（课件第85—89、93页）
+
+图3-1  诊所服务与运营核对业务用例图（B01）
+
+表3-1  业务用例及成果
+
+| 业务编号 | 业务成果 | 主要协作 |
+| --- | --- | --- |
+| BU-01 | 获得就诊服务 | 前台、牙医 |
+| BU-02 | 调整就诊安排 | 前台、主管 |
+| BU-03 | 获取结算说明 | 牙医、前台、财务 |
+| BU-04 | 获取运营核对结果 | 各店、牙医、财务 |
+
+#### 3.1.2 现状就诊服务
+
+图3-2  AS-IS预约、接诊与费用说明（B02）
+
+本图重建案例中的业务问题情境，而不是把v0.3软件当作现状系统。电话预约、患者资料、治疗计量及费用信息由案例支持；由前台向牙医协调、何时读取本店记录采用A1／A2假设。[1]
+
+问题定位：跨店识别、时间协调和结算依据缺乏统一核对时，可能产生反复确认。此模型不证明旧系统每次出错，也不提供现状耗时统计。
+
+#### 3.1.3 现状季度核对
+
+图3-3  AS-IS季度资料归集与核对（B04）
+
+案例明确要求按季度跟踪牙医收入、用品成本及运营费用，并提出总体激励基金比例。具体归集、汇总与缺失追问顺序采用A2／A3，不将补充流程冒充现场调研结论。[1]
+
+核心风险是完整性不能由零散提交自行保证：未提交成本不等于成本为零，取得费用单也不等于已经收款。
+
+### 3.2 系统总体目标与改进业务流程
+
+#### 3.2.1 统一服务
+
+图3-4  TO-BE统一就诊服务主路径（B03）
+
+ADC系统在改进后的业务序列中是新增的业务实体；前台、牙医仍为业务工人。图中保留到店登记、专业诊疗及费用说明的责任区别；不展开软件内部边界类、控制类或SQL。图示以前台代办为主路径，患者自助遵守同等预约约束。（课件第87—89、108—112、314页）
+
+冲突、未知过敏、无治疗关闭和重复完成分别见SU-04、SU-07、SU-08。预约意向不直接生成治疗或费用，系统不代替临床判断。
+
+#### 3.2.2 季度核对
+
+图3-5  TO-BE季度完整性核对及测算（B05）
+
+财务维护、总部查阅分权。以当前有效结算单开单金额作为项目收入口径，按北京时间自然季度归属；先确认人员范围和成本，再形成测算。资料完整与资料缺失由alt片段表示为互斥分支。
+
+对牙医d、季度q：P(d,q)=R(d,q)−C(d,q)−O(d,q)。总体P(q)为纳入牙医利润贡献之和；资料完整且P(q)>0时，F(q)=10%×P(q)。这是项目测算，不是法定财务净利润或个人奖金政策。有成本但无收入者仍需纳入，更正后只计当前版本。[1；项目设计]
+
+#### 3.2.3 候补协同
+
+图3-6  TO-BE候补、限时邀约与明确接受（B06）
+
+候补登记与排程草案都不等于正式预约。主管发布后形成有期限的保留，由本人患者或取得明确意思的前台接受后才创建预约。接受、拒绝和失效在图中分别表达，不视为必然依次发生。
+
+患者候补仍为固定30分钟、有限候选最大匹配，未提供患者短信、邮件或自动通知。任务站内消息另见第3.5.5节。邀约保留至发布后15分钟或预约开始的较早时点；这些期限与上限为项目设计。
+
+#### 3.2.4 责任协调
+
+图3-7  改进后的出诊责任协调业务序列（B07）
+
+主管先明确暂停新增，前台协商并通过原业务流程处理；有阻断不得提交。只在提交与独立复核成立的分支进入后续维护。该TO-BE模型不声称新增了临床停诊或患者自动同意。
+
+### 3.3 用户需求分析
+
+七类工作台按当前身份及对象范围授权。一个人可以有多个授予的岗位，但一次只激活一个；切换身份不能自行审核。SYSADMIN管理账号和目录，私有主机维护是另一项运行责任。
+
+表3-2 利益相关者及职责边界
+
+| 参与角色 | 核心工作目标 | 边界 |
+| --- | --- | --- |
+| 患者 | 预约、核对本人安排与费用、登记候补 | 仅本人绑定资料；不编辑治疗 |
+| 前台 | 建档、预约协调、真实到诊登记 | 当前诊所；代办需患者明确意思 |
+| 负责牙医 | 复核信息、记录治疗、核对结算 | 本人负责的接诊；专业判断由人承担 |
+| 诊所主管 | 本店出诊、候补安排与运营查询 | 先激活身份，再选择授权诊所 |
+| 总部 | 全链汇总、季度核对与设备查阅 | 只读汇总；不代办财务写入或审核 |
+| 财务 | 渠道账户、成本、资金及匹配复核 | 经授权办理；不同账号独立复核 |
+| 技术管理 | 普通账号、基础资料登记、资格记录关联与安全处置 | 不默认获得临床或财务编辑权 |
+
+### 3.4 需求清单与优先级
+
+表3-3 需求模块与业务结果
+
+
+
+| 模块 | 优先目标 | 受保护业务结果 |
+| --- | --- | --- |
+| 患者与临床 | 关键 | 稳定编号、到诊、过敏复核、实际治疗、明确结束。 |
+| 财务与设备 | 关键 | 版本化账单、真实资金及凭据、独立复核、费用来源。 |
+| 排班与协调 | 重要 | 既有承诺保留、明确受理与复核、消息不代替业务事实。 |
+| 运行保障 | 重要 | 失败请求可定位、后台进度可观察、未知结果可辨识。 |
+
+### 3.5 系统用例分析
+
+#### 3.5.1 患者服务与接诊用例
+
+系统边界为ADC软件。与目标系统直接发生功能交互的外部角色映射为系统执行者；主动发起者为主执行者，目标系统请求其协助者为辅执行者。图中实线箭头采用课件的功能交互方向，不表达用例间的时间先后；一次工作上下文仍只激活一个身份。（课件第138—142、212页）
+
+图3-8  患者服务与接诊系统用例（S01）
+
+SU-04包含SF-01，表示提交预约必须执行共享核验；患者在SU-05中仅取消本人允许取消的预约，前台还可办理本店改期与爽约核实。共用椭圆不代表角色具有相同权限。
+
+#### 3.5.2 候补 财务与运营用例
+
+图3-9  候补协同、经营核对与标准目录用例（S02）
+
+SF-01与图3-8为同一共享子功能。SU-16仅接受分支复用占用核验，拒绝无需创建预约；SU-10要求不同账号审核，不允许同一账号切换角色自批。SU-23财务可维护、总部只读。取消与创建是不同目标，不滥用extend表示时间先后。
+
+#### 3.5.3 身份 引导与安全用例
+
+图3-10  公共能力、结果核对及账号安全用例（S03）
+
+SU-01—25及SF-01规约见附录A；SU-26—38见附录B。各用例表示独立可接受的用户目标，不用用例间箭头表达业务办理顺序。原始用例编号保持稳定，新增关系只在规约支持时引入。
+
+#### 3.5.4 资料与出诊维护用例
+
+图3-11  资料与出诊维护系统用例（S04）
+
+角色来自实际业务交互，不因技术管理身份而扩大临床或财务权限；用例之间不以时间先后建立include。详见附录B的SU-26—30。
+
+#### 3.5.5 责任协调与通知用例
+
+图3-12  责任协调与站内通知系统用例（S05）
+
+前台和主管分别承担受理与独立复核；两者均可查看本人的当前范围消息。通知后台属于内部实现机制，不冒充业务执行者。详见SU-31—38。
+
+### 3.6 用例规约与失败保证
+
+附录A与B保留原始SU-01—38和SF-01完整规约。登录、预约、实际治疗完成和独立更正分别检验身份、对象、事实及审核者。预览不写入业务，确认重验当前授权与事实；回执未知时先查业务结果，不自动重放资金或安排。
+
+### 3.7 业务规则与非功能性需求
+
+表3-4  业务规则汇总
+
+| 编号 | 规则内容 |
 | --- | --- |
-| Application | R1 financial evidence retained; R2.1 diagnosis/logging delivered |
-| Regression | 918 source checks; 1,119 PostgreSQL/HTTP/concurrency tests |
-| Browser | 894 isolated assertions; 410 on the updated original Mac |
-| Historical capacity | R1: five clinics, twenty accounts, 30 minutes; 9,000 requests |
-| Recovery | R2.1: 50 independent restore fingerprints; 48 durable Mac fingerprints preserved |
-| Next coding batch | R2.2 worker heartbeat, due backlog and private condition reporting |
+| BR-01 | 身份与范围：有效授权、当前激活身份、诊所及对象范围共同核验。唯一身份也须正式激活；切身份清旧店，切店不改身份。 |
+| BR-02 | 资料：跨店复用患者编号；电话不是唯一身份。未知、已确认无已知过敏及具体过敏条目分别保存。 |
+| BR-03 | 时间与占用：开始早于结束；处于有效出诊时段；同一患者或牙医的有效预约与邀约保留不得重叠。 |
+| BR-04 | 状态：已预约、已到诊、治疗完成、无治疗关闭、取消、爽约、改期替代分别处理；普通编辑不任意回退终态。 |
+| BR-05 | 结算历史：实际治疗为计价依据；逐行舍入至分后汇总；闭合就诊恰有一张逻辑结算单，历史版本不原地覆盖。 |
+| BR-06 | 更正与季度：仅允许范围内的数字更正，独立审核；缺失不等于零，只计当前有效账单版本。 |
+| BR-07 | 候补：每患者同时最多一条有效候补；未来14天连续窗口，至少容纳30分钟；邀约有效且经明确接受才建预约。 |
+| BR-08 | 排程：最多60条需求、80个出诊块、200个候选格；只对枚举图最大匹配；草案超过15分钟不得首次发布。 |
+| BR-09 | 引导：页面与步骤来自维护目录；不自动点击或提交；外部模型可选，不将“下一步”当作业务成功。 |
+| BR-10 | 指标：按Visit而非治疗行计数；未来、改期替代、诊所取消与待核实分别列示；零分母显示N/A。 |
+| BR-11 | 账号：目标状态、操作者和权限重新核验；普通停用遵守业务交接，紧急安全封禁按BR-15独立处理。 |
+| BR-12 | 目录：标准单价变化不回写已存治疗快照和历史结算；财务维护、总部只读。 |
+| BR-13 | 结果：沿选定候补—邀约—预约关联核对；区分曾转换成功与当前预约状态；查询失败不推断原办理失败。 |
+| BR-14 | 只读模式：按经审核的路由与操作语义放行受限查询，不将所有POST等同写入；任何业务写操作仍受限。 |
+| BR-15 | 安全封禁：立即停止受控普通账号访问并使原凭据失效，不等待未闭合业务、不自动取消预约；恢复先重置再启用。 |
 
-Cloud acceptance awaits private server and hostname inputs. The original Windows database recovery remains unresolved. The frozen RC1 report remains the historical design record; this report is the current development and planning companion.
+令t为服务器核验时刻，s为候补最早可开始时间，e为最晚必须结束时间。候选代码采用s>t、e−s≥30分钟、e≤t+14天。跨多天窗口表示一个连续可接受区间，不表示每天重复的时段。合法偏好仍不保证存在匹配资源。
 
-Mind map 思维导图: ADC → delivered R1 money evidence + R2.1 safe diagnosis → next R2.2 observation → recovery freshness → independent host and measured expansion.
+表3-5  关键边界决策
 
-## 2 Business workflow and module ownership 业务流程与模块职责
-
-The main patient journey connects booking, arrival, dentist care, actual treatment, the versioned invoice, receipts or refunds and financial review. Equipment repair connects a responsible work order, another manager’s acceptance, a service event and separately reviewed expense. Existing appointments and scheduling decisions retain their own protected commands.
-
-Seven workspaces（工作身份）separate function, clinic and record authority. A person with multiple grants activates one role at a time. A role switch does not allow self-review or combine permissions. Clinical records, money and equipment rules remain inside their owning module; callers use defined operations [1-2].
-
-| Role | Responsibility and boundary |
+| 条件 | 规范结果 |
 | --- | --- |
-| PATIENT | Own appointments, invoice projection and authorized portal actions |
-| FRONT_DESK | Current-clinic reception, booking and invoice-related receipt/refund evidence |
-| DENTIST | Assigned clinical work and actual treatment; no independent finance approval |
-| MANAGER | Current-clinic equipment, schedule coordination and reconciliation proposals; limited money projection |
-| FINANCE | Channel configuration and independent money/evidence/match review under chain authority |
-| HQ | Authorized aggregate reporting; no detailed statement or patient access from reconciliation |
-| SYSADMIN | Account and directory governance; technical privilege does not grant clinical access |
+| s=t、e≤s或不足30分钟 | 指出对应字段，不保存候补。 |
+| 首次接受时t≥截止时刻 | 拒绝首次接受，不创建预约。 |
+| 已接受后再次提交 | 先核验当前权限，再返回既有预约，不因旧期限已过重建。 |
+| 收到请求但回执丢失 | 查询已有结果；不能自动重复办理或断言未保存。 |
+| 有未来业务但账号疑似泄露 | 允许受控安全封禁，保留业务；后续交接另行核验。 |
 
-Billed revenue, cash received, equipment costs and approved refunds are distinct facts. Missing cost is distinct from confirmed zero. Suggestions are not appointments, an inbox commit is not human agreement, and an approved daily handover is not proof of external channel settlement. Operational monitoring must preserve each distinction.
+表3-6  质量要求及验证方法
 
-Mind map 思维导图: Patient journey → appointments and care; money → invoice, cash and independent review; equipment → repair evidence and explicit scheduling; identity → active role, clinic and object authority.
+| 编号 | 可测试要求 | 证据方法 |
+| --- | --- | --- |
+| NFR-01 | 关键事务无部分生效，重复接受只关联一条预约。 | 真实PostgreSQL独立连接竞争、失败注入及前后数据核对。 |
+| NFR-02 | 320／390px及桌面主要动作可达；键盘与文本错误提示可用。 | 真实模板、浏览器、键盘和辅助技术检查；无AI普通流程仍可用。[15] |
+| NFR-03 | 直接URL、POST、撤权、旧上下文及受限查询均不得越权。 | 角色—对象—范围正反矩阵；不能只查菜单。 |
+| NFR-04 | 指标带分子分母，邀约带期限，核对结论带读取时点。 | 固定样本独立计算和字段核对。 |
+| NFR-05 | 升级保留历史，备份能够恢复；公网配置单独验收。 | 隔离空库恢复、登录与金额核验；归档可读不等于恢复成功。 |
+| NFR-06 | 性能目标与已测能力分开，求解、AI、导出单独记录。 | 原RC拟基准30店／60牙医／1万患者／10万Visit／20并发，列表p95≤2秒、提交p95≤3秒，属于历史目标；当前按五店已测、二十店待验收分开取证（第5、6章）。 |
 
-## 3 R1 financial evidence closure 资金凭据与逐笔对账
+可测试性、异常响应与维护可读性来自课程要求的规格属性；上述具体指标为项目自定目标，不是教师额外评分线，也不是当前已测结果。[3]
 
-Finance establishes stable clinic-specific channel accounts. New receipt, refund, equipment-expense and reversal requests bind the account and reference into a signed preview. The cash entry and first evidence version are saved atomically; a different finance account decides whether to post. Legacy entries keep an explicit missing-evidence status until a separately reviewed supplement is supplied.
+### 3.8 财务与设备管理的细化需求
 
-Managers upload private UTF-8 CSV statements with six v1 columns, at most 2 MiB and 1,000 rows. Source bytes, digest, parser version and normalized rows stay in the database. Confirmation uses a server-held preview and reparses the source. Exact repeats are reported and skipped; a conflicting transaction identity rejects the entire acceptance.
+收款、退款、设备支出与支出冲回分别保留资金事实；业务经办与独立审核分离。账内日结只证明内部四类总额已核对，不证明外部渠道已结算；次日到账可以保持待对账。设备停用或维修不直接撤销已有患者承诺，必须经原有协调流程处理。
 
-| Step | Invariant |
+表3-7 财务与设备补充需求
+
+
+
+| 项目 | 要求与结果 |
 | --- | --- |
-| Propose matching | Same clinic, account, CNY currency, direction, amount and current approved reference |
-| Independent review | Different account; current grants and source facts rechecked under locks |
-| Active correspondence | One statement line to one POSTED cash entry; database uniqueness and transactional rechecks |
-| Correct evidence | Append a reviewed version; invalidate the affected active match and retain its decision |
-| Handle differences | Keep missing evidence, fees, combined deposits and unsupported allocations visible |
-| Daily handover | Keep four gross internal totals separate from current channel matching and next-day settlement |
+| FIN-01 渠道与凭据 | 按诊所维护稳定渠道账户；新资金申请将账户和凭据引用绑定签名预览；停用账户不抹去历史。 |
+| FIN-02 审核与更正 | 不同财务账号审核过账、历史补证与凭据更正；原金额不改写，更正后旧匹配失效且可追踪。 |
+| FIN-03 逐笔核对 | UTF-8 CSV 先预览后确认；相同交易去重，冲突整批拒绝；同店、账户、币种、方向、金额、引用一致才可独立确认一对一匹配。 |
+| FIN-04 差异与交接 | 未供凭据、合并结算、费用和不支持分摊保留为差异；匹配不自动过账、改账单或生成平衡记录。 |
+| EQ-01 维护责任 | 记录设备、维护责任、期限及维修事实，由另一名有权主管验收；不能自行验收或删除历史。 |
+| EQ-02 费用与排班衔接 | 费用关联真实维护或服务来源并独立复核；支出及冲回遵守原资金审核；维修与排班冲突经明确协调处理。 |
 
-Importing or matching never posts money, changes an invoice or invents a balancing entry. The historical R1 browser scenarios accepted on 15 October cover partial receipts, refunds, equipment payments/reversals and evidence correction. In that R1 run, after additional load-time review, 29 matches are confirmed and one prior decision remains stale; 5,031 statement lines are retained. Those are deliberately bounded synthetic scenarios, not a real reconciliation coverage rate [3].
+### 3.9 通知进度与监测失效需求
 
-Mind map 思维导图: Authorized account → signed evidence → retained CSV → exact proposal → different reviewer → readable differences/corrections; internal handover and channel settlement remain separate.
+站内消息入库不是人已阅读，也不是患者同意或任务完成。后台应在空闲时证明数据库轮询仍正常，不能因为近期没有实际投递而报停滞。监测故障本身也必须能够被外部的独立状态读取发现。
 
-## 4 Executed evidence and its scope 已执行验证与适用范围
+表3-8 通知进度与监测需求
 
-R2.1 separates real database behavior, browser workflows, proxy/command sinks, size rotation and encrypted recovery. Counts describe executed checks, not coverage percentages. The local acceptance and protected Mac delivery records are separate [11-13].
 
-The five-clinic SQL oracle independently retains receipts of CNY 50,100.10, refunds of 100.10 and net patient cash of 50,000.00. Equipment expense and reversal are CNY 50.05 each. Invalid requests, CSV errors and technical logging create no balancing cash or invoice changes.
 
-| Check | R2.1 observation |
+| 项目 | 要求与结果 |
 | --- | --- |
-| Regression | 918 source checks; 1,119 PostgreSQL/HTTP/concurrency tests, including 13 new R2.1 methods |
-| Chrome | 568 business + 248 permission/isolation + 78 diagnostic/keyboard/narrow-layout assertions |
-| Real log correlation | 28 browser requests match across Django, Gunicorn and Nginx; 63 private marker values absent |
-| Candidate gateway | 133 distinct references; login GETs stay outside POST login budget; expected 403/429 cases |
-| Size rotation | 250,000 records; 143,591 retained including the final record; production 10m/three-file options |
-| Independent facts | 20 SQL/content assertions; 24 confirmed matches, one retained stale decision and 30 accepted lines |
-| Recovery | 50 model/association fingerprints match; recorded same-Mac empty-target restore/compare 2.452 s |
-| Mac protection | 48 durable fingerprints and 70 private files preserved; same data volume and RC tag; 410 browser assertions |
+| R2-04 心跳 | 分别保留轮询观测时间、最近数据库成功时间和最近非空投递时间；超过90秒无有效成功轮询需检查。 |
+| R2-05 到期积压 | 只统计 PENDING 且 next_attempt_at 不晚于当前时刻的事件；到期时点取原事件与下次尝试的较晚者，年龄下限为零；未来重试单列。 |
+| R2-06 条件与事件 | 状态为 HEALTHY、WARNING、CRITICAL、UNKNOWN；丢失、过期、损坏、外来实例/版本或时钟不一致不能证明健康。相同故障不重复开单，确认不消除条件，连续两次新成功样本才恢复。 |
+| R2-06 私有边界 | 仅私有维护命令和文件，不增加业务角色、公开监测接口或自动外部消息；主管只能查看本店业务通知概况，技术账号不因此获得临床资料。 |
 
-The mixed workload remains R1 historical evidence: five clinics, twenty accounts, 9,000 requests over thirty minutes, p95 0.337 s, under two-CPU/1,728-MiB limits. It was not repeated for R2.1. New restore and gateway checks are local; they do not establish off-host recovery or independent cloud service. Native macOS popup-menu option selection remains outside the earlier automatic acceptance.
+思维导图  患者服务 → 到诊与实际治疗 → 结算与资金证据；排班 → 明确协调 → 责任任务 → 站内消息；运营 → 到期积压 → 私有故障责任。
 
-Mind map 思维导图: Adversarial inputs → actual three-layer correlation → seven-role business outcomes → independent money facts → size rotation → encrypted restore → exact-commit CI and original Mac preservation.
+## 第4章 系统设计
 
-## 5 R2 business requirements 运行保障业务需求
+### 4.1 领域关系与状态模型
 
-R2.1 addresses safe diagnosis when reception, clinical or settlement requests fail: staff receive a support reference and are asked to check stored state before repeating uncertain work. The remaining operational problems are timely detection of stalled coordination notices, an unavailable observer and stale recovery points.
+图4-1  核心概念类及关联多重性（D01）
 
-The requirements note makes the expected outcome testable rather than describing the system as merely reliable [1]. Each R2 requirement therefore specifies an actor, an observable condition, a protected invariant, a failure response and an acceptance case.
+本图保留R4.2的跨店关系与版本含义，使用类矩形、分隔区、关联名和端点多重性，不画数据库主外键。患者、牙医、诊所通过就诊关联；就诊版本组合其治疗明细，其余关系使用普通关联。结算单关联当前发布版本；闭合就诊恰有一张逻辑结算单。图中属性为节选，不是完整物理ER图。（课件第287—296、305—306页）
 
-| Requirement | Observable result and protected invariant |
+图4-2  候补请求状态机及迁移条件（M01）
+
+本状态机只描述候补请求。迁移按“事件[警戒条件]／动作”表达；初始点表示该对象的缺省状态，不是整项业务流程的开始。OFFERED不保证邀约尚有效；到期阻止首次接受，执行回收后才恢复等待。BOOKED保留历史转换事实，后续取消发生在就诊对象上。（课件第339—345、350页）
+
+### 4.2 模块职责与接口合同
+
+图4-3  模块化单体的职责与代表性依赖（A01）
+
+表4-1  模块责任与接口边界
+
+| 责任模块 | 公开合同 | 必须隐藏或隔离的决定 |
+| --- | --- | --- |
+| accounts／workspaces | 核验身份、激活角色、选店、治理账号、校验上下文 | 授权存储、会话及修订机制；不得由模板自行授权。 |
+| scheduling／coordination | 预约、变更、候补登记、建议、发布、接受 | 占用与锁协议、状态转换；各入口不能复制冲突逻辑。 |
+| care／finance | 实际治疗、结算、更正、季度核对 | 价格快照、当前版本、成本完整性及计算粒度。 |
+| guidance／assistants | 手动指南、受限结果核对、可选意图分类 | 模型输出不决定权限；纯规则不依赖网页布局或外部API。 |
+| operations／查询层 | 授权范围内指标与事实读取 | 分母、缺失、期间及查询时点；不改业务状态。 |
+| notifications | 事务内记录派发意图、个人收件箱、显式已读和有限重试 | 原收件授权与当前权限、去重与重试；消息不驱动任务状态。 |
+
+图4-3是责任视图和代表性依赖，不是穷举的源代码导入图。功能与数据应并行细化，模块间联系应尽量少、明确且有序；拆分文件本身不能证明低耦合。[4-5]
+
+### 4.3 结果核对与只读模式
+
+图4-4  候补结果核对的分析序列（X03）
+
+图4-4是SU-24的分析责任视图：边界类处理输入输出，控制类分配协作，领域对象判定授权和准确关联。前台路径换用前台接口并核验本店范围。它不是源码调用图；核对不得改写业务记录，会话与日志属于另一层。（课件第287、314—320页）
+
+开发中曾发现只读模式按POST方法一律拒绝，与SU-24携带签名上下文的只读核对冲突。当前实现沿用经审核路由名的受限例外，保留CSRF、当前身份、对象、旧页面令牌和服务端写入检查；本轮再统一全角色只读提示及表单错误定位。[9-10]
+
+放行查询不等于放行所有POST，不采用宽泛路径前缀。HTTP方法和业务副作用是两个不同维度；查询成功仅反映读取时点，不能锁定后续可用性。
+
+### 4.4 账号安全封禁与业务退役
+
+常规停用要求先处理未闭合业务，以保护业务连续性；但疑似凭据泄露时继续允许访问会妨碍安全处置。SU-25因此将安全访问控制与业务责任交接分离；技术人员只能对受控普通账号操作，不开放自操作、技术账号或超级用户目标。
+
+图4-5  账号安全访问状态及分阶段恢复（A02）
+
+表4-2  安全控制与业务连续性分离
+
+| 操作 | 凭据与访问 | 既有业务 |
+| --- | --- | --- |
+| 常规业务停用 | 检查未闭合工作；不满足条件则拒绝 | 必须先明确处理或交接。 |
+| 紧急安全封禁 | 停用账号，原凭据设为不可用；使旧上下文失效 | 不取消预约，不删除角色绑定，不转移治疗责任。 |
+| 受控密码重置 | 设置新凭据，但仍保持停用 | 资料和历史保持原值。 |
+| 再次明确启用 | 复核后恢复登录；旧会话不因启用自动复活 | 业务交接仍独立办理。 |
+
+管理操作要求操作者重新验证密码、填写依据、核对目标签名，并对紧急封禁作专用确认。账号、工作上下文与审计在同一事务内更新。密码变更和会话失效策略参考框架机制，但本项目已纳入当前回归，实际证据见第5章。[11-12]
+
+封禁不撤销提交前已完成的事务，不清除浏览器已显示的信息，也不自动把患者交给另一位牙医。只读实例不执行封禁写入；技术／超级账号仍需离线受控维护。
+
+### 4.5 生产准备与发布门槛
+
+RC保留原生产配置候选，另增加仅面向本机合成数据的course_demo配置与独立compose.rc.yaml。RC入口使用Gunicorn和Nginx并仅向127.0.0.1开放默认18000端口；数据库不开放宿主机端口。它不是公网HTTPS生产配置；后者仍需独立角色、证书、网络及恢复验收。[9,13-14]
+
+表4-3  生产准备的实现与验证边界
+
+| 配置环节 | 现有实现 | 本地证据与剩余门槛 |
+| --- | --- | --- |
+| 环境契约 | 显式阶段、目标域名和密钥契约；运行与迁移账号分开；本地数据库仅私网。 | 本地运行权限已有回归；实际云凭据、TLS和网络边界另验收。 |
+| HTTP服务 | 非root应用、Gunicorn、Nginx和静态入口；独立HTTPS部署准备。 | Mac本地启动与入口已验证；目标证书、续期及真实公网HTTPS待验收。 |
+| 应用安全 | 分环境关闭DEBUG、Cookie和CSRF设置、HTTPS与只读策略。 | 本地认证、权限和并发已回归；目标域名与完整ASVS评估仍待完成。 |
+| 资源与审计 | 入口限速、安全运行日志、通知心跳及私有条件监测。 | R2.1限流/日志保留历史证据，R2.2有新监测验收；外部响应与主机事件待完成。 |
+| 隔离验证 | compose.verify独立项目、临时数据库和合成凭据，无端口暴露。 | 准确提交的真实Docker完整回归与CI通过；不复用原业务卷。 |
+| 升级与恢复 | 保留原迁移；加密备份、独立空库恢复及原Mac保护。 | 合成数据恢复与金额/登录已验证；Windows原数据库未取得，恢复未完成。 |
+
+### 4.6 设计原则在本项目中的应用
+
+关注点分离体现在业务查询与写入、安全封禁与业务退役、预约意向与实际计费的区分。信息隐藏体现在授权、占用、结算和结果解释由小接口承接易变规则。简单性要求首先修复可复现的问题，而不以新增微服务或求解器替代验证。上述均为课程原则的项目应用，不是讲义指定的技术栈。[4-6]
+
+发布门槛：新版本真实数据库与浏览器主链通过；核心越权、重复提交、回滚与历史金额问题关闭；生产配置、恢复和目标环境检查单独取证。独立公网和大型商业化仍需另行验收。
+
+### 4.7 协调与通知的数据责任
+
+图4-6  出诊、任务和通知的概念关联（D02）
+
+补充类图仅展示新增关系；类分栏与端点多重性区分归属。源审计唯一、事件与原授权消息去重等约束由真实数据库回归验证，证据见第5章。既有患者、治疗和账单关系仍见图4-1。
+
+### 4.8 任务状态与独立复核
+
+图4-7  协调任务状态机（M02）
+
+研究对象为CoordinationTask；任务状态不能代替出诊、预约或消息状态。终态作为历史保存，不把对象的初始点解释为整个业务流程的开始。（课件第339—345、350页）
+
+### 4.9 RC运行路径与安全边界
+
+三种路径使用同一候选源码，但目的与数据权限不同。verify面向临时空库；new-demo仅面向全新合成实例；import-copy仅恢复可信合成备份到新的RC库。任一路径均不得从目录名猜测原v0.7数据卷，也不自动停止或改写原实例。
+
+表4-4 RC运行路径与数据保护
+
+| 路径 | 前置保护 | 结果与剩余验证 |
+| --- | --- | --- |
+| 隔离验证 | 独立Compose项目、合成凭据、临时数据库；固定测试配置。 | 运行时记录实际依赖；验证容器以root写导出证据，不代表非rootWeb部署已验收。 |
+| 全新演示 | 无.env、无既有RC数据卷、无READY标记，显式合成确认。 | 空库迁移后初始化；私密文件保存演示凭据；不作用于导入副本。 |
+| 导入副本 | 可信备份，新的项目、空数据库；不调用seed或密码重置。 | 恢复前后／迁移前后核对范围不同；金额、授权及未覆盖表仍须人工核验。 |
+| 启动与停止 | 只有完成准备的实例可启动；停止仅针对本RC项目。 | db健康→schema完成→Web及worker→本地网关。只读worker退出不写；没有删除卷命令。 |
+
+旧就地升级入口在RC中改为停止提示，以免沿用早期脚本忽略新增通知写入端。最终切换前须人工冻结全部旧写入端，重新导出最终数据；演练备份不覆盖之后的新记录。回退也不得忽略RC期间新增数据。
+
+### 4.10 资金证据与设备费用的模块合同
+
+财务模块拥有渠道账户、资金分录、凭据版本、导入批次及匹配决定。前台经办账单收退款凭据，主管经办本店设备凭据和对账建议，财务另行审核；总部获得受控汇总。其他模块通过已定义的操作查询或提交，不直接更改财务记录。
+
+导入保留原 CSV 字节、解析版本和摘要；确认绑定服务端持有的预览并重新校验。证据更正追加版本，撤销相关当前匹配的有效性，但不覆盖原资金与历史决定。设备费用缺失与零值分别表达，收入、实收、支出和冲回不能混用。
+
+### 4.11 请求追踪与安全日志
+
+R2.1 在请求入口生成服务器编号并返回 X-Request-ID，错误页与应用、Gunicorn、网关日志关联。客户端不能指定编号；编号不是操作成功证明、幂等键或访问权限。
+
+日志采用有限事件和字段白名单，不格式化任意异常、SQL参数、请求正文、患者身份或CSV原文。可选日志失败不改变业务成功/拒绝，必要业务审计失败仍回滚。容器日志按容量轮转；七天按时删除与独立受保护收集尚未完成。
+
+### 4.12 通知心跳与私有条件监测
+
+worker 仍通过原来的短事务、SKIP LOCKED 和事件/授权唯一性处理站内消息。数据库轮询完成后才更新成功心跳；心跳写入失败不重做已提交业务。实例、源码、进程轮次、递增序号和时钟共同约束观测身份。
+
+独立 collector 每30秒采样，只读数据库聚合与心跳，并观察内部Web就绪和运行卷空间。worker 心跳卷由 worker 写、collector 只读；监测卷由 collector 写，Web 容器只读以供私有状态命令使用。不挂载 Docker socket，不增加公网端口。
+
+独立 reader 不依赖数据库和 collector 仍在运行；超过90秒无新有效观测时返回 UNKNOWN。故障按目标和条件归并；确认仅保留维护责任代码，不能提前恢复。监测状态使用0700目录与0600文件、限长解析、校验摘要和原子替换；损坏记录保留待受控重置。
+
+### 4.13 状态和存储的边界
+
+运营监测文件不是不可变财务审计，也不是独立备份；摘要用于发现损坏，不能证明文件作者身份。保留最多128个事件生命周期，每个最多16条变化，裁剪只删除已恢复记录并明确累计数量。受控观察重置另保留最多3份先前记录，并从未知状态重新建立观察。
+
+空间信号反映运行卷所在的Docker Linux文件系统，不等于整台Mac磁盘的独立监控。容器OOM/重启的持续主机侧采集、外部告警、备份新鲜度及24小时观察分别属于后续完整R2验收。
+
+图4-8 通知处理与私有监测责任视图
+
+观察者只能形成诊断和责任记录；预约、任务、消息重试与资金处理仍由原业务操作决定。
+
+思维导图  受控业务接口 → 数据库事务 → 历史事实；已提交通知 → 独立心跳 → 聚合采样 → 私有状态 → 独立读取与责任确认。
+
+## 第5章 系统实现与测试
+
+### 5.1 软件与硬件环境
+
+当前开发和演示主机为Mac，实际应用运行在独立Docker Linux容器中，使用PostgreSQL 17、Django、Gunicorn和Nginx。保留原演示数据库卷、配置及v1.0.0-rc.1标签；重置Windows主机的原始业务数据库仍未恢复。
+
+独立测试使用自己的实例、端口、网络、账号和卷。故障注入只针对这一环境，不对原Mac业务数据注入测试交易。实际依赖版本、源码身份和执行时间由本轮验收记录提供。
+
+本轮应用源码为 02a9dbc90583fbcad47567e64ae77ae810eca33f；依赖固定为Django 5.2.17、psycopg 3.2.10和Gunicorn 26.2.0。准确应用提交的CI通过；报告文档在独立后续提交同步，运行镜像保留已验收应用身份。
+
+### 5.2 核心功能实现说明
+
+身份和诊所选择、预约到诊、实际治疗、版本化结算与季度核对继续使用原业务服务。资金凭据、分次收款、退款、设备支出和冲回与独立财务审核衔接；预约意图不自动收费，账单金额不等于实收。
+
+主管通知概况分别显示已到处理时间、未来重试、终态失败和无收件人事件，不把等待退避的任务算作当前积压。监测状态只供维护责任人读取，不向业务工作台输出跨店队列或内部诊断。
+
+### 5.3 历史运行界面与当前观察
+
+保留历史v0.7截图作为交互背景，图示不作为R2.2的运行证明。当前验证以真实浏览器、数据库事实及私有故障记录为准；各代结果的时间和范围分别标注。
+
+以下为用户此前本地v0.7合成数据演示截图，保留版本背景；仅支持图示路径，不作为原RC真实运行证据。裁切仅去掉无关边缘，不改变业务状态文字。
+
+图5-1  候补接受后显示已转预约
+
+图5-2  切换诊所后旧表单收到拒绝反馈
+
+图5-1中用户另行确认对应正式预约存在；图5-2只说明拒绝反馈出现，底层“完全没有写入”仍需数据核对。
+
+图5-3 R2.2 本店通知概况（390像素大字模式）
+
+来自独立合成演练：两条待派发中仅一条已经到期；未来重试单独显示。该页面为当前诊所概况，后台健康由私有独立读取核对。
+
+### 5.4 测试设计与执行结果
+
+本轮纯规则及源码检查978项、真实PostgreSQL/HTTP/并发回归1,145项通过，未新增数据库迁移。以下结果来自本轮独立五诊所合成演练，源码与验收绑定；全套数量不能自动等同于每个历史用例的逐项覆盖率。
+
+初次CI发现旧预约搜索验收依赖运行时刻；将候选数量测试固定到次日上午，并新增午夜开始时间边界用例。运行、浏览器和恢复演练源码为ed7e10e，最终应用为02a9dbc；两者仅相差该测试及完整性清单，运行模块和配置字节一致。最终提交重新通过本地完整回归与准确CI，Mac按最终版本验证。
+
+真实容器在消息事务提交前被终止，未提交消息和尝试次数回滚；在提交后明确到达屏障，再从外部强制终止并核验退出137，重启没有重复消息或重做任务。平稳停止在24.588秒内被观察，提交前强制终止在110.042秒内被识别。确认责任不清除故障，恢复需要两次新的有效成功样本。
+
+独立数据库核对的合成总收款为50,100.10元，总退款为100.10元。
+
+患者净资金为50,000.00元；设备支出与冲回各50.05元。
+
+24条匹配有效、1条因凭据更正保留为需重核，30条外部流水已接受。对账没有改写账单或生成平衡款项。
+
+日志核对覆盖64类凭据、患者及CSV/引用标记，均未出现；992个请求在应用、Gunicorn和网关间关联。固定启动和停止提示单独分类，原生请求错误和数据库输出保持关闭。完整证据与需求追踪保存在docs/evidence_r22；准确应用CI：https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755。
+
+表5-1 分层测试与执行结果
+
+
+
+| 验证层次 | 执行结果与证据边界 |
 | --- | --- |
-| R2-01 / 02 | Delivered: server reference and strict safe events; no submitted secret, clinical, CSV or URL/body values |
-| R2-03 | Delivered size bounds and sink inventory; strict time expiry/protected collection remain gaps |
-| R2-04 / 05 | Next: successful worker-loop freshness and eligible due-backlog age; future retry and human read stay distinct |
-| R2-06 | Planned: private HEALTHY/WARNING/CRITICAL/UNKNOWN; acknowledgement does not clear the fault |
-| R2-07 / 08 | Planned: separate created/downloaded/restored points and controlled independent recovery |
+| 源码与规则 | 978项通过；含私有文件、状态机、严格类型及有界历史。 |
+| 真实数据库 | 1,145项通过；只读采样、事务、权限和并发回归。 |
+| 运行故障 | 32项通过；真实终止、DB/监测停机、异常文件、幂等确认与模拟空间。 |
+| 真实浏览器 | 869项通过：资金流程568、七角色与跨店248、通知/键盘/窄屏53。 |
+| 独立资金核对 | 20项通过；四类资金、账单、凭据版本、匹配和CSV摘要独立计算。 |
+| 安全运行输出 | 64类私有标记均未出现；992个请求跨三个处理层关联。 |
+| 加密空库恢复 | 50个模型及关联全部匹配；2.454秒包含目标准备、恢复和比较；源库不变。 |
+| 容量与公网 | 本轮不重跑30分钟/24小时。R1五店二十账号、9,000请求及p95 0.337秒属于2026-10-15历史；公网仍等待服务器。 |
 
-Keep the modular monolith（模块化单体）and current worker. Operational logging queries no permissions or business objects and omits role/clinic identifiers. The business module still owns its audit and transaction; operational metadata is a separate diagnostic responsibility [2,5].
+### 5.5 Mac受保护更新与恢复
 
-Mind map 思维导图: Failure → actor and observable symptom → protected business invariant → explicit response → acceptance; operator, clinic and finance responsibilities stay distinct.
+更新前已验证数据库和原配置的加密备份，准确应用提交CI通过后更新Mac镜像并启动worker与collector。本轮原Mac浏览器仅登录、选身份和授权读取，完成437项断言；未导入测试业务或向原库执行恢复。
 
-## 6 Delivered safe diagnosis 已交付的故障定位能力
+更新后48个原有持久模型及关联摘要、70份原私有配置、原数据库卷及RC标签均保持一致。瞬时登录会话、工作上下文和last_login按只读验收需要排除，不能将此比较表述成整个数据库每个字节不变。
 
-At request entry the server creates the reference and returns X-Request-ID. Client headers cannot choose it. Context is reset after completion or exceptions; later Django warning records reuse the immutable server context on the request. The gateway uses the application reference for proxied outcomes and generates a fallback for its own refusals.
+数据库更新后加密归档已再次解密检查；新运行观测另有加密快照并验证解密，原配置摘要再次比较。六项私有运行条件均为健康，目录0700、文件0600及各容器读写挂载方向已验证。现有数据库日备份不会自动包括新增运行文件。
 
-The JSON formatter allows UTC time, severity, service, identified source or unknown, finite event code, server reference, resolved route, normalized method/status and bounded duration. It never formats arbitrary messages, arguments, exception strings or locals. Authentication events omit entered credentials; references confer no record authority.
+独立恢复在全新的空PostgreSQL完成，比较账户、授权、全部业务和关联、凭据版本、CSV原字节和对账历史；临时恢复容器与网络已清理，源库不变。课程报告随后经独立文档提交CI同步，不为文档重启服务。独立公网及原Windows数据恢复仍未完成。
 
-| Contract | Implementation and check |
+### 5.6 需求追踪
+
+R2-04—06连接到R2-A03/04/05/06/09及新增规则、真实PostgreSQL和隔离进程验证；R2-A10/12继续保护权限及原Mac交付。R2-A11的等价容量重复与24小时观察留在R2.4，R2-A07/08的持续恢复新鲜度留在R2.3。
+
+表5-2 需求至验收追踪
+
+
+
+| 需求 | 实现与直接验证 |
 | --- | --- |
-| Context | Separate request module and context variables; original security/workspace middleware order preserved |
-| Safe failures | Generic error and support reference; 500 renderer performs no database context queries |
-| Sinks | Django/Gunicorn/gateway request events controlled; runtime command stderr sanitized; compatible worker aggregate output |
-| Native capture | Database errors can quote submitted values; native DB and credential-bootstrap capture disabled |
-| Business atomicity | Optional log failure preserves success/denial; required financial audit failure still rolls back |
-| Storage | Docker local nominal 10 MiB × 3 files per captured container; size rotation verified, no seven-day deletion claim |
+| R2-04 心跳 | worker受控循环及私有文件；空闲、停机、提交前回滚和提交后回执丢失。 |
+| R2-05 积压 | 只读可重复读查询；到期和未来重试分开、终态失败及无收件人分开。 |
+| R2-06 状态 | 六条件、四状态、有界历史、幂等确认、两次新成功恢复、独立读取。 |
+| R2-A10 权限 | 保留七工作台；主管只能看本店业务概况；无公共监测地址。 |
+| R2-A12 交付 | 准确应用提交CI、加密保护、数据/配置比较、原Mac只读验收。 |
+| 后续门槛 | R2.3恢复新鲜度、R2.4长时容量与故障/安全演练另行执行。 |
 
-Actual checks cover forged references, parallel success/failure, delayed framework logs, login/CSRF, sensitive markers, stale equipment forms and invalid receipts/CSV. Diagnostic metadata, retained financial audit and private operator evidence remain separate [6-8,11]. No business migration, new role, public metrics API or automatic business action was introduced.
+思维导图  测试目标 → 隔离正常/异常场景 → PostgreSQL/进程/浏览器 → 独立业务核算 → 加密恢复 → 准确版本CI → 原Mac受保护更新。
 
-Mind map 思维导图: Server reference → existing permission/transaction → strict safe events → matching proxy outcome → bounded private storage → preserved audit and independent review.
+## 第6章 总结与展望
 
-## 7 Observation and recovery targets 监测与恢复目标
+### 6.1 阶段工作总结
 
-These are proposed R2.2/R2.3 engineering defaults, not achieved service results. R2.1 provides diagnostic records and size bounds; it does not yet collect worker/backup conditions or manage incidents. Missing observations must be UNKNOWN. An idle worker should be healthy when its database-backed loop is current and no overdue eligible events exist.
+系统在原预约、接诊和结算基础上，已形成受控资金证据、逐笔对账、设备维护与通知协调的衔接。R2.1使失败请求可以被安全定位；R2.2进一步明确通知进度、到期积压和监测自身失效，使“没有消息”和“后台不工作”能够被区分。
 
-| Signal | Initial rule |
+需求分析把业务问题转为可观察的不变量；模块合同把财务、诊疗、排班与运行状态的责任分开；数据库与浏览器证据检查实际结果，独立恢复检查保留下来的事实。测试数量不代表覆盖率、临床有效性或大型商业部署能力。
+
+### 6.2 不足与后续工作
+
+继续按R2.3恢复点新鲜度、R2.4完整本地运行保障、R2.5独立公网验收推进；之后依次细化R3多次治疗连续性、R4椅位/房间/设备资源协调、R5二十诊所代表性负载。云端仍等待服务器资料，不以Mac演示或自签名证书代替实际公网验收。
+
+表6-1 后续工作与验收门槛
+
+
+
+| 项目 | 要求与结果 |
 | --- | --- |
-| Web/database readiness | Fault after two failed samples; recovery after two successful samples |
-| Worker success | Stale after 90 seconds when a writable worker is required |
-| Due notification age | Over 120 seconds; use PENDING rows already due, not future scheduled retry |
-| Observer freshness | Over 90 seconds, invalid clock or foreign instance means UNKNOWN |
-| OOM/restart | Any new event retains an incident even when current health recovers |
-| Storage | Warn below 20% free; critical below 10% or 1 GiB free |
-| Recovery points | Warn after 26 hours for daily server backup or verified off-host source point |
-| Independent restore | After deployment and weekly; age warning after eight days; bind backup digest and commit |
+| R2.3 | 分别记录备份创建、已验证异地下载与独立恢复；保持原始源时间及现有UTC保留规则。 |
+| R2.4 | 完成安全差距复核、主机侧事件采集、故障手册、等价负载及24小时本地观察。 |
+| R2.5 | 独立HTTPS主机、国内无代理访问、Mac离线、服务器/worker重启、证书续期与云端恢复。 |
+| R3—R5 | 跨次治疗计划与随访；维护和多资源排班；二十诊所代表性容量与独立运行界限。 |
 
-Track backup creation, verified Mac download and independent restore separately. A repeated check/download never advances the original backup timestamp. Keep seven server days and thirty Mac days; a corrupt file must not cause pruning of a valid recovery point. A sleeping Mac leaves the off-host recovery point at its last verified download.
+思维导图  当前闭环 → 明确尚缺 → 恢复新鲜度 → 完整本地运行 → 独立公网 → 连续治疗 → 资源协调 → 有证据的规模扩展。
 
-Recover only into a distinct empty target with matching source/image/schema provenance. Compare accounts, grants, business/association rows, all four cash legs, evidence versions, original CSV byte digests and match history. Target thirty minutes after the replacement environment is ready. R2.1’s 2.452-second local interval does not promise cloud replacement time.
+## 参考文献
 
-A proposed seven-day technical availability objective is 99.5%; report 4xx/409/429 separately. Functional acceptance still rejects an unexpected 403 or other wrong business outcome. Empty traffic is not 100% availability. Repeat the existing thirty-minute mixed-load gate with p95 within five seconds and measure observer/logging overhead.
+[1] CHEN Z. ANDREW'S DENTAL CHAIN：数据建模：W44694[Z]. 指导：Derrick Neufeld. Ivey Publishing, 2024-10-08. 课程提供案例，第1—2页。
 
-Mind map 思维导图: Delivered diagnosis → proposed worker/backlog/observer freshness → explicit future condition; created → downloaded/decrypted → independently restored point → actual recovery exposure.
+[2] LEVESON N. Software Engineering Concepts：过程模型[Z]. 课程提供讲义note__2，年份未注明. 第4—5页。
 
-## 8 Development sequence and completion gates 开发顺序与验收
+[3] LEVESON N. Software Engineering Concepts：Requirements Specification[Z]. 课程提供讲义note__3，部分页版权标记1999. 第1—5、11页。
 
-R2.1 is delivered with passing application-commit CI, local execution and protected Mac comparison. Continue with bounded R2.2 increments. Each must preserve original data, role scope and independent finance review. Destructive fault injection stays inside an identified disposable rehearsal.
+[4] LEVESON N. Software Engineering Concepts：Software Design[Z]. 课程提供讲义note__4，部分页版权标记1999. 第7、10—11、15—16页。
 
-| Increment | Deliverable and completion gate |
+[5] LEVESON N. Software Design Principles[Z]. 课程提供讲义note__5，部分页版权标记1999. 第4—10页。
+
+[6] LEVESON N. Reuse and COTS[Z]. 课程提供讲义notes__6，部分页版权标记1999. 第4、8—9页。
+
+[7] LEVESON N. Software Engineering Concepts[Z]. 16.355, Fall 2005. 课程提供讲义note__1，第8、18—21页。
+
+[8] OBJECT MANAGEMENT GROUP. Unified Modeling Language, Version 2.5.1[S/OL]. 2017[2026-09-27]. https://www.omg.org/spec/UML/2.5.1/
+
+[9] DJANGO SOFTWARE FOUNDATION. Deployment checklist：Django 5.2 documentation[EB/OL].[2026-09-27]. https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
+[10] DJANGO SOFTWARE FOUNDATION. Middleware：Writing your own middleware[EB/OL].[2026-09-27]. https://docs.djangoproject.com/en/5.2/topics/http/middleware/
+
+[11] OWASP FOUNDATION. Authorization Cheat Sheet；Session Management Cheat Sheet[EB/OL].[2026-09-27]. https://cheatsheetseries.owasp.org/
+
+[12] DJANGO SOFTWARE FOUNDATION. Using the Django authentication system[EB/OL].[2026-09-27]. https://docs.djangoproject.com/en/5.2/topics/auth/default/
+
+[13] GUNICORN AUTHORS. Gunicorn Settings[EB/OL].[2026-09-27]. https://gunicorn.org/reference/settings/
+
+[14] F5 NGINX. Module ngx_http_proxy_module[EB/OL].[2026-09-27]. https://nginx.org/en/docs/http/ngx_http_proxy_module.html
+
+[15] W3C WAI. Understanding SC 3.3.1：Error Identification；Use Clear Step-by-step Instructions[EB/OL].[2026-09-27]. https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html
+
+[16] GOOGLE. The Site Reliability Workbook Monitoring[EB/OL]. https://sre.google/workbook/monitoring/（访问日期2026-10-18）.
+
+[17] OWASP FOUNDATION. Application Security Verification Standard 5.0.0[EB/OL]. https://owasp.org/projects/asvs（访问日期2026-10-18）.
+
+[18] POSTGRESQL GLOBAL DEVELOPMENT GROUP. PostgreSQL 17 SET TRANSACTION[EB/OL]. https://www.postgresql.org/docs/17/sql-set-transaction.html（访问日期2026-10-18）.
+
+[19] DJANGO SOFTWARE FOUNDATION. Database Functions Greatest Django 5.2[EB/OL]. https://docs.djangoproject.com/en/5.2/ref/models/database-functions/（访问日期2026-10-18）.
+
+[20] ADC PROJECT. R1 financial evidence and R2.1 executed acceptance[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/tree/main/docs（历史执行日期分别为2026-10-15、2026-10-18）.
+
+[21] ADC PROJECT. R2.2 implementation contract and executed evidence[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/tree/main/docs/evidence_r22（实际执行结果以发布记录为准）.
+
+[22] Zhang Jialiang. ADC R2.2 application 02a9dbc and exact-commit CI[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755. 2026-10-18.
+
+## 附录A 基础系统用例规约
+
+本附录保留原SU-01—25及SF-01的业务保证和编号，改按课程报告表格呈现。原验收组是追踪目标；当前运行状态统一以第5章及准确提交证据为准，未建立逐项对应时不把总测试数量等同于用例覆盖率。
+
+#### SU-01　登录、选择与切换身份
+
+表A-1 SU-01　登录、选择与切换身份用例规约
+
+
+
+| 标题 | 内容（SU-01） |
 | --- | --- |
-| R2.1 Safe diagnosis | Delivered: references, strict events, safe errors, measured rotation and protected local release |
-| R2.2 Worker observation | Next: heartbeat, due age, private collector and condition/incident lifecycle; expose observer failure |
-| R2.3 Recovery freshness | Separate backup/download/restore receipts; corrupt/wrong-key/stale-copy and empty-target recovery cases |
-| R2.4 Local release | Security gap review, fault runbooks, seven-role browser/load checks and 24-hour local observation |
-| R2.5 Cloud release | Independent HTTPS host; mainland access, Mac offline, restart, renewal, backup/recovery and 24-hour gates |
+| 用例名称 | SU-01　登录、选择与切换身份 |
+| 执行者／触发 | 所有系统用户；登录或点击“切换身份”。 |
+| 涉众利益 | 账号使用者希望少走无效步骤；机构需防止身份混用和越权。 |
+| 前置条件 | 能够打开登录页，已通过受控方式取得账号；本用例包含凭据校验，不把登录成功当作前置条件。 |
+| 基本路径 | 1）账号使用者提交账号和密码；系统验证凭据及账号状态。2）系统核对有效身份；无身份时反馈待授权，唯一身份时正式激活，多身份时由账号使用者选择后激活。3）系统再次核验授权并清除旧诊所范围；前台／主管随后通过SU-02选择诊所。4）账号使用者请求切换时，系统仅提供有效身份；唯一身份不增加重复选择。 |
+| 扩展路径 | 凭据错误或账号停用：留在登录入口，反馈不泄露账号是否存在。 无身份／选择期间撤权：说明原因并提供退出；不授予新身份。 旧标签页提交：拒绝并要求核对当前身份与诊所；不得借用账号的其他身份。 |
+| 成功结果 | 只改变当前工作身份，不增加权限，不改变已有业务记录。 |
+| 最低保证 | 失败不进入受保护工作区，不改变患者、预约或账单。 |
+| 追踪与状态 | BR-01；AT-01；原始规则和验收组保留，当前执行证据与范围见第5章。 |
 
-- Inject database unavailability, stopped/terminated worker, future retry, monitor failure and simulated storage pressure without modifying the running Mac.
-- Verify deduplicated incident opening, acknowledgement and sustained recovery; acknowledgement changes responsibility, not condition truth.
-- Check corrupt archives, cached copies with a wrong key and interrupted downloads; preserve previous valid points and all source business records.
-- Repeat five-clinic/twenty-account valid mixed work with import/review activity, no unexpected statuses/duplicate effects/OOM and p95 within five seconds.
+#### SU-02　选择与切换诊所
 
-The full plan defines R2-A01 through R2-A12 [9]. R2.1 contributes reference/privacy/permission, storage and recovery evidence; it does not pass every full-R2 gate. Local R2 acceptance and cloud acceptance remain separate. Then retain the agreed sequence: R3 treatment continuity, R4 resource coordination and R5 measured twenty-clinic expansion.
+表A-2 SU-02　选择与切换诊所用例规约
 
-Mind map 思维导图: Diagnosis → worker/observer → recoverable points → local fault evidence → independent host; later care continuity → shared resources → measured expansion.
 
-## 9 Security assessment and release boundaries 安全差距与发布边界
 
-Use OWASP ASVS 5.0.0 for the scoped assessment. R2.1 request/context, safe-sink and retained-business tests now support evidence review; they do not establish a standard-wide pass. The register keeps time retention, protected independent collection, session/MFA and target-host work explicit [6,10-11].
-
-| Area | Current assessment direction |
+| 标题 | 内容（SU-02） |
 | --- | --- |
-| Logging and errors | Implemented R2.1 inventory, correlation, UTC/minimal fields, safe failures and adversarial evidence; assess complete controls |
-| Log protection | Size rotation verified; seven-day deletion and separate protected collection remain gaps; native text suppression reduces forensic detail |
-| Authorization | Review existing seven-role/function/object/field tests against the complete requirement scope |
-| Sessions and MFA | Lifetime/concurrency, session inspection, factor changes and MFA need their own contracts/assessment |
-| Customer isolation | One chain’s clinic isolation is not independent customer tenancy |
-| Public operation | Needs server IPv4, SSH user/key path, independently verified host fingerprint and owned hostname |
+| 用例名称 | SU-02　选择与切换诊所 |
+| 执行者／触发 | 当前为前台或主管的用户；进入角色首页或点击“切换诊所”。 |
+| 涉众利益 | 前台／主管需明确当前店；其他诊所不应因切换受误操作影响。 |
+| 前置条件 | 账号已登录并激活前台或主管身份。可进入的诊所集合由系统核验；空集合属于本用例的替代结果。 |
+| 基本路径 | 1）系统反馈当前前台／主管身份可进入的诊所。2）前台／主管提交选定诊所；系统验证该身份与诊所的授权关系。3）系统激活选定诊所范围并反馈当前范围；不改变工作身份。 |
+| 扩展路径 | 没有有效诊所：说明原因，不展示合并数据。 目标诊所停用或无授权：拒绝，不能借用另一角色的范围。 切换后旧表单提交：拒绝并要求刷新。 |
+| 成功结果 | 当前店明确；另一家店的业务不会混入当前查询或提交。 |
+| 最低保证 | 选择失败不激活未授权诊所；合法切换不修改业务记录，旧页不得沿用原范围提交。 |
+| 追踪与状态 | BR-01；AT-02；原始规则和验收组保留，当前执行证据与范围见第5章。 |
 
-The application is updated on the original Mac after exact-commit CI. Encrypted before/after backups are verified; original durable facts, configuration, volume and RC tag remain. Documentation is synchronized separately. No test business records are injected into the original Mac.
+#### SU-03　建立与查阅患者档案
 
-Local checks cannot establish mainland access, real certificate issuance/renewal, service while the Mac is offline or replacement-host recovery. Cloud acceptance awaits server details. Original Windows-data recovery remains unresolved.
+表A-3 SU-03　建立与查阅患者档案用例规约
 
-Mind map 思维导图: Versioned security requirement → existing evidence and explicit gap → targeted work; private server inputs → actual host tests → separately accepted public operation.
 
-## 10 References and report provenance 参考资料与报告来源
 
-The course notes provide the requirements/design framework; official references guide engineering mechanisms. R1 observations remain dated 15 October 2026. R2.1 local acceptance and original-Mac delivery are dated 18 October 2026, with identified application commit ccdcdcd and passing CI [11-13].
+| 标题 | 内容（SU-03） |
+| --- | --- |
+| 用例名称 | SU-03　建立与查阅患者档案 |
+| 执行者／触发 | 前台建档；负责牙医查阅授权记录；新患者需要建档，或工作人员需要查阅。 |
+| 涉众利益 | 患者希望跨店资料一致且隐私受保护；工作人员需可靠识别患者。 |
+| 前置条件 | 有效工作身份与范围；仅使用合成资料。 |
+| 基本路径 | 1）前台提交识别条件；系统检索既有患者，支持跨店复用编号，不按相同电话自动合并。2）前台为新患者提交姓名、出生日期、账单地址、电话、可选邮箱、紧急联系人及逐项过敏资料。3）系统校验资料并分配稳定编号；负责牙医请求查阅时，系统只反馈获授权的接诊所需资料。 |
+| 扩展路径 | 疑似重复：提示核对，不按相同电话自动合并。 必填缺失、未来出生日期或过敏状态矛盾：阻止保存。 无关联/无授权的直接访问：拒绝，不泄露资料。 |
+| 成功结果 | 成功建档产生一份可查询档案；查阅不修改数据。患者业务编号不是登录凭证；完整编辑／合并不在本次实现范围。 |
+| 最低保证 | 建档失败不留部分档案；查阅失败不暴露对象，疑似重复不自动合并患者。 |
+| 追踪与状态 | BR-02；AT-03；原始规则和验收组保留，当前执行证据与范围见第5章。 |
 
-Editable report_source.json and build_report.py produce Word and Markdown; PDF pages are visually inspected. baseline.json binds aggregate evidence and delivery hashes. Credentials, keys, dumps, patient data and CSV source bytes remain private. The frozen 63-page RC1 report, original thirty migrations and RC tag preserve their historical identities.
+#### SU-04　创建预约
 
-Report revision date: 2026-10-18 in the project owner’s client date context. Historical R1 evidence remains dated 2026-10-15 UTC. The separate R2.1 delivery record binds 48 durable-model/association fingerprints, 70 unchanged private files and 410 Mac browser assertions to this application release.
+表A-4 SU-04　创建预约用例规约
 
-[1] Course note 3 Requirements and specification. Supplied project material, physical page 5 on testable observable requirements.
 
-[2] Course note 5 Software design principles. Supplied project material, physical pages 4-5 and 8 on separation, simplicity, restricted visibility and information hiding.
 
-[3] [ADC R1 executed acceptance](https://github.com/Zhang646967/adc-dental-clinic/blob/6a06f356a0c4697f5b8afe2736ed62d427512806/docs/evidence_financial_evidence/acceptance.json). Immutable application baseline; synthetic local scope.
+| 标题 | 内容（SU-04） |
+| --- | --- |
+| 用例名称 | SU-04　创建预约 |
+| 执行者／触发 | 患者或当前诊所前台；用户提出预约并进入确认。 |
+| 涉众利益 | 患者希望安排明确；牙医与诊所需避免重复占用和误收费。 |
+| 前置条件 | 有效患者；牙医、诊所及出诊时段可用。 |
+| 基本路径 | 1）患者提交30分钟候选时段；前台在当前店提交允许的起止时间、特殊需求和治疗意向。2）系统反馈诊所、牙医及北京时间；患者／前台明确确认，查询空闲本身不保留时段。3）系统执行SF-01，重验当前范围、出诊覆盖、患者和牙医预约及有效邀约保留。4）系统保存一条预约并反馈编号与状态；治疗意向不形成收费。 |
+| 扩展路径 | 页面过期、签名不符或范围改变：不创建。 并发争用同一资源：冲突一方收到重新选择提示。 保存或审计失败：撤销本次关联写入；重试成功回执不重复预约。 |
+| 成功结果 | 一条可查询且不冲突的预约；没有隐含治疗确认或付款。 |
+| 最低保证 | 新预约创建失败不留下有效预约或部分保留；已有预约和患者资料不被更改。 |
+| 追踪与状态 | BR-03；AT-04；原始规则和验收组保留，当前执行证据与范围见第5章。 |
 
-[4] [Exact R1 application commit CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38728944434). Successful workflow for commit 6a06f35.
+#### SU-05　调整预约结果
 
-[5] [Google SRE workbook Monitoring](https://sre.google/workbook/monitoring/). Purposeful observation and testing the monitoring/alerting path.
+表A-5 SU-05　调整预约结果用例规约
 
-[6] [OWASP ASVS official project and stable standard](https://owasp.org/projects/asvs). Assessment is pinned to 5.0.0; requirement links are in the ADC register.
 
-[7] [Django 5.2 logging configuration](https://docs.djangoproject.com/en/5.2/howto/logging/). Application logger, formatter and handler mechanisms.
 
-[8] [Docker local logging driver](https://docs.docker.com/engine/logging/drivers/local/). Size-based options; no time-expiry acceptance is claimed.
+| 标题 | 内容（SU-05） |
+| --- | --- |
+| 用例名称 | SU-05　调整预约结果 |
+| 执行者／触发 | 前台；患者仅本人未开始预约取消；取消、改期或核实爽约。 |
+| 涉众利益 | 患者需明确变更结果；诊所需保留原因与改期历史。 |
+| 前置条件 | 目标尚在允许操作的状态；范围与修订号有效。 |
+| 基本路径 | 1）前台／患者明确目标预约及取消、改期或爽约核实的请求；患者仅能取消本人允许取消的预约。2）系统核验范围与状态；前台／患者提交允许操作的原因，改期时前台提交本店新时间，爽约时前台确认确未到诊。3）系统验证原计划结束时间等规则并保存已明确确认的结果；改期保留原记录及后继关联，患者改期仍联系前台。 |
+| 扩展路径 | 尚未到结束时间：不能认定爽约。 已到诊/已结束：普通取消或改期被拒绝。 新时段失败：原预约继续有效。患者改期仍联系前台。 |
+| 成功结果 | 状态、到诊标志和历史一致。当前单店工作台的普通改期仅选择当前店时段。 |
+| 最低保证 | 改期失败保留原有效预约；取消和爽约失败不改变原状态，旧记录不删除。 |
+| 追踪与状态 | BR-04；AT-05；原始规则和验收组保留，当前执行证据与范围见第5章。 |
 
-[9] [ADC R2 operational assurance plan](https://github.com/Zhang646967/adc-dental-clinic/blob/main/docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Implementation contracts and R2-A01 through R2-A12; planned.
+#### SU-06　登记实际到诊
 
-[10] [ADC versioned security gap register](https://github.com/Zhang646967/adc-dental-clinic/blob/main/docs/SECURITY_ASVS_GAP_REGISTER.md). Scoped assessment work, not ASVS certification.
+表A-6 SU-06　登记实际到诊用例规约
 
-[11] [ADC R2.1 executed local acceptance](https://github.com/Zhang646967/adc-dental-clinic/blob/ccdcdcd1f612d490ec144d70ee5e5a9395959c75/docs/evidence_r21/acceptance.json). Regression, real-browser/sink/gateway, money and encrypted-restore results.
 
-[12] [Exact R2.1 application CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480). Successful workflow for ccdcdcd.
 
-[13] [ADC protected Mac delivery record](https://github.com/Zhang646967/adc-dental-clinic/blob/main/docs/evidence_r21/delivery.json). Original data/configuration protection and post-update verification.
+| 标题 | 内容（SU-06） |
+| --- | --- |
+| 用例名称 | SU-06　登记实际到诊 |
+| 执行者／触发 | 当前诊所前台；工作人员选择“登记到诊”。 |
+| 涉众利益 | 患者与牙医需真实到诊队列；管理者不应得到虚假的出勤指标。 |
+| 前置条件 | 当前前台身份和诊所范围有效，目标为已预约；前台须在路径中确认真实到达。系统只核验提交的登记信息，不能独立感知患者到店。 |
+| 基本路径 | 1）前台核对本店预约，提交已确认真实到达的到诊登记请求。2）系统核验当前店权限、原预约状态及修订号。3）系统保存到诊标志、实际到诊时间与事件，并反馈登记结果。真实到达由前台核实，不由软件自行感知。 |
+| 扩展路径 | 已经取消/爽约/改期替代：拒绝直接到诊。 旧修订号或授权撤回：拒绝并提示刷新。 重复或失败请求不产生第二次独立接诊。 |
+| 成功结果 | 到诊=true，状态已到诊；此时尚无治疗完成或收款事实。 |
+| 最低保证 | 校验失败不新增到诊时间；重复请求不产生第二次到诊事件或越过终态限制。 |
+| 追踪与状态 | BR-04；AT-06；原始规则和验收组保留，当前执行证据与范围见第5章。 |
 
-Mind map 思维导图: Course requirements/design → official mechanisms → immutable R1 observations → executed R2.1 acceptance → original Mac delivery → pending R2.2 and independent host.
+#### SU-07　复核信息与记录实际治疗
+
+表A-7 SU-07　复核信息与记录实际治疗用例规约
+
+
+
+| 标题 | 内容（SU-07） |
+| --- | --- |
+| 用例名称 | SU-07　复核信息与记录实际治疗 |
+| 执行者／触发 | 本次负责牙医；从接诊队列进入工作区。 |
+| 涉众利益 | 患者需准确治疗与过敏记录；牙医需保留已存草稿和专业责任。 |
+| 前置条件 | 牙医身份有效，目标本人负责且已到诊。 |
+| 基本路径 | 1）牙医请求办理本人已到诊接诊；系统反馈获授权的主诉与过敏知识状态。2）牙医提交当次复核结果，以及实际治疗项目、标准单位、数量和当时单价。3）系统验证并保存治疗草稿；误录草稿由牙医说明原因后请求撤回。本任务不自动关闭接诊，结束须另行明确请求SU-08。 |
+| 扩展路径 | 未知过敏可以保存草稿，但不能当作已确认无过敏。 数量/价格不合法或页面过期：阻止保存。 已发布内容不在此处直接修改；非本人接诊拒绝。 |
+| 成功结果 | 实际治疗草稿可供后续核对；SU-08必须由牙医另行明确启动。已发布版本不可从本页原地改写。 |
+| 最低保证 | 本次失败不新增治疗行；之前已保存草稿不丢失，历史已发布内容不受影响。 |
+| 追踪与状态 | BR-02、BR-05；AT-07；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-08　完成就诊并生成结算单
+
+表A-8 SU-08　完成就诊并生成结算单用例规约
+
+
+
+| 标题 | 内容（SU-08） |
+| --- | --- |
+| 用例名称 | SU-08　完成就诊并生成结算单 |
+| 执行者／触发 | 本次负责牙医；核对后明确关闭本次接诊。 |
+| 涉众利益 | 患者需可核对费用；机构需闭合状态与唯一结算一致。 |
+| 前置条件 | 已登录为本次负责牙医；目标可查阅。首次完成须已到诊；已经完成的重复请求走既有结果分支。 |
+| 基本路径 | 1）系统反馈待核对的项目、数量、单价、行小计与总额。2）牙医核对后明确请求治疗完成；确无治疗时请求无治疗关闭并提交原因。3）系统验证完成条件，一并保存已发布内容、唯一结算单、闭合状态及事件，反馈结果；已成功完成的授权重试返回既有结算单。 |
+| 扩展路径 | 有实际治疗但过敏未复核、数据不完整或数值非法：指出缺口，不完成。 有治疗却选无治疗：拒绝；确无治疗可保留未知信息，填写原因后生成零明细零金额单。 首次完成的中途失败：本次关闭与开单全部撤销；经授权核验的重复完成返回既有结算单。 |
+| 成功结果 | 闭合就诊恰有一张逻辑结算单；到诊仍为true；不代表已收款。 |
+| 最低保证 | 失败不出现“已闭合却无结算单”或半张账单；已成功完成的结果不得因重试再创建。 |
+| 追踪与状态 | BR-04、BR-05；AT-08；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-09　查阅与打印结算单
+
+表A-9 SU-09　查阅与打印结算单用例规约
+
+
+
+| 标题 | 内容（SU-09） |
+| --- | --- |
+| 用例名称 | SU-09　查阅与打印结算单 |
+| 执行者／触发 | 本人患者、授权前台/负责牙医/财务；用户打开账单或选择历史版本。 |
+| 涉众利益 | 患者需看懂本人的费用；机构需保护历史及他人隐私。 |
+| 前置条件 | 账单已发布；对象属于当前允许范围。 |
+| 基本路径 | 1）患者／获授权工作人员提交目标结算单或历史版本的查阅请求。2）系统核验对象范围，反馈单号、患者、诊所、牙医、时间及对应版本的实际治疗明细和总额。3）患者／工作人员可请求打印已发布版本；系统标识历史版本“非当前”，不增加交易。 |
+| 扩展路径 | 其他患者/诊所的对象：拒绝。 草稿版本不对患者公开；未开单不解释为免费。 历史打印明确“非当前”，不新增一笔交易。 |
+| 成功结果 | 只读展示；任何目录调价不改变历史单据内容。 |
+| 最低保证 | 本用例只读，不因查看或打印改变账单、增加收入或使患者看到他人的资料。 |
+| 追踪与状态 | BR-05；AT-09；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-10　申请与审核账单数字更正
+
+表A-10 SU-10　申请与审核账单数字更正用例规约
+
+
+
+| 标题 | 内容（SU-10） |
+| --- | --- |
+| 用例名称 | SU-10　申请与审核账单数字更正 |
+| 执行者／触发 | 负责牙医申请；不同账号的财务审核；发现原治疗行数量或单价误录。 |
+| 涉众利益 | 患者需纠正误录；机构需独立审核、不覆盖原账单历史。 |
+| 前置条件 | 基版仍为当前版；无另一待审核申请；在允许更正范围内。 |
+| 基本路径 | 1）牙医选定一条原治疗行，提交正确数量或单价及事实依据。2）系统核验基版与申请条件，形成完整草稿，原版继续有效。3）不同账号的财务核对差异并明确批准或拒绝。4）系统在批准时一并发布后继版本、更新同一账单当前指针并保留历史。 |
+| 扩展路径 | 同账号切换财务身份自批：仍拒绝。 基版已变化、撤权或非法数值：不发布。 拒绝/技术失败保留原版；不支持项目增删、身份或退款纠错。 |
+| 成功结果 | 单号不变，旧版可查；收入只计当前有效版。 |
+| 最低保证 | 批准失败或拒绝时旧版本继续有效；已发布历史不覆盖，未审核草稿不计入收入。 |
+| 追踪与状态 | BR-05、BR-06；AT-10；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-11　形成季度成本与利润核对
+
+表A-11 SU-11　形成季度成本与利润核对用例规约
+
+
+
+| 标题 | 内容（SU-11） |
+| --- | --- |
+| 用例名称 | SU-11　形成季度成本与利润核对 |
+| 执行者／触发 | 财务维护；总部授权查阅；选择季度进行核对。 |
+| 涉众利益 | 总部需可信季度结果；牙医需避免漏计成本或重复计算收入。 |
+| 前置条件 | 自然季度与纳入范围明确，当前角色允许读或写。 |
+| 基本路径 | 1）财务提交季度和纳入牙医，包括有成本但无收入者。2）财务逐人提交并确认用品成本、运营费用及依据。3）财务确认人员范围；系统检查遗漏开单人员和未确认成本。4）资料满足条件时，系统反馈收入、利润贡献、总体基金、期间与查询时点；总部按只读授权核对结果。 |
+| 扩展路径 | 未填与确认零值分开；资料不全不发布完整利润。 零/负总体利润：基金政策待确认，不生成负奖金。 旧页面修订号、权限或跨季度对象不符：拒绝写入。 |
+| 成功结果 | 结果带期间、查询时点与口径；不是奖金发放或不可变关账报表。 |
+| 最低保证 | 未确认成本不被默认为零；失败不半途确认人员清单，不对缺失数据发布完整利润。 |
+| 追踪与状态 | BR-06；AT-11；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-12　查询运营指标
+
+表A-12 SU-12　查询运营指标用例规约
+
+
+
+| 标题 | 内容（SU-12） |
+| --- | --- |
+| 用例名称 | SU-12　查询运营指标 |
+| 执行者／触发 | 本店主管或授权总部；用户提交只读筛选条件。 |
+| 涉众利益 | 主管需可解释指标；患者和牙医不应被错误统计结论误导。 |
+| 前置条件 | 有当前范围和明确日期区间。 |
+| 基本路径 | 1）主管／总部提交授权范围内的日期筛选条件。2）系统按计划日期筛选已到结束时间的就诊，区分到诊、患者取消、诊所取消、爽约与待核实。3）系统反馈分子、分母、样本量、查询时刻及缺失说明，不改变业务状态。 |
+| 扩展路径 | 未来预约与被改期替代记录不混入主要分母。 零分母显示N/A；未判定记录不假装为爽约。 范围外查询被拒绝，不用费用或少量样本判断临床能力。 |
+| 成功结果 | 只读结果可解释，数据不因查询改变。 |
+| 最低保证 | 只读查询不改状态；非法范围不扩大权限，零分母不显示为0%。 |
+| 追踪与状态 | BR-10；AT-12；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-13　登记或退出候补
+
+表A-13 SU-13　登记或退出候补用例规约
+
+
+
+| 标题 | 内容（SU-13） |
+| --- | --- |
+| 用例名称 | SU-13　登记或退出候补 |
+| 执行者／触发 | 本人患者或该店前台；无合适时段，或者不再需要等待。 |
+| 涉众利益 | 患者需保留时间选择权；诊所需区分等待偏好与正式承诺。 |
+| 前置条件 | 患者及诊所有效、当前主体获授权；本用例校验时间窗口和现有候补，不预设输入已合法。 |
+| 基本路径 | 1）患者提交诊所、可选牙医及连续可接受区间；前台代办时另核对患者编号。2）系统核验最早可开始和最晚必须结束时间，至少容纳30分钟且在滚动14天范围内；区间不是每天重复时段。3）患者／前台明确确认这只是偏好；系统重验时间与唯一有效候补，保存等待安排。4）患者／前台请求退出并确认后，系统撤回未接受邀约并保留历史；已成预约须走SU-05，不由退出候补取消。 |
+| 扩展路径 | 过去时间、倒置区间或不足30分钟：在对应字段指出具体原因，不使用笼统合并提示。 页面停留后时间失效、已有有效候补、账号／诊所停用：拒绝，不留下第二条有效需求。 需求已转预约：不删除正式预约；引导到预约详情。 |
+| 成功结果 | 登记不是预约；退出不删除历史，也不取消其他正式预约。 |
+| 最低保证 | 非法登记不产生第二条有效候补；退出不删除历史，也不取消已成立的预约。 |
+| 追踪与状态 | BR-07；AT-13；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-14　生成有限排程建议
+
+表A-14 SU-14　生成有限排程建议用例规约
+
+
+
+| 标题 | 内容（SU-14） |
+| --- | --- |
+| 用例名称 | SU-14　生成有限排程建议 |
+| 执行者／触发 | 当前诊所主管；主管请求生成候选安排。 |
+| 涉众利益 | 主管需可行且有边界的建议；患者既有预约不得被自动移动。 |
+| 前置条件 | 当前诊所主管身份与范围有效；本用例负责检查有无候补需求与可用出诊，不把“必有可行方案”当成前置条件。 |
+| 基本路径 | 1）主管请求生成本店建议；系统按登记顺序纳入最多60条需求、80个出诊块，并枚举最多200个30分钟候选格。2）系统排除当前预约、有效保留、时间及牙医偏好冲突。3）系统在有限二部图中求最大匹配，保存并反馈草案、未安排项、生成时点及截断范围；不占位，不移动既有预约。 |
+| 扩展路径 | 无候选：展示未安排及原因范围，不伪造可行解。 达到上限：说明仅处理枚举范围，不称全域最优。 此步骤不锁定时段；求解后可用性仍可能变化。 |
+| 成功结果 | 仅保存草案；不修改已有预约，不声称椅位/资格/通勤优化。 |
+| 最低保证 | 无候选或计算失败只给出说明；不产生邀约、不占用时间、不移动已有预约。 |
+| 追踪与状态 | BR-08；AT-14；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-15　审核并发布限时邀约
+
+表A-15 SU-15　审核并发布限时邀约用例规约
+
+
+
+| 标题 | 内容（SU-15） |
+| --- | --- |
+| 用例名称 | SU-15　审核并发布限时邀约 |
+| 执行者／触发 | 当前诊所主管；主管核对建议后确认发布。 |
+| 涉众利益 | 患者需明确确认期限；主管需避免半批发布及过期草案生效。 |
+| 前置条件 | 草案属于本店，未发布且生成未超过15分钟。 |
+| 基本路径 | 1）主管核对本店草案、生成时点、所涉需求和候选时间，明确请求发布。2）系统执行SF-01并重验授权、需求修订及占用。3）全部通过时，系统整批建立限时邀约；期限为发布后15分钟或预约开始时刻的较早者。4）系统反馈发布结果及确认期限；正式预约数不因发布而增加。 |
+| 扩展路径 | 任一项已变化或发生冲突：整批不发布，提示重新生成。 空草案/过旧草案：拒绝发布。 重复成功提交返回既有结果，不增加同一请求的邀约。 |
+| 成功结果 | 请求转等待确认；邀约暂占资源，但正式预约数不因发布增加。 |
+| 最低保证 | 任何一项不再可行则本批不发布；不得只发一部分而回执声称整批失败。 |
+| 追踪与状态 | BR-07、BR-08；AT-15；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-16　接受或拒绝候补邀约
+
+表A-16 SU-16　接受或拒绝候补邀约用例规约
+
+
+
+| 标题 | 内容（SU-16） |
+| --- | --- |
+| 用例名称 | SU-16　接受或拒绝候补邀约 |
+| 执行者／触发 | 本人患者或当前诊所前台；用户主动查看邀约并作出决定。 |
+| 涉众利益 | 患者保留最终决定权；诊所需保证一次确认仅形成一条预约。 |
+| 前置条件 | 已登录为本人患者或有当前店权限的前台；能读取目标邀约。首次接受须待确认且未过期；已接受的重试另行核验关联预约。 |
+| 基本路径 | 1）患者请求查阅本人邀约；前台在当前店代办时取得患者明确意思。2）系统反馈诊所、牙医、时段与截止；患者／前台明确选择接受或拒绝。3）接受时系统执行SF-01并排除自身保留，重验有效性后同步保存预约、候补及邀约关联。4）拒绝时系统释放保留并恢复等待；接受成功时系统反馈准确关联的预约供核对。 |
+| 扩展路径 | 拒绝有效邀约：不创建预约，释放保留；需求恢复等待。 首次接受已过期、被撤回或已冲突的邀约：拒绝并解释下一步，不创建预约。 已接受的重复请求：先核验当前权限及关联预约，返回同一预约，不因原确认期已过而创建新预约或误报原预约不存在。 当前主体无权、上下文已变或保存失败：拒绝／回滚；无法确定请求结果时先查询既有结果，不盲目重建。 |
+| 成功结果 | 接受恰形成一条正式预约；拒绝不形成预约、不删除需求。 |
+| 最低保证 | 一次成功接受只关联一条预约；失败不半途释放尚有效的保留后丢失原机会。 |
+| 追踪与状态 | BR-07；AT-16；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-17　回收过期邀约
+
+表A-17 SU-17　回收过期邀约用例规约
+
+
+
+| 标题 | 内容（SU-17） |
+| --- | --- |
+| 用例名称 | SU-17　回收过期邀约 |
+| 执行者／触发 | 当前诊所主管或前台；在候补页明确执行回收。 |
+| 涉众利益 | 候补患者需重新参与匹配；已确认预约不得被清理误删。 |
+| 前置条件 | 有本店到期仍待处理的邀约。 |
+| 基本路径 | 1）主管／前台请求回收本店过期邀约，核对影响后确认。2）系统按当前时刻核验应处理对象，并将到期未确认邀约标为过期。3）系统恢复相应候补的等待状态，保留历史；每批最多200条，可继续处理剩余项。到期是否有效不依赖后台或本次清理。 |
+| 扩展路径 | 仍有效、已接受或其他店邀约不受影响。 单次最多200条；剩余可再次执行。 本版没有后台自动回收；过期时间本身已使保留不再阻挡新预约。 |
+| 成功结果 | 历史保留；回收不删除已经成立的预约。 |
+| 最低保证 | 回收只作用于应到期的未确认邀约；不改变已接受邀约或删除正式预约。 |
+| 追踪与状态 | BR-07；AT-17；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-18　获取操作引导
+
+表A-18 SU-18　获取操作引导用例规约
+
+
+
+| 标题 | 内容（SU-18） |
+| --- | --- |
+| 用例名称 | SU-18　获取操作引导 |
+| 执行者／触发 | 患者、牙医、前台、主管、总部、财务；用户提问或从任务目录选择指南。 |
+| 涉众利益 | 初次使用者需找到真实办理路径；机构需防止越权与虚假成功说明。 |
+| 前置条件 | 已选有效工作身份；普通业务无需AI也可用。 |
+| 基本路径 | 1）业务用户提交办理意图或选定任务；系统依据当前身份匹配适用指南，不明确时先澄清。2）仅经同意，系统可请求外部模型识别白名单意图；无钥、不同意或故障时系统明确使用本地模式。3）系统按维护目录反馈真实页面、条件与操作步骤，不把记录治疗扩大为结束接诊。4）业务用户自行办理并确认；说明进度不等于业务完成。候补结果可另用SU-24核对，其他任务尚无通用事实核对能力。 |
+| 扩展路径 | 换身份/诊所：旧引导失效；网络返回后再次检查上下文。 模型失败明确降级；不伪造链接或办理成功。 医学判断转人工；无权任务说明切换已有身份，不新增授权。 |
+| 成功结果 | 聊天无业务写入；只有实际业务页面提交才可能改变记录。 |
+| 最低保证 | 不自行选患者、提交或宣布成功；错误分类可返回任务目录，原业务表单仍可用。 |
+| 追踪与状态 | BR-09；AT-18；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-19　新增牙医出诊时段
+
+表A-19 SU-19　新增牙医出诊时段用例规约
+
+
+
+| 标题 | 内容（SU-19） |
+| --- | --- |
+| 用例名称 | SU-19　新增牙医出诊时段 |
+| 执行者／触发 | 当前诊所主管；新增供预约/排程使用的可用时间。 |
+| 涉众利益 | 主管需协调本店可用时间；牙医需避免跨店出诊重叠。 |
+| 前置条件 | 牙医及本店有效；时段在未来。 |
+| 基本路径 | 1）主管提交本店有效牙医及未来出诊起止时间。2）系统核验当前范围、牙医状态、时间顺序及跨店出诊重叠。3）主管明确确认后，系统保存出诊安排与事件并反馈结果；这本身不等于患者预约或临床资格确认。 |
+| 扩展路径 | 无当前店权限、牙医停用、开始晚于结束或冲突：拒绝。 既有时段变更另见 SU-29／30；不能任意覆盖原时间。 新增时段不意味着医学资格适配或椅位资源已保证。 |
+| 成功结果 | 形成可查询的出诊安排；患者仍须另行确认预约。 |
+| 最低保证 | 冲突或校验失败不写入新的出诊时段；已有预约和出诊记录保持不变。 |
+| 追踪与状态 | BR-03；AT-19；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-20　选择显示方式与非聊天帮助
+
+表A-20 SU-20　选择显示方式与非聊天帮助用例规约
+
+
+
+| 标题 | 内容（SU-20） |
+| --- | --- |
+| 用例名称 | SU-20　选择显示方式与非聊天帮助 |
+| 执行者／触发 | 所有系统用户；用户调整字号、使用键盘或进入帮助目录。 |
+| 涉众利益 | 不同使用习惯的人需可达的操作方式；个人资料不应被自动外传。 |
+| 前置条件 | 已打开支持的页面；业务入口依然存在。 |
+| 基本路径 | 1）账号使用者自主选择标准／大字简明模式，系统不按年龄强制分流。2）系统保留文字、键盘、普通业务和可返回退出的说明路径。3）账号使用者主动请求朗读时，系统仅在设备有可用本地中文声音时提供朗读，不自动录音或上传云端。 |
+| 扩展路径 | 无可用语音：保留文本，不自动上传云端语音。 JavaScript或AI不可用：服务端普通表单仍可使用。 切换身份前提示未提交内容；不声称已自动保存草稿。 |
+| 成功结果 | 用户明确当前模式与进度；无自动录音、病情上传或业务提交。 |
+| 最低保证 | 显示方式调整不改变业务资料；无语音或外部AI时保留文字、键盘与普通操作路径。 |
+| 追踪与状态 | NFR-02；AT-20；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-21　维护普通账号与业务授权
+
+表A-21 SU-21　维护普通账号与业务授权用例规约
+
+
+
+| 标题 | 内容（SU-21） |
+| --- | --- |
+| 用例名称 | SU-21　维护普通账号与业务授权 |
+| 执行者／触发 | 当前具备有效技术管理身份的维护人员；为演示用户开户、授权、停用、绑定或重置密码。 |
+| 涉众利益 | 业务人员需取得适当权限；患者与机构需避免误绑定和擅自提权。 |
+| 前置条件 | 操作者的技术授权有效；能够核对目标账号与操作依据。此页不维护自身或技术管理／超级用户目标。 |
+| 基本路径 | 1）技术管理人员重新验证本人密码，核对目标账号与当前状态，并提交理由。2）系统按明确请求创建默认无业务身份的普通账号，或授予／撤回允许的身份和诊所范围。3）技术管理人员核对既有患者后请求绑定；系统不允许自行认领或覆盖已有绑定。4）系统执行获准的启用、常规停用或密码重置，保存审计并使受影响旧工作上下文失效；未闭合业务的常规处理限制不变。 |
+| 扩展路径 | 密码错误、目标已变或旧表单：拒绝并要求重核。 给自己提权、发放技术身份、组合错误范围、牙医关联无效：拒绝。 已有患者或牙医关联不覆盖；未闭合业务阻止正常退役或受限撤权。凭据失效的账号须先受控重置密码，再明确启用，不自动恢复旧会话。 |
+| 成功结果 | 成功变更仅作用于核对过的目标；默认不开放临床资料，也不删除业务历史。 |
+| 最低保证 | 任一校验或审计失败时本次管理操作不部分生效；密码不写入操作说明与日志。 |
+| 追踪与状态 | BR-01、BR-11；AT-21；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-22　修改本人密码
+
+表A-22 SU-22　修改本人密码用例规约
+
+
+
+| 标题 | 内容（SU-22） |
+| --- | --- |
+| 用例名称 | SU-22　修改本人密码 |
+| 执行者／触发 | 已登录的账号使用者；用户从工作台打开“修改我的密码”。 |
+| 涉众利益 | 账号使用者需安全更换凭据；已有授权与业务应保持不变。 |
+| 前置条件 | 当前会话有效，并能提供原密码；遗忘原密码不属于本用例。 |
+| 基本路径 | 1）账号使用者提交当前密码和两次一致的新密码。2）系统验证原凭据、新密码规则及当前会话；账号使用者明确确认。3）系统保存新凭据，要求重新登录并重新确定身份及必要诊所范围；不改变角色、患者绑定和业务记录。 |
+| 扩展路径 | 两次新密码不一致、原密码错误或新密码不符合规则：显示字段原因，不保存。 身份变化或页面过期：拒绝，重新开始。 遗忘密码：引导到受控管理员重置，不通过该页面跳过旧密码核验。 |
+| 成功结果 | 仅本人登录凭据发生变化；角色、患者绑定、预约和账单不改变。 |
+| 最低保证 | 失败保留旧凭据；不在页面、聊天或日志回显密码。 |
+| 追踪与状态 | BR-11；AT-22；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-23　维护标准治疗目录与当前单价
+
+表A-23 SU-23　维护标准治疗目录与当前单价用例规约
+
+
+
+| 标题 | 内容（SU-23） |
+| --- | --- |
+| 用例名称 | SU-23　维护标准治疗目录与当前单价 |
+| 执行者／触发 | 财务维护；总部只读；新增标准项目，或因业务依据调整当前标准单价。 |
+| 涉众利益 | 财务需维护标准单价；患者与总部需保证历史费用不被回溯改写。 |
+| 前置条件 | 当前财务／总部身份及权限有效；写操作仅财务。目标为允许维护的标准治疗目录，不是某次就诊的账单。 |
+| 基本路径 | 1）财务／总部请求查阅标准目录；系统反馈编码、名称、单位和当前单价。2）财务提交未使用编码的新项目，或既有项目的新单价与依据，并明确确认。3）系统重新核验权限、目标状态和数值，一并保存目录变更及审计。4）新录入治疗按相应计价规则办理；系统不回写已存治疗快照或已发布账单。 |
+| 扩展路径 | 总部只有查阅能力；其他身份不能借目录入口改价。 重复编码、非有限／负金额、超过两位小数、依据不足：明确拒绝，不自动舍入用户单价。 目标已变化、过期页面、撤权或审计失败：不变更；本例不支持删除目录、回溯调价或替代账单更正。 |
+| 成功结果 | 目录当前单价可查；已保存治疗与历史结算单保持原值。 |
+| 最低保证 | 目录和审计一起成功或一起撤销；不以改变目录方式修改历史收入。 |
+| 追踪与状态 | BR-05、BR-12；AT-23；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-24　核对候补是否已转预约
+
+表A-24 SU-24　核对候补是否已转预约用例规约
+
+
+
+| 标题 | 内容（SU-24） |
+| --- | --- |
+| 用例名称 | SU-24　核对候补是否已转预约 |
+| 执行者／触发 | 本人患者或当前诊所前台；在选定候补或邀约页点击只读核对；尤其是确认后未见回执、不确定是否办成。 |
+| 涉众利益 | 患者需辨别准确办理结果；前台需避免因回执未知重复建立预约。 |
+| 前置条件 | 已登录并激活患者／前台身份；前台已选店。目标可访问性、页面上下文和记录一致性由本用例核验，不预设已办理成功。 |
+| 基本路径 | 1）患者／前台选定具体候补并请求核对，不自动换成他人或最近一条预约。2）系统重验当前身份、本人／本店范围与页面上下文，读取该请求及直接关联邀约、预约的必要事实。3）系统先核对已接受历史与关联，再区分当前取消、改期替代、到诊或结束；返回前复核当前授权。4）系统反馈读取时点、规则版本和下一步，仅在关联一致时提供准确入口。5）业务只读模式仍允许此核对，但不赋予接受、撤回、创建或其他业务写入权限。 |
+| 扩展路径 | 无权或记录不存在：不给他人详情；切身份、切店、撤权或旧页面：停止核对并要求返回工作台。 首次确认机会已过期：说明不能首次接受；已转预约不因原截止时间已过而消失。关联缺失／矛盾：提示前台核对，不猜测成功。 读取暂不可用：提示结果未知、不代表此前失败，不自动重发。刷新后的状态可能变化，正式业务提交仍独立核验。 |
+| 成功结果 | 返回所选候补在读取时点的受限结论及真实操作入口；不把历史转换与当前有效预约混淆。 |
+| 最低保证 | 本用例不更改患者、预约、候补、邀约或账单；不调用外部模型，不查临床内容，不以查询失败推断原办理失败。 |
+| 追踪与状态 | BR-01、BR-07、BR-13、NFR-03、NFR-04、BR-14；AT-24；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SU-25　紧急安全封禁普通账号
+
+表A-25 SU-25　紧急安全封禁普通账号用例规约
+
+
+
+| 标题 | 内容（SU-25） |
+| --- | --- |
+| 用例名称 | SU-25　紧急安全封禁普通账号 |
+| 执行者／触发 | 当前技术管理人员；发现普通账号疑似泄露，需要立即阻止后续访问。 |
+| 涉众利益 | 机构需及时阻止受损账号访问；患者与牙医的既有承诺仍须保留。 |
+| 前置条件 | 操作者有有效技术身份并可重新验证自己的密码；目标不是本人、技术管理或超级用户账号。未闭合业务不是本用例的阻断条件。 |
+| 基本路径 | 1）系统反馈目标账号状态及封禁影响：停用、使原凭据失效，保留角色、患者关联和既有业务。2）技术管理人员提交依据，重新验证本人密码，并明确确认紧急封禁。3）系统重验操作者、目标状态和只读限制，一并停用目标、失效原凭据及旧工作上下文并保存审计。4）系统反馈结果和恢复方式：先受控重置密码，再单独启用；业务责任交接由获授权人员另行办理。 |
+| 扩展路径 | 操作者密码错误、目标签名过期、越权或只读实例：拒绝，不改变账号。 目标受保护或已经停用：提示按受控恢复／维护流程处理，不重复授予权限。 审计或保存失败：回滚账号与上下文变更；网络回执未知时先重新查询，不声称已经封禁。 |
+| 成功结果 | 提交生效后，目标不能凭原密码或旧会话继续发起受保护操作；预约、候补、治疗及账单未被该操作取消或转移。 |
+| 最低保证 | 失败不部分封禁；不修改专业责任归属。封禁不撤销其提交前已经完成的业务，也不承诺清除浏览器已显示的信息。 |
+| 追踪与状态 | BR-01、BR-11、BR-15；AT-25；原始规则和验收组保留，当前执行证据与范围见第5章。 |
+
+#### SF-01　核验时间与占用（共享子功能）
+
+表A-26 SF-01　核验时间与占用（共享子功能）用例规约
+
+
+
+| 标题 | 内容（SF-01） |
+| --- | --- |
+| 用例名称 | SF-01　核验时间与占用（共享子功能） |
+| 调用关系 | SU-04创建预约和SU-15发布邀约必须执行；SU-16仅接受分支复用。无独立用户入口。 |
+| 输入及前置 | 提供患者、牙医、诊所、起止时间及可排除的自身保留；上层已识别主体，但仍需核验当前权限及对象范围。 |
+| 行为 | 检查时间顺序、有效出诊覆盖和已有预约／邀约冲突；查询可用性不形成保留，写入前再次核验。 |
+| 结果与最低保证 | 返回可继续办理或具体失败原因；核验本身不创建预约。现有合同不保证椅位、设备或通勤，后续资源扩展不得绕过统一核验。 |
+
+## 附录B 维护 协调与通知用例规约
+
+保留SU-26—38的维护、协调与通知责任。站内消息只覆盖协调任务；不通知患者、不自动同意、不代替接诊或资金事实。资料更正、出诊维护及重试继续遵守原有权限、签名、独立审核与事务规则。
+
+#### SU-26　更正患者联络资料
+
+表B-1 SU-26　更正患者联络资料用例规约
+
+
+
+| 标题 | 内容（SU-26） |
+| --- | --- |
+| 用例名称 | SU-26　更正患者联络资料 |
+| 业务问题与涉众 | 当前档案已经能够建档和查阅，但电话、邮箱或地址发生变化后，前台缺少受控更正入口。患者希望后续联系准确；前台希望一次核对后保存；负责牙医不希望临床内容被联络维护改变；财务希望历史单据仍能反映当时结算依据；维护人员希望差异、责任与重复请求有明确规则。 |
+| 执行者 | 当前激活前台身份并选择授权诊所的工作人员。患者为资料涉众，本用例不开放患者自行编辑。 |
+| 触发 | 前台取得患者说明，需要更新联络资料或更正已核对的录入错误。 |
+| 前置 | 账号已登录，前台工作上下文存在。对象关联、权限是否仍有效、输入是否合法属于执行中检查，不预设成功。仅使用合成演示资料。 |
+| 成功后置 | 恰好更新经预览确认的联络字段，并保存一条与操作编号关联的审计事件。 |
+| 最低保证 | 校验失败不写入任何联络字段；审计或保存失败时本事务不部分生效；只更正指定档案，不触碰身份、过敏、账号关联、预约、治疗及已发布账单。 |
+| BR-16（本增量） | 联络字段严格白名单；患者在当前店创建或有当前店就诊关系才可维护，全局精确查号本身不授予修改权。跨店患者仍是一份共享档案，修改不会复制成另一个人。 |
+| BR-17（本增量） | 预览不改业务数据；最终确认必须重新校验授权、上下文和快照；同次成功请求不重复写入。 |
+| BR-18（本增量） | 联络变更事件不保存原始电话、地址或邮箱。已发布结算头快照保持不变。 |
+| 设计决定 | 预览令牌有效15分钟；更正依据从三个固定理由中选择，不允许在自由原因栏填写病史或其他敏感内容。 |
+| 基本路径 | 1. 前台指定患者，请求更正联络资料。 / 2. 系统核对有效账号、前台身份、当前诊所和患者关联，提供允许维护的当前值及受签名保护的资料快照。 / 3. 前台提供五项完整联络字段和更正依据，请求核对变更。 / 4. 系统复核权限与资料版本，校验字段，反馈变更前后的差异；此时不写入业务数据。 / 5. 前台核对患者、差异与业务边界，明确确认保存。 / 6. 系统在同一事务中锁定授权上下文及目标患者，校验签名、时间、对象、资料指纹和操作编号，更新允许字段并记录事件。 / 7. 系统反馈本次保存结果并返回同一患者的档案；前台核对当前值。 |
+| 扩展路径 | • 2a／4a／6a 无关联、停用或无权限：拒绝，不暴露越权患者；账号拥有其他身份不抵销当前身份限制。 / • 4b 输入缺失、超长、非法邮箱、不可见控制字符或夹带姓名/过敏字段：指出原因，不保存。 / • 4c 没有实际差异：说明无需保存，不增加审计。 / • 4d 编辑期间已被更新：重新读取，不合并或覆盖他人值。 / • 5a 放弃：返回档案；预览不产生待办记录或部分保存。 / • 6b 未明确确认、令牌篡改、过期或工作台变化：拒绝旧确认，要求查询当前资料。 / • 6c 相同成功操作再次提交且仍有权限和有效令牌：返回原事件结果；后来的合法新值不被撤销。 / • 6d 两个不同预览竞争：在应用行锁协议下只允许一个基于旧快照的更正；另一个必须刷新。 / • 6e 联系方式A→B→A：审计游标变化，原A快照仍然过期。 / • 6f 保存/审计异常：回滚；网络回执未知时先查当前档案，不把未知结果说成未保存，也不自动重放。 / • 只读实例：可在授权范围读取现值，但预览写流程及最终保存被拒绝；普通查询不扩权。 |
+
+#### SU-27　登记基础目录资料
+
+表B-2 SU-27　登记基础目录资料用例规约
+
+
+
+| 标题 | 内容（SU-27） |
+| --- | --- |
+| 用例名称 | SU-27　登记基础目录资料 |
+| 主执行者 |  当前激活SYSADMIN的技术维护人员。无外部模型/短信平台作为辅执行者。 |
+| 涉众利益 |  运营人员希望新诊所和新牙医可供后续业务使用；牙医希望身份和联系资料准确且不被过度公开；原有患者/牙医不希望登记动作改写既有预约、治疗或账单；维护人员需要可核对的失败反馈和责任记录。 |
+| 触发 |  技术维护人员依据已经人工核对的合成资料请求登记诊所、牙医或资格类别。 |
+| 前置条件 |  会话有效且已激活技术身份；凭据、授权、编码唯一性和输入合法性由本用例检查，不提前假定全部成立。 |
+| 基本路径 | 1. 技术维护人员提交目录类别、编码、基础字段和登记依据，请求核对。 / 2. 系统验证当前权限、字段范围和模型约束，核对现有编码；反馈拟登记内容及影响，尚不保存。 / 3. 技术维护人员核对目标和资料，提供自己的技术管理密码并明确请求保存。 / 4. 系统重新核验当前身份、工作上下文、确认期限、密码和唯一性；同步保存目录资料及审计。 / 5. 系统反馈稳定的业务对象和后续人工入口；账号授权、资格关联及出诊安排分别办理。 |
+| 扩展路径 | • 2a 字段缺失、隐藏字符、编码不合格式、未来出生日期、非法面积或邮箱：系统指出问题，不登记。 / • 2b 已有相同编码或员工编号（含停用记录）：系统拒绝重复，不覆盖、不恢复，不凭同名自动合并。 / • 3a 维护人员放弃：不保存。 / • 4a 密码错误、未明确确认、撤权、旧上下文或过期令牌：不保存，要求重新核对。 / • 4b 他人已登记同一编码：本次不覆盖，提示查询既有记录。 / • 4c 同一成功操作重试：先核对当前权限与确认期限，再返回原结果；不重复保存。 / • 4d 保存或审计失败：目录与审计一起回滚。回执未知时先查询原编码，不断言前次失败。 |
+| 成功后置条件 |  新增一条所选目录记录和相应事件；没有自动新增账号、角色、出诊、预约或账单。 |
+| 最低保证 |  失败不留下半次登记；既有资料和历史单据保持原值。只读实例不执行保存。 |
+| 扩展路径 | 字段列表： / • 诊所：clinic_code、name、postal_address、supervisor_name、phone、email、area_sqm。 / • 牙医：employee_no、name、date_of_birth、home_address、phone、email。 / • 资格类别：code、name。 / • 控制字段：固定登记依据、操作者密码（不保存）、明确确认、受签名保护的当前上下文/操作编号/期限。 |
+| 设计约束 |  本轮不提供既有身份信息纠错、目录编辑/删除/停用。新目录默认可用，仅表示当前基础记录，不等于完成入职认证；主管联络姓名也不构成账号授权。列表隐藏个人联系地址/出生日期，技术详情受限可读。本课程仅使用合成数据。 |
+| 追踪 |  BR-D01/02/03/05/06；AT-D01/02/04/05/06/07/08；目录字段来自既有registry模型。原验收目标的当前执行证据见第5章。 |
+
+#### SU-28　维护牙医资格关联记录
+
+表B-3 SU-28　维护牙医资格关联记录用例规约
+
+
+
+| 标题 | 内容（SU-28） |
+| --- | --- |
+| 用例名称 | SU-28　维护牙医资格关联记录 |
+| 主执行者 |  当前技术维护人员。 |
+| 涉众利益 |  运营人员希望准确记录牙医的多项资格类别；牙医希望误关联能够纠正且历史不被删除；患者希望不能以目录操作自动决定诊疗安全或撤销已有安排。 |
+| 触发 |  维护人员请求新增关联、撤回误关联或恢复原关联。 |
+| 前置条件 |  当前技术身份有效；牙医与资格类别存在。是否可关联、是否停用和是否重复由本用例核验。 |
+| 基本路径 | 1. 技术维护人员指定牙医和资格类别，说明拟登记、撤回或恢复，并提交相应依据。 / 2. 系统核对当前记录及有效标志，反馈当前关联、拟进行动作和影响，生成状态预览；不保存。 / 3. 技术维护人员核对员工编号、资格类别和动作，提供技术密码并明确确认。 / 4. 系统再次核验权限、上下文、期限和关联快照；同步更新关联记录及审计。 / 5. 系统反馈该牙医的当前关联列表，不替维护人员办理账号或接诊变更。 |
+| 扩展路径 | • 2a 已有有效关联：拒绝重复登记。 / • 2b 已有撤回记录：使用恢复依据，保留同一关联编号，不新建第二条关系。 / • 2c 牙医或资格类别已停用：拒绝新增/恢复；撤回现有误关联仍可按本用例核对。 / • 2d 关联不存在或已经撤回：拒绝再次撤回，不删除记录。 / • 4a 预览后任一相关状态已变化：拒绝旧预览；即使值改回原值，审计游标改变仍使旧预览失效。 / • 4b 密码、权限、签名、期限或只读模式不符：拒绝，不改变原关系。 / • 4c 同一成功操作重复确认：返回原操作的关联对象，不撤销其后的合法变更。 / • 4d 审计/保存失败：本次关系变化回滚；无法核对回执时反馈未知并指向查询入口。 |
+| 成功后置条件 |  仅新增或改变所选DentistQualification当前有效标志，历史编号、原notes和原事件保留。 |
+| 最低保证 |  不改变Patient、UserAccount、RoleAssignment、AvailabilitySlot、Visit、治疗或Invoice；不执行专业许可认证；不将缺失关联解释为无资格。 |
+| 字段列表 |  dentist_id、qualification_id、attach/withdraw、依据类别、关联状态快照、操作编号、当前上下文及其修订、操作者密码和明确确认。 |
+| 设计约束 |  模型没有资格有效期、核验机构、执业地点或医学适配规则。撤回“误关联”不同于撤销行政资格，也不同于安全封禁；账号封禁和业务交接仍使用各自受控流程。 |
+| 追踪 |  BR-D01/03/04/05/06；AT-D03—08；原验收目标的当前执行证据见第5章。 |
+
+#### SU-29　调整未来空闲出诊时间
+
+表B-4 SU-29　调整未来空闲出诊时间用例规约
+
+
+
+| 标题 | 内容（SU-29） |
+| --- | --- |
+| 用例名称 | SU-29　调整未来空闲出诊时间 |
+| 主执行者 |  当前激活MANAGER且已选择诊所的诊所主管。无辅执行者或外部AI。 |
+| 涉众利益 |  主管希望明确出诊安排和变更影响；患者希望既有预约或有效邀约不被暗中取消、改期；牙医希望历史出诊和接诊责任可核对；前台希望业务协调与排班维护职责分开。 |
+| 触发 |  主管依据已核对的计划提出时间调整。 |
+| 前置条件 |  会话有效，当前工作身份为主管且已选店。是否授权、是否空闲、是否尚未开始以及是否冲突由本用例检查，不把它们全部预设为已满足。 |
+| 基本路径 | 1. 主管指定本店原出诊，请求查询安排及相关业务影响。 / 2. 系统核对当前身份与范围，读取原时段、相关预约与邀约的必要事实，反馈时间、牙医、诊所、占用数和读取时点。 / 3. 主管提供新的开始、结束和固定类别的依据，请求预览变更。 / 4. 系统检查原记录及关联事实未在填写期间变化，原时段未开始且有效，没有阻止变更的业务，新时间在未来且不与同牙医其他有效出诊冲突；反馈新旧时间、历史保留方式及未发布草案影响。尚不保存。 / 5. 主管核对影响，明确要求保存。 / 6. 系统再次检查当前权限、上下文、确认期限、源对象与关联快照，并检查当下占用和时间条件。在同一事务中停用原时段、创建同店同牙医的新时段并记录两者关联及审计。 / 7. 系统反馈原记录及其替代记录入口，供主管核对已保存事实。 |
+| 扩展 | • 2a 对象不存在、诊所不符、账号/角色/范围失效：拒绝，不暴露患者资料。 / • 2b 原时段已开始、已结束或已停用：拒绝本轮修改，保留历史。 / • 2c 有SCHEDULED、CHECKED_IN、COMPLETED或CLOSED_NO_TREATMENT记录：拒绝；未闭合业务由前台协调，已完成业务不能为排班调整而取消。 / • 2d 有PENDING且expires_at大于核验时点的邀约：拒绝，待患者决定或到期后重新核对。 / • 2e 记录关联不一致或任一关联集合超过1000条：不以部分结果认定空闲，提示受控核对。 / • 4a 开始不在未来、结束不晚于开始、包含秒/小数秒、新旧时间完全相同：指出问题，不生成可执行确认。 / • 4b 相同牙医在其他有效时段有重叠（包括跨店）：拒绝，不透露其他诊所患者信息。 / • 4c/6a 旧页面或旧快照：拒绝。即使相关事实后来又变回相同值，新增审计/关联记录仍使旧快照失效。 / • 5a 主管放弃：不保存。 / • 6b 预览之后有人预约或发布有效邀约：以本次锁定后事实为准，本次调整不执行。 / • 6c 同一成功操作在有效期和当前权限内重复提交：返回原结果，不再创建替代时段；不恢复此后又被合法停用的替代记录。 / • 6d 新时段并发冲突、保存或审计失败：回滚本次停用和新增，原有效安排保持。 / • 6e 网络回执不确定：先查询原时段与维护记录，不推断原操作失败，不自动重试。 |
+| 成功后置条件 |  原时段is_active=False，但原编号、时间、诊所和牙医保持不变；新增同店同牙医的一条有效时段；维护事件将两者关联；未改动任何Visit、WaitOffer、WaitRequest、Patient、Invoice或账号授权记录。 |
+| 最低保证 |  失败不留下“原时段已停用但替代时段缺失”的部分结果；历史记录不删除，已保存的既有业务不改变。重复请求不撤销先前成功结果。 |
+| 字段列表 |  源出诊编号、新开始、新结束（北京时间、分钟精度）、固定依据类别、源快照令牌、预览确认令牌、当前工作上下文、操作编号、明确确认。 |
+| 交互约束（不混入基本路径） |  主管工作台→出诊安排→查看安排与影响→调整未来空闲时段→预览影响→确认出诊变更。大字模式、键盘及无脚本文本路径保留；新时间控件动态提示结束下限，但服务端始终复核；不会静默重写用户结束时间。 |
+
+#### SU-30　停用未来空闲出诊
+
+表B-5 SU-30　停用未来空闲出诊用例规约
+
+
+
+| 标题 | 内容（SU-30） |
+| --- | --- |
+| 用例名称 | SU-30　停用未来空闲出诊 |
+| 主执行者 |  当前店主管。 |
+| 涉众利益 |  主管需要停止提供某条未来机会；患者不希望预约被无声删除；审计与运营需要保留原安排依据。 |
+| 触发/前置 |  主管提出停止某条原时段；有效会话、当前主管身份与诊所已选择。空闲性、有效性和授权由系统核验。 |
+| 基本路径 | 1. 主管指定原出诊并请求停用影响预览。 / 2. 系统以与SU-29相同的权限、状态、未来时间、关联一致性与占用规则核对原记录。 / 3. 系统反馈原安排、停用影响和已核对的依据；尚不保存。 / 4. 主管明确要求保存。 / 5. 系统重新核验预览、当前授权与占用，在同一事务中将原记录is_active置为False并记录审计。 / 6. 系统反馈原记录当前状态和历史入口。 |
+| 扩展 |  引用SU-29的授权、已开始/已停用、占用、旧页、上限、重复、失败和未知结果分支。停用不得携带新的开始/结束时间；不存在借停用动作更换牙医或诊所的分支。牙医资料已停用时，只要当前诊所授权仍有效且原出诊满足无占用/未开始条件，可以停用，但不能新建替代时段。 |
+| 成功后置条件 |  只停用原出诊并新增审计。旧编号和全部关联历史保留，没有新增替代时段、预约或邀约。 |
+| 最低保证 |  校验失败或审计失败不使部分操作生效，不取消任何正式预约，不自动回收邀约，不删除原记录。 |
+| 字段 |  源出诊编号、固定依据类别、状态/确认令牌、当前上下文、操作编号、明确确认。无新时间字段。 |
+
+#### SU-31　按出诊核对关联业务并定位协调入口
+
+表B-6 SU-31　按出诊核对关联业务并定位协调入口用例规约
+
+
+
+| 标题 | 内容（SU-31） |
+| --- | --- |
+| 用例名称 | SU-31　按出诊核对关联业务并定位协调入口 |
+| 主执行者 |  当前激活前台身份并选择了获授权诊所的前台人员。无辅执行者；不调用外部模型/通知平台。 |
+| 涉众利益 |  前台希望准确定位一条出诊的关联承诺，不在全店列表反复搜索；主管希望得到可重新核对的出诊编号与事实，而不是未经验证的“已清空”；患者希望已有安排只按本人明确意思和原业务规则变更，个人资料不过度展开；牙医希望已到诊/完成记录不因排班清理被撤销；维护人员希望错误关联不会导致越权披露。 |
+| 触发 |  前台依据已核对的人工协调需求，指定本店出诊编号或浏览有关出诊。 |
+| 前置条件 |  已登录且激活前台、已选择诊所。目标属于当前诊所、授权仍有效和资料完整性由本用例验证，不能预设“一定有待处理记录”或“已经允许停用”。 |
+| 基本路径 | 1. 前台提供查询范围或明确出诊编号，请求查阅关联业务。 / 2. 系统验证当前身份和诊所范围，反馈匹配的出诊及定位所需统计；列表不是维护批准。 / 3. 前台指定一条出诊，请求核对其关联预约和邀约。 / 4. 系统读取原计划及完整有界的关联事实，检查诊所/牙医/患者关联、已接受邀约与正式预约的一致性，并计算读取时点下的阻断说明。 / 5. 系统反馈原出诊、牙医、时间、业务编号、分状态解释、读取时点、规则版本与原有授权办理入口。 / 6. 前台在必要时另行发起原预约/邀约用例；本用例不代替患者作决定，也不办理任何取消、改期或接受。 / 7. 前台在原办理返回后请求重新核对；系统重新读取，不根据刚才点击的按钮推测结果。若当前未发现阻断，反馈“可请主管重新核对”，主管维护仍另行核验。 |
+| 扩展路径 | • 2a/4a 当前角色错误、撤权、账号停用、诊所无权或上下文变化：拒绝，不借同一账号其他身份。 / • 2b 查询参数无效：反馈字段错误，不退化成返回全店/全链资料；明确编号查询允许包含历史。 / • 3a 目标不存在或属于他店：相同拒绝语义，不泄露该对象及患者详情。 / • 4b 关联计数超每类1000条上限或检测到关系不一致：反馈需要受控核对；不展开可疑患者编号和深链，不用部分结果判断可维护。 / • 4c 无关联业务：反馈当前未发现维护阻断；仍不是停用许可，查询后可出现新预约。 / • 4d 已有预约或未过期待确认邀约：逐条核对；仅提供原流程，不批量办理。 / • 4e 已到诊、治疗完成或无治疗关闭：作为受保护接诊说明，不提供快捷改期，不诱导为排班清空原记录。 / • 4f 待确认邀约到期但未回收：按服务器时间说明已不再有效；不自动改变其存储状态。 / • 4g 邀约已接受：核对直接关联预约及患者/时间一致性；不按旧确认截止将预约判作失效，不再计第二份保留。 / • 4h 原出诊已开始或停用：反馈当前状态及历史，不提供维护批准或恢复入口。 / • 4i 读取暂不可用：反馈本次结果未知，不推断前次写入失败，不自动重发。 / • 6a 改期产生直接后继：原预约详情提供同患者同诊所的直接前后继和合法来源回跳，不能用任意URL/外店编号绕过授权。 / • 7a 查询后又有新预约或其他变化：以新读取事实更新；原维护命令还须再次核验。 / • 全程只读实例：允许获授权GET查询；保留原业务写入限制，不因新页面开放额外POST例外。 |
+| 成功后置条件 |  返回选定出诊在读取时点的受限关联投影及合法原业务入口；没有创建、更新、取消任何预约/邀约/候补/出诊/治疗/账单或授权，也没有发送通知或建立工单。 |
+| 最低保证 |  无权或不完整查询不被当作“无待办”；读取失败不改变原记录、不自动重放业务命令；患者个人资料不因主管地位较高而扩大可见；结果仅代表本次读取，不保证后续仍空闲。 |
+| 字段列表 |  输入为查询范围、出诊ID、页号；输出为出诊ID、诊所、牙医姓名及工号、原时间和状态、预约业务号/患者业务号、邀约与候补请求号、各自状态与起止/期限、关联预约ID、完整计数、读取时点、规则版本及受控内部入口。新列表不读取投影姓名、电话、地址、主诉、过敏或治疗正文。 |
+| 质量约束 |  窄屏和大字模式下主要动作可达；文字说明不能只依靠颜色；no-store防止浏览器重用旧响应，但不承诺清除用户此前已看见内容。两类关系各分页20项；判断不得只依据当前页。 |
+| 交互约束 |  前台工作台→出诊协调→按出诊编号核对。相关原详情带“返回出诊 #编号”；既有独立页面入口仍可用。主管仅获取聚合影响和告知前台的原出诊编号，本功能没有给主管创建前台入口。 |
+
+#### SU-32　暂停出诊新增接收
+
+表B-7 SU-32　暂停出诊新增接收用例规约
+
+
+
+| 标题 | 内容（SU-32） |
+| --- | --- |
+| 用例名称 | SU-32　暂停出诊新增接收 |
+| 主执行者 | 当前激活MANAGER且已选择获授权诊所的主管。无AI辅执行者。 |
+| 涉众利益 | 主管希望减少协调期间新增负担；患者希望原预约/有效邀约不被暗中撤销；牙医希望原安排与治疗责任不被改变；前台希望看到当前真实接收状态。 |
+| 触发 | 主管依据已核对的协调需求或接待能力复核，请求暂停一条出诊的新增接收。 |
+| 前置 | 会话有效、已选择主管身份和诊所。目标有效性、权限、是否结束、当前状态及冲突由本用例检查。 |
+| 基本路径 | 1. 主管指定本店出诊，请求查询接收状态及关联承诺概况。 / 2. 系统核验范围，读取原出诊、接收修订号、关联计数和历史游标，反馈目前状态。 / 3. 主管提交暂停依据，请求预览。 / 4. 系统核验状态一致，反馈拟暂停及保留已有预约/有效邀约的影响，尚不保存。 / 5. 主管核对并明确确认。 / 6. 系统重新核验当前授权、工作上下文、15分钟确认期限、锁定后的状态摘要及是否尚未结束；同事务更新暂停标志、递增接收修订号并保存审计。 / 7. 系统反馈当前接收状态；前台另在自己的查询页面核对原承诺，按原流程办理。 |
+| 扩展 | • 2a 无权/跨店/旧上下文：拒绝，不展示患者资料。 / • 4a 已停用、已结束或已经暂停：拒绝重复/无效操作，不取消任何记录。 / • 4b 诊所/牙医资料已停用：仍可进一步暂停有效出诊新增，但不能恢复或创建新供给。 / • 5a 放弃预览：没有业务写入。 / • 6a 预览后出现预约、邀约、状态或审计变化：拒绝旧确认，要求重新核对。暂停→恢复同值仍有不同修订号。 / • 6b 同一已成功操作的有效重放：先核验权限，再返回原操作及当前状态，不重新暂停，不撤销后续恢复。 / • 6c 只读实例、保存或审计失败：不部分生效；不根据异常回执认定前一次也失败。 / • 6d 新预约先获取源行锁：按当时状态先保存，该承诺保留；暂停确认需重核变化。暂停先完成：后到的新创建被拒绝。 |
+| 成功后置 | 源出诊booking_paused=true，intake_revision递增，存在审计；is_active、原起止、牙医/诊所、Visit/WaitOffer/WaitRequest/Invoice记录均不被本用例改写。 |
+| 最低保证 | 失败不部分暂停；既有临床/财务/账号事实不改变；不生成通知或推断患者已被联系。 |
+| 字段 | slot_id、pause依据枚举、当前上下文、源状态签名、操作编号、确认签名、明确确认。审计无原始患者资料。 |
+
+#### SU-33　恢复出诊新增接收
+
+表B-8 SU-33　恢复出诊新增接收用例规约
+
+
+
+| 标题 | 内容（SU-33） |
+| --- | --- |
+| 用例名称 | SU-33　恢复出诊新增接收 |
+| 主执行者 | 当前店主管。 |
+| 涉众利益 | 主管希望受控恢复供给；患者希望剩余机会真实且不会自动被登记；牙医希望仍按原排班和权限执行。 |
+| 触发/前置 | 主管确认可以继续接收，指定已暂停、未结束的有效出诊。角色/范围同SU-32。 |
+| 基本路径 | 读取状态→提供恢复依据→预览→主管明确确认→系统重新核对有效牙医/诊所、资料一致性和快照→同事务清除暂停标志、递增修订并审计→反馈。 |
+| 扩展 | 已停用、已结束、从未暂停、资料异常/超核对上限、牙医或诊所停用、旧签名/撤权/只读/审计失败均不恢复。重复已成功确认只返回原结果，不撤销后来的再次暂停。 |
+| 成功后置 | booking_paused=false、修订递增；可以提供新的剩余机会，但不自动创建预约、邀约、排程建议或恢复历史取消。 |
+| 最低保证 | 恢复不延长旧邀约期限、不重开已停用历史出诊、不新增授权、不调用AI。 |
+| 字段（沿用SU-32） | 出诊编号、恢复依据、当前上下文与修订、状态签名、操作编号、确认签名及明确确认。 |
+
+#### SU-34　发起与管理出诊协调任务
+
+表B-9 SU-34　发起与管理出诊协调任务用例规约
+
+
+
+| 标题 | 内容（SU-34） |
+| --- | --- |
+| 用例名称 | SU-34　发起与管理出诊协调任务 |
+| 主执行者 |  当前诊所主管。没有短信、外部AI等辅执行者。 |
+| 涉众利益 |  主管希望协调计划有明确记录且不重复派出；前台希望目标、来源出诊和责任边界清楚；患者与牙医希望任务不偷偷改变服务承诺；维护人员希望保留撤销、交接和复核历史。 |
+| 触发 |  主管对既有出诊提出时间调整或停用的协调需求。 |
+| 前置条件 |  主管会话及当前诊所已选择；授权、源状态、暂停标志和重复任务由系统核验，而非全部假定成立。 |
+| 基本路径 | 1. 主管指定原出诊，提交协调目标及固定类别依据，请求预览。 / 2. 系统核验当前角色/诊所、源出诊尚未开始且有效、已明确暂停新增、关联资料完整且没有另一未结束任务，反馈拟创建任务。已有预约或有效邀约不阻止发起，但必须保留。 / 3. 主管明确确认。 / 4. 系统在锁定源出诊后重新核验状态、授权、确认期限和当前事实，同事务创建待受理任务与审计。 / 5. 系统反馈任务编号；任务不会自动受理或触发任何患者业务。 |
+| 扩展 | • 2a 原出诊未暂停：提示先通过SU-32办理，不隐式暂停。 / • 2b 源已开始/停用、存在关联异常、超过完整上限：不创建普通任务，交由受控流程处理。 / • 2c 已有未结束任务：提示查询原任务，不以新编号绕过。 / • 3a 放弃预览：不创建。 / • 4a 旧上下文、摘要变化、过期/篡改、撤权、只读模式：不写入。 / • 4b 并发重复发起：源行锁与部分唯一约束保护一条活动任务；失败不覆盖原任务。 / • 4c 相同成功确认重放：重新核验当前权限后返回原任务当前状态，不重开或重复创建。 / • 4d 保存/审计异常：本次同事务回滚；回执未知先按原出诊查任务。 / • 管理分支：主管可对处理中/待复核任务说明退回依据，将其重置为待受理并清除当前受理/提交标记；旧办理事件保留。不能代另一个账号受理。 / • 撤销分支：主管可撤销未结束任务，保留历史，不暂停/恢复出诊、不取消患者业务。源已失效时仍可核对并撤销任务，但不能借此宣称正常维护完成。 |
+| 成功后置条件 |  一条待受理任务存在；或一次明确的退回/撤销及相应事件已保存。既有源出诊、预约、邀约、临床与财务事实不改变。 |
+| 最低保证 |  失败不留半次任务变更；原记录、原承诺和暂停标志保持；旧成功请求不撤销后续合法状态。 |
+| 字段 |  source slot ID；目的DEACTIVATE/REPLACE；固定依据；签名状态/确认；当前上下文；操作编号；明确确认。没有任意受理人ID、患者资料或自由文本。 |
+| RC共享通知规则 | 成功任务变化、审计和NotificationOutbox同一事务保存；不向患者发送信息，派发失败不重新执行任务。 |
+
+#### SU-35　受理并记录出诊协调办理
+
+表B-10 SU-35　受理并记录出诊协调办理用例规约
+
+
+
+| 标题 | 内容（SU-35） |
+| --- | --- |
+| 用例名称 | SU-35　受理并记录出诊协调办理 |
+| 主执行者 |  当前诊所前台。 |
+| 涉众利益 |  前台希望明确谁负责当前跟进，能够必要交接；患者希望自身意思仍通过原业务流程确认；主管希望区分联络声明和已保存业务事实。 |
+| 触发 |  前台选择待受理任务，或继续本人已受理任务。 |
+| 基本路径 | 1. 前台查询本店任务，选择准确原出诊。 / 2. 系统核对任务尚未受理，反馈由当前账号受理的影响。 / 3. 前台明确确认；系统再次核对任务修订并保存本人受理责任及审计。 / 4. 前台通过SU-31定位关联记录，另在原预约/邀约用例办理；任务服务不代办这些动作。 / 5. 前台指定本出诊的一条预约/邀约，选择尝试联络、等待患者决定、转原流程办理等有限声明，请求预览并明确确认。需要主管协助可以不指定个人对象。 / 6. 系统核对当前受理人、对象属于该出诊、快照及期限，保存声明事件并推进任务修订，不改变预约状态。 / 7. 前台认为可提交时发起复核请求；系统重新核对完整有界关联无阻断、源仍未来有效且暂停，再经明确确认将任务转为待主管复核并记录当时的业务事实摘要。 |
+| 扩展 | • 别的前台已受理：不能覆盖；只允许当前受理人记录、退回或提交。 / • 无法继续：受理人可明确退回待受理队列；账号停用/撤权后不得自行继续，主管仍可按SU-34退回任务，其他合法前台自行受理。 / • 声明对象无关/不存在，或关联异常/超限：不附加声明；错误反馈不透露另一患者存在与否。 / • 声明类别不是患者同意或办理成功证明：系统不据此清除实际阻断。 / • 有受保护预约/接诊或有效邀约：不能提交复核。旧邀约到期后未回收不再占位，但仍保留历史；接受后的预约按真实预约事实核对。 / • 原出诊恢复接收/开始/停用：不能提交普通维护复核，主管需再核对或转其他流程。 / • 旧页、ABA、并发受理、重复确认、只读、审计异常：遵循签名/修订/锁/事务规则，不产生第二受理人或半次状态。 |
+| 成功后置条件 |  当前受理人明确；或有一条附明确对象的操作者声明；或任务转为待复核且提交人/时点/摘要一致。上述不等于患者已同意，也不证明某次原业务已经成功。 |
+| 最低保证 |  失败不改变责任；不自动处置预约/邀约、不通知患者，不开放其他角色权限。 |
+| 字段 |  任务/出诊ID；操作依据枚举；声明对象类别与记录ID（不得填姓名电话）；状态/确认令牌；操作编号；当前上下文与明确确认。 |
+| RC共享通知规则 | 成功任务变化、审计和NotificationOutbox同一事务保存；不向患者发送信息，派发失败不重新执行任务。 |
+
+#### SU-36　复核出诊协调结果
+
+表B-11 SU-36　复核出诊协调结果用例规约
+
+
+
+| 标题 | 内容（SU-36） |
+| --- | --- |
+| 用例名称 | SU-36　复核出诊协调结果 |
+| 主执行者 |  当前诊所主管，必须与本次提交复核的前台为不同账号。 |
+| 涉众利益 |  主管希望根据真实结果而非勾选进度判断；前台希望结果可追踪；患者希望已有承诺和临床记录不为结案被错误删除；系统维护人员希望失败可以恢复且不自批。 |
+| 基本路径 | 1. 主管查询待复核任务，核对原出诊、目标、受理人和提交时点。 / 2. 系统核对独立账号、当前源状态和完整有界关联；确认原出诊仍未来有效且暂停，没有保护业务/有效邀约/异常/截断，且相关事实摘要仍与前台提交时一致。 / 3. 系统反馈本次可通过的依据，明确不自动维护出诊。 / 4. 主管明确确认。 / 5. 系统重新锁定、核验状态/权限/快照/时间条件，同事务将任务标为协调核对通过并保存独立复核人、时点和审计。 / 6. 系统提供回到原主管出诊的入口；SU-29/30维护或SU-33恢复由主管另行独立办理并重验。 |
+| 扩展 | • 未由前台提交或同账号切身份自批：拒绝。 / • 提交后关联记录、接收修订或源维护历史变化：拒绝通过，主管退回重新核对；即使又变回同样状态也不能复活旧结果。 / • 查到受保护接诊或源已开始：不得为结案虚假取消、爽约或删除，转专门受控流程。 / • 条件不满足：主管按SU-34退回或撤销；不能跳过检查强制通过。 / • 保存/审计失败：任务仍为原状态；重复成功确认不反复结案或取消后续合法维护。 |
+| 成功后置条件 |  协调任务结束，保留复核责任与历史，不新增预约、不改邀约、不改出诊接收标志。 |
+| 最低保证 |  未满足真实条件不得写成功标记；任务结束不是对以后状态的永久保证，也不是停诊指令或临床许可。 |
+| 字段 | 任务／源出诊编号、复核依据、提交事实摘要、状态与确认令牌、操作编号、当前上下文和明确确认。通过前后都须检查主管与提交人不是同一账号。 |
+| RC共享通知规则 | 成功任务变化、审计和NotificationOutbox同一事务保存；不向患者发送信息，派发失败不重新执行任务。 |
+
+#### SU-37　查阅本人任务消息并标记已读
+
+表B-12 SU-37　查阅本人任务消息并标记已读用例规约
+
+
+
+| 标题 | 内容（SU-37） |
+| --- | --- |
+| 用例名称 | SU-37　查阅本人任务消息并标记已读 |
+| 主执行者 | 当前本店前台或主管。无外部消息服务、AI或患者作为辅执行者。 |
+| 涉众利益 | 前台希望知道新协调任务与退回；主管希望知道受理、声明和提交复核；患者希望通知不泄露个人/临床数据，不暗含其同意；原业务各方希望浏览通知不修改服务承诺。 |
+| 触发 | 执行者查询站内收件箱，或对一条消息明确请求标记已读。 |
+| 前置条件 | 有有效会话且激活相应身份和诊所。权限、消息归属、授权是否撤回由系统检查，不预设合法。 |
+| 基本路径 | 1. 执行者提交消息范围及页码，请求查阅本人当前工作范围的消息。 / 2. 系统核验账号、当前身份、诊所及原始收件授权与当前授权，反馈有界分页消息。 / 3. 系统区分事件发生时状态、派发时点、当前查询任务状态及已读标记，反馈原任务查询入口。 / 4. 执行者需要时另行请求对指定本人消息标记已读。 / 5. 系统重新核验当前权限、工作上下文和归属，保存首次已读时间，并反馈该标记不构成受理/同意/完成。 |
+| 扩展 | 2a没有符合条件消息：反馈空结果，但不认定没有任务；2b查询失败：反馈未知并保留原任务入口；2c其他患者或岗位未纳入本版消息：不扩大角色；3a任务有后续变化：以当前任务页为准；4a用户只浏览：不写已读；5a旧上下文/撤权/其他账号消息/其他店：拒绝；5b重复标记：保留第一次时间；5c只读实例：不保存标记；5d保存失败：不伪称成功，不重做原任务。 |
+| 成功后置 | 只读查询不改消息及业务；明确标记仅改变本人该条消息read_at。最低保证：任务、出诊、Visit、WaitOffer、治疗、Invoice保持原值，无自动受理或患者同意。 |
+| 字段 | mode(unread/all)、page、message_id、工作上下文令牌；查询返回task_id、slot_id、动作标题、历史状态/修订、当前状态/修订、发生/派发/首次标记时点。无姓名、电话、病例、自由文本或外部URL。 |
+
+#### SU-38　核对本店通知派发并请求重试
+
+表B-13 SU-38　核对本店通知派发并请求重试用例规约
+
+
+
+| 标题 | 内容（SU-38） |
+| --- | --- |
+| 用例名称 | SU-38　核对本店通知派发并请求重试 |
+| 主执行者 | 当前本店主管；后台worker是内部实现机制，不是主管身份的替代者。 |
+| 涉众利益 | 主管希望发现等待或失败，不因通知失败误判任务失败；维护人员需要受控重试和不泄露敏感数据的错误信息；其他使用者不希望重试重复生成消息或业务动作。 |
+| 触发 | 主管查询当前店通知处理情况，必要时重排失败事件。 |
+| 前置条件 | 有效主管工作上下文，具体事件权限、状态和轮次由系统检查。 |
+| 基本路径 | 1. 主管请求本店派发情况。 / 2. 系统反馈待派发、已生成、无符合条件收件人、失败状态及发生/处理时间；不暴露其他人的个人消息或明细收件名单。 / 3. 主管对一条失败事件核对原因，明确请求只重试通知。 / 4. 系统重新核验当前诊所、权限、只读策略和重试轮次，将原事件重排并保存审计。 / 5. 后台另行按原收件范围及当前授权有界重试，主管以后查询实际结果。 |
+| 扩展 | 2a暂时读取失败：结果未知，不自动重发；3a空收件或失效授权：不通过重试创造新权限/新收件人；4a已处理/已经重排/旧轮次：拒绝第二次重置；4b其他店、前台身份、旧页面、未确认或只读：拒绝；4c审计失败：回滚重排；5a后台未运行：仍PENDING，不虚构成功；5b失败：退避到最多5次后FAILED；5c部分原授权失效：跳过并记录聚合数量，不向新授权补发。 |
+| 成功后置 | 仅通知处理记录与审计变化。最低保证：重试不重新创建任务、取消/改期预约、接受邀约或释放资源；此前成功的消息行不重复。 |
+| 字段 | event_id、expected_round、明确确认及工作上下文令牌。事件和收件快照不可在本入口修改。 |

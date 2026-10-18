@@ -149,3 +149,10 @@ full R2, external hosting and commercial readiness → separate gates.
 Primary mechanisms: [PostgreSQL read-only transactions](https://www.postgresql.org/docs/17/sql-set-transaction.html),
 [Django Greatest](https://docs.djangoproject.com/en/5.2/ref/models/database-functions/#greatest),
 [Python atomic file operations](https://docs.python.org/3.13/library/os.html#os.replace).
+
+## Executed delivery — 2026-10-18
+
+[Local acceptance, exact application CI and protected Mac delivery](evidence_r22/README.md)
+record the real faults, business/permission checks, encrypted restore and remaining gates.
+The current course report uses the supplied six-chapter university format.
+R2.3 backup freshness is next; full R2 and cloud acceptance are still pending.

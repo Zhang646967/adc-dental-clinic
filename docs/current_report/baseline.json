@@ -1,7 +1,7 @@
 {
-  "format": 2,
+  "format": 3,
   "report_date": "2026-10-18",
-  "application_commit": "ccdcdcd1f612d490ec144d70ee5e5a9395959c75",
+  "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
   "R1_historical": {
     "format": 1,
     "report_date": "2026-10-18",
@@ -85,7 +85,15 @@
     },
     "scope": "Aggregate synthetic R1 evidence; this report revision does not rerun acceptance or implement R2."
   },
-  "R21": {
+  "status": {
+    "R21": "HISTORICAL_DELIVERED",
+    "R22": "DELIVERED_ON_MAC",
+    "R2": "IN_PROGRESS",
+    "R23": "NEXT_IMPLEMENTATION",
+    "cloud_acceptance": "NOT_RUN",
+    "windows_original_data_recovery": "unresolved"
+  },
+  "R21_historical": {
     "evidence_path": "docs/evidence_r21/acceptance.json",
     "evidence_sha256": "3a417137af78a0441c10bb9429b7fb19c0de6757b38c2b51c9ecea787d01e780",
     "delivery_path": "docs/evidence_r21/delivery.json",
@@ -107,11 +115,28 @@
     "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480",
     "status": "DELIVERED_ON_MAC"
   },
-  "status": {
-    "R21": "DELIVERED_ON_MAC",
-    "R2": "IN_PROGRESS",
-    "R22": "NEXT_IMPLEMENTATION",
-    "cloud_acceptance": "NOT_RUN",
-    "windows_original_data_recovery": "unresolved"
+  "R22": {
+    "evidence_path": "docs/evidence_r22/acceptance.json",
+    "evidence_sha256": "ec6bc51c72fbaf3885096ca2b89434a3f11cdaee5cfc9a9f2c103e68f55d73e9",
+    "delivery_path": "docs/evidence_r22/delivery.json",
+    "delivery_sha256": "b46ac0b70b51427ee4d3fa7d48d36bfced05996f8b70a4df8f8b4299b1ed93e9",
+    "regression": {
+      "source_checks": 978,
+      "postgresql_http_concurrency_tests": 1145,
+      "new_source_rule_methods": 60,
+      "new_postgresql_methods": 26,
+      "full_isolated_gate_exit": 0,
+      "cleanup_exit": 0,
+      "final_gate": "gate-6, full real PostgreSQL/source/HTTP/concurrency and cleanup passed"
+    },
+    "browser_assertions": 869,
+    "runtime_fault_checks": 32,
+    "mac_browser_assertions": 437,
+    "restored_model_association_fingerprints": 50,
+    "restore_local_seconds": 2.454,
+    "mac_original_durable_fingerprints_preserved": 48,
+    "private_configurations_preserved": 70,
+    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755",
+    "status": "DELIVERED_ON_MAC"
   }
 }

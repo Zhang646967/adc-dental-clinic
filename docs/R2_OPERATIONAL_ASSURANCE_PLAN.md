@@ -6,7 +6,9 @@ independent hosting. Planning baseline: **2026-10-18**, application commit
 tracing and safe operational logging are implemented and locally verified** in
 [the R2.1 contract](R21_SAFE_DIAGNOSTICS.md) and [executed evidence](evidence_r21/README.md).
 Application `ccdcdcd` passed exact-commit CI and [protected Mac delivery](evidence_r21/delivery.json).
-The remaining R2 capabilities, observation windows and cloud gates are pending.
+R2.2 worker/backlog/observer conditions are also implemented and [delivered on Mac](evidence_r22/README.md)
+at `02a9dbc`; the next coding batch is R2.3 recovery freshness.
+Remaining full-R2 observation/security and cloud gates are pending.
 
 The target remains one dental chain with approximately 5–20 clinics. The next
 release should make failed reception, treatment, settlement, notification and
@@ -134,23 +136,23 @@ delivery, not a human read or business agreement. Reuse the due index and do not
 read/export recipients or task/patient details for monitoring.
 
 **R2-06 Condition evaluation.** Collect bounded read-only samples every 30 seconds.
-Use `HEALTHY`, `WARNING`, `CRITICAL` and `UNKNOWN`; exit codes are proposed as
-0/1/2/3 respectively. Missing, stale, corrupt or misidentified observations are
+Use `HEALTHY`, `WARNING`, `CRITICAL` and `UNKNOWN`; exit codes are
+0/1/2/3 respectively (implemented in R2.2). Missing, stale, corrupt or misidentified observations are
 UNKNOWN, never healthy. Acknowledgement records who took responsibility but
 does not clear an active condition. Deduplicate by target and condition; record
 opening, acknowledgement, change and recovery once, without a new notice on every
 unchanged sample. Store output under a private 0700 directory and 0600 files.
 Do not expose raw diagnostics through `/health/` or business pages.
 
-| Candidate trigger | Proposed default | Clear/interpretation |
+| Condition or remaining trigger | R2.2 default / remaining plan | Clear/interpretation |
 |---|---|---|
 | Failed web/database readiness | Two consecutive 30-second samples | Two successful samples; readiness is narrower than complete business correctness |
 | Worker loop success stale | Older than 90 seconds while writable worker is required | Two current successful loop observations; read-only worker absence is expected |
 | Oldest due notification | Older than 120 seconds | No overdue eligible work for two samples; future retry remains pending |
-| Container restart or OOM | Any new event | Preserve event as an incident; current health alone cannot erase it |
+| Container restart or OOM (PENDING host-side collection) | Planned: any new event | R2.2 inspects engine state during tests only; continuous collection remains R2.4 |
 | Monitor sample stale | Older than 90 seconds | Fresh valid sample; no observation is not proof of availability |
-| Storage pressure | Warn below 20%; critical below 10% free or 1 GiB free | Hysteresis and configured volume capacity; no full-disk injection on the Mac |
-| Clock/source inconsistency | Foreign identity, invalid signature/hash, or future time beyond 5 minutes | UNKNOWN until corrected and revalidated |
+| Storage pressure | Warn below 20%; critical below 10% free or 1 GiB free | Recovery above 25% (warning) or 15% and 1.25 GiB (critical); measured volume capacity; no full-disk injection on the Mac |
+| Clock/source inconsistency | Foreign identity, invalid stored checksum, or future time beyond 5 minutes | UNKNOWN until corrected and revalidated |
 
 These are initial engineering thresholds to test under the current workload,
 not measured customer service commitments. CPU/memory utilization is diagnostic;
@@ -241,25 +243,31 @@ functional truth + service indicators → bounded local acceptance.
 | Increment | Deliverable | Completion gate | Dependency |
 |---|---|---|---|
 | R2.1 Safe diagnosis | Request context, JSON event vocabulary, error reference and logging inventory/size rotation | R2-A01/A02/A10 and local runtime/restore evidence passed; exact-commit CI and protected Mac delivery recorded separately | Implemented; see R2.1 evidence |
-| R2.2 Worker and condition monitor | Private heartbeat/status collector, due-age calculation and incident state | R2-A03/A04/A05/A06/A09; prove the observer can fail visibly | R2.1; no server required |
+| R2.2 Worker and condition monitor | Private heartbeat/status collector, due-age calculation and incident state | R2-A03/A04/A05/A09 and low-space portion of A06 passed; [executed evidence](evidence_r22/README.md) | Implemented and delivered; no server required |
 | R2.3 Recovery freshness | Separate creation/download/restore receipts and empty-target comparison | R2-A07/A08; current key and original UTC retention rules | R2.2; local simulation first |
 | R2.4 Local release | Security gap assessment, fault runbooks, browser/load and 24-hour observation | R2-A10/A11/A12; exact-commit CI and Mac preservation | Earlier increments |
 | R2.5 Cloud release | Apply tested version to independent HTTPS host and repeat public gates | Mainland access, Mac offline, reboot/worker, renewal, backups, restore and 24-hour observation | Private server/DNS inputs |
 
-The **next coding batch is R2.2** after protected R2.1 delivery. R2.1 uses a request
-context module and middleware under `adc_core/`, a separate safe logging module,
-explicit configuration in the existing settings and bounded container log
-options. Preserve middleware security ordering: the observer records the result
-of existing checks and cannot activate a role or bypass them. Add targeted
-PostgreSQL/HTTP tests for normal, denied, exceptional and concurrent requests;
-exercise login, settlement, evidence/import and equipment error paths in Chrome.
-No business schema migration, autonomous business action, new account grant,
-external AI or external monitoring service is part of R2.1.
+The **next coding batch is R2.3** after protected R2.2 delivery.
+R2.1 request/logging and R2.2 progress/backlog/incident contracts are delivered;
+their exact controls and evidence remain in their linked contracts. Backup
+freshness, external alert delivery and the full R2 observation window remain open.
 
-Before changing runtime, back up the existing Mac, require exact-commit CI,
-stop old writers where required, update and compare original data/configuration.
-Keep report-only commits distinct from application delivery. R2.1 needs its
-controlled build/restart; subsequent report-only updates do not restart services.
+R2.3 should give each verified creation, download and independent restore its own
+private versioned receipt, bound to instance, application version, archive digest
+and original backup time. Download time must not replace the recovery point.
+Cached/stale/corrupt copies, wrong keys and interrupted downloads cannot advance
+freshness or prune the last valid backup. Preserve existing UTC retention and
+server/Mac seven/thirty daily-copy rules. Keep keys and configuration payloads
+private; use the already-defined R2-A07/A08 isolated adverse and empty-target tests.
+No business schema, account grant, external AI or external notification is added
+by this recovery increment.
+
+Before runtime changes, back up the existing Mac, require exact-commit CI,
+stop old writers where required, and compare original data/configuration after
+updating. App changes require controlled build/restart; report-only commits do
+not restart services. A changed operational source identity needs the explicit
+archive/reset procedure, preserving known incidents and requiring fresh samples.
 
 After R2, preserve the agreed order: **R3 treatment continuity** (versioned plans,
 acceptance, actual completion and follow-up), **R4 resource coordination**
@@ -285,3 +293,8 @@ performed in this increment. Original Windows-data recovery remains unresolved.
 
 Mind map: versioned security requirements → existing evidence → explicit gaps →
 new tests; server credentials → private preparation → actual cloud acceptance.
+
+R2.2 implementation details and explicit reset after source transitions are in
+[the operations contract](R22_OPERATIONS_OBSERVATION.md). Exit 3 (incomplete/unknown)
+can coexist with a known critical condition; inspect each condition, not only the
+overall code. Private status uses no database query and never controls business work.

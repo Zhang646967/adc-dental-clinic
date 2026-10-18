@@ -88,3 +88,14 @@ server; original Windows-data recovery remains unresolved.
 
 Mind map: owned module rules → R1 money evidence → R2 operation → R3 care journey
 → R4 physical resources → R5 measured growth → independently accepted deployment.
+
+## R2.2 implementation update — 2026-10-18
+
+Private notification progress, due-backlog and observer-failure detection are
+[implemented and delivered](evidence_r22/README.md). The capability gap narrows
+for local diagnosis; continuous external response, backup freshness, host events,
+full observation and independent cloud operation remain open. Next is R2.3.
+No vendor comparison, twenty-clinic capacity or commercial-readiness conclusion
+is changed by these local tests.
+
+Mind map: local diagnostic evidence → visible unknown → named response → recovery freshness → measured sustained operation.

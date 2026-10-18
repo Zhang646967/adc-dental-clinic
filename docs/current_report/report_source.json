@@ -1,566 +1,362 @@
 {
-  "title": "ADC System Development Report",
-  "subtitle": "R2.1 delivery and next operational stage 系统开发进展与运行保障",
-  "date_line": "Report date 2026-10-18   Application ccdcdcd   R2.1 DELIVERED   R2 IN PROGRESS",
+  "title": "ADC 牙科连锁运营管理系统分析与设计",
+  "version": "R2.2 课程阶段报告",
+  "date": "2026年10月18日",
   "file_stem": "ADC_Current_System_Report_20261018",
-  "sections": [
+  "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+  "reference_pdf": {
+    "pages": 86,
+    "sha256": "ba3164113b097daa7be79251f540513fe181687e539e82821506a1671078e248",
+    "purpose": "课程报告结构和排版参考"
+  },
+  "frozen_docx_sha256": "554f967012377721dea7809d37407064c5ee39723ae6eb7ba0b1f8dec3b0f27c",
+  "author": {
+    "name": "张加良",
+    "student_no": "8210241102",
+    "supervisor": "毕文杰教授",
+    "school": "商学院",
+    "class": "信管 T2401"
+  },
+  "abstract_cn": [
+    "本项目以 Andrew’s Dental Chain（ADC）课程案例为背景，围绕连锁诊所分散运营、跨店协作、连续交接与经营核对，建立患者资料、预约到诊、实际治疗、版本化结算、收退款、设备维护和运营分析相互衔接的信息系统。系统采用患者、牙医、前台、诊所主管、总部、财务和技术管理七类工作台，将账号、当前身份及诊所范围分别表达。",
+    "报告保留项目愿景、业务用例、现状与改进后的业务序列、系统用例、领域与状态模型，以及 SU-01—38 和 SF-01 的完整规约。在原有接诊与结算基础上，财务流程加入渠道账户、分次收退款凭据、独立审核、私有 CSV 导入和逐笔对账；设备流程保留责任维护、独立验收及费用来源，避免把排班协商或会计核对等同于自动业务变更。",
+    "本阶段继续完善运行保障：R2.1 提供请求追踪编号和安全日志；R2.2 分开记录通知轮询、数据库成功和实际投递，按真实到期时点监测积压，并通过独立读取识别监测缺失、过期、损坏和来源不符。故障确认仅分配责任，不能清除故障、重做任务或代替财务审核。实现与验证结果在第5章绑定具体版本；R1容量结果保留原日期，完整R2、独立公网与商业化验收仍为后续门槛。"
+  ],
+  "abstract_en": [
+    "This course project develops a connected operations system for one dental chain. Patient records, appointments, attendance, actual treatment, versioned billing, receipts and refunds, equipment maintenance and operational review share protected business facts. Seven role-specific workspaces distinguish account ownership, the active role and the current clinic scope.",
+    "The report retains the project vision, business and system use cases, current and improved business sequences, domain and state models, and all original SU-01 to SU-38 and SF-01 specifications. Financial evidence and one-to-one statement reconciliation retain independent review. Equipment records connect maintenance responsibility, separate acceptance and supported expenses without silently rescheduling clinical commitments.",
+    "The R2.2 increment observes notification processing without taking business decisions. Loop observation, successful database progress and actual delivery remain separate. Only eligible due events contribute to backlog age. A private collector and an independent reader distinguish healthy, warning, critical and unknown conditions; acknowledgement does not erase an active fault. Executed results and protected Mac delivery are identified in Chapter 5. Historical R1 capacity evidence does not establish full R2 completion, independent public hosting or commercial readiness."
+  ],
+  "methods": [
     {
-      "heading": "1 Current release and next decision 当前版本与下一步",
+      "heading": "2.1 UML 与用例驱动分析",
       "paragraphs": [
-        "R2.1 request tracing and safe operational logs（请求追踪与安全运行日志）are delivered on the Mac and in GitHub. Failed operations now have a server reference that connects safe application, server and gateway events. Existing financial approval, clinical permissions and business history remain intact. The next implementation is R2.2 worker and backlog observation.",
-        "The agreed product remains one dental chain with approximately 5-20 clinics. Data is synthetic（合成数据）, business currency/time are CNY and Asia/Shanghai, and external AI remains unused. Twenty-clinic capacity, independent hosting and commercial readiness remain separate acceptance targets.",
-        "This revision records R2.1 execution on 18 October 2026 at application commit ccdcdcd [11-13]. R1 results dated 15 October 2026 remain historical [3-4]. Future R2 monitoring thresholds, thirty-minute capacity repetition and twenty-four-hour observation have not been accepted by this release."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Area",
-            "Current position"
-          ],
-          "rows": [
-            [
-              "Application",
-              "R1 financial evidence retained; R2.1 diagnosis/logging delivered"
-            ],
-            [
-              "Regression",
-              "918 source checks; 1,119 PostgreSQL/HTTP/concurrency tests"
-            ],
-            [
-              "Browser",
-              "894 isolated assertions; 410 on the updated original Mac"
-            ],
-            [
-              "Historical capacity",
-              "R1: five clinics, twenty accounts, 30 minutes; 9,000 requests"
-            ],
-            [
-              "Recovery",
-              "R2.1: 50 independent restore fingerprints; 48 durable Mac fingerprints preserved"
-            ],
-            [
-              "Next coding batch",
-              "R2.2 worker heartbeat, due backlog and private condition reporting"
-            ]
-          ],
-          "widths": [
-            1.45,
-            5.55
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "Cloud acceptance awaits private server and hostname inputs. The original Windows database recovery remains unresolved. The frozen RC1 report remains the historical design record; this report is the current development and planning companion."
-      ],
-      "mind_map": "ADC → delivered R1 money evidence + R2.1 safe diagnosis → next R2.2 observation → recovery freshness → independent host and measured expansion."
+        "业务用例说明岗位协作的业务成果，系统用例说明软件对外提供的目标服务；序列模型表达协作，状态模型表达一个对象的合法变化。模型不能替代业务规则和异常规约，图中 include 也不表示先后点击顺序。原始系统用例编号保持稳定。"
+      ]
     },
     {
-      "heading": "2 Business workflow and module ownership 业务流程与模块职责",
+      "heading": "2.2 B/S 结构与模块化单体",
       "paragraphs": [
-        "The main patient journey connects booking, arrival, dentist care, actual treatment, the versioned invoice, receipts or refunds and financial review. Equipment repair connects a responsible work order, another manager’s acceptance, a service event and separately reviewed expense. Existing appointments and scheduling decisions retain their own protected commands.",
-        "Seven workspaces（工作身份）separate function, clinic and record authority. A person with multiple grants activates one role at a time. A role switch does not allow self-review or combine permissions. Clinical records, money and equipment rules remain inside their owning module; callers use defined operations [1-2]."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Role",
-            "Responsibility and boundary"
-          ],
-          "rows": [
-            [
-              "PATIENT",
-              "Own appointments, invoice projection and authorized portal actions"
-            ],
-            [
-              "FRONT_DESK",
-              "Current-clinic reception, booking and invoice-related receipt/refund evidence"
-            ],
-            [
-              "DENTIST",
-              "Assigned clinical work and actual treatment; no independent finance approval"
-            ],
-            [
-              "MANAGER",
-              "Current-clinic equipment, schedule coordination and reconciliation proposals; limited money projection"
-            ],
-            [
-              "FINANCE",
-              "Channel configuration and independent money/evidence/match review under chain authority"
-            ],
-            [
-              "HQ",
-              "Authorized aggregate reporting; no detailed statement or patient access from reconciliation"
-            ],
-            [
-              "SYSADMIN",
-              "Account and directory governance; technical privilege does not grant clinical access"
-            ]
-          ],
-          "widths": [
-            1.35,
-            5.65
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "Billed revenue, cash received, equipment costs and approved refunds are distinct facts. Missing cost is distinct from confirmed zero. Suggestions are not appointments, an inbox commit is not human agreement, and an approved daily handover is not proof of external channel settlement. Operational monitoring must preserve each distinction."
-      ],
-      "mind_map": "Patient journey → appointments and care; money → invoice, cash and independent review; equipment → repair evidence and explicit scheduling; identity → active role, clinic and object authority."
+        "浏览器呈现工作台与表单，Django 组织身份、授权和业务操作，PostgreSQL 保存约束、事务和历史，独立 worker 处理已经提交的站内通知意图。继续采用模块化单体，先明确数据责任和受控操作，再根据实际部署或扩展瓶颈判断是否拆分服务。"
+      ]
     },
     {
-      "heading": "3 R1 financial evidence closure 资金凭据与逐笔对账",
+      "heading": "2.3 需求可测试性与信息隐藏",
       "paragraphs": [
-        "Finance establishes stable clinic-specific channel accounts. New receipt, refund, equipment-expense and reversal requests bind the account and reference into a signed preview. The cash entry and first evidence version are saved atomically; a different finance account decides whether to post. Legacy entries keep an explicit missing-evidence status until a separately reviewed supplement is supplied.",
-        "Managers upload private UTF-8 CSV statements with six v1 columns, at most 2 MiB and 1,000 rows. Source bytes, digest, parser version and normalized rows stay in the database. Confirmation uses a server-held preview and reparses the source. Exact repeats are reported and skipped; a conflicting transaction identity rejects the entire acceptance."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Step",
-            "Invariant"
-          ],
-          "rows": [
-            [
-              "Propose matching",
-              "Same clinic, account, CNY currency, direction, amount and current approved reference"
-            ],
-            [
-              "Independent review",
-              "Different account; current grants and source facts rechecked under locks"
-            ],
-            [
-              "Active correspondence",
-              "One statement line to one POSTED cash entry; database uniqueness and transactional rechecks"
-            ],
-            [
-              "Correct evidence",
-              "Append a reviewed version; invalidate the affected active match and retain its decision"
-            ],
-            [
-              "Handle differences",
-              "Keep missing evidence, fees, combined deposits and unsupported allocations visible"
-            ],
-            [
-              "Daily handover",
-              "Keep four gross internal totals separate from current channel matching and next-day settlement"
-            ]
-          ],
-          "widths": [
-            1.55,
-            5.45
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "Importing or matching never posts money, changes an invoice or invents a balancing entry. The historical R1 browser scenarios accepted on 15 October cover partial receipts, refunds, equipment payments/reversals and evidence correction. In that R1 run, after additional load-time review, 29 matches are confirmed and one prior decision remains stale; 5,031 statement lines are retained. Those are deliberately bounded synthetic scenarios, not a real reconciliation coverage rate [3]."
-      ],
-      "mind_map": "Authorized account → signed evidence → retained CSV → exact proposal → different reviewer → readable differences/corrections; internal handover and channel settlement remain separate."
+        "note 3 将需求与设计区分，并要求可观察、可验证的需求；note 5 强调关注点分离、简单性和受限可见性。本项目把每个问题连接到执行者、行为、不变量、失败响应和验收案例。监测模块只获得聚合事实，不直接改写通知任务、预约、资金或授权。"
+      ]
     },
     {
-      "heading": "4 Executed evidence and its scope 已执行验证与适用范围",
+      "heading": "2.4 数据库事务与独立观察",
       "paragraphs": [
-        "R2.1 separates real database behavior, browser workflows, proxy/command sinks, size rotation and encrypted recovery. Counts describe executed checks, not coverage percentages. The local acceptance and protected Mac delivery records are separate [11-13].",
-        "The five-clinic SQL oracle independently retains receipts of CNY 50,100.10, refunds of 100.10 and net patient cash of 50,000.00. Equipment expense and reversal are CNY 50.05 each. Invalid requests, CSV errors and technical logging create no balancing cash or invoice changes."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Check",
-            "R2.1 observation"
-          ],
-          "rows": [
-            [
-              "Regression",
-              "918 source checks; 1,119 PostgreSQL/HTTP/concurrency tests, including 13 new R2.1 methods"
-            ],
-            [
-              "Chrome",
-              "568 business + 248 permission/isolation + 78 diagnostic/keyboard/narrow-layout assertions"
-            ],
-            [
-              "Real log correlation",
-              "28 browser requests match across Django, Gunicorn and Nginx; 63 private marker values absent"
-            ],
-            [
-              "Candidate gateway",
-              "133 distinct references; login GETs stay outside POST login budget; expected 403/429 cases"
-            ],
-            [
-              "Size rotation",
-              "250,000 records; 143,591 retained including the final record; production 10m/three-file options"
-            ],
-            [
-              "Independent facts",
-              "20 SQL/content assertions; 24 confirmed matches, one retained stale decision and 30 accepted lines"
-            ],
-            [
-              "Recovery",
-              "50 model/association fingerprints match; recorded same-Mac empty-target restore/compare 2.452 s"
-            ],
-            [
-              "Mac protection",
-              "48 durable fingerprints and 70 private files preserved; same data volume and RC tag; 410 browser assertions"
-            ]
-          ],
-          "widths": [
-            1.55,
-            5.45
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "The mixed workload remains R1 historical evidence: five clinics, twenty accounts, 9,000 requests over thirty minutes, p95 0.337 s, under two-CPU/1,728-MiB limits. It was not repeated for R2.1. New restore and gateway checks are local; they do not establish off-host recovery or independent cloud service. Native macOS popup-menu option selection remains outside the earlier automatic acceptance."
-      ],
-      "mind_map": "Adversarial inputs → actual three-layer correlation → seven-role business outcomes → independent money facts → size rotation → encrypted restore → exact-commit CI and original Mac preservation."
+        "关键业务写入保留原有事务和独立审核。R2.2 对数据库使用单独的只读可重复读事务，设置本事务内的语句和锁等待上限，只查询通知状态计数和到期时间；观察失败返回未知，不以零积压代替查询失败。[18-19]"
+      ]
     },
     {
-      "heading": "5 R2 business requirements 运行保障业务需求",
+      "heading": "2.5 运行证据与课程边界",
       "paragraphs": [
-        "R2.1 addresses safe diagnosis when reception, clinical or settlement requests fail: staff receive a support reference and are asked to check stored state before repeating uncertain work. The remaining operational problems are timely detection of stalled coordination notices, an unavailable observer and stale recovery points.",
-        "The requirements note makes the expected outcome testable rather than describing the system as merely reliable [1]. Each R2 requirement therefore specifies an actor, an observable condition, a protected invariant, a failure response and an acceptance case."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Requirement",
-            "Observable result and protected invariant"
-          ],
-          "rows": [
-            [
-              "R2-01 / 02",
-              "Delivered: server reference and strict safe events; no submitted secret, clinical, CSV or URL/body values"
-            ],
-            [
-              "R2-03",
-              "Delivered size bounds and sink inventory; strict time expiry/protected collection remain gaps"
-            ],
-            [
-              "R2-04 / 05",
-              "Next: successful worker-loop freshness and eligible due-backlog age; future retry and human read stay distinct"
-            ],
-            [
-              "R2-06",
-              "Planned: private HEALTHY/WARNING/CRITICAL/UNKNOWN; acknowledgement does not clear the fault"
-            ],
-            [
-              "R2-07 / 08",
-              "Planned: separate created/downloaded/restored points and controlled independent recovery"
-            ]
-          ],
-          "widths": [
-            1.55,
-            5.45
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "Keep the modular monolith（模块化单体）and current worker. Operational logging queries no permissions or business objects and omits role/clinic identifiers. The business module still owns its audit and transaction; operational metadata is a separate diagnostic responsibility [2,5]."
-      ],
-      "mind_map": "Failure → actor and observable symptom → protected business invariant → explicit response → acceptance; operator, clinic and finance responsibilities stay distinct."
-    },
-    {
-      "heading": "6 Delivered safe diagnosis 已交付的故障定位能力",
-      "paragraphs": [
-        "At request entry the server creates the reference and returns X-Request-ID. Client headers cannot choose it. Context is reset after completion or exceptions; later Django warning records reuse the immutable server context on the request. The gateway uses the application reference for proxied outcomes and generates a fallback for its own refusals.",
-        "The JSON formatter allows UTC time, severity, service, identified source or unknown, finite event code, server reference, resolved route, normalized method/status and bounded duration. It never formats arbitrary messages, arguments, exception strings or locals. Authentication events omit entered credentials; references confer no record authority."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Contract",
-            "Implementation and check"
-          ],
-          "rows": [
-            [
-              "Context",
-              "Separate request module and context variables; original security/workspace middleware order preserved"
-            ],
-            [
-              "Safe failures",
-              "Generic error and support reference; 500 renderer performs no database context queries"
-            ],
-            [
-              "Sinks",
-              "Django/Gunicorn/gateway request events controlled; runtime command stderr sanitized; compatible worker aggregate output"
-            ],
-            [
-              "Native capture",
-              "Database errors can quote submitted values; native DB and credential-bootstrap capture disabled"
-            ],
-            [
-              "Business atomicity",
-              "Optional log failure preserves success/denial; required financial audit failure still rolls back"
-            ],
-            [
-              "Storage",
-              "Docker local nominal 10 MiB × 3 files per captured container; size rotation verified, no seven-day deletion claim"
-            ]
-          ],
-          "widths": [
-            1.55,
-            5.45
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "Actual checks cover forged references, parallel success/failure, delayed framework logs, login/CSRF, sensitive markers, stale equipment forms and invalid receipts/CSV. Diagnostic metadata, retained financial audit and private operator evidence remain separate [6-8,11]. No business migration, new role, public metrics API or automatic business action was introduced."
-      ],
-      "mind_map": "Server reference → existing permission/transaction → strict safe events → matching proxy outcome → bounded private storage → preserved audit and independent review."
-    },
-    {
-      "heading": "7 Observation and recovery targets 监测与恢复目标",
-      "paragraphs": [
-        "These are proposed R2.2/R2.3 engineering defaults, not achieved service results. R2.1 provides diagnostic records and size bounds; it does not yet collect worker/backup conditions or manage incidents. Missing observations must be UNKNOWN. An idle worker should be healthy when its database-backed loop is current and no overdue eligible events exist."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Signal",
-            "Initial rule"
-          ],
-          "rows": [
-            [
-              "Web/database readiness",
-              "Fault after two failed samples; recovery after two successful samples"
-            ],
-            [
-              "Worker success",
-              "Stale after 90 seconds when a writable worker is required"
-            ],
-            [
-              "Due notification age",
-              "Over 120 seconds; use PENDING rows already due, not future scheduled retry"
-            ],
-            [
-              "Observer freshness",
-              "Over 90 seconds, invalid clock or foreign instance means UNKNOWN"
-            ],
-            [
-              "OOM/restart",
-              "Any new event retains an incident even when current health recovers"
-            ],
-            [
-              "Storage",
-              "Warn below 20% free; critical below 10% or 1 GiB free"
-            ],
-            [
-              "Recovery points",
-              "Warn after 26 hours for daily server backup or verified off-host source point"
-            ],
-            [
-              "Independent restore",
-              "After deployment and weekly; age warning after eight days; bind backup digest and commit"
-            ]
-          ],
-          "widths": [
-            1.65,
-            5.35
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "Track backup creation, verified Mac download and independent restore separately. A repeated check/download never advances the original backup timestamp. Keep seven server days and thirty Mac days; a corrupt file must not cause pruning of a valid recovery point. A sleeping Mac leaves the off-host recovery point at its last verified download.",
-        "Recover only into a distinct empty target with matching source/image/schema provenance. Compare accounts, grants, business/association rows, all four cash legs, evidence versions, original CSV byte digests and match history. Target thirty minutes after the replacement environment is ready. R2.1’s 2.452-second local interval does not promise cloud replacement time.",
-        "A proposed seven-day technical availability objective is 99.5%; report 4xx/409/429 separately. Functional acceptance still rejects an unexpected 403 or other wrong business outcome. Empty traffic is not 100% availability. Repeat the existing thirty-minute mixed-load gate with p95 within five seconds and measure observer/logging overhead."
-      ],
-      "mind_map": "Delivered diagnosis → proposed worker/backlog/observer freshness → explicit future condition; created → downloaded/decrypted → independently restored point → actual recovery exposure."
-    },
-    {
-      "heading": "8 Development sequence and completion gates 开发顺序与验收",
-      "paragraphs": [
-        "R2.1 is delivered with passing application-commit CI, local execution and protected Mac comparison. Continue with bounded R2.2 increments. Each must preserve original data, role scope and independent finance review. Destructive fault injection stays inside an identified disposable rehearsal."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Increment",
-            "Deliverable and completion gate"
-          ],
-          "rows": [
-            [
-              "R2.1 Safe diagnosis",
-              "Delivered: references, strict events, safe errors, measured rotation and protected local release"
-            ],
-            [
-              "R2.2 Worker observation",
-              "Next: heartbeat, due age, private collector and condition/incident lifecycle; expose observer failure"
-            ],
-            [
-              "R2.3 Recovery freshness",
-              "Separate backup/download/restore receipts; corrupt/wrong-key/stale-copy and empty-target recovery cases"
-            ],
-            [
-              "R2.4 Local release",
-              "Security gap review, fault runbooks, seven-role browser/load checks and 24-hour local observation"
-            ],
-            [
-              "R2.5 Cloud release",
-              "Independent HTTPS host; mainland access, Mac offline, restart, renewal, backup/recovery and 24-hour gates"
-            ]
-          ],
-          "widths": [
-            1.55,
-            5.45
-          ],
-          "center": []
-        }
-      ],
-      "bullets": [
-        "Inject database unavailability, stopped/terminated worker, future retry, monitor failure and simulated storage pressure without modifying the running Mac.",
-        "Verify deduplicated incident opening, acknowledgement and sustained recovery; acknowledgement changes responsibility, not condition truth.",
-        "Check corrupt archives, cached copies with a wrong key and interrupted downloads; preserve previous valid points and all source business records.",
-        "Repeat five-clinic/twenty-account valid mixed work with import/review activity, no unexpected statuses/duplicate effects/OOM and p95 within five seconds."
-      ],
-      "after": [
-        "The full plan defines R2-A01 through R2-A12 [9]. R2.1 contributes reference/privacy/permission, storage and recovery evidence; it does not pass every full-R2 gate. Local R2 acceptance and cloud acceptance remain separate. Then retain the agreed sequence: R3 treatment continuity, R4 resource coordination and R5 measured twenty-clinic expansion."
-      ],
-      "mind_map": "Diagnosis → worker/observer → recoverable points → local fault evidence → independent host; later care continuity → shared resources → measured expansion."
-    },
-    {
-      "heading": "9 Security assessment and release boundaries 安全差距与发布边界",
-      "paragraphs": [
-        "Use OWASP ASVS 5.0.0 for the scoped assessment. R2.1 request/context, safe-sink and retained-business tests now support evidence review; they do not establish a standard-wide pass. The register keeps time retention, protected independent collection, session/MFA and target-host work explicit [6,10-11]."
-      ],
-      "tables": [
-        {
-          "headers": [
-            "Area",
-            "Current assessment direction"
-          ],
-          "rows": [
-            [
-              "Logging and errors",
-              "Implemented R2.1 inventory, correlation, UTC/minimal fields, safe failures and adversarial evidence; assess complete controls"
-            ],
-            [
-              "Log protection",
-              "Size rotation verified; seven-day deletion and separate protected collection remain gaps; native text suppression reduces forensic detail"
-            ],
-            [
-              "Authorization",
-              "Review existing seven-role/function/object/field tests against the complete requirement scope"
-            ],
-            [
-              "Sessions and MFA",
-              "Lifetime/concurrency, session inspection, factor changes and MFA need their own contracts/assessment"
-            ],
-            [
-              "Customer isolation",
-              "One chain’s clinic isolation is not independent customer tenancy"
-            ],
-            [
-              "Public operation",
-              "Needs server IPv4, SSH user/key path, independently verified host fingerprint and owned hostname"
-            ]
-          ],
-          "widths": [
-            1.6,
-            5.4
-          ],
-          "center": []
-        }
-      ],
-      "after": [
-        "The application is updated on the original Mac after exact-commit CI. Encrypted before/after backups are verified; original durable facts, configuration, volume and RC tag remain. Documentation is synchronized separately. No test business records are injected into the original Mac.",
-        "Local checks cannot establish mainland access, real certificate issuance/renewal, service while the Mac is offline or replacement-host recovery. Cloud acceptance awaits server details. Original Windows-data recovery remains unresolved."
-      ],
-      "mind_map": "Versioned security requirement → existing evidence and explicit gap → targeted work; private server inputs → actual host tests → separately accepted public operation."
-    },
-    {
-      "heading": "10 References and report provenance 参考资料与报告来源",
-      "paragraphs": [
-        "The course notes provide the requirements/design framework; official references guide engineering mechanisms. R1 observations remain dated 15 October 2026. R2.1 local acceptance and original-Mac delivery are dated 18 October 2026, with identified application commit ccdcdcd and passing CI [11-13].",
-        "Editable report_source.json and build_report.py produce Word and Markdown; PDF pages are visually inspected. baseline.json binds aggregate evidence and delivery hashes. Credentials, keys, dumps, patient data and CSV source bytes remain private. The frozen 63-page RC1 report, original thirty migrations and RC tag preserve their historical identities."
-      ],
-      "references": [
-        {
-          "id": "[1]",
-          "label": "Course note 3 Requirements and specification",
-          "detail": "Supplied project material, physical page 5 on testable observable requirements."
-        },
-        {
-          "id": "[2]",
-          "label": "Course note 5 Software design principles",
-          "detail": "Supplied project material, physical pages 4-5 and 8 on separation, simplicity, restricted visibility and information hiding."
-        },
-        {
-          "id": "[3]",
-          "label": "ADC R1 executed acceptance",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/blob/6a06f356a0c4697f5b8afe2736ed62d427512806/docs/evidence_financial_evidence/acceptance.json",
-          "detail": "Immutable application baseline; synthetic local scope."
-        },
-        {
-          "id": "[4]",
-          "label": "Exact R1 application commit CI",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/38728944434",
-          "detail": "Successful workflow for commit 6a06f35."
-        },
-        {
-          "id": "[5]",
-          "label": "Google SRE workbook Monitoring",
-          "url": "https://sre.google/workbook/monitoring/",
-          "detail": "Purposeful observation and testing the monitoring/alerting path."
-        },
-        {
-          "id": "[6]",
-          "label": "OWASP ASVS official project and stable standard",
-          "url": "https://owasp.org/projects/asvs",
-          "detail": "Assessment is pinned to 5.0.0; requirement links are in the ADC register."
-        },
-        {
-          "id": "[7]",
-          "label": "Django 5.2 logging configuration",
-          "url": "https://docs.djangoproject.com/en/5.2/howto/logging/",
-          "detail": "Application logger, formatter and handler mechanisms."
-        },
-        {
-          "id": "[8]",
-          "label": "Docker local logging driver",
-          "url": "https://docs.docker.com/engine/logging/drivers/local/",
-          "detail": "Size-based options; no time-expiry acceptance is claimed."
-        },
-        {
-          "id": "[9]",
-          "label": "ADC R2 operational assurance plan",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/blob/main/docs/R2_OPERATIONAL_ASSURANCE_PLAN.md",
-          "detail": "Implementation contracts and R2-A01 through R2-A12; planned."
-        },
-        {
-          "id": "[10]",
-          "label": "ADC versioned security gap register",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/blob/main/docs/SECURITY_ASVS_GAP_REGISTER.md",
-          "detail": "Scoped assessment work, not ASVS certification."
-        },
-        {
-          "id": "[11]",
-          "label": "ADC R2.1 executed local acceptance",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/blob/ccdcdcd1f612d490ec144d70ee5e5a9395959c75/docs/evidence_r21/acceptance.json",
-          "detail": "Regression, real-browser/sink/gateway, money and encrypted-restore results."
-        },
-        {
-          "id": "[12]",
-          "label": "Exact R2.1 application CI",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39127594480",
-          "detail": "Successful workflow for ccdcdcd."
-        },
-        {
-          "id": "[13]",
-          "label": "ADC protected Mac delivery record",
-          "url": "https://github.com/Zhang646967/adc-dental-clinic/blob/main/docs/evidence_r21/delivery.json",
-          "detail": "Original data/configuration protection and post-update verification."
-        }
-      ],
-      "after": [
-        "Report revision date: 2026-10-18 in the project owner’s client date context. Historical R1 evidence remains dated 2026-10-15 UTC. The separate R2.1 delivery record binds 48 durable-model/association fingerprints, 70 unchanged private files and 410 Mac browser assertions to this application release."
-      ],
-      "mind_map": "Course requirements/design → official mechanisms → immutable R1 observations → executed R2.1 acceptance → original Mac delivery → pending R2.2 and independent host."
+        "纯规则、源码检查、真实 PostgreSQL、浏览器业务、独立恢复与云端验证分别取证。Google SRE 强调可用于采取行动的监测，并验证告警路径。[16] 本项目目前仅使用合成资料与站内消息，外部AI保持关闭或本地演示模式；未接入真实支付、短信邮件或医学判断。"
+      ]
     }
-  ]
+  ],
+  "requirements": [
+    {
+      "heading": "3.8 财务与设备管理的细化需求",
+      "paragraphs": [
+        "收款、退款、设备支出与支出冲回分别保留资金事实；业务经办与独立审核分离。账内日结只证明内部四类总额已核对，不证明外部渠道已结算；次日到账可以保持待对账。设备停用或维修不直接撤销已有患者承诺，必须经原有协调流程处理。"
+      ],
+      "table": {
+        "headers": [
+          "项目",
+          "要求与结果"
+        ],
+        "rows": [
+          [
+            "FIN-01 渠道与凭据",
+            "按诊所维护稳定渠道账户；新资金申请将账户和凭据引用绑定签名预览；停用账户不抹去历史。"
+          ],
+          [
+            "FIN-02 审核与更正",
+            "不同财务账号审核过账、历史补证与凭据更正；原金额不改写，更正后旧匹配失效且可追踪。"
+          ],
+          [
+            "FIN-03 逐笔核对",
+            "UTF-8 CSV 先预览后确认；相同交易去重，冲突整批拒绝；同店、账户、币种、方向、金额、引用一致才可独立确认一对一匹配。"
+          ],
+          [
+            "FIN-04 差异与交接",
+            "未供凭据、合并结算、费用和不支持分摊保留为差异；匹配不自动过账、改账单或生成平衡记录。"
+          ],
+          [
+            "EQ-01 维护责任",
+            "记录设备、维护责任、期限及维修事实，由另一名有权主管验收；不能自行验收或删除历史。"
+          ],
+          [
+            "EQ-02 费用与排班衔接",
+            "费用关联真实维护或服务来源并独立复核；支出及冲回遵守原资金审核；维修与排班冲突经明确协调处理。"
+          ]
+        ],
+        "widths": [
+          3.2,
+          12.8
+        ]
+      }
+    },
+    {
+      "heading": "3.9 通知进度与监测失效需求",
+      "paragraphs": [
+        "站内消息入库不是人已阅读，也不是患者同意或任务完成。后台应在空闲时证明数据库轮询仍正常，不能因为近期没有实际投递而报停滞。监测故障本身也必须能够被外部的独立状态读取发现。"
+      ],
+      "table": {
+        "headers": [
+          "项目",
+          "要求与结果"
+        ],
+        "rows": [
+          [
+            "R2-04 心跳",
+            "分别保留轮询观测时间、最近数据库成功时间和最近非空投递时间；超过90秒无有效成功轮询需检查。"
+          ],
+          [
+            "R2-05 到期积压",
+            "只统计 PENDING 且 next_attempt_at 不晚于当前时刻的事件；到期时点取原事件与下次尝试的较晚者，年龄下限为零；未来重试单列。"
+          ],
+          [
+            "R2-06 条件与事件",
+            "状态为 HEALTHY、WARNING、CRITICAL、UNKNOWN；丢失、过期、损坏、外来实例/版本或时钟不一致不能证明健康。相同故障不重复开单，确认不消除条件，连续两次新成功样本才恢复。"
+          ],
+          [
+            "R2-06 私有边界",
+            "仅私有维护命令和文件，不增加业务角色、公开监测接口或自动外部消息；主管只能查看本店业务通知概况，技术账号不因此获得临床资料。"
+          ]
+        ],
+        "widths": [
+          3.2,
+          12.8
+        ]
+      }
+    }
+  ],
+  "design": [
+    {
+      "heading": "4.10 资金证据与设备费用的模块合同",
+      "paragraphs": [
+        "财务模块拥有渠道账户、资金分录、凭据版本、导入批次及匹配决定。前台经办账单收退款凭据，主管经办本店设备凭据和对账建议，财务另行审核；总部获得受控汇总。其他模块通过已定义的操作查询或提交，不直接更改财务记录。",
+        "导入保留原 CSV 字节、解析版本和摘要；确认绑定服务端持有的预览并重新校验。证据更正追加版本，撤销相关当前匹配的有效性，但不覆盖原资金与历史决定。设备费用缺失与零值分别表达，收入、实收、支出和冲回不能混用。"
+      ]
+    },
+    {
+      "heading": "4.11 请求追踪与安全日志",
+      "paragraphs": [
+        "R2.1 在请求入口生成服务器编号并返回 X-Request-ID，错误页与应用、Gunicorn、网关日志关联。客户端不能指定编号；编号不是操作成功证明、幂等键或访问权限。",
+        "日志采用有限事件和字段白名单，不格式化任意异常、SQL参数、请求正文、患者身份或CSV原文。可选日志失败不改变业务成功/拒绝，必要业务审计失败仍回滚。容器日志按容量轮转；七天按时删除与独立受保护收集尚未完成。"
+      ]
+    },
+    {
+      "heading": "4.12 通知心跳与私有条件监测",
+      "paragraphs": [
+        "worker 仍通过原来的短事务、SKIP LOCKED 和事件/授权唯一性处理站内消息。数据库轮询完成后才更新成功心跳；心跳写入失败不重做已提交业务。实例、源码、进程轮次、递增序号和时钟共同约束观测身份。",
+        "独立 collector 每30秒采样，只读数据库聚合与心跳，并观察内部Web就绪和运行卷空间。worker 心跳卷由 worker 写、collector 只读；监测卷由 collector 写，Web 容器只读以供私有状态命令使用。不挂载 Docker socket，不增加公网端口。",
+        "独立 reader 不依赖数据库和 collector 仍在运行；超过90秒无新有效观测时返回 UNKNOWN。故障按目标和条件归并；确认仅保留维护责任代码，不能提前恢复。监测状态使用0700目录与0600文件、限长解析、校验摘要和原子替换；损坏记录保留待受控重置。"
+      ]
+    },
+    {
+      "heading": "4.13 状态和存储的边界",
+      "paragraphs": [
+        "运营监测文件不是不可变财务审计，也不是独立备份；摘要用于发现损坏，不能证明文件作者身份。保留最多128个事件生命周期，每个最多16条变化，裁剪只删除已恢复记录并明确累计数量。受控观察重置另保留最多3份先前记录，并从未知状态重新建立观察。",
+        "空间信号反映运行卷所在的Docker Linux文件系统，不等于整台Mac磁盘的独立监控。容器OOM/重启的持续主机侧采集、外部告警、备份新鲜度及24小时观察分别属于后续完整R2验收。"
+      ]
+    }
+  ],
+  "implementation": [
+    {
+      "heading": "5.1 软件与硬件环境",
+      "paragraphs": [
+        "当前开发和演示主机为Mac，实际应用运行在独立Docker Linux容器中，使用PostgreSQL 17、Django、Gunicorn和Nginx。保留原演示数据库卷、配置及v1.0.0-rc.1标签；重置Windows主机的原始业务数据库仍未恢复。",
+        "独立测试使用自己的实例、端口、网络、账号和卷。故障注入只针对这一环境，不对原Mac业务数据注入测试交易。实际依赖版本、源码身份和执行时间由本轮验收记录提供。",
+        "本轮应用源码为 02a9dbc90583fbcad47567e64ae77ae810eca33f；依赖固定为Django 5.2.17、psycopg 3.2.10和Gunicorn 26.2.0。准确应用提交的CI通过；报告文档在独立后续提交同步，运行镜像保留已验收应用身份。"
+      ]
+    },
+    {
+      "heading": "5.2 核心功能实现说明",
+      "paragraphs": [
+        "身份和诊所选择、预约到诊、实际治疗、版本化结算与季度核对继续使用原业务服务。资金凭据、分次收款、退款、设备支出和冲回与独立财务审核衔接；预约意图不自动收费，账单金额不等于实收。",
+        "主管通知概况分别显示已到处理时间、未来重试、终态失败和无收件人事件，不把等待退避的任务算作当前积压。监测状态只供维护责任人读取，不向业务工作台输出跨店队列或内部诊断。"
+      ]
+    },
+    {
+      "heading": "5.3 历史运行界面与当前观察",
+      "paragraphs": [
+        "保留历史v0.7截图作为交互背景，图示不作为R2.2的运行证明。当前验证以真实浏览器、数据库事实及私有故障记录为准；各代结果的时间和范围分别标注。"
+      ]
+    },
+    {
+      "heading": "5.4 测试设计与执行结果",
+      "paragraphs": [
+        "本轮纯规则及源码检查978项、真实PostgreSQL/HTTP/并发回归1,145项通过，未新增数据库迁移。以下结果来自本轮独立五诊所合成演练，源码与验收绑定；全套数量不能自动等同于每个历史用例的逐项覆盖率。",
+        "初次CI发现旧预约搜索验收依赖运行时刻；将候选数量测试固定到次日上午，并新增午夜开始时间边界用例。运行、浏览器和恢复演练源码为ed7e10e，最终应用为02a9dbc；两者仅相差该测试及完整性清单，运行模块和配置字节一致。最终提交重新通过本地完整回归与准确CI，Mac按最终版本验证。",
+        "真实容器在消息事务提交前被终止，未提交消息和尝试次数回滚；在提交后明确到达屏障，再从外部强制终止并核验退出137，重启没有重复消息或重做任务。平稳停止在24.588秒内被观察，提交前强制终止在110.042秒内被识别。确认责任不清除故障，恢复需要两次新的有效成功样本。",
+        "独立数据库核对的合成总收款为50,100.10元，总退款为100.10元。",
+        "患者净资金为50,000.00元；设备支出与冲回各50.05元。",
+        "24条匹配有效、1条因凭据更正保留为需重核，30条外部流水已接受。对账没有改写账单或生成平衡款项。",
+        "日志核对覆盖64类凭据、患者及CSV/引用标记，均未出现；992个请求在应用、Gunicorn和网关间关联。固定启动和停止提示单独分类，原生请求错误和数据库输出保持关闭。完整证据与需求追踪保存在docs/evidence_r22；准确应用CI：https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755。"
+      ],
+      "table": {
+        "headers": [
+          "验证层次",
+          "执行结果与证据边界"
+        ],
+        "widths": [
+          3.2,
+          12.8
+        ],
+        "rows": [
+          [
+            "源码与规则",
+            "978项通过；含私有文件、状态机、严格类型及有界历史。"
+          ],
+          [
+            "真实数据库",
+            "1,145项通过；只读采样、事务、权限和并发回归。"
+          ],
+          [
+            "运行故障",
+            "32项通过；真实终止、DB/监测停机、异常文件、幂等确认与模拟空间。"
+          ],
+          [
+            "真实浏览器",
+            "869项通过：资金流程568、七角色与跨店248、通知/键盘/窄屏53。"
+          ],
+          [
+            "独立资金核对",
+            "20项通过；四类资金、账单、凭据版本、匹配和CSV摘要独立计算。"
+          ],
+          [
+            "安全运行输出",
+            "64类私有标记均未出现；992个请求跨三个处理层关联。"
+          ],
+          [
+            "加密空库恢复",
+            "50个模型及关联全部匹配；2.454秒包含目标准备、恢复和比较；源库不变。"
+          ],
+          [
+            "容量与公网",
+            "本轮不重跑30分钟/24小时。R1五店二十账号、9,000请求及p95 0.337秒属于2026-10-15历史；公网仍等待服务器。"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "5.5 Mac受保护更新与恢复",
+      "paragraphs": [
+        "更新前已验证数据库和原配置的加密备份，准确应用提交CI通过后更新Mac镜像并启动worker与collector。本轮原Mac浏览器仅登录、选身份和授权读取，完成437项断言；未导入测试业务或向原库执行恢复。",
+        "更新后48个原有持久模型及关联摘要、70份原私有配置、原数据库卷及RC标签均保持一致。瞬时登录会话、工作上下文和last_login按只读验收需要排除，不能将此比较表述成整个数据库每个字节不变。",
+        "数据库更新后加密归档已再次解密检查；新运行观测另有加密快照并验证解密，原配置摘要再次比较。六项私有运行条件均为健康，目录0700、文件0600及各容器读写挂载方向已验证。现有数据库日备份不会自动包括新增运行文件。",
+        "独立恢复在全新的空PostgreSQL完成，比较账户、授权、全部业务和关联、凭据版本、CSV原字节和对账历史；临时恢复容器与网络已清理，源库不变。课程报告随后经独立文档提交CI同步，不为文档重启服务。独立公网及原Windows数据恢复仍未完成。"
+      ]
+    },
+    {
+      "heading": "5.6 需求追踪",
+      "paragraphs": [
+        "R2-04—06连接到R2-A03/04/05/06/09及新增规则、真实PostgreSQL和隔离进程验证；R2-A10/12继续保护权限及原Mac交付。R2-A11的等价容量重复与24小时观察留在R2.4，R2-A07/08的持续恢复新鲜度留在R2.3。"
+      ],
+      "table": {
+        "headers": [
+          "需求",
+          "实现与直接验证"
+        ],
+        "widths": [
+          3.2,
+          12.8
+        ],
+        "rows": [
+          [
+            "R2-04 心跳",
+            "worker受控循环及私有文件；空闲、停机、提交前回滚和提交后回执丢失。"
+          ],
+          [
+            "R2-05 积压",
+            "只读可重复读查询；到期和未来重试分开、终态失败及无收件人分开。"
+          ],
+          [
+            "R2-06 状态",
+            "六条件、四状态、有界历史、幂等确认、两次新成功恢复、独立读取。"
+          ],
+          [
+            "R2-A10 权限",
+            "保留七工作台；主管只能看本店业务概况；无公共监测地址。"
+          ],
+          [
+            "R2-A12 交付",
+            "准确应用提交CI、加密保护、数据/配置比较、原Mac只读验收。"
+          ],
+          [
+            "后续门槛",
+            "R2.3恢复新鲜度、R2.4长时容量与故障/安全演练另行执行。"
+          ]
+        ]
+      }
+    }
+  ],
+  "conclusion": [
+    {
+      "heading": "6.1 阶段工作总结",
+      "paragraphs": [
+        "系统在原预约、接诊和结算基础上，已形成受控资金证据、逐笔对账、设备维护与通知协调的衔接。R2.1使失败请求可以被安全定位；R2.2进一步明确通知进度、到期积压和监测自身失效，使“没有消息”和“后台不工作”能够被区分。",
+        "需求分析把业务问题转为可观察的不变量；模块合同把财务、诊疗、排班与运行状态的责任分开；数据库与浏览器证据检查实际结果，独立恢复检查保留下来的事实。测试数量不代表覆盖率、临床有效性或大型商业部署能力。"
+      ]
+    },
+    {
+      "heading": "6.2 不足与后续工作",
+      "paragraphs": [
+        "继续按R2.3恢复点新鲜度、R2.4完整本地运行保障、R2.5独立公网验收推进；之后依次细化R3多次治疗连续性、R4椅位/房间/设备资源协调、R5二十诊所代表性负载。云端仍等待服务器资料，不以Mac演示或自签名证书代替实际公网验收。"
+      ],
+      "table": {
+        "headers": [
+          "项目",
+          "要求与结果"
+        ],
+        "rows": [
+          [
+            "R2.3",
+            "分别记录备份创建、已验证异地下载与独立恢复；保持原始源时间及现有UTC保留规则。"
+          ],
+          [
+            "R2.4",
+            "完成安全差距复核、主机侧事件采集、故障手册、等价负载及24小时本地观察。"
+          ],
+          [
+            "R2.5",
+            "独立HTTPS主机、国内无代理访问、Mac离线、服务器/worker重启、证书续期与云端恢复。"
+          ],
+          [
+            "R3—R5",
+            "跨次治疗计划与随访；维护和多资源排班；二十诊所代表性容量与独立运行界限。"
+          ]
+        ],
+        "widths": [
+          3.2,
+          12.8
+        ]
+      }
+    }
+  ],
+  "mind_maps": {
+    "1": "案例事实 → 连锁协作问题 → 统一业务事实 → 岗位与范围 → 可观察目标 → 合成数据与验收边界。",
+    "2": "需求可追踪 → 用例与模型 → 模块化单体 → 事务与信息隐藏 → 只读观察 → 分层证据与可恢复性。",
+    "3": "患者服务 → 到诊与实际治疗 → 结算与资金证据；排班 → 明确协调 → 责任任务 → 站内消息；运营 → 到期积压 → 私有故障责任。",
+    "4": "受控业务接口 → 数据库事务 → 历史事实；已提交通知 → 独立心跳 → 聚合采样 → 私有状态 → 独立读取与责任确认。",
+    "5": "测试目标 → 隔离正常/异常场景 → PostgreSQL/进程/浏览器 → 独立业务核算 → 加密恢复 → 准确版本CI → 原Mac受保护更新。",
+    "6": "当前闭环 → 明确尚缺 → 恢复新鲜度 → 完整本地运行 → 独立公网 → 连续治疗 → 资源协调 → 有证据的规模扩展。"
+  },
+  "extra_references": [
+    "[16] GOOGLE. The Site Reliability Workbook Monitoring[EB/OL]. https://sre.google/workbook/monitoring/（访问日期2026-10-18）.",
+    "[17] OWASP FOUNDATION. Application Security Verification Standard 5.0.0[EB/OL]. https://owasp.org/projects/asvs（访问日期2026-10-18）.",
+    "[18] POSTGRESQL GLOBAL DEVELOPMENT GROUP. PostgreSQL 17 SET TRANSACTION[EB/OL]. https://www.postgresql.org/docs/17/sql-set-transaction.html（访问日期2026-10-18）.",
+    "[19] DJANGO SOFTWARE FOUNDATION. Database Functions Greatest Django 5.2[EB/OL]. https://docs.djangoproject.com/en/5.2/ref/models/database-functions/（访问日期2026-10-18）.",
+    "[20] ADC PROJECT. R1 financial evidence and R2.1 executed acceptance[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/tree/main/docs（历史执行日期分别为2026-10-15、2026-10-18）.",
+    "[21] ADC PROJECT. R2.2 implementation contract and executed evidence[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/tree/main/docs/evidence_r22（实际执行结果以发布记录为准）.",
+    "[22] Zhang Jialiang. ADC R2.2 application 02a9dbc and exact-commit CI[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755. 2026-10-18."
+  ],
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755"
 }

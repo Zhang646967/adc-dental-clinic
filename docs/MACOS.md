@@ -3,10 +3,10 @@
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh
 synthetic demo → continue development on `main`.
 
-Current documentation, 2026-10-18: [R2.1 delivery and next-stage report](current_report/README.md).
-The application is now R2.1 safe diagnosis at `ccdcdcd`, retaining R1 financial
+Current documentation, 2026-10-18: [R2.2 delivery and course-format report](current_report/README.md).
+The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
 evidence. [Mac delivery](evidence_r21/delivery.json) verifies original data and
-configuration. R2.2 observation is next in [the R2 contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
+configuration. R2.3 recovery freshness is next in [the R2 contract](R2_OPERATIONAL_ASSURANCE_PLAN.md).
 The migration instructions and dated evidence below retain their original scope.
 
 ## Source baseline
@@ -114,3 +114,17 @@ legacy summaries before and after schema migration and does not seed or reset
 accounts. This path has not been exercised with a Windows backup during this
 migration, because none was supplied. Independent recovery remains open; G3
 browser acceptance is separately recorded and does not imply backup recovery.
+
+## Private operational status — R2.2
+
+Run `./RC_MACOS.sh operations` from this instance. Codes are HEALTHY 0, WARNING 1,
+CRITICAL 2 and UNKNOWN 3; inspect individual conditions. A business health check
+does not prove worker or backup health. The collector starts with normal Mac startup.
+See [the private command/reset guide](R22_OPERATIONS_OBSERVATION.md).
+
+The current report companion is synchronized without rebuilding the accepted
+application. A later rebuild changes its source identity: stop the collector and
+follow the explicit archive/reset procedure, then require fresh samples. Preserve
+known faults; do not copy old observations as current health. Operations files have
+a separate encrypted delivery snapshot and are not included automatically in the
+existing database-only daily backup. All backup keys/credentials stay private.

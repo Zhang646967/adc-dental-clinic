@@ -1,0 +1,108 @@
+{
+  "requirements": [
+    {
+      "id": "R2-04",
+      "behavior": "Idle progress, observed/DB/delivery separation; no replay on interruption",
+      "tests": [
+        "checks/test_operations.py:OperationPolicies",
+        "tests/test_operations_observation.py:test_idle_has_current_db_success_without_any_delivery",
+        "tests/test_operations_observation.py:test_delivery_heartbeat_written_after_inbox_commit",
+        "tests/test_operations_observation.py:test_optional_heartbeat_lock_io_failure_does_not_block_delivery"
+      ],
+      "runtime_checks": [
+        "identified idle worker is healthy without recent delivery",
+        "actual operational files are owner only",
+        "web has no Docker socket or published operational port",
+        "operations has no Docker socket or published operational port",
+        "notification-worker has no Docker socket or published operational port",
+        "graceful worker stop observed",
+        "idle worker restarts with fresh successful loops",
+        "worker reached uncommitted inbox transaction barrier",
+        "forced precommit kill rolls back inbox and attempt",
+        "forced worker stop detected within 120 seconds",
+        "restart commits one message per original grant",
+        "postcommit kill has positive barrier and engine exit 137",
+        "lost postcommit receipt retains committed inbox and outcome",
+        "restart after committed receipt loss has no duplicate or task replay"
+      ],
+      "status": "LOCAL_PASSED"
+    },
+    {
+      "id": "R2-05",
+      "behavior": "Due based on later event/retry time; future, failed and no-recipient states separate",
+      "tests": [
+        "tests/test_operations_observation.py:test_future_retry_is_pending_but_not_due",
+        "tests/test_operations_observation.py:test_due_age_uses_later_retry_not_original_event",
+        "tests/test_operations_observation.py:test_sampling_selects_only_aggregate_columns",
+        "tests/test_operations_observation.py:test_manager_cannot_see_foreign_clinic_backlog"
+      ],
+      "browser_assertions": 53,
+      "status": "LOCAL_PASSED"
+    },
+    {
+      "id": "R2-06",
+      "behavior": "Unknown observer, deduplicated incidents, responsibility acknowledgement, two-sample recovery, bounded private storage",
+      "tests": [
+        "checks/test_operations.py:test_stopped_observer_independent_reader_unknown",
+        "checks/test_operations.py:test_acknowledgement_not_recovery_or_freshness",
+        "checks/test_operations.py:test_incident_retention_bounded_without_removing_active",
+        "checks/test_operations.py:test_single_writer_lock",
+        "tests/test_operations_observation.py:test_status_reader_does_not_need_database"
+      ],
+      "runtime_checks": [
+        "acknowledgement is idempotent and does not clear fault",
+        "authorized retry resolves notice without replaying task",
+        "database outage is not reported as empty healthy backlog",
+        "database outage health is safe 503 with server reference",
+        "stopped observer detected without database access",
+        "database and observer recover through new good samples",
+        "duplicate active collector is refused",
+        "corrupt observer record is safely UNKNOWN",
+        "foreign observer record is safely UNKNOWN",
+        "future observer record is safely UNKNOWN",
+        "public-mode observer record is safely UNKNOWN",
+        "simulated low storage opens critical condition",
+        "storage simulation recovers after two real good samples",
+        "all original clinical money equipment and grant facts unchanged",
+        "no duplicate event-grant inbox records",
+        "all five rehearsal services running without OOM"
+      ],
+      "status": "LOCAL_PASSED"
+    },
+    {
+      "id": "R2-A08",
+      "behavior": "Encrypted full-data independent empty-target restore",
+      "evidence": "acceptance.json:restore",
+      "status": "RESTORE_PASSED_FRESHNESS_RECEIPTS_PENDING_R23"
+    },
+    {
+      "id": "R2-A10",
+      "behavior": "Seven roles, five clinics, limited projections; no private monitor web endpoint",
+      "evidence": "acceptance.json:browser",
+      "status": "LOCAL_PASSED"
+    },
+    {
+      "id": "R2-A12",
+      "behavior": "Exact application CI, encrypted protection and original Mac preservation",
+      "evidence": "delivery.json",
+      "status": "DELIVERED_ON_MAC_EXACT_APPLICATION_CI_PASSED"
+    },
+    {
+      "id": "R2-A06",
+      "behavior": "Low-space condition and recovery",
+      "evidence": "acceptance.json:runtime_faults",
+      "status": "R22_LOW_SPACE_PASSED_ROTATION_HISTORICAL_R21"
+    },
+    {
+      "id": "R2-A07",
+      "behavior": "Created/downloaded/restored freshness and corrupt/stale transfer protection",
+      "status": "PENDING_R23"
+    },
+    {
+      "id": "R2-A11",
+      "behavior": "Equivalent capacity repeat and 24-hour observation",
+      "status": "PENDING_R24"
+    }
+  ],
+  "notes": "Named test methods are located by their def name; these links are not a line coverage percentage."
+}

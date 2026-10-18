@@ -1,5 +1,21 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
+## R2.2 progress and condition observation — 2026-10-18
+
+Application `02a9dbc` adds private worker/collector state and independent
+observer-failure detection, preserving all 30 migrations and existing permissions.
+Due work excludes future retry; responsibility acknowledgement does not erase a fault.
+[Executed evidence](docs/evidence_r22/README.md) records 978 source checks,
+1,145 PostgreSQL/HTTP/concurrency tests, 32 live fault checks, 869 isolated browser
+assertions and a 50-model encrypted empty-target restore. [Exact application CI passed](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755).
+Protected Mac delivery preserves 48 durable fingerprints and 70 private files;
+437 authorized-read browser assertions pass. The current report follows the
+supplied university course format: bilingual abstracts, six chapters, original
+models, SU-01—38 and SF-01 appendices, and executed evidence. Frozen RC files remain.
+
+Next is R2.3 recovery freshness. Full R2 load/24-hour/security acceptance and
+independent cloud remain pending; original Windows-data recovery is unresolved.
+
 ## R2.1 diagnosis and logging — 2026-10-18
 
 Server request IDs, safe errors/logs and measured size rotation are implemented.

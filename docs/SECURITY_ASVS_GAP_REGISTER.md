@@ -2,7 +2,7 @@
 
 Business permissions → security requirements → evidence review → targeted repair
 → independent assessment. Baseline date: **2026-10-18**; application commit
-`ccdcdcd1f612d490ec144d70ee5e5a9395959c75` (R2.1; the earlier R1 planning baseline is retained in history).
+`02a9dbc90583fbcad47567e64ae77ae810eca33f` (R2.2; R1/R2.1 evidence is retained in history).
 
 This is a scoped planning register against **OWASP ASVS 5.0.0**, not a completed
 assessment or Level 2 conformity claim. Requirement identifiers are pinned to
@@ -23,13 +23,18 @@ R2.1 update: [safe diagnostics](R21_SAFE_DIAGNOSTICS.md) and
 Those rows move to evidence review, not automatic ASVS passes. Size rotation is
 verified; strict time expiry and separate protected collection remain gaps.
 
+R2.2 update: [private observer evidence](evidence_r22/README.md) adds UTC/monotonic/boot
+checks, bounded private files, source validation, failure visibility and 64-marker
+runtime checks. These support evidence review; they do not complete an ASVS assessment.
+Continuous host events, independent collection and strict time expiry remain gaps.
+
 ## Logging and error assessment
 
 | ASVS 5.0.0 | Topic | Baseline status and evidence | Planned action and acceptance |
 |---|---|---|---|
 | 16.1.1 | Logging inventory | EVIDENCE_TO_REVIEW; R2.1 versioned sink/retention inventory and separate business audit | Inventory all sinks, events, owners, access and bounded retention; R2-A02/A06 |
 | 16.2.1 / 16.2.4 | Useful metadata and correlation | EVIDENCE_TO_REVIEW; R2.1 server context and delayed-framework/parallel/real-proxy checks | Versioned JSON allowlist, server request IDs and cross-request tests; R2-A01 |
-| 16.2.2 | Explicit time basis | EVIDENCE_TO_REVIEW; existing timestamps exist in business/backup records | UTC/offset in operational records; clock skew and stale observer tests |
+| 16.2.2 | Explicit time basis | EVIDENCE_TO_REVIEW; R2.2 worker/collector clocks and stale/foreign/future tests; host clock synchronization still requires target review | UTC/offset in operational records; clock skew and stale observer tests |
 | 16.2.5 | Sensitive data controls | EVIDENCE_TO_REVIEW; aggregate worker output and redacted application errors | Marker-secret checks across gateway/framework/worker/command sinks; R2-A02 |
 | 16.3.1 | Authentication events | EVIDENCE_TO_REVIEW; R2.1 success/failure/logout events omit credentials; complete control scope still needs assessment | Log result/reason code, not entered names/passwords; verify successful and failed paths |
 | 16.3.2 | Authorization denials | EVIDENCE_TO_REVIEW; bounded R2.1 denial events plus existing route/grant checks | Bounded denial codes with no protected target details; R2-A02/A10 |

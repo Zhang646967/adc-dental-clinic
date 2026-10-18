@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755",
+  "original_durable_models_compared": 48,
+  "all_original_durable_fingerprints_match": true,
+  "comparison_exclusions": "Transient sessions/workspaces and last_login; browser only performs login/workspace setup and authorized reads.",
+  "private_configuration_files_preserved": 70,
+  "original_database_volume_preserved": true,
+  "rc_tag_preserved": true,
+  "mac_browser_assertions": 437,
+  "test_business_records_injected_into_original": false,
+  "private_fault_routes_on_original": false,
+  "source_commit_metadata_matches_image": true,
+  "delivered_at_utc": "2026-10-18T14:19:09.580897+00:00",
+  "application_ci_conclusion": "success",
+  "before_after_encrypted_database_backups_verified": true,
+  "original_configuration_encryption_and_before_after_hashes_verified": true,
+  "operational_observation": {
+    "passed": true,
+    "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+    "private_status": "HEALTHY",
+    "all_six_conditions_healthy": true,
+    "status_needs_no_database_query": true,
+    "private_directory_and_file_modes_verified": true,
+    "mounts_read_write": {
+      "web": {
+        "/app/operations/monitor": false
+      },
+      "operations": {
+        "/app/operations/monitor": true,
+        "/app/operations/worker": false
+      },
+      "worker": {
+        "/app/operations/worker": true
+      }
+    },
+    "operations_snapshot_encrypted_and_decryption_verified": true,
+    "operations_snapshot_sha256": "f01888046d64bb858b6bc9f9abd368074cc652deb9cce61eafa9e2b48644f34b",
+    "database_daily_backups_do_not_automatically_include_operations_files": true,
+    "no_fault_injection_or_test_business_on_original": true
+  },
+  "operations_snapshot_is_separate_from_database_backup": true,
+  "external_ai": "unused; local rule/demo mode only",
+  "cloud_acceptance": "NOT_RUN",
+  "windows_original_data_recovery": "unresolved",
+  "documentation_revision": "The report companion is synchronized separately after its exact-commit CI; application source remains the identified application commit."
+}

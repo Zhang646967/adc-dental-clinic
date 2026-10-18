@@ -1,0 +1,440 @@
+{
+  "accepted_at_utc": "2026-10-18T14:09:21.084256+00:00",
+  "passed": true,
+  "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+  "base_commit": "bfb8994d611a9c31a165627c7f8288a3bf3f07eb",
+  "scope": "R2.2 isolated local synthetic acceptance; full R2, cloud and commercial acceptance remain pending.",
+  "application_changes_sha256": {
+    "Dockerfile.production": "cd7cca900452474a53e36278f34fe1c1a1cbda1de5e6380b35bca00cc2d39822",
+    "RC_MACOS.sh": "3c2a66737dc9f5f7e57476264382375b3433edcce02ab0f8b6ae6b217e5186f2",
+    "adc_core/management/commands/observe_operations.py": "0e55dc8ad401a066176d51036c49bf99a6ccef4c30dba202663a5f088fd979aa",
+    "adc_core/management/commands/operations_ack.py": "41fbd5c849b7a50e4f6514686b5674488ad653535944aa716b3dcc602dd51f55",
+    "adc_core/management/commands/operations_reset.py": "fe03cf8232540119c36fc7e671074b5651262db7993ee3833ccd60172a06afd6",
+    "adc_core/management/commands/operations_status.py": "e08eaec9da7f7e51b2d456501f9a7293edc6b5114230b3405b96c801c7e77ae3",
+    "adc_core/operational_logging.py": "f91358484bc31edec75e586fb6d3e868a2c338ffdbc40a5d5a29be71f15ff89d",
+    "adc_core/operations.py": "4514329ca1ca46e623a9bf4bb23b6e7e5415a817b27cdf03fe7afd51865e9233",
+    "adc_core/operations_sampling.py": "46466c8ba6565a0e8bde95c5af25c4695879f7e93ca1fd44493de8445690bf2f",
+    "adc_core/operations_store.py": "5e1bdb6a6b5dae1769590b7fb8ff2d9d3a91ce111f7bae5895f4fab733bd4355",
+    "checks/test_g4_preparation.py": "f42a11195b47e626e5f20ecdebf8fe340d5a004bccd0f306fcbad3b99b05b94a",
+    "checks/test_macos_launcher.py": "861b85d6ed5e52fe38cfe458a7e784394b79113a03240447eeedb7410c437cd3",
+    "checks/test_operations.py": "82a07b74b8a5e4c4f4f059f02670c35614f5816a498b2f071d08c29462dc018f",
+    "compose.rc.yaml": "b681ecd089cceb8f8b4396170b3981b95faff5fa105fceb22a7cd17360c416d9",
+    "deployment/g4/compose.template.yaml": "7776a900159086787b408c9d2f20b8c40bc60c363750f9f2f772d76901d9de54",
+    "manage.py": "919d1381fe3631dcd7d84beb27219714976e77adf6c9f188ebf85b24c654492f",
+    "notifications/management/commands/dispatch_notifications.py": "0f2cfe3d1df528a6994bc2625e65d25ed9e2fa6cdb4e5b0e19eae10abebf9fd8",
+    "notifications/services.py": "32cb5a5b00181a12139ad6351b678cd53f00a689e08ebe331b49344b25b9796e",
+    "scripts/g4_course.py": "a4527645d370201c1bce902c4760b9bb984a338f3013ff19d8fc69167601bafe",
+    "scripts/g4_prepare.py": "9309d6ec1a5e26032cf1869a5bda43847ffd3c5ff59e3c126c2aa9743f0cce29",
+    "templates/notifications/status.html": "fd86af313795a5fbade1dc0fce00b3bbcff73658494c72d4b6c229986530dcd9",
+    "tests/test_operations_observation.py": "1d010e82e82276ef9d2b4cce3fa30abaa5f38ce1deb5859abf615c207d08505b",
+    "tests/test_reschedule_optimization.py": "210fb1edc978d10b837249577e6b6c3308a1f9ef4ed488779b72f83866ab392b"
+  },
+  "project_migrations_preserved": 30,
+  "new_migrations": 0,
+  "regression": {
+    "source_checks": 978,
+    "postgresql_http_concurrency_tests": 1145,
+    "new_source_rule_methods": 60,
+    "new_postgresql_methods": 26,
+    "full_isolated_gate_exit": 0,
+    "cleanup_exit": 0,
+    "final_gate": "gate-6, full real PostgreSQL/source/HTTP/concurrency and cleanup passed"
+  },
+  "runtime_faults": {
+    "passed": true,
+    "application_commit": "ed7e10e97fe80a3e8a51f74e59ffa6ba84e017d1",
+    "checks": [
+      {
+        "name": "identified idle worker is healthy without recent delivery",
+        "passed": true
+      },
+      {
+        "name": "actual operational files are owner only",
+        "passed": true
+      },
+      {
+        "name": "web has no Docker socket or published operational port",
+        "passed": true
+      },
+      {
+        "name": "operations has no Docker socket or published operational port",
+        "passed": true
+      },
+      {
+        "name": "notification-worker has no Docker socket or published operational port",
+        "passed": true
+      },
+      {
+        "name": "graceful worker stop observed",
+        "passed": true,
+        "seconds": 24.588
+      },
+      {
+        "name": "idle worker restarts with fresh successful loops",
+        "passed": true
+      },
+      {
+        "name": "worker reached uncommitted inbox transaction barrier",
+        "passed": true
+      },
+      {
+        "name": "forced precommit kill rolls back inbox and attempt",
+        "passed": true
+      },
+      {
+        "name": "forced worker stop detected within 120 seconds",
+        "passed": true,
+        "seconds": 110.042
+      },
+      {
+        "name": "restart commits one message per original grant",
+        "passed": true
+      },
+      {
+        "name": "postcommit kill has positive barrier and engine exit 137",
+        "passed": true
+      },
+      {
+        "name": "lost postcommit receipt retains committed inbox and outcome",
+        "passed": true
+      },
+      {
+        "name": "restart after committed receipt loss has no duplicate or task replay",
+        "passed": true
+      },
+      {
+        "name": "future retry excluded and effective due time used",
+        "passed": true
+      },
+      {
+        "name": "terminal failed and no-recipient states remain separate",
+        "passed": true
+      },
+      {
+        "name": "acknowledgement is idempotent and does not clear fault",
+        "passed": true
+      },
+      {
+        "name": "authorized retry resolves notice without replaying task",
+        "passed": true
+      },
+      {
+        "name": "database outage is not reported as empty healthy backlog",
+        "passed": true
+      },
+      {
+        "name": "database outage health is safe 503 with server reference",
+        "passed": true
+      },
+      {
+        "name": "stopped observer detected without database access",
+        "passed": true
+      },
+      {
+        "name": "database and observer recover through new good samples",
+        "passed": true
+      },
+      {
+        "name": "duplicate active collector is refused",
+        "passed": true
+      },
+      {
+        "name": "corrupt observer record is safely UNKNOWN",
+        "passed": true
+      },
+      {
+        "name": "foreign observer record is safely UNKNOWN",
+        "passed": true
+      },
+      {
+        "name": "future observer record is safely UNKNOWN",
+        "passed": true
+      },
+      {
+        "name": "public-mode observer record is safely UNKNOWN",
+        "passed": true
+      },
+      {
+        "name": "simulated low storage opens critical condition",
+        "passed": true
+      },
+      {
+        "name": "storage simulation recovers after two real good samples",
+        "passed": true
+      },
+      {
+        "name": "all original clinical money equipment and grant facts unchanged",
+        "passed": true,
+        "models": 32
+      },
+      {
+        "name": "no duplicate event-grant inbox records",
+        "passed": true
+      },
+      {
+        "name": "all five rehearsal services running without OOM",
+        "passed": true
+      }
+    ],
+    "scope": "Identified independent five-clinic synthetic rehearsal; original Mac and G4 untouched.",
+    "signal_cli_control": "PID 1 self-SIGKILL was not effective; failed attempts are preserved. Final injection uses an external Docker KILL after a positive commit barrier and checks engine ExitCode 137.",
+    "completed_at_utc": "2026-10-18T13:55:46.069975+00:00"
+  },
+  "browser": {
+    "business": {
+      "passed": true,
+      "assertions": 568
+    },
+    "isolation": {
+      "passed": true,
+      "assertions": 248
+    },
+    "notifications": {
+      "passed": true,
+      "assertions": 53
+    }
+  },
+  "browser_assertions": 869,
+  "runtime_privacy": {
+    "passed": true,
+    "application_commit": "ed7e10e97fe80a3e8a51f74e59ffa6ba84e017d1",
+    "services": {
+      "web": {
+        "log_events": 2313,
+        "private_marker_found": false,
+        "oom": false,
+        "logging": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "mounts_read_write": {
+          "/app/operations/monitor": false
+        }
+      },
+      "gateway": {
+        "log_events": 1551,
+        "private_marker_found": false,
+        "oom": false,
+        "logging": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "mounts_read_write": {}
+      },
+      "notification-worker": {
+        "log_events": 156,
+        "private_marker_found": false,
+        "oom": false,
+        "logging": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "mounts_read_write": {
+          "/app/operations/worker": true
+        }
+      },
+      "operations": {
+        "log_events": 49,
+        "private_marker_found": false,
+        "oom": false,
+        "logging": {
+          "Type": "local",
+          "Config": {
+            "compress": "true",
+            "max-file": "3",
+            "max-size": "10m"
+          }
+        },
+        "mounts_read_write": {
+          "/app/operations/monitor": true,
+          "/app/operations/worker": false
+        }
+      },
+      "db": {
+        "log_events": 0,
+        "private_marker_found": false,
+        "oom": false,
+        "logging": {
+          "Type": "none",
+          "Config": {}
+        },
+        "mounts_read_write": {}
+      }
+    },
+    "credential_patient_csv_reference_markers_checked": 64,
+    "requests_correlated_across_three_services": 992,
+    "operational_log_payload_sha256": "a5db07c062903194412da9ee3e98a125859c9a9046b9599cb59f8caf82ee5a33",
+    "operational_mount_ownership_enforced": true,
+    "private_status_has_no_business_values": true,
+    "native_database_capture_disabled": true
+  },
+  "business_financial_oracle": {
+    "passed": true,
+    "assertions": 20,
+    "checks": [
+      {
+        "name": "Four exact independent cash legs clinic 1",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 2",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 3",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 4",
+        "passed": true
+      },
+      {
+        "name": "Four exact independent cash legs clinic 5",
+        "passed": true
+      },
+      {
+        "name": "No pending or self-reviewed money",
+        "passed": true
+      },
+      {
+        "name": "Invoice facts unchanged",
+        "passed": true
+      },
+      {
+        "name": "Matching and stale history retained",
+        "passed": true
+      },
+      {
+        "name": "No self-reviewed match",
+        "passed": true
+      },
+      {
+        "name": "Original and appended evidence retained",
+        "passed": true
+      },
+      {
+        "name": "Malformed CSV creates no accepted lines",
+        "passed": true
+      },
+      {
+        "name": "Internal handover remains separately stale",
+        "passed": true
+      },
+      {
+        "name": "Maintenance ownership retained",
+        "passed": true
+      },
+      {
+        "name": "Equipment state retained",
+        "passed": true
+      },
+      {
+        "name": "No cross-account source rows",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 1",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 2",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 3",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 4",
+        "passed": true
+      },
+      {
+        "name": "Original CSV digest retained 5",
+        "passed": true
+      }
+    ],
+    "gross_receipts_cny": "50100.10",
+    "gross_refunds_cny": "100.10",
+    "net_patient_cash_cny": "50000.00",
+    "equipment_expenses_cny": "50.05",
+    "equipment_reversals_cny": "50.05",
+    "new_posted_cash": 25,
+    "confirmed_matches": 24,
+    "stale_matches": 1,
+    "accepted_statement_lines": 30
+  },
+  "restore": {
+    "passed": true,
+    "source_project": "adc_rc1_4cfef2635cfd",
+    "source_database_modified": false,
+    "new_empty_target": true,
+    "published_cash_and_equipment_included": true,
+    "raw_csv_and_normalized_rows_included": true,
+    "source_images_pinned_by_id": true,
+    "models_and_associations_compared": 50,
+    "all_model_fingerprints_match": true,
+    "restore_and_compare_seconds": 2.454,
+    "encrypted_backup_sha256": "dd29bd49f215dd49a0b6da4069bf654ee49a54fa99859656ca434fd2931f3734",
+    "cleanup": "temporary restore container and network removed; source volume retained"
+  },
+  "cleanup": {
+    "passed": true,
+    "only_identified_rehearsal_stopped": true,
+    "business_and_operations_volumes_retained": true,
+    "test_triggers_functions_and_control_container_absent": true,
+    "temporary_restore_target_and_network_removed": true,
+    "original_Mac_and_G4_not_cleaned": true
+  },
+  "new_30_minute_load_run": false,
+  "new_24_hour_observation": false,
+  "external_alert_delivery": false,
+  "live_fault_business_projection_models_compared": 32,
+  "execution_notes": [
+    "Final postcommit injection used an external Docker KILL after a positive commit barrier and verified engine exit 137. Earlier unsuccessful harness attempts remain private; PID 1 self-SIGKILL was not accepted as a successful fault.",
+    "No test fault routes or permanent database triggers/functions were added. Browser actor/phase setup and container stdin were corrected in private test tooling.",
+    "Fixed Nginx main-process startup notices and the fixed worker stop notice are classified separately from request events. Native request-error output and database capture remain disabled.",
+    "Initial exact CI failed at a legacy row-cap test after 22:00 Asia/Shanghai because the selected-day search correctly returned 27 rows before midnight. The test now uses an explicit future morning; a new 23:30 boundary test proves day-end semantics. Runtime modules/configuration are unchanged. The final commit passed the complete 1145-test local gate; its CI and Mac outcome are separate delivery evidence."
+  ],
+  "rollout_checkpoint": {
+    "application_ci": "PENDING_AT_LOCAL_ACCEPTANCE",
+    "Mac": "PENDING_AT_LOCAL_ACCEPTANCE",
+    "actual_follow_up": "delivery.json"
+  },
+  "cloud_acceptance": "NOT_RUN",
+  "windows_original_data_recovery": "unresolved",
+  "initial_local_acceptance_at_utc": "2026-10-18T14:00:05.732020+00:00",
+  "runtime_browser_restore_executed_commit": "ed7e10e97fe80a3e8a51f74e59ffa6ba84e017d1",
+  "application_equivalence": {
+    "initial_runtime_commit": "ed7e10e97fe80a3e8a51f74e59ffa6ba84e017d1",
+    "final_application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+    "only_changed_files": [
+      "CHECKSUMS.sha256",
+      "UPDATE_MANIFEST.json",
+      "tests/test_reschedule_optimization.py"
+    ],
+    "initial_22_tested_source_files_byte_identical": true,
+    "existing_runtime_module_configuration_templates_and_commands_unchanged": true,
+    "reason": "Initial CI exposed a time-of-day-dependent candidate-cap fixture. Fix uses explicit future morning slots and adds selected-day midnight-boundary coverage; runtime search is unchanged.",
+    "initial_failed_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39133923207"
+  },
+  "initial_regression": {
+    "source_checks": 978,
+    "postgresql_http_concurrency_tests": 1144,
+    "new_source_rule_methods": 60,
+    "new_postgresql_methods": 25,
+    "full_isolated_gate_exit": 0,
+    "cleanup_exit": 0
+  }
+}

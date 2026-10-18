@@ -1,141 +1,325 @@
-"""Build the current report from its reviewed JSON source using python-docx.
+"""Rebuild the current course report using retained model/specification source.
 
-Run in a writable checkout with an explicitly selected Python environment.
-PDF export/rendering is a separate verified LibreOffice step, documented in README.
-No database, credentials, web service or host runtime is touched.
+The frozen RC1 file is never modified. Supplied PDF format is recorded by digest.
+Run with python-docx in an explicitly selected document runtime; PDF export is
+separate. --folder supplies editable report_source.json and optional toc_pages.json.
 """
 from pathlib import Path
-import argparse
-import json
+from copy import deepcopy
+import argparse,hashlib,json,re
 from docx import Document
-from docx.enum.table import WD_ALIGN_VERTICAL
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Cm,Pt,RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH,WD_BREAK
+from docx.enum.section import WD_SECTION_START
+from docx.enum.table import WD_TABLE_ALIGNMENT,WD_CELL_VERTICAL_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt, RGBColor
+
+SERIF='Noto Serif CJK SC';SANS='Noto Sans CJK SC';LATIN='Liberation Serif'
+
+def font(run,size=12,bold=None,family=SERIF):
+ run.font.name=LATIN;run.font.size=Pt(size);run.font.color.rgb=RGBColor(0,0,0)
+ if bold is not None:run.bold=bold
+ pr=run._element.get_or_add_rPr();f=pr.find(qn('w:rFonts'))
+ if f is None:f=OxmlElement('w:rFonts');pr.insert(0,f)
+ for key,val in [('eastAsia',family),('ascii',LATIN),('hAnsi',LATIN)]:f.set(qn('w:'+key),val)
+ for key in ('position','vertAlign'):
+  for old in list(pr.findall(qn('w:'+key))):pr.remove(old)
+
+def style(st,size,bold=False,family=SERIF):
+ st.font.name=LATIN;st.font.size=Pt(size);st.font.bold=bold;st.font.color.rgb=RGBColor(0,0,0)
+ pr=st.element.get_or_add_rPr();f=pr.find(qn('w:rFonts'))
+ if f is None:f=OxmlElement('w:rFonts');pr.insert(0,f)
+ for key,val in [('eastAsia',family),('ascii',LATIN),('hAnsi',LATIN)]:f.set(qn('w:'+key),val)
 
 
-def font(style, size):
-    style.font.name = 'Arial'
-    style.font.size = Pt(size)
-    style.font.color.rgb = RGBColor(0, 0, 0)
-    rpr = style.element.get_or_add_rPr()
-    fonts = rpr.find(qn('w:rFonts'))
-    if fonts is None:
-        fonts = OxmlElement('w:rFonts')
-        rpr.insert(0, fonts)
-    for attr, value in [('ascii', 'Arial'), ('hAnsi', 'Arial'), ('eastAsia', 'PingFang SC')]:
-        fonts.set(qn('w:' + attr), value)
+def build(folder,repo):
+ source=json.loads((folder/'report_source.json').read_text());base=repo/'docs/release_report/Report_R5_RC1.docx'
+ assert hashlib.sha256(base.read_bytes()).hexdigest()==source['frozen_docx_sha256']
+ D=Document(base);paras=list(D.paragraphs);children=list(D._element.body);positions={id(p._p):children.index(p._p) for p in paras}
+ def frozen(a,b):return [deepcopy(x) for x in children[positions[id(paras[a]._p)]:positions[id(paras[b]._p)]] if x.tag!=qn('w:sectPr')]
+ legacy={key:frozen(a,b) for key,a,b in [('business',50,86),('system',86,118),('design',118,164),('screens',178,185)]}
+ old_goal=deepcopy(D.tables[0]._tbl);old_roles=deepcopy(D.tables[1]._tbl);old_assumptions=deepcopy(D.tables[2]._tbl)
+ # The current application has separate HQ and finance workspaces.
+ from docx.table import Table
+ role_view=Table(old_roles,D._body)
+ for row in list(role_view.rows):
+  if '总部' in row.cells[0].text and '财务' in row.cells[0].text:
+   copy_row=deepcopy(row._tr);row._tr.addnext(copy_row)
+   for cell,value in zip(row.cells,['总部','全链汇总、季度核对与设备查阅','只读汇总；不代办财务写入或审核']):cell.text=value
+   finance_row=next(r for r in Table(old_roles,D._body).rows if r._tr is copy_row)
+   for cell,value in zip(finance_row.cells,['财务','渠道账户、成本、资金及匹配复核','经授权办理；不同账号独立复核']):cell.text=value
+ old_refs=[p.text for p in paras[197:212]]
+ uc=[]
+ for a,p in enumerate(paras):
+  if p.style.name=='Heading 3' and re.match(r'(SU-\d+|SF-01)',p.text):
+   b=next((j for j in range(a+1,len(paras)) if paras[j].style.name.startswith('Heading') and paras[j].text.strip()),len(paras))
+   uc.append((p.text,[x.text for x in paras[a+1:b] if x.text.strip()]))
+ for child in list(D._element.body):
+  if child.tag!=qn('w:sectPr'):D._element.body.remove(child)
+ # Retained drawings keep their actual package relationships; section furniture is rebuilt.
+ sec=D.sections[0];sec.page_width=Cm(21);sec.page_height=Cm(29.7)
+ sec.left_margin=Cm(3);sec.right_margin=Cm(2);sec.top_margin=Cm(2.5);sec.bottom_margin=Cm(2.3)
+ sec.header_distance=Cm(1.3);sec.footer_distance=Cm(1.2)
+ for name,size,bold,family in [('Normal',12,False,SERIF),('Title',22,True,SERIF),('Subtitle',14,False,SERIF),('Heading 1',16,True,SANS),('Heading 2',14,True,SANS),('Heading 3',12,True,SANS),('Caption',10.5,False,SERIF)]:style(D.styles[name],size,bold,family)
+ for st in D.styles:
+  for rule in list(st.element.iter(qn('w:pBdr'))):rule.getparent().remove(rule)
+ normal=D.styles['Normal'].paragraph_format;normal.line_spacing=Pt(22);normal.space_after=Pt(0);normal.space_before=Pt(0);normal.first_line_indent=Pt(24);normal.widow_control=True
+ for name in ('Heading 1','Heading 2','Heading 3'):
+  pf=D.styles[name].paragraph_format;pf.first_line_indent=Pt(0);pf.line_spacing=1.25;pf.space_before=Pt(12);pf.space_after=Pt(8);pf.keep_with_next=True;pf.page_break_before=False
+ D.styles['Heading 1'].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
+ D.styles['Caption'].paragraph_format.first_line_indent=Pt(0)
+ D.core_properties.title=source['title'];D.core_properties.subject=source['version'];D.core_properties.author=source['author']['name'];D.core_properties.keywords='系统分析与设计 R2.2 财务 设备 通知监测 合成数据'
+ next_page=[False]
+ toc=[];markdown=['# '+source['title'],'',source['version']+' '+source['date'],'']
+ def p(text='',size=12,bold=False,center=False,indent=True,space=0):
+  x=D.add_paragraph();font(x.add_run(text),size,bold)
+  x.paragraph_format.space_after=Pt(space)
+  if not text and size==1:x.paragraph_format.line_spacing=Pt(1);x.paragraph_format.space_before=Pt(0);x.paragraph_format.space_after=Pt(0)
+  if size>18:x.paragraph_format.line_spacing=1.15
+  if not indent:x.paragraph_format.first_line_indent=Pt(0)
+  if re.match(r'^表[A-Za-z]?[0-9]+-[0-9]+',text):x.paragraph_format.keep_with_next=True
+  if center:x.alignment=WD_ALIGN_PARAGRAPH.CENTER;x.paragraph_format.first_line_indent=Pt(0)
+  markdown.extend([text,'']);return x
+ def heading(text,level=2,add_toc=True):
+  x=D.add_heading(text,level)
+  if next_page[0]:x.paragraph_format.page_break_before=True;next_page[0]=False
+  font(x.runs[0],{1:16,2:14,3:12}[level],True,SANS)
+  if add_toc and level<3:toc.append((text,level))
+  markdown.extend(['#'*(level+1)+' '+text,'']);return x
+ def table(headers,rows,widths=None):
+  if headers[0]=='标题':
+   # Preserve every character, while giving long fields explicit continuation rows.
+   bounded=[]
+   for label,value in rows:
+    chunks=[];remaining=str(value)
+    while len(remaining)>900:
+     stop=remaining.rfind('\n',0,900)
+     if stop<450:stop=remaining.rfind('。',0,900)
+     take=stop+1 if stop>=450 else 900
+     chunks.append(remaining[:take]);remaining=remaining[take:]
+    chunks.append(remaining);assert ''.join(chunks)==str(value)
+    for n,chunk in enumerate(chunks):bounded.append([label if n==0 else label+'（续'+str(n)+'）',chunk])
+   rows=bounded
+  if headers[0]=='标题':
+   case=rows[0][1];number=int(case[3:5]) if case.startswith('SU-') else 26;label='A' if case.startswith('SF-') or number<=25 else 'B';ordinal=number if label=='A' else number-25
+   cap=p('表'+label+'-'+str(ordinal)+' '+case+'用例规约',10.5,False,True);cap.paragraph_format.keep_with_next=True
+  widths=widths or [3.2,12.8];t=D.add_table(rows=1,cols=len(headers));t.alignment=WD_TABLE_ALIGNMENT.CENTER;t.autofit=False
+  for col,w in zip(t.columns,widths):col.width=Cm(w)
+  for i,values in enumerate([headers,*rows]):
+   row=t.rows[0] if i==0 else t.add_row();pr=row._tr.get_or_add_trPr();pr.append(OxmlElement('w:cantSplit'))
+   if i==0:pr.append(OxmlElement('w:tblHeader'))
+   for j,(c,text) in enumerate(zip(row.cells,values)):
+    c.width=Cm(widths[j]);c.vertical_alignment=WD_CELL_VERTICAL_ALIGNMENT.CENTER
+    cp=c._tc.get_or_add_tcPr();borders=OxmlElement('w:tcBorders')
+    for edge in ('top','bottom','left','right'):
+     e=OxmlElement('w:'+edge)
+     for key,val in [('val','single'),('sz','4'),('color','D9D9D9')]:e.set(qn('w:'+key),val)
+     borders.append(e)
+    cp.append(borders);m=OxmlElement('w:tcMar')
+    for edge in ('top','bottom','left','right'):
+     e=OxmlElement('w:'+edge);e.set(qn('w:w'),'85' if edge in ('top','bottom') else '95');e.set(qn('w:type'),'dxa');m.append(e)
+    cp.append(m)
+    if i==0:s=OxmlElement('w:shd');s.set(qn('w:fill'),'F2F2F2');cp.append(s)
+    pp=c.paragraphs[0];pp.paragraph_format.first_line_indent=Pt(0);pp.paragraph_format.line_spacing=Pt(15.5);pp.paragraph_format.space_after=Pt(0)
+    pp.paragraph_format.keep_with_next=(i==0)
+    font(pp.add_run(str(text)),10.5,i==0)
+  p('',size=1,indent=False)
+  markdown.extend(['| '+' | '.join(headers)+' |','| '+' | '.join('---' for _ in headers)+' |'])
+  markdown.extend('| '+' | '.join(str(v).replace('\n',' / ').replace('|','/') for v in row)+' |' for row in rows);markdown.append('')
+  return t
+ def add(spec):
+  heading(spec['heading'])
+  for text in spec.get('paragraphs',[]):p(text)
+  if spec.get('table'):
+   v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
+   p(label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
+ def mind(n):p('思维导图  '+source['mind_maps'][str(n)],size=10.5,indent=False,space=6)
+ def page():next_page[0]=True
+ def furniture(section,front=False):
+  section.header.is_linked_to_previous=False;section.footer.is_linked_to_previous=False
+  section.different_first_page_header_footer=False
+  hp=section.header.paragraphs[0];hp.clear();hp.paragraph_format.first_line_indent=Pt(0);hp.paragraph_format.tab_stops.clear_all();hp.paragraph_format.tab_stops.add_tab_stop(Cm(16),WD_ALIGN_PARAGRAPH.RIGHT)
+  font(hp.add_run('中南大学 · 系统分析与设计\tADC 牙科连锁运营管理系统'),9)
+  pr=hp._p.get_or_add_pPr();border=OxmlElement('w:pBdr');bottom=OxmlElement('w:bottom');bottom.set(qn('w:val'),'single');bottom.set(qn('w:sz'),'4');bottom.set(qn('w:space'),'6');border.append(bottom);pr.append(border)
+  fp=section.footer.paragraphs[0];fp.clear();fp.alignment=WD_ALIGN_PARAGRAPH.CENTER;fp.paragraph_format.first_line_indent=Pt(0)
+  if not front:font(fp.add_run('第 '),9)
+  field=OxmlElement('w:fldSimple');field.set(qn('w:instr'),'PAGE');fp._p.append(field)
+  if not front:font(fp.add_run(' 页'),9)
+  sn=section._sectPr.find(qn('w:pgNumType'))
+  if sn is None:sn=OxmlElement('w:pgNumType');section._sectPr.append(sn)
+  sn.set(qn('w:start'),'1');sn.set(qn('w:fmt'),'upperRoman' if front else 'decimal')
+ def fix_legacy(text):
+  text=text.replace('第3.7节','第3.5.5节')
+  text=re.sub(r'图2-(\d+)',lambda m:'图3-'+str({3:4,4:3}.get(int(m[1]),int(m[1]))),text)
+  text=re.sub(r'图3-(\d+)',lambda m:m[0],text) # source-specific system mapping occurs before this function
+  for a,b in [('当前候选','当前实现'),('本轮RC','原RC'),('仍需真实登录与数据库回归','已纳入当前回归，实际证据见第5章'),('须在真实数据库验收','由真实数据库回归验证，证据见第5章'),('当前尚不满足完整发布条件','独立公网和大型商业化仍需另行验收'),('本报告仍','本报告')]:text=text.replace(a,b)
+  if '追踪' in text and ('待执行' in text or '待本地回归' in text):text=re.sub(r'真实HTTP/PG[^。]*待执行','原验收目标的当前执行证据见第5章',text)
+  if text.startswith('追踪与状态：'):text=re.sub(r'；[^；]*待[^；]*$', '；当前执行证据见第5章',text)
+  return text
+ def append_nodes(nodes,mapping=None,system=False):
+  from docx.text.paragraph import Paragraph
+  from docx.table import Table
+  for node in nodes:
+   for pr in node.xpath('.//w:sectPr'):pr.getparent().remove(pr)
+   if node.tag==qn('w:p'):
+    x=Paragraph(node,D._body);text=x.text
+    if not text.strip() and not node.xpath('.//w:drawing'):continue
+    if x.style.name.startswith('Heading'):
+     if mapping is None or text not in mapping:continue
+     value,level=mapping[text];x.clear();font(x.add_run(value),{1:16,2:14,3:12}[level],True,SANS);x.style=D.styles['Heading '+str(level)]
+     if level<3:toc.append((value,level))
+     markdown.extend(['#'*(level+1)+' '+value,''])
+    elif not node.xpath('.//w:drawing'):
+     if system:text=re.sub(r'图3-(\d+)',lambda m:'图3-'+str(int(m[1])+7),text)
+     text=fix_legacy(text)
+     text=re.sub(r'表3-(\d+)',lambda m:'表3-'+str(int(m[1])+3),text)
+     text=text.replace('表2-1','表3-1')
+     if text.strip():
+      x.clear();font(x.add_run(text),10.5 if x.style.name=='Caption' else 12)
+      markdown.extend([text,''])
+    pf=x.paragraph_format
+    if x.style.name=='Normal':pf.line_spacing=Pt(22);pf.keep_with_next=False
+    pf.page_break_before=False;pf.space_before=Pt(0);pf.space_after=Pt(5) if x.style.name=='Caption' else Pt(0)
+    if node.xpath('.//w:drawing'):
+     pf.first_line_indent=Pt(0);pf.keep_with_next=True;pf.line_spacing=1.0
+     for extent in node.xpath('.//wp:extent'):
+      cx,cy=int(extent.get('cx')),int(extent.get('cy'));ratio=min(1,Cm(16)/cx,Cm(18)/cy)
+      extent.set('cx',str(int(cx*ratio)));extent.set('cy',str(int(cy*ratio)))
+    elif x.style.name=='Caption':pf.keep_with_next=True;pf.first_line_indent=Pt(0);x.alignment=WD_ALIGN_PARAGRAPH.CENTER
+   elif node.tag==qn('w:tbl'):
+    t=Table(node,D._body)
+    if t.rows[0].cells[0].text=='路径':p('表4-4 RC运行路径与数据保护',10.5,False,True)
+    if len(t.columns)==3 and t.rows[0].cells[0].text=='配置环节':
+     for cell,value in zip(t.rows[0].cells,['配置环节','现有实现','本地证据与剩余门槛']):cell.text=value
+     updates={
+      '环境契约':('显式阶段、目标域名和密钥契约；运行与迁移账号分开；本地数据库仅私网。','本地运行权限已有回归；实际云凭据、TLS和网络边界另验收。'),
+      'HTTP服务':('非root应用、Gunicorn、Nginx和静态入口；独立HTTPS部署准备。','Mac本地启动与入口已验证；目标证书、续期及真实公网HTTPS待验收。'),
+      '应用安全':('分环境关闭DEBUG、Cookie和CSRF设置、HTTPS与只读策略。','本地认证、权限和并发已回归；目标域名与完整ASVS评估仍待完成。'),
+      '资源与审计':('入口限速、安全运行日志、通知心跳及私有条件监测。','R2.1限流/日志保留历史证据，R2.2有新监测验收；外部响应与主机事件待完成。'),
+      '隔离验证':('compose.verify独立项目、临时数据库和合成凭据，无端口暴露。','准确提交的真实Docker完整回归与CI通过；不复用原业务卷。'),
+      '升级与恢复':('保留原迁移；加密备份、独立空库恢复及原Mac保护。','合成数据恢复与金额/登录已验证；Windows原数据库未取得，恢复未完成。')}
+     for row in t.rows[1:]:
+      values=updates.get(row.cells[0].text)
+      if values:
+       row.cells[1].text=values[0];row.cells[2].text=values[1]
+    for row_no,row in enumerate(t.rows):
+     if row.cells[0].text.strip()=='NFR-06' and len(row.cells)==3:
+      row.cells[2].text='原RC拟基准30店／60牙医／1万患者／10万Visit／20并发，列表p95≤2秒、提交p95≤3秒，属于历史目标；当前按五店已测、二十店待验收分开取证（第5、6章）。'
+     row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+     for cell in row.cells:
+      for pp in cell.paragraphs:
+       pp.paragraph_format.keep_with_next=(row_no==0)
+       pp.paragraph_format.first_line_indent=Pt(0);pp.paragraph_format.line_spacing=Pt(15.5)
+       for r in pp.runs:font(r,10.5)
+    markdown.append('| '+' | '.join(c.text.replace('\n',' / ') for c in t.rows[0].cells)+' |');markdown.append('| '+' | '.join('---' for _ in t.rows[0].cells)+' |')
+    markdown.extend(['| '+' | '.join(c.text.replace('\n',' / ') for c in row.cells)+' |' for row in t.rows[1:]]);markdown.append('')
+   D._element.body.insert(len(D._element.body)-1,node)
+ # Cover follows the supplied university page, without headers or page numbers.
+ for container in (sec.header,sec.footer,sec.first_page_header,sec.first_page_footer):
+  for x in container.paragraphs:x.clear()
+ sec.different_first_page_header_footer=True
+ p('',space=18);p('中 南 大 学',26,True,True,space=5);p('CENTRAL SOUTH UNIVERSITY',14,False,True,space=34)
+ p('系统分析与设计',24,True,True,space=8);p('课 程 阶 段 报 告',24,True,True,space=7);p('COURSE PROJECT PROGRESS REPORT',12,False,True,space=26)
+ topic=p('题　目  '+source['title'],16,True,True,space=12);topic.style=D.styles['Title'];topic.paragraph_format.first_line_indent=Pt(0)
+ a=source['author']
+ for label,value in [('学生姓名',a['name']),('学　　号',a['student_no']),('指导教师',a['supervisor']),('学　　院',a['school']),('专业班级',a['class'])]:
+  x=p(label+'  '+value,14,False,False,False,space=8);x.paragraph_format.left_indent=Cm(3.2)
+ p(source['version'],11,False,True,space=12);p(source['date'],14,False,True)
+ front=D.add_section(WD_SECTION_START.NEW_PAGE);furniture(front,True)
+ heading(source['title'],1,False);heading('摘　要',1,False)
+ for text in source['abstract_cn']:p(text)
+ p('关键词  系统分析与设计；连锁诊所；业务范围；财务证据；通知监测；可验证性',10.5,True,False,False)
+ page();heading('Analysis and Design of the ADC Dental Chain Operations Management System',1,False);heading('ABSTRACT',1,False)
+ for text in source['abstract_en']:p(text)
+ p('Key words  systems analysis and design; dental chain; financial evidence; notification monitoring; verifiability',10.5,False,False,False)
+ page();heading('目　录',1,False);toc_anchor=D.add_paragraph()
+ main=D.add_section(WD_SECTION_START.NEW_PAGE);furniture(main)
+ heading('第1章 绪论',1)
+ p('逻辑链  案例需求 → 业务与系统模型 → 模块合同 → 可运行实现 → 分层验证 → 受保护交付。',10.5,False,False,False)
+ heading('1.1 项目背景与实践意义');p(paras[35].text);p(paras[36].text)
+ p('案例中的15家诊所与扩张计划是原始问题背景；当前产品目标是一家拥有约5至20家诊所的连锁，已执行容量基线仅覆盖五家。不能把业务愿景、已实现功能和已测规模视为同一结论。')
+ heading('1.2 案例依据与研究方法');p('以课程提供案例及note讲义为核心，结合现有代码、受控业务规约和实际验收证据开展迭代。note 3要求区分需求与设计并使需求可测试；note 5要求关注点分离、简单性和受限可见性。对标成熟系统只借鉴工作流，不以厂商文档推导比较性能或安全结论。')
+ heading('1.3 项目愿景与主要工作');p(paras[38].text);p('当前主要工作包括完整接诊链、独立资金审核、设备维护责任、跨店权限隔离、资金凭据与逐笔核对，以及安全诊断和通知处理观察。后续持续治疗、椅位/房间等共享资源及长期独立运行分别建模和验收。')
+ p('表1-1 项目目标与可观察结果',10.5,False,True);append_nodes([old_goal]);heading('1.4 报告范围与组织结构');p('本报告沿用上一版课程阶段报告的中英摘要、目录、六章正文及完整规约附录。第3章描述业务和系统需求，第4章说明设计责任，第5章记录实际证据与限制。原RC标签、冻结报告与历史证据不被本报告覆盖。')
+ p('仅供合成数据课程演示，不含真实患者、真实支付接口、保险申报或临床资格自动认证。账单不是税务发票，通知投递不是人已阅读，技术管理身份不扩大临床权限。');mind(1)
+ page();heading('第2章 相关方法与技术',1)
+ for item in source['methods']:add(item)
+ mind(2)
+ page();heading('第3章 系统需求分析',1)
+ heading('3.1 业务范围与现状分析')
+ business_map={'2.1　业务边界与业务用例':('3.1.1 业务边界与业务用例',3),'2.2　现状业务序列：就诊服务':('3.1.2 现状就诊服务',3),'2.4　现状业务序列：季度核对':('3.1.3 现状季度核对',3)}
+ append_nodes(frozen(51,62),business_map);append_nodes(frozen(67,72),business_map)
+ heading('3.2 系统总体目标与改进业务流程')
+ mapping={'2.3　改进后的业务序列：统一服务':('3.2.1 统一服务',3),'2.5　改进后的业务序列：季度核对':('3.2.2 季度核对',3),'2.6　改进后的业务序列：候补协同':('3.2.3 候补协同',3),'2.7　改进后的业务序列：责任协调':('3.2.4 责任协调',3)}
+ append_nodes(frozen(62,67),mapping);append_nodes(frozen(72,86),mapping)
+ heading('3.3 用户需求分析');p('七类工作台按当前身份及对象范围授权。一个人可以有多个授予的岗位，但一次只激活一个；切换身份不能自行审核。SYSADMIN管理账号和目录，私有主机维护是另一项运行责任。');p('表3-2 利益相关者及职责边界',10.5,False,True);append_nodes([old_roles])
+ heading('3.4 需求清单与优先级');p('表3-3 需求模块与业务结果',10.5,False,True);table(['模块','优先目标','受保护业务结果'],[['患者与临床','关键','稳定编号、到诊、过敏复核、实际治疗、明确结束。'],['财务与设备','关键','版本化账单、真实资金及凭据、独立复核、费用来源。'],['排班与协调','重要','既有承诺保留、明确受理与复核、消息不代替业务事实。'],['运行保障','重要','失败请求可定位、后台进度可观察、未知结果可辨识。']], [3,2.2,10.8])
+ heading('3.5 系统用例分析')
+ mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
+ append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
+ heading('3.6 用例规约与失败保证');p('附录A与B保留原始SU-01—38和SF-01完整规约。登录、预约、实际治疗完成和独立更正分别检验身份、对象、事实及审核者。预览不写入业务，确认重验当前授权与事实；回执未知时先查业务结果，不自动重放资金或安排。')
+ heading('3.7 业务规则与非功能性需求');append_nodes(frozen(100,110),{},True)
+ for item in source['requirements']:add(item)
+ mind(3)
+ page();heading('第4章 系统设计',1)
+ mapping={p.text:(p.text.replace('　',' ',1),2) for p in paras[119:164] if p.style.name=='Heading 2'}
+ append_nodes(legacy['design'],mapping)
+ for item in source['design']:add(item)
+ if (folder/'operations-flow.png').exists():
+  p0=D.add_paragraph();p0.paragraph_format.first_line_indent=Pt(0);p0.alignment=WD_ALIGN_PARAGRAPH.CENTER;p0.add_run().add_picture(str(folder/'operations-flow.png'),width=Cm(16));p0.paragraph_format.keep_with_next=True;p0.paragraph_format.line_spacing=1.0
+  c=p('图4-8 通知处理与私有监测责任视图',10.5,False,True);c.paragraph_format.keep_with_next=True
+  p('观察者只能形成诊断和责任记录；预约、任务、消息重试与资金处理仍由原业务操作决定。',10.5)
+ mind(4)
+ page();heading('第5章 系统实现与测试',1)
+ for item in source['implementation']:
+  add(item)
+  if item['heading'].startswith('5.3'):
+   append_nodes(legacy['screens'],{})
+   if (folder/'notification-overview.png').exists():
+    image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'notification-overview.png'),width=Cm(6.2))
+    p('图5-3 R2.2 本店通知概况（390像素大字模式）',10.5,False,True)
+    p('来自独立合成演练：两条待派发中仅一条已经到期；未来重试单独显示。该页面为当前诊所概况，后台健康由私有独立读取核对。',10.5)
+ mind(5)
+ page();heading('第6章 总结与展望',1)
+ for item in source['conclusion']:add(item)
+ mind(6)
+ page();heading('参考文献',1)
+ for text in old_refs+source['extra_references']:p(text,10.5,False,False,False,space=5)
+ page();heading('附录A 基础系统用例规约',1)
+ p('本附录保留原SU-01—25及SF-01的业务保证和编号，改按课程报告表格呈现。原验收组是追踪目标；当前运行状态统一以第5章及准确提交证据为准，未建立逐项对应时不把总测试数量等同于用例覆盖率。',10.5)
+ appendix_b=False
+ for title,texts in uc:
+  if title.startswith('SU-26'):
+   page();heading('附录B 维护 协调与通知用例规约',1);appendix_b=True
+   p('保留SU-26—38的维护、协调与通知责任。站内消息只覆盖协调任务；不通知患者、不自动同意、不代替接诊或资金事实。资料更正、出诊维护及重试继续遵守原有权限、签名、独立审核与事务规则。',10.5)
+  heading(title,3,False);rows=[['用例名称',title]];group='说明';buffer=[]
+  def flush():
+   if buffer:rows.append([group,'\n'.join(buffer)]);buffer.clear()
+  expanded=[line for value in texts for line in value.splitlines() if line.strip()]
+  for text in expanded:
+   text=fix_legacy(text)
+   if text.startswith('追踪与状态：'):
+    parts=[v for v in text.split('；') if re.search(r'(?:BR|NFR|AT)-[0-9]+',v)]
+    text='；'.join(parts)+'；原始规则和验收组保留，当前执行证据与范围见第5章。'
+   if re.fullmatch(r'[A-G]\. .+',text) or text.rstrip('：:') in ('扩展','扩展路径','业务规则','基本路径','追踪与验收'):
+    flush();group=re.sub(r'^[A-G]\. ','',text).rstrip('：:');continue
+   match=re.match(r'^([^：]{1,22})：(.+)',text)
+   if match and not re.match(r'^[•\d]',text):
+    flush();rows.append([match[1],match[2]])
+   else:buffer.append(text)
+  flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
+ # Contents is generated from actual headings; page mapping comes from latest PDF.
+ pages=json.loads((folder/'toc_pages.json').read_text()) if (folder/'toc_pages.json').exists() else {}
+ for text,level in toc:
+  x=D.add_paragraph();x.paragraph_format.first_line_indent=Pt(0);x.paragraph_format.left_indent=Cm(0 if level==1 else .6);x.paragraph_format.line_spacing=Pt(16);x.paragraph_format.space_after=Pt(0)
+  tabs=OxmlElement('w:tabs');tab=OxmlElement('w:tab');tab.set(qn('w:val'),'right');tab.set(qn('w:leader'),'dot');tab.set(qn('w:pos'),'9070');tabs.append(tab);x._p.get_or_add_pPr().append(tabs)
+  font(x.add_run(text+'\t'+str(pages.get(text,'待校核'))),10.5,level==1)
+  toc_anchor._p.addprevious(x._p)
+ toc_anchor._p.getparent().remove(toc_anchor._p)
+ stem=source['file_stem'];D.save(folder/(stem+'.docx'));(folder/'REPORT.md').write_text('\n'.join(markdown).rstrip()+'\n')
+ (folder/'toc_entries.json').write_text(json.dumps(toc,ensure_ascii=False,indent=2)+'\n')
+ print(json.dumps({'docx':stem+'.docx','use_cases_retained':len(uc),'tables':len(D.tables),'images':len(D.inline_shapes),'toc_entries':len(toc)},ensure_ascii=False))
 
-
-def hyperlink(paragraph, label, url):
-    from docx.opc.constants import RELATIONSHIP_TYPE
-    link = OxmlElement('w:hyperlink')
-    link.set(qn('r:id'), paragraph.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True))
-    run = OxmlElement('w:r')
-    props = OxmlElement('w:rPr')
-    color = OxmlElement('w:color'); color.set(qn('w:val'), '1F4E79'); props.append(color)
-    run.append(props)
-    value = OxmlElement('w:t'); value.text = label; run.append(value)
-    link.append(run); paragraph._p.append(link)
-
-
-def table(doc, spec):
-    result = doc.add_table(rows=1, cols=len(spec['headers']))
-    result.autofit = False
-    widths = spec['widths']
-    for column, width in zip(result.columns, widths):column.width = Inches(width)
-    for index, values in enumerate([spec['headers'], *spec['rows']]):
-        row = result.rows[0] if index == 0 else result.add_row()
-        properties = row._tr.get_or_add_trPr()
-        no_split = OxmlElement('w:cantSplit'); properties.append(no_split)
-        if index == 0:
-            repeat = OxmlElement('w:tblHeader'); properties.append(repeat)
-        for n, (cell, text) in enumerate(zip(row.cells, values)):
-            cell.width = Inches(widths[n]); cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-            tcpr = cell._tc.get_or_add_tcPr()
-            borders = OxmlElement('w:tcBorders')
-            for edge in ('top','left','bottom','right'):
-                line = OxmlElement('w:' + edge)
-                for key, value in [('val','single'),('sz','4'),('color','D9D9D9')]:line.set(qn('w:' + key), value)
-                borders.append(line)
-            tcpr.append(borders)
-            margin = OxmlElement('w:tcMar')
-            for edge in ('top','bottom','left','right'):
-                child = OxmlElement('w:' + edge); child.set(qn('w:w'), '95'); child.set(qn('w:type'), 'dxa'); margin.append(child)
-            tcpr.append(margin)
-            shade = OxmlElement('w:shd')
-            shade.set(qn('w:fill'), '263B4B' if index == 0 else ('F0F4F6' if index % 2 == 0 else 'FFFFFF'))
-            tcpr.append(shade)
-            p = cell.paragraphs[0]; p.paragraph_format.space_after = Pt(0)
-            p.paragraph_format.space_before = Pt(0); p.paragraph_format.line_spacing = 1.06
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER if n in spec.get('center', []) else WD_ALIGN_PARAGRAPH.LEFT
-            run = p.add_run(str(text)); run.font.size = Pt(10.2)
-            if index == 0:run.bold = True; run.font.color.rgb = RGBColor(255,255,255)
-    doc.add_paragraph().paragraph_format.space_after = Pt(0)
-
-
-def build(folder):
-    source = json.loads((folder/'report_source.json').read_text(encoding='utf-8'))
-    doc = Document(); section = doc.sections[0]
-    section.page_width = Inches(8.5); section.page_height = Inches(11)
-    section.top_margin = section.bottom_margin = Inches(.70)
-    section.left_margin = section.right_margin = Inches(.75)
-    section.header_distance = section.footer_distance = Inches(.30)
-    for name, size in [('Normal',11),('Title',23),('Subtitle',12),('Heading 1',16),('Heading 2',12),('Caption',10)]:font(doc.styles[name],size)
-    # The runtime template can carry decorative paragraph rules. Keep this report plain.
-    for style in doc.styles:
-        for border in list(style.element.iter(qn('w:pBdr'))):
-            border.getparent().remove(border)
-    normal = doc.styles['Normal'].paragraph_format
-    normal.space_after = Pt(6); normal.line_spacing = 1.12; normal.widow_control = True
-    for name in ('Heading 1','Heading 2'):
-        p = doc.styles[name].paragraph_format
-        p.space_before = Pt(9); p.space_after = Pt(7); p.keep_with_next = True
-    doc.styles['Title'].paragraph_format.space_after = Pt(8)
-    doc.styles['Subtitle'].paragraph_format.space_after = Pt(10)
-    head = section.header.paragraphs[0]; head.add_run('ADC  Systems Analysis and Design').font.size = Pt(8.5)
-    foot = section.footer.paragraphs[0]; foot.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    foot.add_run('ADC  |  Page ').font.size = Pt(8.5)
-    number = OxmlElement('w:fldSimple'); number.set(qn('w:instr'),'PAGE'); foot._p.append(number)
-    doc.core_properties.title = source['title']
-    doc.core_properties.subject = source['subtitle']
-    doc.core_properties.author = 'ADC project'
-    doc.core_properties.keywords = 'R1; R2 plan; synthetic course system; operational assurance'
-    doc.add_paragraph(source['title'], 'Title')
-    doc.add_paragraph(source['subtitle'], 'Subtitle')
-    doc.add_paragraph(source['date_line'])
-    markdown = ['# '+source['title'], '', source['subtitle'], '', source['date_line'], '']
-    for index, item in enumerate(source['sections']):
-        if index:doc.add_page_break()
-        doc.add_heading(item['heading'],1)
-        markdown += ['## '+item['heading'], '']
-        for text in item.get('paragraphs',[]):doc.add_paragraph(text); markdown += [text,'']
-        for spec in item.get('tables',[]):
-            table(doc,spec)
-            markdown += ['| '+' | '.join(spec['headers'])+' |', '| '+' | '.join('---' for _ in spec['headers'])+' |']
-            markdown += ['| '+' | '.join(str(v).replace('|','/') for v in row)+' |' for row in spec['rows']]
-            markdown.append('')
-        for text in item.get('bullets',[]):doc.add_paragraph(text,'List Bullet'); markdown += ['- '+text]
-        if item.get('bullets'):markdown.append('')
-        for text in item.get('after',[]):doc.add_paragraph(text); markdown += [text,'']
-        for reference in item.get('references',[]):
-            p = doc.add_paragraph()
-            p.add_run(reference['id']+' ')
-            if reference.get('url'):hyperlink(p,reference['label'],reference['url'])
-            else:p.add_run(reference['label'])
-            if reference.get('detail'):p.add_run('. '+reference['detail'])
-            label = '['+reference['label']+']('+reference['url']+')' if reference.get('url') else reference['label']
-            markdown += [reference['id']+' '+label+'. '+reference.get('detail',''), '']
-        if item.get('mind_map'):
-            p = doc.add_paragraph(); p.add_run('Mind map 思维导图  ').bold = True; p.add_run(item['mind_map'])
-            markdown += ['Mind map 思维导图: '+item['mind_map'],'']
-    stem = source['file_stem']
-    doc.save(folder/(stem+'.docx'))
-    (folder/'REPORT.md').write_text('\n'.join(markdown).rstrip()+'\n',encoding='utf-8')
-    print(json.dumps({'docx':stem+'.docx','sections':len(source['sections']),'markdown':'REPORT.md'}))
-
-
-if __name__ == '__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--folder',type=Path,default=Path(__file__).resolve().parent)
-    build(parser.parse_args().folder.resolve())
+if __name__=='__main__':
+ parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--folder',type=Path,default=Path(__file__).resolve().parent);parser.add_argument('--repo',type=Path,default=Path(__file__).resolve().parents[2]);a=parser.parse_args();build(a.folder.resolve(),a.repo.resolve())
