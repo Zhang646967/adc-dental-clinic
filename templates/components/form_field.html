@@ -1,0 +1,4 @@
+{% if field %}<div class="form-field{% if field.errors %} has-error{% endif %}">
+{% if field.use_fieldset %}<fieldset class="choice-fieldset"><legend>{{ field.label }}</legend>{{ field }}{% if field.help_text %}<div class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</div>{% endif %}{{ field.errors }}</fieldset>
+{% else %}{% if field.field.widget.input_type == 'checkbox' %}<div class="check-line">{{ field }}{{ field.label_tag }}</div>{% else %}{{ field.label_tag }}{{ field }}{% endif %}{% if field.help_text %}<div class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</div>{% endif %}{{ field.errors }}{% endif %}
+</div>{% endif %}

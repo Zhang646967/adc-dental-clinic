@@ -1,11 +1,14 @@
 {% extends 'base.html' %}{% block content %}
 <div class="eyebrow">业务日程</div><div class="heading-row"><h1>预约与到诊</h1>{% if can_front %}<a class="button" href="{% url 'visit_create' %}">创建预约</a>{% endif %}</div>
 <p class="lede">按办理事项、日期或状态查找。到期仍未核实的记录不会自动判为爽约，已取消和改期历史继续保留。</p>
+<nav class="queue-tabs" aria-label="预约办理清单">{% for item in queue_shortcuts %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}</nav>
+<p class="queue-note">快捷清单会重设日期和状态，保留搜索词；不会改变任何预约。</p>
+{% if filter_chips %}<nav class="filter-chips" aria-label="当前筛选，点击移除该条件">{% for item in filter_chips %}<a href="{{ item.url }}" aria-label="移除{{ item.label }}条件：{{ item.value }}">{{ item.label }}：{{ item.value }} <span aria-hidden="true">×</span></a>{% endfor %}</nav>{% endif %}
 <section class="panel"><form method="get" class="worklist-filters">
-  {{ filter_form.as_div }}<div class="actions"><button type="submit">筛选预约</button><a class="button secondary" href="{% url 'visits' %}">清除筛选</a></div>
+  {% include 'components/form_errors.html' with form=filter_form error_heading='筛选未应用，请修正以下内容' %}{% for field in filter_form %}{% include 'components/form_field.html' %}{% endfor %}<div class="actions"><button type="submit">筛选预约</button><a class="button secondary" href="{% url 'visits' %}">清除筛选</a></div>
 </form></section>
 {% if filters_valid %}<p class="muted">符合当前筛选 {{ page.paginator.count }} 条；待到诊及待核实清单按预约时间排序，接诊队列按实际到诊时间排序。</p>{% else %}<p class="notice" role="alert">请修正筛选条件。尚未查询记录。</p>{% endif %}
-<section class="panel"><div class="table-scroll" tabindex="0"><table><caption>仅当前身份和诊所授权范围内的预约</caption><thead><tr><th>开始 / 结束</th><th>诊所 / 牙医</th><th>患者</th><th>业务状态</th><th>操作</th></tr></thead><tbody>
-{% for r in rows %}<tr><td>{{ r.start|date:'Y-m-d H:i' }}<small>至 {{ r.end|date:'H:i' }}</small></td><td>{{ r.clinic }}<small>{{ r.dentist }}</small></td><td>{{ r.patient }}</td><td><span class="badge">{{ r.status }}</span></td><td>{% if r.has_details %}<a href="{% url 'visit_detail' r.id %}">打开记录</a>{% else %}运营范围{% endif %}</td></tr>
+<section class="panel"><div class="table-scroll" tabindex="0"><table class="appointment-table" role="table"><caption>仅当前身份和诊所授权范围内的预约</caption><thead role="rowgroup"><tr role="row"><th scope="col">时间 / 就诊编号</th><th scope="col">诊所 / 牙医</th><th scope="col">患者</th><th scope="col">业务状态</th><th scope="col">操作</th></tr></thead><tbody role="rowgroup">
+{% for r in rows %}<tr role="row"><td role="cell" data-label="时间 / 就诊编号">{{ r.start|date:'Y-m-d H:i' }}<small>至 {{ r.end|date:'H:i' }}</small><span class="visit-reference">{{ r.visit_no }}</span></td><td role="cell" data-label="诊所 / 牙医">{{ r.clinic }}<small>{{ r.dentist }}</small></td><td role="cell" data-label="患者">{{ r.patient }}</td><td role="cell" data-label="业务状态"><span class="badge">{{ r.status }}</span></td><td role="cell" data-label="操作">{% if r.has_details %}<a class="row-action" aria-label="打开就诊 {{ r.visit_no }}" href="{% url 'visit_detail' r.id %}">打开记录</a>{% else %}运营范围{% endif %}</td></tr>
 {% empty %}<tr><td colspan="5" class="empty">{% if filters_valid %}没有符合筛选的授权记录。可清除筛选后查看其他状态。{% else %}筛选条件无效，未展示记录。{% endif %}</td></tr>{% endfor %}
 </tbody></table></div>{% include '_pagination.html' %}</section>{% endblock %}

@@ -26,7 +26,7 @@ from patients.services import create_patient, PATIENT_FIELDS
 from scheduling.selectors import visible_visits, can_read_visit_details, booking_slots
 from scheduling.services import create_appointment, change_appointment, reschedule, create_slot
 from scheduling.models import Visit
-from scheduling.worklists import VisitFilterForm, filtered_visits
+from scheduling.worklists import VisitFilterForm, filtered_visits, visit_filter_navigation
 from scheduling.reschedule_forms import ReplacementSearchForm, RescheduleConfirmForm
 from scheduling.reschedule_selectors import replacement_options, check_target, HORIZON_DAYS
 from scheduling.reschedule_services import prepare_reschedule, confirm_reschedule
@@ -109,7 +109,9 @@ def visit_list(request):
              "patient": v.patient.name if has_details else "受限",
              "has_details": has_details} for v in page]
     query = {k: str(v) for k, v in form.cleaned_data.items() if v} if valid else {}
+    queue_shortcuts, filter_chips = visit_filter_navigation(form.cleaned_data if valid else {})
     return render(request, "visits.html", {"page": page, "rows": rows, "filter_form": form,
+                  "queue_shortcuts": queue_shortcuts, "filter_chips": filter_chips,
                   "pagination_query": urlencode(query), "filters_valid": valid}, status=200 if valid else 400)
 
 @login_required

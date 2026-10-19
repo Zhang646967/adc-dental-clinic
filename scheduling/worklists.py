@@ -1,5 +1,6 @@
 """Read-only appointment queues. Every filter starts with the active role scope."""
 from datetime import datetime, time, timedelta
+from urllib.parse import urlencode
 
 from django import forms
 from django.core.exceptions import PermissionDenied
@@ -14,6 +15,25 @@ QUEUE_CHOICES = (
     ('arrival', '今日待到诊'), ('outcome', '到期结果待核实'),
     ('care', '已到诊，接诊未关闭'),
 )
+
+
+def visit_filter_navigation(data):
+    """Links carry only validated display filters, never workspace authority."""
+    query = {key: str(data[key]) for key in ('queue', 'day', 'status', 'q') if data.get(key)}
+    queue = query.get('queue', 'all')
+    search = {'q': query['q']} if query.get('q') else {}
+    shortcuts = [dict(label=label, active=value == queue,
+                      url='?' + urlencode(dict(queue=value, **search))) for value, label in QUEUE_CHOICES]
+    labels = {'queue': '清单', 'day': '日期', 'status': '状态', 'q': '搜索'}
+    choices = {'queue': dict(QUEUE_CHOICES), 'status': dict(STATUS_CHOICES)}
+    chips = []
+    for key, value in query.items():
+        if key == 'queue' and value == 'all':
+            continue
+        remaining = {k: v for k, v in query.items() if k != key}
+        chips.append(dict(label=labels[key], value=choices.get(key, {}).get(value, value),
+                          url='?' + urlencode(remaining)))
+    return shortcuts, chips
 
 
 def day_bounds(day):

@@ -1,0 +1,54 @@
+/* UX2: clear filters, native field groups and one responsive appointment table. */
+.queue-tabs, .filter-chips, .care-jumps { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
+.queue-tabs a, .filter-chips a, .care-jumps a { display: inline-flex; align-items: center; min-height: 44px; padding: .45rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: #fff; }
+.queue-tabs a[aria-current=page] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 650; }
+.filter-chips a { background: var(--soft); max-width: 100%; overflow-wrap: anywhere; font-size: .9rem; }
+.queue-note { font-size: .85rem; color: var(--muted); }
+.appointment-table .visit-reference { display: block; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+.appointment-table .row-action { display: inline-flex; align-items: center; min-height: 44px; white-space: nowrap; }
+.form-section { border: 0; border-top: 1px solid var(--line); padding: 1.2rem 0 .2rem; margin: .75rem 0; min-width: 0; }
+.form-section legend { font-weight: 700; padding: 0 .5rem 0 0; color: var(--ink); font-size: 1.05rem; }
+.form-section:first-of-type { margin-top: .5rem; }
+.form-field { margin-bottom: 1.1rem; min-width: 0; }
+.form-field .helptext { margin-top: .4rem; font-size: .85rem; line-height: 1.6; }
+.form-field .errorlist { margin: .45rem 0 0; }
+.form-field.has-error input, .form-field.has-error select, .form-field.has-error textarea { border-color: #a3402d; }
+.form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 1.2rem; }
+.choice-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.choice-fieldset legend { font-size: 1rem; margin-bottom: .4rem; }
+.choice-fieldset label { font-weight: 500; }
+.check-line { display: flex; align-items: flex-start; gap: .5rem; }
+.check-line input[type=checkbox] { margin: .35rem 0; }
+.check-line label { padding: .1rem 0; margin: 0; font-weight: 500; }
+.form-error-summary { padding: 1rem 1.2rem; margin: 1rem 0; border: 1px solid #c17b69; border-left: 4px solid #a3402d; border-radius: .5rem; background: #fff7f3; color: #7b2f22; overflow-wrap: anywhere; }
+.form-error-summary a { color: #7b2f22; text-decoration: underline; }
+.form-error-summary ul { margin-bottom: 0; padding-left: 1.2rem; }
+.form-footer { border-top: 1px solid var(--line); padding-top: 1rem; margin-top: .5rem; }
+.care-jumps { margin-bottom: 1.5rem; }
+.care-jumps a { font-size: .9rem; }
+.care-status { display: flex; flex-wrap: wrap; gap: .5rem 2rem; }
+.care-status p { margin: .25rem 0 .8rem; color: var(--muted); }
+.care-section { scroll-margin-top: 1rem; }
+.care-section h2 { font-size: 1.2rem; }
+.care-section .step-note { color: var(--muted); font-size: .9rem; }
+.cash-source { padding: 1rem 1.2rem; background: var(--soft); border-radius: .6rem; overflow-wrap: anywhere; }
+@media(max-width:650px) {
+  .form-grid { grid-template-columns: minmax(0,1fr); }
+  .queue-tabs a { flex: 1 1 auto; justify-content: center; font-size: .9rem; }
+  .care-jumps a { flex: 1 1 auto; justify-content: center; }
+  .appointment-table, .appointment-table tbody { display: block; white-space: normal !important; }
+  .appointment-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .appointment-table tr { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); border: 1px solid var(--line); border-radius: .6rem; margin: .8rem 0; padding: .6rem; gap: .35rem .7rem; }
+  .appointment-table td { display: block; border: 0; padding: .3rem; min-width: 0; overflow-wrap: anywhere; }
+  .appointment-table td::before { content: attr(data-label); display: block; font-size: .78rem; color: var(--muted); margin-bottom: .2rem; }
+  .appointment-table td:first-child { grid-column: 1 / -1; }
+  .appointment-table td:last-child { align-self: end; }
+  .appointment-table .row-action { white-space: normal; }
+  .form-footer button, .form-footer .button { width: 100%; }
+}
+@media print {
+  .queue-tabs, .filter-chips a, .care-jumps { display: none; }
+  .form-section { break-inside: avoid; }
+}
+
+.worklist-filters > .form-error-summary { grid-column: 1 / -1; }
