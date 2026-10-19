@@ -292,6 +292,17 @@ class Course:
         return result
 
     def backup(self, recipient_file, age='age'):
+        from scripts.host_events import backup_event
+        try:
+            result = self._backup(recipient_file, age)
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError, tarfile.TarError):
+            backup_event(self.bundle, self.plan['project'], self.plan['requested_source_commit'], False)
+            raise
+        result['host_event'] = backup_event(self.bundle, self.plan['project'],
+                                           self.plan['requested_source_commit'], True)
+        return result
+
+    def _backup(self, recipient_file, age='age'):
         recipient = private_file(recipient_file).read_text().strip()
         if not RECIPIENT.fullmatch(recipient):
             raise ValueError('Use one age X25519 public recipient; private keys stay on the Mac.')

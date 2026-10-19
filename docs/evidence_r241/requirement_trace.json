@@ -1,0 +1,99 @@
+{
+  "format": 1,
+  "requirements": [
+    {
+      "id": "R241-01",
+      "problem": "Identify what stopped or restarted.",
+      "actor": "Private host operator",
+      "invariant": "Explicit local project and application source; five runtime services; finite metadata.",
+      "implementation": "docker_sample; source guard and service filtering",
+      "tests": [
+        "test_remote_endpoint_is_rejected_before_listing_containers",
+        "test_docker_projection_does_not_request_logs_or_credentials"
+      ],
+      "live": [
+        "initial_target_identity",
+        "worker_stop_critical",
+        "manual_restart_detected"
+      ]
+    },
+    {
+      "id": "R241-02",
+      "problem": "Distinguish OOM from a generic process exit.",
+      "actor": "Private host operator",
+      "invariant": "OOM reason and prior incident survive container recovery.",
+      "implementation": "Journal.condition / collect",
+      "tests": [
+        "test_oom_reason_supersedes_generic_exit_in_same_sample",
+        "test_oom_survives_restart_and_requires_human_closure"
+      ],
+      "live": [
+        "real_cgroup_oom_killed",
+        "oom_critical_retained",
+        "oom_history_survives_recovery"
+      ]
+    },
+    {
+      "id": "R241-03",
+      "problem": "Missing observation must not look healthy.",
+      "actor": "Independent reader",
+      "invariant": "90-second staleness, clock mismatch, transport failure or bounded event gap yields UNKNOWN.",
+      "implementation": "Journal.collect/status; independent CLI",
+      "tests": [
+        "test_collection_gap_remains_incident_after_recovery",
+        "test_event_ring_saturation_is_unknown",
+        "test_corrupt_host_status_is_unknown_exit_three"
+      ],
+      "live": [
+        "docker_transport_failure_unknown",
+        "independent_reader_detects_stopped_collector"
+      ]
+    },
+    {
+      "id": "R241-04",
+      "problem": "Responsibility is different from verified recovery.",
+      "actor": "Assigned private operator",
+      "invariant": "Acknowledgement/actions never refresh samples; close requires responsibility, action and two fresh good host samples.",
+      "implementation": "Journal.handle; finite action codes",
+      "tests": [
+        "test_acknowledgement_changes_no_sample_or_condition",
+        "test_close_requires_action_and_two_new_good_samples",
+        "test_stale_observation_cannot_close_incident"
+      ],
+      "live": [
+        "early_close_refused",
+        "worker_recovered_with_retained_closure"
+      ]
+    },
+    {
+      "id": "R241-05",
+      "problem": "Backup failure must remain visible without rewriting the recovery point.",
+      "actor": "Course backup operation / private operator",
+      "invariant": "Only actual backup outcome hook; separate host incident and R2.3 receipts.",
+      "implementation": "Course.backup; backup_event",
+      "tests": [
+        "test_backup_wrapper_records_real_failure",
+        "test_backup_wrapper_keeps_success_when_observer_unavailable",
+        "test_backup_failure_and_success_retain_incident"
+      ],
+      "live": [
+        "backup_failure_distinct",
+        "backup_failure_history_survives"
+      ]
+    },
+    {
+      "id": "R241-06",
+      "problem": "Preserve useful private history without unlimited growth.",
+      "actor": "Private operator",
+      "invariant": "Existing owner-only store, bounded events/incidents, retained closed history and explicit prune counts.",
+      "implementation": "PrivateStore; Journal.event/condition",
+      "tests": [
+        "test_host_history_is_bounded_and_active_incident_retained"
+      ],
+      "live": [
+        "owner_only_host_records",
+        "status_does_not_refresh_sample"
+      ]
+    }
+  ]
+}

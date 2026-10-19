@@ -1,0 +1,73 @@
+{
+  "format": 1,
+  "date": "2026-10-18",
+  "status": "LOCAL_HOST_GATE_PASSED",
+  "tool_identity": "Enclosing Git commit plus exact source digests; CI and Mac delivery follow separately.",
+  "application_source": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+  "regression": {
+    "source_rule_checks": 1042,
+    "postgresql_http_concurrency_tests": 1152,
+    "new_host_rule_tests": 26,
+    "all_passed": true,
+    "isolated_cleanup_exit": 0
+  },
+  "host": {
+    "checks": [
+      "initial_target_identity",
+      "initial_five_services_healthy",
+      "worker_stop_critical",
+      "worker_stop_distinct_from_collector",
+      "acknowledgement_does_not_clear_stop",
+      "early_close_refused",
+      "worker_recovered_with_retained_closure",
+      "manual_restart_detected",
+      "real_cgroup_oom_killed",
+      "oom_critical_retained",
+      "restarted_oom_still_requires_review",
+      "oom_history_survives_recovery",
+      "monitor_container_stop_separate",
+      "docker_transport_failure_unknown",
+      "backup_failure_distinct",
+      "backup_failure_history_survives",
+      "independent_reader_detects_stopped_collector",
+      "status_does_not_refresh_sample",
+      "owner_only_host_records",
+      "no_mounts_ports_or_host_network",
+      "final_five_services_healthy"
+    ],
+    "passed": 21,
+    "real_container_oom": true,
+    "container_memory_limit_mib": 48,
+    "no_network_mounts_ports": true,
+    "finite_metadata_only": true,
+    "source": "Five independent finite Docker processes using the accepted app image; not full business dependency drills.",
+    "collector_unavailability": "Actual CLI transport refusal via test wrapper; Docker engine and original services were not stopped.",
+    "stale_reader": "Deterministic +91-second clock; not a 90-second wall-time outage.",
+    "backup": "Failure/completion observation lifecycle injected in private test journal; real wrapper success/failure linkage is covered by rule tests, not a new encrypted restore exercise.",
+    "containers_removed": true
+  },
+  "fixes": [
+    {
+      "problem": "Docker template failed for containers without a Health member.",
+      "resolution": "Use optional indexed health metadata; finite runtime rehearsal passed."
+    },
+    {
+      "problem": "Generic exited state could hide the specific OOM cause at the same severity.",
+      "resolution": "Retain explicit OOM cause through recovery and require human closure."
+    }
+  ],
+  "source_changes_sha256": {
+    "scripts/host_events.py": "732f95141174eea23f976cc537b96e7413758f7f72f6902100282293c55c106a",
+    "scripts/g4_course.py": "6fef5d4a5a27fa4336816fd5a5637084d66a869080cd74072b5257111648fa0b",
+    "checks/test_host_events.py": "eedb8a5dd5d10d80ff30571a3c55a258fed5ab26d7cc545fd000629adbb35451"
+  },
+  "no_business_schema_roles_or_public_api": true,
+  "original_mac_fault_injection": false,
+  "pending": [
+    "R2.4.2 business dependency fault exercises",
+    "R2.4.3 equivalent 30-minute load",
+    "R2.4.4 real 24-hour observation and security review",
+    "R2.5 cloud acceptance; server not purchased",
+    "Original Windows business database recovery unresolved"
+  ]
+}
