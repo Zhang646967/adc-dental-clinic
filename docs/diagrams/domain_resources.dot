@@ -1,0 +1,27 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad=.28,nodesep=.5,ranksep=.82,splines=polyline];
+ node [shape=record,fontname="Noto Sans CJK SC",fontsize=18,color="#334155",penwidth=1.3,margin=".15,.10"];
+ edge [dir=none,fontname="Noto Sans CJK SC",fontsize=13,color="#475569",labeldistance=1.9];
+ department [label="{科室\nDepartment|所属诊所、开放时间\l}"];
+ room [label="{诊室\nTreatmentRoom|同房可有多椅并行\l}"];
+ service [label="{预约服务\nBookingService|总时长、接收医师\l必要设备要求\l}"];
+ asset [label="{设备资产\nEquipmentAsset|含牙椅，沿用原台账\l在用／维修／退役\l}"];
+ binding [label="{排程位置\nResourceBinding|固定诊室或本店共享\l不重复登记资产\l}"];
+ plan [label="{资源方案版本\nResourcePlan|服务与资源快照\l替换保留原版及依据\l}"];
+ claim [label="{物理资源占用\nResourceClaim|整段起止、暂占／正式\l释放时间及原因\l}"];
+ visit [label="{原预约／邀约|Visit 或 WaitOffer\l至少一个来源\l接受时关联同一预约\l}"];
+ issue [label="{资源协调事项\nResourceCoordination|原承诺、责任与联系期限\l}"];
+ department -> room [taillabel="1",headlabel="0..*",label="包含"];
+ department -> service [taillabel="1",headlabel="0..*",label="提供"];
+ asset -> binding [taillabel="1",headlabel="0..1",label="配置排程"];
+ room -> binding [taillabel="0..1",headlabel="0..*",label="固定设备"];
+ service -> plan [taillabel="1",headlabel="0..*",label="快照依据"];
+ room -> plan [taillabel="1",headlabel="0..*",label="诊疗地点"];
+ visit -> plan [taillabel="1",headlabel="1..*",label="保留版本"];
+ plan -> claim [taillabel="1",headlabel="1..*",label="占用整段"];
+ asset:e -> claim:e [taillabel="1",headlabel="0..*",label="时间不重叠",constraint=false];
+ plan -> issue [taillabel="1",headlabel="0..*",label="故障影响"];
+ {rank=same;department;asset;visit;}
+ 
+ {rank=same;claim;issue;}
+ }

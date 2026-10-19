@@ -4,7 +4,7 @@ Unexpected integrity failures are never mislabeled as user input errors.
 from functools import wraps
 from django.db import IntegrityError, OperationalError
 from adc_core.rules import RuleError
-CONFLICT_CONSTRAINTS = {"slot_dentist_no_overlap", "visit_dentist_no_overlap", "visit_patient_no_overlap"}
+CONFLICT_CONSTRAINTS = {"physical_resource_no_overlap", "slot_dentist_no_overlap", "visit_dentist_no_overlap", "visit_patient_no_overlap"}
 def business_errors(fn):
     @wraps(fn)
     def wrapped(*args, **kwargs):
@@ -14,7 +14,7 @@ def business_errors(fn):
             cause = exc.__cause__
             name = getattr(getattr(cause, "diag", None), "constraint_name", None)
             if name in CONFLICT_CONSTRAINTS:
-                raise RuleError("该牙医或患者的时间发生冲突，请刷新并选择其他时段。") from exc
+                raise RuleError("该医师、患者或诊疗资源的时间发生冲突，请刷新并选择其他时段。") from exc
             raise  # Unexpected integrity errors must not be mislabeled as scheduling conflicts.
         except OperationalError as exc:
             if getattr(exc.__cause__, "sqlstate", None) in ("40P01", "40001"):

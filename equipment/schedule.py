@@ -28,5 +28,8 @@ def maintenance_schedule(actor,asset_id,slot='',page='1'):
         with reporting_snapshot():
             task=CoordinationTask.objects.filter(slot_id=slot_id,state__in=['OPEN','IN_PROGRESS','READY']).order_by('-pk').first()
             data['existing_task']=task
+    from scheduling.resource_models import ResourceClaim,ResourceCoordination
+    data['resource_impacts']=ResourceCoordination.objects.filter(asset=asset).select_related('plan__visit','plan__offer').order_by('-pk')[:100]
+    data['resource_binding']=getattr(asset,'scheduling_binding',None)
     manager_clinic(actor)
     return data

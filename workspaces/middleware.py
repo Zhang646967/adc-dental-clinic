@@ -13,6 +13,9 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'reception_list':{'FRONT_DESK'},'reception_create':{'FRONT_DESK'},'reception_detail':{'FRONT_DESK'},
+ 'resource_mapping':{'MANAGER'},'resource_catalogue':{'MANAGER'},'resource_config':{'MANAGER'},'resource_candidates':{'FRONT_DESK'},
+ 'resource_coordination_list':{'MANAGER','FRONT_DESK'},'resource_coordination_detail':{'FRONT_DESK'},'resource_summary':{'HQ'},
  'cancellation_analysis':{'MANAGER','HQ'},'cancellation_followups':{'FRONT_DESK'},
  'cancellation_followup':{'FRONT_DESK'},'appointment_improvements':{'MANAGER','FRONT_DESK'},
  'appointment_improvement_detail':{'MANAGER','FRONT_DESK'},'appointment_improvement_new':{'MANAGER'},

@@ -11,6 +11,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 from adc_core.rules import RuleError
 from registry.models import Clinic
+from scheduling.resources import service_for
 from scheduling.models import Visit
 from portal.forms import BookingConfirmationForm, CancelForm, SlotFilterForm
 from portal.policies import patient_access
@@ -44,7 +45,11 @@ def slots(request):
     patient_access(request.user)
     form=SlotFilterForm(request.GET)
     rows=[]
-    if form.is_valid(): rows=public_options(request.user,form.cleaned_data["clinic"],form.cleaned_data["day"])
+    if form.is_valid():
+        try: rows=public_options(request.user,form.cleaned_data["clinic"],form.cleaned_data["day"],
+            form.cleaned_data['service'].pk if form.cleaned_data.get('service') else None,
+            form.cleaned_data['dentist'].pk if form.cleaned_data.get('dentist') else None)
+        except EXPECTED_ERRORS as exc:add_error(form,exc)
     return render(request,"portal/slots.html",{"rows":rows,"form":form,"clinics":Clinic.objects.filter(is_active=True)})
 
 @login_required(login_url="portal_login")
@@ -63,11 +68,12 @@ def booking_preview(request):
     try:
         start=parse_datetime(request.GET.get("start",""))
         if start is None or timezone.is_naive(start): raise RuleError("请选择有效时段。")
-        slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start)
+        slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start,service_id=int(request.GET["service"]) if request.GET.get("service") else None)
     except (ValueError, *EXPECTED_ERRORS):
         messages.error(request,"该时段已变化，请重新选择。")
         return redirect("portal_slots")
     return render(request,"portal/confirm.html",{"slot":slot,"start":start,"end":end,
+        "service_label": service_for(slot.clinic_id,int(request.GET["service"])) if request.GET.get("service") else None,
         "form":BookingConfirmationForm(initial={"token":token})})
 
 @login_required(login_url="portal_login")

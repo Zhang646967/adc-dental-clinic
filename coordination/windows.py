@@ -12,14 +12,14 @@ class WindowError(ValueError):
         self.field, self.code = field, code
         super().__init__(message)
 
-def validate_wait_window(start, end, *, now):
+def validate_wait_window(start, end, *, now, minimum=MIN_DURATION):
     for name, value in (('earliest', start), ('latest', end), ('clock', now)):
         if not isinstance(value, datetime) or value.tzinfo is None or value.utcoffset() is None:
             raise WindowError(name, 'timezone', '请选择有效的北京时间；时间必须明确所属时区。')
     if end <= start:
         raise WindowError('latest', 'order', '最晚结束时间必须晚于最早开始时间。')
-    if end - start < MIN_DURATION:
-        raise WindowError('latest', 'duration', '结束时间至少比开始时间晚30分钟，才能放下一个完整的候补预约。')
+    if end - start < minimum:
+        raise WindowError('latest', 'duration', f'结束时间至少比开始时间晚{int(minimum.total_seconds()//60)}分钟，才能放下一个完整的候补预约。')
     if start <= now:
         raise WindowError('earliest', 'past', '开始时间已经过去或刚刚到达，请重新选择未来时间。')
     if end > now + HORIZON:

@@ -4,6 +4,7 @@ from django.db.models import Q,F
 class WaitRequest(models.Model):
     patient=models.ForeignKey('patients.Patient',on_delete=models.PROTECT)
     clinic=models.ForeignKey('registry.Clinic',on_delete=models.PROTECT)
+    service=models.ForeignKey('scheduling.BookingService',null=True,blank=True,on_delete=models.PROTECT)
     preferred_dentist=models.ForeignKey('registry.Dentist',null=True,blank=True,on_delete=models.PROTECT)
     earliest=models.DateTimeField()
     latest=models.DateTimeField()

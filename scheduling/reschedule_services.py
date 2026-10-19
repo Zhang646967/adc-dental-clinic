@@ -56,7 +56,7 @@ def _load(token):
             raise ValueError
         data = signing.loads(token, salt=SALT, max_age=MAX_AGE)
         required = {'contract', 'uid', 'workspace', 'workspace_revision', 'clinic', 'visit', 'visit_version',
-                    'slot', 'slot_clinic', 'slot_dentist', 'intake_revision', 'start', 'end', 'reason', 'origin'}
+                    'slot', 'slot_clinic', 'slot_dentist', 'intake_revision', 'start', 'end', 'reason', 'origin','service','resources'}
         if type(data) is not dict or set(data) != required or data['contract'] != CONTRACT:
             raise ValueError
         for key in ('uid', 'clinic', 'visit', 'slot', 'slot_clinic', 'slot_dentist'):
@@ -79,7 +79,7 @@ def _load(token):
 
 
 @sensitive_variables('reason')
-def prepare_reschedule(*, actor, visit_id, expected_version, new_slot_id, start, end, reason, origin=None):
+def prepare_reschedule(*, actor, visit_id, expected_version, new_slot_id, start, end, reason, origin=None,service_id=None):
     with reporting_snapshot():
         binding = _binding(actor)
         old = owned_source(actor, visit_id)
@@ -93,14 +93,18 @@ def prepare_reschedule(*, actor, visit_id, expected_version, new_slot_id, start,
         slot = AvailabilitySlot.objects.select_related('clinic', 'dentist').get(pk=new_slot_id, clinic_id=binding['clinic'])
         now = timezone.now()
         check_target(old, slot, start, end, now)
+        from scheduling.resources import choose_bundle,current_plan
+        original_plan=current_plan(old)
+        service_id=service_id or (original_plan.service_id if original_plan else None)
+        bundle=choose_bundle(slot=slot,start=start,end=end,service_id=service_id,ignore_visit=old.pk)
         origin = visit_return_slot(actor, str(origin), old) if origin is not None else None
         data = dict(binding, contract=CONTRACT, visit=old.pk, visit_version=old.lock_version,
                     slot=slot.pk, slot_clinic=slot.clinic_id, slot_dentist=slot.dentist_id,
                     intake_revision=slot.intake_revision, start=start.isoformat(), end=end.isoformat(),
-                    reason=reason.strip(), origin=origin)
+                    reason=reason.strip(), origin=origin,service=service_id,resources=bundle)
         return {'original': old, 'destination': slot, 'start': start, 'end': end, 'reason': reason.strip(),
                 'observed_at': now, 'proposal_token': signing.dumps(data, salt=SALT, compress=True),
-                'duration_changed': end-start != old.scheduled_end-old.scheduled_start}
+                'resources':bundle,'duration_changed': end-start != old.scheduled_end-old.scheduled_start}
 
 
 @business_errors
@@ -114,8 +118,12 @@ def confirm_reschedule(*, actor, visit_id, proposal_token, confirmed):
     if any(data[key] != value for key, value in binding.items()) or data['visit'] != visit_id:
         raise RuleError('工作身份、诊所或原预约已经变化，请重新预览。')
     lock_clinic_grant(actor, binding['clinic'])
-    preview = Visit.objects.only('availability_slot_id').get(pk=visit_id, clinic_id=binding['clinic'])
+    preview = Visit.objects.only('availability_slot_id','patient_id','dentist_id','clinic_id').get(pk=visit_id, clinic_id=binding['clinic'])
     slots = lock_slots([preview.availability_slot_id, data['slot']])
+    from coordination.reservations import lock_resources
+    from scheduling.resources import lock_physical
+    lock_resources(patients=[preview.patient_id], dentists=[s.dentist_id for s in slots.values()])
+    lock_physical(preview.clinic_id)
     old = Visit.objects.select_for_update(of=('self',)).select_related('patient', 'clinic', 'dentist').get(
         pk=visit_id, clinic_id=binding['clinic'])
     start, end = _time(data['start']), _time(data['end'])
@@ -138,5 +146,5 @@ def confirm_reschedule(*, actor, visit_id, proposal_token, confirmed):
     # The existing command checks active resources, live holds, time conflicts
     # and row versions again, in the same transaction and shared lock protocol.
     new = reschedule(actor=actor, visit_id=old.pk, expected_version=data['visit_version'],
-        new_slot_id=target.pk, start=start, end=end, reason=data['reason'])
+        new_slot_id=target.pk, start=start, end=end, reason=data['reason'],service_id=data['service'],resource_snapshot=data['resources'])
     return RescheduleResult(new, False, data['origin'])

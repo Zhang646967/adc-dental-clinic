@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="business-flow"><h1>{{ title }}</h1><p>只记录本次必要的联络与服务意向；过敏未知不等于无过敏。</p><form method="post" class="panel form-panel">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit">{{ button }}</button></form></div>{% endblock %}

@@ -139,5 +139,8 @@ def confirm_equipment(*,actor,proposal_token,confirmed,expected_action=None,expe
         asset.save(update_fields=['state','next_service_due','lock_version'])
         event=EquipmentEvent.objects.create(asset=asset,operation_id=payload['operation'],sequence=asset.lock_version,recorded_by=actor,**clean)
     else:raise RuleError('未知设备操作。')
+    if asset.state in ('MAINTENANCE','RETIRED'):
+        from scheduling.resources import record_asset_impact_locked
+        record_asset_impact_locked(asset,'设备送修或退役，原预约及邀约保留，请协调兼容资源')
     emit(actor,'EQUIPMENT_RECORDED',event,summary={'asset_id':asset.pk,'sequence':asset.lock_version,'kind':event.kind})
     return asset,False

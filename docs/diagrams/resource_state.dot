@@ -1,0 +1,19 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad=.25,nodesep=.65,ranksep=.85,splines=polyline];
+ node [shape=box,style=rounded,fontname="Noto Sans CJK SC",fontsize=19,color="#334155",penwidth=1.3,margin=".18,.12"];
+ edge [fontname="Noto Sans CJK SC",fontsize=14,color="#475569",arrowsize=.8];
+ start [shape=point,width=.12,label=""];
+ open [label="待协调\n原预约／邀约保留"];
+ contact [label="待联系\n有效负责人＋联系期限"];
+ replaced [label="已替换资源\n原方案释放，新方案追加",peripheries=2];
+ resolved [label="已核实解决\n保留核实依据",peripheries=2];
+ start -> open [label="送修／退役／排程停用\n／登记受影响原承诺"];
+ open -> contact [label="前台受理／明确责任与期限"];
+ contact -> contact [label="联系未果或责任失效\n／保留原约，明确交接与期限"];
+ open -> replaced [label="确认兼容方案 [店／医师／时间不变]\n／原子替换"];
+ contact -> replaced [label="确认替换／保留版本"];
+ contact -> resolved [label="核实 [资源障碍消除\n或原承诺已结束]／记录结果"];
+ note [shape=note,style="",fontsize=15,label="改变医师或时间须获患者同意并改期。\n联系未果保留原约，取消须有发起方及原因。\n治疗中故障由医护处置，不自动搬迁。"];
+ resolved -> note [style=dashed,arrowhead=none];
+ {rank=same;replaced;resolved;}
+ }

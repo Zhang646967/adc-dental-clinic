@@ -1,0 +1,23 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad=.25,nodesep=.55,ranksep=.75,splines=polyline];
+ node [shape=record,fontname="Noto Sans CJK SC",fontsize=18,color="#334155",penwidth=1.3,margin=".15,.10"];
+ edge [dir=none,fontname="Noto Sans CJK SC",fontsize=13,color="#475569",labeldistance=1.9];
+ clinic [label="{诊所\nClinic|本店办理范围\l}"];
+ patient [label="{患者\nPatient|成约前完整建档\l}"];
+ staff [label="{前台账号\nUserAccount|有效本店授权\l}"];
+ reception [label="{电话接待单\nReceptionCase|待核实联络、服务意向\l办理状态、责任与期限\l}"];
+ history [label="{沟通历史\nReceptionCommunication|追加式记录、经办与快照\l}"];
+ wait [label="{候补需求\nWaitRequest|可接受时间、服务及医师偏好\l}"];
+ offer [label="{限时邀约\nWaitOffer|患者明确确认后转正\l}"];
+ visit [label="{正式预约\nVisit|原成约事实与后续结果\l}"];
+ clinic -> reception [taillabel="1",headlabel="0..*",label="受理"];
+ staff -> reception [taillabel="1",headlabel="0..*",label="负责联系"];
+ patient -> reception [taillabel="0..1",headlabel="0..*",label="核对档案"];
+ reception -> history [taillabel="1",headlabel="1..*",label="保留沟通"];
+ reception -> wait [taillabel="0..1",headlabel="0..1",label="明确转候补"];
+ wait -> offer [taillabel="1",headlabel="0..*",label="形成建议后发布"];
+ reception -> visit [taillabel="0..1",headlabel="0..1",label="唯一成约关联",constraint=false];
+ offer -> visit [taillabel="0..1",headlabel="0..1",label="明确接受后创建"];
+ {rank=same;clinic;patient;staff;}
+ {rank=same;history;wait;}
+ }

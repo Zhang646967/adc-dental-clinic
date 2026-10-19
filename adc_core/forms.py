@@ -5,9 +5,10 @@ from scheduling.selectors import booking_slots
 from adc_core.rules import RuleError, validate_allergies
 
 class PatientForm(forms.Form):
+    reception_case=forms.IntegerField(required=False,widget=forms.HiddenInput,min_value=1)
     clinic = forms.ModelChoiceField(label="建档诊所", queryset=Clinic.objects.none())
     name = forms.CharField(label="姓名", max_length=80)
-    date_of_birth = forms.DateField(label="出生日期", widget=forms.DateInput(attrs={"type": "date"}))
+    date_of_birth = forms.DateField(label="出生日期", widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}))
     billing_address = forms.CharField(label="账单地址", max_length=255)
     phone = forms.CharField(label="电话", max_length=32)
     email = forms.EmailField(label="邮箱（选填）", required=False)
@@ -29,18 +30,28 @@ class PatientForm(forms.Form):
         return result
 
 class AppointmentForm(forms.Form):
+    from scheduling.resource_models import BookingService
+    service=forms.ModelChoiceField(label='预约服务',queryset=BookingService.objects.none(),required=False)
+    consent=forms.BooleanField(label='已核对诊所、服务、医师和起止时间，并取得患者同意',required=False)
     patient_no = forms.CharField(label="患者业务编号", max_length=40, help_text="从患者页复制完整编号。跨店患者先用精确编号检索。")
     slot = forms.ModelChoiceField(label="出诊时段", queryset=None)
-    start = forms.DateTimeField(label="预约开始", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
-    end = forms.DateTimeField(label="预计结束", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
+    start = forms.DateTimeField(label="预约开始", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}))
+    end = forms.DateTimeField(label="预计结束", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}))
     chief_complaint = forms.CharField(label="患者主诉", widget=forms.Textarea(attrs={"rows": 2}), required=False, max_length=2000)
     special_needs = forms.CharField(label="特殊需求", widget=forms.Textarea(attrs={"rows": 2}), required=False, max_length=2000)
     treatment_request = forms.CharField(label="治疗意向（不是已治疗项目）", required=False, max_length=500)
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["slot"].queryset = booking_slots(user)
+        self.fields['service'].queryset=self.BookingService.objects.filter(department__clinic_id__in=clinic_ids(user),is_active=True).select_related('department')
+        from scheduling.resources import policy
+        row=policy(getattr(getattr(user,'_adc_workspace',None),'clinic_id',None))
+        if row:
+            self.fields['service'].required=True;self.fields['consent'].required=True
 
 class RescheduleForm(forms.Form):
+    from scheduling.resource_models import BookingService
+    service=forms.ModelChoiceField(label='预约服务',queryset=BookingService.objects.none(),required=False)
     expected_version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
     slot = forms.ModelChoiceField(label="新的出诊时段", queryset=None)
     start = forms.DateTimeField(label="新的开始时间", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M:%S", attrs={"type": "datetime-local", "step": "1"}))
@@ -49,6 +60,9 @@ class RescheduleForm(forms.Form):
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["slot"].queryset = booking_slots(user)
+        self.fields['service'].queryset=self.BookingService.objects.filter(department__clinic_id__in=clinic_ids(user),is_active=True).select_related('department')
+        from scheduling.resources import policy
+        if policy(getattr(getattr(user,'_adc_workspace',None),'clinic_id',None)):self.fields['service'].required=True
 
 class ActionForm(forms.Form):
     expected_version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
@@ -59,8 +73,8 @@ class ActionForm(forms.Form):
 class SlotForm(forms.Form):
     clinic = forms.ModelChoiceField(label="诊所", queryset=Clinic.objects.none())
     dentist = forms.ModelChoiceField(label="牙医", queryset=Dentist.objects.none())
-    start = forms.DateTimeField(label="开始", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
-    end = forms.DateTimeField(label="结束", widget=forms.DateTimeInput(attrs={"type": "datetime-local"}))
+    start = forms.DateTimeField(label="开始", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}))
+    end = forms.DateTimeField(label="结束", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}))
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["clinic"].queryset = Clinic.objects.filter(pk__in=clinic_ids(user, ("MANAGER",)), is_active=True)

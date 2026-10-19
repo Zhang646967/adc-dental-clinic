@@ -181,5 +181,24 @@ def workspace_worklist(actor):
                     result['cards'].append({'label': '有效候补等待安排', 'count': entries.filter(
                         state='WAITING', latest__gt=now, patient__is_active=True).count(),
                         'url': reverse('schedule_plans'), 'note': '先核对偏好和可用时段，再明确生成、发布建议。'})
+        if role in ('FRONT_DESK','MANAGER','HQ'):
+            from reception.models import ReceptionCase
+            from scheduling.resource_models import ResourceCoordination
+            reception=ReceptionCase.objects.exclude(state__in=['BOOKED','UNBOOKED','WITHDRAWN'])
+            issues=ResourceCoordination.objects.filter(state__in=['OPEN','CONTACT'])
+            if role!='HQ':
+                reception=reception.filter(clinic_id=context.clinic_id)
+                issues=issues.filter(Q(plan__visit__clinic_id=context.clinic_id)|Q(plan__offer__request__clinic_id=context.clinic_id))
+            if role=='FRONT_DESK':
+                groups.append(_group('reception_contacts','本人电话接待及联系期限',reception.filter(owner=actor).select_related('owner').order_by('due_at','pk'),
+                    lambda row:{'title':f'接待 #{row.pk}','detail':row.get_state_display(),'when':row.due_at,
+                        'url':reverse('reception_detail',args=[row.pk]),'action':'核对沟通并继续办理'},
+                    _url('reception_list',queue='mine'),'候选不占位；待联系、待确认及候补等待保留负责人和期限。'))
+            result['cards'].append({'label':'逾期接待联系','count':reception.filter(due_at__lt=now).count(),
+                'url':_url('reception_list',queue='overdue') if role=='FRONT_DESK' else reverse('resource_summary') if role=='HQ' else reverse('operations_dashboard'),
+                'note':'核实负责人与下次期限；统计不包含联系人和沟通文字。'})
+            result['cards'].append({'label':'资源故障待协调','count':issues.count(),
+                'url':reverse('resource_summary') if role=='HQ' else reverse('resource_coordination_list'),
+                'note':'原承诺保留；替换资源、改期和取消分别明确办理。'})
         result['has_items'] = any(group['total'] for group in groups) or any(card['count'] for card in result['cards'])
         return result

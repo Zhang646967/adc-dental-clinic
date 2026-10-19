@@ -49,7 +49,7 @@ def join(request):
         d=form.cleaned_data
         try:services.join_waitlist(actor=request.user,clinic_id=d['clinic'].pk,
             dentist_id=d['preferred_dentist'].pk if d['preferred_dentist'] else None,
-            patient_no=d.get('patient_no'),earliest=d['earliest'],latest=d['latest'])
+            patient_no=d.get('patient_no'),earliest=d['earliest'],latest=d['latest'],service_id=d['service'].pk if d.get('service') else None)
         except EXPECTED_ERRORS as e:add_error(form,e)
         else:messages.success(request,'候补已登记，尚未形成预约。');return redirect('waitlist')
     return render(request,'coordination/form.html',{'title':'登记候补偏好','form':form,

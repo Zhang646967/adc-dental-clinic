@@ -1,7 +1,10 @@
+from datetime import timedelta
 from django import forms
 from accounts.policies import clinic_ids
 from registry.models import Clinic,Dentist
 class JoinForm(forms.Form):
+    from scheduling.resource_models import BookingService
+    service=forms.ModelChoiceField(label='预约服务（启用资源控制的诊所必选）',queryset=BookingService.objects.none(),required=False)
     clinic=forms.ModelChoiceField(label='希望就诊的诊所',queryset=Clinic.objects.none())
     preferred_dentist=forms.ModelChoiceField(label='希望的牙医（不限制则留空）',queryset=Dentist.objects.none(),required=False)
     patient_no=forms.CharField(label='患者业务编号（前台代登记）',required=False,max_length=40)
@@ -23,13 +26,14 @@ class JoinForm(forms.Form):
             self.fields['patient_no'].required=True
         else:self.fields.pop('patient_no')
         self.fields['preferred_dentist'].queryset=Dentist.objects.filter(is_active=True)
+        self.fields['service'].queryset=self.BookingService.objects.filter(is_active=True,department__clinic__in=self.fields['clinic'].queryset).select_related('department')
     def clean(self):
         data = super().clean()
         if data.get('earliest') and data.get('latest'):
             from django.utils import timezone
             from coordination.windows import validate_wait_window, WindowError
             try:
-                validate_wait_window(data['earliest'], data['latest'], now=timezone.now())
+                validate_wait_window(data['earliest'], data['latest'], now=timezone.now(),minimum=timedelta(minutes=data['service'].duration_minutes) if data.get('service') else timedelta(minutes=30))
             except WindowError as exc:
                 self.add_error(exc.field if exc.field in self.fields else None, str(exc))
         return data

@@ -1,0 +1,27 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad=.25,nodesep=.55,ranksep=.75,splines=polyline];
+ node [shape=box,style=rounded,fontname="Noto Sans CJK SC",fontsize=19,color="#334155",penwidth=1.3,margin=".18,.12"];
+ edge [fontname="Noto Sans CJK SC",fontsize=14,color="#475569",arrowsize=.8];
+ start [shape=point,width=.12,label=""];
+ verify [label="待核对"];
+ contact [label="待联系\n负责人＋下次期限"];
+ confirm [label="待患者确认\n负责人＋下次期限"];
+ wait [label="候补等待\n关联原需求＋联系期限"];
+ booked [label="已成约\n保留唯一预约事实",peripheries=2];
+ unbooked [label="未成约\n保留明确原因",peripheries=2];
+ withdrawn [label="已撤回\n保留办理历史",peripheries=2];
+ start -> verify [label="登记来电／保存首次沟通"];
+ verify -> contact [label="资料待核实／约定联系"];
+ contact -> confirm [label="提供方案／待答复"];
+ confirm -> contact [label="未答复／再联系",constraint=false];
+ confirm -> wait [label="无合适安排 [完整建档]／登记候补"];
+ verify -> booked [label="明确同意 [档案及资源齐备]\n／原子成约"];
+ confirm -> booked [label="明确同意／核验成约"];
+ wait -> booked [label="接受原邀约\n／关联同一预约"];
+ contact -> unbooked [label="结束办理 [记录原因]\n／保留未成约结果"];
+ verify -> withdrawn [label="明确撤回／保留沟通"];
+ note [shape=note,style="",fontsize=16,label="主线状态及主要事件。\n办理中可明确结束或撤回。\n查询不占位；追加沟通不成约。\n取消改期不改变已成约事实。"];
+ booked -> note [style=dashed,arrowhead=none,constraint=false];
+ 
+ {rank=same;unbooked;withdrawn;}
+ }

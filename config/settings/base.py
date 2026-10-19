@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 INSTALLED_APPS = [
     "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions",
     "django.contrib.messages", "django.contrib.staticfiles", "django.contrib.postgres",
-    "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment", "operations",
+    "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment", "operations", "reception",
 ]
 MIDDLEWARE = [
     "adc_core.request_trace.RequestTraceMiddleware",

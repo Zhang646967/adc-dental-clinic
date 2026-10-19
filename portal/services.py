@@ -19,11 +19,21 @@ from portal.rules import validate_public_start, BOOKING_MINUTES, HORIZON_DAYS
 
 SALT = "adc.portal.booking.v04"
 
-def public_options(user, clinic_id=None, day=None):
+def public_options(user, clinic_id=None, day=None, service_id=None, dentist_id=None):
     access = patient_access(user)
     now = timezone.now()
+    if service_id:
+        from scheduling.resource_candidates import candidates
+        from scheduling.resources import service_for
+        from scheduling.resource_models import BookingService
+        service = BookingService.objects.select_related('department').get(pk=service_id,department__clinic__is_active=True)
+        if clinic_id and clinic_id != service.department.clinic_id: raise RuleError('服务与所选诊所不一致，请重新选择。')
+        return candidates(clinic_id=service.department.clinic_id,service_id=service_id,day=day or timezone.localdate(),
+            patient_id=access.patient_id,dentist_id=dentist_id)
+    from scheduling.resource_models import ResourcePolicy
     slots = AvailabilitySlot.objects.filter(is_active=True, booking_paused=False, clinic__is_active=True,
         dentist__is_active=True, ends_at__gt=now, starts_at__lt=now+timedelta(days=HORIZON_DAYS)).select_related("clinic","dentist")
+    slots = slots.exclude(clinic_id__in=ResourcePolicy.objects.values("clinic_id"))
     if clinic_id: slots = slots.filter(clinic_id=clinic_id)
     if day:
         from datetime import time
@@ -61,12 +71,23 @@ def public_options(user, clinic_id=None, day=None):
             start = end
     return rows
 
-def preview_booking(*, user, slot_id, start):
+def preview_booking(*, user, slot_id, start, service_id=None):
     access = patient_access(user)
     slot = AvailabilitySlot.objects.select_related("clinic","dentist").get(pk=slot_id,
         is_active=True, booking_paused=False, clinic__is_active=True, dentist__is_active=True)
-    end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
+    from scheduling.resources import policy,choose_bundle,service_for
+    from adc_core.rules import validate_slot
+    bundle=None
+    if policy(slot.clinic_id):
+        service=service_for(slot.clinic_id,service_id)
+        end=start+timedelta(minutes=service.duration_minutes)
+        _resource_public_time(start,end,slot)
+        from coordination.reservations import assert_free
+        assert_free(access.patient_id,slot.dentist_id,start,end)
+        bundle=choose_bundle(slot=slot,start=start,end=end,service_id=service_id)
+    else:end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
     data = {"uid":user.pk,"access":access.pk,"slot":slot.pk,"start":start.isoformat(),"nonce":str(uuid4()),"intake_revision":slot.intake_revision}
+    data.update(service=service_id,resources=bundle,end=end.isoformat())
     return slot, end, signing.dumps(data, salt=SALT, compress=True)
 
 def _read_token(token, user):
@@ -94,9 +115,14 @@ def confirm_booking(*, actor, token):
     patient = Patient.objects.select_for_update().get(pk=access.patient_id, is_active=True)
     try: start = datetime.fromisoformat(data["start"])
     except (ValueError, TypeError) as exc: raise RuleError("预约时间格式失效。") from exc
-    end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
+    from scheduling.resources import policy
+    if policy(slot.clinic_id):
+        if not data.get('resources'):raise RuleError('本店已启用诊疗资源，请重新选择服务和时间。')
+        end=datetime.fromisoformat(data['end']);_resource_public_time(start,end,slot)
+    else:end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
     visit = create_visit_locked(actor=actor, patient=patient, slot=slot, start=start, end=end,
-                       chief_complaint="患者端预约；具体需求由接诊人员确认。")
+                       chief_complaint="患者端预约；具体需求由接诊人员确认。",
+                       service_id=data.get("service"),resource_snapshot=data.get("resources"))
     BookingReceipt.objects.create(nonce=data["nonce"], access=access, visit=visit)
     emit(actor, "PORTAL_BOOKING_CONFIRMED", visit, visit=visit, summary={"source":"patient_portal"})
     return visit
@@ -108,14 +134,27 @@ def cancel_booking(*, actor, visit_id, expected_version, reason):
     access = patient_access(actor, lock=True)
     preview = Visit.objects.get(pk=visit_id, patient_id=access.patient_id)
     _lock_slots([preview.availability_slot_id])
+    from coordination.reservations import lock_resources
+    from scheduling.resources import lock_physical
+    lock_resources(patients=[preview.patient_id],dentists=[preview.dentist_id]);lock_physical(preview.clinic_id)
     visit = Visit.objects.select_for_update().get(pk=visit_id, patient_id=access.patient_id)
     _assert_current(visit, expected_version)
     if visit.status != "SCHEDULED" or visit.scheduled_start <= timezone.now():
         raise RuleError("仅可自助取消尚未开始的预约；其他情况请联系前台。")
     if not isinstance(reason,str) or not 1 <= len(reason.strip()) <= 500:
         raise RuleError("请填写1至500字的取消原因。")
+    from scheduling.resources import release_visit_locked
+    release_visit_locked(visit, 'PORTAL_CANCELLED')
     visit.status="CANCELLED";visit.cancellation_party="PATIENT";visit.cancellation_reason=reason.strip()
     visit.lock_version+=1
     visit.save(update_fields=["status","cancellation_party","cancellation_reason","lock_version"])
     emit(actor,"PORTAL_CANCELLED",visit,visit=visit,reason=reason.strip(),summary={"status":visit.status})
     return visit
+
+
+def _resource_public_time(start,end,slot):
+    from adc_core.rules import validate_slot
+    now=timezone.now()
+    validate_slot(start,end,slot.starts_at,slot.ends_at,now)
+    if start>now+timedelta(days=HORIZON_DAYS) or (start-slot.starts_at).total_seconds()%900:
+        raise RuleError('请选择未来十四天内、与出诊起点按十五分钟对齐的时间。')

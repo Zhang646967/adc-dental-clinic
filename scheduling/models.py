@@ -67,3 +67,8 @@ class VisitRequest(models.Model):
     treatment_type = models.ForeignKey("registry.TreatmentType", on_delete=models.PROTECT, null=True, blank=True)
     class Meta:
         db_table = "adc_visit_request"
+
+# Scheduling owns resource calendars; assets remain owned by equipment.
+from scheduling.resource_models import (ResourcePolicy, Department, DepartmentHours, TreatmentRoom,
+    BookingService, ServiceRequirement, ResourceBinding, ResourceBlock, ResourcePlan,
+    ResourceClaim, ResourceCoordination, ResourceAction)

@@ -5,7 +5,7 @@ const {instance}=require('@viz-js/viz'),{chromium}=require('playwright');
  const folder=path.resolve(__dirname,'../diagrams'),viz=await instance();
  const browser=await chromium.launch({channel:'chrome',headless:true});
  const page=await browser.newPage({viewport:{width:2400,height:1800},deviceScaleFactor:1});
- for(const name of ['domain_care','domain_appointment','visit_state','improvement_state']){
+ for(const name of ['domain_care','domain_appointment','visit_state','improvement_state','domain_reception','domain_resources','reception_state','resource_state']){
   // WASM Graphviz has no CJK font metrics. Reserve measured label widths using
   // monospace proxies, then restore the original text in the resulting SVG.
   const original=fs.readFileSync(path.join(folder,name+'.dot'),'utf8');

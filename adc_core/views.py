@@ -81,16 +81,22 @@ def patient_detail(request, pk):
 def patient_create(request):
     if not has_role(request.user, "FRONT_DESK"):
         raise PermissionDenied
-    form = PatientForm(request.POST or None, user=request.user)
+    form = PatientForm(request.POST or None, user=request.user,initial={'reception_case':request.GET.get('reception','')})
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data
         try:
+            reception_case=None
+            if d.get('reception_case'):
+                from reception.services import cases_for
+                reception_case=cases_for(request.user).get(pk=d['reception_case'])
             p = create_patient(actor=request.user, clinic_id=d["clinic"].pk,
                                details={k: d[k] for k in PATIENT_FIELDS}, allergy_status=d["allergy_status"], allergy_ids=[a.pk for a in d["allergies"]])
         except EXPECTED_ERRORS as exc:
             add_error(form, exc)
         else:
             messages.success(request, "患者档案已创建。")
+            if reception_case:
+                return redirect(reverse('reception_detail',args=[reception_case.pk])+'?'+urlencode({'patient_no':p.patient_no}))
             return redirect("patient_detail", pk=p.pk)
     return render(request, "form.html", {"form": form, "title": "建立患者档案", "subtitle": "仅录入虚构演示数据；未知不等于无过敏。", "button": "保存患者档案"})
 
@@ -119,10 +125,26 @@ def visit_list(request):
 def visit_create(request):
     if not has_role(request.user, "FRONT_DESK"):
         raise PermissionDenied
-    form = AppointmentForm(request.POST or None, user=request.user, initial={"patient_no": request.GET.get("patient_no", "")[:40]})
+    from scheduling.resources import policy
+    from scheduling.resource_forms import ConfirmForm
+    from scheduling.booking import prepare_booking,confirm_booking
+    resource_mode=policy(request.workspace.clinic_id) is not None
+    if request.method=='POST' and request.POST.get('action')=='confirm':
+        confirmation=ConfirmForm(request.POST)
+        if confirmation.is_valid():
+            try:v,_=confirm_booking(actor=request.user,proposal_token=confirmation.cleaned_data['proposal_token'],confirmed=confirmation.cleaned_data['confirmed'])
+            except EXPECTED_ERRORS as exc:add_error(confirmation,exc)
+            else:messages.success(request,'预约已确认，资源占用已一并保存。');return redirect('visit_detail',pk=v.pk)
+        return render(request,'scheduling/booking_confirm.html',{'form':confirmation,'failed':True},status=409)
+    initial={k:request.GET.get(k,'') for k in ('patient_no','service','slot','start','end')}
+    form = AppointmentForm(request.POST or None, user=request.user, initial=initial)
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data
         try:
+            if resource_mode:
+                preview=prepare_booking(actor=request.user,patient_no=d['patient_no'],slot_id=d['slot'].pk,start=d['start'],end=d['end'],
+                    service_id=d['service'].pk,consent=d['consent'],chief_complaint=d['chief_complaint'],special_needs=d['special_needs'],treatment_request=d['treatment_request'])
+                return render(request,'scheduling/booking_confirm.html',{'preview':preview,'form':ConfirmForm(initial={'proposal_token':preview['proposal_token']})})
             v = create_appointment(actor=request.user, patient_no=d["patient_no"], slot_id=d["slot"].pk,
                 start=d["start"], end=d["end"], chief_complaint=d["chief_complaint"], special_needs=d["special_needs"],
                 requests=[d["treatment_request"]] if d["treatment_request"] else [])
@@ -131,7 +153,7 @@ def visit_create(request):
         else:
             messages.success(request, "预约已保存。")
             return redirect("visit_detail", pk=v.pk)
-    return render(request, "form.html", {"form": form, "title": "创建预约", "subtitle": "时间采用北京时间；同时检查患者与牙医的跨店冲突。", "button": "确认预约"})
+    return render(request, "form.html", {"form": form, "title": "创建预约", "subtitle": "请先从服务与资源查询选择可行安排；时间采用北京时间。", "button": "核对预约方案" if resource_mode else "确认预约"})
 
 @login_required
 @require_http_methods(["GET", "POST"])
@@ -153,7 +175,8 @@ def visit_detail(request, pk):
             else:
                 messages.success(request, "预约结果已更新。")
                 return redirect(reverse("visit_detail", args=[v.pk]) + ("?"+urlencode({"coord_slot":origin}) if origin else ""))
-    return render(request, "visit_detail.html", {"visit": v, "form": form, "can_act": can_act,
+    from scheduling.resources import current_plan
+    return render(request, "visit_detail.html", {"visit": v, "resource_plan": current_plan(v), "form": form, "can_act": can_act,
                   "can_care": bindings(request.user).filter(role="DENTIST",scope_kind="SELF_DENTIST",user__dentist_id=v.dentist_id).exists(),
                   "events": v.events.order_by("-recorded_at")[:15], "requests": v.requests.all(), **return_context(origin), **visit_chain_context(request.user, v, origin)})
 
@@ -190,7 +213,9 @@ def visit_reschedule(request, pk):
     if v.status != 'SCHEDULED':
         return render(request, 'scheduling/reschedule_recovery.html', {'visit': v,
             'problem': '原预约当前不能普通改期。请打开原记录核对状态与直接关联的后继预约。', **return_context(origin)}, status=409)
-    initial = {'expected_version': v.lock_version}
+    from scheduling.resources import current_plan
+    original_plan=current_plan(v)
+    initial = {'expected_version': v.lock_version,'service':original_plan.service_id if original_plan else None}
     selection_problem = ''
     if request.method == 'GET' and any(name in request.GET for name in ('slot', 'start', 'end')):
         try:
@@ -208,7 +233,7 @@ def visit_reschedule(request, pk):
         d = form.cleaned_data
         try:
             preview = prepare_reschedule(actor=request.user, visit_id=v.pk, expected_version=d['expected_version'],
-                new_slot_id=d['slot'].pk, start=d['start'], end=d['end'], reason=d['reason'], origin=origin)
+                new_slot_id=d['slot'].pk, start=d['start'], end=d['end'], reason=d['reason'], origin=origin,service_id=d['service'].pk if d.get('service') else None)
         except EXPECTED_ERRORS as exc:
             add_error(form, exc)
         except DatabaseError:

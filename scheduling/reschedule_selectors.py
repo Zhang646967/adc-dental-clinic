@@ -61,6 +61,16 @@ def replacement_options(*, actor, visit_id, day, dentist_id=None):
         today = now.astimezone(BUSINESS_TZ).date()
         if day < today or day > today + timedelta(days=HORIZON_DAYS):
             raise RuleError('请选择今日起未来14天内的日期。')
+        from scheduling.resources import policy,current_plan
+        if policy(visit.clinic_id):
+            plan=current_plan(visit)
+            if plan is None:raise RuleError('原预约尚未核实服务和资源，请先进入资源协调。')
+            from scheduling.resource_candidates import candidates
+            rows=candidates(clinic_id=visit.clinic_id,service_id=plan.service_id,day=day,
+                patient_id=visit.patient_id,dentist_id=dentist_id,ignore_visit=visit.pk)
+            rows=[dict(r,dentist=r['slot'].dentist.name) for r in rows if not (r['slot'].dentist_id==visit.dentist_id and r['start']==visit.scheduled_start and r['end']==visit.scheduled_end)]
+            return {'rows':rows[:MAX_OPTIONS],'observed_at':now,'limited':len(rows)>MAX_OPTIONS,'checked_cells':len(rows),
+                'duration_minutes':plan.service.duration_minutes,'limit_reason':'按服务时长及诊疗资源核对'}
         duration = visit.scheduled_end - visit.scheduled_start
         result = {'rows': [], 'observed_at': now, 'limited': False, 'checked_cells': 0,
                   'duration_minutes': duration.total_seconds() / 60, 'limit_reason': ''}
