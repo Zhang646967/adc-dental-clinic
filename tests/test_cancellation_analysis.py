@@ -213,6 +213,27 @@ class CancellationWorkTests(B11Fixture,TransactionTestCase):
 
 class ImprovementTests(B11Fixture,TransactionTestCase):
     def setUp(self):self.setup_b11()
+    @override_settings(LANGUAGE_CODE='zh-hans')
+    def test_native_initial_dates_are_usable_without_manual_reentry(self):
+        from html.parser import HTMLParser
+        from datetime import date
+        class Dates(HTMLParser):
+            def __init__(self):super().__init__();self.values={}
+            def handle_starttag(self, tag, attrs):
+                a=dict(attrs)
+                if tag=='input' and a.get('type')=='date':self.values[a['name']]=a.get('value','')
+        self.client.force_login(self.manager);client=self.client
+        response=client.get(reverse('appointment_improvement_new'))
+        self.assertEqual(response.status_code,200)
+        dates=Dates();dates.feed(response.content.decode())
+        self.assertEqual(set(dates.values),{'baseline_start','baseline_end','due_on'})
+        for value in dates.values.values():self.assertEqual(date.fromisoformat(value).isoformat(),value)
+        v=self.historical()
+        self.client.force_login(self.front)
+        response=self.client.get(reverse('cancellation_followup',args=[v.pk]))
+        dates=Dates();dates.feed(response.content.decode())
+        self.assertEqual(date.fromisoformat(dates.values['due_on']),timezone.localdate())
+
     def test_complete_measure_with_independent_review(self):
         self.historical();row=self.plan()
         with patch('django.utils.timezone.now',return_value=self.start+timedelta(days=1)):
