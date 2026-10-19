@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "source_rules": 1046,
+  "postgresql_http_concurrency": 1199,
+  "new_b11_cases": 44,
+  "new_b11_test_seconds": 3.984,
+  "full_database_seconds": 163.112,
+  "additive_migrations": 1,
+  "previous_30_migration_files_unchanged": true,
+  "scope": "developer regression; browser/recovery/live delivery recorded separately"
+}

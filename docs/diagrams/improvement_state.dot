@@ -1,0 +1,22 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad=.2,nodesep=.8,ranksep=.82,splines=polyline];
+ node [shape=box,style=rounded,fontname="Noto Sans CJK SC",fontsize=18,margin=".2,.14",color="#334155",penwidth=1.3];
+ edge [fontname="Noto Sans CJK SC",fontsize=14,color="#475569",arrowsize=.7];
+ initial [shape=point,width=.14];
+ OPEN [label="待开始 OPEN\n责任人、期限及原窗口已保存"];
+ WORKING [label="执行中 WORKING\n记录实际办理与依据"];
+ READY [label="待复核 READY\n执行人已明确提交"];
+ CLOSED [label="已复核 CLOSED\n后续窗口及复核依据保留"];
+ CANCELLED [label="已终止 CANCELLED\n终止依据保留"];
+ initial -> OPEN [label="主管建立／保存原窗口数量与分母"];
+ OPEN -> WORKING [label="负责人开始"];
+ WORKING -> READY [label="负责人提交／保存实际执行"];
+ READY -> WORKING [label="另一主管退回／记录待补事项",constraint=false];
+ READY -> CLOSED [label="另一主管复核 [身份独立、完整窗口且不早于最近开始日]\n／核对样本、比较限制与结论"];
+ WORKING -> OPEN [label="主管重新分配／重设责任与期限",constraint=false];
+ READY -> OPEN [label="主管重新分配 [包括负责人失效]",constraint=false];
+ OPEN -> CANCELLED [label="主管终止／记录原因"];
+ WORKING -> CANCELLED [label="主管终止"];
+ READY -> CANCELLED [label="主管终止"];
+ {rank=same;CLOSED;CANCELLED;}
+ }

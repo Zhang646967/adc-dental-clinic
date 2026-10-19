@@ -13,6 +13,10 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'cancellation_analysis':{'MANAGER','HQ'},'cancellation_followups':{'FRONT_DESK'},
+ 'cancellation_followup':{'FRONT_DESK'},'appointment_improvements':{'MANAGER','FRONT_DESK'},
+ 'appointment_improvement_detail':{'MANAGER','FRONT_DESK'},'appointment_improvement_new':{'MANAGER'},
+ 'appointment_improvement_step':{'MANAGER','FRONT_DESK'},
  'payment_accounts':{'MANAGER','FINANCE'},'payment_account_new':{'FINANCE'},'payment_account_state':{'FINANCE'},
  'reconciliation_home':{'MANAGER','FINANCE','HQ'},'statement_template':{'MANAGER'},'statement_import':{'MANAGER'},
  'statement_batch':{'MANAGER','FINANCE'},'statement_match':{'MANAGER','FINANCE'},

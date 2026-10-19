@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="business-flow"><p><a href="{% url 'appointment_improvements' %}">← 改进措施</a></p><h1>{{ title }}</h1>
+<p>措施聚焦一个诊所、星期和开始时段。执行和复核有明确责任；患者安排、候补、出诊和账务通过原流程办理。</p>
+{% if row %}<section class="panel"><h2>当前措施</h2><p>{{ row.plan }}</p><p>{{ row.get_state_display }} · {{ row.assigned_to.username }} · {{ row.due_on|date:'Y-m-d' }}</p></section>{% endif %}
+<form method="post" class="panel form-panel">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">{{ form.as_div }}<button type="submit"{% if adc_read_only %} disabled{% endif %}>预览措施办理</button></form></div>{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}{% block title %}预约时段取消分析 · ADC{% endblock %}{% block content %}<div class="business-flow">
+<div class="workspace-heading"><p class="eyebrow">预约服务 · 从原因到改进</p><h1>预约时段取消分析</h1><p>找出值得调查的时段，再核实原因、明确责任和措施。数字变化不自动证明措施有效。</p></div>
+<nav class="actions"><a class="button secondary" href="{% url 'operations_dashboard' %}">履约总览</a>{% if workspace_role == 'MANAGER' %}<a class="button" href="{% url 'appointment_improvements' %}">改进措施与复核</a>{% endif %}</nav>
+<section class="panel"><form method="get" class="filter-form">{{ form.as_div }}<button type="submit">查看分析</button></form></section>
+{% if report.choose_clinic %}<p class="notice">请选择一家获授权诊所，按相同诊所、星期和开始时段比较。跨店履约汇总请查看“履约总览”。</p>{% elif report %}
+<p class="report-metadata">预约开始日期 {{ report.start|date:'Y-m-d' }} 至 {{ report.end|date:'Y-m-d' }} · 查询 {{ report.as_of|date:'Y-m-d H:i:s' }}（北京时间）· {{ report.policy }} · 手动刷新</p>
+{% with m=report.metrics %}<div class="management-summary">
+<div class="metric"><span>患者取消率</span><strong>{{ m.cancel_rate|default_if_none:'无法计算' }}{% if m.cancel_rate != None %}%{% endif %}</strong><p>{{ m.patient_cancel }} / {{ m.denominator }}；分母为到诊、患者取消及核实爽约。</p></div>
+<div class="metric"><span>整体取消率</span><strong>{{ m.overall_rate|default_if_none:'无法计算' }}{% if m.overall_rate != None %}%{% endif %}</strong><p>患者取消 {{ m.patient_cancel }} + 诊所取消 {{ m.clinic_cancel }}，除以已核实结果 {{ m.overall_denominator }}。</p></div>
+<div class="metric"><span>状态完整率</span><strong>{{ m.completeness|default_if_none:'无法计算' }}{% if m.completeness != None %}%{% endif %}</strong><p>到期未核实 {{ m.pending }}；爽约 {{ m.no_show }}，爽约率 {{ m.no_show_rate|default_if_none:'无法计算' }}{% if m.no_show_rate != None %}%{% endif %}。</p></div></div>{% endwith %}
+<section class="panel"><h2>哪些时段需要优先调查？</h2>
+<p>只列主要分母至少30且状态完整率至少95%的格子，按患者取消率排序。这是调查提示，不是统计显著性或人员绩效结论。</p>
+{% if report.ranking %}<ol>{% for c in report.ranking %}<li><a href="{{ c.url }}">{{ c.day_label }} {{ c.band_label }}</a>：患者取消 {{ c.patient_cancel }}/{{ c.denominator }}，{{ c.cancel_rate }}%；诊所取消 {{ c.clinic_cancel }}，完整率 {{ c.completeness }}%。</li>{% endfor %}</ol>
+{% else %}<p class="notice">当前没有满足排行条件的时段。先核实缺失结果、积累样本；仍可查看每格数量并安排原因跟进。</p>{% endif %}
+<div class="table-scroll" tabindex="0" aria-label="星期与开始时段分析，可横向滚动"><table><caption>全店星期 × 预约开始时段：患者取消率及分子／分母。选择格子查看其原因；跨午夜按开始时段归组。</caption><thead><tr><th scope="col">星期</th>{% for code,label in bands %}<th scope="col">{{ label }}</th>{% endfor %}</tr></thead><tbody>
+{% for r in report.grid %}<tr><th scope="row">{{ r.label }}</th>{% for c in r.cells %}<td><a href="{{ c.url }}">{{ c.cancel_rate|default_if_none:'无法计算' }}{% if c.cancel_rate != None %}%{% endif %}</a><br>{{ c.patient_cancel }}/{{ c.denominator }}<br><small>{{ c.sample_note }}{% if c.pending %} · 待核实 {{ c.pending }}{% endif %}</small></td>{% endfor %}</tr>{% endfor %}
+</tbody></table></div></section>
+<section class="panel"><h2>当前筛选的取消原因与联系进度</h2><p>分类依据前台核实结果；原始取消说明保留。未登记或未提供原因不会自动归类。</p>
+<div class="table-scroll" tabindex="0"><table><caption>成熟取消预约的当前原因分类</caption><thead><tr><th>原因</th><th>数量</th></tr></thead><tbody>{% for code,label,count in report.reasons %}<tr><td>{{ label }}</td><td>{{ count }}</td></tr>{% endfor %}</tbody></table></div>
+<p>未登记跟进 {{ report.followups.missing }}；待联系／待回复 {{ report.followups.pending }}；联系逾期 {{ report.followups.overdue }}。</p>
+<h3>取消提前量</h3><p>开始前24小时内（含24小时）{{ report.lead.within24 }}；超过24小时 {{ report.lead.earlier }}；开始后取消 {{ report.lead.after_start }}；取消事件时间未知 {{ report.lead.unknown }}。缺失时间不以创建日期代替。</p>
+{% if report.new_action_url %}<a class="button" href="{{ report.new_action_url }}">为当前时段安排改进措施</a><p>先选定星期和时段再建立措施；系统将保存原窗口数量及分母。患者联系由本店前台在“取消原因跟进”办理。</p>{% endif %}</section>
+<section class="panel"><h2>如何把分析用到日常办理？</h2><ul><li>行程变化或联系问题：按患者偏好联系，提供合适替代时间和取消改期说明。</li><li>诊所或医师调整：先核对既有预约，协商替代医师或日期，患者同意后再正式办理。</li><li>临近取消：通过原候补流程邀约愿意候补的患者，明确确认后补位。</li><li>结果和原因缺失：先核实待办，再评估时段。不要通过改变分母制造改善。</li></ul>
+<p>措施负责人记录实际执行，另一位主管核对后续窗口与依据。联系记录不会自动预约、取消、发短信或改账。</p></section>
+<details class="panel"><summary>口径与比较限制</summary><p>仅分析预约结束时间已到的记录；未来未成熟 {{ report.future }} 条、改期前身 {{ report.replaced }} 条单列排除。无治疗关闭计为到诊。区间左闭右开，时段按北京时间归组。</p><p>原因分类为查询时最新核实结果；历史结果可能因后续核实而重述。相同星期和时段仍可能有服务结构、节假日和提前预约天数差异；系统尚未提供标准化服务类型分层，不能据此解释因果。本页不展示患者身份、联系方式或病历。</p></details>
+{% endif %}</div>{% endblock %}

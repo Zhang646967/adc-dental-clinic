@@ -12,6 +12,7 @@ from care import correction_views
 handler500 = 'adc_core.request_trace.server_error'
 
 urlpatterns = [
+    path("", include("operations.urls")),
     path("", include("finance.reconciliation_urls")),
     path("", include("finance.daily_urls")),
     path("", include("equipment.urls")),

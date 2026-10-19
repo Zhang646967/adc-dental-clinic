@@ -1,0 +1,26 @@
+digraph G {
+ graph [rankdir=TB, bgcolor="white", pad=.2, nodesep=.48, ranksep=.62, splines=polyline, fontname="Noto Sans CJK SC"];
+ node [shape=record, fontname="Noto Sans CJK SC", fontsize=17, color="#334155", penwidth=1.3, margin=".15,.10", width=2.4];
+ edge [dir=none, fontname="Noto Sans CJK SC", fontsize=13, color="#475569", labeldistance=1.8];
+ patient [label="{患者\nPatient|稳定患者编号\l当前联系资料\l}"];
+ clinic [label="{诊所\nClinic|业务所属诊所\l}"];
+ dentist [label="{医师\nDentist|负责诊疗的医师\l}"];
+ slot [label="{出诊时段\nAvailabilitySlot|起止时间、接收状态\l}"];
+ visit [label="{预约与就诊\nVisit|计划起止、实际到诊与结果\l同次就诊的稳定身份\l}"];
+ version [label="{就诊版本\nVisitRecordVersion|草稿／发布／弃用\l过敏复核、临床与费用快照\l}"];
+ line [label="{实际治疗\nTreatmentRecord|某版本的治疗项目与金额\l}"];
+ invoice [label="{逻辑结算单\nInvoice|同次就诊唯一单号\l当前已发布版本\l}"];
+ correction [label="{更正申请\nCorrectionRequest|申请人与独立审核人\l原版与拟更正版依据\l}"];
+ clinic -> slot [taillabel="1",headlabel="0..*",label="安排"];
+ dentist -> slot [taillabel="1",headlabel="0..*",label="出诊"];
+ slot -> visit [taillabel="1",headlabel="0..*",label="覆盖"];
+ patient -> visit [taillabel="1",headlabel="0..*",label="接受服务"];
+ visit -> version [taillabel="1",headlabel="0..*",label="形成版本"];
+ version -> line [taillabel="1",headlabel="0..*",label="包含"];
+ visit -> invoice [taillabel="1",headlabel="0..1",label="结算"];
+ invoice -> version [taillabel="0..1",headlabel="1",label="当前发布",style=dashed,constraint=false];
+ visit -> correction [taillabel="1",headlabel="0..*",label="申请更正"];
+ correction -> version [taillabel="0..1",headlabel="0..1",label="拟更正版",style=dashed,constraint=false];
+ {rank=same;patient;clinic;dentist;}
+ {rank=same;version;invoice;correction;}
+ }

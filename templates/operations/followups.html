@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block content %}<div class="business-flow">
+<div class="workspace-heading"><p class="eyebrow">本店前台 · 预约取消后的服务</p><h1>取消原因跟进</h1><p>核对原说明，明确联系责任和下次期限。取消记录保留；另约仍通过原预约流程确认。</p></div>
+<nav class="actions"><a class="button secondary" href="{% url 'appointment_improvements' %}">我的改进措施</a><a class="button secondary" href="{% url 'visits' %}">预约清单</a></nav>
+<p>未登记 {{ totals.missing }} · 待联系／待回复 {{ totals.pending }} · 联系逾期 {{ totals.overdue }}</p>
+<section class="panel"><form method="get" class="filter-form">{{ form.as_div }}<button>筛选待办</button></form></section>
+{% for v in rows %}<section class="panel"><h2><a href="{% url 'cancellation_followup' v.pk %}">{{ v.visit_no }}</a> · {{ v.patient.name }}</h2><p>{{ v.scheduled_start|date:'Y-m-d H:i' }} · {{ v.dentist.name }} · {{ v.get_cancellation_party_display }}发起取消</p>
+{% if v.followup %}<p>{{ v.followup.get_reason_code_display }} · {{ v.followup.get_state_display }} · 责任人 {{ v.followup.assigned_to.username }}{% if v.followup.due_on %} · 联系期限 {{ v.followup.due_on|date:'Y-m-d' }}{% endif %}{% if not v.owner_available %} · 原负责人授权失效，请重新分配{% endif %}</p>{% else %}<p>尚未登记跟进；取消原因未分类。</p>{% endif %}
+<a class="button" href="{% url 'cancellation_followup' v.pk %}">核对原因与联系结果</a></section>{% empty %}<p class="notice">当前筛选没有取消待办。可切换“全部”查阅已完成的联系记录。</p>{% endfor %}
+{% include 'operations/pagination.html' %}</div>{% endblock %}
