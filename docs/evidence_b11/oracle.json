@@ -1,0 +1,217 @@
+{
+  "cases": [
+    {
+      "clinic": 1,
+      "raw_cells": {
+        "10_12": {
+          "A": 30,
+          "P": 30,
+          "C": 0,
+          "N": 0,
+          "U": 0
+        },
+        "08_10": {
+          "A": 6,
+          "P": 2,
+          "C": 1,
+          "N": 1,
+          "U": 3
+        }
+      },
+      "independent_rates": {
+        "patient": "22.22",
+        "no_show": "11.11",
+        "overall": "30.00",
+        "completeness": "76.92"
+      },
+      "raw_totals": {
+        "A": 36,
+        "P": 32,
+        "C": 1,
+        "N": 1,
+        "U": 3
+      },
+      "history_versions": 2
+    },
+    {
+      "clinic": 2,
+      "raw_cells": {
+        "10_12": {
+          "A": 30,
+          "P": 30,
+          "C": 0,
+          "N": 0,
+          "U": 0
+        },
+        "08_10": {
+          "A": 6,
+          "P": 2,
+          "C": 1,
+          "N": 1,
+          "U": 3
+        }
+      },
+      "independent_rates": {
+        "patient": "22.22",
+        "no_show": "11.11",
+        "overall": "30.00",
+        "completeness": "76.92"
+      },
+      "raw_totals": {
+        "A": 36,
+        "P": 32,
+        "C": 1,
+        "N": 1,
+        "U": 3
+      },
+      "history_versions": 1
+    },
+    {
+      "clinic": 3,
+      "raw_cells": {
+        "10_12": {
+          "A": 30,
+          "P": 30,
+          "C": 0,
+          "N": 0,
+          "U": 0
+        },
+        "08_10": {
+          "A": 6,
+          "P": 2,
+          "C": 1,
+          "N": 1,
+          "U": 3
+        }
+      },
+      "independent_rates": {
+        "patient": "22.22",
+        "no_show": "11.11",
+        "overall": "30.00",
+        "completeness": "76.92"
+      },
+      "raw_totals": {
+        "A": 36,
+        "P": 32,
+        "C": 1,
+        "N": 1,
+        "U": 3
+      },
+      "history_versions": 1
+    },
+    {
+      "clinic": 4,
+      "raw_cells": {
+        "10_12": {
+          "A": 30,
+          "P": 30,
+          "C": 0,
+          "N": 0,
+          "U": 0
+        },
+        "08_10": {
+          "A": 6,
+          "P": 2,
+          "C": 1,
+          "N": 1,
+          "U": 3
+        }
+      },
+      "independent_rates": {
+        "patient": "22.22",
+        "no_show": "11.11",
+        "overall": "30.00",
+        "completeness": "76.92"
+      },
+      "raw_totals": {
+        "A": 36,
+        "P": 32,
+        "C": 1,
+        "N": 1,
+        "U": 3
+      },
+      "history_versions": 1
+    },
+    {
+      "clinic": 5,
+      "raw_cells": {
+        "10_12": {
+          "A": 30,
+          "P": 30,
+          "C": 0,
+          "N": 0,
+          "U": 0
+        },
+        "08_10": {
+          "A": 6,
+          "P": 2,
+          "C": 1,
+          "N": 1,
+          "U": 3
+        }
+      },
+      "independent_rates": {
+        "patient": "22.22",
+        "no_show": "11.11",
+        "overall": "30.00",
+        "completeness": "76.92"
+      },
+      "raw_totals": {
+        "A": 36,
+        "P": 32,
+        "C": 1,
+        "N": 1,
+        "U": 3
+      },
+      "history_versions": 1
+    }
+  ],
+  "checks": [
+    "original-period visits 1",
+    "insufficient cell raw facts 1",
+    "sufficient cell raw facts 1",
+    "independent decimal formulas 1",
+    "raw group totals 1",
+    "original cancelled visit retained 1",
+    "accountable followup 1",
+    "original-period visits 2",
+    "insufficient cell raw facts 2",
+    "sufficient cell raw facts 2",
+    "independent decimal formulas 2",
+    "raw group totals 2",
+    "original cancelled visit retained 2",
+    "accountable followup 2",
+    "original-period visits 3",
+    "insufficient cell raw facts 3",
+    "sufficient cell raw facts 3",
+    "independent decimal formulas 3",
+    "raw group totals 3",
+    "original cancelled visit retained 3",
+    "accountable followup 3",
+    "original-period visits 4",
+    "insufficient cell raw facts 4",
+    "sufficient cell raw facts 4",
+    "independent decimal formulas 4",
+    "raw group totals 4",
+    "original cancelled visit retained 4",
+    "accountable followup 4",
+    "original-period visits 5",
+    "insufficient cell raw facts 5",
+    "sufficient cell raw facts 5",
+    "independent decimal formulas 5",
+    "raw group totals 5",
+    "original cancelled visit retained 5",
+    "accountable followup 5",
+    "actual rebooking same patient clinic and active",
+    "reason correction retained versions",
+    "four remaining followups pending with deadlines",
+    "current action waits for real later window",
+    "historical synthetic action independently reviewed",
+    "duplicate confirmations have one event"
+  ],
+  "passed": true,
+  "financial_and_clinical_groups_unchanged": 13,
+  "check_count": 42,
+  "synthetic": true,
+  "application_commit": "75056a7300baf3b4d25df4e76ac28fe655b2d95e"
+}

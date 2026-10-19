@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "application_commit": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39210907593",
+  "architecture": "arm64",
+  "image": "sha256:44e1b3642b726e4e69f8da820d025c16317d94f42d83ae8673fbf9552f1439e6",
+  "deployment_uses_exact_business_tested_image": true,
+  "database_container_preserved": true,
+  "private_configurations_preserved": 70,
+  "business_fingerprints_preserved": 48,
+  "migration_additions": {
+    "original_models": 48,
+    "new_empty_business_tables": 3,
+    "additive_permission_rows": 12,
+    "additive_content_type_rows": 3
+  },
+  "rc_tag_preserved": true,
+  "planned_restarts": [
+    "web",
+    "notification-worker",
+    "operations",
+    "gateway"
+  ],
+  "new_observation_identity": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
+  "old_observer_preexisting_exit_recorded": true,
+  "old_observation_status": "UNKNOWN_OBSERVER_UNAVAILABLE",
+  "six_application_conditions": "HEALTHY",
+  "host_state": "HEALTHY",
+  "new_launchd_job": false,
+  "nginx_configuration_loaded_and_valid": true,
+  "new_ui_and_static_served": true,
+  "original_business_test_data_injected": false,
+  "mac_browser_checks": 149,
+  "mac_accounts": 9,
+  "roles": 7,
+  "mac_business_writes": false,
+  "encrypted_before_and_after_backups_verified": true,
+  "old_observations_and_host_journal_encrypted_and_retained": true,
+  "course_report": {
+    "pages": 102,
+    "business_use_cases": 56,
+    "shared_subfunctions": 1,
+    "complete_specifications": 57,
+    "figures": 24,
+    "word_sha256": "79a532bc9f8cbfd0bf628cd676340930d8150410e5b97aaaae3fbea8074c167c",
+    "pdf_sha256": "b24ac790f756bef4280f8b08380b9a22f10fd49f0e7aef98d82cd782bbc05c5f"
+  },
+  "full_24h_observation_claimed": false,
+  "cloud_acceptance": false,
+  "Windows_data_recovery": "unresolved"
+}

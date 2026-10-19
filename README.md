@@ -17,9 +17,9 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-**当前业务完善方向：预约服务。** [下一阶段业务计划](docs/APPOINTMENT_BUSINESS_PLAN.md)重点解决分时段取消分析、电话接待与患者确认、科室及诊疗资源核对和手机自助改期。网站已支持患者自助预约与取消；小程序尚未接入。正式报告按业务问题、流程、用例、设计及业务测试组织，包含54项业务用例和1项共享核验，已实现与待实现分别标明。
+**B1.1 已实现：预约取消分析与改进闭环。** 主管查看“星期×开始时段”的取消率、样本及缺失；前台核实原因、联系责任和正式另约；措施由负责人执行、另一主管复核。[业务说明](docs/B11_APPOINTMENT_IMPROVEMENT.md) · [执行证据](docs/evidence_b11/README.md) · [下一步电话接待](docs/APPOINTMENT_BUSINESS_PLAN.md#b12电话接待与预约办理)。
 
-应用已有的容量及界面验证保留在[工程验收记录](docs/evidence_r243/README.md)；它们不代表新增业务设计已完成。
+正式报告包含56项业务用例和1项共享核验，领域关系和状态模型已拆图重绘。网站支持患者自助预约与取消；结构化电话接待、自助改期、科室资源日历和小程序仍待实现。历史容量保持[原实测范围](docs/evidence_r243/README.md)，本轮合成分析不代表已找到真实高取消时段或已降低取消率。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

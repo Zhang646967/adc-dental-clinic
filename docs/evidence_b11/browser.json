@@ -1,0 +1,470 @@
+{
+  "scope": "B1.1 real Chrome, five clinics, seven role boundaries and business closure; resumed already-confirmed formal rebooking and two reason versions from initial run",
+  "checks": [
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Clinic 0 analytical scope",
+      "passed": true
+    },
+    {
+      "name": "Clinic 0 exact synthetic ratios",
+      "passed": true
+    },
+    {
+      "name": "Clinic 0 sufficient comparison cell",
+      "passed": true
+    },
+    {
+      "name": "Clinic 0 no patient identities",
+      "passed": true
+    },
+    {
+      "name": "Manager personal followup refused",
+      "passed": true
+    },
+    {
+      "name": "Reviewed linked rebooking",
+      "passed": true
+    },
+    {
+      "name": "Existing actual booking and reason revision retained",
+      "passed": true
+    },
+    {
+      "name": "b11-followup-mobile 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Clinic 0 aggregate after followup",
+      "passed": true
+    },
+    {
+      "name": "Clinic 0 followup does not change denominator",
+      "passed": true
+    },
+    {
+      "name": "b11-analysis-mobile 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "New accountable measure preview accepted",
+      "passed": true
+    },
+    {
+      "name": "New accountable measure signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "New accountable measure concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Owner START",
+      "passed": true
+    },
+    {
+      "name": "Owner START preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Owner START signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Owner START concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Owner SUBMIT",
+      "passed": true
+    },
+    {
+      "name": "Owner SUBMIT preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Owner SUBMIT signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Owner SUBMIT concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Submission remains pending review",
+      "passed": true
+    },
+    {
+      "name": "Self-review attempt page",
+      "passed": true
+    },
+    {
+      "name": "Self-review cannot reach confirmation",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Fresh measure comparison boundary",
+      "passed": true
+    },
+    {
+      "name": "Pre-execution comparison rejected",
+      "passed": true
+    },
+    {
+      "name": "Historical synthetic completed-window measure",
+      "passed": true
+    },
+    {
+      "name": "Independent synthetic measure review preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Independent synthetic measure review signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Independent synthetic measure review concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Independent completed-window result visible",
+      "passed": true
+    },
+    {
+      "name": "b11-measure-mobile 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 analytical scope",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 exact synthetic ratios",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 sufficient comparison cell",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 no patient identities",
+      "passed": true
+    },
+    {
+      "name": "Manager personal followup refused",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 accountable followup source",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 accountable followup preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 accountable followup signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 accountable followup concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 aggregate after followup",
+      "passed": true
+    },
+    {
+      "name": "Clinic 1 followup does not change denominator",
+      "passed": true
+    },
+    {
+      "name": "Wrong clinic followup refused",
+      "passed": true
+    },
+    {
+      "name": "Wrong clinic analysis rejected",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 analytical scope",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 exact synthetic ratios",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 sufficient comparison cell",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 no patient identities",
+      "passed": true
+    },
+    {
+      "name": "Manager personal followup refused",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 accountable followup source",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 accountable followup preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 accountable followup signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 accountable followup concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 aggregate after followup",
+      "passed": true
+    },
+    {
+      "name": "Clinic 2 followup does not change denominator",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 analytical scope",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 exact synthetic ratios",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 sufficient comparison cell",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 no patient identities",
+      "passed": true
+    },
+    {
+      "name": "Manager personal followup refused",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 accountable followup source",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 accountable followup preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 accountable followup signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 accountable followup concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 aggregate after followup",
+      "passed": true
+    },
+    {
+      "name": "Clinic 3 followup does not change denominator",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 analytical scope",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 exact synthetic ratios",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 sufficient comparison cell",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 no patient identities",
+      "passed": true
+    },
+    {
+      "name": "Manager personal followup refused",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 accountable followup source",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 accountable followup preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 accountable followup signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 accountable followup concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 aggregate after followup",
+      "passed": true
+    },
+    {
+      "name": "Clinic 4 followup does not change denominator",
+      "passed": true
+    },
+    {
+      "name": "Login form HQ",
+      "passed": true
+    },
+    {
+      "name": "HQ select clinic",
+      "passed": true
+    },
+    {
+      "name": "HQ explicitly selects clinic",
+      "passed": true
+    },
+    {
+      "name": "HQ aggregate only",
+      "passed": true
+    },
+    {
+      "name": "HQ has no case identifiers",
+      "passed": true
+    },
+    {
+      "name": "Login form DENTIST",
+      "passed": true
+    },
+    {
+      "name": "capacity_doctor_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "capacity_doctor_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "capacity_doctor_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "capacity_patient_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "capacity_patient_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "capacity_patient_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "Login form FINANCE",
+      "passed": true
+    },
+    {
+      "name": "capacity_finance_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "capacity_finance_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "capacity_finance_0 restricted business role",
+      "passed": true
+    },
+    {
+      "name": "Login form SYSADMIN",
+      "passed": true
+    },
+    {
+      "name": "Technical role does not bypass business scope",
+      "passed": true
+    },
+    {
+      "name": "Technical role does not bypass business scope",
+      "passed": true
+    },
+    {
+      "name": "Technical role does not bypass business scope",
+      "passed": true
+    },
+    {
+      "name": "Front queue keyboard",
+      "passed": true
+    },
+    {
+      "name": "Keyboard has visible focus",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.84",
+  "passed": true,
+  "application_commit": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
+  "initial_confirmed_business_steps": {
+    "formal_replacement_booking": 1,
+    "reviewed_reason_versions": 2,
+    "replayed_write_not_repeated": true
+  }
+}

@@ -10,6 +10,7 @@
 | 接诊、治疗、结算与设备衔接 | [完整流程](CARE_FINANCE_EQUIPMENT_WORKFLOWS.md)、[交接规则](FINANCE_EQUIPMENT_HANDOFFS.md) |
 | 收退款、资金凭据与逐笔对账 | [财务凭据](FINANCIAL_EVIDENCE_RECONCILIATION.md)、[账内日结](DAILY_RECONCILIATION.md) |
 | 设备费用及维护 | [费用更正](EQUIPMENT_COST_AMENDMENTS.md)、[维护工单](MAINTENANCE_WORK_ORDERS.md) |
+| 取消分析与服务改进 | [B1.1业务合同](B11_APPOINTMENT_IMPROVEMENT.md)、[领域及状态图](diagrams/)、[已执行追踪](evidence_b11/traceability.md) |
 | 预约业务下一阶段 | [取消时段、电话接待、自助预约与科室资源](APPOINTMENT_BUSINESS_PLAN.md) |
 | 预约与排班 | [预约改期](RESCHEDULING_OPTIMIZATION.md)、[出诊维护](SU29_SU30_AVAILABILITY.md)、[前台协调](SU31_FRONT_COORDINATION.md) |
 | 接诊控制、任务和通知 | [接诊控制](SU32_SU33_INTAKE_CONTROL.md)、[协调任务](SU34_SU35_SU36_COORDINATION_TASKS.md)、[通知](SU37_SU38_NOTIFICATIONS.md) |
@@ -34,6 +35,7 @@
 
 | 验证范围 | 实际记录 |
 |---|---|
+| B1.1 取消分析、原因跟进与措施复核 | [执行证据](evidence_b11/README.md)、[需求追踪](evidence_b11/traceability.md)、[恢复范围](evidence_b11/recovery.md) |
 | R2.4.3 等价容量与UX2 | [执行证据](evidence_r243/README.md)、[需求追踪](evidence_r243/requirement_trace.json)、[页面与浏览器](evidence_ux2/README.md)、[Mac交付](evidence_r243/delivery.json) |
 | R2.4.2 依赖恢复及UX1界面 | [执行证据](evidence_r242/README.md)、[需求追踪](evidence_r242/requirement_trace.json)、[界面验证](evidence_ux1/README.md)、[Mac交付](evidence_r242/delivery.json) |
 | R2.4.1 主机事件与故障处置 | [执行证据](evidence_r241/README.md)、[需求追踪](evidence_r241/requirement_trace.json)、[Mac 交付](evidence_r241/delivery.json) |

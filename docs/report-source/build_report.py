@@ -6,7 +6,7 @@ separate. --folder supplies editable report_source.json and optional toc_pages.j
 """
 from pathlib import Path
 from copy import deepcopy
-import argparse,hashlib,json,re
+import argparse,hashlib,json,re,os
 from docx import Document
 from docx.shared import Cm,Pt,RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH,WD_BREAK
@@ -140,7 +140,7 @@ def build(folder,repo,output=None):
  def figure(path,caption,width=16):
   if not path.exists():raise FileNotFoundError(path)
   x=D.add_paragraph();x.paragraph_format.first_line_indent=Pt(0);x.alignment=WD_ALIGN_PARAGRAPH.CENTER;x.paragraph_format.keep_with_next=True;x.paragraph_format.line_spacing=1.0
-  x.add_run().add_picture(str(path),width=Cm(width));p(caption,10.5,False,True);markdown.extend(['!['+caption+']('+path.name+')',''])
+  x.add_run().add_picture(str(path),width=Cm(width));p(caption,10.5,False,True);markdown.extend(['!['+caption+']('+Path(os.path.relpath(path,folder)).as_posix()+')',''])
  def mind(n):p('思维导图  '+source['mind_maps'][str(n)],size=10.5,indent=False,space=6)
  def page():next_page[0]=True
  def furniture(section,front=False):
@@ -174,7 +174,7 @@ def build(folder,repo,output=None):
    return '质量评价覆盖核心业务完整性、权限、重复提交、回滚及历史金额。公开服务和更大规模需要独立验证，不能仅凭模型或功能数量作出结论。'
   text=text.replace('本轮再统一全角色只读提示及表单错误定位','界面统一提示当前只读状态并定位表单错误')
   return text
- def append_nodes(nodes,mapping=None,system=False):
+ def append_nodes(nodes,mapping=None,system=False,design=False):
   from docx.text.paragraph import Paragraph
   from docx.table import Table
   for node in nodes:
@@ -188,6 +188,7 @@ def build(folder,repo,output=None):
      if level<3:toc.append((value,level))
      markdown.extend(['#'*(level+1)+' '+value,''])
     elif not node.xpath('.//w:drawing'):
+     if design:text=re.sub(r'图4-(\d+)',lambda m:'图4-'+str(1 if int(m[1])==1 else int(m[1])+3),text)
      if system:text=re.sub(r'图3-(\d+)',lambda m:'图3-'+str(int(m[1])+7),text)
      text=fix_legacy(text)
      text=re.sub(r'表3-(\d+)',lambda m:'表3-'+str(int(m[1])+4),text)
@@ -277,13 +278,13 @@ def build(folder,repo,output=None):
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例清单与业务完整性');p('系统共定义54项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—54。电话接待关注咨询与联系，SU-04关注正式成约；网站和未来小程序属于SU-04的渠道路径，不按页面数量重复计数。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义56项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—56。电话接待关注咨询与联系，SU-04关注正式成约；网站和未来小程序属于SU-04的渠道路径，不按页面数量重复计数。')
  p('表3-4 用例分组及业务目标',10.5,False,True)
  table(['业务范围','编号','使用者目标'],[
  ['身份与资料','SU-01—03、21—23、25—28','登录选店、患者资料、账号与基础目录。'],
  ['预约与接诊','SU-04—10、19、29—33\nSU-39—40、54','预约、变更、到诊、治疗、结算与资源核对。'],
  ['候补与协作','SU-13—17、24、31、34—38','候补、邀约、任务办理、独立复核及消息。'],
- ['经营与引导','SU-11—12、18、20、41','成本利润、取消分析和操作协助。'],
+ ['经营与引导','SU-11—12、18、20、41、55—56','成本利润、取消分析和操作协助。'],
  ['资金与对账','SU-42—49、53','渠道、收退款、凭据、流水、对账及日结。'],
  ['设备维护','SU-50—52','资产、维修责任和独立验收。']
  ],[3.1,5.8,7.1])
@@ -296,10 +297,20 @@ def build(folder,repo,output=None):
    p('新增接待单、结构化联系结果和诊疗资源联动为目标流程；当前正式预约已核对医师、患者时间及邀约保留。图中查询候选不是占用，患者同意后仍须最终核验。',10.5)
  mind(3)
  page();heading('第4章 系统设计',1)
- mapping={p.text:(p.text.replace('　',' ',1),2) for p in paras[119:146] if p.style.name=='Heading 2'}
- append_nodes(frozen(119,146),mapping)
+ heading('4.1 领域关系与状态模型')
+ p('领域模型分别表达诊疗结算和取消改进的业务对象，避免把所有职责挤入一张图。端点数字为关联多重性；实线表示业务关联，虚线表示引用当前版本或经办责任。图中为主要对象与关键属性，未穷举全部数据表；预约意向、资金和设备在各自模块设计中说明。')
+ figure(repo/'docs/diagrams/domain_care.png','图4-1 诊疗与结算的核心领域关系',16)
+ p('一个患者可有多次就诊，每次就诊由一个出诊时段覆盖；诊所和医师经出诊时段确定。实现中的就诊同时保留诊所与医师引用，由预约操作核对一致。就诊可形成多个记录版本，每版包含实际治疗；同次就诊至多一个逻辑结算单，指向当前发布版本。更正申请及拟更正版保留独立关联，不能直接覆盖已发布资料。')
+ figure(repo/'docs/diagrams/domain_appointment.png','图4-2 取消跟进与改进措施的领域关系',16)
+ p('每个已取消预约至多一条当前跟进；原因、联系结果和责任变化保留多次历史。跟进可引用一个同店同患者的有效另约，另约仍由预约模块确认。措施按诊所、星期和时段建立，不占用患者时段。每条历史必须且只能属于一条跟进或一项措施；历史中的责任、经办与复核快照不能改写。')
+ figure(repo/'docs/diagrams/visit_state.png','图4-3 预约与就诊状态及业务守卫',16)
+ p('箭头标注“事件 [条件]／业务动作”。已到诊才能完成治疗或无治疗关闭；取消、核实爽约和改期具有各自依据。改期使原记录成为终态，并在同一事务创建唯一后继，新预约从已预约开始；不能将原记录直接改回已预约。治疗后的更正通过版本与独立申请办理，不倒退就诊状态。')
+ figure(repo/'docs/diagrams/improvement_state.png','图4-4 改进措施状态与独立复核',16)
+ p('措施状态与就诊状态分开。执行人开始并提交，另一主管复核或退回。后续窗口须不早于最近执行开始日、晚于原窗口，且在查询当日以前完整结束；样本不足与不可比须保留具体依据。负责人失效时主管可对待开始、执行中和待复核措施重新分配，重新安排执行；终止保留原因，不修改原预约或统计历史。')
+ mapping={p.text:(p.text.replace('　',' ',1),2) for p in paras[123:146] if p.style.name=='Heading 2'}
+ append_nodes(frozen(123,146),mapping,design=True)
  mapping={p.text:(p.text.replace('4.6','4.5',1).replace('4.7','4.6',1).replace('4.8','4.7',1).replace('　',' ',1),2) for p in paras[150:161] if p.style.name=='Heading 2'}
- append_nodes(frozen(150,161),mapping)
+ append_nodes(frozen(150,161),mapping,design=True)
  for item in source['design']:add(item)
  mind(4)
  page();heading('第5章 系统实现与测试',1)
@@ -338,7 +349,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 预约完善 财务与设备用例规约',1)
- p('本附录补充SU-39—54。电话接待、患者自助改期、分时段取消分析和多资源核对为待实现设计；资金、对账及设备规约说明现有业务。每项的实现状态及验收目标分别列明。',10.5)
+ p('本附录补充SU-39—56。电话接待、患者自助改期和多资源核对为待实现设计；取消分析、原因跟进、措施复核、资金、对账及设备规约说明现有业务。每项的实现状态及验收目标分别列明。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

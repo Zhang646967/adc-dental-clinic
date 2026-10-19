@@ -6,15 +6,15 @@
 - [在线正文](REPORT.md) · [版式与内容约定](FORMAT_REFERENCE.md) · [内容及排版核验](validation.json)
 - [六项修改要求追踪](../business_report_review.json) · [预约业务完善计划](../APPOINTMENT_BUSINESS_PLAN.md)
 
-正式报告共95页，含大学封面、中英文摘要、两页目录、六章正文、参考文献、附录A/B/C；54项业务用例及1项共享核验均提供完整规约。72张表、21幅图、52项目录及六章思维导图均已核对。编号与页码对应，PDF字体全部嵌入。
+正式报告共102页，含大学封面、中英文摘要、两页目录、六章正文、参考文献、附录A/B/C；56项业务用例及1项共享核验均提供完整规约。74张表、24幅图、52项目录及六章思维导图均已核对。编号与页码对应，PDF字体全部嵌入。
 
 预约章节细化电话接待、资源核对、候选协商、明确同意、未成约及改期处理。取消分析明确成熟预约、分子分母、诊所取消、爽约、改期前身和少样本显示规则；示例使用合成数据，不声称发现真实高取消时段或已产生改善效果。
 
-现有网站预约及取消可用；SU-39结构化电话接待、SU-40患者自助改期、SU-41时段分析、SU-54科室资源协调为待实现设计，小程序尚未接入。财务和设备增补规约描述现有业务。验收目标不等于已执行结果；原AT-01—25及业务核心规则保留。
+现有网站预约及取消可用；SU-41时段分析、SU-55原因跟进及SU-56措施复核已实现；SU-39结构化电话接待、SU-40患者自助改期、SU-54科室资源协调为待实现设计，小程序尚未接入。财务和设备增补规约描述现有业务。验收目标不等于已执行结果；原AT-01—25及业务核心规则保留。
 
 ## 文件与构建
 
-`report_source.json`维护正文，`business_use_cases.json`维护附录C规约，`build_report.py`生成Word及在线正文。`appointment-sequence.svg/.png`及绘图脚本保存电话接待时序图。`toc_entries.json`和`toc_pages.json`记录目录和渲染后的实际页码。
+`report_source.json`维护正文，`business_use_cases.json`维护附录C规约，`build_report.py`生成Word及在线正文。`appointment-sequence.svg/.png`及绘图脚本保存电话接待时序图；`../diagrams/domain_*.dot/.svg/.png`及两个状态图保存优化后的模型，`render_models.cjs`保留确定性生成方式。`toc_entries.json`和`toc_pages.json`记录目录和渲染后的实际页码。
 
 ```sh
 python docs/report-source/build_report.py --repo . --output /tmp/adc-report
@@ -24,7 +24,7 @@ python docs/report-source/build_report.py --repo . --output /tmp/adc-report
 
 ## 验证边界
 
-本次更新范围为业务规划和正式报告，应用代码、数据库和运行配置未变更。已重新执行1,046项源码规则检查；本次报告核验见validation.json。报告覆盖95个页面的视觉检查或与已检查页面的正文像素比对，并核对目录、编号、完整规约、指标算例和隐私。
+本次应用新增取消分析、原因跟进及措施复核，执行1,046项源码规则及1,200项数据库、请求和并发测试，五店浏览器、独立核算与恢复另见[执行证据](../evidence_b11/README.md)。报告内容和版式核验见validation.json。报告覆盖102个页面的视觉检查或与已检查页面的正文像素比对，并核对目录、编号、完整规约、指标算例和隐私。
 
 `baseline.json`保留既有分期工程事实；[既有容量与业务验证](../evidence_r243/README.md)及[UX2验证](../evidence_ux2/README.md)仍按原范围读取。未完成的24小时、安全、公网与历史数据恢复工作不因报告更新而通过。工程运行、迁移和提交过程记录在独立工程文档中。
 

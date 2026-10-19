@@ -1,7 +1,7 @@
 {
   "format": 1,
   "date": "2026-10-19",
-  "scope": "business analysis and formal report revision; no application changes",
+  "scope": "formal business report and implemented B1.1 cancellation workflow; historical operating results retain original scope",
   "user_requests": [
     {
       "id": "U1",
@@ -11,10 +11,13 @@
         "4.11",
         "5.6",
         "6.2",
-        "SU-41"
+        "SU-41",
+        "SU-55",
+        "SU-56"
       ],
       "plan": "B1.1",
-      "status": "specified; actual time-band feature and operational findings pending"
+      "status": "implemented and synthetic five-clinic workflows accepted; operational high-risk periods and improvements not established",
+      "evidence": "evidence_b11/README.md"
     },
     {
       "id": "U2",
@@ -62,9 +65,9 @@
         "3.6",
         "appendix A/B/C"
       ],
-      "business_use_cases": 54,
+      "business_use_cases": 56,
       "shared_subfunction": 1,
-      "status": "55 complete specifications; no page-count inflation"
+      "status": "57 complete specifications including one shared subfunction"
     },
     {
       "id": "U6",
@@ -80,5 +83,6 @@
     }
   ],
   "validation": "report-source/validation.json",
-  "application_changes": false
+  "application_changes": false,
+  "domain_and_state_models": "two domain relationship views and two separate lifecycle views, aligned with source"
 }

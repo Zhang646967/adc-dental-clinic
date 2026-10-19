@@ -1,28 +1,27 @@
 {
-  "format": 9,
+  "format": 10,
   "report_date": "2026-10-19",
   "passed": true,
-  "scope": "Formal system analysis and design report plus appointment business plan; no application or schema changes; planned features not accepted by this review.",
-  "application_source": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
-  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39192905333",
+  "scope": "implemented B1.1 and formal course report; capacity/cloud/history retain original scope",
+  "application_source": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39210907593",
   "artifact_checks": {
     "passed": true,
-    "scope": "formal report content/layout checks; no new application acceptance",
-    "pdf_pages": 95,
-    "business_use_cases": 54,
+    "scope": "formal report content and layout; executed business evidence is recorded separately in evidence_b11",
+    "pdf_pages": 102,
+    "business_use_cases": 56,
     "shared_subfunctions": 1,
-    "complete_specifications": 55,
-    "tables": 72,
-    "figures": 21,
+    "complete_specifications": 57,
+    "tables": 74,
+    "figures": 24,
     "mind_maps": 6,
     "contents_entries": 52,
-    "legacy_substantive_fields_preserved": 129,
+    "legacy_substantive_fields_preserved": 204,
     "SU04_channel_expansion_explicit": true,
     "all_AT_01_25_retained": true,
     "pending_cases": [
       "SU-39",
       "SU-40",
-      "SU-41",
       "SU-54"
     ],
     "contents_match": true,
@@ -35,419 +34,189 @@
     "original_migrations_preserved": 30,
     "frozen_reports_unchanged": true,
     "private_values_absent": 36,
-    "word_sha256": "72e77d2bf32459ad262ab0d6dd93cefd2bb97bf33d967045ea276e91f9ea939e",
-    "pdf_sha256": "e2f02f4c34be5f73e9dd55657d2a24e0231b18a47fdc779c17f367e765cc18e7"
+    "word_sha256": "79a532bc9f8cbfd0bf628cd676340930d8150410e5b97aaaae3fbea8074c167c",
+    "pdf_sha256": "b24ac790f756bef4280f8b08380b9a22f10fd49f0e7aef98d82cd782bbc05c5f"
   },
   "visual_review": {
     "passed": true,
-    "pages": 95,
-    "body_pixel_matches_to_previously_inspected_pages": {
-      "1": {
-        "folder": "render-2",
-        "page": 1
-      },
-      "2": {
-        "folder": "render-2",
-        "page": 2
-      },
-      "3": {
-        "folder": "render-2",
-        "page": 3
-      },
-      "4": {
-        "folder": "render-4",
-        "page": 4
-      },
-      "6": {
-        "folder": "render-2",
-        "page": 6
-      },
-      "7": {
-        "folder": "render-2",
-        "page": 7
-      },
-      "8": {
-        "folder": "render-2",
-        "page": 8
-      },
-      "9": {
-        "folder": "render-2",
-        "page": 9
-      },
-      "10": {
-        "folder": "render-2",
-        "page": 10
-      },
-      "11": {
-        "folder": "render-2",
-        "page": 11
-      },
-      "12": {
-        "folder": "render-final-3",
-        "page": 11
-      },
-      "13": {
-        "folder": "render-final-3",
-        "page": 12
-      },
-      "14": {
-        "folder": "render-final-3",
-        "page": 13
-      },
-      "15": {
-        "folder": "render-final-3",
-        "page": 14
-      },
-      "16": {
-        "folder": "render-final-3",
-        "page": 15
-      },
-      "17": {
-        "folder": "render-2",
-        "page": 17
-      },
-      "18": {
-        "folder": "render-3",
-        "page": 18
-      },
-      "19": {
-        "folder": "render-final-3",
-        "page": 18
-      },
-      "20": {
-        "folder": "render-final-3",
-        "page": 19
-      },
-      "21": {
-        "folder": "render-final-3",
-        "page": 20
-      },
-      "22": {
-        "folder": "render-final-3",
-        "page": 21
-      },
-      "23": {
-        "folder": "render-4",
-        "page": 23
-      },
-      "24": {
-        "folder": "render-3",
-        "page": 24
-      },
-      "25": {
-        "folder": "render-4",
-        "page": 25
-      },
-      "26": {
-        "folder": "render-2",
-        "page": 27
-      },
-      "27": {
-        "folder": "render-4",
-        "page": 27
-      },
-      "28": {
-        "folder": "render-4",
-        "page": 28
-      },
-      "29": {
-        "folder": "render-4",
-        "page": 29
-      },
-      "30": {
-        "folder": "render-final-3",
-        "page": 27
-      },
-      "31": {
-        "folder": "render-final-3",
-        "page": 28
-      },
-      "32": {
-        "folder": "render-4",
-        "page": 32
-      },
-      "33": {
-        "folder": "render-4",
-        "page": 33
-      },
-      "34": {
-        "folder": "render-4",
-        "page": 34
-      },
-      "35": {
-        "folder": "render-4",
-        "page": 35
-      },
-      "36": {
-        "folder": "render-4",
-        "page": 36
-      },
-      "37": {
-        "folder": "render-4",
-        "page": 37
-      },
-      "38": {
-        "folder": "render-4",
-        "page": 38
-      },
-      "39": {
-        "folder": "render-2",
-        "page": 40
-      },
-      "40": {
-        "folder": "render-4",
-        "page": 40
-      },
-      "42": {
-        "folder": "render-4",
-        "page": 43
-      },
-      "43": {
-        "folder": "render-4",
-        "page": 44
-      },
-      "44": {
-        "folder": "render-4",
-        "page": 45
-      },
-      "45": {
-        "folder": "render-4",
-        "page": 46
-      },
-      "46": {
-        "folder": "render-4",
-        "page": 47
-      },
-      "47": {
-        "folder": "render-4",
-        "page": 48
-      },
-      "48": {
-        "folder": "render-4",
-        "page": 49
-      },
-      "49": {
-        "folder": "render-4",
-        "page": 50
-      },
-      "50": {
-        "folder": "render-4",
-        "page": 51
-      },
-      "51": {
-        "folder": "render-4",
-        "page": 52
-      },
-      "52": {
-        "folder": "render-4",
-        "page": 53
-      },
-      "53": {
-        "folder": "render-4",
-        "page": 54
-      },
-      "54": {
-        "folder": "render-4",
-        "page": 55
-      },
-      "55": {
-        "folder": "render-4",
-        "page": 56
-      },
-      "56": {
-        "folder": "render-4",
-        "page": 57
-      },
-      "57": {
-        "folder": "render-4",
-        "page": 58
-      },
-      "58": {
-        "folder": "render-4",
-        "page": 59
-      },
-      "59": {
-        "folder": "render-4",
-        "page": 60
-      },
-      "60": {
-        "folder": "render-4",
-        "page": 61
-      },
-      "61": {
-        "folder": "render-4",
-        "page": 62
-      },
-      "62": {
-        "folder": "render-4",
-        "page": 63
-      },
-      "64": {
-        "folder": "render-final-3",
-        "page": 69
-      },
-      "65": {
-        "folder": "render-4",
-        "page": 66
-      },
-      "68": {
-        "folder": "render-4",
-        "page": 69
-      },
-      "69": {
-        "folder": "render-final-3",
-        "page": 74
-      },
-      "70": {
-        "folder": "render-final-3",
-        "page": 75
-      },
-      "71": {
-        "folder": "render-final-3",
-        "page": 76
-      },
-      "72": {
-        "folder": "render-final-3",
-        "page": 77
-      },
-      "73": {
-        "folder": "render-final-3",
-        "page": 78
-      },
-      "74": {
-        "folder": "render-final-3",
-        "page": 79
-      },
-      "75": {
-        "folder": "render-4",
-        "page": 76
-      },
-      "76": {
-        "folder": "render-4",
-        "page": 77
-      },
-      "77": {
-        "folder": "render-4",
-        "page": 78
-      },
-      "78": {
-        "folder": "render-final-3",
-        "page": 83
-      },
-      "79": {
-        "folder": "render-final-3",
-        "page": 84
-      },
-      "80": {
-        "folder": "render-4",
-        "page": 81
-      },
-      "81": {
-        "folder": "render-4",
-        "page": 82
-      },
-      "82": {
-        "folder": "render-4",
-        "page": 83
-      }
+    "pages": 102,
+    "body_pixel_matches_to_previously_reviewed_pages": {
+      "6": 6,
+      "8": 8,
+      "9": 9,
+      "10": 10,
+      "11": 11,
+      "12": 12,
+      "13": 13,
+      "14": 14,
+      "15": 15,
+      "16": 16,
+      "17": 17,
+      "18": 18,
+      "19": 19,
+      "20": 20,
+      "21": 21,
+      "22": 22,
+      "24": 24,
+      "25": 25,
+      "26": 26,
+      "40": 36,
+      "49": 44,
+      "50": 45,
+      "51": 46,
+      "52": 47,
+      "53": 48,
+      "54": 49,
+      "55": 50,
+      "56": 51,
+      "57": 52,
+      "58": 53,
+      "59": 54,
+      "60": 55,
+      "61": 56,
+      "62": 57,
+      "63": 58,
+      "64": 59,
+      "65": 60,
+      "66": 61,
+      "67": 62,
+      "68": 63,
+      "69": 64,
+      "70": 65,
+      "71": 66,
+      "72": 67,
+      "73": 68,
+      "74": 69,
+      "75": 70,
+      "76": 71,
+      "77": 72,
+      "78": 73,
+      "79": 74,
+      "80": 75,
+      "81": 76,
+      "82": 77,
+      "83": 78,
+      "84": 79,
+      "86": 81,
+      "88": 83,
+      "89": 84,
+      "90": 85,
+      "91": 86,
+      "92": 87,
+      "93": 88,
+      "94": 89,
+      "95": 90,
+      "96": 91,
+      "97": 92,
+      "98": 93,
+      "99": 94,
+      "100": 95
     },
-    "remaining_pages_inspected_at_original_resolution": [
+    "new_or_changed_pages_reviewed": [
+      1,
+      2,
+      3,
+      4,
       5,
+      7,
+      23,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
       41,
-      63,
-      66,
-      67,
-      83,
-      84,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
       85,
-      86,
       87,
-      88,
-      89,
-      90,
-      91,
-      92,
-      93,
-      94,
-      95
+      101,
+      102
     ],
-    "coverage": "All 95 final pages covered; running page numbers, text bounds and fonts checked independently."
+    "focused_domain_and_state_page_review": [
+      30,
+      31,
+      32,
+      33
+    ],
+    "contact_sheets_reviewed": 6,
+    "method": "all changed pages rendered and visually reviewed; unchanged bodies matched to reviewed prior report; headers, pagination, captions and fonts checked independently"
   },
   "business_checks": {
-    "user_requests_addressed": [
-      "U1",
-      "U2",
-      "U3",
-      "U4",
-      "U5",
-      "U6"
+    "business_use_cases": 56,
+    "complete_specifications": 57,
+    "pending_cases": [
+      "SU-39",
+      "SU-40",
+      "SU-54"
     ],
-    "full_use_case_specs": 55,
-    "business_use_cases": 54,
-    "shared_subfunction": 1,
-    "telephone_workflow_and_alternatives": true,
-    "website_current_and_miniprogram_planned": true,
-    "planned_case_statuses_explicit": true,
-    "metric_sample": {
-      "A": 6,
-      "P": 2,
-      "C": 1,
-      "N": 1,
-      "U": 3,
-      "R": 5,
-      "D": 9,
-      "patient_cancel_percent": "22.22",
-      "no_show_percent": "11.11",
-      "overall_cancel_percent": "30.00",
-      "completeness_percent": "76.92",
-      "synthetic": true,
-      "ranking_eligible": false
-    },
-    "no_claim_of_real_high_cancellation_timeband": true,
-    "formal_cover_and_business_chapters": true,
-    "development_diary_and_mac_sections_absent": true
+    "B11_synthetic_acceptance": "../../docs/evidence_b11/README.md",
+    "no_real_cancellation_findings_claimed": true
   },
   "current_source_checks": {
     "passed": true,
-    "count": 1046,
-    "elapsed_seconds": 5.809,
-    "scope": "unchanged application source rules; not new booking-feature acceptance"
+    "application_commit": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
+    "source_rules": 1046,
+    "postgresql_http_and_concurrency": 1200,
+    "new_B11_tests": 45,
+    "source_rule_seconds": 7.501,
+    "postgresql_seconds": 154.789,
+    "checks": [
+      "Django system check",
+      "31 forward migrations",
+      "makemigrations --check --dry-run: no changes"
+    ],
+    "original_migrations_preserved": 30,
+    "new_migrations": 1,
+    "gate_cleanup_exit": 0
   },
   "historical_evidence": {
     "index": "baseline.json",
-    "capacity_and_business": "../evidence_r243/README.md",
-    "ux": "../evidence_ux2/README.md",
-    "not_reexecuted_for_document_only_revision": [
+    "not_reexecuted": [
       "30-minute capacity",
-      "browser business acceptance",
-      "encrypted recovery"
+      "true24h",
+      "public cloud",
+      "nonempty statement backup restore"
     ],
     "unresolved": [
-      "true24h/security",
+      "real24h/security",
       "independent public hosting",
       "historical Windows data recovery"
     ]
   },
-  "repository_organization": {
-    "canonical_report_directory": "课程报告",
-    "filenames": "课程报告_张加良_8210241102.pdf/.docx",
-    "source_directory": "docs/report-source",
-    "engineering_history_retained_separately": true
-  },
   "sources_and_outputs_sha256": {
-    "report_source.json": "5f153e80660d3fa0305717560dfbbf86ceb2d7128dd2f692de7e03632b6cdecd",
-    "business_use_cases.json": "fa2883103e6cd603d81b0ca2bb6583ecd46286b8eeafaea07730b9bb5acf70f0",
-    "build_report.py": "d4945c29c644a14f2ad2ab8395db43b9d62965083dcada47807aed336190f65f",
-    "baseline.json": "b57415259704d45753e5430d3ade44cf8394fa998f036e96574463f43b49dab9",
-    "README.md": "7f74c2107436e9aa8a0889fae2a0e834919682e78503901bf22c9a7e70d89f65",
     "FORMAT_REFERENCE.md": "4d5bc8456c021520c11c0a86ef2e140ef85d3587e9f84a2b03885d292229a19f",
-    "REPORT.md": "47a70da65a568bc4b74e2f8adbd377a914494205ec9bda662ae950a0d9c2f6d0",
-    "toc_entries.json": "07713611de3d59728b22d7a1387c80760da28e611d7776b54cb5744382d02258",
-    "toc_pages.json": "35ac1906d7284aa69ec1d2dc197abd4f3c99aff5813ff67341f25c6669d08147",
-    "draw_appointment_sequence.py": "39a96022022a2f3a46a3054573c144b9b3e4d3c58af280ebed7d65b6d278247a",
-    "appointment-sequence.svg": "68dfec035813227010fec813a69d94efc3798fa06f480a34a738143aff8e5106",
+    "README.md": "6a444f65840c8a128ae05b1243874b242b66985a6cb8602f46ab0f9a821928d9",
+    "REPORT.md": "50eeb926b12829339b8fecf11148c04a2d1b84389abaed5fe2fc87be1ccc5e4d",
     "appointment-sequence.png": "53163cf1ede7b3370ded35a53ea9016e31783929e79927af1a9978e4adf8ab61",
-    "../../课程报告/课程报告_张加良_8210241102.docx": "72e77d2bf32459ad262ab0d6dd93cefd2bb97bf33d967045ea276e91f9ea939e",
-    "../../课程报告/课程报告_张加良_8210241102.pdf": "e2f02f4c34be5f73e9dd55657d2a24e0231b18a47fdc779c17f367e765cc18e7"
+    "appointment-sequence.svg": "68dfec035813227010fec813a69d94efc3798fa06f480a34a738143aff8e5106",
+    "baseline.json": "b57415259704d45753e5430d3ade44cf8394fa998f036e96574463f43b49dab9",
+    "build_report.py": "65635d783e2ca4933d5bf49c615ec08cbfdbad9f410e951492794a0eae4c1615",
+    "business_use_cases.json": "8e6d56b2ee3da5300835c6f893df9c9dec7eb68feead2408b14d4556b37e8eb7",
+    "draw_appointment_sequence.py": "39a96022022a2f3a46a3054573c144b9b3e4d3c58af280ebed7d65b6d278247a",
+    "draw_operations_flow.py": "c371b28adc131c1143fda5a53320b31b6979972cf1aaa11090c0b9880d07f393",
+    "finance-form-ux2.png": "3006bf1a7e58c7a5526dcf96472338d4e5eba16c7841b3ab8188a7d227b7a169",
+    "notification-overview.png": "37560d40294c8b462dd4687a2476509d5f35e805302e91dbd70b1d378117c271",
+    "operations-flow.png": "f2e55fe04bead53a2a578239dfb2b8a489321c3a281baeefdc6e6126130c8227",
+    "render_models.cjs": "8aa1b0603d6ea1b1c08eadf360461f48221271ee5088c6f56fd3cae001eb84e1",
+    "report_source.json": "7a0e6fca46d3ba207bd3ef6c0806c447882739749d9fc4fd070aed1ea3a03429",
+    "toc_entries.json": "07713611de3d59728b22d7a1387c80760da28e611d7776b54cb5744382d02258",
+    "toc_pages.json": "5b742ac996fa2d6bb86129bcee00d7f6225cddc5a864a93dbe10fc092373165e",
+    "workbench-login.png": "991a5c81895b55db6203e6ea997c0079bdeec70c348f4a0c367119a7b23fe036",
+    "../../课程报告/课程报告_张加良_8210241102.docx": "79a532bc9f8cbfd0bf628cd676340930d8150410e5b97aaaae3fbea8074c167c",
+    "../../课程报告/课程报告_张加良_8210241102.pdf": "b24ac790f756bef4280f8b08380b9a22f10fd49f0e7aef98d82cd782bbc05c5f"
   }
 }

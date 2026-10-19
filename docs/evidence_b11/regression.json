@@ -1,11 +1,17 @@
 {
   "passed": true,
+  "application_commit": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
   "source_rules": 1046,
-  "postgresql_http_concurrency": 1199,
-  "new_b11_cases": 44,
-  "new_b11_test_seconds": 3.984,
-  "full_database_seconds": 163.112,
-  "additive_migrations": 1,
-  "previous_30_migration_files_unchanged": true,
-  "scope": "developer regression; browser/recovery/live delivery recorded separately"
+  "postgresql_http_and_concurrency": 1200,
+  "new_B11_tests": 45,
+  "source_rule_seconds": 7.501,
+  "postgresql_seconds": 154.789,
+  "checks": [
+    "Django system check",
+    "31 forward migrations",
+    "makemigrations --check --dry-run: no changes"
+  ],
+  "original_migrations_preserved": 30,
+  "new_migrations": 1,
+  "gate_cleanup_exit": 0
 }

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "scope": "encrypted data restored into an independent empty database with exact released migrations; all row and schema fingerprints compared",
+  "application_commit": "75056a7300baf3b4d25df4e76ac28fe655b2d95e",
+  "database": "PostgreSQL 17",
+  "method": "PG17_JSONB_SHA256_V1",
+  "tables": 54,
+  "rows": 29338,
+  "facts_sha256": "6a64a818df2ba14befa2925a19243aee1b534337beda1be179d3c1c9164bebfb",
+  "restore_seconds_after_empty_database_ready": 2.924,
+  "total_seconds": 3.73,
+  "encrypted_dump_sha256": "749dcff0d549a207d95174bbdaffa492a6082d99811c73404454e67e2c7490ee",
+  "new_table_rows": {
+    "adc_cancellation_followup": 5,
+    "adc_appointment_improvement": 2,
+    "adc_appointment_action_event": 13
+  },
+  "original_runtime_untouched": true,
+  "cash_evidence_rows": 500,
+  "statement_batch_line_and_match_rows": [
+    0,
+    0,
+    0
+  ],
+  "nonempty_statement_recovery_reexecuted": false
+}
