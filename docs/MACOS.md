@@ -6,7 +6,7 @@ synthetic demo → continue development on `main`.
 Current documentation, 2026-10-18: [当前课程格式报告](../课程报告/README.md).
 The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
 evidence. [Mac application delivery](evidence_r22/delivery.json) verifies original data and
-configuration. R2.3 independent recovery tools are delivered separately; [R2.4.1 host events](R241_HOST_EVENTS.md) are now delivered; R2.4.2 business dependency exercises are next.
+configuration. R2.3 independent recovery tools are delivered separately; [R2.4.1 host events](R241_HOST_EVENTS.md) are now delivered; R2.4.2 dependency exercises and UX1 are [delivered](evidence_r242/README.md); equivalent capacity and true 24h/security are next.
 The migration instructions and dated evidence below retain their original scope.
 
 ## Source baseline
@@ -136,3 +136,10 @@ R2.3 host backup/restore tools are delivered separately from the R2.2 business i
 ## R2.4.1 private host events
 
 [The host runbook](R241_HOST_EVENTS.md) covers explicit-target collection, independent status, acknowledgement, finite action records and verified closure. The existing Mac host collector is started explicitly; it does not install a new launchd job or publish a monitoring endpoint. Sleep/disconnection and process expiry remain visible gaps. The five existing container identities are retained; Web, notification worker and application observer keep the accepted R2.2 application image. [Executed scope and delivery](evidence_r241/README.md).
+
+
+## R2.4.2 application and interface update
+
+Current application `1977b4b` passes [exact CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082). The protected update rebuilt web/worker/observer and recreated the gateway to load its changed bind-mounted configuration; the original database container/volume and all 70 private configurations remain. Previous host and application observations are encrypted and retained, then new-source observations start UNKNOWN and require fresh success. The new host target is started explicitly; no new scheduled job is installed. [Executed delivery](evidence_r242/delivery.json) · [dependency runbook](R242_DEPENDENCY_DRILLS.md) · [UX1](evidence_ux1/README.md).
+
+For future source changes, preserve old observations and stop the old collector before the explicit `operations_reset --confirm-reset-observations` transition described in the runbook. A normal same-source restart does not justify erasing observation history. Dynamic Docker DNS allows the gateway to recover after an application address change without a gateway reload.

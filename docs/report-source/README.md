@@ -1,94 +1,35 @@
 # 报告源文件与复现说明
 
-Case and notes → business/system models → explicit responsibilities → executed
-evidence → protected delivery. Date: **2026-10-18**. Business runtime **`02a9dbc90583fbcad47567e64ae77ae810eca33f`**;
-[exact application CI passed](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755).
+课程案例与note → 业务合同和模型 → 执行证据 → 受保护交付。当前正式报告为2026-10-18的R2.4.2故障演练与界面优化版，应用 `1977b4bc2d8787711966c19439a5a272c9a9f1ca`，已通过[准确CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082)并更新Mac。[验收与交付](../evidence_r242/README.md) · [界面调研](../UI_UX_STUDY.md)。
 
+- [正式PDF](../../课程报告/课程报告_张加良_8210241102.pdf) · [正式Word](../../课程报告/课程报告_张加良_8210241102.docx)
+- [可在线阅读正文](REPORT.md) · [格式合同](FORMAT_REFERENCE.md) · [结构/排版/隐私核验](validation.json)
+- [需求至测试](../evidence_r242/requirement_trace.json) · [依赖处置手册](../R242_DEPENDENCY_DRILLS.md) · [下一阶段计划](../R24_ACCEPTANCE_PLAN.md)
 
-R2.4.1 host tools **`837a834f892586838fe3d186dac7e137dfb7b6c8`** passed [exact CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39180157857) and protected Mac delivery. The current 78-page report adds private host events, human incident handling and 21 isolated host checks including real container OOM. The current full gate passes 1,042 source/rule and 1,152 PostgreSQL/HTTP/concurrency tests. Business runtime remains `02a9dbc`; original 48 durable fingerprints, 70 configurations and five runtime containers are preserved. [Acceptance and delivery](../evidence_r241/README.md) · [Host runbook](../R241_HOST_EVENTS.md).
+## 当前内容与格式
 
-The following R2.3 and R2.2 results retain their historical scope.
+沿用用户86页大学课程PDF的版式，来源按摘要标识，私有原文只读。当前报告81页，包括大学封面、中英文摘要、两页目录、六章、参考文献和两份完整用例附录。中文为正文，英文摘要及必要技术术语保留。
 
+SU-01—38和SF-01共39份完整规约、AT-01—25、原19幅模型图均保留。现有56张编号表、24幅图，每章附思维导图；49项目录与实际页码一致。旧界面截图保留版本范围，新增UX1空输入登录截图。
 
-R2.3 independent-recovery host tools **`20961babacf909810bc3149fb92994fb408e8b8c`** passed [exact tool CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39145021878) and protected Mac synchronization. The report records 1,016 source/rule checks, 1,152 real PostgreSQL/HTTP/concurrency tests and 24 real-age/PG restore success/refusal checks. A separate empty target matched 51 tables and 29,144 rows; recovery, comparison and startup took 15.868 seconds. Transport was simulated locally. The original R2.3 first-increment evidence remains historical.
+## 本轮证据和历史边界
 
-- [Word report](../../课程报告/课程报告_张加良_8210241102.docx)
-- [PDF report](../../课程报告/课程报告_张加良_8210241102.pdf)
-- [Readable Markdown report](REPORT.md)
-- [Format reference and retained scope](FORMAT_REFERENCE.md)
-- [R2.3 independent recovery and executed delivery](../evidence_r23/README.md)
-- [R2.3 requirement-to-test trace](../evidence_r23/restore_requirement_trace.json)
-- [R2.4 next-step acceptance plan](../R24_ACCEPTANCE_PLAN.md)
-- [R2.2 implementation and executed delivery](../evidence_r22/README.md)
-- [Requirement-to-test trace](../evidence_r22/requirement_trace.json)
-- [R2 next-stage plan](../R2_OPERATIONAL_ASSURANCE_PLAN.md) and
-  [ASVS gap register](../SECURITY_ASVS_GAP_REGISTER.md)
+当前完整回归1,046项源码/规则与1,152项真实PostgreSQL/HTTP/并发；四类实际依赖中断28项、应用换址7项和真实浏览器60项通过。Mac计划更新应用/worker/observer/网关，数据库容器保留；48项原持久事实、70份配置、原卷和RC标签一致。原观测加密保留后建立新源码观察。
 
-The report follows the supplied **86-page university course PDF format**, identified
-by digest in the reference contract; the supplied PDF stays private and read-only.
-The new report is **78 pages**: university cover, Chinese and English abstracts,
-a checked two-page contents list, six main chapters, references and two specification
-appendices. Chinese is the main text, with an English abstract and key technical terms.
+[baseline.json](baseline.json)分别保留R1/R2.1/R2.2、两批R2.3、R2.4.1与当前R2.4.2/UX1结果和证据摘要。R2.3恢复24项、51表29,144行、15.868秒及R2.2资金/权限场景保留其历史执行范围；没有把本轮收款数据集当成非零退款或设备冲回场景。
 
-All **SU-01—38 and SF-01** specifications, original AT-01—25 references and
-19 original model figures are retained. Two historical UI observations are dated;
-a current responsibility diagram and notification-overview capture are added.
-The result contains **39 specifications, 55 numbered tables and 23 figures**.
-Each main chapter ends with a mind map. All 48 contents entries agree with the PDF.
-Long fields use repeated headers and explicit continuation where needed.
+R1五店二十账号、三十分钟容量日期为2026-10-15。本轮未重做容量、真实24小时或加密空库恢复；R2.4.3/2.4.4和R2.5另验。服务器未购买，Windows原数据恢复未解决。UX研究为官方文档、启发式观察和工程验证，尚非用户访谈、效率实验或完整WCAG认证。
 
-## Executed evidence and limits
+## 源文件与复现
 
-R2.2 records **978 source/rule checks**, **1,145 real PostgreSQL/HTTP/concurrency
-tests**, **32 live fault checks**, **869 isolated Chrome assertions**, a 20-check
-independent financial oracle and an encrypted empty-target restore matching
-**50** model/association fingerprints. Protected Mac verification passes **437**
-authorized-read assertions and preserves **48** original durable fingerprints,
-**70** original configurations, the original database volume and RC tag.
-
-Runtime/browser/restore exercises ran at `ed7e10e`. Initial exact CI exposed
-a legacy time-of-day-dependent row-cap fixture. Final application `02a9dbc`
-changes that test, adds a midnight case and refreshes integrity files; the
-22 previously tested source files and all runtime modules/configuration are
-byte-identical. The final source passed the complete 1,145-test gate and exact CI,
-and the Mac image/source/observer were verified at that final commit. This
-relationship and the initial CI failure are retained in the evidence.
-
-R1 capacity results remain dated **2026-10-15**: five clinics, twenty accounts and
-thirty minutes. They do not establish the new full-R2 or twenty-clinic envelope.
-R2.4.2 business dependency drills, equivalent capacity/24-hour/security work and cloud
-acceptance remain pending. The server has not been purchased. Original Windows-data
-recovery remains unresolved. R2.2 operational files have a separate encrypted delivery snapshot. R2.3 format-2 backups include bounded private observation history, restored as historical bytes rather than live health.
-
-This report replaces the current companion; the [frozen 63-page R5/RC1 report](../release_report/README.md),
-original models, 30 migration files and RC tag preserve their historical bytes.
-R2.2 adds no migration or business role.
-
-## Sources and reproduction
-
-`report_source.json` is editable text; `baseline.json` separately records R1/R2.1/R2.2 evidence and both R2.3 tool increments/digests. `build_report.py` reads the frozen
-Word source only to retain models and full specifications, then generates Word in `课程报告/` and Markdown in this source directory. It needs Python with `python-docx`; it never accesses a database
-or host credentials:
+`report_source.json`为可编辑正文，`build_report.py`只从冻结的RC1 Word保留模型和完整规约，不访问数据库或凭据。`baseline.json`保留各代范围，`toc_pages.json`保存最终PDF页码，`validation.json`记录检查与文件摘要。
 
 ```sh
-python docs/report-source/build_report.py
+python docs/report-source/build_report.py --output /absolute/draft/folder
 ```
 
-The responsibility-view PNG has a reproducible Pillow source in
-`draw_operations_flow.py`, taking explicit output and font paths. The notification
-capture is the sanitized current-clinic panel only. No private account guide,
-CSV payload, dump, key or raw operational state is included.
+Python需要python-docx，PDF渲染使用LibreOffice和Poppler；字体为Noto Serif CJK SC、Noto Sans CJK SC和Liberation Serif，PDF字体全部嵌入。新导出后重核目录、重建并检查所有页面。`draw_operations_flow.py`保留责任图生成来源，通知截图保留R2.2日期，`workbench-login.png`来自当前真实Chrome空输入页面。
 
-Use `--output /absolute/output/folder` for an isolated draft. PDF export uses LibreOffice and Poppler. Fonts are Noto Serif CJK SC,
-Noto Sans CJK SC and Liberation Serif; the PDF embeds its fonts.
-[Official Noto CJK sources](https://github.com/notofonts/noto-cjk).
-An editable Word rendering needs compatible fonts. After a new export, recheck
-the rendered pages, update `toc_pages.json` from the Arabic page labels, rebuild
-and repeat until the contents map is stable. Do not overwrite frozen RC files.
+正式Word/PDF只放顶层课程报告目录，文件名固定。冻结R5/RC1报告、原模型、30份迁移及RC标签不改。报告文档随后同步不重启已验收应用。
 
-`validation.json` records the 78-page visual/structural/privacy review and source/
-output hashes. The accepted application is updated separately; synchronizing this
-documentation companion does not restart its five running services.
-
-Mind map: retained case/specifications → current contracts → executed facts →
-source and CI identity → readable course report → GitHub/Mac document synchronization.
+思维导图：原案例和规约 → 当前责任合同 → 分阶段证据 → 源码与CI → 课程报告 → GitHub与Mac同步。

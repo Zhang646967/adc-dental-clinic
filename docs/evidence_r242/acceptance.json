@@ -1,0 +1,258 @@
+{
+  "format": 1,
+  "date": "2026-10-18",
+  "status": "LOCAL_DEPENDENCY_AND_UI_GATES_PASSED",
+  "application_source": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
+  "started_at_utc": "2026-10-19T01:12:20.185024+00:00",
+  "completed_at_utc": "2026-10-19T01:17:13.020493+00:00",
+  "regression": {
+    "source_rule_checks": 1046,
+    "postgresql_http_concurrency_tests": 1152,
+    "new_source_checks": 4,
+    "all_passed": true,
+    "isolated_cleanup_exit": 0
+  },
+  "fixture": {
+    "clinics": 5,
+    "patients": 10004,
+    "visits": 10505,
+    "invoices": 500,
+    "equipment_assets": 150,
+    "posted_receipts": 500,
+    "ledger_totals": {
+      "RECEIPT": "50000.00",
+      "REFUND": "0.00",
+      "EQUIPMENT_EXPENSE": "0.00",
+      "EXPENSE_REVERSAL": "0.00"
+    },
+    "limitation": "Receipt-only financial fixture; nonzero refund/equipment/reversal acceptance remains separately dated R1/R2.2 evidence."
+  },
+  "dependencies": {
+    "cases": [
+      {
+        "duration_seconds": 68.849,
+        "name": "worker",
+        "recovered": true,
+        "responsibility": "course_operator"
+      },
+      {
+        "duration_seconds": 11.041,
+        "name": "gateway",
+        "recovered": true,
+        "responsibility": "course_operator"
+      },
+      {
+        "duration_seconds": 86.559,
+        "name": "observer",
+        "recovered": true,
+        "responsibility": "course_operator"
+      },
+      {
+        "duration_seconds": 120.099,
+        "name": "database",
+        "recovered": true,
+        "responsibility": "course_operator"
+      }
+    ],
+    "checks": [
+      {
+        "name": "five_clinics_and_nonempty_finance_fixture",
+        "passed": true
+      },
+      {
+        "name": "worker_host_identifies_stopped_service",
+        "passed": true
+      },
+      {
+        "detected_seconds": 0.627,
+        "name": "stopped_worker_leaves_committed_notice_pending",
+        "passed": true
+      },
+      {
+        "name": "notice_delivered_once_without_task_replay",
+        "passed": true
+      },
+      {
+        "name": "worker_business_facts_unchanged",
+        "passed": true,
+        "protected_tables": 33
+      },
+      {
+        "name": "worker_independent_ledger_unchanged",
+        "passed": true
+      },
+      {
+        "name": "worker_host_recovered_with_history",
+        "passed": true
+      },
+      {
+        "name": "gateway_host_identifies_stopped_service",
+        "passed": true
+      },
+      {
+        "name": "gateway_outage_blocks_browser_entry",
+        "passed": true
+      },
+      {
+        "name": "notice_delivered_once_without_task_replay",
+        "passed": true
+      },
+      {
+        "name": "gateway_outage_does_not_stop_internal_work",
+        "passed": true
+      },
+      {
+        "name": "gateway_business_facts_unchanged",
+        "passed": true,
+        "protected_tables": 33
+      },
+      {
+        "name": "gateway_independent_ledger_unchanged",
+        "passed": true
+      },
+      {
+        "name": "gateway_host_recovered_with_history",
+        "passed": true
+      },
+      {
+        "name": "observer_host_identifies_stopped_service",
+        "passed": true
+      },
+      {
+        "name": "notice_delivered_once_without_task_replay",
+        "passed": true
+      },
+      {
+        "name": "independent_reader_detects_real_observer_expiry",
+        "passed": true,
+        "seconds": 64.316
+      },
+      {
+        "name": "observer_outage_keeps_business_http_ready",
+        "passed": true
+      },
+      {
+        "name": "observer_business_facts_unchanged",
+        "passed": true,
+        "protected_tables": 33
+      },
+      {
+        "name": "observer_independent_ledger_unchanged",
+        "passed": true
+      },
+      {
+        "name": "observer_host_recovered_with_history",
+        "passed": true
+      },
+      {
+        "name": "database_host_identifies_stopped_service",
+        "passed": true
+      },
+      {
+        "name": "database_outage_has_unknown_backlog_not_zero",
+        "passed": true,
+        "seconds": 53.947
+      },
+      {
+        "name": "database_outage_returns_safe_health_503",
+        "passed": true
+      },
+      {
+        "name": "database_business_facts_unchanged",
+        "passed": true,
+        "protected_tables": 33
+      },
+      {
+        "name": "database_independent_ledger_unchanged",
+        "passed": true
+      },
+      {
+        "name": "database_host_recovered_with_history",
+        "passed": true
+      },
+      {
+        "name": "no_duplicate_inbox_business_effects",
+        "passed": true
+      }
+    ],
+    "passed_checks": 28,
+    "protected_business_tables": 33,
+    "default_sample_interval_seconds": 30,
+    "default_expiry_seconds": 90,
+    "real_wall_time_expiry": true,
+    "expiry_definition": "Age of the last valid observation, not necessarily outage duration.",
+    "notices": "Committed task/outbox retained; inbox per event/grant remains unique; no business replay.",
+    "incidents": "Human acknowledgement, finite actions, fresh recovery samples and retained closure for each case."
+  },
+  "gateway_address_change": {
+    "passed": true,
+    "application_source": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
+    "checks": [
+      "candidate_entry_ready",
+      "actual_application_container_recreated",
+      "actual_application_address_changed",
+      "gateway_keeps_same_container_without_reload",
+      "gateway_automatically_recovers_http_entry",
+      "clinical_financial_grant_facts_preserved",
+      "independent_ledger_unchanged"
+    ],
+    "recovery_seconds": 1.425,
+    "actual_address_change": true,
+    "gateway_reloaded_after_change": false,
+    "source_nginx_sha256": "450950790870b5b5bce1cc63930220009d1f34e546dbe370d2f77f8339b2cdb7"
+  },
+  "nginx_syntax": {
+    "passed": true,
+    "version": "nginx version: nginx/1.30.5",
+    "configs": [
+      {
+        "config": "deployment/nginx.course.conf",
+        "syntax_passed": true
+      },
+      {
+        "config": "deployment/g4/nginx.template.conf",
+        "syntax_passed": true
+      },
+      {
+        "config": "deployment/g4/nginx.mac-tunnel.template.conf",
+        "syntax_passed": true
+      }
+    ],
+    "scope": "Local Nginx syntax; no certificate issuance or cloud acceptance"
+  },
+  "fixes": [
+    {
+      "problem": "Application container recreation changed its IP; gateway cached the old address and returned 502.",
+      "resolution": "Shared upstream with Docker DNS dynamic resolution in all three gateway configurations; actual IP change recovered without gateway reload."
+    },
+    {
+      "problem": "Drill harness initially treated cached healthy worker state as current-start readiness, and assumed task revision 1.",
+      "resolution": "Wait for a successful heartbeat from the current startup and compare the actual initial revision (0); preserve failed runs privately."
+    },
+    {
+      "problem": "Mac browser harness mistook the business operations-report route for a technical-only page.",
+      "resolution": "Checked route policy: management/HQ can read operations reports; technical role cannot. Corrected the harness expectation, without changing application permissions. Failed harness output retained privately."
+    }
+  ],
+  "ui": {
+    "evidence": "../evidence_ux1/acceptance.json",
+    "checks": 60,
+    "passed": true
+  },
+  "no_business_schema_or_role_changes": true,
+  "original_migrations_preserved": 30,
+  "original_mac_fault_injection": false,
+  "no_new_recovery_or_capacity_claim": true,
+  "pending": [
+    "R2.4.3 equivalent 30-minute capacity",
+    "R2.4.4 real 24-hour observation and security review",
+    "R2.5 cloud: no server purchased",
+    "Historical Windows original-data recovery unresolved"
+  ],
+  "isolated_cleanup": {
+    "test_containers_and_networks_removed": true,
+    "testing_volumes_retained": 4,
+    "no_oom_after_exercises": true,
+    "original_and_g4_projects_not_selected": true
+  }
+}

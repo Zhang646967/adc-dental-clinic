@@ -7,7 +7,7 @@ tracing and safe operational logging are implemented and locally verified** in
 [the R2.1 contract](R21_SAFE_DIAGNOSTICS.md) and [executed evidence](evidence_r21/README.md).
 Application `ccdcdcd` passed exact-commit CI and [protected Mac delivery](evidence_r21/delivery.json).
 R2.2 worker/backlog/observer conditions are also implemented and [delivered on Mac](evidence_r22/README.md)
-at `02a9dbc`; R2.3 has passed local snapshot-consistent backup and independent restore verification; R2.4.1 host events and human incident handling are now [delivered on Mac](evidence_r241/README.md); R2.4.2 business dependency drills are next.
+at `02a9dbc`; R2.3 has passed local snapshot-consistent backup and independent restore verification; R2.4.1 host events and human incident handling are now [delivered on Mac](evidence_r241/README.md); R2.4.2 business dependency drills and UX1 are now [delivered on Mac](evidence_r242/README.md) at `1977b4b`; equivalent capacity, true 24h and security review are next.
 Remaining full-R2 observation/security and cloud gates are pending.
 
 The target remains one dental chain with approximately 5–20 clinics. The next

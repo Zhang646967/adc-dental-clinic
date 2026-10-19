@@ -1,0 +1,77 @@
+{
+  "format": 1,
+  "source": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
+  "requirements": [
+    {
+      "requirement": "R242-D1",
+      "business_problem": "通知处理",
+      "actor": "运维与协调经办",
+      "invariant": "已提交任务/事件保留；每事件/授权仅一条消息",
+      "failure_response": "先恢复worker，不重做协调任务",
+      "direct_checks": [
+        "stopped_worker_leaves_committed_notice_pending",
+        "notice_delivered_once_without_task_replay",
+        "worker_business_facts_unchanged"
+      ],
+      "evidence": "acceptance.json#/dependencies/checks"
+    },
+    {
+      "requirement": "R242-D2",
+      "business_problem": "用户入口",
+      "actor": "运维",
+      "invariant": "内部健康不等于入口可达；消息可继续完成",
+      "failure_response": "恢复网关并核对实际入口",
+      "direct_checks": [
+        "gateway_outage_blocks_browser_entry",
+        "gateway_outage_does_not_stop_internal_work",
+        "gateway_host_recovered_with_history"
+      ],
+      "evidence": "acceptance.json#/dependencies/checks"
+    },
+    {
+      "requirement": "R242-D3",
+      "business_problem": "独立监测",
+      "actor": "运维",
+      "invariant": "最后有效观察过期为UNKNOWN；业务可继续",
+      "failure_response": "恢复observer，等待新的成功采样",
+      "direct_checks": [
+        "independent_reader_detects_real_observer_expiry",
+        "observer_outage_keeps_business_http_ready",
+        "observer_host_recovered_with_history"
+      ],
+      "evidence": "acceptance.json#/dependencies/checks"
+    },
+    {
+      "requirement": "R242-D4",
+      "business_problem": "数据库",
+      "actor": "运维及原业务负责人",
+      "invariant": "积压未知不是零；诊疗、金额、授权不改写",
+      "failure_response": "先数据库就绪，再worker；结果不明先查持久状态",
+      "direct_checks": [
+        "database_outage_has_unknown_backlog_not_zero",
+        "database_outage_returns_safe_health_503",
+        "database_business_facts_unchanged",
+        "database_independent_ledger_unchanged"
+      ],
+      "evidence": "acceptance.json#/dependencies/checks"
+    },
+    {
+      "requirement": "R242-G1",
+      "business_problem": "应用换址后旧网关上游失效",
+      "actor": "运维",
+      "invariant": "更换应用地址后入口自动恢复，不重启网关、不改业务事实",
+      "failure_response": "核对实际DNS与已加载配置",
+      "direct_checks": [
+        "candidate_entry_ready",
+        "actual_application_container_recreated",
+        "actual_application_address_changed",
+        "gateway_keeps_same_container_without_reload",
+        "gateway_automatically_recovers_http_entry",
+        "clinical_financial_grant_facts_preserved",
+        "independent_ledger_unchanged"
+      ],
+      "evidence": "acceptance.json#/gateway_address_change"
+    }
+  ],
+  "full_regression_is_not_a_use_case_coverage_percentage": true
+}

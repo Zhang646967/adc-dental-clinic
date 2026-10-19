@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统分析与设计
 
-R2.4.1 主机运行保障阶段报告 2026年10月18日
+R2.4.2 故障演练与界面优化阶段报告 2026年10月18日
 
 
 
@@ -26,7 +26,7 @@ COURSE PROJECT PROGRESS REPORT
 
 专业班级  信管 T2401
 
-R2.4.1 主机运行保障阶段报告
+R2.4.2 故障演练与界面优化阶段报告
 
 2026年10月18日
 
@@ -38,7 +38,7 @@ R2.4.1 主机运行保障阶段报告
 
 报告保留项目愿景、业务用例、现状与改进后的业务序列、系统用例、领域与状态模型，以及 SU-01—38 和 SF-01 的完整规约。在原有接诊与结算基础上，财务流程加入渠道账户、分次收退款凭据、独立审核、私有 CSV 导入和逐笔对账；设备流程保留责任维护、独立验收及费用来源，避免把排班协商或会计核对等同于自动业务变更。
 
-R2.1完成请求追踪与安全日志，R2.2识别通知心跳、积压及监测失效，R2.3完成快照一致的备份与独立恢复。本轮R2.4.1增加主机事件和故障处置：区分停止、重启、内存终止与采集失联，记录认领、行动、验证和关闭。第5章保留本轮与历史证据，完整R2、独立公网和商业化验收仍待完成。
+R2.1完成请求追踪与安全日志，R2.2识别通知心跳、积压及监测失效，R2.3完成快照一致的备份与独立恢复。R2.4.1建立主机事件和人工处置。本轮R2.4.2演练通知、数据库、网关和监测中断，按新采样和持久业务事实验证恢复，并修复网关旧地址引发的502。界面更新借鉴成熟工作视图与无障碍规范，改善登录、导航及常用入口。完整R2、独立公网和商业化验收仍待完成。
 
 关键词  系统分析与设计；连锁诊所；业务范围；财务证据；通知监测；可验证性
 
@@ -50,7 +50,7 @@ This course project develops a connected operations system for one dental chain.
 
 The report retains the project vision, business and system use cases, current and improved business sequences, domain and state models, and all original SU-01 to SU-38 and SF-01 specifications. Financial evidence and one-to-one statement reconciliation retain independent review. Equipment records connect maintenance responsibility, separate acceptance and supported expenses without silently rescheduling clinical commitments.
 
-R2.1 provides safe request tracing, R2.2 observes notification progress, and R2.3 verifies snapshot-consistent backups and independent restoration. R2.4.1 adds host events and human incident handling. It distinguishes stops, restarts, out-of-memory termination and collector failure, retaining responsibility, actions and verified closure. Chapter 5 separates current and historical evidence. Full R2, independent hosting and commercial readiness remain unverified.
+R2.1 provides safe request tracing, R2.2 observes notification progress, and R2.3 verifies snapshot-consistent backups and independent restoration. R2.4.1 adds host events and human incident handling. R2.4.2 exercises notification, database, gateway and observer outages, verifying recovery against fresh samples and retained business facts. Dynamic gateway resolution fixes stale-address 502 errors. A first interface update improves sign-in, navigation and frequent actions using established workflow and accessibility guidance. Full R2, independent hosting and commercial readiness remain unverified.
 
 Key words  systems analysis and design; dental chain; financial evidence; notification monitoring; verifiability
 
@@ -459,13 +459,13 @@ worker 仍通过原来的短事务、SKIP LOCKED 和事件/授权唯一性处理
 
 独立 collector 每30秒采样，只读数据库聚合与心跳，并观察内部Web就绪和运行卷空间。worker 心跳卷由 worker 写、collector 只读；监测卷由 collector 写，Web 容器只读以供私有状态命令使用。不挂载 Docker socket，不增加公网端口。
 
-独立 reader 不依赖数据库和 collector 仍在运行；超过90秒无新有效观测时返回 UNKNOWN。故障按目标和条件归并；确认仅保留维护责任代码，不能提前恢复。监测状态使用0700目录与0600文件、限长解析、校验摘要和原子替换；损坏记录保留待受控重置。
+独立 reader 在数据库或 collector 停机后仍可读取。最后有效观察超过90秒时，状态为未知（UNKNOWN）。故障按目标和条件归并；确认仅保留维护责任代码，不能提前恢复。监测状态使用0700目录与0600文件、限长解析、校验摘要和原子替换；损坏记录保留待受控重置。
 
 ### 4.13 状态和存储的边界
 
 运营监测文件不是不可变财务审计，也不是独立备份；摘要用于发现损坏，不能证明文件作者身份。保留最多128个事件生命周期，每个最多16条变化，裁剪只删除已恢复记录并明确累计数量。受控观察重置另保留最多3份先前记录，并从未知状态重新建立观察。
 
-空间信号反映运行卷所在的Docker Linux文件系统，不等于整台Mac磁盘的独立监控。容器OOM/重启的持续主机侧采集、外部告警、备份新鲜度及24小时观察分别属于后续完整R2验收。
+空间信号反映运行卷所在的Docker Linux文件系统，不等于整台Mac磁盘的独立监控。R2.4.1增加主机侧有限采集及人工处置，R2.4.2验证实际依赖恢复；外部告警、备份新鲜度及真实24小时观察仍按完整R2门槛分别验收。
 
 图4-8 通知处理与私有监测责任视图
 
@@ -481,7 +481,7 @@ worker 仍通过原来的短事务、SKIP LOCKED 和事件/授权唯一性处理
 
 独立测试使用自己的实例、端口、网络、账号和卷。故障注入只针对这一环境，不对原Mac业务数据注入测试交易。实际依赖版本、源码身份和执行时间由本轮验收记录提供。
 
-本轮应用源码为 02a9dbc90583fbcad47567e64ae77ae810eca33f；依赖固定为Django 5.2.17、psycopg 3.2.10和Gunicorn 26.2.0。准确应用提交的CI通过；报告文档在独立后续提交同步，运行镜像保留已验收应用身份。
+本轮应用及故障工具源码为 1977b4bc2d8787711966c19439a5a272c9a9f1ca；依赖固定为Django 5.2.17、psycopg 3.2.10和Gunicorn 26.2.0。按准确实现提交通过CI后更新Mac镜像，文档另行同步；应用源码身份与文档版本分别保留。
 
 ### 5.2 核心功能实现说明
 
@@ -507,6 +507,8 @@ worker 仍通过原来的短事务、SKIP LOCKED 和事件/授权唯一性处理
 
 ### 5.4 测试设计与执行结果
 
+R2.4.2本地完整回归通过1,046项源码/规则和1,152项真实PostgreSQL/HTTP/并发测试。四类真实依赖中断共28项检查；另有7项应用换址恢复检查、三种网关配置语法及60项真实浏览器检查。下表及其后R2.2结果保留历史范围，不作为本轮容量或恢复新成绩。
+
 R2.2纯规则及源码检查978项、真实PostgreSQL/HTTP/并发回归1,145项通过，未新增数据库迁移。以下结果来自R2.2独立五诊所合成演练，源码与验收绑定；全套数量不能自动等同于每个历史用例的逐项覆盖率。
 
 初次CI发现旧预约搜索验收依赖运行时刻；将候选数量测试固定到次日上午，并新增午夜开始时间边界用例。运行、浏览器和恢复演练源码为ed7e10e，最终应用为02a9dbc；两者仅相差该测试及完整性清单，运行模块和配置字节一致。最终提交重新通过本地完整回归与准确CI，Mac按最终版本验证。
@@ -520,6 +522,12 @@ R2.2纯规则及源码检查978项、真实PostgreSQL/HTTP/并发回归1,145项�
 24条匹配有效、1条因凭据更正保留为需重核，30条外部流水已接受。对账没有改写账单或生成平衡款项。
 
 日志核对覆盖64类凭据、患者及CSV/引用标记，均未出现；992个请求在应用、Gunicorn和网关间关联。固定启动和停止提示单独分类，原生请求错误和数据库输出保持关闭。完整证据与需求追踪保存在docs/evidence_r22；准确应用CI：https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755。
+
+本轮隔离环境包含五店、10,004名合成患者、10,505条Visit、500张账单、150件设备和500笔已过账收款。独立汇总实收50,000.00元，退款、设备支出和冲回为零；这一数据集不能证明非零四类资金场景。原Mac不注入故障或测试交易。
+
+通知停机后已提交任务和待发事件保留，重启仅投递一次；网关停机时内部通知继续运行；最后有效观察超过90秒后独立读取UNKNOWN；数据库停机时健康503、积压为未知而非零。恢复后六条件均健康，临床、资金、授权和患者访问事实摘要及独立金额一致，主机事件保留认领、行动和验证关闭。
+
+演练发现应用重建换址后网关连接旧地址，产生502。三种网关配置增加Docker DNS动态解析；强制保留旧地址并创建新应用后，无需重启网关即恢复入口，未改变受保护业务事实。[28]
 
 表5-1 分层测试与执行结果
 
@@ -546,6 +554,8 @@ R2.2数据库备份与运行观测另存；R2.3新格式增加私有观测历史
 
 R2.4.1更新前加密保护，更新后核对48项业务摘要、70份配置、原卷及RC标签。实际遇时钟不一致导致监测退出，先加密保留旧观测，再显式恢复并用主机事件簿记录处置。业务服务未重建；主机采集显式启动，睡眠或失联留痕，完整24小时另验。
 
+R2.4.2更新前核验加密数据库与配置备份；准确实现CI通过后构建新镜像，计划重建应用、通知处理、observer及网关，数据库容器和原卷保留。旧观测和主机事件先加密保留，新源码建立新身份观察，不将历史健康写成当前健康。更新后核对原48项持久事实、70份配置、RC标签和实际浏览器入口。
+
 ### 5.6 需求追踪
 
 R2.4.1在主机侧读取明确实例的有限Docker元数据，区分worker停止、容器重启/重建、真实OOM、采集失败及观察缺口。运维记录私有保存；工具不执行重启、不读患者和资金明细，也不重放业务。
@@ -554,7 +564,9 @@ R2.4.1在主机侧读取明确实例的有限Docker元数据，区分worker停�
 
 第二批20961ba通过1,016项规则、1,152项PostgreSQL/HTTP/并发及24项真实age/PG恢复检查。空库比对51表、29,144行，恢复、比对及启动15.868秒；含五店资金凭据、CSV及匹配历史。本地传输模拟不证明云端SSH。
 
-本轮837a834通过1,042项规则及1,152项PostgreSQL/HTTP/并发回归。21项隔离主机检查含48MiB限额下真实OOM及恢复；人工认领和行动不清故障，关闭需新鲜恢复采样。备份结果与R2.3恢复点分开；完整追踪及CI见docs/evidence_r241。
+R2.4.1的837a834通过1,042项规则及1,152项PostgreSQL/HTTP/并发回归。21项隔离主机检查含48MiB限额下真实OOM及恢复；人工认领和行动不清故障，关闭需新鲜恢复采样。备份结果与R2.3恢复点分开；完整追踪及CI见docs/evidence_r241。
+
+R2.4.2依赖演练使用独立合成实例和实际停止/启动，90秒失效判断采用真实时间，不改阈值。资金请求中断时，先查原申请、版本和持久结果，再由责任人核查，禁止凭错误页面盲目再次收退款。完整记录与处置手册见docs/evidence_r242及docs/R242_DEPENDENCY_DRILLS.md。
 
 表5-2 需求至验收追踪
 
@@ -566,22 +578,46 @@ R2.4.1在主机侧读取明确实例的有限Docker元数据，区分worker停�
 | R2-06 应用状态 | 保留原六条件与独立状态读取；与主机元数据分别判断。 |
 | R2.4.1 主机事件 | 有限元数据、真实OOM、重启、采集失败；认领、处置、新采样及保留关闭。 |
 | R2-A07/08 恢复 | 保留R2.3同快照、独立空库、全事实及原字节比对结果。 |
-| R2-A10/12 交付 | 准确CI、加密备份、48项业务及70份配置核对；业务容器不重建。 |
-| 后续门槛 | R2.4.2业务依赖演练、等价负载、24小时及安全；R2.5公网另验。 |
+| R2-A10/12 交付 | 准确实现CI、加密备份、48项业务及70份配置核对；本轮明确更新应用与网关，原数据库卷保留。 |
+| R2.4.2 依赖恢复 | 四类中断、真实过期、28项检查；换址恢复7项；新采样及临床/资金/授权事实核对。 |
+| UX1 界面 | 七角色、键盘、无脚本、320/390像素及大字；60项浏览器检查，主要动作对比度6.73。 |
+| 后续门槛 | R2.4.3等价负载、R2.4.4真实24小时及安全；R2.5公网另验。 |
 
-思维导图  测试目标 → 隔离正常/异常场景 → PostgreSQL/进程/浏览器 → 独立业务核算 → 加密恢复 → 准确版本CI → 原Mac受保护更新。
+### 5.7 页面调研与体验更新
+
+本轮采用官方产品文档调研、现有页面启发式评估和真实浏览器验证，尚未开展教师、前台及财务用户访谈。Open Dental按诊所和医生组织工作视图，Odoo通过筛选聚焦相关记录；W3C规范用于核对窄屏、目标尺寸和键盘焦点。[23-27]
+
+界面沿用Django原生页面，按当前范围、常用操作、真实待办和完整模块组织信息。登录统一员工与患者入口，增加显式密码显示；手机导航展开后完整纵向呈现。前台增加预约和患者入口，财务增加待审核、渠道对账及日结入口，仍进入原授权页面。
+
+1440像素同一合成前台中，创建预约入口由页面约1,577像素处提前到283像素处；这是入口位置测量，不是办事时间提升。60项Chrome检查覆盖七个工作台、无脚本登录退出、键盘、320/390像素及文字放大。主要动作文字对比度6.73，新增控件按44像素设计目标检查；局部通过不等于完整WCAG认证。
+
+表5-3 页面调研与落实
+
+
+
+| 学习来源 | 本轮应用 |
+| --- | --- |
+| 工作视图与筛选 | 始终显示身份与诊所，财务待审入口带原服务端筛选，不在前端虚构统计。 |
+| 窄屏与键盘 | 表单优先、导航折叠可展开，隐藏菜单时焦点返回控制按钮；无脚本仍可办理。 |
+| 下一轮UX2 | 按实际反馈细化预约长清单、接诊与财务表单；保持预览、签名、独立复核和当前范围。 |
+
+图5-4 UX1 员工登录页
+
+来自隔离实例的真实Chrome页面；输入为空，不包含私有账号、患者信息或密码。
+
+思维导图  测试目标 → 隔离依赖中断 → 新采样与业务事实 → 网关换址修复；界面调研 → 原生交互 → 多尺寸验证 → 准确CI → 原Mac受保护更新。
 
 ## 第6章 总结与展望
 
 ### 6.1 阶段工作总结
 
-系统已衔接预约接诊、资金凭据与逐笔对账、设备维护及通知协调。R2.1提供安全请求定位，R2.2识别通知和监测故障，R2.3验证快照一致的独立恢复。本轮R2.4.1把主机异常转为可认领、可记录处置并以新采样验证关闭的事件，保留恢复前后的历史。
+系统已衔接预约接诊、资金凭据与逐笔对账、设备维护及通知协调。R2.1—R2.3建立定位、监测及独立恢复，R2.4.1保留主机事件与人工处置，本轮R2.4.2按实际业务结果验证依赖恢复。首批界面更新将常用动作放在待办前，并改善手机导航和登录阅读顺序。
 
 需求分析把业务问题转为可观察的不变量；模块合同把财务、诊疗、排班与运行状态的责任分开；数据库与浏览器证据检查实际结果，独立恢复检查保留下来的事实。测试数量不代表覆盖率、临床有效性或大型商业部署能力。
 
 ### 6.2 不足与后续工作
 
-下一步R2.4.2完成真实业务依赖故障演练及处置手册验证，再进行等价负载、24小时观察与安全差距复核。R2.5公网仍待服务器。之后依次推进R3跨次治疗与随访、R4维护与多资源排班、R5二十诊所代表性容量；本机主机事件通过不代表这些门槛已完成。
+下一步R2.4.3验证等价负载，R2.4.4进行真实24小时观察与安全差距复核；UX2并行细化预约清单、接诊与财务表单，并收集实际使用反馈。R2.5公网仍待服务器。之后依次推进R3跨次治疗与随访、R4维护与多资源排班、R5二十诊所代表性容量；本轮通过不替代这些门槛。
 
 表6-1 后续工作与验收门槛
 
@@ -590,11 +626,12 @@ R2.4.1在主机侧读取明确实例的有限Docker元数据，区分worker停�
 | 项目 | 要求与结果 |
 | --- | --- |
 | R2.3 | 本地生成、下载、独立恢复及全业务比对通过；准确工具CI与Mac保护交付分别留证，原始时点及UTC保留规则不变。 |
-| R2.4 | R2.4.1主机事件与处置已通过本地验收；业务依赖演练、等价负载、24小时及安全复核待完成。 |
+| R2.4 | R2.4.1主机事件及R2.4.2依赖演练通过；等价负载、真实24小时及安全复核待完成。 |
+| UX2 | 基于反馈优化复杂筛选、长清单和临床/财务表单，保留全部原授权与明确确认。 |
 | R2.5 | 独立HTTPS主机、国内无代理访问、Mac离线、服务器/worker重启、证书续期与云端恢复。 |
 | R3—R5 | 跨次治疗计划与随访；维护和多资源排班；二十诊所代表性容量与独立运行界限。 |
 
-思维导图  当前闭环 → 明确尚缺 → 恢复新鲜度 → 完整本地运行 → 独立公网 → 连续治疗 → 资源协调 → 有证据的规模扩展。
+思维导图  当前闭环 → 等价负载与真实24小时 → 安全复核 → 独立公网；使用反馈 → 表单与清单改进 → 连续治疗 → 资源协调 → 有证据的规模扩展。
 
 ## 参考文献
 
@@ -641,6 +678,18 @@ R2.4.1在主机侧读取明确实例的有限Docker元数据，区分worker停�
 [21] ADC PROJECT. R2.2 implementation contract and executed evidence[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/tree/main/docs/evidence_r22（实际执行结果以发布记录为准）.
 
 [22] Zhang Jialiang. ADC R2.2 application 02a9dbc and exact-commit CI[EB/OL]. https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755. 2026-10-18.
+
+[23] OPEN DENTAL. Appointment Views[EB/OL]. https://www.opendental.com/manual/appointmentviews.html（访问日期2026-10-18）.
+
+[24] ODOO. Search filter and group records[EB/OL]. https://www.odoo.com/documentation/19.0/applications/essentials/search.html（访问日期2026-10-18）.
+
+[25] W3C. Understanding Reflow[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/reflow.html（访问日期2026-10-18）.
+
+[26] W3C. Understanding Target Size Minimum[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html（访问日期2026-10-18）.
+
+[27] W3C. Understanding Focus Not Obscured Minimum[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html（访问日期2026-10-18）.
+
+[28] NGINX. Module ngx_http_upstream_module[EB/OL]. https://nginx.org/en/docs/http/ngx_http_upstream_module.html（访问日期2026-10-18）.
 
 ## 附录A 基础系统用例规约
 

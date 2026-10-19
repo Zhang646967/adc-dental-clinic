@@ -1,0 +1,51 @@
+{
+  "format": 1,
+  "date": "2026-10-18",
+  "passed": true,
+  "status": "DEPENDENCY_DRILLS_AND_UX1_DELIVERED_ON_MAC",
+  "application_commit": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082",
+  "ci_conclusion": "success",
+  "image": "sha256:9421a9c975616d9416f5287af8b59ec261acaa98bd68d1f90cb618df2bb407c8",
+  "architecture": "arm64",
+  "pre_update_encrypted_database_and_config_backups_verified": true,
+  "post_update_encrypted_database_archive_verified": true,
+  "observation_history_and_previous_host_journal_encrypted_and_verified": true,
+  "new_source_observations_started_unknown_then_six_healthy": true,
+  "original_business_fingerprints_preserved": 48,
+  "original_private_configurations_preserved": 70,
+  "original_volume_and_rc_tag_preserved": true,
+  "database_container_preserved": true,
+  "planned_service_restarts": [
+    "web",
+    "notification-worker",
+    "operations",
+    "gateway"
+  ],
+  "host_collection_target": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
+  "new_launchd_or_scheduled_job": false,
+  "actual_gateway_configuration_loaded_and_syntax_valid": true,
+  "actual_health_login_and_new_assets_200": true,
+  "mac_browser": {
+    "checks": 93,
+    "passed": true,
+    "roles": 7,
+    "accounts": 9,
+    "scope": "Login/workspace selection and authorized read-only routes; no original business submissions."
+  },
+  "synthetic_business_data_injected_into_original": false,
+  "restore_into_original_database": false,
+  "course_report": {
+    "pages": 81,
+    "specifications": 39,
+    "tables": 56,
+    "figures": 24,
+    "contents_entries": 49,
+    "word_sha256": "caf27c5d640bd6f012e92b83dbf9c1ddeddc7b8004e068dea2e34c7fb56896a3",
+    "pdf_sha256": "553ff27dca01f51e66310cfc14fe7ac89ecde53f2f9f0c0de8e96c7888deddb9"
+  },
+  "independent_empty_database_restore_this_increment": false,
+  "capacity_30min_this_increment": false,
+  "continuous_24h_acceptance": false,
+  "pending": "R2.4.3 capacity, R2.4.4 true 24h/security, R2.5 cloud; no server purchased. Historical Windows-data recovery unresolved."
+}

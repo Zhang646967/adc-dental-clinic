@@ -133,7 +133,7 @@ def build(folder,repo,output=None):
   heading(spec['heading'])
   for text in spec.get('paragraphs',[]):p(text)
   if spec.get('table'):
-   v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
+   v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','5.7':'表5-3 页面调研与落实','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
    p(label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
  def mind(n):p('思维导图  '+source['mind_maps'][str(n)],size=10.5,indent=False,space=6)
  def page():next_page[0]=True
@@ -285,6 +285,10 @@ def build(folder,repo,output=None):
     image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'notification-overview.png'),width=Cm(6.2))
     p('图5-3 R2.2 本店通知概况（390像素大字模式）',10.5,False,True)
     p('来自独立合成演练：两条待派发中仅一条已经到期；未来重试单独显示。该页面为当前诊所概况，后台健康由私有独立读取核对。',10.5)
+  if item['heading'].startswith('5.7') and (folder/'workbench-login.png').exists():
+   image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'workbench-login.png'),width=Cm(16))
+   p('图5-4 UX1 员工登录页',10.5,False,True)
+   p('来自隔离实例的真实Chrome页面；输入为空，不包含私有账号、患者信息或密码。',10.5)
  mind(5)
  page();heading('第6章 总结与展望',1)
  for item in source['conclusion']:add(item)

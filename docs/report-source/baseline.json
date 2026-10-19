@@ -1,7 +1,7 @@
 {
-  "format": 6,
+  "format": 7,
   "report_date": "2026-10-18",
-  "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+  "application_commit": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
   "R1_historical": {
     "format": 1,
     "report_date": "2026-10-18",
@@ -91,7 +91,10 @@
     "R2": "IN_PROGRESS",
     "R23": "LOCAL_RECOVERY_TOOLS_DELIVERED",
     "cloud_acceptance": "NOT_RUN",
-    "windows_original_data_recovery": "unresolved"
+    "windows_original_data_recovery": "unresolved",
+    "R242": "DELIVERED_ON_MAC",
+    "UX1": "DELIVERED_ON_MAC",
+    "R24": "IN_PROGRESS"
   },
   "R21_historical": {
     "evidence_path": "docs/evidence_r21/acceptance.json",
@@ -139,7 +142,7 @@
     "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755",
     "status": "DELIVERED_ON_MAC"
   },
-  "tool_commit": "837a834f892586838fe3d186dac7e137dfb7b6c8",
+  "tool_commit": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
   "R23_first_increment": {
     "evidence_path": "docs/evidence_r23/acceptance.json",
     "evidence_sha256": "a85d90049c820669e32fa4506240e57ed4c2f64a0906a75606145912d4e80d33",
@@ -197,5 +200,26 @@
     "host_checks": 21,
     "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39180157857",
     "scope": "Host Docker process metadata and incident workflow; business dependency drills and 24h remain pending"
+  },
+  "R242": {
+    "evidence_path": "docs/evidence_r242/acceptance.json",
+    "evidence_sha256": "4f0856fcf333bd35a93857d11240038350d128c0f9aaa6bb270e10f568310328",
+    "delivery_path": "docs/evidence_r242/delivery.json",
+    "delivery_sha256": "aab8eba22c82e6e7969cefad3b414d06b1b37c5918581eafa4a533025399ed5d",
+    "regression": {
+      "source_rule_checks": 1046,
+      "postgresql_http_concurrency_tests": 1152
+    },
+    "dependency_checks": 28,
+    "gateway_address_change_checks": 7,
+    "browser_checks": 60,
+    "mac_browser_checks": 93,
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082",
+    "scope": "Real isolated dependencies and UI; no new capacity/24h/empty-target recovery/cloud claim"
+  },
+  "UX1": {
+    "evidence_path": "docs/evidence_ux1/acceptance.json",
+    "evidence_sha256": "fd0eb7b012716ff2ec38b788e4ba0a81ccd8b5410435e3564dc65ac9de7c81f9",
+    "method": "Official research, heuristic and real-browser engineering checks; no interviews or task-time study"
   }
 }

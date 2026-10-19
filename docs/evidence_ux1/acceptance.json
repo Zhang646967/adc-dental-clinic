@@ -1,0 +1,272 @@
+{
+  "format": 1,
+  "date": "2026-10-18",
+  "source": "1977b4bc2d8787711966c19439a5a272c9a9f1ca",
+  "status": "LOCAL_NATIVE_INTERFACE_ACCEPTED",
+  "method": "Official documentation research, heuristic assessment and real Chrome checks; no user interview or measured task-time experiment.",
+  "research": "../UI_UX_STUDY.md",
+  "browser": "155.0.8059.84",
+  "checks": [
+    {
+      "name": "Login desktop two columns",
+      "passed": true
+    },
+    {
+      "name": "Password keyboard reveal",
+      "passed": true
+    },
+    {
+      "name": "Password keyboard hide preserves value",
+      "passed": true
+    },
+    {
+      "name": "Invalid login remains private password input",
+      "passed": true
+    },
+    {
+      "name": "320px login reflow",
+      "passed": true
+    },
+    {
+      "name": "Mobile login narrative hidden",
+      "passed": true
+    },
+    {
+      "name": "Mobile inputs labelled",
+      "passed": true
+    },
+    {
+      "name": "320px large text login reflow",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK login GET",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK main heading",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK scope explicit",
+      "passed": true
+    },
+    {
+      "name": "Booking action before worklist and above fold",
+      "passed": true
+    },
+    {
+      "name": "Keyboard skip main",
+      "passed": true
+    },
+    {
+      "name": "Resize focus returns to navigation control",
+      "passed": true
+    },
+    {
+      "name": "Narrow nav initially collapsed",
+      "passed": true
+    },
+    {
+      "name": "390px front desk reflow",
+      "passed": true
+    },
+    {
+      "name": "Keyboard opens complete mobile navigation",
+      "passed": true
+    },
+    {
+      "name": "Mobile nav keyboard reachable",
+      "passed": true
+    },
+    {
+      "name": "390px front large mode reflow",
+      "passed": true
+    },
+    {
+      "name": "320px front large mode reflow",
+      "passed": true
+    },
+    {
+      "name": "200 percent font front reflow",
+      "passed": true
+    },
+    {
+      "name": "Primary action contrast and target height",
+      "passed": true
+    },
+    {
+      "name": "Front desk cannot open management operations reports",
+      "passed": true
+    },
+    {
+      "name": "Patient list desktop reflow",
+      "passed": true
+    },
+    {
+      "name": "MANAGER fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "MANAGER login GET",
+      "passed": true
+    },
+    {
+      "name": "MANAGER main heading",
+      "passed": true
+    },
+    {
+      "name": "MANAGER scope explicit",
+      "passed": true
+    },
+    {
+      "name": "FINANCE fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "FINANCE login GET",
+      "passed": true
+    },
+    {
+      "name": "FINANCE main heading",
+      "passed": true
+    },
+    {
+      "name": "FINANCE scope explicit",
+      "passed": true
+    },
+    {
+      "name": "Pending cash shortcut retains server filter",
+      "passed": true
+    },
+    {
+      "name": "Pending cash page returns correct filter",
+      "passed": true
+    },
+    {
+      "name": "Finance cash narrow large reflow",
+      "passed": true
+    },
+    {
+      "name": "HQ fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "HQ login GET",
+      "passed": true
+    },
+    {
+      "name": "HQ main heading",
+      "passed": true
+    },
+    {
+      "name": "HQ scope explicit",
+      "passed": true
+    },
+    {
+      "name": "DENTIST fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "DENTIST login GET",
+      "passed": true
+    },
+    {
+      "name": "DENTIST main heading",
+      "passed": true
+    },
+    {
+      "name": "DENTIST scope explicit",
+      "passed": true
+    },
+    {
+      "name": "Treatment read remains accessible",
+      "passed": true
+    },
+    {
+      "name": "Clinical care narrow reflow",
+      "passed": true
+    },
+    {
+      "name": "PATIENT fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "PATIENT login GET",
+      "passed": true
+    },
+    {
+      "name": "PATIENT main heading",
+      "passed": true
+    },
+    {
+      "name": "Patient portal narrow reflow",
+      "passed": true
+    },
+    {
+      "name": "Patient clinic administration rejected",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN fixture assigned",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN login GET",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN main heading",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN scope explicit",
+      "passed": true
+    },
+    {
+      "name": "No JS full navigation available",
+      "passed": true
+    },
+    {
+      "name": "No JS logout keeps server POST",
+      "passed": true
+    },
+    {
+      "name": "Logout accepted without JS",
+      "passed": true
+    },
+    {
+      "name": "No browser JavaScript failures",
+      "passed": true
+    },
+    {
+      "name": "All application assets load",
+      "passed": true
+    }
+  ],
+  "passed_checks": 60,
+  "page_errors": 0,
+  "asset_failures": 0,
+  "measurements": {
+    "before_booking_action_y": 1576.609375,
+    "after_booking_action_y": 282.765625,
+    "viewport": "1440x1000",
+    "primary_action_contrast": 6.728807018915356,
+    "mobile_widths": [
+      320,
+      390
+    ],
+    "large_text": true,
+    "font_200_percent": true
+  },
+  "roles": 7,
+  "native_forms_and_permission_contracts_preserved": true,
+  "no_js_navigation_and_logout": true,
+  "no_new_framework_or_business_api": true,
+  "scope_limit": "Selected accessibility checks, not complete WCAG certification or user satisfaction evidence.",
+  "next_increment": "UX2: long lists, clinically grouped forms and financial filters, prioritized with real feedback."
+}

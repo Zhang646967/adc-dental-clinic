@@ -17,7 +17,7 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-Current development（当前进展）：R2.4.1 主机事件采集与故障处置已交付 Mac，可区分停止、重启、OOM 和采集失联，并保留认领、行动与验证关闭记录。[实现与运维](docs/R241_HOST_EVENTS.md) · [验收与交付](docs/evidence_r241/README.md) · [课程报告](课程报告/README.md) · [后续计划](docs/R24_ACCEPTANCE_PLAN.md)。业务依赖演练、容量/24小时、安全和云端验收分别推进。
+Current development（当前进展）：R2.4.2 业务依赖故障演练与 UX1 界面更新已交付 Mac。完成通知、数据库、网关及监测恢复，修复应用换址后的502；更新登录、手机导航及前台/财务快捷入口。[验收与交付](docs/evidence_r242/README.md) · [界面调研与截图](docs/evidence_ux1/README.md) · [课程报告](课程报告/README.md) · [下一步](docs/R24_ACCEPTANCE_PLAN.md)。等价容量、真实24小时、安全及云端验收仍分别推进。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

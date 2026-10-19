@@ -30,6 +30,8 @@ Continuous host events, independent collection and strict time expiry remain gap
 
 R2.4.1 update: [bounded host events and incident handling](evidence_r241/README.md) add private source-bound metadata, explicit OOM/restart evidence and human verified closure. Independent protected log collection, strict time expiry and the full ASVS assessment remain gaps.
 
+R2.4.2 update: [actual dependency exercises](evidence_r242/README.md) verify safe DB-health 503, unknown backlog, real observation expiry and retained financial/clinical/authorization facts. UX1 browser checks retain seven-role boundaries and native forms. These are additional evidence for review; no full ASVS assessment or new security conformity claim is made.
+
 ## Logging and error assessment
 
 | ASVS 5.0.0 | Topic | Baseline status and evidence | Planned action and acceptance |

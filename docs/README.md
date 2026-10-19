@@ -18,6 +18,7 @@
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
 - [需求追踪](TRACEABILITY.md)、[物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)、[模型图](diagrams/)。
+- [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [成熟系统学习与差距](MATURE_SYSTEM_STUDY.md)、[后续开发方向](COMMERCIAL_DEVELOPMENT.md)。
 - [AI 接口与边界](AI_INTERFACE.md)、[版本范围](V1_SCOPE_AND_REMAINING.md)。
 
@@ -25,13 +26,14 @@
 
 - [Mac 使用与数据保护](MACOS.md)、[课程上线与备份恢复](COURSE_ONLINE.md)、[部署配置](../deployment/README.md)。
 - [R2 阶段规划](R2_OPERATIONAL_ASSURANCE_PLAN.md)、[R2.1 请求编号和安全日志](R21_SAFE_DIAGNOSTICS.md)、[R2.2 通知与监测](R22_OPERATIONS_OBSERVATION.md)、[R2.3 恢复点新鲜度](R23_RECOVERY_FRESHNESS.md)、[R2.4 本地验收计划](R24_ACCEPTANCE_PLAN.md)。
-- [R2.4.1 主机事件与故障处置](R241_HOST_EVENTS.md)。
+- [R2.4.1 主机事件与故障处置](R241_HOST_EVENTS.md)、[R2.4.2 业务依赖演练与处置手册](R242_DEPENDENCY_DRILLS.md)。
 - [安全差距登记](SECURITY_ASVS_GAP_REGISTER.md)、[通知进程运维](WORKER_PROCESS_ACCEPTANCE.md)。
 
 ## 测试与验收
 
 | 验证范围 | 实际记录 |
 |---|---|
+| R2.4.2 依赖恢复及UX1界面 | [执行证据](evidence_r242/README.md)、[需求追踪](evidence_r242/requirement_trace.json)、[界面验证](evidence_ux1/README.md)、[Mac交付](evidence_r242/delivery.json) |
 | R2.4.1 主机事件与故障处置 | [执行证据](evidence_r241/README.md)、[需求追踪](evidence_r241/requirement_trace.json)、[Mac 交付](evidence_r241/delivery.json) |
 | R2.3 备份与独立恢复工具 | [记录与范围](evidence_r23/README.md) |
 | R2.2 心跳、积压与监测失效 | [证据说明](evidence_r22/README.md)、[需求到测试](evidence_r22/requirement_trace.json)、[Mac 交付](evidence_r22/delivery.json) |
