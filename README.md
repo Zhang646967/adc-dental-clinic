@@ -17,7 +17,7 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-Current development（当前进展）：R2.2 notification heartbeat, due-backlog and observer-failure detection delivered on Mac; R2.3 snapshot-consistent backup and independently compared restore tools delivered. [R2.3 contract](docs/R23_RECOVERY_FRESHNESS.md) · [R2.2 contract and evidence](docs/R22_OPERATIONS_OBSERVATION.md) · [Current Word/PDF report](课程报告/README.md) · [R2 plan](docs/R2_OPERATIONAL_ASSURANCE_PLAN.md). Synthetic course scope; cloud and commercial-scale acceptance remain incomplete.
+Current development（当前进展）：R2.4.1 主机事件采集与故障处置已交付 Mac，可区分停止、重启、OOM 和采集失联，并保留认领、行动与验证关闭记录。[实现与运维](docs/R241_HOST_EVENTS.md) · [验收与交付](docs/evidence_r241/README.md) · [课程报告](课程报告/README.md) · [后续计划](docs/R24_ACCEPTANCE_PLAN.md)。业务依赖演练、容量/24小时、安全和云端验收分别推进。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

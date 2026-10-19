@@ -1,10 +1,10 @@
 {
-  "format": 5,
+  "format": 6,
   "report_date": "2026-10-18",
   "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
-  "tool_commit": "20961babacf909810bc3149fb92994fb408e8b8c",
+  "tool_commit": "837a834f892586838fe3d186dac7e137dfb7b6c8",
   "passed": true,
-  "scope": "R2.3 independent-recovery host tools and protected Mac delivery; R2.4 and cloud remain pending.",
+  "scope": "R2.4.1 private host events, human incident handling and protected Mac delivery; remaining local/cloud gates separate.",
   "artifact_checks": {
     "passed": true,
     "pdf_pages": 78,
@@ -53,6 +53,7 @@
       37,
       38,
       39,
+      40,
       43,
       44,
       45,
@@ -94,7 +95,6 @@
       1,
       2,
       3,
-      40,
       41,
       42
     ],
@@ -129,10 +129,18 @@
       "/YAAAAA+NotoSerifCJKsc-Regular",
       "/ZAAAAA+NotoSerifCJKsc-Regular"
     ],
-    "word_sha256": "472c11c2e88b456c5ab1b5bf155832403c15f763e22f665bfff061b316601c10",
-    "pdf_sha256": "523c2729b810c411a2aa5720dacc79cd6c4f119a0298d6558a904dc0e12dd90f",
-    "R23": "SECOND_INCREMENT_LOCAL_RESTORE_PASSED",
-    "independent_restore_receipts": "VERIFIED_IN_ISOLATED_REHEARSAL_ONLY"
+    "word_sha256": "d2358e9a59cea88be42446e37e06a0b95e1568bfa0a2af14c3b0c45d553d44bc",
+    "pdf_sha256": "939305dcb4a2f10e786e58f54e80d8dea354b8a237269c1f1a68ebc5ea3c0693",
+    "R241": "LOCAL_HOST_GATE_PASSED",
+    "host_checks": 21,
+    "word_package_changed_parts": [
+      "docProps/core.xml",
+      "word/document.xml"
+    ],
+    "tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39180157857",
+    "tool_delivery_verified": true,
+    "reference_pdf_sha256": "ba3164113b097daa7be79251f540513fe181687e539e82821506a1671078e248",
+    "all_fonts_embedded": true
   },
   "fidelity_checks": {
     "passed": true,
@@ -210,23 +218,24 @@
     "content_updated_after_tool_verification": true
   },
   "sources_and_outputs_sha256": {
-    "report_source.json": "b2925f6e4d4dff32263bff94efc01b28511be11b914ed4726a3574fc021b73f7",
-    "baseline.json": "62155c999d7941e3e8e00952e275901e4150c322b13ccb7792de562c67571b66",
+    "report_source.json": "14431e16826cea22e04ffa87554b3f0d017e06b554e2ba82b91df2a3a964006a",
+    "baseline.json": "6f5629aed14d117ca2720350453adc790d0fabfad53cc7f85c53ea558539a1e8",
     "build_report.py": "5d0192c897abfa658de4a7b90a1af4ab0f97d5d2827b13ffd082c89acc0a3c68",
     "draw_operations_flow.py": "c371b28adc131c1143fda5a53320b31b6979972cf1aaa11090c0b9880d07f393",
-    "REPORT.md": "e3aed713e8647ec7fbb1771e2344791c274993905bd6d5273e2f65e2598fa161",
-    "README.md": "0e252baddb42ed944ae13ccad92b607eca8aa32f875c70c99bd1cd15d91b8515",
-    "FORMAT_REFERENCE.md": "feca9b0c201983bb4039d262dc4a272a2132cc5c9223f0d91bcc7b4ed6b7a7f3",
+    "REPORT.md": "c089634c37bf92ce6f2bfcd65a4f433ea28b2a740d16f2dc2f79e6c3fd6c16ad",
+    "README.md": "f90bbd8a79e0bcf9ed676cf7f7558e641c598837acb11de5da0e13291921b7df",
+    "FORMAT_REFERENCE.md": "481fcf27de94598946352bc673f677337d0d6af7517ca0c67f9995fa62996a43",
     "toc_entries.json": "584e1b3d4e1a715b208cfed2374f2f9c42c6130f7ec617b89a023557e998f662",
     "toc_pages.json": "335e9a1ffbaa1fa1d9863f2e170e200ead6605e320c2a277a9e150b9af511bab",
     "operations-flow.png": "f2e55fe04bead53a2a578239dfb2b8a489321c3a281baeefdc6e6126130c8227",
     "notification-overview.png": "37560d40294c8b462dd4687a2476509d5f35e805302e91dbd70b1d378117c271",
-    "../../课程报告/课程报告_张加良_8210241102.pdf": "523c2729b810c411a2aa5720dacc79cd6c4f119a0298d6558a904dc0e12dd90f",
-    "../../课程报告/课程报告_张加良_8210241102.docx": "472c11c2e88b456c5ab1b5bf155832403c15f763e22f665bfff061b316601c10"
+    "../../课程报告/课程报告_张加良_8210241102.pdf": "939305dcb4a2f10e786e58f54e80d8dea354b8a237269c1f1a68ebc5ea3c0693",
+    "../../课程报告/课程报告_张加良_8210241102.docx": "d2358e9a59cea88be42446e37e06a0b95e1568bfa0a2af14c3b0c45d553d44bc"
   },
   "R23": "LOCAL_RECOVERY_TOOLS_DELIVERED",
   "R2": "IN_PROGRESS",
   "R24_capacity_and_24h_observation": "NOT_RUN",
   "cloud_acceptance": "NOT_RUN",
-  "windows_original_data_recovery": "unresolved"
+  "windows_original_data_recovery": "unresolved",
+  "R241": "HOST_TOOLS_DELIVERED_ON_MAC"
 }

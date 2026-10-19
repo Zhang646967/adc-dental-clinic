@@ -6,7 +6,7 @@ synthetic demo → continue development on `main`.
 Current documentation, 2026-10-18: [当前课程格式报告](../课程报告/README.md).
 The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
 evidence. [Mac application delivery](evidence_r22/delivery.json) verifies original data and
-configuration. R2.3 independent recovery tools are delivered separately; [R2.4 local operational acceptance](R24_ACCEPTANCE_PLAN.md) is next.
+configuration. R2.3 independent recovery tools are delivered separately; [R2.4.1 host events](R241_HOST_EVENTS.md) are now delivered; R2.4.2 business dependency exercises are next.
 The migration instructions and dated evidence below retain their original scope.
 
 ## Source baseline
@@ -131,3 +131,8 @@ existing database-only daily backup. All backup keys/credentials stay private.
 
 
 R2.3 host backup/restore tools are delivered separately from the R2.2 business image. See [recovery-point states and commands](R23_RECOVERY_FRESHNESS.md) and [delivery evidence](evidence_r23/restore_delivery.json). No independent course-backup receipt is fabricated for the RC demo: missing facts remain UNKNOWN. The existing six service conditions keep their original meaning.
+
+
+## R2.4.1 private host events
+
+[The host runbook](R241_HOST_EVENTS.md) covers explicit-target collection, independent status, acknowledgement, finite action records and verified closure. The existing Mac host collector is started explicitly; it does not install a new launchd job or publish a monitoring endpoint. Sleep/disconnection and process expiry remain visible gaps. The five existing container identities are retained; Web, notification worker and application observer keep the accepted R2.2 application image. [Executed scope and delivery](evidence_r241/README.md).

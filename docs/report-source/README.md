@@ -5,6 +5,11 @@ evidence → protected delivery. Date: **2026-10-18**. Business runtime **`02a9d
 [exact application CI passed](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755).
 
 
+R2.4.1 host tools **`837a834f892586838fe3d186dac7e137dfb7b6c8`** passed [exact CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39180157857) and protected Mac delivery. The current 78-page report adds private host events, human incident handling and 21 isolated host checks including real container OOM. The current full gate passes 1,042 source/rule and 1,152 PostgreSQL/HTTP/concurrency tests. Business runtime remains `02a9dbc`; original 48 durable fingerprints, 70 configurations and five runtime containers are preserved. [Acceptance and delivery](../evidence_r241/README.md) · [Host runbook](../R241_HOST_EVENTS.md).
+
+The following R2.3 and R2.2 results retain their historical scope.
+
+
 R2.3 independent-recovery host tools **`20961babacf909810bc3149fb92994fb408e8b8c`** passed [exact tool CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39145021878) and protected Mac synchronization. The report records 1,016 source/rule checks, 1,152 real PostgreSQL/HTTP/concurrency tests and 24 real-age/PG restore success/refusal checks. A separate empty target matched 51 tables and 29,144 rows; recovery, comparison and startup took 15.868 seconds. Transport was simulated locally. The original R2.3 first-increment evidence remains historical.
 
 - [Word report](../../课程报告/课程报告_张加良_8210241102.docx)
@@ -51,7 +56,7 @@ relationship and the initial CI failure are retained in the evidence.
 
 R1 capacity results remain dated **2026-10-15**: five clinics, twenty accounts and
 thirty minutes. They do not establish the new full-R2 or twenty-clinic envelope.
-R2.4 equivalent capacity/24-hour/security work and cloud
+R2.4.2 business dependency drills, equivalent capacity/24-hour/security work and cloud
 acceptance remain pending. The server has not been purchased. Original Windows-data
 recovery remains unresolved. R2.2 operational files have a separate encrypted delivery snapshot. R2.3 format-2 backups include bounded private observation history, restored as historical bytes rather than live health.
 

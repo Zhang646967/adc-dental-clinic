@@ -1,0 +1,43 @@
+{
+  "format": 1,
+  "passed": true,
+  "date": "2026-10-18",
+  "status": "R241_HOST_TOOLS_DELIVERED_ON_MAC",
+  "tool_commit": "837a834f892586838fe3d186dac7e137dfb7b6c8",
+  "tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39180157857",
+  "tool_ci_conclusion": "success",
+  "business_runtime_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+  "pre_update_encrypted_database_and_config_backups_verified": true,
+  "original_business_fingerprints_preserved": 48,
+  "original_private_configurations_preserved": 70,
+  "original_volume_and_rc_tag_preserved": true,
+  "five_service_ids_unchanged": true,
+  "six_application_conditions": "HEALTHY",
+  "host_collector": {
+    "passed": true,
+    "host_state": "HEALTHY",
+    "host_tool_commit": "837a834f892586838fe3d186dac7e137dfb7b6c8",
+    "application_source": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
+    "expected_project": true,
+    "collector_interval_seconds": 30,
+    "independent_reader_seconds": 90,
+    "foreground_watch_started_as_private_session": true,
+    "new_launchd_or_scheduled_job": false,
+    "no_business_service_restart": true,
+    "no_original_fault_injection": true
+  },
+  "existing_application_collector_recovery": {
+    "cause": "CLOCK_INCONSISTENCY",
+    "prior_history_encrypted_and_retained": true,
+    "explicit_offline_observation_reset": true,
+    "same_collector_restarted": true,
+    "host_incident_acknowledged_actioned_and_closed": true,
+    "continuous_24h_acceptance": false
+  },
+  "business_runtime_restarted": false,
+  "business_test_data_injected": false,
+  "report_delivery": "Reviewed 78-page Word/PDF delivered in the enclosing documentation revision; canonical names retained.",
+  "R24_remaining": "Business dependency drills, equivalent capacity, real 24h and security review pending",
+  "cloud_acceptance": "NOT_RUN_NO_SERVER",
+  "windows_original_data_recovery": "UNRESOLVED"
+}

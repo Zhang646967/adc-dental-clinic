@@ -28,6 +28,8 @@ checks, bounded private files, source validation, failure visibility and 64-mark
 runtime checks. These support evidence review; they do not complete an ASVS assessment.
 Continuous host events, independent collection and strict time expiry remain gaps.
 
+R2.4.1 update: [bounded host events and incident handling](evidence_r241/README.md) add private source-bound metadata, explicit OOM/restart evidence and human verified closure. Independent protected log collection, strict time expiry and the full ASVS assessment remain gaps.
+
 ## Logging and error assessment
 
 | ASVS 5.0.0 | Topic | Baseline status and evidence | Planned action and acceptance |

@@ -1,5 +1,5 @@
 {
-  "format": 5,
+  "format": 6,
   "report_date": "2026-10-18",
   "application_commit": "02a9dbc90583fbcad47567e64ae77ae810eca33f",
   "R1_historical": {
@@ -139,7 +139,7 @@
     "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39134681755",
     "status": "DELIVERED_ON_MAC"
   },
-  "tool_commit": "20961babacf909810bc3149fb92994fb408e8b8c",
+  "tool_commit": "837a834f892586838fe3d186dac7e137dfb7b6c8",
   "R23_first_increment": {
     "evidence_path": "docs/evidence_r23/acceptance.json",
     "evidence_sha256": "a85d90049c820669e32fa4506240e57ed4c2f64a0906a75606145912d4e80d33",
@@ -186,5 +186,16 @@
     "business_runtime_restarted": false,
     "original_business_fingerprints_preserved": 48,
     "original_private_configurations_preserved": 70
+  },
+  "R241": {
+    "evidence_path": "docs/evidence_r241/acceptance.json",
+    "evidence_sha256": "726b03b5c77b0c609a229d1f5f3cca4047bda3ee20b66433b274acbad62e44d4",
+    "regression": {
+      "source_rule_checks": 1042,
+      "postgresql_http_concurrency_tests": 1152
+    },
+    "host_checks": 21,
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39180157857",
+    "scope": "Host Docker process metadata and incident workflow; business dependency drills and 24h remain pending"
   }
 }
