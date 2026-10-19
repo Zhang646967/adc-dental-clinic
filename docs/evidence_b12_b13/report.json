@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "scope": "formal report content and layout; executed business evidence is recorded separately in evidence_b12_b13",
+  "pdf_pages": 108,
+  "business_use_cases": 57,
+  "shared_subfunctions": 1,
+  "complete_specifications": 58,
+  "tables": 75,
+  "figures": 28,
+  "mind_maps": 6,
+  "contents_entries": 52,
+  "legacy_substantive_fields_preserved": 209,
+  "SU04_channel_expansion_explicit": true,
+  "all_AT_01_25_retained": true,
+  "pending_cases": [
+    "SU-40"
+  ],
+  "contents_match": true,
+  "arabic_pages_match": true,
+  "all_captions_in_order": true,
+  "text_outside_bounds": false,
+  "all_fonts_embedded": true,
+  "font_subsets": 23,
+  "media_parts_preserved": 39,
+  "original_migrations_preserved": 31,
+  "frozen_reports_unchanged": true,
+  "private_values_absent": 36,
+  "word_sha256": "509e01cb93734cbbb39c08d73ff1fe8e4ad0b982ae5870295e2274209e0081d4",
+  "pdf_sha256": "a584810ea896ca68f19e065a6bc244e2c0edf7d741a97ca09f0ec5d60b9b1666",
+  "visual_review": {
+    "pages": 108,
+    "new_or_changed_bodies_reviewed": 43,
+    "previously_reviewed_body_pixel_matches": 65,
+    "final_render_changed_pages": [
+      23
+    ],
+    "final_changed_page_reviewed": true,
+    "clipping_or_label_collisions_observed": false
+  }
+}

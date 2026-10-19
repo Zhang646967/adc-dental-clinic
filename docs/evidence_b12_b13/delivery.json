@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39230803698",
+  "architecture": "arm64",
+  "tested_application_image": "sha256:db5269b39917b0368f2ba11eb29f1a6d83125875f33ece30212c2cd31935de0b",
+  "same_rehearsal_image_deployed": true,
+  "original_database_container_and_volume_preserved": true,
+  "original_rc_tag_preserved": true,
+  "original_row_groups_preserved": 51,
+  "private_configuration_files_preserved": 70,
+  "synthetic_resource_configuration": {
+    "clinics": 2,
+    "assets": 10,
+    "services": 8,
+    "future_slots_created": 12,
+    "original_slots_reused": 2,
+    "normal_business_commands": true,
+    "original_patients_clinical_cash_unchanged": true
+  },
+  "schema_additions": {
+    "original_models": 51,
+    "new_empty_business_tables": 15,
+    "additive_permission_rows": 56,
+    "additive_content_type_rows": 14
+  },
+  "business_browser": {
+    "accounts": 9,
+    "roles": 7,
+    "checks": 185,
+    "passed": true
+  },
+  "observer_recovery": {
+    "passed": true,
+    "confirmed_reason": "CLOCK_INCONSISTENCY",
+    "old_monitor_encrypted_and_decryption_checked": true,
+    "six_application_conditions": "HEALTHY",
+    "host": "HEALTHY",
+    "incidents_handled_and_closed": 2,
+    "business_data_changed": false,
+    "continuous_observation": false
+  },
+  "encrypted_database_and_configuration_before_update_verified": true,
+  "encrypted_database_after_update_decryption_and_inventory_verified": true,
+  "cloud_acceptance": "PENDING_SERVER_NOT_PURCHASED",
+  "historical_windows_database_recovery": "UNRESOLVED",
+  "real_24_hour_observation": "NOT_PASSED"
+}

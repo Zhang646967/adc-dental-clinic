@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "measured_application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+  "scope": "equivalence for the existing valid 80/20 workload only; not a claim that the final commit was independently timed for thirty minutes",
+  "changes": [
+    "equipment catalogue display label only",
+    "telephone invalid-window exception translated to actionable business feedback"
+  ],
+  "normal_valid_path_checks": [
+    {
+      "file": "equipment/models.py",
+      "valid_path_ast_unchanged": true,
+      "normalized_ast_sha256": "3cfcfffc0c3c02171f96a6ed502a87356ece1e46b1a757d7be2b67136c4c0ea5"
+    },
+    {
+      "file": "reception/services.py",
+      "valid_path_ast_unchanged": true,
+      "normalized_ast_sha256": "022e3711ccf544a984a6df7207b715b3749e0423448177c7109d1235e9084edd"
+    }
+  ],
+  "migration_files_identical_including_package_initializers": 51,
+  "unchanged": "booking/resource allocation, queries, lock ordering, positive-path mutations, dependencies, runtime settings and measured load driver",
+  "negative_input_fix": "separately exercised on PostgreSQL and repeated on the final application version"
+}

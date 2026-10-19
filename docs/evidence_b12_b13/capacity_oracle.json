@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "assertions": 992,
+  "original_row_groups_preserved": 66,
+  "patients_created": 900,
+  "draft_note_saves": 900,
+  "max_business_gap_seconds": 4.5121,
+  "measured_application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+  "elapsed_seconds": 1800.005,
+  "requests": 9000,
+  "read_requests": 7200,
+  "write_requests": 1800,
+  "p95_seconds": 0.352,
+  "resource_samples": 150,
+  "observation_samples": 50
+}

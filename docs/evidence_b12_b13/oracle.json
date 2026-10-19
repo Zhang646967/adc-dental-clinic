@@ -1,0 +1,179 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Unique completed telephone result clinic 1",
+      "passed": true
+    },
+    {
+      "name": "Append-only multi-contact and explicit booking 1",
+      "passed": true
+    },
+    {
+      "name": "Actual treatments equal invoice 1",
+      "passed": true
+    },
+    {
+      "name": "Independent posted receipt 1",
+      "passed": true
+    },
+    {
+      "name": "Replacement retains original resource history 1",
+      "passed": true
+    },
+    {
+      "name": "Unique completed telephone result clinic 2",
+      "passed": true
+    },
+    {
+      "name": "Append-only multi-contact and explicit booking 2",
+      "passed": true
+    },
+    {
+      "name": "Actual treatments equal invoice 2",
+      "passed": true
+    },
+    {
+      "name": "Independent posted receipt 2",
+      "passed": true
+    },
+    {
+      "name": "Replacement retains original resource history 2",
+      "passed": true
+    },
+    {
+      "name": "Unique completed telephone result clinic 3",
+      "passed": true
+    },
+    {
+      "name": "Append-only multi-contact and explicit booking 3",
+      "passed": true
+    },
+    {
+      "name": "Actual treatments equal invoice 3",
+      "passed": true
+    },
+    {
+      "name": "Independent posted receipt 3",
+      "passed": true
+    },
+    {
+      "name": "Replacement retains original resource history 3",
+      "passed": true
+    },
+    {
+      "name": "Unique completed telephone result clinic 4",
+      "passed": true
+    },
+    {
+      "name": "Append-only multi-contact and explicit booking 4",
+      "passed": true
+    },
+    {
+      "name": "Actual treatments equal invoice 4",
+      "passed": true
+    },
+    {
+      "name": "Independent posted receipt 4",
+      "passed": true
+    },
+    {
+      "name": "Replacement retains original resource history 4",
+      "passed": true
+    },
+    {
+      "name": "Unique completed telephone result clinic 5",
+      "passed": true
+    },
+    {
+      "name": "Append-only multi-contact and explicit booking 5",
+      "passed": true
+    },
+    {
+      "name": "Actual treatments equal invoice 5",
+      "passed": true
+    },
+    {
+      "name": "Independent posted receipt 5",
+      "passed": true
+    },
+    {
+      "name": "Replacement retains original resource history 5",
+      "passed": true
+    },
+    {
+      "name": "Portal 45-minute cancel releases all resources 1",
+      "passed": true
+    },
+    {
+      "name": "Portal 45-minute cancel releases all resources 2",
+      "passed": true
+    },
+    {
+      "name": "Portal 45-minute cancel releases all resources 3",
+      "passed": true
+    },
+    {
+      "name": "Portal 45-minute cancel releases all resources 4",
+      "passed": true
+    },
+    {
+      "name": "Portal 45-minute cancel releases all resources 5",
+      "passed": true
+    },
+    {
+      "name": "Waitlist retains one original accepted appointment",
+      "passed": true
+    },
+    {
+      "name": "Fifteen-minute snapshot and atomic hold conversion",
+      "passed": true
+    },
+    {
+      "name": "Fault and repair preserve doctor and promised times",
+      "passed": true
+    },
+    {
+      "name": "Repair independently accepted",
+      "passed": true
+    },
+    {
+      "name": "Explicit compatible resource replacement history",
+      "passed": true
+    },
+    {
+      "name": "Contact responsibility and patient refusal retained",
+      "passed": true
+    },
+    {
+      "name": "Resource records create no extra clinical/financial facts",
+      "passed": true
+    },
+    {
+      "name": "No active physical-resource overlaps",
+      "passed": true
+    },
+    {
+      "name": "No duplicate business result scheduling.ResourcePlan",
+      "passed": true
+    },
+    {
+      "name": "No duplicate business result reception.ReceptionCommunication",
+      "passed": true
+    },
+    {
+      "name": "No duplicate business result scheduling.ResourceAction",
+      "passed": true
+    }
+  ],
+  "assertions": 41,
+  "five_clinic_treatment_total_cny": "500.00",
+  "five_clinic_independently_posted_receipts_cny": "500.00",
+  "active_resource_overlaps": 0,
+  "case_count": 7,
+  "communications": 26,
+  "resource_plans": 23,
+  "resource_claims": 30,
+  "lost_response_retry_single_history": true,
+  "short_window_created_no_wait_request": true
+}

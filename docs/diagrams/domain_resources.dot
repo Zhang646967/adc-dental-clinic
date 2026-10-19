@@ -19,7 +19,7 @@ digraph G {
  room -> plan [taillabel="1",headlabel="0..*",label="诊疗地点"];
  visit -> plan [taillabel="1",headlabel="1..*",label="保留版本"];
  plan -> claim [taillabel="1",headlabel="1..*",label="占用整段"];
- asset:e -> claim:e [taillabel="1",headlabel="0..*",label="时间不重叠",constraint=false];
+ asset -> claim [taillabel="1",headlabel="0..*",label="时间不重叠"];
  plan -> issue [taillabel="1",headlabel="0..*",label="故障影响"];
  {rank=same;department;asset;visit;}
  

@@ -1,6 +1,7 @@
 /* UX2: clear filters, native field groups and one responsive appointment table. */
-.queue-tabs, .filter-chips, .care-jumps { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
-.queue-tabs a, .filter-chips a, .care-jumps a { display: inline-flex; align-items: center; min-height: 44px; padding: .45rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: #fff; }
+.queue-tabs, .filter-chips, .care-jumps, .action-row { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
+.queue-tabs a, .filter-chips a, .care-jumps a, .action-row a { display: inline-flex; align-items: center; min-height: 44px; padding: .45rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: #fff; }
+.action-row a { max-width: 100%; overflow-wrap: anywhere; }
 .queue-tabs a[aria-current=page] { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 650; }
 .filter-chips a { background: var(--soft); max-width: 100%; overflow-wrap: anywhere; font-size: .9rem; }
 .queue-note { font-size: .85rem; color: var(--muted); }

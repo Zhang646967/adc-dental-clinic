@@ -1,7 +1,7 @@
 {
   "format": 1,
   "date": "2026-10-19",
-  "scope": "formal business report and implemented B1.1 cancellation workflow; historical operating results retain original scope",
+  "scope": "formal report and implemented B1.1/B1.2/B1.3 workflows; historical results retain their original scope",
   "user_requests": [
     {
       "id": "U1",
@@ -41,10 +41,12 @@
         "4.8",
         "4.9",
         "SU-39",
-        "SU-54"
+        "SU-54",
+        "SU-57"
       ],
       "plan": "B1.2/B1.3",
-      "status": "manual front-desk booking current; structured intake and resource calendar pending"
+      "status": "implemented telephone intake, resource catalogue/calendar and shared admission; synthetic five-clinic workflows accepted",
+      "evidence": "evidence_b12_b13/README.md"
     },
     {
       "id": "U4",
@@ -65,9 +67,9 @@
         "3.6",
         "appendix A/B/C"
       ],
-      "business_use_cases": 56,
+      "business_use_cases": 57,
       "shared_subfunction": 1,
-      "status": "57 complete specifications including one shared subfunction"
+      "status": "58 complete specifications including one shared subfunction"
     },
     {
       "id": "U6",
@@ -83,6 +85,6 @@
     }
   ],
   "validation": "report-source/validation.json",
-  "application_changes": false,
-  "domain_and_state_models": "two domain relationship views and two separate lifecycle views, aligned with source"
+  "application_changes": true,
+  "domain_and_state_models": "three core views: care/billing, telephone conversion and resource occupation; separate reception and resource-coordination states"
 }

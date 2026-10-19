@@ -1,0 +1,105 @@
+{
+  "passed": true,
+  "measured_application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+  "final_application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+  "scope": "Local synthetic loopback HTTP; per-service resource caps are not an independent cloud host",
+  "started_utc": "2026-10-19T08:55:22.758131+00:00",
+  "seconds": 1800,
+  "elapsed_seconds": 1800.005,
+  "offered": 9000,
+  "actual_rps": 5.0,
+  "distinct_users": 20,
+  "clinics": 5,
+  "max_in_flight": 20,
+  "arrival_mode": "waves",
+  "max_offer_gap_seconds": 4.005,
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.352,
+    "max_seconds": 0.7856
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.348,
+    "max_seconds": 0.7668
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.374,
+    "max_seconds": 0.7856
+  },
+  "by_role": {
+    "FRONT_DESK": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.36,
+      "max_seconds": 0.7856
+    },
+    "DENTIST": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.361,
+      "max_seconds": 0.771
+    },
+    "MANAGER": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.362,
+      "max_seconds": 0.745
+    },
+    "FINANCE": {
+      "requests": 1350,
+      "failures": 0,
+      "p95_seconds": 0.282,
+      "max_seconds": 0.5511
+    },
+    "HQ": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.293,
+      "max_seconds": 0.5533
+    }
+  },
+  "resource_samples": 150,
+  "healthy_observation_samples": 50,
+  "sampling_errors": [],
+  "deadlock_delta": 0,
+  "oom_or_unplanned_restarts": false,
+  "normal_valid_path_equivalence_only": true,
+  "final_commit_independently_timed_30_minutes": false,
+  "stability_exclusions": [
+    {
+      "table": "scheduling.ResourcePolicy",
+      "scope": "one clinic policy changed by explicit block/release scenario"
+    },
+    {
+      "table": "equipment.EquipmentAsset",
+      "scope": "one camera changed by explicit repair and independent acceptance"
+    }
+  ],
+  "resource_limits": {
+    "db": {
+      "memory_limit": 805306368,
+      "nano_cpus": 750000000
+    },
+    "web": {
+      "memory_limit": 805306368,
+      "nano_cpus": 1000000000
+    },
+    "notification-worker": {
+      "memory_limit": 134217728,
+      "nano_cpus": 125000000
+    },
+    "gateway": {
+      "memory_limit": 67108864,
+      "nano_cpus": 125000000
+    },
+    "operations": {
+      "memory_limit": 134217728,
+      "nano_cpus": 100000000
+    }
+  }
+}

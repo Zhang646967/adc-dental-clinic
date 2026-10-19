@@ -15,7 +15,7 @@
 <line x1="900" y1="345" x2="1770" y2="345" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
 <text x="1335.0" y="307" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">2 核对患者档案与可用安排</text>
 <line x1="1770" y1="475" x2="900" y2="475" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
-<text x="1335.0" y="437" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">3 返回候选及待人工核对条件</text>
+<text x="1335.0" y="437" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">3 返回可行医师与资源组合</text>
 <line x1="900" y1="605" x2="170" y2="605" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
 <text x="535.0" y="567" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">4 解释医师、时间和资源方案</text>
 <line x1="170" y1="735" x2="900" y2="735" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
@@ -32,5 +32,5 @@
 <text x="1335.0" y="1107" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">8 返回编号；冲突则重新协商</text>
 <line x1="900" y1="1275" x2="170" y2="1275" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
 <text x="535.0" y="1237" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">9 交付安排及查询、取消改期方式</text>
-<text x="1000" y="1335" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="30">目标业务序列：新增接待单与资源联动的实现状态见正文</text>
+<text x="1000" y="1335" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="30">电话接待与资源核对已实现；候选不占位，确认时重新核验</text>
 </svg>

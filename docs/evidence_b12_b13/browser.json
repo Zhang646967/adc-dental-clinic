@@ -1,0 +1,1296 @@
+{
+  "passed": true,
+  "runs": [
+    {
+      "workflow": "b13-browser-business",
+      "application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+      "scope": "B1.2/B1.3 five-clinic real Chrome telephone, resources, care, settlement and role workflows",
+      "checks": [
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Successful reception retains original booking link",
+          "passed": true
+        },
+        {
+          "name": "Reception retains booking fact after clinical completion",
+          "passed": true
+        },
+        {
+          "name": "b13-reception-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "Manager resource catalogue",
+          "passed": true
+        },
+        {
+          "name": "b13-resource-catalogue-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "Telephone workflow supports keyboard focus",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "New telephone intake",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 telephone intake preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 telephone intake signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 telephone intake concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 second communication page",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 second communication preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 second communication signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 second communication concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Full patient registration from reception",
+          "passed": true
+        },
+        {
+          "name": "Complete patient registration returns to original reception",
+          "passed": true
+        },
+        {
+          "name": "New patient business number supplied",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 verified patient profile page",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 verified patient profile preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 verified patient profile signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 verified patient profile concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Negotiated candidates",
+          "passed": true
+        },
+        {
+          "name": "Feasible provider chair equipment bundle visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 explicit telephone booking preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 explicit telephone booking signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Telephone confirmation includes service and clinic",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 explicit telephone booking concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in resource review source",
+          "passed": true
+        },
+        {
+          "name": "Occupied chair blocks duplicate actual check-in",
+          "passed": true
+        },
+        {
+          "name": "Resource coordination after occupied chair",
+          "passed": true
+        },
+        {
+          "name": "Same-time compatible alternative resource exists",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 resource replacement preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 resource replacement signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 resource replacement concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in after explicit resource replacement source",
+          "passed": true
+        },
+        {
+          "name": "Compatible replacement permits check-in",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned doctor care",
+          "passed": true
+        },
+        {
+          "name": "Explicit allergy review",
+          "passed": true
+        },
+        {
+          "name": "Actual treatment only after provider confirmation",
+          "passed": true
+        },
+        {
+          "name": "Clinical and billing completion preview",
+          "passed": true
+        },
+        {
+          "name": "Publish treatment and invoice",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 receipt evidence source",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 receipt evidence preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 receipt evidence signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 receipt evidence concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 independent receipt review review page",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 independent receipt review preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 independent receipt review signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 independent receipt review concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C2 independent receipt review posted cash",
+          "passed": true
+        },
+        {
+          "name": "Successful reception retains original booking link",
+          "passed": true
+        },
+        {
+          "name": "Reception retains booking fact after clinical completion",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "New telephone intake",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 telephone intake preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 telephone intake signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 telephone intake concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 second communication page",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 second communication preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 second communication signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 second communication concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Full patient registration from reception",
+          "passed": true
+        },
+        {
+          "name": "Complete patient registration returns to original reception",
+          "passed": true
+        },
+        {
+          "name": "New patient business number supplied",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 verified patient profile page",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 verified patient profile preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 verified patient profile signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 verified patient profile concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Negotiated candidates",
+          "passed": true
+        },
+        {
+          "name": "Feasible provider chair equipment bundle visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 explicit telephone booking preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 explicit telephone booking signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Telephone confirmation includes service and clinic",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 explicit telephone booking concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in resource review source",
+          "passed": true
+        },
+        {
+          "name": "Occupied chair blocks duplicate actual check-in",
+          "passed": true
+        },
+        {
+          "name": "Resource coordination after occupied chair",
+          "passed": true
+        },
+        {
+          "name": "Same-time compatible alternative resource exists",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 resource replacement preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 resource replacement signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 resource replacement concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in after explicit resource replacement source",
+          "passed": true
+        },
+        {
+          "name": "Compatible replacement permits check-in",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned doctor care",
+          "passed": true
+        },
+        {
+          "name": "Explicit allergy review",
+          "passed": true
+        },
+        {
+          "name": "Actual treatment only after provider confirmation",
+          "passed": true
+        },
+        {
+          "name": "Clinical and billing completion preview",
+          "passed": true
+        },
+        {
+          "name": "Publish treatment and invoice",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 receipt evidence source",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 receipt evidence preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 receipt evidence signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 receipt evidence concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 independent receipt review review page",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 independent receipt review preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 independent receipt review signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 independent receipt review concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C3 independent receipt review posted cash",
+          "passed": true
+        },
+        {
+          "name": "Successful reception retains original booking link",
+          "passed": true
+        },
+        {
+          "name": "Reception retains booking fact after clinical completion",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "New telephone intake",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 telephone intake preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 telephone intake signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 telephone intake concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 second communication page",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 second communication preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 second communication signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 second communication concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Full patient registration from reception",
+          "passed": true
+        },
+        {
+          "name": "Complete patient registration returns to original reception",
+          "passed": true
+        },
+        {
+          "name": "New patient business number supplied",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 verified patient profile page",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 verified patient profile preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 verified patient profile signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 verified patient profile concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Negotiated candidates",
+          "passed": true
+        },
+        {
+          "name": "Feasible provider chair equipment bundle visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 explicit telephone booking preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 explicit telephone booking signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Telephone confirmation includes service and clinic",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 explicit telephone booking concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in resource review source",
+          "passed": true
+        },
+        {
+          "name": "Occupied chair blocks duplicate actual check-in",
+          "passed": true
+        },
+        {
+          "name": "Resource coordination after occupied chair",
+          "passed": true
+        },
+        {
+          "name": "Same-time compatible alternative resource exists",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 resource replacement preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 resource replacement signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 resource replacement concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in after explicit resource replacement source",
+          "passed": true
+        },
+        {
+          "name": "Compatible replacement permits check-in",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned doctor care",
+          "passed": true
+        },
+        {
+          "name": "Explicit allergy review",
+          "passed": true
+        },
+        {
+          "name": "Actual treatment only after provider confirmation",
+          "passed": true
+        },
+        {
+          "name": "Clinical and billing completion preview",
+          "passed": true
+        },
+        {
+          "name": "Publish treatment and invoice",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 receipt evidence source",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 receipt evidence preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 receipt evidence signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 receipt evidence concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 independent receipt review review page",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 independent receipt review preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 independent receipt review signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 independent receipt review concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C4 independent receipt review posted cash",
+          "passed": true
+        },
+        {
+          "name": "Successful reception retains original booking link",
+          "passed": true
+        },
+        {
+          "name": "Reception retains booking fact after clinical completion",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "New telephone intake",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 telephone intake preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 telephone intake signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 telephone intake concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 second communication page",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 second communication preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 second communication signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 second communication concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Full patient registration from reception",
+          "passed": true
+        },
+        {
+          "name": "Complete patient registration returns to original reception",
+          "passed": true
+        },
+        {
+          "name": "New patient business number supplied",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 verified patient profile page",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 verified patient profile preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 verified patient profile signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 verified patient profile concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Negotiated candidates",
+          "passed": true
+        },
+        {
+          "name": "Feasible provider chair equipment bundle visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 explicit telephone booking preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 explicit telephone booking signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Telephone confirmation includes service and clinic",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 explicit telephone booking concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in resource review source",
+          "passed": true
+        },
+        {
+          "name": "Occupied chair blocks duplicate actual check-in",
+          "passed": true
+        },
+        {
+          "name": "Resource coordination after occupied chair",
+          "passed": true
+        },
+        {
+          "name": "Same-time compatible alternative resource exists",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 resource replacement preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 resource replacement signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 resource replacement concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Check-in after explicit resource replacement source",
+          "passed": true
+        },
+        {
+          "name": "Compatible replacement permits check-in",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "Assigned doctor care",
+          "passed": true
+        },
+        {
+          "name": "Explicit allergy review",
+          "passed": true
+        },
+        {
+          "name": "Actual treatment only after provider confirmation",
+          "passed": true
+        },
+        {
+          "name": "Clinical and billing completion preview",
+          "passed": true
+        },
+        {
+          "name": "Publish treatment and invoice",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 receipt evidence source",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 receipt evidence preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 receipt evidence signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 receipt evidence concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 independent receipt review review page",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 independent receipt review preview accepted",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 independent receipt review signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 independent receipt review concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "B13-C5 independent receipt review posted cash",
+          "passed": true
+        },
+        {
+          "name": "Successful reception retains original booking link",
+          "passed": true
+        },
+        {
+          "name": "Reception retains booking fact after clinical completion",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.84",
+      "passed": true
+    },
+    {
+      "workflow": "b13-browser-extended",
+      "application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+      "scope": "B1.2/B1.3 website service durations, waitlist, resource faults, role boundaries and keyboard",
+      "checks": [
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Portal 15 minute service",
+          "passed": true
+        },
+        {
+          "name": "b13-patient-booking-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "X13-C1 publish 15 minute offer draft",
+          "passed": true
+        },
+        {
+          "name": "X13-C1 publish 15 minute offer original publication retained",
+          "passed": true
+        },
+        {
+          "name": "Telephone case links original waitlist success",
+          "passed": true
+        },
+        {
+          "name": "Waitlist success becomes reception booked fact",
+          "passed": true
+        },
+        {
+          "name": "Service-aware wait window controls",
+          "passed": true
+        },
+        {
+          "name": "15 minute service permits 11:15 end choice",
+          "passed": true
+        },
+        {
+          "name": "Native keyboard time selection usable",
+          "passed": true
+        },
+        {
+          "name": "b13-wait-window-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "Original appointment survives device fault",
+          "passed": true
+        },
+        {
+          "name": "Fault does not silently cancel appointment",
+          "passed": true
+        },
+        {
+          "name": "Fault coordination preserves doctor and time",
+          "passed": true
+        },
+        {
+          "name": "Check-in refuses unavailable device",
+          "passed": true
+        },
+        {
+          "name": "Unavailable device blocks check-in with coordination route",
+          "passed": true
+        },
+        {
+          "name": "Actionable fault coordination on narrow screen",
+          "passed": true
+        },
+        {
+          "name": "b13-resource-fault-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "Login form HQ",
+          "passed": true
+        },
+        {
+          "name": "HQ aggregates only",
+          "passed": true
+        },
+        {
+          "name": "HQ never receives caller contact text",
+          "passed": true
+        },
+        {
+          "name": "Login form DENTIST",
+          "passed": true
+        },
+        {
+          "name": "capacity_doctor_0 cannot read reception contacts",
+          "passed": true
+        },
+        {
+          "name": "capacity_doctor_0 cannot configure resources",
+          "passed": true
+        },
+        {
+          "name": "Login form FINANCE",
+          "passed": true
+        },
+        {
+          "name": "capacity_finance_0 cannot read reception contacts",
+          "passed": true
+        },
+        {
+          "name": "capacity_finance_0 cannot configure resources",
+          "passed": true
+        },
+        {
+          "name": "Login form PATIENT",
+          "passed": true
+        },
+        {
+          "name": "capacity_patient_0 cannot read reception contacts",
+          "passed": true
+        },
+        {
+          "name": "capacity_patient_0 cannot configure resources",
+          "passed": true
+        },
+        {
+          "name": "Login form SYSADMIN",
+          "passed": true
+        },
+        {
+          "name": "Technical account has no reception bypass",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Cross-clinic reception access rejected",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.84",
+      "passed": true
+    },
+    {
+      "workflow": "b13-browser-repair",
+      "application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+      "scope": "Independent equipment repair acceptance and original promise retained",
+      "checks": [
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Repair13 open source",
+          "passed": true
+        },
+        {
+          "name": "Repair13 open preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Repair13 open signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Repair13 open concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Repair13 start source",
+          "passed": true
+        },
+        {
+          "name": "Repair13 start preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Repair13 start signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Repair13 start concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Repair13 submit source",
+          "passed": true
+        },
+        {
+          "name": "Repair13 submit preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Repair13 submit signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Repair13 submit concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Owner cannot perform own acceptance",
+          "passed": true
+        },
+        {
+          "name": "Owner has no approve link",
+          "passed": true
+        },
+        {
+          "name": "Repair13 independent approval source",
+          "passed": true
+        },
+        {
+          "name": "Repair13 independent approval preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Repair13 independent approval signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Repair13 independent approval concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Equipment restored only after independent approval",
+          "passed": true
+        },
+        {
+          "name": "Restored equipment is in service",
+          "passed": true
+        },
+        {
+          "name": "Original appointment after repair",
+          "passed": true
+        },
+        {
+          "name": "Original promise still scheduled",
+          "passed": true
+        },
+        {
+          "name": "Explicit compatible allocation after repair",
+          "passed": true
+        },
+        {
+          "name": "Repaired resource has compatible same-time alternative",
+          "passed": true
+        },
+        {
+          "name": "Repair13 explicit compatible resources preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Repair13 explicit compatible resources signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Repair13 explicit compatible resources concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Unchanged appointment time and provider",
+          "passed": true
+        },
+        {
+          "name": "b13-repaired-resource-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.84",
+      "passed": true
+    },
+    {
+      "workflow": "b13-browser-final",
+      "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+      "scope": "Final commit actionable invalid window and human-readable asset labels",
+      "checks": [
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Login form MANAGER",
+          "passed": true
+        },
+        {
+          "name": "Final telephone form",
+          "passed": true
+        },
+        {
+          "name": "Final13 invalid-window intake preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Final13 invalid-window intake signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Final13 invalid-window intake concurrent duplicate confirmations return same result",
+          "passed": true
+        },
+        {
+          "name": "Final invalid wait window",
+          "passed": true
+        },
+        {
+          "name": "Short window returns usable form feedback",
+          "passed": true
+        },
+        {
+          "name": "b13-final-invalid-window-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "Manager asset selection",
+          "passed": true
+        },
+        {
+          "name": "Asset choices show code and human-readable name",
+          "passed": true
+        },
+        {
+          "name": "b13-final-asset-selector-mobile 390px large text layout",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.84",
+      "passed": true
+    },
+    {
+      "workflow": "b13-browser-lost-response",
+      "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+      "scope": "Real Chrome lost confirmation response then original signed retry",
+      "checks": [
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Original reception communication",
+          "passed": true
+        },
+        {
+          "name": "Lost13 note preview accepted",
+          "passed": true
+        },
+        {
+          "name": "Lost13 note signed confirmation visible",
+          "passed": true
+        },
+        {
+          "name": "Server committed confirmation before response loss",
+          "passed": true
+        },
+        {
+          "name": "Chrome received connection failure",
+          "passed": true
+        },
+        {
+          "name": "Original confirmation retry returns successful result",
+          "passed": true
+        },
+        {
+          "name": "Saved communication visible after reconnect",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.84",
+      "passed": true
+    }
+  ],
+  "note": "Positive workflows completed in retained/resumed runs; counts are assertions from these runs, not unique use-case counts. Final negative-input and lost-response checks use final application commit. Prototype/harness failures remain private and are not counted as acceptance."
+}
