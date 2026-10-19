@@ -93,9 +93,12 @@ def _fields(clinic,action,fields,row=None,lock=False):
         if not row or not row.patient_id or not row.service_id:raise RuleError('转候补前请完成患者建档并核实预约服务。')
         _patient(row.patient.patient_no)
         clean['earliest']=_at(d['earliest']);clean['latest']=_at(d['latest'])
-        from coordination.windows import validate_wait_window
+        from coordination.windows import validate_wait_window,WindowError
         from datetime import timedelta
-        validate_wait_window(clean['earliest'],clean['latest'],now=timezone.now(),minimum=timedelta(minutes=row.service.duration_minutes))
+        try:
+            validate_wait_window(clean['earliest'],clean['latest'],now=timezone.now(),minimum=timedelta(minutes=row.service.duration_minutes))
+        except WindowError as exc:
+            raise RuleError(str(exc)) from exc
         clean['due_at']=_at(d['due_at']);_owner(row.owner_id,clinic,lock)
     elif action=='BOOK':
         if not row or not row.patient_id or not row.service_id:raise RuleError('成约前请完成患者建档并核实预约服务。')

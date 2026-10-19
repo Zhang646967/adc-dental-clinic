@@ -19,6 +19,9 @@ class EquipmentAsset(models.Model):
     lock_version = models.PositiveIntegerField(default=0)
     registered_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
     registered_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f'{self.asset_code} · {self.name}'
+
     class Meta:
         db_table = 'adc_equipment_asset'
         ordering = ['asset_code']

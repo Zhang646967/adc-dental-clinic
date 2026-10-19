@@ -455,3 +455,16 @@ class ResourceWorkflowPresentationTests(ResourceFixture,TransactionTestCase):
         from django.urls import reverse
         r=self.client.get(reverse('resource_summary'));self.assertContains(r,self.a.name);self.assertNotContains(r,self.b.name)
         self.assertNotContains(r,'本店私有联络');self.assertNotContains(r,'外店私有联络')
+
+
+class TelephoneWindowFeedbackTests(ResourceFixture,TransactionTestCase):
+    def setUp(self):self.resources()
+    def test_too_short_window_returns_business_feedback_without_creating_wait_request(self):
+        from django.urls import reverse
+        from coordination.models import WaitRequest
+        c=self.case(patient_no=self.p1.patient_no);self.client.force_login(self.front)
+        r=self.client.post(reverse('reception_detail',args=[c.pk]),{'case_action':'WAITLIST','revision':c.revision,
+            'earliest':self.t.isoformat(),'latest':(self.t+timedelta(minutes=15)).isoformat(),
+            'due_at':(timezone.now()+timedelta(hours=1)).isoformat(),'note':'患者可接受范围短于预约服务时长'})
+        self.assertEqual(r.status_code,200);self.assertContains(r,'至少比开始时间晚30分钟')
+        self.assertFalse(WaitRequest.objects.exists());c.refresh_from_db();self.assertEqual(c.state,'CONTACT')
