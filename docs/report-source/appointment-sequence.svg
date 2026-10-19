@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1370" viewBox="0 0 2000 1370">
+<rect width="100%" height="100%" fill="white"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L8,5 L0,10" fill="none" stroke="black" stroke-width="1.3"/></marker></defs>
+<rect x="50" y="35" width="240" height="80" fill="white" stroke="black" stroke-width="3"/>
+<text x="170" y="75" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="42">患者</text>
+<line x1="170" y1="115" x2="170" y2="1280" stroke="black" stroke-width="3" stroke-dasharray="12 10"/>
+<rect x="780" y="35" width="240" height="80" fill="white" stroke="black" stroke-width="3"/>
+<text x="900" y="75" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="42">前台</text>
+<line x1="900" y1="115" x2="900" y2="1280" stroke="black" stroke-width="3" stroke-dasharray="12 10"/>
+<rect x="1650" y="35" width="240" height="80" fill="white" stroke="black" stroke-width="3"/>
+<text x="1770" y="75" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="42">预约系统</text>
+<line x1="1770" y1="115" x2="1770" y2="1280" stroke="black" stroke-width="3" stroke-dasharray="12 10"/>
+<line x1="170" y1="215" x2="900" y2="215" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="535.0" y="177" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">1 来电：诉求、日期与联络信息</text>
+<line x1="900" y1="345" x2="1770" y2="345" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="1335.0" y="307" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">2 核对患者档案与可用安排</text>
+<line x1="1770" y1="475" x2="900" y2="475" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
+<text x="1335.0" y="437" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">3 返回候选及待人工核对条件</text>
+<line x1="900" y1="605" x2="170" y2="605" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="535.0" y="567" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">4 解释医师、时间和资源方案</text>
+<line x1="170" y1="735" x2="900" y2="735" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
+<text x="535.0" y="697" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">5 明确接受／另选／暂缓</text>
+<text x="1000" y="805" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="30">未明确同意：记录待联系或未成约；不生成预约、不占用</text>
+<line x1="900" y1="905" x2="1770" y2="905" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="1335.0" y="867" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">6 患者同意后提交最终确认</text>
+<line x1="1770" y1="965" x2="1930" y2="965" stroke="black" stroke-width="3"/>
+<line x1="1930" y1="965" x2="1930" y2="1025" stroke="black" stroke-width="3"/>
+<line x1="1930" y1="1025" x2="1770" y2="1025" stroke="black" stroke-width="3" marker-end="url(#arrow)"/>
+<text x="1330" y="978" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="30">7 重验授权与占用</text>
+<text x="1330" y="1020" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="30">保存唯一预约</text>
+<line x1="1770" y1="1145" x2="900" y2="1145" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
+<text x="1335.0" y="1107" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">8 返回编号；冲突则重新协商</text>
+<line x1="900" y1="1275" x2="170" y2="1275" stroke="black" stroke-width="3" stroke-dasharray="12 10" marker-end="url(#arrow)"/>
+<text x="535.0" y="1237" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="36">9 交付安排及查询、取消改期方式</text>
+<text x="1000" y="1335" text-anchor="middle" dominant-baseline="central" font-family="Noto Sans CJK SC" font-size="30">目标业务序列：新增接待单与资源联动的实现状态见正文</text>
+</svg>

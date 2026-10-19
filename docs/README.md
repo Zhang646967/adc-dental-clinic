@@ -10,6 +10,7 @@
 | 接诊、治疗、结算与设备衔接 | [完整流程](CARE_FINANCE_EQUIPMENT_WORKFLOWS.md)、[交接规则](FINANCE_EQUIPMENT_HANDOFFS.md) |
 | 收退款、资金凭据与逐笔对账 | [财务凭据](FINANCIAL_EVIDENCE_RECONCILIATION.md)、[账内日结](DAILY_RECONCILIATION.md) |
 | 设备费用及维护 | [费用更正](EQUIPMENT_COST_AMENDMENTS.md)、[维护工单](MAINTENANCE_WORK_ORDERS.md) |
+| 预约业务下一阶段 | [取消时段、电话接待、自助预约与科室资源](APPOINTMENT_BUSINESS_PLAN.md) |
 | 预约与排班 | [预约改期](RESCHEDULING_OPTIMIZATION.md)、[出诊维护](SU29_SU30_AVAILABILITY.md)、[前台协调](SU31_FRONT_COORDINATION.md) |
 | 接诊控制、任务和通知 | [接诊控制](SU32_SU33_INTAKE_CONTROL.md)、[协调任务](SU34_SU35_SU36_COORDINATION_TASKS.md)、[通知](SU37_SU38_NOTIFICATIONS.md) |
 | 基础目录与权限 | [目录规约](SU27_SU28_DIRECTORY.md)、[字段目录](FIELD_CATALOG.md) |

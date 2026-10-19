@@ -70,14 +70,12 @@ def build(folder,repo,output=None):
   pf=D.styles[name].paragraph_format;pf.first_line_indent=Pt(0);pf.line_spacing=1.25;pf.space_before=Pt(12);pf.space_after=Pt(8);pf.keep_with_next=True;pf.page_break_before=False
  D.styles['Heading 1'].paragraph_format.alignment=WD_ALIGN_PARAGRAPH.CENTER
  D.styles['Caption'].paragraph_format.first_line_indent=Pt(0)
- D.core_properties.title=source['title'];D.core_properties.subject=source['version'];D.core_properties.author=source['author']['name'];D.core_properties.keywords='系统分析与设计 财务 设备 通知监测 独立恢复 合成数据'
+ D.core_properties.title=source['title'];D.core_properties.subject=source['version'];D.core_properties.author=source['author']['name'];D.core_properties.keywords='系统分析与设计 预约业务 患者服务 财务 设备 用例规约'
  next_page=[False]
  toc=[];markdown=['# '+source['title'],'',source['version']+' '+source['date'],'']
  def p(text='',size=12,bold=False,center=False,indent=True,space=0):
   x=D.add_paragraph();font(x.add_run(text),size,bold)
-  # Keep identifiers, amounts and Latin terms intact in the new evidence text.
-  if text.startswith(('本轮等价容量','另在窗口内执行','独立核对900','五条正常协调','R2.4.3准确应用','R2.4.2演练发现')):
-   lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');x.runs[0]._element.get_or_add_rPr().append(lang)
+  lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');x.runs[0]._element.get_or_add_rPr().append(lang)
   x.paragraph_format.space_after=Pt(space)
   if not text and size==1:x.paragraph_format.line_spacing=Pt(1);x.paragraph_format.space_before=Pt(0);x.paragraph_format.space_after=Pt(0)
   if size>18:x.paragraph_format.line_spacing=1.15
@@ -91,7 +89,7 @@ def build(folder,repo,output=None):
   font(x.runs[0],{1:16,2:14,3:12}[level],True,SANS)
   if add_toc and level<3:toc.append((text,level))
   markdown.extend(['#'*(level+1)+' '+text,'']);return x
- def table(headers,rows,widths=None):
+ def table(headers,rows,widths=None,case_label=None):
   if headers[0]=='标题':
    # Preserve every character, while giving long fields explicit continuation rows.
    bounded=[]
@@ -106,7 +104,7 @@ def build(folder,repo,output=None):
     for n,chunk in enumerate(chunks):bounded.append([label if n==0 else label+'（续'+str(n)+'）',chunk])
    rows=bounded
   if headers[0]=='标题':
-   case=rows[0][1];number=int(case[3:5]) if case.startswith('SU-') else 26;label='A' if case.startswith('SF-') or number<=25 else 'B';ordinal=number if label=='A' else number-25
+   case=rows[0][1];number=int(case[3:5]) if case.startswith('SU-') else 26;label=case_label or ('A' if case.startswith('SF-') or number<=25 else 'B');ordinal=number if label=='A' else number-(38 if label=='C' else 25)
    cap=p('表'+label+'-'+str(ordinal)+' '+case+'用例规约',10.5,False,True);cap.paragraph_format.keep_with_next=True
   widths=widths or [3.2,12.8];t=D.add_table(rows=1,cols=len(headers));t.alignment=WD_TABLE_ALIGNMENT.CENTER;t.autofit=False
   for col,w in zip(t.columns,widths):col.width=Cm(w)
@@ -126,8 +124,9 @@ def build(folder,repo,output=None):
     cp.append(m)
     if i==0:s=OxmlElement('w:shd');s.set(qn('w:fill'),'F2F2F2');cp.append(s)
     pp=c.paragraphs[0];pp.paragraph_format.first_line_indent=Pt(0);pp.paragraph_format.line_spacing=Pt(15.5);pp.paragraph_format.space_after=Pt(0)
-    pp.paragraph_format.keep_with_next=(i==0)
-    font(pp.add_run(str(text)),10.5,i==0)
+    pp.paragraph_format.keep_with_next=(i < len(rows) if case_label=='C' else i==0)
+    run=pp.add_run(str(text));font(run,10.5,i==0)
+    lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');run._element.get_or_add_rPr().append(lang)
   p('',size=1,indent=False)
   markdown.extend(['| '+' | '.join(headers)+' |','| '+' | '.join('---' for _ in headers)+' |'])
   markdown.extend('| '+' | '.join(str(v).replace('\n',' / ').replace('|','/') for v in row)+' |' for row in rows);markdown.append('')
@@ -137,7 +136,11 @@ def build(folder,repo,output=None):
   for text in spec.get('paragraphs',[]):p(text)
   if spec.get('table'):
    v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','5.7':'表5-3 页面调研与落实','5.8':'表5-4 业务体验问题与可验证行为','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
-   p(label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
+   p(spec.get('caption') or label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
+ def figure(path,caption,width=16):
+  if not path.exists():raise FileNotFoundError(path)
+  x=D.add_paragraph();x.paragraph_format.first_line_indent=Pt(0);x.alignment=WD_ALIGN_PARAGRAPH.CENTER;x.paragraph_format.keep_with_next=True;x.paragraph_format.line_spacing=1.0
+  x.add_run().add_picture(str(path),width=Cm(width));p(caption,10.5,False,True);markdown.extend(['!['+caption+']('+path.name+')',''])
  def mind(n):p('思维导图  '+source['mind_maps'][str(n)],size=10.5,indent=False,space=6)
  def page():next_page[0]=True
  def furniture(section,front=False):
@@ -156,10 +159,20 @@ def build(folder,repo,output=None):
  def fix_legacy(text):
   text=text.replace('第3.7节','第3.5.5节')
   text=re.sub(r'图2-(\d+)',lambda m:'图3-'+str({3:4,4:3}.get(int(m[1]),int(m[1]))),text)
-  text=re.sub(r'图3-(\d+)',lambda m:m[0],text) # source-specific system mapping occurs before this function
-  for a,b in [('当前候选','当前实现'),('本轮RC','原RC'),('仍需真实登录与数据库回归','已纳入当前回归，实际证据见第5章'),('须在真实数据库验收','由真实数据库回归验证，证据见第5章'),('当前尚不满足完整发布条件','独立公网和大型商业化仍需另行验收'),('本报告仍','本报告')]:text=text.replace(a,b)
-  if '追踪' in text and ('待执行' in text or '待本地回归' in text):text=re.sub(r'真实HTTP/PG[^。]*待执行','原验收目标的当前执行证据见第5章',text)
-  if text.startswith('追踪与状态：'):text=re.sub(r'；[^；]*待[^；]*$', '；当前执行证据见第5章',text)
+  if text.startswith('系统边界为ADC软件。'):return '系统边界为ADC软件。患者、前台、牙医和财务等作为执行者分别达成目标，每次工作上下文只激活一个身份。实线箭头表示功能交互，include表示共享核验，不表示业务的时间先后。'
+  text=text.replace('（本增量）','').replace('真实HTTP/PG验证待执行。','实现范围及业务测试见第5章。').replace('真实HTTP/PG与两连接竞争待执行。','实现范围及业务测试见第5章。')
+  text=text.replace('RC共享通知规则','通知协作规则').replace('本轮不提供','本功能不提供').replace('本轮修改','该变更')
+  text=text.replace('R4.2的','既有的').replace('保留R4.2的','说明').replace('当前候选','系统').replace('原RC','系统')
+  text=text.replace('唯一身份直达为候选修订，待本地回归','按规则核验唯一有效身份').replace('已有候选实现；具体人工观察及验证边界见第5章','实现范围与业务测试见第5章')
+  text=text.replace('仍需真实登录与数据库回归','身份与数据库约束须经测试验证').replace('须在真实数据库验收','由数据库和业务测试验证')
+  text=text.replace('本图重建案例中的业务问题情境，而不是把v0.3软件当作现状系统。','本图根据案例描述重建现状业务情境。')
+  if text.startswith('开发中曾发现只读模式'):
+   return '只读模式按业务副作用控制写入，允许经过授权的结果核对。查询仍需有效身份、诊所和对象范围；读取结果只表示当前时点，不构成后续预约的占用承诺。'
+  if text.startswith('本图保留'):
+   text=text.replace('本图保留既有的','本图表达')
+  if text.startswith('发布门槛：'):
+   return '质量评价覆盖核心业务完整性、权限、重复提交、回滚及历史金额。公开服务和更大规模需要独立验证，不能仅凭模型或功能数量作出结论。'
+  text=text.replace('本轮再统一全角色只读提示及表单错误定位','界面统一提示当前只读状态并定位表单错误')
   return text
  def append_nodes(nodes,mapping=None,system=False):
   from docx.text.paragraph import Paragraph
@@ -177,7 +190,7 @@ def build(folder,repo,output=None):
     elif not node.xpath('.//w:drawing'):
      if system:text=re.sub(r'图3-(\d+)',lambda m:'图3-'+str(int(m[1])+7),text)
      text=fix_legacy(text)
-     text=re.sub(r'表3-(\d+)',lambda m:'表3-'+str(int(m[1])+3),text)
+     text=re.sub(r'表3-(\d+)',lambda m:'表3-'+str(int(m[1])+4),text)
      text=text.replace('表2-1','表3-1')
      if text.strip():
       x.clear();font(x.add_run(text),10.5 if x.style.name=='Caption' else 12)
@@ -191,6 +204,7 @@ def build(folder,repo,output=None):
       cx,cy=int(extent.get('cx')),int(extent.get('cy'));ratio=min(1,Cm(16)/cx,Cm(18)/cy)
       extent.set('cx',str(int(cx*ratio)));extent.set('cy',str(int(cy*ratio)))
     elif x.style.name=='Caption':pf.keep_with_next=True;pf.first_line_indent=Pt(0);x.alignment=WD_ALIGN_PARAGRAPH.CENTER
+    if re.match(r'^表[0-9]+-[0-9]+',x.text):pf.keep_with_next=True
    elif node.tag==qn('w:tbl'):
     t=Table(node,D._body)
     if t.rows[0].cells[0].text=='路径':p('表4-4 RC运行路径与数据保护',10.5,False,True)
@@ -209,7 +223,8 @@ def build(folder,repo,output=None):
        row.cells[1].text=values[0];row.cells[2].text=values[1]
     for row_no,row in enumerate(t.rows):
      if row.cells[0].text.strip()=='NFR-06' and len(row.cells)==3:
-      row.cells[2].text='原RC拟基准30店／60牙医／1万患者／10万Visit／20并发，列表p95≤2秒、提交p95≤3秒，属于历史目标；当前按五店已测、二十店待验收分开取证（第5、6章）。'
+      row.cells[1].text='性能目标与已测能力分开；预约、接诊及财务办理分别测量，复杂分析与导出另行记录。'
+      row.cells[2].text='以可重复的预约、接诊和财务工作负载测量正常请求p95及失败率；五店已测，二十店规模仍需业务代表性验证（第5、6章）。'
      row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
      for cell in row.cells:
       for pp in cell.paragraphs:
@@ -224,33 +239,29 @@ def build(folder,repo,output=None):
   for x in container.paragraphs:x.clear()
  sec.different_first_page_header_footer=True
  p('',space=18);p('中 南 大 学',26,True,True,space=5);p('CENTRAL SOUTH UNIVERSITY',14,False,True,space=34)
- p('系统分析与设计',24,True,True,space=8);p('课 程 阶 段 报 告',24,True,True,space=7);p('COURSE PROJECT PROGRESS REPORT',12,False,True,space=26)
+ p('系统分析与设计',24,True,True,space=8);p('课 程 项 目 报 告',24,True,True,space=7);p('SYSTEMS ANALYSIS AND DESIGN REPORT',12,False,True,space=26)
  topic=p('题　目  '+source['title'],16,True,True,space=12);topic.style=D.styles['Title'];topic.paragraph_format.first_line_indent=Pt(0)
  a=source['author']
  for label,value in [('学生姓名',a['name']),('学　　号',a['student_no']),('指导教师',a['supervisor']),('学　　院',a['school']),('专业班级',a['class'])]:
   x=p(label+'  '+value,14,False,False,False,space=8);x.paragraph_format.left_indent=Cm(3.2)
- p(source['version'],11,False,True,space=12);p(source['date'],14,False,True)
+ p('',11,False,True,space=12);p(source['date'],14,False,True)
  front=D.add_section(WD_SECTION_START.NEW_PAGE);furniture(front,True)
  heading(source['title'],1,False);heading('摘　要',1,False)
  for text in source['abstract_cn']:p(text)
- p('关键词  系统分析与设计；连锁诊所；业务范围；财务证据；通知监测；可验证性',10.5,True,False,False)
+ p('关键词  系统分析与设计；连锁诊所；预约流程；患者服务；财务管理；设备维护',10.5,True,False,False)
  page();heading('Analysis and Design of the ADC Dental Chain Operations Management System',1,False);heading('ABSTRACT',1,False)
  for text in source['abstract_en']:
   x=p(text)
   # English uses word boundaries rather than inherited CJK character breaks.
   for run in x.runs:
    lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');run._element.get_or_add_rPr().append(lang)
- p('Key words  systems analysis and design; dental chain; financial evidence; notification monitoring; verifiability',10.5,False,False,False)
+ p('Key words  systems analysis and design; dental chain; appointments; patient service; finance; equipment maintenance',10.5,False,False,False)
  page();heading('目　录',1,False);toc_anchor=D.add_paragraph()
  main=D.add_section(WD_SECTION_START.NEW_PAGE);furniture(main)
  heading('第1章 绪论',1)
- p('逻辑链  案例需求 → 业务与系统模型 → 模块合同 → 可运行实现 → 分层验证 → 受保护交付。',10.5,False,False,False)
- heading('1.1 项目背景与实践意义');p(paras[35].text);p(paras[36].text)
- p('案例中的15家诊所与扩张计划是原始问题背景；当前产品目标是一家拥有约5至20家诊所的连锁，已执行容量基线仅覆盖五家。不能把业务愿景、已实现功能和已测规模视为同一结论。')
- heading('1.2 案例依据与研究方法');p('以课程提供案例及note讲义为核心，结合现有代码、受控业务规约和实际验收证据开展迭代。note 3要求区分需求与设计并使需求可测试；note 5要求关注点分离、简单性和受限可见性。对标成熟系统只借鉴工作流，不以厂商文档推导比较性能或安全结论。')
- heading('1.3 项目愿景与主要工作');p(paras[38].text);p('当前主要工作包括完整接诊链、独立资金审核、设备维护责任、跨店权限隔离、资金凭据与逐笔核对，以及安全诊断和通知处理观察。后续持续治疗、椅位/房间等共享资源及长期独立运行分别建模和验收。')
- p('表1-1 项目目标与可观察结果',10.5,False,True);append_nodes([old_goal]);heading('1.4 报告范围与组织结构');p('本报告沿用上一版课程阶段报告的中英摘要、目录、六章正文及完整规约附录。第3章描述业务和系统需求，第4章说明设计责任，第5章记录实际证据与限制。原RC标签、冻结报告与历史证据不被本报告覆盖。')
- p('仅供合成数据课程演示，不含真实患者、真实支付接口、保险申报或临床资格自动认证。账单不是税务发票，通知投递不是人已阅读，技术管理身份不扩大临床权限。');mind(1)
+ for item in source['introduction']:add(item)
+ p('表1-1 项目目标与可观察结果',10.5,False,True);append_nodes([old_goal])
+ mind(1)
  page();heading('第2章 相关方法与技术',1)
  for item in source['methods']:add(item)
  mind(2)
@@ -261,41 +272,41 @@ def build(folder,repo,output=None):
  heading('3.2 系统总体目标与改进业务流程')
  mapping={'2.3　改进后的业务序列：统一服务':('3.2.1 统一服务',3),'2.5　改进后的业务序列：季度核对':('3.2.2 季度核对',3),'2.6　改进后的业务序列：候补协同':('3.2.3 候补协同',3),'2.7　改进后的业务序列：责任协调':('3.2.4 责任协调',3)}
  append_nodes(frozen(62,67),mapping);append_nodes(frozen(72,86),mapping)
- heading('3.3 用户需求分析');p('七类工作台按当前身份及对象范围授权。一个人可以有多个授予的岗位，但一次只激活一个；切换身份不能自行审核。SYSADMIN管理账号和目录，私有主机维护是另一项运行责任。');p('表3-2 利益相关者及职责边界',10.5,False,True);append_nodes([old_roles])
- heading('3.4 需求清单与优先级');p('表3-3 需求模块与业务结果',10.5,False,True);table(['模块','优先目标','受保护业务结果'],[['患者与临床','关键','稳定编号、到诊、过敏复核、实际治疗、明确结束。'],['财务与设备','关键','版本化账单、真实资金及凭据、独立复核、费用来源。'],['排班与协调','重要','既有承诺保留、明确受理与复核、消息不代替业务事实。'],['运行保障','重要','失败请求可定位、后台进度可观察、未知结果可辨识。']], [3,2.2,10.8])
+ heading('3.3 用户需求分析');p('七类工作台按当前身份及对象范围授权。一个人可以有多个授予的岗位，但一次只激活一个；切换身份不能自行审核。技术管理负责普通账号和基础目录，不因维护职责取得患者病历或财务审核权。');p('表3-2 利益相关者及职责边界',10.5,False,True);append_nodes([old_roles])
+ heading('3.4 需求清单与优先级');p('表3-3 需求模块与业务结果',10.5,False,True);table(['模块','优先目标','受保护业务结果'],[['患者与临床','关键','稳定编号、到诊、过敏复核、实际治疗、明确结束。'],['财务与设备','关键','版本化账单、真实资金及凭据、独立复核、费用来源。'],['预约与服务','关键','患者明确确认，电话接待有责任，资源核对有依据，取消改期可解释。'],['排班与协调','重要','既有承诺保留、明确受理与复核、消息不代替业务事实。'],['经营与保障','重要','时段指标带分母与缺失，服务中断可识别，业务记录可恢复。']], [3,2.2,10.8])
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例规约与失败保证');p('附录A与B保留原始SU-01—38和SF-01完整规约。登录、预约、实际治疗完成和独立更正分别检验身份、对象、事实及审核者。预览不写入业务，确认重验当前授权与事实；回执未知时先查业务结果，不自动重放资金或安排。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义54项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—54。电话接待关注咨询与联系，SU-04关注正式成约；网站和未来小程序属于SU-04的渠道路径，不按页面数量重复计数。')
+ p('表3-4 用例分组及业务目标',10.5,False,True)
+ table(['业务范围','编号','使用者目标'],[
+ ['身份与资料','SU-01—03、21—23、25—28','登录选店、患者资料、账号与基础目录。'],
+ ['预约与接诊','SU-04—10、19、29—33\nSU-39—40、54','预约、变更、到诊、治疗、结算与资源核对。'],
+ ['候补与协作','SU-13—17、24、31、34—38','候补、邀约、任务办理、独立复核及消息。'],
+ ['经营与引导','SU-11—12、18、20、41','成本利润、取消分析和操作协助。'],
+ ['资金与对账','SU-42—49、53','渠道、收退款、凭据、流水、对账及日结。'],
+ ['设备维护','SU-50—52','资产、维修责任和独立验收。']
+ ],[3.1,5.8,7.1])
+ p('分组交叉列出的协作用例只计一次。每项规约说明触发、前置、交互、替代路径、成功结果、最低保证和验收目标；待实现设计在规约和第5章明确标注。')
  heading('3.7 业务规则与非功能性需求');append_nodes(frozen(100,110),{},True)
- for item in source['requirements']:add(item)
+ for item in source['requirements']:
+  add(item)
+  if item['heading'].startswith('3.8'):
+   figure(folder/'appointment-sequence.png','图3-13 电话预约接待与最终确认的目标业务序列',16)
+   p('新增接待单、结构化联系结果和诊疗资源联动为目标流程；当前正式预约已核对医师、患者时间及邀约保留。图中查询候选不是占用，患者同意后仍须最终核验。',10.5)
  mind(3)
  page();heading('第4章 系统设计',1)
- mapping={p.text:(p.text.replace('　',' ',1),2) for p in paras[119:164] if p.style.name=='Heading 2'}
- append_nodes(legacy['design'],mapping)
+ mapping={p.text:(p.text.replace('　',' ',1),2) for p in paras[119:146] if p.style.name=='Heading 2'}
+ append_nodes(frozen(119,146),mapping)
+ mapping={p.text:(p.text.replace('4.6','4.5',1).replace('4.7','4.6',1).replace('4.8','4.7',1).replace('　',' ',1),2) for p in paras[150:161] if p.style.name=='Heading 2'}
+ append_nodes(frozen(150,161),mapping)
  for item in source['design']:add(item)
- if (folder/'operations-flow.png').exists():
-  p0=D.add_paragraph();p0.paragraph_format.first_line_indent=Pt(0);p0.alignment=WD_ALIGN_PARAGRAPH.CENTER;p0.add_run().add_picture(str(folder/'operations-flow.png'),width=Cm(16));p0.paragraph_format.keep_with_next=True;p0.paragraph_format.line_spacing=1.0
-  c=p('图4-8 通知处理与私有监测责任视图',10.5,False,True);c.paragraph_format.keep_with_next=True
-  p('观察者只能形成诊断和责任记录；预约、任务、消息重试与资金处理仍由原业务操作决定。',10.5)
  mind(4)
  page();heading('第5章 系统实现与测试',1)
  for item in source['implementation']:
   add(item)
   if item['heading'].startswith('5.3'):
-   append_nodes(legacy['screens'],{})
-   if (folder/'notification-overview.png').exists():
-    image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'notification-overview.png'),width=Cm(6.2))
-    p('图5-3 R2.2 本店通知概况（390像素大字模式）',10.5,False,True)
-    p('来自独立合成演练：两条待派发中仅一条已经到期；未来重试单独显示。该页面为当前诊所概况，后台健康由私有独立读取核对。',10.5)
-  if item['heading'].startswith('5.7') and (folder/'workbench-login.png').exists():
-   image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'workbench-login.png'),width=Cm(16))
-   p('图5-4 UX1 员工登录页',10.5,False,True)
-   p('来自隔离实例的真实Chrome页面；输入为空，不包含私有账号、患者信息或密码。',10.5)
-  if item['heading'].startswith('5.8') and (folder/'finance-form-ux2.png').exists():
-   image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'finance-form-ux2.png'),width=Cm(14))
-   p('图5-5 UX2 资金申请表单分组',10.5,False,True)
-   p('真实Chrome隔离实例的空白表单区域，不含账号或患者信息。金额、渠道凭据和申请依据分开核对，提交前仍须进入原有签名预览。',10.5)
+   figure(folder/'finance-form-ux2.png','图5-1 收退款申请的分组表单',14)
  mind(5)
  page();heading('第6章 总结与展望',1)
  for item in source['conclusion']:add(item)
@@ -303,12 +314,13 @@ def build(folder,repo,output=None):
  page();heading('参考文献',1)
  for text in old_refs+source['extra_references']:p(text,10.5,False,False,False,space=5)
  page();heading('附录A 基础系统用例规约',1)
- p('本附录保留原SU-01—25及SF-01的业务保证和编号，改按课程报告表格呈现。原验收组是追踪目标；当前运行状态统一以第5章及准确提交证据为准，未建立逐项对应时不把总测试数量等同于用例覆盖率。',10.5)
+ p('本附录给出SU-01—25及共享核验SF-01。规约以业务目标、交互、正常与异常结果为核心；验收编号为需求追踪标识，功能完成状态见第5章。',10.5)
  appendix_b=False
  for title,texts in uc:
   if title.startswith('SU-26'):
    page();heading('附录B 维护 协调与通知用例规约',1);appendix_b=True
-   p('保留SU-26—38的维护、协调与通知责任。站内消息只覆盖协调任务；不通知患者、不自动同意、不代替接诊或资金事实。资料更正、出诊维护及重试继续遵守原有权限、签名、独立审核与事务规则。',10.5)
+   p('SU-26—38说明资料维护、出诊协调和站内任务消息。消息仅提示办理，不代替患者同意、任务受理或资金事实；资料更正、出诊维护及重试按各自业务流程办理。',10.5)
+  texts=source.get('use_case_overrides',{}).get(title[:5],texts)
   heading(title,3,False);rows=[['用例名称',title]];group='说明';buffer=[]
   def flush():
    if buffer:rows.append([group,'\n'.join(buffer)]);buffer.clear()
@@ -317,7 +329,7 @@ def build(folder,repo,output=None):
    text=fix_legacy(text)
    if text.startswith('追踪与状态：'):
     parts=[v for v in text.split('；') if re.search(r'(?:BR|NFR|AT)-[0-9]+',v)]
-    text='；'.join(parts)+'；原始规则和验收组保留，当前执行证据与范围见第5章。'
+    text='；'.join(parts)+'；功能范围及业务测试见第5章。'
    if re.fullmatch(r'[A-G]\. .+',text) or text.rstrip('：:') in ('扩展','扩展路径','业务规则','基本路径','追踪与验收'):
     flush();group=re.sub(r'^[A-G]\. ','',text).rstrip('：:');continue
    match=re.match(r'^([^：]{1,22})：(.+)',text)
@@ -325,6 +337,12 @@ def build(folder,repo,output=None):
     flush();rows.append([match[1],match[2]])
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
+ page();heading('附录C 预约完善 财务与设备用例规约',1)
+ p('本附录补充SU-39—54。电话接待、患者自助改期、分时段取消分析和多资源核对为待实现设计；资金、对账及设备规约说明现有业务。每项的实现状态及验收目标分别列明。',10.5)
+ for c in json.loads((folder/'business_use_cases.json').read_text()):
+  title=c['id']+'　'+c['name'];heading(title,3,False)
+  rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]
+  table(['标题','内容（'+c['id']+'）'],rows,[3,13],case_label='C')
  # Contents is generated from actual headings; page mapping comes from latest PDF.
  pages=json.loads((folder/'toc_pages.json').read_text()) if (folder/'toc_pages.json').exists() else {}
  for text,level in toc:

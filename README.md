@@ -17,7 +17,9 @@
 | 部署工具 | [deployment/](deployment/)、[scripts/](scripts/) | 部署配置、备份恢复和操作工具 |
 | 开发进展 | [RELEASE_CURRENT.md](RELEASE_CURRENT.md) | 当前实施范围及待完成事项 |
 
-Current development（当前进展）：R2.4.3等价容量与UX2已交付Mac。五店二十账号连续30分钟、9,000请求、1,800合法写入，p95 0.3090秒，零意外失败/重复效果/OOM；预约清单、接诊和财务表单已优化。[验收与交付](docs/evidence_r243/README.md) · [页面与浏览器](docs/evidence_ux2/README.md) · [课程报告](课程报告/README.md) · [下一步](docs/R24_ACCEPTANCE_PLAN.md)。真实24小时、安全及公网仍另验。
+**当前业务完善方向：预约服务。** [下一阶段业务计划](docs/APPOINTMENT_BUSINESS_PLAN.md)重点解决分时段取消分析、电话接待与患者确认、科室及诊疗资源核对和手机自助改期。网站已支持患者自助预约与取消；小程序尚未接入。正式报告按业务问题、流程、用例、设计及业务测试组织，包含54项业务用例和1项共享核验，已实现与待实现分别标明。
+
+应用已有的容量及界面验证保留在[工程验收记录](docs/evidence_r243/README.md)；它们不代表新增业务设计已完成。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

@@ -1,0 +1,84 @@
+{
+  "format": 1,
+  "date": "2026-10-19",
+  "scope": "business analysis and formal report revision; no application changes",
+  "user_requests": [
+    {
+      "id": "U1",
+      "request": "identify high-cancellation time bands and remedies",
+      "report": [
+        "3.9",
+        "4.11",
+        "5.6",
+        "6.2",
+        "SU-41"
+      ],
+      "plan": "B1.1",
+      "status": "specified; actual time-band feature and operational findings pending"
+    },
+    {
+      "id": "U2",
+      "request": "patient website or mini-program booking",
+      "report": [
+        "3.8",
+        "5.1",
+        "SU-04"
+      ],
+      "source": [
+        "portal/views.py",
+        "portal/services.py"
+      ],
+      "status": "website booking/cancellation implemented; mini-program and self-rescheduling pending"
+    },
+    {
+      "id": "U3",
+      "request": "detail telephone intake and availability checks",
+      "report": [
+        "3.8",
+        "4.8",
+        "4.9",
+        "SU-39",
+        "SU-54"
+      ],
+      "plan": "B1.2/B1.3",
+      "status": "manual front-desk booking current; structured intake and resource calendar pending"
+    },
+    {
+      "id": "U4",
+      "request": "prioritize business completeness and usefulness",
+      "report": [
+        "1.2",
+        "5.4",
+        "5.7",
+        "6.2"
+      ],
+      "plan": "B1.1 through B1.5",
+      "status": "business-first roadmap and observable scenario gates"
+    },
+    {
+      "id": "U5",
+      "request": "at least thirty use cases",
+      "report": [
+        "3.6",
+        "appendix A/B/C"
+      ],
+      "business_use_cases": 54,
+      "shared_subfunction": 1,
+      "status": "55 complete specifications; no page-count inflation"
+    },
+    {
+      "id": "U6",
+      "request": "formal report without Mac or development diary",
+      "report": [
+        "cover",
+        "abstracts",
+        "chapter1",
+        "chapter5",
+        "chapter6"
+      ],
+      "status": "formal report rewritten; engineering history retained outside report"
+    }
+  ],
+  "validation": "report-source/validation.json",
+  "application_changes": false
+}
