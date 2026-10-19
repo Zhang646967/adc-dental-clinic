@@ -72,7 +72,17 @@ def prepare_config(*,actor,kind,fields=None,target=None):
                 raise RuleError('请补齐服务、开放时间及牙椅，并逐项核实现有预约和有效邀约后再启用。')
     else:raise RuleError('资源目录操作无效。')
     data={'clinic':clinic,'kind':kind,'target':target,'fields':clean,'revision':row.revision if row else None}
-    return {'kind':kind,'fields':clean,'proposal_token':proposal(actor,CONTRACT,('MANAGER',),data)}
+    display=[]
+    if kind in FORMS:
+        for key,value in form.cleaned_data.items():
+            if hasattr(value,'values_list'):value='、'.join(str(x) for x in value)
+            elif key=='asset' and value:value=value.name+'（'+value.asset_code+'）'
+            elif isinstance(value,bool):value='是' if value else '否'
+            elif isinstance(value,datetime):value=timezone.localtime(value).strftime('%Y-%m-%d %H:%M')
+            elif value is None:value='未提供'
+            display.append((form.fields[key].label or key,value))
+    label={'department':'维护科室','hours':'维护开放时间','room':'维护诊室','service':'维护预约服务','binding':'核对设备排程位置','block':'登记临时停用','release_block':'结束临时停用','start':'开始本店资源核对','activate':'启用统一资源控制'}[kind]
+    return {'kind':kind,'kind_label':label,'fields':clean,'display_fields':display,'proposal_token':proposal(actor,CONTRACT,('MANAGER',),data)}
 
 @business_errors
 @transaction.atomic

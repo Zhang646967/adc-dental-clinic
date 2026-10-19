@@ -48,7 +48,11 @@
     const high=parseWall(limits.max_end), low0=parseWall(limits.min_start);
     const epoch=Date.parse(limits.server_now), loaded=performance.now();
     if (!rawStart || !rawEnd || !feedback || !submit || !Number.isFinite(high) || !Number.isFinite(low0) || !Number.isFinite(epoch)) return;
-    const duration=limits.duration_minutes || 30, step=limits.choice_step_minutes || 15;
+    let duration=limits.duration_minutes || 30;
+    const step=limits.choice_step_minutes || 15;
+    const service=form.querySelector('[name=service]');
+    function serviceDuration(){duration=Number((limits.service_durations||{})[service?service.value:''])||30;}
+    serviceDuration();
     const originals=[rawStart.value,rawEnd.value];
     function controls(raw, description) {
       const oldId=raw.id;
@@ -109,6 +113,7 @@
     form.addEventListener('submit',e=>{if (!sync()) {e.preventDefault();feedback.focus();}});
     feedback.tabIndex=-1;
     window.setInterval(()=>{if (!document.hidden) sync();},30000);
+    if(service)service.addEventListener('change',()=>{serviceDuration();sync();});
     window.addEventListener('pageshow',sync);
     sync();form.dataset.windowEnhanced='true';
   }

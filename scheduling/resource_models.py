@@ -166,5 +166,8 @@ class ResourceAction(models.Model):
     kind = models.CharField(max_length=40)
     result = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
+    @property
+    def kind_label(self):
+        return {'department':'科室维护','hours':'开放时间维护','room':'诊室维护','service':'预约服务维护','binding':'设备排程位置维护','block':'临时停用','release_block':'结束停用','start':'开始核对','activate':'启用资源控制','MAP_EXISTING':'核实原承诺','FRONT_BOOKING':'预约确认','COORD_REPLACE':'资源替换','COORD_CONTACT':'联系交接','COORD_OPEN':'登记资源协调','COORD_RESOLVE':'核实协调解决'}.get(self.kind,self.kind)
     class Meta:
         db_table = 'adc_resource_action'

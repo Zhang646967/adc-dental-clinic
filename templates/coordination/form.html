@@ -1,11 +1,11 @@
 {% extends base_template %}{% load static workspace_tags %}{% block content %}
 <a href="{% url 'waitlist' %}">返回候补列表</a><h1>{{ title }}</h1><p>{{ description }}</p>
 {% if window_limits %}<div class="notice" id="window-explanation">
-<p>例如：明天14:00至17:00，表示你能接受其中任一段完整的30分钟预约；不是连续治疗3小时。</p>
+<p>例如：明天14:00至17:00，表示可接受其中一段完整的预约，时长按所选服务；不是连续治疗3小时。</p>
 <p>跨天范围表示从开始到结束之间都能接受；系统只会匹配牙医已登记的出诊时段。每位患者最多一条有效候补。</p>
 </div>{{ window_limits|json_script:'wait-window-limits' }}<script defer src="{% static 'wait-window.js' %}"></script>{% endif %}
 <form class="panel" method="post"{% if window_limits %} data-wait-window aria-describedby="window-explanation"{% endif %}>
 {% csrf_token %}{% workspace_token %}{{ form.as_div }}
 {% if window_limits %}<p data-window-feedback class="notice" role="status" aria-live="polite">先选最早时间，再选择最晚结束时间。</p>
-<noscript><p>脚本未启用，可使用原始时间输入。结束必须比开始至少晚30分钟；提交时仍会检查未来14天范围。</p></noscript>{% endif %}
+<noscript><p>脚本未启用，可使用原始时间输入。范围须容纳所选服务时长；无资源模式时至少30分钟，提交时仍检查未来14天范围。</p></noscript>{% endif %}
 <button class="button" type="submit">{{ button }}</button></form>{% endblock %}

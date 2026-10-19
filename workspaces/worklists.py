@@ -195,7 +195,7 @@ def workspace_worklist(actor):
                         'url':reverse('reception_detail',args=[row.pk]),'action':'核对沟通并继续办理'},
                     _url('reception_list',queue='mine'),'候选不占位；待联系、待确认及候补等待保留负责人和期限。'))
             result['cards'].append({'label':'逾期接待联系','count':reception.filter(due_at__lt=now).count(),
-                'url':_url('reception_list',queue='overdue') if role=='FRONT_DESK' else reverse('resource_summary') if role=='HQ' else reverse('operations_dashboard'),
+                'url':_url('reception_list',queue='overdue') if role=='FRONT_DESK' else reverse('resource_summary'),
                 'note':'核实负责人与下次期限；统计不包含联系人和沟通文字。'})
             result['cards'].append({'label':'资源故障待协调','count':issues.count(),
                 'url':reverse('resource_summary') if role=='HQ' else reverse('resource_coordination_list'),

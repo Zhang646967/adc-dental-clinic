@@ -397,7 +397,7 @@ class ResourceHTTPAndFinancialTests(ResourceFixture,TransactionTestCase):
         for actor,role in roles:
             self.client.force_login(actor)
             for name,allowed in [('reception_list',{'FRONT_DESK'}),('resource_catalogue',{'MANAGER'}),
-                ('resource_candidates',{'FRONT_DESK'}),('resource_coordination_list',{'FRONT_DESK','MANAGER'}),('resource_summary',{'HQ'})]:
+                ('resource_candidates',{'FRONT_DESK'}),('resource_coordination_list',{'FRONT_DESK','MANAGER'}),('resource_summary',{'HQ','MANAGER'})]:
                 response=self.client.get(reverse(name));self.assertEqual(response.status_code,200 if role in allowed else 403,(role,name))
                 if role!='FRONT_DESK':self.assertNotContains(response,private,status_code=response.status_code)
     def test_front_resource_booking_http_requires_two_steps(self):
@@ -430,3 +430,28 @@ class ResourceHTTPAndFinancialTests(ResourceFixture,TransactionTestCase):
         v.refresh_from_db();bill=complete_visit(actor=doctor,visit_id=v.pk,expected_version=v.lock_version,outcome='TREATED')
         self.assertEqual(bill.current_record_version.total_amount,Decimal('240.00'));self.assertEqual(CashEntry.objects.count(),0)
         self.assertEqual(ResourcePlan.objects.count(),1);c.refresh_from_db();self.assertEqual(c.visit.status,'COMPLETED')
+
+class ResourceWorkflowPresentationTests(ResourceFixture,TransactionTestCase):
+    def setUp(self):self.resources()
+    def test_manager_resource_mode_does_not_claim_fixed_slot_optimality(self):
+        self.client.force_login(self.manager)
+        from django.urls import reverse
+        r=self.client.get(reverse('schedule_plans'))
+        self.assertContains(r,'不保证全局最优');self.assertNotContains(r,'固定30分钟')
+    def test_waitlist_has_service_duration_metadata(self):
+        self.client.force_login(self.front)
+        from django.urls import reverse
+        from coordination.forms import JoinForm
+        self.service.duration_minutes=15;self.service.save()
+        f=JoinForm(user=self.front)
+        self.assertEqual(f.window_limits['service_durations'][str(self.service.pk)],15)
+        r=self.client.get(reverse('waitlist_join'));self.assertContains(r,'service_durations')
+    def test_manager_summary_never_combines_other_clinic_cases(self):
+        self.case(contact='本店私有联络')
+        self.front2._adc_workspace=WorkspaceContext.objects.create(user=self.front2,role='FRONT_DESK',clinic=self.b)
+        p=prepare_case(actor=self.front2,action='CREATE',fields=self.reception_fields(owner=self.front2.pk,service_id=None,contact='外店私有联络'))
+        confirm_case(actor=self.front2,proposal_token=p['proposal_token'],confirmed=True)
+        self.client.force_login(self.manager)
+        from django.urls import reverse
+        r=self.client.get(reverse('resource_summary'));self.assertContains(r,self.a.name);self.assertNotContains(r,self.b.name)
+        self.assertNotContains(r,'本店私有联络');self.assertNotContains(r,'外店私有联络')

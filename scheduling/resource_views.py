@@ -57,9 +57,12 @@ class CandidateForm(forms.Form):
     patient_no=forms.CharField(label='患者业务编号（咨询可留空）',required=False,max_length=40)
     service=forms.ModelChoiceField(label='预约服务',queryset=BookingService.objects.none())
     day=forms.DateField(label='预约日期',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
-    dentist=forms.IntegerField(label='指定医师编号（选填）',required=False,min_value=1)
+    from registry.models import Dentist
+    dentist=forms.ModelChoiceField(label='医师偏好（可选）',required=False,queryset=Dentist.objects.none())
     def __init__(self,*args,clinic,**kwargs):
         super().__init__(*args,**kwargs);self.fields['service'].queryset=BookingService.objects.filter(department__clinic_id=clinic,is_active=True).select_related('department')
+        from scheduling.models import AvailabilitySlot
+        self.fields['dentist'].queryset=self.Dentist.objects.filter(is_active=True,pk__in=AvailabilitySlot.objects.filter(clinic_id=clinic,is_active=True).values('dentist_id'))
 
 @login_required
 @require_GET
@@ -70,7 +73,7 @@ def candidate_list(request):
             from patients.models import Patient
             p=Patient.objects.get(patient_no=form.cleaned_data['patient_no'],is_active=True) if form.cleaned_data['patient_no'] else None
             rows=candidates(clinic_id=clinic,service_id=form.cleaned_data['service'].pk,day=form.cleaned_data['day'],
-                dentist_id=form.cleaned_data['dentist'],patient_id=p.pk if p else None,horizon=False)
+                dentist_id=form.cleaned_data['dentist'].pk if form.cleaned_data['dentist'] else None,patient_id=p.pk if p else None,horizon=False)
             for r in rows:r['choose']='?'+urlencode({'patient_no':p.patient_no if p else '', 'service':r['service'].pk,'slot':r['slot_id'],
                 'start':timezone.localtime(r['start']).strftime('%Y-%m-%dT%H:%M'),'end':timezone.localtime(r['end']).strftime('%Y-%m-%dT%H:%M')})
         except EXPECTED_ERRORS as exc:add_error(form,exc)
@@ -134,9 +137,15 @@ def coordination_detail(request,pk):
 @require_GET
 def summary(request):
     from django.core.exceptions import PermissionDenied
-    if request.workspace.role!='HQ':raise PermissionDenied
-    return render(request,'scheduling/resource_summary.html',{'rows':ResourcePolicy.objects.values('clinic__name','state').annotate(count=Count('clinic')),
-        'reception':ReceptionCase.objects.values('clinic__name','state').annotate(count=Count('pk'))})
+    if request.workspace.role not in ('HQ','MANAGER'):raise PermissionDenied
+    policies=ResourcePolicy.objects.all();cases=ReceptionCase.objects.all()
+    if request.workspace.role=='MANAGER':
+        clinic=manager_clinic(request.user);policies=policies.filter(clinic_id=clinic);cases=cases.filter(clinic_id=clinic)
+    from reception.models import STATES
+    reception=list(cases.values('clinic__name','state').annotate(count=Count('pk')))
+    for row in reception:row['label']=dict(STATES).get(row['state'],row['state'])
+    return render(request,'scheduling/resource_summary.html',{'rows':[dict(row,label=dict(ResourcePolicy._meta.get_field('state').choices).get(row['state'],row['state'])) for row in policies.values('clinic__name','state').annotate(count=Count('clinic'))],
+        'reception':reception,'overdue':cases.exclude(state__in=['BOOKED','UNBOOKED','WITHDRAWN']).filter(due_at__lt=timezone.now()).count()})
 
 
 class MappingForm(forms.Form):

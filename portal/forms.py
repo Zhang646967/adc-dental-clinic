@@ -18,7 +18,9 @@ class SlotFilterForm(forms.Form):
         super().__init__(*args,**kwargs)
         from scheduling.resource_models import ResourcePolicy
         self.fields['service'].queryset=self.BookingService.objects.filter(is_active=True,department__is_active=True,
-            department__clinic_id__in=ResourcePolicy.objects.filter(state='ENABLED').values('clinic_id')).select_related('department')
+            department__clinic_id__in=ResourcePolicy.objects.filter(state='ENABLED').values('clinic_id')).select_related('department__clinic')
+        self.fields['service'].label_from_instance=lambda s:s.department.clinic.name+' · '+str(s)
+        self.fields['service'].help_text='启用资源的诊所须选择预约服务，系统安排兼容设备。'
         self.fields['dentist'].queryset=self.Dentist.objects.filter(is_active=True)
 
     clinic = forms.IntegerField(label="诊所编号（选填）", required=False, min_value=1)

@@ -31,6 +31,7 @@ def public_options(user, clinic_id=None, day=None, service_id=None, dentist_id=N
         return candidates(clinic_id=service.department.clinic_id,service_id=service_id,day=day or timezone.localdate(),
             patient_id=access.patient_id,dentist_id=dentist_id)
     from scheduling.resource_models import ResourcePolicy
+    if clinic_id and ResourcePolicy.objects.filter(clinic_id=clinic_id).exists():raise RuleError('请先选择该诊所的预约服务，再查询可用组合。')
     slots = AvailabilitySlot.objects.filter(is_active=True, booking_paused=False, clinic__is_active=True,
         dentist__is_active=True, ends_at__gt=now, starts_at__lt=now+timedelta(days=HORIZON_DAYS)).select_related("clinic","dentist")
     slots = slots.exclude(clinic_id__in=ResourcePolicy.objects.values("clinic_id"))

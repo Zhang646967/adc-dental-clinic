@@ -19,14 +19,16 @@ class JoinForm(forms.Form):
         self.fields['earliest'].widget.attrs.update({'min': self.window_limits['min_start'], 'max': self.window_limits['max_start'], 'step': '60'})
         self.fields['latest'].widget.attrs.update({'min': self.window_limits['min_start'], 'max': self.window_limits['max_end'], 'step': '60'})
         self.fields['earliest'].help_text = '只选未来时间。默认每15分钟提供一个快捷选项；不会修改既有候补时间。'
-        self.fields['latest'].help_text = '必须比开始时间至少晚30分钟，且不超过当前时刻之后14天。' 
+        self.fields['latest'].help_text = '范围须能容纳所选服务；无资源模式时至少30分钟，结束不超过当前时刻之后14天。'
         self.fields['clinic'].queryset=Clinic.objects.filter(is_active=True)
         if getattr(getattr(user,'_adc_workspace',None),'role',None)=='FRONT_DESK':
             self.fields['clinic'].queryset=self.fields['clinic'].queryset.filter(pk__in=clinic_ids(user))
             self.fields['patient_no'].required=True
         else:self.fields.pop('patient_no')
         self.fields['preferred_dentist'].queryset=Dentist.objects.filter(is_active=True)
-        self.fields['service'].queryset=self.BookingService.objects.filter(is_active=True,department__clinic__in=self.fields['clinic'].queryset).select_related('department')
+        self.fields['service'].queryset=self.BookingService.objects.filter(is_active=True,department__clinic__in=self.fields['clinic'].queryset).select_related('department__clinic')
+        self.fields['service'].label_from_instance=lambda s:s.department.clinic.name+' · '+str(s)
+        self.window_limits['service_durations']={str(s.pk):s.duration_minutes for s in self.fields['service'].queryset}
     def clean(self):
         data = super().clean()
         if data.get('earliest') and data.get('latest'):

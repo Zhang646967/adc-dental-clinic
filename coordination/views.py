@@ -1,3 +1,4 @@
+from scheduling.resources import enabled
 from scheduling.front_coordination_links import offer_return_slot, return_context
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -53,7 +54,7 @@ def join(request):
         except EXPECTED_ERRORS as e:add_error(form,e)
         else:messages.success(request,'候补已登记，尚未形成预约。');return redirect('waitlist')
     return render(request,'coordination/form.html',{'title':'登记候补偏好','form':form,
-        'description':'请选择未来14天内你能接受的时间范围。结束时间至少比开始时间晚30分钟。登记只是偏好，不是正式预约。',
+        'description':'请选择未来14天内可接受的时间范围，至少能容纳所选服务的完整时长；未启用资源模式时沿用30分钟。登记只是偏好，不是正式预约。',
         'window_limits':form.window_limits,
         'base_template':template_for(request),'button':'确认登记候补'})
 
@@ -96,7 +97,8 @@ def plans(request):
         try:p=services.create_plan(actor=request.user,clinic_id=cid)
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:return redirect('schedule_plan',pk=p.pk)
-    return render(request,'coordination/plans.html',{'plans':SchedulePlan.objects.filter(clinic_id=cid).order_by('-created_at')[:30],'form':form})
+    return render(request,'coordination/plans.html',{'plans':SchedulePlan.objects.filter(clinic_id=cid).order_by('-created_at')[:30],'form':form,
+        'resource_mode':enabled(cid)})
 
 @login_required
 @require_http_methods(['GET','POST'])
