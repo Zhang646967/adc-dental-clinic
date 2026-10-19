@@ -645,6 +645,22 @@
       "passed": true
     },
     {
+      "name": "Mac patient resource service candidates",
+      "passed": true
+    },
+    {
+      "name": "Mac future course slot is feasible",
+      "passed": true
+    },
+    {
+      "name": "Mac patient sees consultation confirmation",
+      "passed": true
+    },
+    {
+      "name": "Mac read-only confirmation no overflow",
+      "passed": true
+    },
+    {
       "name": "multi_demo login GET",
       "passed": true
     },

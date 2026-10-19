@@ -3,7 +3,7 @@
   "version": "系统分析与设计课程报告",
   "date": "2026-10-19",
   "file_stem": "课程报告_张加良_8210241102",
-  "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+  "application_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
   "reference_pdf": {
     "pages": 86,
     "sha256": "ba3164113b097daa7be79251f540513fe181687e539e82821506a1671078e248",
@@ -573,9 +573,9 @@
     "[19] W3C. Understanding Target Size Minimum[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html（访问日期2026-10-18）.",
     "[20] W3C. Understanding Focus Not Obscured Minimum[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html（访问日期2026-10-18）."
   ],
-  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39230803698",
-  "tool_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
-  "tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39230803698",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39235771285",
+  "tool_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
+  "tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39235771285",
   "document_kind": "formal_system_analysis_and_design",
   "introduction": [
     {

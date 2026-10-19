@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
-  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39230803698",
+  "application_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39235771285",
   "architecture": "arm64",
-  "tested_application_image": "sha256:db5269b39917b0368f2ba11eb29f1a6d83125875f33ece30212c2cd31935de0b",
+  "tested_application_image": "sha256:b54f146babefba6e6b1248eaeadd36fa8b541f169e528729192a8f9a854518cd",
   "same_rehearsal_image_deployed": true,
   "original_database_container_and_volume_preserved": true,
   "original_rc_tag_preserved": true,
@@ -27,8 +27,9 @@
   "business_browser": {
     "accounts": 9,
     "roles": 7,
-    "checks": 185,
-    "passed": true
+    "checks": 189,
+    "passed": true,
+    "includes_actual_website_resource_candidate_and_read_only_confirmation": true
   },
   "observer_recovery": {
     "passed": true,
@@ -44,5 +45,31 @@
   "encrypted_database_after_update_decryption_and_inventory_verified": true,
   "cloud_acceptance": "PENDING_SERVER_NOT_PURCHASED",
   "historical_windows_database_recovery": "UNRESOLVED",
-  "real_24_hour_observation": "NOT_PASSED"
+  "real_24_hour_observation": "NOT_PASSED",
+  "core_rollout": {
+    "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+    "original_row_groups_preserved": 51,
+    "original_private_configurations_preserved": 70,
+    "schema_additions": {
+      "original_models": 51,
+      "new_empty_business_tables": 15,
+      "additive_permission_rows": 56,
+      "additive_content_type_rows": 14
+    },
+    "observer_recovery": {
+      "passed": true,
+      "confirmed_reason": "CLOCK_INCONSISTENCY",
+      "old_monitor_encrypted_and_decryption_checked": true,
+      "six_application_conditions": "HEALTHY",
+      "host": "HEALTHY",
+      "incidents_handled_and_closed": 2,
+      "business_data_changed": false,
+      "continuous_observation": false
+    }
+  },
+  "presentation_patch": "44px separated action-row links; all business modules and migration bytes identical to the core release",
+  "final_presentation_rollout_original_row_groups_preserved": 66,
+  "final_six_conditions": "HEALTHY",
+  "final_host": "HEALTHY",
+  "final_business_records_and_private_configurations_preserved": true
 }

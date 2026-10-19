@@ -1290,6 +1290,48 @@
       "page_errors": 0,
       "browser_version": "155.0.8059.84",
       "passed": true
+    },
+    {
+      "workflow": "b13-spacing-final",
+      "application_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
+      "scope": "Reception operation spacing and keyboard targets, exact deployed stylesheet",
+      "checks": [
+        {
+          "name": "Login form FRONT_DESK",
+          "passed": true
+        },
+        {
+          "name": "Reception actions",
+          "passed": true
+        },
+        {
+          "name": "Reception retains nine separate actions",
+          "passed": true
+        },
+        {
+          "name": "All actions have at least 44px height",
+          "passed": true
+        },
+        {
+          "name": "Actions have separate non-overlapping hit areas",
+          "passed": true
+        },
+        {
+          "name": "390px large-text reflow",
+          "passed": true
+        },
+        {
+          "name": "Keyboard moves to next action",
+          "passed": true
+        },
+        {
+          "name": "No JavaScript errors",
+          "passed": true
+        }
+      ],
+      "page_errors": 0,
+      "browser_version": "155.0.8059.84",
+      "passed": true
     }
   ],
   "note": "Positive workflows completed in retained/resumed runs; counts are assertions from these runs, not unique use-case counts. Final negative-input and lost-response checks use final application commit. Prototype/harness failures remain private and are not counted as acceptance."

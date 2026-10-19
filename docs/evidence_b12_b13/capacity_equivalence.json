@@ -1,10 +1,12 @@
 {
   "passed": true,
   "measured_application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
+  "final_application_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
   "scope": "equivalence for the existing valid 80/20 workload only; not a claim that the final commit was independently timed for thirty minutes",
   "changes": [
     "equipment catalogue display label only",
-    "telephone invalid-window exception translated to actionable business feedback"
+    "telephone invalid-window exception translated to actionable business feedback",
+    "spacing and target sizing for newly introduced action-row links only"
   ],
   "normal_valid_path_checks": [
     {

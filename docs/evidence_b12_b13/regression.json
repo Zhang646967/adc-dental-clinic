@@ -1,14 +1,16 @@
 {
   "passed": true,
-  "application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+  "application_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
   "source_checks": 1046,
   "postgresql_http_concurrency_tests": 1256,
   "new_tests": 56,
   "database": "PostgreSQL 17",
-  "clean_git_archive": true,
-  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39230803698",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39235771285",
   "original_numeric_migrations_preserved": 31,
   "additive_numeric_migrations": 6,
   "total_numeric_migrations": 37,
-  "verification_project": "adc_b13_verify_7c5d03b2b8"
+  "verification_project": "adc_b13_verify_7c5d03b2b8",
+  "local_full_gate_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+  "exact_application_full_regression": "GitHub CI completed successfully; 1046 source checks and 1256 PostgreSQL/HTTP/concurrency tests",
+  "local_clean_git_archive": true
 }

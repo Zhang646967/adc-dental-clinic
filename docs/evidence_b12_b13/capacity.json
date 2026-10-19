@@ -1,7 +1,7 @@
 {
   "passed": true,
   "measured_application_commit": "a313aefdbab97347b6c6014ade5594c22843d266",
-  "final_application_commit": "43b5037223ccb2c0ee0b81d6d7af1cf3d00d22ce",
+  "final_application_commit": "63c27333f29fec386bc360bbb185680d41ea6e4d",
   "scope": "Local synthetic loopback HTTP; per-service resource caps are not an independent cloud host",
   "started_utc": "2026-10-19T08:55:22.758131+00:00",
   "seconds": 1800,
@@ -101,5 +101,6 @@
       "memory_limit": 134217728,
       "nano_cpus": 100000000
     }
-  }
+  },
+  "presentation_patch": "action-row spacing only; original CSS declarations and all queries/locks/migrations unchanged"
 }
