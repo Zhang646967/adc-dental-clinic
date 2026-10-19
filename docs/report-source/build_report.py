@@ -75,6 +75,9 @@ def build(folder,repo,output=None):
  toc=[];markdown=['# '+source['title'],'',source['version']+' '+source['date'],'']
  def p(text='',size=12,bold=False,center=False,indent=True,space=0):
   x=D.add_paragraph();font(x.add_run(text),size,bold)
+  # Keep identifiers, amounts and Latin terms intact in the new evidence text.
+  if text.startswith(('本轮等价容量','另在窗口内执行','独立核对900','五条正常协调','R2.4.3准确应用','R2.4.2演练发现')):
+   lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');x.runs[0]._element.get_or_add_rPr().append(lang)
   x.paragraph_format.space_after=Pt(space)
   if not text and size==1:x.paragraph_format.line_spacing=Pt(1);x.paragraph_format.space_before=Pt(0);x.paragraph_format.space_after=Pt(0)
   if size>18:x.paragraph_format.line_spacing=1.15
@@ -133,7 +136,7 @@ def build(folder,repo,output=None):
   heading(spec['heading'])
   for text in spec.get('paragraphs',[]):p(text)
   if spec.get('table'):
-   v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','5.7':'表5-3 页面调研与落实','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
+   v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','5.7':'表5-3 页面调研与落实','5.8':'表5-4 业务体验问题与可验证行为','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
    p(label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
  def mind(n):p('思维导图  '+source['mind_maps'][str(n)],size=10.5,indent=False,space=6)
  def page():next_page[0]=True
@@ -289,6 +292,10 @@ def build(folder,repo,output=None):
    image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'workbench-login.png'),width=Cm(16))
    p('图5-4 UX1 员工登录页',10.5,False,True)
    p('来自隔离实例的真实Chrome页面；输入为空，不包含私有账号、患者信息或密码。',10.5)
+  if item['heading'].startswith('5.8') and (folder/'finance-form-ux2.png').exists():
+   image_p=D.add_paragraph();image_p.alignment=WD_ALIGN_PARAGRAPH.CENTER;image_p.paragraph_format.first_line_indent=Pt(0);image_p.paragraph_format.keep_with_next=True;image_p.paragraph_format.line_spacing=1.0;image_p.add_run().add_picture(str(folder/'finance-form-ux2.png'),width=Cm(14))
+   p('图5-5 UX2 资金申请表单分组',10.5,False,True)
+   p('真实Chrome隔离实例的空白表单区域，不含账号或患者信息。金额、渠道凭据和申请依据分开核对，提交前仍须进入原有签名预览。',10.5)
  mind(5)
  page();heading('第6章 总结与展望',1)
  for item in source['conclusion']:add(item)

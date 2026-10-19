@@ -1,0 +1,488 @@
+{
+  "source": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
+  "assertions_executed": 999,
+  "checks": [
+    {
+      "name": "Positive HTTP gate",
+      "passed": true
+    },
+    {
+      "name": "Continuous 30 minute wall-clock gate",
+      "passed": true
+    },
+    {
+      "name": "9000 requests and 1800 writes",
+      "passed": true
+    },
+    {
+      "name": "Twenty concurrent in-flight requests observed",
+      "passed": true
+    },
+    {
+      "name": "1800 database-confirmed writes without interruption",
+      "passed": true
+    },
+    {
+      "name": "Original patient rows unchanged",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained auth.Permission",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained auth.Group_permissions",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained auth.Group",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained contenttypes.ContentType",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained accounts.UserAccount_groups",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained accounts.UserAccount_user_permissions",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained accounts.UserAccount",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained accounts.RoleAssignment",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained registry.Clinic",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained registry.Dentist",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained registry.Qualification",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained registry.DentistQualification",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained registry.Allergy",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained registry.TreatmentType",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained patients.Patient",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained patients.PatientAllergy",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained scheduling.AvailabilitySlot",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained scheduling.Visit",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained scheduling.VisitRequest",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained care.CorrectionRequest",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained care.VisitRecordVersion",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained care.TreatmentRecord",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained care.Invoice",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained care.AuditEvent",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.Quarter",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.DentistQuarterCost",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.CashEntry",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.DailyClose",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.PaymentAccount",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.CashEvidenceVersion",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.StatementBatch",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.StatementLine",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained finance.ReconciliationMatch",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained portal.PatientAccess",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained portal.BookingReceipt",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained assistants.UsageBucket",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained assistants.AssistantEvent",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained coordination.WaitRequest",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained coordination.SchedulePlan",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained coordination.WaitOffer",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained coordination.CoordinationTask",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained notifications.NotificationOutbox",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained notifications.InboxMessage",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained equipment.EquipmentAsset",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained equipment.EquipmentEvent",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained equipment.EquipmentCostAmendment",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained equipment.MaintenanceOrder",
+      "passed": true
+    },
+    {
+      "name": "Original rows retained equipment.MaintenanceAction",
+      "passed": true
+    },
+    {
+      "name": "Unrelated visits and published records unchanged",
+      "passed": true
+    },
+    {
+      "name": "900 distinct accepted patient creations",
+      "passed": true
+    },
+    {
+      "name": "180 accepted draft saves doctor 7",
+      "passed": true
+    },
+    {
+      "name": "Last acknowledged note doctor 7",
+      "passed": true
+    },
+    {
+      "name": "No accidental draft publication doctor 7",
+      "passed": true
+    },
+    {
+      "name": "180 accepted draft saves doctor 10",
+      "passed": true
+    },
+    {
+      "name": "Last acknowledged note doctor 10",
+      "passed": true
+    },
+    {
+      "name": "No accidental draft publication doctor 10",
+      "passed": true
+    },
+    {
+      "name": "180 accepted draft saves doctor 13",
+      "passed": true
+    },
+    {
+      "name": "Last acknowledged note doctor 13",
+      "passed": true
+    },
+    {
+      "name": "No accidental draft publication doctor 13",
+      "passed": true
+    },
+    {
+      "name": "180 accepted draft saves doctor 16",
+      "passed": true
+    },
+    {
+      "name": "Last acknowledged note doctor 16",
+      "passed": true
+    },
+    {
+      "name": "No accidental draft publication doctor 16",
+      "passed": true
+    },
+    {
+      "name": "180 accepted draft saves doctor 19",
+      "passed": true
+    },
+    {
+      "name": "Last acknowledged note doctor 19",
+      "passed": true
+    },
+    {
+      "name": "No accidental draft publication doctor 19",
+      "passed": true
+    },
+    {
+      "name": "All explicit audit effects explained",
+      "passed": true
+    },
+    {
+      "name": "All four gross cash legs and posted rows unchanged",
+      "passed": true
+    },
+    {
+      "name": "All invoices and amounts unchanged by load/import/review",
+      "passed": true
+    },
+    {
+      "name": "Bounded browser import/review accepted",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 1",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 2",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 3",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 4",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 5",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 6",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 7",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 8",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 9",
+      "passed": true
+    },
+    {
+      "name": "CSV bytes retained with correct digest 10",
+      "passed": true
+    },
+    {
+      "name": "1000 imported rows and source hash 6",
+      "passed": true
+    },
+    {
+      "name": "1000 imported rows and source hash 7",
+      "passed": true
+    },
+    {
+      "name": "1000 imported rows and source hash 8",
+      "passed": true
+    },
+    {
+      "name": "1000 imported rows and source hash 9",
+      "passed": true
+    },
+    {
+      "name": "1000 imported rows and source hash 10",
+      "passed": true
+    },
+    {
+      "name": "Exact matching coverage and visible exceptions",
+      "passed": true
+    },
+    {
+      "name": "Exact unchanged money",
+      "passed": true
+    },
+    {
+      "name": "No duplicated statement, active match or notification",
+      "passed": true
+    },
+    {
+      "name": "One actual delivery without task replay 1",
+      "passed": true
+    },
+    {
+      "name": "One actual delivery without task replay 2",
+      "passed": true
+    },
+    {
+      "name": "One actual delivery without task replay 3",
+      "passed": true
+    },
+    {
+      "name": "One actual delivery without task replay 4",
+      "passed": true
+    },
+    {
+      "name": "One actual delivery without task replay 5",
+      "passed": true
+    },
+    {
+      "name": "No unexplained pending or failed notifications",
+      "passed": true
+    },
+    {
+      "name": "All 900 new patients independently verified unique and in correct clinic",
+      "passed": true
+    }
+  ],
+  "financial_checks": [
+    {
+      "name": "Four exact independent cash legs clinic 1",
+      "passed": true
+    },
+    {
+      "name": "Four exact independent cash legs clinic 2",
+      "passed": true
+    },
+    {
+      "name": "Four exact independent cash legs clinic 3",
+      "passed": true
+    },
+    {
+      "name": "Four exact independent cash legs clinic 4",
+      "passed": true
+    },
+    {
+      "name": "Four exact independent cash legs clinic 5",
+      "passed": true
+    },
+    {
+      "name": "No pending or self-reviewed money",
+      "passed": true
+    },
+    {
+      "name": "Invoice facts unchanged",
+      "passed": true
+    },
+    {
+      "name": "Matching and stale history retained",
+      "passed": true
+    },
+    {
+      "name": "No self-reviewed match",
+      "passed": true
+    },
+    {
+      "name": "Original and appended evidence retained",
+      "passed": true
+    },
+    {
+      "name": "Malformed CSV creates no accepted lines",
+      "passed": true
+    },
+    {
+      "name": "Internal handover remains separately stale",
+      "passed": true
+    },
+    {
+      "name": "Maintenance ownership retained",
+      "passed": true
+    },
+    {
+      "name": "Equipment state retained",
+      "passed": true
+    },
+    {
+      "name": "No cross-account source rows",
+      "passed": true
+    },
+    {
+      "name": "Original CSV digest retained 1",
+      "passed": true
+    },
+    {
+      "name": "Original CSV digest retained 2",
+      "passed": true
+    },
+    {
+      "name": "Original CSV digest retained 3",
+      "passed": true
+    },
+    {
+      "name": "Original CSV digest retained 4",
+      "passed": true
+    },
+    {
+      "name": "Original CSV digest retained 5",
+      "passed": true
+    }
+  ]
+}

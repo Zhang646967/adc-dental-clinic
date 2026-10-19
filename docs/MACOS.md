@@ -140,6 +140,13 @@ R2.3 host backup/restore tools are delivered separately from the R2.2 business i
 
 ## R2.4.2 application and interface update
 
-Current application `1977b4b` passes [exact CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082). The protected update rebuilt web/worker/observer and recreated the gateway to load its changed bind-mounted configuration; the original database container/volume and all 70 private configurations remain. Previous host and application observations are encrypted and retained, then new-source observations start UNKNOWN and require fresh success. The new host target is started explicitly; no new scheduled job is installed. [Executed delivery](evidence_r242/delivery.json) · [dependency runbook](R242_DEPENDENCY_DRILLS.md) · [UX1](evidence_ux1/README.md).
+At the R2.4.2 delivery, application `1977b4b` passes [exact CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082). The protected update rebuilt web/worker/observer and recreated the gateway to load its changed bind-mounted configuration; the original database container/volume and all 70 private configurations remain. Previous host and application observations are encrypted and retained, then new-source observations start UNKNOWN and require fresh success. The new host target is started explicitly; no new scheduled job is installed. [Executed delivery](evidence_r242/delivery.json) · [dependency runbook](R242_DEPENDENCY_DRILLS.md) · [UX1](evidence_ux1/README.md).
 
 For future source changes, preserve old observations and stop the old collector before the explicit `operations_reset --confirm-reset-observations` transition described in the runbook. A normal same-source restart does not justify erasing observation history. Dynamic Docker DNS allows the gateway to recover after an application address change without a gateway reload.
+
+
+## R2.4.3 equivalent capacity and UX2 delivery
+
+Application `6ac06cb1d49850a7b905c63816b4ee005f8e88bd` passes [exact CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39192905333) and is now the identified arm64 Mac image. New native worklist/form assets are served. Before/after encrypted backups were checked; all48 durable business fingerprints,70 private configurations, original database container/volume and RC tag were preserved. Previous source observations were archived with verified encryption, and the new source starts a fresh observation identity. No load, fault or synthetic business writes target this original instance. [Delivery](evidence_r243/delivery.json) · [capacity scope](evidence_r243/README.md) · [UX2](evidence_ux2/README.md).
+
+Application and documentation revisions remain distinct; report-only fast-forward does not restart the accepted image. R2.4.4 true24h/security and R2.5 cloud still await their own evidence.

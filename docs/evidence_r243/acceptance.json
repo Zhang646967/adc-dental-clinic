@@ -1,0 +1,299 @@
+{
+  "format": 1,
+  "evidence_date_utc": "2026-10-19",
+  "status": "LOCAL_EQUIVALENT_CAPACITY_PASSED",
+  "passed": true,
+  "application_source": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
+  "completed_at_utc": "2026-10-19T03:04:03.037532+00:00",
+  "scope": "Five-clinic single-chain local Mac/Docker synthetic test; not independent cloud, maximum commercial capacity, 20 clinics or 24-hour reliability.",
+  "regression": {
+    "source_rule_checks": 1046,
+    "postgresql_http_concurrency_tests": 1155,
+    "new_behavior_tests": 3,
+    "all_passed": true,
+    "cleanup_exit": 0
+  },
+  "fixture_before_load": {
+    "clinics": 5,
+    "patients": 10004,
+    "visits": 10507,
+    "invoices": 502,
+    "invoice_total_cny": "50200.00",
+    "equipment_assets": 150,
+    "posted_cash_entries": 525,
+    "evidence_versions": 526,
+    "statement_lines": 30,
+    "confirmed_matches": 24,
+    "stale_matches": 1,
+    "extra_ux2_cases": 2,
+    "external_ai": "disabled/demo"
+  },
+  "measured_load": {
+    "scope": "Local synthetic loopback HTTP; per-service resource caps are not an independent cloud host",
+    "started_utc": "2026-10-19T02:33:30.102455+00:00",
+    "arrival_mode": "waves",
+    "seconds": 1800,
+    "target_rps": 5,
+    "elapsed_seconds": 1800.005,
+    "wall_elapsed_seconds": 1799.998,
+    "max_offer_gap_seconds": 4.007,
+    "continuity_passed": true,
+    "actual_rps": 5.0,
+    "distinct_users": 20,
+    "clinics": 5,
+    "offered": 9000,
+    "dropped": [],
+    "max_in_flight": 20,
+    "summary": {
+      "requests": 9000,
+      "failures": 0,
+      "p95_seconds": 0.309,
+      "max_seconds": 1.1701
+    },
+    "reads": {
+      "requests": 7200,
+      "failures": 0,
+      "p95_seconds": 0.304,
+      "max_seconds": 1.1701
+    },
+    "writes": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.32,
+      "max_seconds": 1.1563
+    },
+    "by_role": {
+      "FRONT_DESK": {
+        "requests": 2250,
+        "failures": 0,
+        "p95_seconds": 0.312,
+        "max_seconds": 1.1117
+      },
+      "DENTIST": {
+        "requests": 2250,
+        "failures": 0,
+        "p95_seconds": 0.317,
+        "max_seconds": 1.1701
+      },
+      "MANAGER": {
+        "requests": 2250,
+        "failures": 0,
+        "p95_seconds": 0.317,
+        "max_seconds": 1.1631
+      },
+      "FINANCE": {
+        "requests": 1350,
+        "failures": 0,
+        "p95_seconds": 0.257,
+        "max_seconds": 0.6685
+      },
+      "HQ": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.259,
+        "max_seconds": 0.9829
+      }
+    },
+    "by_clinic": {
+      "1": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.275,
+        "max_seconds": 1.0964
+      },
+      "2": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.29,
+        "max_seconds": 1.003
+      },
+      "3": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.31,
+        "max_seconds": 1.0742
+      },
+      "4": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.343,
+        "max_seconds": 1.1118
+      },
+      "5": {
+        "requests": 900,
+        "failures": 0,
+        "p95_seconds": 0.364,
+        "max_seconds": 1.1631
+      }
+    },
+    "http_passed": true
+  },
+  "measurement_definition": "Latency is completion minus scheduled due time, including client queue delay; twenty simultaneous offers every four seconds; no retries; setup, ancillary financial HTTP and observers excluded from the 9000 denominator.",
+  "ancillary": {
+    "financial_batches": 5,
+    "rows_per_batch": 1000,
+    "new_statement_lines": 5000,
+    "independent_match_reviews": 5,
+    "concurrent_duplicate_confirmations": true,
+    "browser_checks": 82,
+    "separately_counted": true,
+    "activity": [
+      {
+        "source_sha256": "7bb3eb9121cdcb55662b7d13e7233efbcf44d15ad00d55f7a20fd53036fae2d9",
+        "raw_bytes": 70827,
+        "new_rows": 1000,
+        "started": "2026-10-19T02:34:33.957Z",
+        "finished": "2026-10-19T02:34:36.716Z"
+      },
+      {
+        "source_sha256": "8a654d276b64bee96bd51c21cf54d6638efd045e7ff88351bc0a1614908768e4",
+        "raw_bytes": 70827,
+        "new_rows": 1000,
+        "started": "2026-10-19T02:34:37.189Z",
+        "finished": "2026-10-19T02:34:40.110Z"
+      },
+      {
+        "source_sha256": "f4cf2ea920cf0efca70e030ff2bfeb2ba7793123a9b61df855bd63ab3eeb4064",
+        "raw_bytes": 70827,
+        "new_rows": 1000,
+        "started": "2026-10-19T02:34:40.581Z",
+        "finished": "2026-10-19T02:34:43.377Z"
+      },
+      {
+        "source_sha256": "ad9a0fe2b6ae5492eb3cb50e7cbd6fbe5cde5c7c3439f9da04a8db66da918388",
+        "raw_bytes": 70827,
+        "new_rows": 1000,
+        "started": "2026-10-19T02:34:43.843Z",
+        "finished": "2026-10-19T02:34:46.596Z"
+      },
+      {
+        "source_sha256": "c7a9fb022090b5c3eb5438a879a43ef454cd77ca2765dadd9548dfd09fa996c6",
+        "raw_bytes": 70827,
+        "new_rows": 1000,
+        "started": "2026-10-19T02:34:47.068Z",
+        "finished": "2026-10-19T02:34:49.826Z"
+      }
+    ],
+    "notification_tasks": 5,
+    "notification_messages": 7,
+    "maximum_delivery_seconds": 4.270968
+  },
+  "resources": {
+    "samples": 150,
+    "services": {
+      "db": {
+        "memory_limit_mib": 768.0,
+        "cpu_limit": 0.75,
+        "peak_sampled_memory_mib": 60.68,
+        "peak_sampled_cpu_percent": 21.77,
+        "oom_events": 0,
+        "unexpected_restarts": 0
+      },
+      "web": {
+        "memory_limit_mib": 768.0,
+        "cpu_limit": 1.0,
+        "peak_sampled_memory_mib": 167.5,
+        "peak_sampled_cpu_percent": 86.31,
+        "oom_events": 0,
+        "unexpected_restarts": 0
+      },
+      "notification-worker": {
+        "memory_limit_mib": 128.0,
+        "cpu_limit": 0.125,
+        "peak_sampled_memory_mib": 53.59,
+        "peak_sampled_cpu_percent": 0.94,
+        "oom_events": 0,
+        "unexpected_restarts": 0
+      },
+      "gateway": {
+        "memory_limit_mib": 64.0,
+        "cpu_limit": 0.125,
+        "peak_sampled_memory_mib": 15.93,
+        "peak_sampled_cpu_percent": 0.58,
+        "oom_events": 0,
+        "unexpected_restarts": 0
+      },
+      "operations": {
+        "memory_limit_mib": 128.0,
+        "cpu_limit": 0.1,
+        "peak_sampled_memory_mib": 52.57,
+        "peak_sampled_cpu_percent": 2.15,
+        "oom_events": 0,
+        "unexpected_restarts": 0
+      }
+    },
+    "sampling_errors": [],
+    "postgres_deadlocks_before": 0,
+    "postgres_deadlocks_after": 0,
+    "same_postgres_stats_epoch": true,
+    "limitation": "The four business-service caps reproduce R1 (2 CPU quotas and 1728 MiB in sum). Observer adds 0.1 CPU and 128 MiB, for 2.1 CPU/1856 MiB container quotas. Shared Mac/Docker host and per-container caps do not prove a 2-core/2-GB independent host operating envelope."
+  },
+  "observation": {
+    "samples": 50,
+    "all_six_conditions_healthy": true,
+    "sampling_interval_seconds": 30,
+    "expiry_seconds": 90,
+    "max_sampled_due": 0,
+    "max_sampled_failed": 0,
+    "final_pending": 0,
+    "final_failed": 0,
+    "delivery_source": "Independent database outbox/inbox/task facts; one event per clinic; recipient grants vary by clinic and are independently rechecked; no notification replay."
+  },
+  "independent_database": {
+    "passed": true,
+    "assertions": 999,
+    "original_row_groups_preserved": 48,
+    "patients_created": 900,
+    "draft_note_saves": 900,
+    "max_business_gap_seconds": 4.676662,
+    "confirmed_matches": 29,
+    "stale_matches": 1,
+    "accepted_statement_lines": 5030,
+    "cash_entries": 525,
+    "matching_coverage_percent": 5.5238,
+    "unmatched_statement_lines": 5001,
+    "net_patient_cash_cny": "50000.00",
+    "notification_tasks": 5,
+    "notification_messages": 7,
+    "max_notification_latency_seconds": 4.270968
+  },
+  "financial_facts": {
+    "passed": true,
+    "assertions": 20,
+    "gross_receipts_cny": "50100.10",
+    "gross_refunds_cny": "100.10",
+    "net_patient_cash_cny": "50000.00",
+    "equipment_expenses_cny": "50.05",
+    "equipment_reversals_cny": "50.05",
+    "new_posted_cash": 25,
+    "confirmed_matches": 24,
+    "stale_matches": 1,
+    "accepted_statement_lines": 30
+  },
+  "business_browser_checks": 568,
+  "ux2_checks": 66,
+  "evidence_digest": {
+    "raw_load": "1b3d94022e7c2ce386dff5b6d4a9cc17e698d4488094accfdf0eafacb6f8df08",
+    "raw_resources": "1c79dad64f5746f0cfefe8e0d9f24caff3c1e4c2fc1ba62b9702e265fab6df52",
+    "business_oracle": "868210fc6793d3a74247f64404ceb151e347135c0d5534ccd98679041a8ea441",
+    "independent_oracle": "e2b6893d0a2faa679d86ca6bbe676f1626015136ef0ef6ce3e98d366dc9bb6b5",
+    "browser_business": "6c83de1ffcc632af0be55031955f43574353d0a2ae42e4cb6ee13549935e3e31",
+    "browser_ux2": "068e587132af386b3cd77758fe9a5af545b3cd3b68ac34a67b68bfd86e82acc0",
+    "browser_keyboard": "b2fc0d73c14373b4377662bbaa615016e608dccdf2065653581e3c56748cb328",
+    "ancillary_import": "1ec3c0c3b285e6a69f622a1e64b79fd89de5758c1a35fca41ac2030178d25279",
+    "source_driver": "09163d910e3b5a6aaccf33835f7b68cf776288e6bbd558672f506fb7cc872635"
+  },
+  "failed_attempts_retained": {
+    "regression": "First full gate found a missing historical-review message; restored the explicit message and reran all 1155 tests successfully.",
+    "browser": "Harness readiness, missing private fixture/date data and incorrect status/field-id/redirect assumptions were corrected; failed output retained privately. No permission or business invariant was weakened."
+  },
+  "no_new_business_schema_or_roles": true,
+  "original_migrations_preserved": 30,
+  "original_mac_load_or_fault_injection": false,
+  "new_empty_database_restore_claim": false,
+  "pending": [
+    "R2.4.4 real 24-hour observation and ASVS gap review",
+    "R2.5 independent HTTPS hosting; no server purchased",
+    "Historical Windows original-data recovery unresolved"
+  ]
+}

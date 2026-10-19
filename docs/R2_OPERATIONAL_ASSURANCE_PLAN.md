@@ -1,5 +1,7 @@
 # R2 operational assurance plan 运行保障开发计划
 
+Current update: [R2.4.3 equivalent capacity and UX2](evidence_r243/README.md) passed locally and were delivered to Mac. True 24-hour observation, the ASVS gap review and independent hosting remain separate gates. Earlier sections retain their historical scope.
+
 R1 evidence → observable failures → responsible response → verified recovery →
 independent hosting. Planning baseline: **2026-10-18**, application commit
 `6a06f356a0c4697f5b8afe2736ed62d427512806`. **R2 is IN_PROGRESS. R2.1 request

@@ -1,5 +1,7 @@
 # ADC v1.0.0-rc.1：批次A/B交付与范围冻结
 
+当前：R2.4.3等价容量与UX2已交付Mac。五诊所、二十账号、30分钟9,000次、1,800合法写入，p95 0.3090秒；有界财务导入与通知单独核对。优化预约编号/清单、接诊错误定位和财务分组，原30份迁移不改。[执行及交付](docs/evidence_r243/README.md) · [UX2](docs/evidence_ux2/README.md) · [课程报告](课程报告/README.md)。下一步R2.4.4真实24小时与安全复核；服务器未购买，R2.5公网及Windows原数据恢复未完成。下文保留历史交付。
+
 ## R2.4.2 业务依赖恢复与UX1界面更新 — 2026-10-18
 
 应用 `1977b4b` 已通过[准确提交CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39184693082)并更新Mac镜像。完整回归1,046项源码/规则、1,152项真实PostgreSQL/HTTP/并发通过；四类真实依赖中断28项、应用换址7项、三种网关语法及真实浏览器60项通过。[执行证据](docs/evidence_r242/README.md)与[处置手册](docs/R242_DEPENDENCY_DRILLS.md)保留影响、责任、恢复及独立事实核对。

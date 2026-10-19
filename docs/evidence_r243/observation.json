@@ -1,0 +1,1055 @@
+{
+  "source": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
+  "samples": [
+    {
+      "sampled_at_utc": "2026-10-19T02:33:28.442059+00:00",
+      "observed_at_epoch": 1792377193.253239,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 0,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:34:03.888512+00:00",
+      "observed_at_epoch": 1792377223.256459,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 0,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:34:40.712814+00:00",
+      "observed_at_epoch": 1792377253.390045,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 0,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:35:16.968598+00:00",
+      "observed_at_epoch": 1792377313.269086,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 0,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:35:52.766346+00:00",
+      "observed_at_epoch": 1792377343.274459,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:36:29.020818+00:00",
+      "observed_at_epoch": 1792377373.277936,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:37:04.914852+00:00",
+      "observed_at_epoch": 1792377403.276342,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:37:41.738354+00:00",
+      "observed_at_epoch": 1792377433.317658,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:38:18.042631+00:00",
+      "observed_at_epoch": 1792377493.287284,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:38:53.927241+00:00",
+      "observed_at_epoch": 1792377523.291011,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:39:30.106387+00:00",
+      "observed_at_epoch": 1792377553.296376,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 1,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:40:07.010733+00:00",
+      "observed_at_epoch": 1792377583.301545,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 2,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:40:42.907445+00:00",
+      "observed_at_epoch": 1792377643.296448,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 2,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:41:19.077646+00:00",
+      "observed_at_epoch": 1792377673.315383,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 2,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:41:54.972252+00:00",
+      "observed_at_epoch": 1792377703.320616,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 2,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:42:31.805003+00:00",
+      "observed_at_epoch": 1792377733.310136,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 2,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:43:08.072048+00:00",
+      "observed_at_epoch": 1792377763.317805,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 2,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:43:43.953398+00:00",
+      "observed_at_epoch": 1792377823.33391,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:44:20.714465+00:00",
+      "observed_at_epoch": 1792377853.400648,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:44:57.059447+00:00",
+      "observed_at_epoch": 1792377883.404954,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:45:33.972071+00:00",
+      "observed_at_epoch": 1792377913.345208,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:46:11.157334+00:00",
+      "observed_at_epoch": 1792377943.350991,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:46:47.050819+00:00",
+      "observed_at_epoch": 1792378003.355844,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:47:22.946368+00:00",
+      "observed_at_epoch": 1792378033.358544,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 3,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:47:59.115445+00:00",
+      "observed_at_epoch": 1792378063.359421,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:48:34.992435+00:00",
+      "observed_at_epoch": 1792378093.36415,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:49:11.774257+00:00",
+      "observed_at_epoch": 1792378123.369255,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:49:48.087558+00:00",
+      "observed_at_epoch": 1792378183.378695,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:50:23.990759+00:00",
+      "observed_at_epoch": 1792378213.39759,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:51:00.856717+00:00",
+      "observed_at_epoch": 1792378243.384025,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:51:37.095623+00:00",
+      "observed_at_epoch": 1792378273.4872,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 4,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:52:12.977498+00:00",
+      "observed_at_epoch": 1792378333.391341,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:52:48.155870+00:00",
+      "observed_at_epoch": 1792378363.41043,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:53:25.033091+00:00",
+      "observed_at_epoch": 1792378393.419339,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:54:00.910510+00:00",
+      "observed_at_epoch": 1792378423.422629,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:54:36.104369+00:00",
+      "observed_at_epoch": 1792378453.500955,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:55:12.946088+00:00",
+      "observed_at_epoch": 1792378513.420435,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:55:48.187440+00:00",
+      "observed_at_epoch": 1792378543.596512,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:56:24.051697+00:00",
+      "observed_at_epoch": 1792378573.483588,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:57:00.838097+00:00",
+      "observed_at_epoch": 1792378603.431527,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:57:37.126134+00:00",
+      "observed_at_epoch": 1792378633.430209,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:58:13.052910+00:00",
+      "observed_at_epoch": 1792378693.438395,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:58:49.217940+00:00",
+      "observed_at_epoch": 1792378723.45623,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T02:59:24.068475+00:00",
+      "observed_at_epoch": 1792378753.462288,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T03:00:00.881137+00:00",
+      "observed_at_epoch": 1792378783.460073,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T03:00:37.148917+00:00",
+      "observed_at_epoch": 1792378813.468364,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T03:01:13.072915+00:00",
+      "observed_at_epoch": 1792378873.459602,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T03:01:49.204488+00:00",
+      "observed_at_epoch": 1792378903.474878,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T03:02:24.082693+00:00",
+      "observed_at_epoch": 1792378933.480686,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    },
+    {
+      "sampled_at_utc": "2026-10-19T03:03:00.917829+00:00",
+      "observed_at_epoch": 1792378963.482291,
+      "state": "HEALTHY",
+      "conditions": {
+        "backlog": "HEALTHY",
+        "database": "HEALTHY",
+        "failed_delivery": "HEALTHY",
+        "storage": "HEALTHY",
+        "web": "HEALTHY",
+        "worker": "HEALTHY"
+      },
+      "aggregates": {
+        "delivered": 5,
+        "due": 0,
+        "failed": 0,
+        "no_recipients": 0,
+        "oldest_due_seconds": 0,
+        "pending": 0
+      }
+    }
+  ]
+}

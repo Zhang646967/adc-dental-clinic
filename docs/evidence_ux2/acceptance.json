@@ -1,0 +1,283 @@
+{
+  "format": 1,
+  "application_source": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
+  "status": "LOCAL_NATIVE_WORKFLOWS_ACCEPTED",
+  "passed": true,
+  "checks": [
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Combined appointment filters",
+      "passed": true
+    },
+    {
+      "name": "Shortcut preserves search and resets day/status",
+      "passed": true
+    },
+    {
+      "name": "Preset exposes current state",
+      "passed": true
+    },
+    {
+      "name": "Browser back restores submitted filter",
+      "passed": true
+    },
+    {
+      "name": "Exact visit number search",
+      "passed": true
+    },
+    {
+      "name": "Searchable visit number is visible",
+      "passed": true
+    },
+    {
+      "name": "Detail action announces visit number",
+      "passed": true
+    },
+    {
+      "name": "Removing search clears only that condition",
+      "passed": true
+    },
+    {
+      "name": "Appointment table 320px at 200% has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "One table and one result row remain",
+      "passed": true
+    },
+    {
+      "name": "Appointment table 390px at 200% has no page overflow",
+      "passed": true
+    },
+    {
+      "name": "One table and one result row remain",
+      "passed": true
+    },
+    {
+      "name": "Invalid filter safely rejects query",
+      "passed": true
+    },
+    {
+      "name": "Invalid filter exposes no visit rows",
+      "passed": true
+    },
+    {
+      "name": "Error summary receives focus",
+      "passed": true
+    },
+    {
+      "name": "Error points to native field id_day",
+      "passed": true
+    },
+    {
+      "name": "Error link focuses id_day",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Manager limited appointment projection",
+      "passed": true
+    },
+    {
+      "name": "Manager gets visit identifier without patient identity or detail action",
+      "passed": true
+    },
+    {
+      "name": "ux2-manager-visits 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Login form DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Additional care case",
+      "passed": true
+    },
+    {
+      "name": "Four keyboard reachable care steps",
+      "passed": true
+    },
+    {
+      "name": "Error summary receives focus",
+      "passed": true
+    },
+    {
+      "name": "Error points to native field id_note_confirmed",
+      "passed": true
+    },
+    {
+      "name": "Error link focuses id_note_confirmed",
+      "passed": true
+    },
+    {
+      "name": "Invalid note retains text",
+      "passed": true
+    },
+    {
+      "name": "Valid note saves",
+      "passed": true
+    },
+    {
+      "name": "Allergy review saves",
+      "passed": true
+    },
+    {
+      "name": "Error summary receives focus",
+      "passed": true
+    },
+    {
+      "name": "Error points to native field id_treatment_quantity",
+      "passed": true
+    },
+    {
+      "name": "Error link focuses id_treatment_quantity",
+      "passed": true
+    },
+    {
+      "name": "Invalid quantity retained",
+      "passed": true
+    },
+    {
+      "name": "Actual treatment saves",
+      "passed": true
+    },
+    {
+      "name": "ux2-care 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Complete care review",
+      "passed": true
+    },
+    {
+      "name": "Conflicting completion remains editable with error",
+      "passed": true
+    },
+    {
+      "name": "Treated completion publishes",
+      "passed": true
+    },
+    {
+      "name": "Published result opens the invoice",
+      "passed": true
+    },
+    {
+      "name": "Published care review",
+      "passed": true
+    },
+    {
+      "name": "Historical review is explicit and close form absent",
+      "passed": true
+    },
+    {
+      "name": "Financial form",
+      "passed": true
+    },
+    {
+      "name": "Finance has three native fieldsets",
+      "passed": true
+    },
+    {
+      "name": "Error summary receives focus",
+      "passed": true
+    },
+    {
+      "name": "Error points to native field id_amount",
+      "passed": true
+    },
+    {
+      "name": "Error link focuses id_amount",
+      "passed": true
+    },
+    {
+      "name": "Invalid finance retains evidence",
+      "passed": true
+    },
+    {
+      "name": "ux2-financial-error 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "No-JavaScript appointment navigation works",
+      "passed": true
+    },
+    {
+      "name": "No-JavaScript native financial form works",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Appointment keyboard entry",
+      "passed": true
+    },
+    {
+      "name": "Enter activates native queue link",
+      "passed": true
+    },
+    {
+      "name": "Keyboard error entry",
+      "passed": true
+    },
+    {
+      "name": "Tab reaches summary error link",
+      "passed": true
+    },
+    {
+      "name": "Enter moves focus to invalid date field",
+      "passed": true
+    },
+    {
+      "name": "Native label audit /invoices/1/cash-request/",
+      "passed": true
+    },
+    {
+      "name": "Every visible form control has a native label /invoices/1/cash-request/",
+      "passed": true
+    },
+    {
+      "name": "IDs remain unique /invoices/1/cash-request/",
+      "passed": true
+    },
+    {
+      "name": "Native label audit /visits/",
+      "passed": true
+    },
+    {
+      "name": "Every visible form control has a native label /visits/",
+      "passed": true
+    },
+    {
+      "name": "IDs remain unique /visits/",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "passed_checks": 66,
+  "browser_version": "155.0.8059.84",
+  "page_errors": 0,
+  "selected_mobile_widths": [
+    320,
+    390
+  ],
+  "large_text_percent": 200,
+  "native_no_javascript_forms": true,
+  "no_new_business_roles_or_api": true,
+  "limitation": "Focused engineering and accessibility checks; no full WCAG certification, user interview or measured task-efficiency claim."
+}

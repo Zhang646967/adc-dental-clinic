@@ -33,6 +33,7 @@
 
 | 验证范围 | 实际记录 |
 |---|---|
+| R2.4.3 等价容量与UX2 | [执行证据](evidence_r243/README.md)、[需求追踪](evidence_r243/requirement_trace.json)、[页面与浏览器](evidence_ux2/README.md)、[Mac交付](evidence_r243/delivery.json) |
 | R2.4.2 依赖恢复及UX1界面 | [执行证据](evidence_r242/README.md)、[需求追踪](evidence_r242/requirement_trace.json)、[界面验证](evidence_ux1/README.md)、[Mac交付](evidence_r242/delivery.json) |
 | R2.4.1 主机事件与故障处置 | [执行证据](evidence_r241/README.md)、[需求追踪](evidence_r241/requirement_trace.json)、[Mac 交付](evidence_r241/delivery.json) |
 | R2.3 备份与独立恢复工具 | [记录与范围](evidence_r23/README.md) |

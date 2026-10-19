@@ -1,0 +1,62 @@
+{
+  "source": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
+  "requirements": [
+    {
+      "requirement": "CAP-01",
+      "business_problem": "负载与写入分母",
+      "actor": "运维",
+      "invariant": "五店二十独立账号、1800秒、9000请求、1800合法写入、峰值20；无重试",
+      "failure_response": "保留失败，不减小负载替代验证",
+      "direct_tests": "scripts/multiclinic_load.py; database_checks.json"
+    },
+    {
+      "requirement": "CAP-02",
+      "business_problem": "财务导入/复核与实际资金",
+      "actor": "主管和独立财务",
+      "invariant": "5000行另计量；不改资金或账单；29有效匹配/1需重核可解释",
+      "failure_response": "保留差异，不生成平衡记录",
+      "direct_tests": "五店浏览器568项; 20项资金核算; database_checks.json"
+    },
+    {
+      "requirement": "CAP-03",
+      "business_problem": "积压和运行资源",
+      "actor": "通知处理与运维",
+      "invariant": "原业务行保持；每事件/授权仅一次投递；无OOM、意外重启或新增死锁",
+      "failure_response": "按原处置手册查事件和新采样，不重做任务",
+      "direct_tests": "observation.json; acceptance.json#/resources"
+    },
+    {
+      "requirement": "UX-01",
+      "business_problem": "预约筛选与范围",
+      "actor": "前台/牙医/主管",
+      "invariant": "快捷清单显式重设；搜索词保留；主管不见患者身份",
+      "failure_response": "400不展示数据；只移除被选条件",
+      "direct_tests": "test_ux2_workflows.QueueNavigationTests; UX2浏览器"
+    },
+    {
+      "requirement": "UX-02",
+      "business_problem": "接诊错误和发布结果",
+      "actor": "负责牙医",
+      "invariant": "输入保留；未确认不写记录；治疗决定开单；历史复核明确保留",
+      "failure_response": "焦点与错误链接定位原控件",
+      "direct_tests": "test_ux2_workflows.NativeFormFailureTests; CareFlowOptimizationTests; UX2浏览器"
+    },
+    {
+      "requirement": "UX-03",
+      "business_problem": "金额凭据分组",
+      "actor": "前台/主管/独立财务",
+      "invariant": "非法金额不生成申请；原预览、版本、确认和独立审核保留",
+      "failure_response": "保留原输入和错误；不绕过规则",
+      "direct_tests": "test_ux2_workflows.NativeFormFailureTests; 财务浏览器568项"
+    },
+    {
+      "requirement": "UX-04",
+      "business_problem": "手机和键盘",
+      "actor": "所有原授权岗位",
+      "invariant": "同一份内容；窄屏大字；原生表单无需脚本",
+      "failure_response": "可见标签、原生链接和错误摘要",
+      "direct_tests": "evidence_ux2/acceptance.json"
+    }
+  ],
+  "full_suite_count_is_not_use_case_coverage_percent": true
+}

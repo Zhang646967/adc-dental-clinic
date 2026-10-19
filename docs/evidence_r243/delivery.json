@@ -1,0 +1,51 @@
+{
+  "format": 1,
+  "date_utc": "2026-10-19",
+  "passed": true,
+  "status": "R243_AND_UX2_DELIVERED_ON_MAC",
+  "application_commit": "6ac06cb1d49850a7b905c63816b4ee005f8e88bd",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39192905333",
+  "ci_conclusion": "success",
+  "image": "sha256:9047849f7c5ea1c0a727b0864ea29f9abbce476db58f711d89ce9d7b0c0f33be",
+  "architecture": "arm64",
+  "pre_update_encrypted_backups_verified": true,
+  "post_update_encrypted_database_archive_verified": true,
+  "old_observations_and_host_history_encrypted": true,
+  "new_source_identity_with_fresh_six_conditions": true,
+  "original_business_fingerprints_preserved": 48,
+  "private_configurations_preserved": 70,
+  "database_container_and_volume_preserved": true,
+  "rc_tag_preserved": true,
+  "original_mac_business_injection": false,
+  "isolated_test_containers_and_networks_removed": true,
+  "test_volumes_retained": 4,
+  "exact_tested_image_reused": true,
+  "preexisting_mac_observer": {
+    "running_before_update": false,
+    "exit_recorded_at_utc": "2026-10-19T02:00:44.642455001Z",
+    "independent_status": "UNKNOWN/OBSERVER_UNAVAILABLE",
+    "old_files_encrypted_and_retained": true,
+    "new_source_six_conditions_verified_healthy": true
+  },
+  "mac_browser": {
+    "checks": 111,
+    "roles": 7,
+    "accounts": 9,
+    "passed": true,
+    "scope": "Authentication/workspace selection and authorized reads only; no original business submissions."
+  },
+  "course_report": {
+    "pdf_pages": 84,
+    "specifications": 39,
+    "tables": 57,
+    "figures": 25,
+    "contents_entries": 50,
+    "word_sha256": "a1c13d2dfc1de3a40c0afae3fb3372873eb7da70e12287d95083575e8da519a7",
+    "pdf_sha256": "e23a543cc02783d6836812eed8864963f893ff8c71f5641ff065fc38fa7353d4"
+  },
+  "pending": [
+    "R2.4.4 real 24-hour observation and ASVS gap review",
+    "R2.5 independent HTTPS hosting; no server purchased",
+    "Historical Windows original-data recovery unresolved"
+  ]
+}
