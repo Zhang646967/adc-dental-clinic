@@ -843,7 +843,7 @@
     "templates/care/corrections.html": "29ef6b3e8016adbb9a444e8397ecc38d12f7b9c001b05aa6895d17df5ebae05d",
     "templates/care/invoice.html": "fd2f684160aeb940657b93ccd7bef78671e41e459f391930396112e79f2d5511",
     "templates/care/notes.html": "0f664db274eefd280c63ba018710c675dad4a1c2f91f4fa8e4777600c1f8365a",
-    "templates/care/progress.html": "a74dd67d3f1625a9b2b80f1a94a2c150b4fa1f9dd6484c2ac30734408435af18",
+    "templates/care/progress.html": "764a69c9c6f53f9b40d5af29bdc684b528cece2d505b1c2371fa35c998b6b228",
     "templates/care/workspace.html": "da3fd8204fc025c62ce86eff016ca68c19449518315144214a9c3f73fb62c83b",
     "templates/components/form_errors.html": "4d75b42a3f429dc15a7a177bccf18733c25b09252a86e4eaddc1b159ec1e21c1",
     "templates/components/form_field.html": "c56fd7a44ae15246fca39fab5c584eb0b8474b1f50b1675e5795b0b34f108fec",
