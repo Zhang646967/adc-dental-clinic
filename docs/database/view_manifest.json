@@ -1,4 +1,50 @@
 {
+  "er_schedule_coordination": {
+    "title": "前台排班与调班责任",
+    "tables": 7,
+    "relationships": 6,
+    "note": "出诊是医师供给，预约与有效邀约是承诺；协调任务经slot_id归店，assignee_id可空，due_at历史可空。每个出诊至多一个活动任务；独立复核与具体预约变更另行办理。",
+    "columns": {
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_dentist": [
+        "id",
+        "employee_no"
+      ],
+      "adc_availability_slot": [
+        "id",
+        "clinic_id",
+        "dentist_id",
+        "starts_at",
+        "ends_at",
+        "booking_paused"
+      ],
+      "adc_visit": [
+        "id",
+        "availability_slot_id",
+        "status"
+      ],
+      "adc_wait_offer": [
+        "id",
+        "slot_id",
+        "state",
+        "expires_at"
+      ],
+      "adc_coordination_task": [
+        "id",
+        "slot_id",
+        "assignee_id",
+        "due_at",
+        "state"
+      ],
+      "adc_user": [
+        "id",
+        "username"
+      ]
+    }
+  },
   "er_booking": {
     "title": "预约与电话接待",
     "tables": 7,
@@ -199,7 +245,7 @@
     "passed": true,
     "tables": 69,
     "orm_tables": 68,
-    "columns_types_and_nullability_checked": 617,
+    "columns_types_and_nullability_checked": 618,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -211,7 +257,7 @@
     "orm_foreign_keys": 169,
     "sql_foreign_keys": 170,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "e034f68a7f9eb831f9d80c2747ff012d41e72ce566d2f6f1d8cb9197c442aba2",
+    "snapshot_sha256": "23a3f9b6fc7dbbdded464803b55d9dff03f3825a840fc3dbadf8ce4a290c2a07",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

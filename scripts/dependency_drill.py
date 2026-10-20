@@ -139,8 +139,8 @@ from scheduling.intake_services import inspect_intake,prepare_intake,confirm_int
 from coordination.task_services import inspect_task,prepare_task,confirm_task
 from coordination.task_rules import ACTION_REASONS
 from notifications.models import NotificationOutbox
-u=UserAccount.objects.get(username='capacity_manager_0')
-u._adc_workspace=WorkspaceContext.objects.filter(user=u,role='MANAGER').first()
+u=UserAccount.objects.get(username='capacity_front_0')
+u._adc_workspace=WorkspaceContext.objects.filter(user=u,role='FRONT_DESK').first()
 start=(timezone.now()+timedelta(days='''+str(int(self.marker.get('fixture_day',20)))+''')).replace(hour=8,minute=0,second=0,microsecond=0)+timedelta(hours='''+str(number*2)+''')
 slot=create_slot(actor=u,clinic_id=u._adc_workspace.clinic_id,dentist_id=Dentist.objects.get(employee_no='CAP-D0-1').pk,start=start,end=start+timedelta(hours=1))
 _,token=inspect_intake(actor=u,slot_id=slot.pk)

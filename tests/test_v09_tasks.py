@@ -39,7 +39,7 @@ class TaskWorkflowTests(FixtureMixin,TransactionTestCase):
         RoleAssignment.objects.create(user=self.manager2,role='MANAGER',scope_kind='CLINIC',clinic=self.a)
         self.manager2._adc_workspace=WorkspaceContext.objects.create(user=self.manager2,role='MANAGER',clinic=self.a,revision=1)
     def intake(self,action,actor=None):
-        actor=actor or self.manager
+        actor=actor or self.front
         _,s=inspect_intake(actor=actor,slot_id=self.slot1.pk)
         p=prepare_intake(actor=actor,slot_id=self.slot1.pk,state_token=s,action=action,reason='COORDINATION' if action=='pause' else 'READY_TO_REOPEN')
         return confirm_intake(actor=actor,slot_id=self.slot1.pk,proposal_token=p['proposal_token'],confirmed=True)
@@ -62,10 +62,10 @@ class TaskWorkflowTests(FixtureMixin,TransactionTestCase):
     def ready(self):return self.command(self.front,'submit',self.working())
     def add_offer(self):
         req=WaitRequest.objects.create(patient=self.p1,clinic=self.a,earliest=self.t,latest=self.t+timedelta(hours=4),created_by=self.front)
-        plan=SchedulePlan.objects.create(clinic=self.a,created_by=self.manager,
+        plan=SchedulePlan.objects.create(clinic=self.a,created_by=self.front,metadata={'scheduling_contract':SchedulePlan.CONTRACT},
             suggestions=[dict(request_id=req.pk,request_revision=0,slot_id=self.slot1.pk,
                 start=self.t.isoformat(),end=(self.t+timedelta(minutes=30)).isoformat(),intake_revision=0)])
-        publish_plan(actor=self.manager,plan_id=plan.pk)
+        publish_plan(actor=self.front,plan_id=plan.pk)
         return WaitOffer.objects.get(plan=plan)
     def test_open_preview_has_no_writes(self):
         self.pause_fixture();before=AuditEvent.objects.count();p=self.preview(self.manager,'open')
@@ -102,9 +102,9 @@ class TaskWorkflowTests(FixtureMixin,TransactionTestCase):
     def test_manager_cannot_claim(self):
         t=self.opened()
         with self.assertRaises(RuleError):self.preview(self.manager,'claim',t)
-    def test_front_cannot_create(self):
+    def test_front_can_create(self):
         self.pause_fixture()
-        with self.assertRaises(RuleError):self.preview(self.front,'open')
+        self.assertEqual(self.command(self.front,'open').created_by_id,self.front.pk)
     def test_other_front_cannot_report(self):
         t=self.working()
         with self.assertRaises(RuleError):self.preview(self.front2,'progress',t,reason='NEED_HELP')
@@ -280,7 +280,7 @@ class TaskWorkflowTests(FixtureMixin,TransactionTestCase):
         self.pause_fixture();c=WorkspaceClient();c.force_login(self.manager)
         url=reverse('coordination_task_open',args=[self.slot1.pk]);r=c.get(url);self.assertEqual(r.status_code,200)
         token=r.context['form'].initial['state_token']
-        p=c.post(url,dict(state_token=token,purpose='REPLACE',reason='PLAN_CHANGE'))
+        p=c.post(url,dict(state_token=token,purpose='REPLACE',reason='PLAN_CHANGE',due_at=timezone.localtime(timezone.now()+timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M')))
         self.assertEqual(p.status_code,200);self.assertContains(p,'尚未保存');self.assertEqual(CoordinationTask.objects.count(),0)
         r=c.post(reverse('coordination_task_confirm_new',args=[self.slot1.pk]),dict(proposal_token=p.context['preview']['proposal_token'],confirmed='on'))
         self.assertEqual(r.status_code,302);self.assertEqual(CoordinationTask.objects.count(),1)

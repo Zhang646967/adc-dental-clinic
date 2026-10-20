@@ -77,15 +77,16 @@ def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="",
 
 @business_errors
 @transaction.atomic
-def create_slot(*, actor, clinic_id, dentist_id, start, end):
-    lock_clinic_grant(actor, clinic_id, roles=("MANAGER",))
+def create_slot(*, actor, clinic_id, dentist_id, start, end, operation_id=None):
+    lock_clinic_grant(actor, clinic_id, roles=("FRONT_DESK",))
     validate_interval(start, end)
     if start < timezone.now():
         raise RuleError("新出诊安排必须位于未来。")
     clinic = Clinic.objects.get(pk=clinic_id, is_active=True)
     dentist = Dentist.objects.get(pk=dentist_id, is_active=True)
     obj = AvailabilitySlot.objects.create(clinic=clinic, dentist=dentist, starts_at=start, ends_at=end)
-    emit(actor, "SLOT_CREATED", obj, summary={"clinic_id": clinic_id, "dentist_id": dentist_id})
+    emit(actor, "SLOT_CREATED", obj, summary={"clinic_id": clinic_id, "dentist_id": dentist_id,
+        **({'operation':operation_id} if operation_id else {})})
     return obj
 
 @business_errors

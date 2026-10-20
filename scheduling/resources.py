@@ -59,15 +59,19 @@ class ResourceCalendar:
         if ignore_visit: claims = claims.exclude(plan__visit_id=ignore_visit)
         if ignore_offer: claims = claims.exclude(plan__offer_id=ignore_offer)
         self.busy = defaultdict(list)
+        self.eligible_dentists = {}
+        self.requirements = {}
         for asset_id, a, b in claims.values_list('asset_id', 'starts_at', 'ends_at'):
             self.busy[asset_id].append((a, b))
 
     def bundles(self, service, dentist_id, start, end, *, selected=None, limit=10, requirements=None):
         if not self.ready:
             raise RuleError('本店诊疗资源尚在核对中，暂不能新增预约；已有预约和邀约请通过协调入口办理。')
+        if service.pk not in self.eligible_dentists:
+            self.eligible_dentists[service.pk]=set(service.dentists.filter(is_active=True).values_list('pk',flat=True))
         if (not service.is_active or not service.department.is_active or
                 service.department.clinic_id != self.clinic_id or
-                not service.dentists.filter(pk=dentist_id, is_active=True).exists()):
+                dentist_id not in self.eligible_dentists[service.pk]):
             raise RuleError('该服务、科室或医师适配已变化，请重新选择服务和出诊。')
         if end - start != timedelta(minutes=service.duration_minutes):
             raise RuleError('预约起止时间必须与服务配置时长一致（已包含准备和周转）。')
@@ -77,7 +81,9 @@ class ResourceCalendar:
             return []
         blocks = [b for b in self.blocks if b.starts_at < end and start < b.ends_at]
         if any(b.department_id == service.department_id for b in blocks): return []
-        if requirements is None: requirements = list(service.requirements.order_by('category'))
+        if requirements is None:
+            if service.pk not in self.requirements:self.requirements[service.pk]=list(service.requirements.order_by('category'))
+            requirements=self.requirements[service.pk]
         def usable(binding, room):
             asset = binding.asset
             return (asset.state == 'IN_SERVICE' and (binding.shared or binding.room_id == room.pk) and

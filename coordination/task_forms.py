@@ -4,6 +4,8 @@ from coordination.task_rules import ACTION_REASONS, REASONS, PURPOSES, validate_
 class TaskChangeForm(forms.Form):
     state_token=forms.CharField(max_length=6000,widget=forms.HiddenInput)
     reason=forms.ChoiceField(label='本次操作依据')
+    due_at=forms.DateTimeField(label='下次跟进期限（北京时间）',required=False,
+        widget=forms.DateTimeInput(format='%Y-%m-%dT%H:%M',attrs={'type':'datetime-local'}))
     purpose=forms.ChoiceField(label='协调目标',required=False,choices=[('','请选择目标')]+list(PURPOSES.items()))
     target_kind=forms.ChoiceField(label='办理声明对应的对象',required=False,
         choices=[('','不指定对象，仅请求主管协助'),('visit','本出诊预约'),('offer','本出诊邀约')])
@@ -16,6 +18,8 @@ class TaskChangeForm(forms.Form):
         else: self.fields['purpose'].required=True
         if action!='progress':
             self.fields.pop('target_kind');self.fields.pop('target_id')
+        if action in ('open','claim','progress'):self.fields['due_at'].required=True
+        else:self.fields.pop('due_at')
     def clean(self):
         d=super().clean()
         if self.errors: return d

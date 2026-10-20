@@ -3,11 +3,15 @@
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh
 synthetic demo → continue development on `main`.
 
-Current documentation, 2026-10-18: [当前课程格式报告](../课程报告/README.md).
+Historical documentation, 2026-10-18: [当前课程格式报告](../课程报告/README.md).
 The application is now R2.2 progress/backlog observation at `02a9dbc`, retaining R1 financial
 evidence. [Mac application delivery](evidence_r22/delivery.json) verifies original data and
 configuration. R2.3 independent recovery tools are delivered separately; [R2.4.1 host events](R241_HOST_EVENTS.md) are now delivered; R2.4.2 dependency exercises and UX1 are [delivered](evidence_r242/README.md); equivalent capacity and true 24h/security are next.
 The migration instructions and dated evidence below retain their original scope.
+
+## Current B1.3.1 course update
+
+Front-desk availability/intake/waitlist planning, day/week observations and follow-up deadlines replace the former manager-owned daily workflow. Managers retain resource catalogues and independent review. [Business and execution evidence](evidence_b131/README.md) records the tested commit and local delivery separately. Preserve the original instance identity, data volume, private configuration and RC tag; use an encrypted backup and additive migrations before updating.
 
 ## Source baseline
 

@@ -32,7 +32,7 @@ ACTION_REASONS = {
     'return': ('REVIEW_RETURN','OWNER_UNAVAILABLE'), 'approve': ('REVIEW_PASSED',),
     'cancel': ('PLAN_WITHDRAWN','OTHER_HANDLING')}
 MANAGER_ACTIONS = frozenset(('open','return','approve','cancel'))
-FRONT_ACTIONS = frozenset(('claim','progress','release','submit'))
+FRONT_ACTIONS = frozenset(('open','claim','progress','release','submit'))
 
 class TaskError(ValueError):
     pass
@@ -54,7 +54,7 @@ def review_gate(slot, impact, now):
     if parse_time(slot['starts_at']) <= now:
         reasons.append('出诊已开始或已结束；本任务不处理临床停诊，请转受控现场流程。')
     if not slot['booking_paused']:
-        reasons.append('当前仍接收新增；请主管先暂停新增，再重新核对。')
+        reasons.append('当前仍接收新增；请前台先暂停新增，再重新核对。')
     if impact.too_many:
         reasons.append('关联记录超过完整核对上限，不能用当前页或部分结果结案。')
     if impact.anomalies:
@@ -147,7 +147,7 @@ def validate_step(task, *, action, actor_id, role, slot, impact, now,
 def validate_payload(value, *, proposal):
     keys = {'contract','kind','actor','role','context','context_revision','clinic',
             'slot','task','state'}
-    if proposal: keys |= {'operation','action','reason','purpose','target_kind','target_id'}
+    if proposal: keys |= {'operation','action','reason','purpose','target_kind','target_id','due_at'}
     if type(value) is not dict or set(value) != keys:
         raise TaskError('确认字段不完整或含未允许字段。')
     if value['contract'] != CONTRACT or value['kind'] != ('proposal' if proposal else 'state'):
@@ -166,6 +166,7 @@ def validate_payload(value, *, proposal):
     if type(value['state']) is not str or not re.fullmatch('[0-9a-f]{64}',value['state']):
         raise TaskError('状态摘要不正确。')
     if proposal:
+        if value['due_at'] is not None:parse_time(value['due_at'])
         validate_options(value['action'],value['reason'],purpose=value['purpose'],
             target_kind=value['target_kind'],target_id=value['target_id'])
         if (value['task'] is None) != (value['action'] == 'open'):

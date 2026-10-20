@@ -36,7 +36,7 @@ def listing(request):
     return render(request,'coordination/waitlist.html',{'rows':[entry_row(request,e) for e in page],
         'page':page,'may_join':request.workspace.role in ('PATIENT','FRONT_DESK'),
          'may_recycle':request.workspace.role in ('MANAGER','FRONT_DESK'),
-        'may_plan':request.workspace.role == 'MANAGER',
+        'may_plan':request.workspace.role == 'FRONT_DESK',
         'waiting_count':qs.filter(state='WAITING').count(),
         'expired_count':WaitOffer.objects.filter(request__in=qs,state='PENDING',expires_at__lte=timezone.now()).count(),
         'has_open_wait':qs.filter(state__in=('WAITING','OFFERED')).exists(),
@@ -91,7 +91,8 @@ def offer(request,pk):
 @login_required
 @require_http_methods(['GET','POST'])
 def plans(request):
-    cid=request.workspace.clinic_id
+    from scheduling.availability_services import require_availability_actor
+    cid=require_availability_actor(request.user).clinic_id
     form=ConfirmForm(request.POST or None)
     if request.method=='POST' and form.is_valid():
         try:p=services.create_plan(actor=request.user,clinic_id=cid)
@@ -103,7 +104,9 @@ def plans(request):
 @login_required
 @require_http_methods(['GET','POST'])
 def plan(request,pk):
-    p=get_object_or_404(SchedulePlan,pk=pk,clinic_id=request.workspace.clinic_id)
+    from scheduling.availability_services import require_availability_actor
+    cid=require_availability_actor(request.user).clinic_id
+    p=get_object_or_404(SchedulePlan,pk=pk,clinic_id=cid)
     form=ConfirmForm(request.POST or None)
     if request.method=='POST' and form.is_valid():
         try:services.publish_plan(actor=request.user,plan_id=p.pk)

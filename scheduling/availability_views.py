@@ -1,4 +1,4 @@
-"""Manager-only, clinic-scoped availability screens. No clinical/patient lists."""
+"""Front-desk-only, clinic-scoped availability screens. No clinical/patient lists."""
 from urllib.parse import urlencode
 from django.conf import settings
 from django.contrib import messages

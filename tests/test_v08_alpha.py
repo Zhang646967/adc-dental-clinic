@@ -89,18 +89,18 @@ class WindowFormTests(V07Fixture,TransactionTestCase):
 
 class WaitlistUXTests(V07Fixture,TransactionTestCase):
     def setUp(self):self.setup07()
-    def test_manager_has_navigation_cta(self):
-        self.join();self.login(self.manager,'MANAGER',self.a);r=self.c.get(reverse('waitlist'))
+    def test_frontdesk_has_navigation_cta(self):
+        self.join();self.login(self.front,'FRONT_DESK',self.a);r=self.c.get(reverse('waitlist'))
         self.assertContains(r,'前往排程建议');self.assertContains(r,reverse('schedule_plans'))
     def test_patient_has_no_manager_cta(self):
         self.join();self.login(self.pa,'PATIENT');self.assertNotContains(self.c.get(reverse('waitlist')),reverse('schedule_plans'))
-    def test_frontdesk_no_manager_cta(self):
-        self.join();self.login(self.front,'FRONT_DESK',self.a);self.assertNotContains(self.c.get(reverse('waitlist')),reverse('schedule_plans'))
+    def test_manager_no_scheduling_cta(self):
+        self.join();self.login(self.manager,'MANAGER',self.a);self.assertNotContains(self.c.get(reverse('waitlist')),reverse('schedule_plans'))
     def test_no_expired_offers_hide_recycle_form(self):
         self.login(self.manager,'MANAGER',self.a);r=self.c.get(reverse('waitlist'))
         self.assertNotContains(r,'action="'+reverse('expire_offers')+'"');self.assertContains(r,'没有待回收')
     def test_plan_expiry_visible(self):
-        e,p,o=self.offered();self.login(self.manager,'MANAGER',self.a)
+        e,p,o=self.offered();self.login(self.front,'FRONT_DESK',self.a)
         self.assertContains(self.c.get(reverse('schedule_plan',args=[p.pk])),'截止：')
     def test_accepted_offer_links_to_booking(self):
         e,p,o=self.offered();o=co.answer_offer(actor=self.pa,offer_id=o.pk,accept=True)

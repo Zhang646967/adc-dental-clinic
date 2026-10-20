@@ -1,0 +1,116 @@
+{
+  "scope": "Local synthetic loopback HTTP; per-service resource caps are not an independent cloud host",
+  "started_utc": "2026-10-20T16:37:18.850451+00:00",
+  "seconds": 1800,
+  "target_rps": 5,
+  "elapsed_seconds": 1800.002,
+  "wall_elapsed_seconds": 1799.998,
+  "max_offer_gap_seconds": 4.009,
+  "actual_rps": 5.0,
+  "distinct_users": 20,
+  "clinics": 5,
+  "offered": 9000,
+  "max_in_flight": 20,
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.349,
+    "max_seconds": 1.0037
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.343,
+    "max_seconds": 1.0037
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.371,
+    "max_seconds": 0.875
+  },
+  "by_role": {
+    "FRONT_DESK": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.355,
+      "max_seconds": 0.8548
+    },
+    "DENTIST": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.365,
+      "max_seconds": 0.875
+    },
+    "MANAGER": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.352,
+      "max_seconds": 1.0037
+    },
+    "FINANCE": {
+      "requests": 1350,
+      "failures": 0,
+      "p95_seconds": 0.282,
+      "max_seconds": 0.5543
+    },
+    "HQ": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.284,
+      "max_seconds": 0.6636
+    }
+  },
+  "by_clinic": {
+    "1": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.331,
+      "max_seconds": 0.5578
+    },
+    "2": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.343,
+      "max_seconds": 0.6912
+    },
+    "3": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.351,
+      "max_seconds": 0.7595
+    },
+    "4": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.354,
+      "max_seconds": 0.7323
+    },
+    "5": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.374,
+      "max_seconds": 1.0037
+    }
+  },
+  "http_passed": true,
+  "continuity_passed": true,
+  "passed": true,
+  "resource_samples": 148,
+  "observation_samples": 50,
+  "resource_failures": [],
+  "oom_events": 0,
+  "unexpected_restarts": 0,
+  "source_role_view_equivalence": "capacity-equivalence.json",
+  "database_assertions": 914,
+  "database_checked": true,
+  "seed_baseline": "private synthetic fixture manifest; 10004 patients, 10505 visits, 500 invoices and 500 receipts",
+  "clinical_browser_additions": "two independently checked invoices and receipts of CNY 100 each",
+  "full_run_original_row_hash_comparison": false,
+  "docker_event_query": {
+    "since": "2026-10-20T16:37:18.850451+00:00",
+    "until": "2026-10-20T17:07:18.848451+00:00",
+    "oom_restart_die_events": 0,
+    "scope": "Docker daemon retained events plus sampled OOM flags, restart counters and service/worker observations"
+  }
+}

@@ -36,8 +36,8 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 19. macOS source migration and a new synthetic local demo are authorized. Do not claim recovery of the reset Windows database. Backup import still requires a supplied trusted synthetic backup and the explicit import-copy flag. Existing logical migration tools stay unchanged.
 20. SU-27/28 is SYSADMIN/current-workspace-only bounded directory registration and qualification-record association, not clinical verification or a general CRUD editor. Keep code uniqueness, preview-before-save, password/confirmation checks, signed context binding, audit-cursor ABA protection and replay guards. No automatic accounts, grants, appointments, scheduling eligibility or history rewrites. No deletion or renaming.
 
-## Availability maintenance (alpha.6)
-- Only current-clinic MANAGER; an assigned role is not the active role.
+## Availability maintenance (B1.3.1; replaces alpha.6 ownership)
+- Only current-clinic FRONT_DESK maintains availability, intake and waitlist planning; an assigned role is not the active role. MANAGER maintains resource catalogues and independently reviews coordination.
 - Stop/replace only future effective source slots without protected visits or effective holds.
 - Never rewrite original interval/clinic/dentist or delete history; replacement uses a new row.
 - Maintain actor/context/grant/source-slot lock ordering and retain original exclusion constraints.
@@ -62,7 +62,7 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 
 
 ## Accountable coordination tasks (alpha.9)
-- SU34/35/36 add a workflow record only. No implicit slot pause/resume, appointment cancellation, offer answer, care change or patient notification.
+- Front desk can initiate a paused-slot task and records a future follow-up deadline. Existing historical deadlines remain absent. SU34/35/36 add a workflow record only. No implicit slot pause/resume, appointment cancellation, offer answer, care change or patient notification.
 - Only current-clinic MANAGER/FRONT_DESK. A frontdesk claims for themself; another frontdesk cannot update an owned task. A manager may requeue an unavailable owner's work without impersonation or expanding grants.
 - One active task per source slot, source identity is immutable, no deletion/terminal rewrite. Preserve new migration and all previous 14 migrations.
 - Start only after explicit pause on future effective source. Submit/approve only against full bounded current facts and a still-paused future source. Accepted old offers can still become protected visits.

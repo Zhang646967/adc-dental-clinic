@@ -6,7 +6,7 @@ changes a visit, offer, task, invoice, cost, permission or notification.
 from urllib.parse import urlencode
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.urls import reverse
 from django.utils import timezone
 
@@ -45,8 +45,8 @@ def _visit_item(visit, *, clinical=False, metadata=False):
 
 
 def _task_item(task):
-    return {'title': f'协调任务 #{task.pk}', 'detail': f'{task.slot.dentist.name} · {task.get_state_display()}',
-            'when': task.slot.starts_at, 'url': reverse('coordination_task_detail', args=[task.slot_id, task.pk]),
+    return {'title': f'协调任务 #{task.pk}', 'detail': f'{task.slot.dentist.name} · {task.get_state_display()}' + (' · 跟进逾期' if task.due_at and task.due_at<timezone.now() else ''),
+            'when': task.due_at or task.slot.starts_at, 'url': reverse('coordination_task_detail', args=[task.slot_id, task.pk]),
             'action': '核对任务'}
 
 
@@ -158,26 +158,26 @@ def workspace_worklist(actor):
                 tasks = CoordinationTask.objects.filter(slot__clinic_id=context.clinic_id).select_related('slot__dentist')
                 if role == 'FRONT_DESK':
                     groups.append(_group('my_tasks', '本人正在协调的任务',
-                        tasks.filter(state='IN_PROGRESS', assignee_id=actor.pk).order_by('slot__starts_at', 'pk'),
+                        tasks.filter(state='IN_PROGRESS', assignee_id=actor.pk).order_by(F('due_at').asc(nulls_last=True), 'pk'),
                         _task_item, _url('coordination_task_list', mode='mine'),
                         '先跟进本人任务；声明、预约变更与提交复核分别办理。'))
                     groups.append(_group('unclaimed', '本店待受理协调任务', tasks.filter(state='OPEN').order_by('slot__starts_at', 'pk'),
                         _task_item, reverse('coordination_task_list'), '核对后明确受理；浏览任务不代表承担责任。'))
-                else:
-                    groups.append(_group('review', '可独立复核的协调任务',
-                        tasks.filter(state='READY').exclude(submitted_by_id=actor.pk).order_by('submitted_at', 'pk'),
-                        _task_item, reverse('coordination_task_list'), '与提交人不同账号复核；通过后仍须单独办理出诊维护。'))
                     paused = AvailabilitySlot.objects.filter(clinic_id=context.clinic_id, is_active=True,
                         booking_paused=True, starts_at__gt=now).exclude(coordination_tasks__state__in=('OPEN', 'IN_PROGRESS', 'READY')).select_related('dentist').order_by('starts_at', 'pk')
                     groups.append(_group('paused', '暂停出诊尚待核对后续', paused,
                         lambda slot: {'title': f'出诊 #{slot.pk} · {slot.dentist.name}', 'detail': '当前没有进行中的协调任务',
                             'when': slot.starts_at, 'url': reverse('availability_detail', args=[slot.pk]), 'action': '核对维护或恢复'},
                         reverse('availability_list'), '暂停并不释放牙医时间；依实际业务选择协调、维护或恢复接收。'))
+                else:
+                    groups.append(_group('review', '可独立复核的协调任务',
+                        tasks.filter(state='READY').exclude(submitted_by_id=actor.pk).order_by('submitted_at', 'pk'),
+                        _task_item, reverse('coordination_task_list'), '与提交人不同账号复核；通过后由前台单独办理出诊维护。'))
                 entries = WaitRequest.objects.filter(clinic_id=context.clinic_id)
                 result['cards'].append({'label': '过期邀约待回收', 'count': WaitOffer.objects.filter(
                     request__in=entries, state='PENDING', expires_at__lte=now).count(),
                     'url': reverse('waitlist'), 'note': '到期已不占用时间；核对并回收后候补才能重新匹配。'})
-                if role == 'MANAGER':
+                if role == 'FRONT_DESK':
                     result['cards'].append({'label': '有效候补等待安排', 'count': entries.filter(
                         state='WAITING', latest__gt=now, patient__is_active=True).count(),
                         'url': reverse('schedule_plans'), 'note': '先核对偏好和可用时段，再明确生成、发布建议。'})

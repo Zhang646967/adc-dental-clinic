@@ -7,7 +7,9 @@ from equipment.models import EquipmentAsset
 from equipment.policies import manager_clinic
 from equipment.fees import source_id
 from scheduling.models import AvailabilitySlot
-from scheduling.availability_services import inspect_availability
+from scheduling.availability_services import observe_availability_locked
+from scheduling.coordination import lock_slots
+from django.db import transaction
 from coordination.models import CoordinationTask
 
 def maintenance_schedule(actor,asset_id,slot='',page='1'):
@@ -22,7 +24,11 @@ def maintenance_schedule(actor,asset_id,slot='',page='1'):
         if slot_id is not None:AvailabilitySlot.objects.get(pk=slot_id,clinic_id=clinic)
     data=dict(asset=asset,rows=rows,page_obj=page_obj,page_query=urlencode(dict(slot=slot)),selected=None)
     if slot_id is not None:
-        snapshot,_=inspect_availability(actor=actor,slot_id=slot_id)
+        with transaction.atomic():
+            manager_clinic(actor)
+            selected=AvailabilitySlot.objects.get(pk=slot_id,clinic_id=clinic)
+            locked=lock_slots([selected.pk])[selected.pk]
+            snapshot=observe_availability_locked(locked)
         data.update(selected=snapshot.slot,impact=snapshot.impact,blocked=snapshot.blocked,observed_at=snapshot.observed_at,
             task_eligible=snapshot.slot.is_active and snapshot.slot.starts_at>snapshot.observed_at and snapshot.slot.booking_paused)
         with reporting_snapshot():

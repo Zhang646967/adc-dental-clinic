@@ -1,0 +1,32 @@
+{
+  "scope": "B1.3.1 real browser keyboard filter submission and narrow-screen resource context",
+  "checks": [
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Read day filters",
+      "passed": true
+    },
+    {
+      "name": "Enter submits day/week filter",
+      "passed": true
+    },
+    {
+      "name": "Selected week retained in URL",
+      "passed": true
+    },
+    {
+      "name": "No horizontal overflow at 390px large text",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "passed": true
+}

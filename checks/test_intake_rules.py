@@ -135,9 +135,9 @@ class IntegrationContractTests(unittest.TestCase):
         s=self.source('portal/services.py');self.assertEqual(s.count('booking_paused=False'),2)
         self.assertIn('revision != slot.intake_revision',s)
     def test_front_slots_excludes_paused(self):self.assertIn('booking_paused=False',self.source('scheduling/selectors.py'))
-    def test_only_manager_routes(self):
+    def test_only_frontdesk_routes(self):
         s=self.source('workspaces/middleware.py')
-        self.assertIn("'intake_change':{'MANAGER'}",s);self.assertIn("'intake_confirm':{'MANAGER'}",s)
+        self.assertIn("'intake_change':{'FRONT_DESK'}",s);self.assertIn("'intake_confirm':{'FRONT_DESK'}",s)
     def test_pause_does_not_write_other_records(self):
         s=self.source('scheduling/intake_services.py')
         for name in ['Visit.objects','WaitOffer.objects','Patient.objects','Invoice.objects','WaitRequest.objects']:self.assertNotIn(name,s)
@@ -159,8 +159,8 @@ class IntegrationContractTests(unittest.TestCase):
             self.assertIn('method="post"',s);self.assertIn('尚未保存' if name=='intake_confirm.html' else '尚不保存',s)
     def test_manual_guide_real_route(self):
         from guidance.catalog import GUIDES,choose_guide
-        self.assertEqual(GUIDES['manager-intake'].roles,('MANAGER',))
-        self.assertEqual(choose_guide('MANAGER','overview','暂停接收新预约'),'manager-intake')
+        self.assertEqual(GUIDES['front-intake'].roles,('FRONT_DESK',))
+        self.assertEqual(choose_guide('FRONT_DESK','overview','暂停接收新预约'),'front-intake')
     def test_no_unexpected_dependencies(self):
         tree=ast.parse(self.source('scheduling/intake_rules.py'))
         imports=[n.module for n in ast.walk(tree) if isinstance(n,ast.ImportFrom)]

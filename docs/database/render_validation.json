@@ -1,4 +1,11 @@
 {
+  "er_schedule_coordination": {
+    "nodes": 7,
+    "edges": 6,
+    "width": 511,
+    "height": 508,
+    "minPrintedFontPt": 12.425753424657534
+  },
   "er_booking": {
     "nodes": 7,
     "edges": 8,

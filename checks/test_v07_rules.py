@@ -53,7 +53,7 @@ class WorkspaceGuideChecks(unittest.TestCase):
   self.assertTrue(all(s.route in names for g in GUIDES.values() for s in g.steps))
  def test_clinical_not_instruction_guide(self):self.assertIsNone(choose_guide('PATIENT','clinical'))
  def test_patient_cannot_get_manager_plan(self):self.assertIsNone(choose_guide('PATIENT','planning'))
- def test_manager_plan_is_role_specific(self):self.assertEqual(choose_guide('MANAGER','planning'),'manager-plan')
+ def test_frontdesk_plan_is_role_specific(self):self.assertEqual(choose_guide('FRONT_DESK','planning'),'front-plan')
  def test_switch_guide(self):self.assertEqual(choose_guide('DENTIST','help','切换身份'),'switch-role')
  def test_accessible_display_choice(self):self.assertEqual(choose_guide('PATIENT','accessibility'),'display-mode')
  def test_waitlist_keyword_before_cancellation(self):self.assertEqual(local_intent('退出候补','patient'),'waitlist')

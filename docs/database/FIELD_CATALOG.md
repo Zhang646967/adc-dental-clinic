@@ -28,6 +28,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_ai_usage_bucket_key_key`：`CREATE UNIQUE INDEX adc_ai_usage_bucket_key_key ON public.adc_ai_usage_bucket USING btree (key)`。
 - `adc_ai_usage_bucket_pkey`：`CREATE UNIQUE INDEX adc_ai_usage_bucket_pkey ON public.adc_ai_usage_bucket USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## adc_allergy
 
 模型：`registry.Allergy`。
@@ -49,6 +52,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_allergy_code_88ac287b_like`：`CREATE INDEX adc_allergy_code_88ac287b_like ON public.adc_allergy USING btree (code varchar_pattern_ops)`。
 - `adc_allergy_code_key`：`CREATE UNIQUE INDEX adc_allergy_code_key ON public.adc_allergy USING btree (code)`。
 - `adc_allergy_pkey`：`CREATE UNIQUE INDEX adc_allergy_pkey ON public.adc_allergy USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## adc_appointment_action_event
 
@@ -81,6 +87,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_appointment_action_event_improvement_id_8a168f3c`：`CREATE INDEX adc_appointment_action_event_improvement_id_8a168f3c ON public.adc_appointment_action_event USING btree (improvement_id)`。
 - `adc_appointment_action_event_operation_id_key`：`CREATE UNIQUE INDEX adc_appointment_action_event_operation_id_key ON public.adc_appointment_action_event USING btree (operation_id)`。
 - `adc_appointment_action_event_pkey`：`CREATE UNIQUE INDEX adc_appointment_action_event_pkey ON public.adc_appointment_action_event USING btree (id)`。
+
+跨表及历史触发器：
+
+- `appointment_history_immutable`：`CREATE TRIGGER appointment_history_immutable BEFORE DELETE OR UPDATE ON public.adc_appointment_action_event FOR EACH ROW EXECUTE FUNCTION adc_appointment_history_immutable()`。
 
 ## adc_appointment_improvement
 
@@ -135,6 +145,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_appointment_improvement_submitted_by_id_1766aec5`：`CREATE INDEX adc_appointment_improvement_submitted_by_id_1766aec5 ON public.adc_appointment_improvement USING btree (submitted_by_id)`。
 - `improve_clinic_state_due`：`CREATE INDEX improve_clinic_state_due ON public.adc_appointment_improvement USING btree (clinic_id, state, due_on)`。
 
+跨表及历史触发器：
+
+
 ## adc_assistant_event
 
 模型：`assistants.AssistantEvent`。
@@ -165,6 +178,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_assistant_event_pkey`：`CREATE UNIQUE INDEX adc_assistant_event_pkey ON public.adc_assistant_event USING btree (id)`。
 - `adc_assistant_event_request_id_key`：`CREATE UNIQUE INDEX adc_assistant_event_request_id_key ON public.adc_assistant_event USING btree (request_id)`。
 - `adc_assistant_event_user_id_32ab42ac`：`CREATE INDEX adc_assistant_event_user_id_32ab42ac ON public.adc_assistant_event USING btree (user_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_audit_event
 
@@ -199,6 +215,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_audit_event_visit_id_155d86a2`：`CREATE INDEX adc_audit_event_visit_id_155d86a2 ON public.adc_audit_event USING btree (visit_id)`。
 - `audit_subject_time_idx`：`CREATE INDEX audit_subject_time_idx ON public.adc_audit_event USING btree (subject_type, subject_key, recorded_at)`。
 
+跨表及历史触发器：
+
+- `audit_history_guard`：`CREATE TRIGGER audit_history_guard BEFORE DELETE OR UPDATE ON public.adc_audit_event FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
 ## adc_availability_slot
 
 模型：`scheduling.AvailabilitySlot`。
@@ -228,7 +248,12 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_availability_slot_clinic_id_f510d79d`：`CREATE INDEX adc_availability_slot_clinic_id_f510d79d ON public.adc_availability_slot USING btree (clinic_id)`。
 - `adc_availability_slot_dentist_id_cd3e15fc`：`CREATE INDEX adc_availability_slot_dentist_id_cd3e15fc ON public.adc_availability_slot USING btree (dentist_id)`。
 - `adc_availability_slot_pkey`：`CREATE UNIQUE INDEX adc_availability_slot_pkey ON public.adc_availability_slot USING btree (id)`。
+- `slot_clinic_start_idx`：`CREATE INDEX slot_clinic_start_idx ON public.adc_availability_slot USING btree (clinic_id, starts_at)`。
 - `slot_dentist_no_overlap`：`CREATE INDEX slot_dentist_no_overlap ON public.adc_availability_slot USING gist (tstzrange(starts_at, ends_at, '[)'::text), dentist_id) WHERE is_active`。
+
+跨表及历史触发器：
+
+- `slot_history_guard`：`CREATE TRIGGER slot_history_guard BEFORE UPDATE ON public.adc_availability_slot FOR EACH ROW EXECUTE FUNCTION adc_protect_slot()`。
 
 ## adc_booking_service
 
@@ -257,6 +282,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_booking_service_pkey`：`CREATE UNIQUE INDEX adc_booking_service_pkey ON public.adc_booking_service USING btree (id)`。
 - `service_department_code`：`CREATE UNIQUE INDEX service_department_code ON public.adc_booking_service USING btree (department_id, code)`。
 
+跨表及历史触发器：
+
+
 ## adc_booking_service_dentists
 
 模型：`scheduling.BookingService_dentists`；ORM生成的连接表。
@@ -280,6 +308,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_booking_service_dentists_bookingservice_id_cd23e050`：`CREATE INDEX adc_booking_service_dentists_bookingservice_id_cd23e050 ON public.adc_booking_service_dentists USING btree (bookingservice_id)`。
 - `adc_booking_service_dentists_dentist_id_51362169`：`CREATE INDEX adc_booking_service_dentists_dentist_id_51362169 ON public.adc_booking_service_dentists USING btree (dentist_id)`。
 - `adc_booking_service_dentists_pkey`：`CREATE UNIQUE INDEX adc_booking_service_dentists_pkey ON public.adc_booking_service_dentists USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## adc_cancellation_followup
 
@@ -317,6 +348,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_cancellation_followup_pkey`：`CREATE UNIQUE INDEX adc_cancellation_followup_pkey ON public.adc_cancellation_followup USING btree (id)`。
 - `adc_cancellation_followup_replacement_visit_id_d62bf875`：`CREATE INDEX adc_cancellation_followup_replacement_visit_id_d62bf875 ON public.adc_cancellation_followup USING btree (replacement_visit_id)`。
 - `adc_cancellation_followup_visit_id_key`：`CREATE UNIQUE INDEX adc_cancellation_followup_visit_id_key ON public.adc_cancellation_followup USING btree (visit_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_cash_entry
 
@@ -381,6 +415,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `cash_clinic_state_date_idx`：`CREATE INDEX cash_clinic_state_date_idx ON public.adc_cash_entry USING btree (clinic_id, state, occurred_on)`。
 - `cash_one_live_reversal`：`CREATE UNIQUE INDEX cash_one_live_reversal ON public.adc_cash_entry USING btree (reversal_of_id) WHERE ((reversal_of_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[])))`。
 
+跨表及历史触发器：
+
+- `aaa_daily_cash_lock`：`CREATE TRIGGER aaa_daily_cash_lock BEFORE INSERT OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_daily_cash_lock()`。
+- `cash_entry_history`：`CREATE TRIGGER cash_entry_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_cash_history_guard()`。
+
 ## adc_cash_evidence
 
 模型：`finance.CashEvidenceVersion`。
@@ -433,6 +472,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `cash_evidence_one_pending`：`CREATE UNIQUE INDEX cash_evidence_one_pending ON public.adc_cash_evidence USING btree (cash_entry_id) WHERE ((state)::text = 'PENDING'::text)`。
 - `cash_evidence_version_unique`：`CREATE UNIQUE INDEX cash_evidence_version_unique ON public.adc_cash_evidence USING btree (cash_entry_id, version)`。
 
+跨表及历史触发器：
+
+- `cash_evidence_history`：`CREATE TRIGGER cash_evidence_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_cash_evidence FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
+- `evidence_matches_current`：`CREATE CONSTRAINT TRIGGER evidence_matches_current AFTER INSERT OR UPDATE ON public.adc_cash_evidence DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_evidence_commit_guard()`。
+
 ## adc_clinic
 
 模型：`registry.Clinic`。
@@ -461,6 +505,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_clinic_clinic_code_key`：`CREATE UNIQUE INDEX adc_clinic_clinic_code_key ON public.adc_clinic USING btree (clinic_code)`。
 - `adc_clinic_pkey`：`CREATE UNIQUE INDEX adc_clinic_pkey ON public.adc_clinic USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## adc_coordination_task
 
 模型：`coordination.CoordinationTask`。
@@ -475,6 +522,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | state | character varying(12) | — | 否 | — |
 | created_by_id | bigint | FK | 否 | `adc_user.id` |
 | assignee_id | bigint | FK | 是 | `adc_user.id` |
+| due_at | timestamp with time zone | — | 是 | — |
 | submitted_by_id | bigint | FK | 是 | `adc_user.id` |
 | submitted_at | timestamp with time zone | — | 是 | — |
 | submitted_digest | character varying(64) | — | 否 | — |
@@ -514,6 +562,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_coordination_task_submitted_by_id_bc23e4df`：`CREATE INDEX adc_coordination_task_submitted_by_id_bc23e4df ON public.adc_coordination_task USING btree (submitted_by_id)`。
 - `coord_task_one_active_slot`：`CREATE UNIQUE INDEX coord_task_one_active_slot ON public.adc_coordination_task USING btree (slot_id) WHERE ((state)::text = ANY ((ARRAY['OPEN'::character varying, 'IN_PROGRESS'::character varying, 'READY'::character varying])::text[]))`。
 - `coord_task_queue_idx`：`CREATE INDEX coord_task_queue_idx ON public.adc_coordination_task USING btree (state, created_at)`。
+
+跨表及历史触发器：
+
+- `coordination_task_history_guard`：`CREATE TRIGGER coordination_task_history_guard BEFORE DELETE OR UPDATE ON public.adc_coordination_task FOR EACH ROW EXECUTE FUNCTION adc_protect_coord_task()`。
 
 ## adc_correction_request
 
@@ -559,6 +611,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_correction_request_reviewer_id_6ab618bf`：`CREATE INDEX adc_correction_request_reviewer_id_6ab618bf ON public.adc_correction_request USING btree (reviewer_id)`。
 - `adc_correction_request_visit_id_8b8fcf3e`：`CREATE INDEX adc_correction_request_visit_id_8b8fcf3e ON public.adc_correction_request USING btree (visit_id)`。
 - `one_open_correction_per_visit`：`CREATE UNIQUE INDEX one_open_correction_per_visit ON public.adc_correction_request USING btree (visit_id) WHERE ((status)::text = 'OPEN'::text)`。
+
+跨表及历史触发器：
+
+- `correction_history_guard`：`CREATE TRIGGER correction_history_guard BEFORE DELETE OR UPDATE ON public.adc_correction_request FOR EACH ROW EXECUTE FUNCTION adc_protect_closed_correction()`。
 
 ## adc_daily_close
 
@@ -612,6 +668,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `daily_queue_idx`：`CREATE INDEX daily_queue_idx ON public.adc_daily_close USING btree (state, business_date)`。
 - `daily_version_unique`：`CREATE UNIQUE INDEX daily_version_unique ON public.adc_daily_close USING btree (clinic_id, business_date, version)`。
 
+跨表及历史触发器：
+
+- `daily_close_history`：`CREATE TRIGGER daily_close_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_daily_close FOR EACH ROW EXECUTE FUNCTION adc_daily_close_guard()`。
+
 ## adc_dentist
 
 模型：`registry.Dentist`。
@@ -638,6 +698,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_dentist_employee_no_key`：`CREATE UNIQUE INDEX adc_dentist_employee_no_key ON public.adc_dentist USING btree (employee_no)`。
 - `adc_dentist_pkey`：`CREATE UNIQUE INDEX adc_dentist_pkey ON public.adc_dentist USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## adc_dentist_qualification
 
 模型：`registry.DentistQualification`。
@@ -663,6 +726,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_dentist_qualification_pkey`：`CREATE UNIQUE INDEX adc_dentist_qualification_pkey ON public.adc_dentist_qualification USING btree (id)`。
 - `adc_dentist_qualification_qualification_id_805becd7`：`CREATE INDEX adc_dentist_qualification_qualification_id_805becd7 ON public.adc_dentist_qualification USING btree (qualification_id)`。
 - `dentist_qualification_unique`：`CREATE UNIQUE INDEX dentist_qualification_unique ON public.adc_dentist_qualification USING btree (dentist_id, qualification_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_dentist_quarter_cost
 
@@ -700,6 +766,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_dentist_quarter_cost_quarter_id_e640de6c`：`CREATE INDEX adc_dentist_quarter_cost_quarter_id_e640de6c ON public.adc_dentist_quarter_cost USING btree (quarter_id)`。
 - `dentist_quarter_unique`：`CREATE UNIQUE INDEX dentist_quarter_unique ON public.adc_dentist_quarter_cost USING btree (quarter_id, dentist_id)`。
 
+跨表及历史触发器：
+
+
 ## adc_department
 
 模型：`scheduling.Department`。
@@ -724,6 +793,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_department_pkey`：`CREATE UNIQUE INDEX adc_department_pkey ON public.adc_department USING btree (id)`。
 - `department_clinic_code`：`CREATE UNIQUE INDEX department_clinic_code ON public.adc_department USING btree (clinic_id, code)`。
 
+跨表及历史触发器：
+
+
 ## adc_department_hours
 
 模型：`scheduling.DepartmentHours`。
@@ -747,6 +819,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `adc_department_hours_department_id_661a9154`：`CREATE INDEX adc_department_hours_department_id_661a9154 ON public.adc_department_hours USING btree (department_id)`。
 - `adc_department_hours_pkey`：`CREATE UNIQUE INDEX adc_department_hours_pkey ON public.adc_department_hours USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## adc_equipment_asset
 
@@ -787,6 +862,12 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_equipment_asset_pkey`：`CREATE UNIQUE INDEX adc_equipment_asset_pkey ON public.adc_equipment_asset USING btree (id)`。
 - `adc_equipment_asset_registered_by_id_94b16682`：`CREATE INDEX adc_equipment_asset_registered_by_id_94b16682 ON public.adc_equipment_asset USING btree (registered_by_id)`。
 - `equipment_code_unique`：`CREATE UNIQUE INDEX equipment_code_unique ON public.adc_equipment_asset USING btree (asset_code)`。
+
+跨表及历史触发器：
+
+- `equipment_asset_history`：`CREATE TRIGGER equipment_asset_history BEFORE DELETE OR UPDATE ON public.adc_equipment_asset FOR EACH ROW EXECUTE FUNCTION adc_equipment_asset_guard()`。
+- `equipment_final_consistency`：`CREATE CONSTRAINT TRIGGER equipment_final_consistency AFTER INSERT OR UPDATE ON public.adc_equipment_asset DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_equipment_final_guard()`。
+- `maintenance_asset_consistency`：`CREATE CONSTRAINT TRIGGER maintenance_asset_consistency AFTER INSERT OR UPDATE ON public.adc_equipment_asset DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_maintenance_final_guard()`。
 
 ## adc_equipment_cost_amendment
 
@@ -834,6 +915,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `equip_cost_event_state_idx`：`CREATE INDEX equip_cost_event_state_idx ON public.adc_equipment_cost_amendment USING btree (event_id, state, id)`。
 - `equip_cost_one_pending`：`CREATE UNIQUE INDEX equip_cost_one_pending ON public.adc_equipment_cost_amendment USING btree (event_id) WHERE ((state)::text = 'PENDING'::text)`。
 
+跨表及历史触发器：
+
+- `equipment_cost_history`：`CREATE TRIGGER equipment_cost_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_equipment_cost_amendment FOR EACH ROW EXECUTE FUNCTION adc_equipment_cost_guard()`。
+
 ## adc_equipment_event
 
 模型：`equipment.EquipmentEvent`。
@@ -874,6 +959,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_equipment_event_recorded_by_id_4c2c7ad0`：`CREATE INDEX adc_equipment_event_recorded_by_id_4c2c7ad0 ON public.adc_equipment_event USING btree (recorded_by_id)`。
 - `equipment_event_sequence_unique`：`CREATE UNIQUE INDEX equipment_event_sequence_unique ON public.adc_equipment_event USING btree (asset_id, sequence)`。
 
+跨表及历史触发器：
+
+- `equipment_event_history`：`CREATE TRIGGER equipment_event_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_equipment_event FOR EACH ROW EXECUTE FUNCTION adc_equipment_event_guard()`。
+
 ## adc_inbox_message
 
 模型：`notifications.InboxMessage`。
@@ -910,6 +999,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `inbox_event_grant_unique`：`CREATE UNIQUE INDEX inbox_event_grant_unique ON public.adc_inbox_message USING btree (event_id, grant_id)`。
 - `inbox_scope_idx`：`CREATE INDEX inbox_scope_idx ON public.adc_inbox_message USING btree (recipient_id, clinic_id, role, read_at)`。
 
+跨表及历史触发器：
+
+- `inbox_ownership_guard`：`CREATE TRIGGER inbox_ownership_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_inbox_message FOR EACH ROW EXECUTE FUNCTION adc_inbox_ownership()`。
+
 ## adc_invoice
 
 模型：`care.Invoice`。
@@ -941,6 +1034,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_invoice_invoice_no_key`：`CREATE UNIQUE INDEX adc_invoice_invoice_no_key ON public.adc_invoice USING btree (invoice_no)`。
 - `adc_invoice_pkey`：`CREATE UNIQUE INDEX adc_invoice_pkey ON public.adc_invoice USING btree (id)`。
 - `adc_invoice_visit_id_key`：`CREATE UNIQUE INDEX adc_invoice_visit_id_key ON public.adc_invoice USING btree (visit_id)`。
+
+跨表及历史触发器：
+
+- `adc_invoice_final_consistency`：`CREATE CONSTRAINT TRIGGER adc_invoice_final_consistency AFTER INSERT OR DELETE OR UPDATE ON public.adc_invoice DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_visit_final()`。
+- `invoice_correction_approval`：`CREATE CONSTRAINT TRIGGER invoice_correction_approval AFTER INSERT OR UPDATE ON public.adc_invoice DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_validate_correction_publication()`。
 
 ## adc_maintenance_action
 
@@ -975,6 +1073,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_maintenance_action_order_id_01035220`：`CREATE INDEX adc_maintenance_action_order_id_01035220 ON public.adc_maintenance_action USING btree (order_id)`。
 - `adc_maintenance_action_pkey`：`CREATE UNIQUE INDEX adc_maintenance_action_pkey ON public.adc_maintenance_action USING btree (id)`。
 - `maintenance_action_sequence`：`CREATE UNIQUE INDEX maintenance_action_sequence ON public.adc_maintenance_action USING btree (order_id, sequence)`。
+
+跨表及历史触发器：
+
+- `maintenance_action_history`：`CREATE TRIGGER maintenance_action_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_maintenance_action FOR EACH ROW EXECUTE FUNCTION adc_maintenance_action_guard()`。
 
 ## adc_maintenance_order
 
@@ -1035,6 +1137,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `maintenance_one_active`：`CREATE UNIQUE INDEX maintenance_one_active ON public.adc_maintenance_order USING btree (asset_id) WHERE ((state)::text = ANY ((ARRAY['ASSIGNED'::character varying, 'IN_PROGRESS'::character varying, 'READY'::character varying])::text[]))`。
 - `maintenance_queue_idx`：`CREATE INDEX maintenance_queue_idx ON public.adc_maintenance_order USING btree (state, due_on)`。
 
+跨表及历史触发器：
+
+- `maintenance_final_consistency`：`CREATE CONSTRAINT TRIGGER maintenance_final_consistency AFTER INSERT OR UPDATE ON public.adc_maintenance_order DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_maintenance_final_guard()`。
+- `maintenance_order_history`：`CREATE TRIGGER maintenance_order_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_maintenance_order FOR EACH ROW EXECUTE FUNCTION adc_maintenance_order_guard()`。
+
 ## adc_notification_outbox
 
 模型：`notifications.NotificationOutbox`。
@@ -1084,6 +1191,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_notification_outbox_task_id_fc8830c7`：`CREATE INDEX adc_notification_outbox_task_id_fc8830c7 ON public.adc_notification_outbox USING btree (task_id)`。
 - `notice_due_idx`：`CREATE INDEX notice_due_idx ON public.adc_notification_outbox USING btree (state, next_attempt_at, id)`。
 
+跨表及历史触发器：
+
+- `notice_identity_guard`：`CREATE TRIGGER notice_identity_guard BEFORE DELETE OR UPDATE ON public.adc_notification_outbox FOR EACH ROW EXECUTE FUNCTION adc_notice_immutable()`。
+
 ## adc_patient
 
 模型：`patients.Patient`。
@@ -1121,6 +1232,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_patient_pkey`：`CREATE UNIQUE INDEX adc_patient_pkey ON public.adc_patient USING btree (id)`。
 - `patient_phone_idx`：`CREATE INDEX patient_phone_idx ON public.adc_patient USING btree (phone)`。
 
+跨表及历史触发器：
+
+
 ## adc_patient_access
 
 模型：`portal.PatientAccess`。
@@ -1147,6 +1261,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_patient_access_pkey`：`CREATE UNIQUE INDEX adc_patient_access_pkey ON public.adc_patient_access USING btree (id)`。
 - `adc_patient_access_user_id_key`：`CREATE UNIQUE INDEX adc_patient_access_user_id_key ON public.adc_patient_access USING btree (user_id)`。
 
+跨表及历史触发器：
+
+
 ## adc_patient_allergy
 
 模型：`patients.PatientAllergy`。
@@ -1172,6 +1289,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_patient_allergy_patient_id_597e0d3b`：`CREATE INDEX adc_patient_allergy_patient_id_597e0d3b ON public.adc_patient_allergy USING btree (patient_id)`。
 - `adc_patient_allergy_pkey`：`CREATE UNIQUE INDEX adc_patient_allergy_pkey ON public.adc_patient_allergy USING btree (id)`。
 - `patient_allergy_unique`：`CREATE UNIQUE INDEX patient_allergy_unique ON public.adc_patient_allergy USING btree (patient_id, allergy_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_payment_account
 
@@ -1208,6 +1328,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_payment_account_pkey`：`CREATE UNIQUE INDEX adc_payment_account_pkey ON public.adc_payment_account USING btree (id)`。
 - `payment_account_code_unique`：`CREATE UNIQUE INDEX payment_account_code_unique ON public.adc_payment_account USING btree (clinic_id, code)`。
 
+跨表及历史触发器：
+
+- `payment_account_history`：`CREATE TRIGGER payment_account_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_payment_account FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
+
 ## adc_portal_booking_receipt
 
 模型：`portal.BookingReceipt`。
@@ -1235,6 +1359,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_portal_booking_receipt_pkey`：`CREATE UNIQUE INDEX adc_portal_booking_receipt_pkey ON public.adc_portal_booking_receipt USING btree (id)`。
 - `adc_portal_booking_receipt_visit_id_key`：`CREATE UNIQUE INDEX adc_portal_booking_receipt_visit_id_key ON public.adc_portal_booking_receipt USING btree (visit_id)`。
 
+跨表及历史触发器：
+
+
 ## adc_qualification
 
 模型：`registry.Qualification`。
@@ -1256,6 +1383,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_qualification_code_b4282804_like`：`CREATE INDEX adc_qualification_code_b4282804_like ON public.adc_qualification USING btree (code varchar_pattern_ops)`。
 - `adc_qualification_code_key`：`CREATE UNIQUE INDEX adc_qualification_code_key ON public.adc_qualification USING btree (code)`。
 - `adc_qualification_pkey`：`CREATE UNIQUE INDEX adc_qualification_pkey ON public.adc_qualification USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## adc_quarter
 
@@ -1287,6 +1417,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_quarter_pkey`：`CREATE UNIQUE INDEX adc_quarter_pkey ON public.adc_quarter USING btree (id)`。
 - `adc_quarter_roster_confirmed_by_id_6b58e2a2`：`CREATE INDEX adc_quarter_roster_confirmed_by_id_6b58e2a2 ON public.adc_quarter USING btree (roster_confirmed_by_id)`。
 - `quarter_unique`：`CREATE UNIQUE INDEX quarter_unique ON public.adc_quarter USING btree (year, quarter_no)`。
+
+跨表及历史触发器：
+
 
 ## adc_reception_case
 
@@ -1346,6 +1479,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_reception_case_wait_request_id_key`：`CREATE UNIQUE INDEX adc_reception_case_wait_request_id_key ON public.adc_reception_case USING btree (wait_request_id)`。
 - `reception_worklist`：`CREATE INDEX reception_worklist ON public.adc_reception_case USING btree (clinic_id, state, due_at)`。
 
+跨表及历史触发器：
+
+- `reception_case_history`：`CREATE TRIGGER reception_case_history BEFORE DELETE OR UPDATE ON public.adc_reception_case FOR EACH ROW EXECUTE FUNCTION adc_reception_case_guard()`。
+
 ## adc_reception_communication
 
 模型：`reception.ReceptionCommunication`。
@@ -1378,6 +1515,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_reception_communication_operation_id_key`：`CREATE UNIQUE INDEX adc_reception_communication_operation_id_key ON public.adc_reception_communication USING btree (operation_id)`。
 - `adc_reception_communication_pkey`：`CREATE UNIQUE INDEX adc_reception_communication_pkey ON public.adc_reception_communication USING btree (id)`。
 - `reception_history_sequence`：`CREATE UNIQUE INDEX reception_history_sequence ON public.adc_reception_communication USING btree (case_id, sequence)`。
+
+跨表及历史触发器：
+
+- `reception_communication_history`：`CREATE TRIGGER reception_communication_history BEFORE DELETE OR UPDATE ON public.adc_reception_communication FOR EACH ROW EXECUTE FUNCTION adc_reception_history_guard()`。
 
 ## adc_reconciliation_match
 
@@ -1426,6 +1567,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `reconciliation_cash_active`：`CREATE UNIQUE INDEX reconciliation_cash_active ON public.adc_reconciliation_match USING btree (cash_entry_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying])::text[]))`。
 - `reconciliation_line_active`：`CREATE UNIQUE INDEX reconciliation_line_active ON public.adc_reconciliation_match USING btree (line_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying])::text[]))`。
 
+跨表及历史触发器：
+
+- `reconciliation_history`：`CREATE TRIGGER reconciliation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
+
 ## adc_resource_action
 
 模型：`scheduling.ResourceAction`。
@@ -1454,6 +1599,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_resource_action_operation_id_key`：`CREATE UNIQUE INDEX adc_resource_action_operation_id_key ON public.adc_resource_action USING btree (operation_id)`。
 - `adc_resource_action_pkey`：`CREATE UNIQUE INDEX adc_resource_action_pkey ON public.adc_resource_action USING btree (id)`。
 
+跨表及历史触发器：
+
+- `resource_action_history`：`CREATE TRIGGER resource_action_history BEFORE DELETE OR UPDATE ON public.adc_resource_action FOR EACH ROW EXECUTE FUNCTION adc_resource_action_guard()`。
+
 ## adc_resource_binding
 
 模型：`scheduling.ResourceBinding`。
@@ -1479,6 +1628,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_resource_binding_asset_id_key`：`CREATE UNIQUE INDEX adc_resource_binding_asset_id_key ON public.adc_resource_binding USING btree (asset_id)`。
 - `adc_resource_binding_pkey`：`CREATE UNIQUE INDEX adc_resource_binding_pkey ON public.adc_resource_binding USING btree (id)`。
 - `adc_resource_binding_room_id_bb0065c6`：`CREATE INDEX adc_resource_binding_room_id_bb0065c6 ON public.adc_resource_binding USING btree (room_id)`。
+
+跨表及历史触发器：
+
+- `binding_business_relation`：`CREATE TRIGGER binding_business_relation BEFORE INSERT OR UPDATE ON public.adc_resource_binding FOR EACH ROW EXECUTE FUNCTION adc_scheduling_relation_guard()`。
 
 ## adc_resource_block
 
@@ -1518,6 +1671,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_resource_block_recorded_by_id_c801afa1`：`CREATE INDEX adc_resource_block_recorded_by_id_c801afa1 ON public.adc_resource_block USING btree (recorded_by_id)`。
 - `adc_resource_block_room_id_ee7b4a78`：`CREATE INDEX adc_resource_block_room_id_ee7b4a78 ON public.adc_resource_block USING btree (room_id)`。
 
+跨表及历史触发器：
+
+- `block_business_relation`：`CREATE TRIGGER block_business_relation BEFORE INSERT OR UPDATE ON public.adc_resource_block FOR EACH ROW EXECUTE FUNCTION adc_scheduling_relation_guard()`。
+
 ## adc_resource_claim
 
 模型：`scheduling.ResourceClaim`。
@@ -1553,6 +1710,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `resource_claim_lookup`：`CREATE INDEX resource_claim_lookup ON public.adc_resource_claim USING btree (asset_id, active, starts_at)`。
 - `resource_plan_asset_unique`：`CREATE UNIQUE INDEX resource_plan_asset_unique ON public.adc_resource_claim USING btree (plan_id, asset_id)`。
 
+跨表及历史触发器：
+
+- `claim_business_relation`：`CREATE TRIGGER claim_business_relation BEFORE INSERT OR UPDATE ON public.adc_resource_claim FOR EACH ROW EXECUTE FUNCTION adc_scheduling_relation_guard()`。
+- `resource_claim_history`：`CREATE TRIGGER resource_claim_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_resource_claim FOR EACH ROW EXECUTE FUNCTION adc_resource_claim_guard()`。
+
 ## adc_resource_coordination
 
 模型：`scheduling.ResourceCoordination`。
@@ -1584,6 +1746,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_resource_coordination_pkey`：`CREATE UNIQUE INDEX adc_resource_coordination_pkey ON public.adc_resource_coordination USING btree (id)`。
 - `adc_resource_coordination_plan_id_e22f1263`：`CREATE INDEX adc_resource_coordination_plan_id_e22f1263 ON public.adc_resource_coordination USING btree (plan_id)`。
 - `one_open_resource_issue`：`CREATE UNIQUE INDEX one_open_resource_issue ON public.adc_resource_coordination USING btree (plan_id, asset_id) WHERE ((state)::text = ANY ((ARRAY['OPEN'::character varying, 'CONTACT'::character varying])::text[]))`。
+
+跨表及历史触发器：
+
 
 ## adc_resource_plan
 
@@ -1625,6 +1790,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `offer_current_resource_plan`：`CREATE UNIQUE INDEX offer_current_resource_plan ON public.adc_resource_plan USING btree (offer_id) WHERE (is_current AND (offer_id IS NOT NULL))`。
 - `visit_current_resource_plan`：`CREATE UNIQUE INDEX visit_current_resource_plan ON public.adc_resource_plan USING btree (visit_id) WHERE (is_current AND (visit_id IS NOT NULL))`。
 
+跨表及历史触发器：
+
+- `plan_business_relation`：`CREATE TRIGGER plan_business_relation BEFORE INSERT OR UPDATE ON public.adc_resource_plan FOR EACH ROW EXECUTE FUNCTION adc_scheduling_relation_guard()`。
+- `resource_plan_history`：`CREATE TRIGGER resource_plan_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_resource_plan FOR EACH ROW EXECUTE FUNCTION adc_resource_plan_guard()`。
+
 ## adc_resource_policy
 
 模型：`scheduling.ResourcePolicy`。
@@ -1648,6 +1818,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `adc_resource_policy_clinic_id_key`：`CREATE UNIQUE INDEX adc_resource_policy_clinic_id_key ON public.adc_resource_policy USING btree (clinic_id)`。
 - `adc_resource_policy_pkey`：`CREATE UNIQUE INDEX adc_resource_policy_pkey ON public.adc_resource_policy USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## adc_role_assignment
 
@@ -1677,6 +1850,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `role_clinic_unique`：`CREATE UNIQUE INDEX role_clinic_unique ON public.adc_role_assignment USING btree (user_id, role, scope_kind, clinic_id) WHERE (clinic_id IS NOT NULL)`。
 - `role_noclinic_unique`：`CREATE UNIQUE INDEX role_noclinic_unique ON public.adc_role_assignment USING btree (user_id, role, scope_kind) WHERE (clinic_id IS NULL)`。
 
+跨表及历史触发器：
+
+
 ## adc_schedule_plan
 
 模型：`coordination.SchedulePlan`。
@@ -1704,6 +1880,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_schedule_plan_created_by_id_c94552ee`：`CREATE INDEX adc_schedule_plan_created_by_id_c94552ee ON public.adc_schedule_plan USING btree (created_by_id)`。
 - `adc_schedule_plan_pkey`：`CREATE UNIQUE INDEX adc_schedule_plan_pkey ON public.adc_schedule_plan USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## adc_service_requirement
 
 模型：`scheduling.ServiceRequirement`。
@@ -1728,6 +1907,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_service_requirement_pkey`：`CREATE UNIQUE INDEX adc_service_requirement_pkey ON public.adc_service_requirement USING btree (id)`。
 - `adc_service_requirement_service_id_8a7429d0`：`CREATE INDEX adc_service_requirement_service_id_8a7429d0 ON public.adc_service_requirement USING btree (service_id)`。
 - `service_category_unique`：`CREATE UNIQUE INDEX service_category_unique ON public.adc_service_requirement USING btree (service_id, category)`。
+
+跨表及历史触发器：
+
 
 ## adc_statement_batch
 
@@ -1767,6 +1949,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_statement_batch_operation_id_key`：`CREATE UNIQUE INDEX adc_statement_batch_operation_id_key ON public.adc_statement_batch USING btree (operation_id)`。
 - `adc_statement_batch_pkey`：`CREATE UNIQUE INDEX adc_statement_batch_pkey ON public.adc_statement_batch USING btree (id)`。
 
+跨表及历史触发器：
+
+- `statement_batch_history`：`CREATE TRIGGER statement_batch_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_batch FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
+- `statement_import_complete`：`CREATE CONSTRAINT TRIGGER statement_import_complete AFTER INSERT OR UPDATE ON public.adc_statement_batch DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_evidence_commit_guard()`。
+
 ## adc_statement_line
 
 模型：`finance.StatementLine`。
@@ -1799,6 +1986,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_statement_line_pkey`：`CREATE UNIQUE INDEX adc_statement_line_pkey ON public.adc_statement_line USING btree (id)`。
 - `statement_reference_idx`：`CREATE INDEX statement_reference_idx ON public.adc_statement_line USING btree (account_id, reference)`。
 - `statement_transaction_unique`：`CREATE UNIQUE INDEX statement_transaction_unique ON public.adc_statement_line USING btree (account_id, transaction_id)`。
+
+跨表及历史触发器：
+
+- `statement_line_history`：`CREATE TRIGGER statement_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_line FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
 
 ## adc_treatment_record
 
@@ -1841,6 +2032,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_treatment_record_treatment_type_id_979e40f2`：`CREATE INDEX adc_treatment_record_treatment_type_id_979e40f2 ON public.adc_treatment_record USING btree (treatment_type_id)`。
 - `record_line_unique`：`CREATE UNIQUE INDEX record_line_unique ON public.adc_treatment_record USING btree (record_version_id, line_no)`。
 
+跨表及历史触发器：
+
+- `adc_treatment_record_final_consistency`：`CREATE CONSTRAINT TRIGGER adc_treatment_record_final_consistency AFTER INSERT OR DELETE OR UPDATE ON public.adc_treatment_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_visit_final()`。
+- `published_line_guard`：`CREATE TRIGGER published_line_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_treatment_record FOR EACH ROW EXECUTE FUNCTION adc_protect_published_line()`。
+
 ## adc_treatment_room
 
 模型：`scheduling.TreatmentRoom`。
@@ -1864,6 +2060,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_treatment_room_department_id_ac8fc9cf`：`CREATE INDEX adc_treatment_room_department_id_ac8fc9cf ON public.adc_treatment_room USING btree (department_id)`。
 - `adc_treatment_room_pkey`：`CREATE UNIQUE INDEX adc_treatment_room_pkey ON public.adc_treatment_room USING btree (id)`。
 - `room_department_code`：`CREATE UNIQUE INDEX room_department_code ON public.adc_treatment_room USING btree (department_id, code)`。
+
+跨表及历史触发器：
+
 
 ## adc_treatment_type
 
@@ -1889,6 +2088,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_treatment_type_code_11978108_like`：`CREATE INDEX adc_treatment_type_code_11978108_like ON public.adc_treatment_type USING btree (code varchar_pattern_ops)`。
 - `adc_treatment_type_code_key`：`CREATE UNIQUE INDEX adc_treatment_type_code_key ON public.adc_treatment_type USING btree (code)`。
 - `adc_treatment_type_pkey`：`CREATE UNIQUE INDEX adc_treatment_type_pkey ON public.adc_treatment_type USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## adc_user
 
@@ -1923,6 +2125,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_user_username_11f8da29_like`：`CREATE INDEX adc_user_username_11f8da29_like ON public.adc_user USING btree (username varchar_pattern_ops)`。
 - `adc_user_username_key`：`CREATE UNIQUE INDEX adc_user_username_key ON public.adc_user USING btree (username)`。
 
+跨表及历史触发器：
+
+
 ## adc_user_groups
 
 模型：`accounts.UserAccount_groups`；ORM生成的连接表。
@@ -1947,6 +2152,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_user_groups_useraccount_id_cdfc6c5e`：`CREATE INDEX adc_user_groups_useraccount_id_cdfc6c5e ON public.adc_user_groups USING btree (useraccount_id)`。
 - `adc_user_groups_useraccount_id_group_id_a85dd0fa_uniq`：`CREATE UNIQUE INDEX adc_user_groups_useraccount_id_group_id_a85dd0fa_uniq ON public.adc_user_groups USING btree (useraccount_id, group_id)`。
 
+跨表及历史触发器：
+
+
 ## adc_user_user_permissions
 
 模型：`accounts.UserAccount_user_permissions`；ORM生成的连接表。
@@ -1970,6 +2178,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_user_user_permissions_permission_id_ce7f8ae8`：`CREATE INDEX adc_user_user_permissions_permission_id_ce7f8ae8 ON public.adc_user_user_permissions USING btree (permission_id)`。
 - `adc_user_user_permissions_pkey`：`CREATE UNIQUE INDEX adc_user_user_permissions_pkey ON public.adc_user_user_permissions USING btree (id)`。
 - `adc_user_user_permissions_useraccount_id_8d0bb1bb`：`CREATE INDEX adc_user_user_permissions_useraccount_id_8d0bb1bb ON public.adc_user_user_permissions USING btree (useraccount_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_visit
 
@@ -2033,6 +2244,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `visit_dentist_no_overlap`：`CREATE INDEX visit_dentist_no_overlap ON public.adc_visit USING gist (tstzrange(scheduled_start, scheduled_end, '[)'::text), dentist_id) WHERE ((status)::text = ANY ((ARRAY['SCHEDULED'::character varying, 'CHECKED_IN'::character varying, 'COMPLETED'::character varying, 'CLOSED_NO_TREATMENT'::character varying])::text[]))`。
 - `visit_patient_no_overlap`：`CREATE INDEX visit_patient_no_overlap ON public.adc_visit USING gist (tstzrange(scheduled_start, scheduled_end, '[)'::text), patient_id) WHERE ((status)::text = ANY ((ARRAY['SCHEDULED'::character varying, 'CHECKED_IN'::character varying, 'COMPLETED'::character varying, 'CLOSED_NO_TREATMENT'::character varying])::text[]))`。
 
+跨表及历史触发器：
+
+- `adc_visit_final_consistency`：`CREATE CONSTRAINT TRIGGER adc_visit_final_consistency AFTER INSERT OR DELETE OR UPDATE ON public.adc_visit DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_visit_final()`。
+- `visit_slot_guard`：`CREATE TRIGGER visit_slot_guard BEFORE INSERT OR UPDATE ON public.adc_visit FOR EACH ROW EXECUTE FUNCTION adc_check_visit_slot()`。
+
 ## adc_visit_record_version
 
 模型：`care.VisitRecordVersion`。
@@ -2090,6 +2306,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `version_id_visit_unique`：`CREATE UNIQUE INDEX version_id_visit_unique ON public.adc_visit_record_version USING btree (id, visit_id)`。
 - `visit_revision_unique`：`CREATE UNIQUE INDEX visit_revision_unique ON public.adc_visit_record_version USING btree (visit_id, revision_no)`。
 
+跨表及历史触发器：
+
+- `adc_visit_record_version_final_consistency`：`CREATE CONSTRAINT TRIGGER adc_visit_record_version_final_consistency AFTER INSERT OR DELETE OR UPDATE ON public.adc_visit_record_version DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_visit_final()`。
+- `published_version_guard`：`CREATE TRIGGER published_version_guard BEFORE DELETE OR UPDATE ON public.adc_visit_record_version FOR EACH ROW EXECUTE FUNCTION adc_protect_published_version()`。
+
 ## adc_visit_request
 
 模型：`scheduling.VisitRequest`。
@@ -2112,6 +2333,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_visit_request_pkey`：`CREATE UNIQUE INDEX adc_visit_request_pkey ON public.adc_visit_request USING btree (id)`。
 - `adc_visit_request_treatment_type_id_a9447146`：`CREATE INDEX adc_visit_request_treatment_type_id_a9447146 ON public.adc_visit_request USING btree (treatment_type_id)`。
 - `adc_visit_request_visit_id_a2459cbd`：`CREATE INDEX adc_visit_request_visit_id_a2459cbd ON public.adc_visit_request USING btree (visit_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_wait_offer
 
@@ -2152,6 +2376,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_wait_offer_visit_id_key`：`CREATE UNIQUE INDEX adc_wait_offer_visit_id_key ON public.adc_wait_offer USING btree (visit_id)`。
 - `offer_expiry_idx`：`CREATE INDEX offer_expiry_idx ON public.adc_wait_offer USING btree (state, expires_at)`。
 - `offer_one_pending_request`：`CREATE UNIQUE INDEX offer_one_pending_request ON public.adc_wait_offer USING btree (request_id) WHERE ((state)::text = 'PENDING'::text)`。
+- `offer_slot_state_exp_idx`：`CREATE INDEX offer_slot_state_exp_idx ON public.adc_wait_offer USING btree (slot_id, state, expires_at)`。
+
+跨表及历史触发器：
+
 
 ## adc_wait_request
 
@@ -2193,6 +2421,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_wait_request_service_id_4da6945a`：`CREATE INDEX adc_wait_request_service_id_4da6945a ON public.adc_wait_request USING btree (service_id)`。
 - `wait_one_open_patient`：`CREATE UNIQUE INDEX wait_one_open_patient ON public.adc_wait_request USING btree (patient_id) WHERE ((state)::text = ANY ((ARRAY['WAITING'::character varying, 'OFFERED'::character varying])::text[]))`。
 
+跨表及历史触发器：
+
+
 ## adc_workspace_context
 
 模型：`workspaces.WorkspaceContext`。
@@ -2220,6 +2451,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_workspace_context_pkey`：`CREATE UNIQUE INDEX adc_workspace_context_pkey ON public.adc_workspace_context USING btree (id)`。
 - `adc_workspace_context_user_id_88d56c99`：`CREATE INDEX adc_workspace_context_user_id_88d56c99 ON public.adc_workspace_context USING btree (user_id)`。
 
+跨表及历史触发器：
+
+
 ## auth_group
 
 模型：`auth.Group`。
@@ -2240,6 +2474,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `auth_group_name_key`：`CREATE UNIQUE INDEX auth_group_name_key ON public.auth_group USING btree (name)`。
 - `auth_group_pkey`：`CREATE UNIQUE INDEX auth_group_pkey ON public.auth_group USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## auth_group_permissions
 
 模型：`auth.Group_permissions`；ORM生成的连接表。
@@ -2250,7 +2487,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | group_id | integer | FK | 否 | `auth_group.id` |
 | permission_id | integer | FK | 否 | `auth_permission.id` |
 
-待设计核对：`id`的模型类型为`integer`，实际数据库类型为`bigint`。本目录按实际类型记录；未执行缩窄字段或改写历史。
+兼容性记录：`id`的模型类型为`integer`，实际数据库类型为`bigint`。本目录按实际类型记录；未执行缩窄字段或改写历史。
 
 数据库约束：
 
@@ -2265,6 +2502,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `auth_group_permissions_group_id_permission_id_0cd325b0_uniq`：`CREATE UNIQUE INDEX auth_group_permissions_group_id_permission_id_0cd325b0_uniq ON public.auth_group_permissions USING btree (group_id, permission_id)`。
 - `auth_group_permissions_permission_id_84c5c92e`：`CREATE INDEX auth_group_permissions_permission_id_84c5c92e ON public.auth_group_permissions USING btree (permission_id)`。
 - `auth_group_permissions_pkey`：`CREATE UNIQUE INDEX auth_group_permissions_pkey ON public.auth_group_permissions USING btree (id)`。
+
+跨表及历史触发器：
+
 
 ## auth_permission
 
@@ -2289,6 +2529,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `auth_permission_content_type_id_codename_01ab375a_uniq`：`CREATE UNIQUE INDEX auth_permission_content_type_id_codename_01ab375a_uniq ON public.auth_permission USING btree (content_type_id, codename)`。
 - `auth_permission_pkey`：`CREATE UNIQUE INDEX auth_permission_pkey ON public.auth_permission USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## django_content_type
 
 模型：`contenttypes.ContentType`。
@@ -2309,6 +2552,9 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `django_content_type_app_label_model_76bd3d3b_uniq`：`CREATE UNIQUE INDEX django_content_type_app_label_model_76bd3d3b_uniq ON public.django_content_type USING btree (app_label, model)`。
 - `django_content_type_pkey`：`CREATE UNIQUE INDEX django_content_type_pkey ON public.django_content_type USING btree (id)`。
 
+跨表及历史触发器：
+
+
 ## django_session
 
 模型：`sessions.Session`。
@@ -2328,3 +2574,5 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `django_session_expire_date_a5c62663`：`CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING btree (expire_date)`。
 - `django_session_pkey`：`CREATE UNIQUE INDEX django_session_pkey ON public.django_session USING btree (session_key)`。
 - `django_session_session_key_c0390e0f_like`：`CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session USING btree (session_key varchar_pattern_ops)`。
+
+跨表及历史触发器：

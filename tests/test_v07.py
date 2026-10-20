@@ -30,7 +30,7 @@ class V07Fixture(V04Fixture):
  def join(self,actor=None,**kwargs):
   return co.join_waitlist(actor=actor or self.pa,clinic_id=self.a.pk,earliest=self.t,latest=self.t+timedelta(hours=2),**kwargs)
  def offered(self):
-  e=self.join();p=co.create_plan(actor=self.manager,clinic_id=self.a.pk);co.publish_plan(actor=self.manager,plan_id=p.pk)
+  e=self.join();p=co.create_plan(actor=self.front,clinic_id=self.a.pk);co.publish_plan(actor=self.front,plan_id=p.pk)
   return e,p,WaitOffer.objects.get(request=e)
 
 class WorkspaceAcceptanceTests(V07Fixture,TransactionTestCase):
@@ -54,7 +54,7 @@ class WorkspaceAcceptanceTests(V07Fixture,TransactionTestCase):
  def test_ungranted_clinic_post_denied(self):
   self.login(self.manager,'MANAGER');self.assertEqual(self.post('activate_clinic',{'clinic':self.b.pk}).status_code,403)
  def test_select_clinic_and_dashboard(self):
-  self.login(self.manager,'MANAGER',self.a);self.assertEqual(self.ctx().clinic_id,self.a.pk);self.assertContains(self.c.get(reverse('manager_home')),'排程建议')
+  self.login(self.manager,'MANAGER',self.a);self.assertEqual(self.ctx().clinic_id,self.a.pk);self.assertContains(self.c.get(reverse('manager_home')),'协调任务')
  def test_role_switch_clears_scope(self):
   self.manager.dentist=self.d2;self.manager.save(update_fields=['dentist']);RoleAssignment.objects.create(user=self.manager,role='DENTIST',scope_kind='SELF_DENTIST')
   self.login(self.manager,'MANAGER',self.a);self.post('activate_role',{'role':'DENTIST'});self.assertIsNone(self.ctx().clinic_id)
@@ -68,7 +68,7 @@ class WorkspaceAcceptanceTests(V07Fixture,TransactionTestCase):
   self.login(self.front,'FRONT_DESK',self.a);old=token_for(self.ctx());self.post('activate_clinic',{'clinic':self.b.pk})
   r=self.c.post(reverse('waitlist_join'),{'workspace_token':old});self.assertEqual(r.status_code,409);self.assertFalse(WaitRequest.objects.exists())
  def test_forged_context_rejected(self):
-  self.login(self.manager,'MANAGER',self.a);self.assertEqual(self.c.post(reverse('schedule_plans'),{'confirmed':'on','workspace_token':'forged'}).status_code,409)
+  self.login(self.front,'FRONT_DESK',self.a);self.assertEqual(self.c.post(reverse('schedule_plans'),{'confirmed':'on','workspace_token':'forged'}).status_code,409)
  def test_technical_role_has_no_business_bypass(self):
   self.login(self.tech,'SYSADMIN');self.assertEqual(self.c.get(reverse('patients')).status_code,403)
  def test_patient_not_auto_promoted_to_staff(self):
@@ -118,7 +118,7 @@ class WaitlistAcceptanceTests(V07Fixture,TransactionTestCase):
  def test_future_range_required(self):
   with self.assertRaises(RuleError):co.join_waitlist(actor=self.pa,clinic_id=self.a.pk,earliest=timezone.now()-timedelta(hours=1),latest=self.t)
  def test_plan_is_advisory(self):
-  self.join();p=co.create_plan(actor=self.manager,clinic_id=self.a.pk);self.assertTrue(p.suggestions);self.assertFalse(Visit.objects.exists());self.assertFalse(WaitOffer.objects.exists())
+  self.join();p=co.create_plan(actor=self.front,clinic_id=self.a.pk);self.assertTrue(p.suggestions);self.assertFalse(Visit.objects.exists());self.assertFalse(WaitOffer.objects.exists())
  def test_publish_creates_hold_not_booking(self):
   e,p,o=self.offered();self.assertEqual(o.state,'PENDING');self.assertFalse(Visit.objects.exists())
  def test_accept_creates_one_booking_and_is_idempotent(self):
@@ -150,20 +150,20 @@ class WaitlistAcceptanceTests(V07Fixture,TransactionTestCase):
   e,p,o=self.offered();WaitOffer.objects.filter(pk=o.pk).update(expires_at=timezone.now()-timedelta(seconds=1))
   self.assertEqual(co.expire_clinic_offers(actor=self.manager,clinic_id=self.a.pk),1);e.refresh_from_db();self.assertEqual(e.state,'WAITING')
  def test_old_plan_refuses_publish(self):
-  self.join();p=co.create_plan(actor=self.manager,clinic_id=self.a.pk);SchedulePlan.objects.filter(pk=p.pk).update(created_at=timezone.now()-timedelta(minutes=16))
-  with self.assertRaises(RuleError):co.publish_plan(actor=self.manager,plan_id=p.pk)
+  self.join();p=co.create_plan(actor=self.front,clinic_id=self.a.pk);SchedulePlan.objects.filter(pk=p.pk).update(created_at=timezone.now()-timedelta(minutes=16))
+  with self.assertRaises(RuleError):co.publish_plan(actor=self.front,plan_id=p.pk)
  def test_changed_request_refuses_publish(self):
-  e=self.join();p=co.create_plan(actor=self.manager,clinic_id=self.a.pk);co.withdraw(actor=self.pa,entry_id=e.pk)
-  with self.assertRaises(RuleError):co.publish_plan(actor=self.manager,plan_id=p.pk)
+  e=self.join();p=co.create_plan(actor=self.front,clinic_id=self.a.pk);co.withdraw(actor=self.pa,entry_id=e.pk)
+  with self.assertRaises(RuleError):co.publish_plan(actor=self.front,plan_id=p.pk)
   self.assertFalse(WaitOffer.objects.exists())
  def test_conflicting_booking_blocks_publish(self):
-  self.join();p=co.create_plan(actor=self.manager,clinic_id=self.a.pk);row=p.suggestions[0]
+  self.join();p=co.create_plan(actor=self.front,clinic_id=self.a.pk);row=p.suggestions[0]
   from datetime import datetime
   self.book(patient_no=self.p2.patient_no,start=datetime.fromisoformat(row['start']),end=datetime.fromisoformat(row['end']))
-  with self.assertRaises(RuleError):co.publish_plan(actor=self.manager,plan_id=p.pk)
+  with self.assertRaises(RuleError):co.publish_plan(actor=self.front,plan_id=p.pk)
   self.assertFalse(WaitOffer.objects.exists())
  def test_publication_retry_does_not_duplicate(self):
-  e,p,o=self.offered();co.publish_plan(actor=self.manager,plan_id=p.pk);self.assertEqual(WaitOffer.objects.count(),1)
+  e,p,o=self.offered();co.publish_plan(actor=self.front,plan_id=p.pk);self.assertEqual(WaitOffer.objects.count(),1)
  def test_audit_failure_rolls_back_offer_acceptance(self):
   e,p,o=self.offered()
   with patch('coordination.services.emit',side_effect=RuntimeError('synthetic failure')):
@@ -177,5 +177,5 @@ class WaitlistAcceptanceTests(V07Fixture,TransactionTestCase):
  def test_manager_page_does_not_display_patient_name(self):
   self.join();self.login(self.manager,'MANAGER',self.a);r=self.c.get(reverse('waitlist'));self.assertEqual(r.status_code,200);self.assertNotContains(r,self.p1.name)
  def test_plan_and_offer_templates_render(self):
-  e,p,o=self.offered();self.login(self.manager,'MANAGER',self.a);self.assertEqual(self.c.get(reverse('schedule_plan',args=[p.pk])).status_code,200)
+  e,p,o=self.offered();self.login(self.front,'FRONT_DESK',self.a);self.assertEqual(self.c.get(reverse('schedule_plan',args=[p.pk])).status_code,200)
   self.login(self.pa,'PATIENT');self.assertEqual(self.c.get(reverse('wait_offer',args=[o.pk])).status_code,200)

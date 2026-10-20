@@ -143,14 +143,14 @@ class AvailabilitySourceContracts(unittest.TestCase):
     def test_scope_first_before_source_lock(self):
         n=next(n for n in self.tree.body if isinstance(n,ast.FunctionDef) and n.name=='_owned_slot')
         s=ast.unparse(n);self.assertLess(s.index('clinic_id=ctx.clinic_id'),s.index('lock_slots('))
-    def test_new_routes_are_manager_only(self):
+    def test_new_routes_are_frontdesk_only(self):
         from adc_core.route_manifest import named_routes
         routes=named_routes(ROOT)
         for key in ('availability_list','availability_detail','availability_change','availability_confirm'):self.assertIn(key,routes)
         tree=ast.parse((ROOT/'workspaces/middleware.py').read_text())
         node=next(n.value for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='ROUTES' for t in n.targets))
         mapping={ast.literal_eval(k):ast.literal_eval(v) for k,v in zip(node.keys,node.values) if ast.literal_eval(k).startswith('availability_')}
-        for key in ('availability_list','availability_detail','availability_change','availability_confirm'):self.assertEqual(mapping[key],{'MANAGER'})
+        for key in ('availability_list','availability_detail','availability_change','availability_confirm'):self.assertEqual(mapping[key],{'FRONT_DESK'})
     def test_confirm_requires_post_and_csrf_present(self):
         s=(ROOT/'scheduling/availability_views.py').read_text();self.assertIn('@require_POST\ndef confirm',s)
         t=(ROOT/'templates/scheduling/availability_confirm.html').read_text();self.assertIn('{% csrf_token %}',t);self.assertIn('{% workspace_token %}',t)
@@ -161,7 +161,7 @@ class AvailabilitySourceContracts(unittest.TestCase):
             self.assertFalse(allowed_in_read_only('POST',name))
     def test_guide_is_role_scoped(self):
         from guidance.catalog import GUIDES
-        self.assertEqual(GUIDES['manager-availability'].roles,('MANAGER',))
+        self.assertEqual(GUIDES['front-availability'].roles,('FRONT_DESK',))
     def test_service_snapshot_contains_no_patient_fields(self):
         for word in ('patient_no','phone','email','chief_complaint','date_of_birth'):self.assertNotIn(word,self.source)
 

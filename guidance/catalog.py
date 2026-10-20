@@ -1,6 +1,6 @@
 """Versioned, reviewed page/button directory; LLMs cannot invent these steps."""
 from dataclasses import dataclass
-VERSION='NAV-09A10.1'
+VERSION='NAV-B131.1'
 @dataclass(frozen=True)
 class Step:
     title:str
@@ -66,11 +66,11 @@ GUIDES={g.key:g for g in [
  S('打开账单','从本人已完成就诊打开当前结算单，选择更正入口。','visits'),
  S('填写依据','本版仅支持一条原治疗行的数量或单价更正。核对差异并填写事实依据。','corrections'),
  S('等待独立审核','提交后查看“我的更正申请”。财务批准前，原版仍为当前版本。','corrections'))),
- Guide('manager-slots','查看并新增本店出诊安排',('MANAGER',),'身份不变，诊所须先选择正确。',(
- S('确认当前诊所','页首核对诊所；需要换店时使用“切换诊所”，不要手动篡改表单编号。','manager_home'),
- S('新增出诊','在“出诊安排”点击“新增出诊安排”，选择医生、开始和结束时间，然后点击“保存出诊安排”。','slot_create','#id_dentist'),
- S('核对后续可用性','成功提示说明已保存；预约仍会再次检查患者与医生的时段冲突。本版不含椅位和交通时间优化。','manager_home'))),
- Guide('manager-plan','给本店候补生成排程建议',('MANAGER',),'建议不是已发布邀约，邀约也不是已确认预约。',(
+ Guide('front-slots','查看并新增本店出诊安排',('FRONT_DESK',),'身份不变，诊所须先选择正确。',(
+ S('确认当前诊所','页首核对诊所；需要换店时使用“切换诊所”，不要手动篡改表单编号。','frontdesk_home'),
+ S('新增出诊','在“出诊安排”点击“新增出诊安排”，选择医生、开始和结束时间，先预览，核对医师工作安排后明确确认。','slot_create','#id_dentist'),
+ S('核对后续可用性','成功提示说明已保存；预约仍会再次检查患者与医生的时段冲突。在日周排班核对预约、资源及维修影响。','schedule_calendar'))),
+ Guide('front-plan','给本店候补生成排程建议',('FRONT_DESK',),'建议不是已发布邀约，邀约也不是已确认预约。',(
  S('检查候补','先在“本店候补”查看时间偏好；有过期邀约时，明确确认后点击“回收过期邀约”。','waitlist'),
  S('生成建议','进入“排程建议”，阅读求解范围并勾选确认，点击“生成候选安排”。','schedule_plans'),
  S('核对方案','查看医生、时间、未安排数量和算法边界；合适时勾选确认并点击“发布限时邀约”。','schedule_plans'),
@@ -110,9 +110,9 @@ GUIDES['front-wait']=Guide('front-wait','帮助患者办理候补',('FRONT_DESK'
 
 ROLE_INTENT={
  'PATIENT':{'book':'patient-book','appointments':'patient-appointments','cancel':'patient-cancel','bill':'patient-bill','waitlist':'patient-wait'},
- 'FRONT_DESK':{'appointment_policy':'front-change','overview':'front-arrive','waitlist':'front-wait','book':'front-create'},
+ 'FRONT_DESK':{'appointment_policy':'front-change','overview':'front-arrive','waitlist':'front-wait','book':'front-create','planning':'front-plan'},
  'DENTIST':{'care_help':'doctor-care','billing_policy':'doctor-close','correction':'doctor-correct','overview':'doctor-care'},
- 'MANAGER':{'overview':'manager-ops','appointment_policy':'manager-slots','waitlist':'manager-plan','planning':'manager-plan'},
+ 'MANAGER':{'overview':'manager-ops','planning':'manager-task'},
  'FINANCE':{'billing_policy':'finance-quarter','finance':'finance-quarter','correction':'finance-review','overview':'finance-quarter'},
  'HQ':{'overview':'hq-overview','finance':'hq-overview'},
 }
@@ -120,7 +120,7 @@ ROLE_INTENT={
 def choose_guide(role,intent,message=''):
     if intent=='clinical':return None
     if role in ('MANAGER','FRONT_DESK') and any(x in message for x in ('协调任务','受理任务','任务复核','办理声明')):return 'manager-task' if role=='MANAGER' else 'front-task'
-    if role=='MANAGER' and any(x in message for x in ('暂停新增','暂停接收','恢复接收','停止接收','停止新增')):return 'manager-intake'
+    if role=='FRONT_DESK' and any(x in message for x in ('暂停新增','暂停接收','恢复接收','停止接收','停止新增')):return 'front-intake'
     if role=='FRONT_DESK' and '出诊' in message and any(w in message for w in ('协调','停用','停诊','调整','改期','关联')):return 'front-coordination'
     if intent=='clinical':return None
     if role=='FRONT_DESK' and any(x in message for x in ('更正','修改','更新','换')) and any(x in message for x in ('联络','联系电话','联系信息','手机号','电话','邮箱','账单地址','紧急联系人')):return 'front-contact'
@@ -144,7 +144,7 @@ GUIDES['technical-directory'] = Guide('technical-directory','登记诊所或牙�
  S('先查重复','在“基础资料目录”选择诊所、牙医或资格类别，按编码或名称查找原记录；不要换编号重复登记。','directory_home'),
  S('填写并预览','选择“登记新的…”填写资料及登记依据，点击“预览并核对（尚不保存）”。','directory_home'),
  S('确认再保存','在核对页检查目标和全部资料，输入自己的技术管理密码并明确确认后保存；不确定结果时先按原编码查询。','directory_home'),
- S('分别办理后续事项','登记牙医后可核对资格关联；需要登录的账号另去“账号与授权”创建并授权，出诊由主管另行安排。','account_manage_list')))
+ S('分别办理后续事项','登记牙医后可核对资格关联；需要登录的账号另去“账号与授权”创建并授权，出诊由前台另行安排。','account_manage_list')))
 GUIDES['technical-qualifications'] = Guide('technical-qualifications','登记或更正牙医资格关联',('SYSADMIN',),
  '关联只是登记事实，不判断执业许可、治疗适配性或有效期。',(
  S('定位牙医','在基础资料目录查到具体牙医，核对员工编号与姓名，查看资格关联记录。','directory_home'),
@@ -152,38 +152,38 @@ GUIDES['technical-qualifications'] = Guide('technical-qualifications','登记或
  S('核对并确认','预览页明确当前关联和拟执行动作，输入自己的技术管理密码后确认。旧页失效时重新读取，不覆盖他人修改。','directory_home'),
  S('核对当前状态','成功后查看同一牙医的关联状态；没有自动取消预约、停用账号或认证专业资格。','directory_home')))
 
-GUIDES['manager-availability']=Guide('manager-availability','调整或停用未来空闲出诊',('MANAGER',),
+GUIDES['front-availability']=Guide('front-availability','调整或停用未来空闲出诊',('FRONT_DESK',),
  '只处理当前店未开始且无有效占用的时段；不代患者改期，不删除历史。',(
  S('核对原安排','进入“出诊安排”，找到牙医和完整日期，点击“查看安排与影响”。','availability_list'),
- S('查看是否存在占用','有预约、接诊或有效邀约时，按详情中的协调步骤处理，再重新读取；主管不能借此取消预约。','availability_list'),
+ S('查看是否存在占用','有预约、接诊或有效邀约时，按详情中的协调步骤处理，再重新读取；不能借此自动取消预约。','availability_list'),
  S('填写拟变更','满足条件时选择“调整未来空闲时段”或“停用原时段”，填写时间与依据，点击“预览影响，尚不保存”。','availability_list'),
  S('人工确认并查结果','核对新旧时间与历史保护提示，明确确认后从原记录查看状态和替代编号；回执未知时先查询，不重复新增。','availability_list')))
 
 GUIDES['front-coordination']=Guide('front-coordination','按出诊协调预约与邀约',('FRONT_DESK',),
-    '先核实主管计划与患者意思；只读列表不暂停接收预约，不表示停诊任务已经下达。',(
-    S('确定原出诊','在当前诊所输入主管提供的出诊编号，核对牙医与原时间。','front_coordination_list'),
+    '先核实调班依据与患者意思；只读列表不暂停接收预约，不表示停诊任务已经下达。',(
+    S('确定原出诊','在当前诊所输入原出诊编号，核对牙医与原时间。','front_coordination_list'),
     S('分类核对关联','进入所选出诊，分别查看已预约、受保护接诊及邀约期限；查询未知不等于没有预约。','front_coordination_list'),
     S('进入原业务入口','需要变更时逐条进入原预约或邀约详情，核实患者意思后明确确认；不取消受保护接诊。','front_coordination_list'),
-    S('返回并重新核对','用页面中的返回链接读取原出诊当前状态。无阻断时请主管另行核验，不能把旧查询结果当作停用许可。','front_coordination_list'),
+    S('返回并重新核对','用页面中的返回链接读取原出诊当前状态。无阻断时进入出诊维护另行核验，不能把旧查询结果当作停用许可。','front_coordination_list'),
 ))
 
-GUIDES['manager-intake']=Guide('manager-intake','暂停或恢复出诊新增接收',('MANAGER',),
+GUIDES['front-intake']=Guide('front-intake','暂停或恢复出诊新增接收',('FRONT_DESK',),
  '停止新增不等于取消已有预约；有效邀约仍可在原期限内确认。',(
- S('找到本店出诊','在主管工作台选择诊所，进入“出诊安排”，核对出诊编号、牙医、日期和当前接收状态。','availability_list'),
+ S('找到本店出诊','在前台工作台选择诊所，进入“出诊安排”，核对出诊编号、牙医、日期和当前接收状态。','availability_list'),
  S('选择接收控制','在出诊详情选择“核对并暂停新增”或“核对并恢复接收”，选择已核对的依据。','availability_list'),
  S('预览后明确确认','逐项核对拟保存状态、既有预约与有效邀约保留规则；预览尚未保存，只有亲自确认才生效。','availability_list'),
  S('核对并分别协调','返回原出诊确认当前状态。前台仍在自己的工作台按原流程协调；有效邀约接受后仍会增加关联预约，最终维护需再次核验。','availability_list')))
 
 
-GUIDES['manager-task']=Guide('manager-task','发起和复核出诊协调任务',('MANAGER',),
- '任务不改变预约或接收状态；复核人与提交复核的前台必须为不同账号。',(
- S('核对并暂停新增','从本店出诊核对计划，确需协调时先明确暂停新增，再发起协调任务。有效旧邀约仍可确认。','availability_list'),
- S('明确发起任务','在原出诊详情进入“发起协调任务”，选择停用或调整目标和依据；预览后亲自确认。','availability_list'),
- S('独立复核或退回','从“协调任务”查看当前关联事实。仍有预约、有效邀约或事实变化时，不可通过复核；原受理人无法继续时可退回队列。','coordination_task_list'),
- S('分别办理出诊维护','协调复核通过不等于原出诊已停用；返回原出诊，通过原维护命令重新检查并确认。撤销任务也不会自动恢复接收。','availability_list')))
+GUIDES['manager-task']=Guide('manager-task','独立复核出诊协调任务',('MANAGER',),
+ '复核人与提交前台须为不同账号；复核不改变预约和出诊安排。',(
+ S('查找待复核任务','从主管工作台进入协调任务，核对本店、协调目标及当前办理事实。','coordination_task_list'),
+ S('独立复核或退回','仍有预约、有效邀约或事实变化时不能通过；原受理人无法继续时可退回队列。','coordination_task_list'),
+ S('核对复核结果','确认任务状态；通过后由前台重新检查并另行维护原出诊。','coordination_task_list')))
 GUIDES['front-task']=Guide('front-task','受理并办理出诊协调任务',('FRONT_DESK',),
  '先明确本人责任，再按原流程处理；办理声明不证明患者同意。',(
- S('受理准确任务','在当前店“协调任务”核对原出诊和主管目标，选择受理、核对依据并确认。','coordination_task_list'),
+ S('发起协调与期限','从原出诊明确暂停新增，核对调班依据后发起任务并填写下次跟进期限。','availability_list'),
+ S('受理准确任务','在当前店“协调任务”核对原出诊和调班目标，选择受理、核对依据并确认。','coordination_task_list'),
  S('按原流程协调','进入任务中的关联出诊入口，核实患者意思，分别进入原预约或邀约页面。不得为清空排班取消受保护接诊。','front_coordination_list'),
  S('记录本人声明','返回任务，记录明确对象的联络或办理声明。不要填写姓名、电话或病史；声明不会改变原预约记录。','coordination_task_list'),
  S('核对后提交复核','只有重新查询未发现阻断且仍暂停新增时，才能提交主管复核；需要交接时退回待受理队列，不直接标记已完成。','coordination_task_list')))

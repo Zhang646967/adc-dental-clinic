@@ -34,27 +34,28 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
     def setUp(self):
         self.assertEqual(connection.vendor,'postgresql')
         self.make_fixture()
-        self.manager._adc_workspace=WorkspaceContext.objects.create(user=self.manager,role='MANAGER',clinic=self.a,revision=1)
+        self.scheduler=self.front2
+        self.scheduler._adc_workspace=WorkspaceContext.objects.create(user=self.scheduler,role='FRONT_DESK',clinic=self.a,revision=1)
         self.other=UserAccount.objects.create_user(username='intake_manager2',password='test-only-pass-123')
-        RoleAssignment.objects.create(user=self.other,role='MANAGER',scope_kind='CLINIC',clinic=self.a)
-        self.other._adc_workspace=WorkspaceContext.objects.create(user=self.other,role='MANAGER',clinic=self.a,revision=1)
+        RoleAssignment.objects.create(user=self.other,role='FRONT_DESK',scope_kind='CLINIC',clinic=self.a)
+        self.other._adc_workspace=WorkspaceContext.objects.create(user=self.other,role='FRONT_DESK',clinic=self.a,revision=1)
         self.pa=UserAccount.objects.create_user(username='intake_patient',password='test-only-pass-123')
         self.access=PatientAccess.objects.create(user=self.pa,patient=self.p1)
     def preview(self,action='pause',actor=None,slot=None):
-        actor=actor or self.manager;slot=slot or self.slot1
+        actor=actor or self.scheduler;slot=slot or self.slot1
         _,token=inspect_intake(actor=actor,slot_id=slot.pk)
         return prepare_intake(actor=actor,slot_id=slot.pk,state_token=token,action=action,
             reason='COORDINATION' if action=='pause' else 'READY_TO_REOPEN')
     def commit(self,p,actor=None,confirmed=True):
-        return confirm_intake(actor=actor or self.manager,slot_id=p['slot_id'],proposal_token=p['proposal_token'],confirmed=confirmed)
+        return confirm_intake(actor=actor or self.scheduler,slot_id=p['slot_id'],proposal_token=p['proposal_token'],confirmed=confirmed)
     def pause(self):return self.commit(self.preview())
     def plan(self,patient=None,slot=None):
         slot=slot or self.slot1;patient=patient or self.p1
         e=WaitRequest.objects.create(patient=patient,clinic=self.a,earliest=self.t,latest=self.t+timedelta(hours=4),created_by=self.front)
-        return SchedulePlan.objects.create(clinic=self.a,created_by=self.manager,suggestions=[dict(request_id=e.pk,request_revision=e.revision,
+        return SchedulePlan.objects.create(clinic=self.a,created_by=self.scheduler,metadata={'scheduling_contract':SchedulePlan.CONTRACT},suggestions=[dict(request_id=e.pk,request_revision=e.revision,
             slot_id=slot.pk,start=self.t.isoformat(),end=(self.t+timedelta(minutes=30)).isoformat(),intake_revision=0)])
     def offer(self):
-        p=self.plan();publish_plan(actor=self.manager,plan_id=p.pk)
+        p=self.plan();publish_plan(actor=self.scheduler,plan_id=p.pk)
         return WaitOffer.objects.get(plan=p)
     def counts(self):
         return tuple(m.objects.count() for m in (AvailabilitySlot,Visit,WaitOffer,WaitRequest,Invoice,AuditEvent))
@@ -125,18 +126,18 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
         second=answer_offer(actor=self.front,offer_id=o.pk,accept=True)
         self.assertEqual(first.visit_id,second.visit_id);self.assertEqual(Visit.objects.count(),1)
     def test_new_plan_excludes_paused(self):
-        self.plan();self.pause();plan=create_plan(actor=self.manager,clinic_id=self.a.pk)
+        self.plan();self.pause();plan=create_plan(actor=self.scheduler,clinic_id=self.a.pk)
         self.assertFalse(any(r['slot_id']==self.slot1.pk for r in plan.suggestions))
     def test_unpublished_draft_rejected_after_pause(self):
         p=self.plan();self.pause()
-        with self.assertRaises(RuleError):publish_plan(actor=self.manager,plan_id=p.pk)
+        with self.assertRaises(RuleError):publish_plan(actor=self.scheduler,plan_id=p.pk)
         p.refresh_from_db();self.assertEqual(p.state,'DRAFT');self.assertFalse(WaitOffer.objects.exists())
     def test_unpublished_draft_rejected_after_pause_resume(self):
         p=self.plan();self.pause();self.commit(self.preview('resume'))
-        with self.assertRaises(RuleError):publish_plan(actor=self.manager,plan_id=p.pk)
+        with self.assertRaises(RuleError):publish_plan(actor=self.scheduler,plan_id=p.pk)
     def test_published_plan_retry_returns_original(self):
-        p=self.plan();publish_plan(actor=self.manager,plan_id=p.pk);self.pause()
-        self.assertEqual(publish_plan(actor=self.manager,plan_id=p.pk).pk,p.pk)
+        p=self.plan();publish_plan(actor=self.scheduler,plan_id=p.pk);self.pause()
+        self.assertEqual(publish_plan(actor=self.scheduler,plan_id=p.pk).pk,p.pk)
         self.assertEqual(WaitOffer.objects.filter(plan=p).count(),1)
     def test_batch_publish_with_paused_slot_rolls_back_all(self):
         p=self.plan();e=WaitRequest.objects.create(patient=self.p2,clinic=self.a,earliest=self.t,latest=self.t+timedelta(hours=4),created_by=self.front)
@@ -146,14 +147,14 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
         p.suggestions.append(dict(request_id=e.pk,request_revision=0,slot_id=other.pk,start=other.starts_at.isoformat(),
             end=(other.starts_at+timedelta(minutes=30)).isoformat(),intake_revision=0));p.save()
         self.commit(self.preview(slot=other))
-        with self.assertRaises(RuleError):publish_plan(actor=self.manager,plan_id=p.pk)
+        with self.assertRaises(RuleError):publish_plan(actor=self.scheduler,plan_id=p.pk)
         self.assertFalse(WaitOffer.objects.exists());self.assertFalse(WaitRequest.objects.filter(state='OFFERED').exists())
     def test_waitlist_registration_is_still_allowed(self):
         self.pause();e=join_waitlist(actor=self.front,clinic_id=self.a.pk,patient_no=self.p1.patient_no,earliest=self.t,latest=self.t+timedelta(hours=4))
         self.assertEqual(e.state,'WAITING')
     def test_reschedule_out_allowed(self):
         v=self.book();self.pause()
-        dest=create_slot(actor=self.manager,clinic_id=self.a.pk,dentist_id=self.d1.pk,start=self.t+timedelta(days=1),end=self.t+timedelta(days=1,hours=2))
+        dest=create_slot(actor=self.scheduler,clinic_id=self.a.pk,dentist_id=self.d1.pk,start=self.t+timedelta(days=1),end=self.t+timedelta(days=1,hours=2))
         new=reschedule(actor=self.front,visit_id=v.pk,expected_version=0,new_slot_id=dest.pk,start=dest.starts_at,end=dest.starts_at+timedelta(minutes=30),reason='合成同意改期')
         self.assertEqual(new.availability_slot_id,dest.pk)
     def test_reschedule_into_paused_rolls_back_source(self):
@@ -170,17 +171,17 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
         self.pause();self.commit(self.preview('resume'));self.book();self.assertEqual(Visit.objects.count(),1)
     def test_pause_keeps_original_resource_constraint(self):
         self.pause()
-        with self.assertRaises(RuleError):create_slot(actor=self.manager,clinic_id=self.a.pk,dentist_id=self.d1.pk,start=self.t,end=self.t+timedelta(hours=1))
+        with self.assertRaises(RuleError):create_slot(actor=self.scheduler,clinic_id=self.a.pk,dentist_id=self.d1.pk,start=self.t,end=self.t+timedelta(hours=1))
     def test_empty_paused_replacement_preserves_pause(self):
-        self.pause();_,token=inspect_availability(actor=self.manager,slot_id=self.slot1.pk)
-        p=prepare_availability_change(actor=self.manager,slot_id=self.slot1.pk,state_token=token,action='replace',reason_code='PLAN_CHANGED',start=self.t+timedelta(days=1),end=self.t+timedelta(days=1,hours=2))
-        r=confirm_availability_change(actor=self.manager,slot_id=self.slot1.pk,proposal_token=p.proposal_token,confirmed=True)
+        self.pause();_,token=inspect_availability(actor=self.scheduler,slot_id=self.slot1.pk)
+        p=prepare_availability_change(actor=self.scheduler,slot_id=self.slot1.pk,state_token=token,action='replace',reason_code='PLAN_CHANGED',start=self.t+timedelta(days=1),end=self.t+timedelta(days=1,hours=2))
+        r=confirm_availability_change(actor=self.scheduler,slot_id=self.slot1.pk,proposal_token=p.proposal_token,confirmed=True)
         self.assertTrue(AvailabilitySlot.objects.get(pk=r.replacement_id).booking_paused)
     def test_old_maintenance_preview_rejected_after_intake_changes(self):
-        _,token=inspect_availability(actor=self.manager,slot_id=self.slot1.pk)
-        p=prepare_availability_change(actor=self.manager,slot_id=self.slot1.pk,state_token=token,action='deactivate',reason_code='PLAN_CHANGED')
+        _,token=inspect_availability(actor=self.scheduler,slot_id=self.slot1.pk)
+        p=prepare_availability_change(actor=self.scheduler,slot_id=self.slot1.pk,state_token=token,action='deactivate',reason_code='PLAN_CHANGED')
         self.pause()
-        with self.assertRaises(RuleError):confirm_availability_change(actor=self.manager,slot_id=self.slot1.pk,proposal_token=p.proposal_token,confirmed=True)
+        with self.assertRaises(RuleError):confirm_availability_change(actor=self.scheduler,slot_id=self.slot1.pk,proposal_token=p.proposal_token,confirmed=True)
     def test_intake_aba_invalidates_another_managers_preview(self):
         old=self.preview(actor=self.other);self.pause();self.commit(self.preview('resume'))
         with self.assertRaises(RuleError):self.commit(old,actor=self.other)
@@ -196,8 +197,8 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
         self.slot1.refresh_from_db();self.assertFalse(self.slot1.booking_paused);self.assertEqual(self.slot1.intake_revision,0)
     def test_clinic_scope_rejected(self):
         with self.assertRaises(PermissionDenied):self.preview(slot=self.slot2)
-    def test_front_cannot_change_intake(self):
-        with self.assertRaises(PermissionDenied):self.preview(actor=self.front)
+    def test_manager_cannot_change_intake(self):
+        with self.assertRaises(PermissionDenied):self.preview(actor=self.manager)
     def test_readonly_blocks_service_commit(self):
         p=self.preview()
         with override_settings(ADC_READ_ONLY=True),self.assertRaises(PermissionDenied):self.commit(p)
@@ -211,21 +212,21 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
         p=self.preview();self.book()
         with self.assertRaises(RuleError):self.commit(p)
     def test_role_revocation_rejects_commit(self):
-        p=self.preview();RoleAssignment.objects.filter(user=self.manager).update(is_active=False)
+        p=self.preview();RoleAssignment.objects.filter(user=self.scheduler).update(is_active=False)
         with self.assertRaises(PermissionDenied):self.commit(p)
     def test_manager_pages_render_real_templates(self):
-        c=WorkspaceClient();c.force_login(self.manager)
+        c=WorkspaceClient();c.force_login(self.scheduler)
         self.assertContains(c.get(reverse('intake_change',args=[self.slot1.pk,'pause'])),'暂停接收新预约')
         self.assertContains(c.get(reverse('availability_detail',args=[self.slot1.pk])),'控制是否接收新预约')
     def test_get_confirm_never_writes(self):
-        c=WorkspaceClient();c.force_login(self.manager);before=self.counts()
+        c=WorkspaceClient();c.force_login(self.scheduler);before=self.counts()
         self.assertEqual(c.get(reverse('intake_confirm',args=[self.slot1.pk])).status_code,405)
         self.assertEqual(before,self.counts())
     def test_http_csrf_still_enforced(self):
-        c=WorkspaceClient(enforce_csrf_checks=True);c.force_login(self.manager)
+        c=WorkspaceClient(enforce_csrf_checks=True);c.force_login(self.scheduler)
         self.assertEqual(c.post(reverse('intake_confirm',args=[self.slot1.pk]),{'confirmed':'on','proposal_token':'x'}).status_code,403)
     def test_actual_http_preview_confirm_and_resume(self):
-        c=WorkspaceClient();c.force_login(self.manager)
+        c=WorkspaceClient();c.force_login(self.scheduler)
         for action,reason,paused in [('pause','COORDINATION',True),('resume','READY_TO_REOPEN',False)]:
             page=c.get(reverse('intake_change',args=[self.slot1.pk,action]))
             token=page.context['form'].initial['state_token']
@@ -233,15 +234,15 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
             self.assertContains(preview,'尚未保存')
             result=c.post(reverse('intake_confirm',args=[self.slot1.pk]),dict(proposal_token=preview.context['preview']['proposal_token'],confirmed='on'))
             self.assertEqual(result.status_code,302);self.slot1.refresh_from_db();self.assertEqual(self.slot1.booking_paused,paused)
-    def test_front_http_direct_intake_is_denied(self):
-        c=WorkspaceClient();c.force_login(self.front)
+    def test_manager_http_direct_intake_is_denied(self):
+        c=WorkspaceClient();c.force_login(self.manager)
         self.assertEqual(c.get(reverse('intake_change',args=[self.slot1.pk,'pause'])).status_code,403)
     def test_readonly_http_post_remains_denied(self):
-        c=WorkspaceClient();c.force_login(self.manager)
+        c=WorkspaceClient();c.force_login(self.scheduler)
         with override_settings(ADC_READ_ONLY=True):
             self.assertIn(c.post(reverse('intake_change',args=[self.slot1.pk,'pause']),dict(reason='COORDINATION')).status_code,(403,409))
     def test_context_change_refuses_old_confirmation(self):
-        p=self.preview();ctx=self.manager._adc_workspace
+        p=self.preview();ctx=self.scheduler._adc_workspace
         WorkspaceContext.objects.filter(pk=ctx.pk).update(revision=ctx.revision+1)
         with self.assertRaises(PermissionDenied):self.commit(p)
     def test_existing_care_can_close_while_intake_paused(self):
@@ -277,8 +278,9 @@ class IntakeAcceptanceTests(FixtureMixin, TransactionTestCase):
 class IntakeConcurrencyTests(FixtureMixin, TransactionTestCase):
     def setUp(self):
         self.assertEqual(connection.vendor,'postgresql');self.make_fixture()
-        self.ctx=WorkspaceContext.objects.create(user=self.manager,role='MANAGER',clinic=self.a,revision=1)
-        self.manager._adc_workspace=self.ctx
+        self.scheduler=self.front2
+        self.ctx=WorkspaceContext.objects.create(user=self.scheduler,role='FRONT_DESK',clinic=self.a,revision=1)
+        self.scheduler._adc_workspace=self.ctx
     def wait_for_lock(self,app):
         deadline=monotonic()+8
         while monotonic()<deadline:
@@ -292,10 +294,10 @@ class IntakeConcurrencyTests(FixtureMixin, TransactionTestCase):
         plan=None;offer=None
         if kind in ('publish','accept'):
             entry=WaitRequest.objects.create(patient=self.p1,clinic=self.a,earliest=self.t,latest=self.t+timedelta(hours=4),created_by=self.front)
-            plan=SchedulePlan.objects.create(clinic=self.a,created_by=self.manager,suggestions=[dict(request_id=entry.pk,request_revision=0,slot_id=self.slot1.pk,start=self.t.isoformat(),end=(self.t+timedelta(minutes=30)).isoformat(),intake_revision=0)])
-            if kind=='accept':publish_plan(actor=self.manager,plan_id=plan.pk);offer=WaitOffer.objects.get(plan=plan)
-        _,state=inspect_intake(actor=self.manager,slot_id=self.slot1.pk)
-        preview=prepare_intake(actor=self.manager,slot_id=self.slot1.pk,state_token=state,action='pause',reason='COORDINATION')
+            plan=SchedulePlan.objects.create(clinic=self.a,created_by=self.scheduler,metadata={'scheduling_contract':SchedulePlan.CONTRACT},suggestions=[dict(request_id=entry.pk,request_revision=0,slot_id=self.slot1.pk,start=self.t.isoformat(),end=(self.t+timedelta(minutes=30)).isoformat(),intake_revision=0)])
+            if kind=='accept':publish_plan(actor=self.scheduler,plan_id=plan.pk);offer=WaitOffer.objects.get(plan=plan)
+        _,state=inspect_intake(actor=self.scheduler,slot_id=self.slot1.pk)
+        preview=prepare_intake(actor=self.scheduler,slot_id=self.slot1.pk,state_token=state,action='pause',reason='COORDINATION')
         locked=Event();release=Event();original=intake_services._transition
         def block_transition(snapshot,action,reason):
             locked.set()
@@ -304,7 +306,7 @@ class IntakeConcurrencyTests(FixtureMixin, TransactionTestCase):
         def pause_worker():
             close_old_connections()
             try:
-                actor=UserAccount.objects.get(pk=self.manager.pk);actor._adc_workspace=WorkspaceContext.objects.get(pk=self.ctx.pk)
+                actor=UserAccount.objects.get(pk=self.scheduler.pk);actor._adc_workspace=WorkspaceContext.objects.get(pk=self.ctx.pk)
                 return confirm_intake(actor=actor,slot_id=self.slot1.pk,proposal_token=preview['proposal_token'],confirmed=True)
             finally:connection.close()
         app='adc_intake_race_'+kind
@@ -314,14 +316,14 @@ class IntakeConcurrencyTests(FixtureMixin, TransactionTestCase):
                 with connection.cursor() as cur:cur.execute("SELECT set_config('application_name',%s,false)",[app])
                 actor=UserAccount.objects.get(pk=self.front.pk)
                 if kind=='publish':
-                    # Separate manager account avoids serializing only on actor (rather than slot).
-                    actor=UserAccount.objects.get(pk=self.manager2.pk)
+                    # Separate front-desk account avoids serializing only on actor (rather than slot).
+                    actor=UserAccount.objects.get(pk=self.scheduler2.pk)
                     return publish_plan(actor=actor,plan_id=plan.pk)
                 if kind=='accept':return answer_offer(actor=actor,offer_id=offer.pk,accept=True)
                 return create_appointment(actor=actor,patient_no=self.p1.patient_no,slot_id=self.slot1.pk,start=self.t,end=self.t+timedelta(minutes=30))
             finally:connection.close()
-        self.manager2=UserAccount.objects.create_user(username='race_manager2',password='synthetic-pass')
-        RoleAssignment.objects.create(user=self.manager2,role='MANAGER',scope_kind='CLINIC',clinic=self.a)
+        self.scheduler2=UserAccount.objects.create_user(username='race_manager2',password='synthetic-pass')
+        RoleAssignment.objects.create(user=self.scheduler2,role='FRONT_DESK',scope_kind='CLINIC',clinic=self.a)
         with ThreadPoolExecutor(max_workers=2) as pool,patch('scheduling.intake_services._transition',side_effect=block_transition):
             first=pool.submit(pause_worker)
             try:

@@ -53,8 +53,8 @@ class BusinessFixture(V05Fixture, V07Fixture):
     def offered(self):
         entry = coordination.join_waitlist(actor=self.pa, clinic_id=self.a.pk,
             earliest=self.t, latest=self.t + timedelta(hours=2))
-        plan = coordination.create_plan(actor=self.manager, clinic_id=self.a.pk)
-        coordination.publish_plan(actor=self.manager, plan_id=plan.pk)
+        plan = coordination.create_plan(actor=self.front, clinic_id=self.a.pk)
+        coordination.publish_plan(actor=self.front, plan_id=plan.pk)
         return entry, plan, WaitOffer.objects.get(request=entry)
 
 
@@ -333,7 +333,7 @@ class PatientAndCoordinationWorklistTests(BusinessFixture, TransactionTestCase):
 
     def test_paused_without_active_task_shows_separate_maintenance_link(self):
         AvailabilitySlot.objects.filter(pk=self.slot1.pk).update(booking_paused=True, intake_revision=1)
-        group = self.groups(self.worklist(self.manager, 'MANAGER', self.a))['paused']
+        group = self.groups(self.worklist(self.front, 'FRONT_DESK', self.a))['paused']
         self.assertEqual(group['total'], 1)
         self.assertEqual(group['items'][0]['url'], reverse('availability_detail', args=[self.slot1.pk]))
         self.slot1.refresh_from_db(); self.assertTrue(self.slot1.booking_paused)
@@ -347,7 +347,7 @@ class PatientAndCoordinationWorklistTests(BusinessFixture, TransactionTestCase):
         other = self.groups(self.worklist(self.front2, 'FRONT_DESK', self.b))
         self.assertEqual(own['unclaimed']['total'], 1)
         self.assertEqual(other['unclaimed']['total'], 0)
-        self.assertEqual(self.groups(self.worklist(self.manager, 'MANAGER', self.a))['paused']['total'], 0)
+        self.assertEqual(self.groups(self.worklist(self.front, 'FRONT_DESK', self.a))['paused']['total'], 0)
 
     def test_manager_never_gets_self_submitted_review_task(self):
         from uuid import uuid4

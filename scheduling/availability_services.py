@@ -24,7 +24,7 @@ from scheduling.availability_rules import (CONTRACT, REASONS, MAX_RELATIONS, Ava
 from workspaces.context import require_active, valid_context
 from workspaces.models import WorkspaceContext
 
-SALT = 'adc.availability.09a6'
+SALT = 'adc.availability.b131'
 MAX_AGE = 900
 EVENTS = ('SLOT_REPLACED', 'SLOT_DEACTIVATED')
 STATE_EVENTS = ('SLOT_CREATED', *EVENTS, 'SLOT_INTAKE_PAUSED', 'SLOT_INTAKE_RESUMED')
@@ -62,14 +62,14 @@ class SlotResult:
 
 def require_availability_actor(actor):
     ctx = getattr(actor, '_adc_workspace', None)
-    if ctx is None or ctx.role != 'MANAGER' or ctx.clinic_id is None:
-        raise PermissionDenied('请以诊所主管身份选择当前诊所后再操作。')
-    require_active(actor, ('MANAGER',), ctx.clinic_id)
+    if ctx is None or ctx.role != 'FRONT_DESK' or ctx.clinic_id is None:
+        raise PermissionDenied('请以诊所前台身份选择当前诊所后再操作。')
+    require_active(actor, ('FRONT_DESK',), ctx.clinic_id)
     if not valid_context(actor, ctx) or not WorkspaceContext.objects.filter(pk=ctx.pk, user_id=actor.pk,
-            role='MANAGER', clinic_id=ctx.clinic_id, revision=ctx.revision).exists():
+            role='FRONT_DESK', clinic_id=ctx.clinic_id, revision=ctx.revision).exists():
         raise PermissionDenied('工作身份或诊所已变化，请返回当前工作台。')
-    if not bindings(actor).filter(role='MANAGER', scope_kind='CLINIC', clinic_id=ctx.clinic_id).exists():
-        raise PermissionDenied('当前诊所主管授权已失效。')
+    if not bindings(actor).filter(role='FRONT_DESK', scope_kind='CLINIC', clinic_id=ctx.clinic_id).exists():
+        raise PermissionDenied('当前诊所前台授权已失效。')
     return ctx
 
 
@@ -99,7 +99,7 @@ def _serial_rows(rows):
              for key, value in row.items()} for row in rows]
 
 
-def _snapshot(slot):
+def observe_availability_locked(slot):
     # All application mutations of related Visit/Offer state first lock this row.
     now = timezone.now()
     vq = Visit.objects.filter(availability_slot_id=slot.pk).order_by('pk')
@@ -143,7 +143,7 @@ def _authorize_payload(actor, payload, slot_id):
 def inspect_availability(*, actor, slot_id):
     binding = _binding(actor)
     slot = _owned_slot(actor, slot_id)
-    snapshot = _snapshot(slot)
+    snapshot = observe_availability_locked(slot)
     if _binding(actor) != binding:
         raise PermissionDenied('工作范围已变化，不能返回旧数据。')
     token = signing.dumps({**binding, 'kind': 'state', 'slot': slot.pk, 'state': snapshot.state}, salt=SALT)
@@ -157,7 +157,7 @@ def prepare_availability_change(*, actor, slot_id, state_token, action, reason_c
     payload = _load(state_token, proposal=False)
     binding = _authorize_payload(actor, payload, slot_id)
     slot = _owned_slot(actor, slot_id)
-    snapshot = _snapshot(slot)
+    snapshot = observe_availability_locked(slot)
     if payload['state'] != snapshot.state:
         raise RuleError('出诊或关联业务在填写期间已变化，请重新读取并核对；尚未保存。')
     try:
@@ -189,7 +189,7 @@ def confirm_availability_change(*, actor, slot_id, proposal_token, confirmed):
         raise RuleError('请明确核对时间与影响后再确认。')
     ctx = require_availability_actor(actor)
     # Writes follow the same actor/context/grant/slot order as booking commands.
-    lock_clinic_grant(actor, ctx.clinic_id, roles=('MANAGER',))
+    lock_clinic_grant(actor, ctx.clinic_id, roles=('FRONT_DESK',))
     payload = _load(proposal_token, proposal=True)
     _authorize_payload(actor, payload, slot_id)
     slot = _owned_slot(actor, slot_id)
@@ -200,7 +200,7 @@ def confirm_availability_change(*, actor, slot_id, proposal_token, confirmed):
         if summary.get('contract') != CONTRACT or summary.get('action') != payload['action'] or summary.get('state_before') != payload['state']:
             raise RuleError('原操作关联需核对，不能重放。')
         return SlotResult(slot.pk, summary.get('replacement_id'), event.pk, True)
-    snapshot = _snapshot(slot)
+    snapshot = observe_availability_locked(slot)
     if snapshot.state != payload['state']:
         raise RuleError('预览后出诊或关联业务已经变化；本次未执行，请重新核对。')
     start = parse_time(payload['start']) if payload['action'] == 'replace' else None

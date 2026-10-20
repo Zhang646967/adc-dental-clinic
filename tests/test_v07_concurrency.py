@@ -33,8 +33,8 @@ class V07ConcurrencyTests(V07Fixture,TransactionTestCase):
   rows=self.race([lambda:confirm(self.pa.pk),lambda:confirm(self.front.pk)])
   self.assertEqual([r[0] for r in rows],['ok','ok']);self.assertEqual(rows[0][1],rows[1][1]);self.assertEqual(Visit.objects.count(),1)
  def test_regular_booking_and_offer_cannot_both_take_time(self):
-  self.join();plan=co.create_plan(actor=self.manager,clinic_id=self.a.pk);r=plan.suggestions[0]
-  def publish():return co.publish_plan(actor=UserAccount.objects.get(pk=self.manager.pk),plan_id=plan.pk).pk
+  self.join();plan=co.create_plan(actor=self.front,clinic_id=self.a.pk);r=plan.suggestions[0]
+  def publish():return co.publish_plan(actor=UserAccount.objects.get(pk=self.front2.pk),plan_id=plan.pk).pk
   def booking():return create_appointment(actor=UserAccount.objects.get(pk=self.front.pk),patient_no=self.p2.patient_no,slot_id=r['slot_id'],start=datetime.fromisoformat(r['start']),end=datetime.fromisoformat(r['end'])).pk
   rows=self.race([publish,booking]);self.assertEqual(sum(x[0]=='ok' for x in rows),1)
   self.assertEqual(Visit.objects.count()+WaitOffer.objects.filter(state='PENDING').count(),1)

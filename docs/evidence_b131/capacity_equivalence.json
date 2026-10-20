@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "scope": "Measured service command, model, SQL, authorization, query and static code equals delivery source; four wording-only templates differ. This does not claim a second full binary capacity run.",
+  "runtime_files_compared": 492,
+  "identical_files": 488,
+  "wording_only_differences": [
+    "templates/scheduling/front_coordination_list.html",
+    "templates/scheduling/availability_list.html",
+    "templates/scheduling/slot_create_confirm.html",
+    "templates/scheduling/intake_change.html"
+  ],
+  "full_thirty_minute_measurement": "capacity.json",
+  "final_wording_requires_real_browser_smoke": true
+}

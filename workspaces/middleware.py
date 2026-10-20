@@ -13,6 +13,7 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'schedule_calendar':{'FRONT_DESK'},
  'reception_list':{'FRONT_DESK'},'reception_create':{'FRONT_DESK'},'reception_detail':{'FRONT_DESK'},
  'resource_mapping':{'MANAGER'},'resource_catalogue':{'MANAGER'},'resource_config':{'MANAGER'},'resource_candidates':{'FRONT_DESK'},
  'resource_coordination_list':{'MANAGER','FRONT_DESK'},'resource_coordination_detail':{'FRONT_DESK'},'resource_summary':{'HQ','MANAGER'},
@@ -48,10 +49,10 @@ ROUTES={
  'coordination_task_action':{'MANAGER','FRONT_DESK'},
  'coordination_task_confirm_new':{'MANAGER','FRONT_DESK'},
  'coordination_task_confirm':{'MANAGER','FRONT_DESK'},
- 'intake_change':{'MANAGER'},'intake_confirm':{'MANAGER'},
+ 'intake_change':{'FRONT_DESK'},'intake_confirm':{'FRONT_DESK'},
  'front_coordination_list':{'FRONT_DESK'},'front_coordination_detail':{'FRONT_DESK'},
- 'availability_list':{'MANAGER'},'availability_detail':{'MANAGER'},
- 'availability_change':{'MANAGER'},'availability_confirm':{'MANAGER'},
+ 'availability_list':{'FRONT_DESK'},'availability_detail':{'FRONT_DESK'},
+ 'availability_change':{'FRONT_DESK'},'availability_confirm':{'FRONT_DESK'},
  'directory_home':{'SYSADMIN'},'directory_list':{'SYSADMIN'},'directory_detail':{'SYSADMIN'},
  'directory_create':{'SYSADMIN'},'directory_confirm':{'SYSADMIN'},
  'directory_attach':{'SYSADMIN'},'directory_withdraw_preview':{'SYSADMIN'},
@@ -66,7 +67,7 @@ ROUTES={
  'patients':{'FRONT_DESK','DENTIST'},'patient_create':{'FRONT_DESK'},'patient_lookup':{'FRONT_DESK'},
  'patient_detail':{'FRONT_DESK','DENTIST'},'visits':{'FRONT_DESK','DENTIST','MANAGER','HQ'},
  'visit_detail':{'FRONT_DESK','DENTIST'},'visit_create':{'FRONT_DESK'},'visit_reschedule':{'FRONT_DESK'},
- 'slot_create':{'MANAGER'},'care_workspace':{'DENTIST'},'care_complete':{'DENTIST'},
+ 'slot_create':{'FRONT_DESK'},'care_workspace':{'DENTIST'},'care_complete':{'DENTIST'},
  'invoice_detail':{'FRONT_DESK','DENTIST','FINANCE'},'corrections':{'DENTIST','FINANCE'},
  'correction_create':{'DENTIST'},'correction_detail':{'DENTIST','FINANCE'},
  'finance_quarters':{'FINANCE','HQ'},'quarter_detail':{'FINANCE','HQ'},'quarter_cost':{'FINANCE'},'quarter_export':{'FINANCE','HQ'},
@@ -74,7 +75,7 @@ ROUTES={
  'guide_index':ALL,'guide_task':ALL,
  'waitlist':{'PATIENT','FRONT_DESK','MANAGER'},'waitlist_join':{'PATIENT','FRONT_DESK'},
  'waitlist_withdraw':{'PATIENT','FRONT_DESK'},'wait_offer':{'PATIENT','FRONT_DESK'},
- 'schedule_plans':{'MANAGER'},'schedule_plan':{'MANAGER'},'expire_offers':{'MANAGER','FRONT_DESK'},
+ 'schedule_plans':{'FRONT_DESK'},'schedule_plan':{'FRONT_DESK'},'expire_offers':{'MANAGER','FRONT_DESK'},
 }
 
 def route_roles(name,kwargs):

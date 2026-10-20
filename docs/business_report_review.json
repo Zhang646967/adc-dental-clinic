@@ -1,7 +1,7 @@
 {
   "format": 1,
   "date": "2026-10-20",
-  "scope": "formal report, current database ER and next-stage front-desk scheduling; historical business results retain their original scope",
+  "scope": "B1.3.1 front-desk scheduling, day/week coordination, actual schema ER and formal course report",
   "user_requests": [
     {
       "id": "U1",
@@ -67,9 +67,9 @@
         "3.6",
         "appendix A/B/C"
       ],
-      "business_use_cases": 57,
+      "business_use_cases": 58,
       "shared_subfunction": 1,
-      "status": "58 complete specifications including one shared subfunction"
+      "status": "59 complete specifications including one shared subfunction"
     },
     {
       "id": "U6",
@@ -92,7 +92,8 @@
         "6.2"
       ],
       "plan": "FRONT_DESK_SCHEDULING_PLAN.md",
-      "status": "target responsibility and acceptance planned; current manager-only scheduling permissions still await implementation"
+      "status": "implemented front-desk scheduling, day/week views, due dates and independent coordination review; PostgreSQL and five-clinic browser accepted",
+      "evidence": "evidence_b131/README.md"
     },
     {
       "id": "U8",
@@ -102,11 +103,11 @@
         "6.2"
       ],
       "evidence": "database/README.md",
-      "status": "four ER views, complete field/foreign-key catalogue and 69-table/170-FK metadata baseline added; database optimization is a next-stage gate"
+      "status": "five actual ER views; 69 tables, 618 columns, 170 foreign keys and 42 triggers; additive relation guards and direct PostgreSQL counterexamples verified"
     }
   ],
   "validation": "report-source/validation.json",
   "domain_and_state_models": "three core views: care/billing, telephone conversion and resource occupation; separate reception and resource-coordination states",
   "historical_application_changes": true,
-  "this_update_application_changes": false
+  "this_update_application_changes": true
 }

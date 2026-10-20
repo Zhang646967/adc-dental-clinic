@@ -155,8 +155,8 @@ class TelephoneReceptionTests(ResourceFixture,TransactionTestCase):
         from coordination.services import create_plan,publish_plan,answer_offer
         c=self.case(patient_no=self.p1.patient_no)
         c=self.step(c,'WAITLIST',earliest=self.t,latest=self.t+timedelta(hours=3),due_at=timezone.now()+timedelta(hours=2),note='患者同意候补')
-        p=create_plan(actor=self.manager,clinic_id=self.a.pk);self.assertEqual(p.metadata['algorithm'],'RESOURCE_GREEDY_V1')
-        publish_plan(actor=self.manager,plan_id=p.pk)
+        p=create_plan(actor=self.front,clinic_id=self.a.pk);self.assertEqual(p.metadata['algorithm'],'RESOURCE_GREEDY_V1')
+        publish_plan(actor=self.front,plan_id=p.pk)
         offer=c.wait_request.offers.get();answer_offer(actor=self.front,offer_id=offer.pk,accept=True)
         c.refresh_from_db();offer.refresh_from_db()
         self.assertEqual(c.state,'BOOKED');self.assertEqual(c.visit_id,offer.visit_id);self.assertEqual(Visit.objects.count(),1)
@@ -249,14 +249,14 @@ class ResourcePortalAndWaitlistTests(ResourceFixture,TransactionTestCase):
         self.service.duration_minutes=15;self.service.save()
         e=join_waitlist(actor=self.front,clinic_id=self.a.pk,patient_no=self.p1.patient_no,service_id=self.service.pk,
             earliest=self.t,latest=self.t+timedelta(minutes=15))
-        p=create_plan(actor=self.manager,clinic_id=self.a.pk);publish_plan(actor=self.manager,plan_id=p.pk)
+        p=create_plan(actor=self.front,clinic_id=self.a.pk);publish_plan(actor=self.front,plan_id=p.pk)
         o=e.offers.get();self.assertEqual(o.ends_at-o.starts_at,timedelta(minutes=15))
         answer_offer(actor=self.front,offer_id=o.pk,accept=True);self.assertEqual(Visit.objects.count(),1)
     def test_offer_snapshot_survives_catalogue_duration_edit(self):
         from coordination.services import join_waitlist,create_plan,publish_plan,answer_offer
         e=join_waitlist(actor=self.front,clinic_id=self.a.pk,patient_no=self.p1.patient_no,service_id=self.service.pk,
             earliest=self.t,latest=self.t+timedelta(hours=2))
-        p=create_plan(actor=self.manager,clinic_id=self.a.pk);publish_plan(actor=self.manager,plan_id=p.pk)
+        p=create_plan(actor=self.front,clinic_id=self.a.pk);publish_plan(actor=self.front,plan_id=p.pk)
         self.service.duration_minutes=60;self.service.save()
         o=e.offers.get();answer_offer(actor=self.front,offer_id=o.pk,accept=True);o.refresh_from_db()
         self.assertEqual(o.visit.scheduled_end-o.visit.scheduled_start,timedelta(minutes=30))
@@ -265,7 +265,7 @@ class ResourcePortalAndWaitlistTests(ResourceFixture,TransactionTestCase):
         from coordination.services import join_waitlist,create_plan,publish_plan,answer_offer,withdraw
         e=join_waitlist(actor=self.front,clinic_id=self.a.pk,patient_no=self.p1.patient_no,service_id=self.service.pk,
             earliest=self.t,latest=self.t+timedelta(hours=2))
-        p=create_plan(actor=self.manager,clinic_id=self.a.pk);publish_plan(actor=self.manager,plan_id=p.pk)
+        p=create_plan(actor=self.front,clinic_id=self.a.pk);publish_plan(actor=self.front,plan_id=p.pk)
         o=e.offers.get();answer_offer(actor=self.front,offer_id=o.pk,accept=False)
         self.assertFalse(ResourceClaim.objects.filter(active=True).exists())
         withdraw(actor=self.front,entry_id=e.pk)
@@ -433,8 +433,8 @@ class ResourceHTTPAndFinancialTests(ResourceFixture,TransactionTestCase):
 
 class ResourceWorkflowPresentationTests(ResourceFixture,TransactionTestCase):
     def setUp(self):self.resources()
-    def test_manager_resource_mode_does_not_claim_fixed_slot_optimality(self):
-        self.client.force_login(self.manager)
+    def test_frontdesk_resource_mode_does_not_claim_fixed_slot_optimality(self):
+        self.client.force_login(self.front)
         from django.urls import reverse
         r=self.client.get(reverse('schedule_plans'))
         self.assertContains(r,'不保证全局最优');self.assertNotContains(r,'固定30分钟')

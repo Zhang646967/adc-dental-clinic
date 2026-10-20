@@ -268,16 +268,26 @@ def visit_reschedule(request, pk):
 @login_required
 @require_http_methods(["GET", "POST"])
 def slot_create(request):
-    if not has_role(request.user, "MANAGER"):
+    if not has_role(request.user, "FRONT_DESK"):
         raise PermissionDenied
+    from scheduling.slot_creation import prepare_slot_creation,confirm_slot_creation
+    from scheduling.resource_forms import ConfirmForm
+    if request.method=='POST' and 'proposal_token' in request.POST:
+        confirmation=ConfirmForm(request.POST)
+        if confirmation.is_valid():
+            try:slot,repeated=confirm_slot_creation(actor=request.user,proposal_token=confirmation.cleaned_data['proposal_token'],confirmed=confirmation.cleaned_data['confirmed'])
+            except EXPECTED_ERRORS as exc:add_error(confirmation,exc)
+            else:
+                messages.success(request,'原出诊已保存，本次没有重复登记。' if repeated else '出诊安排已保存，请核对当前安排。')
+                return redirect('availability_detail',pk=slot.pk)
+        return render(request,'scheduling/slot_create_confirm.html',{'form':confirmation},status=409)
     form = SlotForm(request.POST or None, user=request.user)
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data
         try:
-            create_slot(actor=request.user, clinic_id=d["clinic"].pk, dentist_id=d["dentist"].pk, start=d["start"], end=d["end"])
+            preview=prepare_slot_creation(actor=request.user, clinic_id=d["clinic"].pk, dentist_id=d["dentist"].pk, start=d["start"], end=d["end"])
         except EXPECTED_ERRORS as exc:
             add_error(form, exc)
         else:
-            messages.success(request, "出诊安排已保存，请到本店出诊列表核对。")
-            return redirect("availability_list")
-    return render(request, "form.html", {"form": form, "title": "新增出诊安排", "subtitle": "同一牙医的有效时段不能跨店重叠。已有安排请从“出诊安排”查看影响；有预约或有效邀约时不能直接调整。", "button": "保存出诊安排"})
+            return render(request,'scheduling/slot_create_confirm.html',{'preview':preview,'form':ConfirmForm(initial={'proposal_token':preview['proposal_token']})})
+    return render(request, "form.html", {"form": form, "title": "新增出诊安排", "subtitle": "先核对医师工作安排。同一医师的有效时段不能跨店重叠；已有预约或有效邀约先协调再调整。", "button": "预览出诊安排"})

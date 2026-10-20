@@ -1,0 +1,112 @@
+{
+  "scope": "B1.3.1 independent payment review after two completed real-browser clinical scenarios",
+  "checks": [
+    {
+      "name": "Login form FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Read saved completed appointment",
+      "passed": true
+    },
+    {
+      "name": "Read actual saved invoice",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-1 source",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-1 preview accepted",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-1 signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-1 concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "b131-review-1 review page",
+      "passed": true
+    },
+    {
+      "name": "b131-review-1 preview accepted",
+      "passed": true
+    },
+    {
+      "name": "b131-review-1 signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "b131-review-1 concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "b131-review-1 posted cash",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Read saved completed appointment",
+      "passed": true
+    },
+    {
+      "name": "Read actual saved invoice",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-2 source",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-2 preview accepted",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-2 signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "b131-receipt-2 concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "b131-review-2 review page",
+      "passed": true
+    },
+    {
+      "name": "b131-review-2 preview accepted",
+      "passed": true
+    },
+    {
+      "name": "b131-review-2 signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "b131-review-2 concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "b131-review-2 posted cash",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "passed": true
+}

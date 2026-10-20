@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block content %}<div class="availability">
-<p class="eyebrow">诊所主管 · 当前店范围</p><h1>本店出诊安排</h1>
+<p class="eyebrow">诊所前台 · 当前店范围</p><h1>本店出诊安排</h1>
 <p class="lede">先查阅原安排和关联业务，再决定是否调整。调整出诊不会替患者改期或取消预约。</p>
 <div class="actions">{% if not read_only %}<a class="button" href="{% url 'slot_create' %}">新增出诊安排</a>{% endif %}<a class="button secondary" href="{% url 'schedule_plans' %}">前往排程建议</a></div>
 <form class="panel av-filter" method="get"><label for="mode">查看范围</label><select id="mode" name="mode"><option value="future"{% if mode == 'future' %} selected{% endif %}>仍有效且尚未结束</option><option value="inactive"{% if mode == 'inactive' %} selected{% endif %}>已停用历史</option><option value="all"{% if mode == 'all' %} selected{% endif %}>全部记录</option></select><button type="submit">查询</button></form>

@@ -187,6 +187,7 @@ Table adc_coordination_task {
   state "character varying(12)" [not null]
   created_by_id "bigint" [not null]
   assignee_id "bigint" [null]
+  due_at "timestamp with time zone" [null]
   submitted_by_id "bigint" [null]
   submitted_at "timestamp with time zone" [null]
   submitted_digest "character varying(64)" [not null]

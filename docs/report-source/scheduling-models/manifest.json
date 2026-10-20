@@ -1,0 +1,37 @@
+{
+  "S02": {
+    "description": "包含关系仅SU15→SF01；SU16的接受分支在规约中复用，拒绝分支不误画include。",
+    "kind": "system-use-case",
+    "width": 1050,
+    "height": 1210,
+    "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
+  },
+  "S04": {
+    "description": "前台维护当前店出诊和患者联络；技术维护基础目录。",
+    "kind": "system-use-case",
+    "width": 1050,
+    "height": 870,
+    "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
+  },
+  "S05": {
+    "description": "工作台相互独立，前台与主管共享本人消息目标但不共享业务权限。",
+    "kind": "system-use-case",
+    "width": 1050,
+    "height": 1240,
+    "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
+  },
+  "B07": {
+    "description": "消息为接收者承担的责任；实例、生命线和返回分开；无额外业务能力。",
+    "kind": "business-sequence",
+    "width": 1050,
+    "height": 1014,
+    "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
+  },
+  "B06": {
+    "description": "消息为接收者承担的责任；实例、生命线和返回分开；无额外业务能力。",
+    "kind": "business-sequence",
+    "width": 1050,
+    "height": 1170,
+    "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
+  }
+}

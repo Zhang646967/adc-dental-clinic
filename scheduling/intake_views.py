@@ -1,4 +1,4 @@
-"""Current-clinic MANAGER only. Explicit state change, no automatic actions."""
+"""Current-clinic FRONT_DESK only. Explicit state change, no automatic actions."""
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required

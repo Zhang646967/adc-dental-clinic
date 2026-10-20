@@ -3,6 +3,7 @@ Canonical write locks: actor -> context -> active grant -> source slot -> task.
 No Visit/WaitOffer/slot/clinical/financial/account mutations. Transactional notice intent only; no transport.
 """
 from dataclasses import dataclass
+from datetime import timedelta
 from uuid import uuid4
 from django.core import signing
 from django.core.exceptions import PermissionDenied
@@ -19,13 +20,13 @@ from coordination.task_facts import observe_locked, check_statement_target
 from coordination.task_rules import (CONTRACT, ACTIVE_STATES, STATES, PURPOSES, ACTIONS, REASONS,
     ACTION_REASONS, MANAGER_ACTIONS, FRONT_ACTIONS, TaskError, review_gate, validate_step,
     validate_options, validate_payload)
-from scheduling.availability_rules import digest, display_time, positive_id
+from scheduling.availability_rules import digest, display_time, positive_id, parse_time
 from scheduling.coordination import lock_slots
 from scheduling.models import AvailabilitySlot
 from workspaces.context import require_active, valid_context
 from workspaces.models import WorkspaceContext
 
-SALT = 'adc.coordination.task.09a9'
+SALT = 'adc.coordination.task.b131'
 MAX_AGE = 900
 EVENT_TYPES = dict(open='TASK_CREATED',claim='TASK_CLAIMED',progress='TASK_REPORTED',
     release='TASK_RELEASED',submit='TASK_SUBMITTED',return_='TASK_REQUEUED',
@@ -75,7 +76,7 @@ def _task_data(t):
     if t is None: return None
     return dict(id=t.pk,state=t.state,revision=t.revision,purpose=t.purpose,
                 assignee_id=t.assignee_id,submitted_by_id=t.submitted_by_id,
-                submitted_digest=t.submitted_digest)
+                submitted_digest=t.submitted_digest,due_at=t.due_at.isoformat() if t.due_at else None)
 
 
 def _locked_task(slot_id,task_id):
@@ -127,6 +128,8 @@ def _visible(task,slot,obs):
         purpose=PURPOSES[task.purpose] if task else '',
         assignee=task.assignee.username if task and task.assignee_id else '尚未受理',
         creator=task.created_by.username if task else '',
+        due_at=task.due_at if task else None,
+        overdue=bool(task and task.state in ACTIVE_STATES and task.due_at and task.due_at<timezone.now()),
         observed_at=display_time(obs.observed_at),impact=obs.impact,
         gate=review_gate(obs.slot,obs.impact,obs.observed_at))
 
@@ -174,7 +177,7 @@ def inspect_task(*,actor,slot_id,task_id=None):
 @business_errors
 @transaction.atomic
 @sensitive_variables()
-def prepare_task(*,actor,slot_id,task_id,state_token,action,reason,purpose='',target_kind='',target_id=None):
+def prepare_task(*,actor,slot_id,task_id,state_token,action,reason,purpose='',target_kind='',target_id=None,due_at=None):
     data = _load(state_token,proposal=False)
     identity = _bind_payload(actor,data,slot_id,task_id)
     try: validate_options(action,reason,purpose=purpose,target_kind=target_kind,target_id=target_id)
@@ -186,13 +189,21 @@ def prepare_task(*,actor,slot_id,task_id,state_token,action,reason,purpose='',ta
     if action=='progress':
         try: check_statement_target(obs,kind=target_kind,target_id=target_id)
         except TaskError as exc: raise RuleError(str(exc)) from exc
+    deadline=None
+    if action in ('open','claim','progress'):
+        now=timezone.now()
+        deadline=due_at
+        if deadline is None:
+            deadline=task.due_at if task and task.due_at and task.due_at>now else now+timedelta(hours=4)
+            if slot.starts_at>now:deadline=min(deadline,slot.starts_at)
+        if timezone.is_naive(deadline) or deadline<=now:raise RuleError('请填写未来的下次跟进期限。')
     payload = identity | dict(kind='proposal',slot=slot_id,task=task_id,state=state,
         operation=str(uuid4()),action=action,reason=reason,purpose=purpose,
-        target_kind=target_kind,target_id=target_id)
+        target_kind=target_kind,target_id=target_id,due_at=deadline.isoformat() if deadline else None)
     visible = _visible(task,slot,obs) | dict(action=action,action_label=ACTIONS[action],
         reason=REASONS[reason],after=STATES[new_state],purpose=PURPOSES[purpose] if purpose else PURPOSES[task.purpose],
         target_label=(('预约' if target_kind=='visit' else '邀约')+' #'+str(target_id)) if target_kind else '',
-        proposal_token=signing.dumps(payload,salt=SALT))
+        due_at=deadline or (task.due_at if task else None),proposal_token=signing.dumps(payload,salt=SALT))
     if _binding(actor)!=identity: raise PermissionDenied('工作范围已改变。')
     return visible
 
@@ -221,14 +232,18 @@ def confirm_task(*,actor,slot_id,task_id,proposal_token,confirmed):
     if state!=data['state']: raise RuleError('预览后事实已变化，本次未保存；请重新读取。')
     next_state = _transition(task,obs,action=data['action'],actor=actor,another_active=bool(active))
     action=data['action']; now=timezone.now()
+    deadline=parse_time(data['due_at']) if data['due_at'] else None
+    if action in ('open','claim','progress') and (deadline is None or deadline<=now):
+        raise RuleError('跟进期限已到，请重新核对责任及下次期限。')
     if action=='progress':
         try: check_statement_target(obs,kind=data['target_kind'],target_id=data['target_id'])
         except TaskError as exc: raise RuleError(str(exc)) from exc
     if action=='open':
         task=CoordinationTask.objects.create(slot=slot,purpose=data['purpose'],opening_reason=data['reason'],
-            creation_operation=data['operation'],created_by=actor,state='OPEN')
+            creation_operation=data['operation'],created_by=actor,state='OPEN',due_at=deadline)
     else:
         task.state=next_state; task.revision+=1
+        if deadline:task.due_at=deadline
         if action=='claim': task.assignee=actor
         if action in ('release','return'):
             task.assignee=None; task.submitted_by=None; task.submitted_at=None; task.submitted_digest=''
@@ -239,10 +254,11 @@ def confirm_task(*,actor,slot_id,task_id,proposal_token,confirmed):
         if action=='cancel':
             task.submitted_by=None; task.submitted_at=None; task.submitted_digest=''
         task.save(update_fields=['state','revision','assignee','submitted_by','submitted_at',
-                                'submitted_digest','closed_by','closed_at','updated_at'])
+                                'submitted_digest','closed_by','closed_at','due_at','updated_at'])
     summary=dict(contract=CONTRACT,slot_id=slot_id,action=action,operation=data['operation'],
         proposal_digest=digest(data),reason_code=data['reason'],state_after=task.state,
         task_revision=task.revision,assignee_id=task.assignee_id,
+        due_at=task.due_at.isoformat() if task.due_at else None,
         observation_digest=obs.digest,blocking_visits=obs.impact.blocking_visits,
         effective_offers=obs.impact.effective_offers,observed_at=obs.observed_at.isoformat())
     if action=='progress': summary.update(statement_only=True,target_kind=data['target_kind'],target_id=data['target_id'])
@@ -264,13 +280,15 @@ def list_tasks(*,actor,mode='active',slot_id=None,page='1'):
     if mode in ('active','mine'): qs=qs.filter(state__in=ACTIVE_STATES)
     elif mode=='history': qs=qs.exclude(state__in=ACTIVE_STATES)
     if mode=='mine': qs=qs.filter(assignee_id=actor.pk)
-    qs=qs.select_related('slot__clinic','slot__dentist','assignee','created_by').order_by('slot__starts_at','pk')
+    from django.db.models import F
+    qs=qs.select_related('slot__clinic','slot__dentist','assignee','created_by').order_by(F('due_at').asc(nulls_last=True),'slot__starts_at','pk')
     total=qs.count(); number,start,pages=safe_page(page,total)
     rows=[]
     for t in qs[start:start+20]:
         rows.append(dict(id=t.pk,slot_id=t.slot_id,status=STATES.get(t.state,'需核对'),purpose=PURPOSES.get(t.purpose,'需核对'),
             dentist=t.slot.dentist.name,start=display_time(t.slot.starts_at),end=display_time(t.slot.ends_at),
             assignee=t.assignee.username if t.assignee_id else '尚未受理',
+            due_at=t.due_at,overdue=bool(t.due_at and t.due_at<timezone.now() and t.state in ACTIVE_STATES),
             paused=t.slot.booking_paused,slot_active=t.slot.is_active))
     if _binding(actor)!=identity: raise PermissionDenied('工作范围已变化，不返回旧任务列表。')
     return dict(rows=rows,total=total,number=number,pages=pages,mode=mode,slot_filter=slot_id or '',

@@ -77,5 +77,5 @@ class SlotForm(forms.Form):
     end = forms.DateTimeField(label="结束", widget=forms.DateTimeInput(format="%Y-%m-%dT%H:%M", attrs={"type": "datetime-local"}))
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["clinic"].queryset = Clinic.objects.filter(pk__in=clinic_ids(user, ("MANAGER",)), is_active=True)
+        self.fields["clinic"].queryset = Clinic.objects.filter(pk__in=clinic_ids(user, ("FRONT_DESK",)), is_active=True)
         self.fields["dentist"].queryset = Dentist.objects.filter(is_active=True)

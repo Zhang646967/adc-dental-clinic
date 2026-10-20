@@ -20,6 +20,7 @@ class WaitRequest(models.Model):
           models.UniqueConstraint(fields=['patient'],condition=Q(state__in=['WAITING','OFFERED']),name='wait_one_open_patient')]
 
 class SchedulePlan(models.Model):
+    CONTRACT='FRONT-DESK-SCHEDULING-1'
     clinic=models.ForeignKey('registry.Clinic',on_delete=models.PROTECT)
     created_by=models.ForeignKey('accounts.UserAccount',on_delete=models.PROTECT)
     created_at=models.DateTimeField(auto_now_add=True)
@@ -46,7 +47,8 @@ class WaitOffer(models.Model):
             models.CheckConstraint(condition=Q(state__in=['PENDING','ACCEPTED','DECLINED','EXPIRED','REVOKED']),name='offer_state_valid'),
             models.UniqueConstraint(fields=['request'],condition=Q(state='PENDING'),name='offer_one_pending_request'),
             models.CheckConstraint(condition=Q(state='ACCEPTED',visit__isnull=False)|(~Q(state='ACCEPTED')&Q(visit__isnull=True)),name='offer_visit_state')]
-        indexes=[models.Index(fields=['state','expires_at'],name='offer_expiry_idx')]
+        indexes=[models.Index(fields=['state','expires_at'],name='offer_expiry_idx'),
+            models.Index(fields=['slot','state','expires_at'],name='offer_slot_state_exp_idx')]
 
 
 class CoordinationTask(models.Model):
@@ -59,6 +61,7 @@ class CoordinationTask(models.Model):
     state = models.CharField(max_length=12, default='OPEN', choices=[('OPEN','待前台受理'),('IN_PROGRESS','前台协调中'),('READY','待主管复核'),('CLOSED','协调核对已通过'),('CANCELLED','任务已撤销')])
     created_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, related_name='coordination_tasks_created')
     assignee = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True, related_name='coordination_tasks_assigned')
+    due_at = models.DateTimeField(null=True, blank=True)
     submitted_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True, related_name='coordination_tasks_submitted')
     submitted_at = models.DateTimeField(null=True, blank=True)
     submitted_digest = models.CharField(max_length=64, default='', blank=True)

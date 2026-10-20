@@ -19,6 +19,7 @@ class AvailabilitySlot(models.Model):
     class Meta:
         db_table = "adc_availability_slot"
         ordering = ["starts_at", "id"]
+        indexes = [models.Index(fields=['clinic','starts_at'],name='slot_clinic_start_idx')]
         constraints = [
             models.CheckConstraint(condition=Q(ends_at__gt=F("starts_at")), name="slot_time_order"),
             ExclusionConstraint(name="slot_dentist_no_overlap", expressions=[(TsTzRange("starts_at", "ends_at", RangeBoundary()), RangeOperators.OVERLAPS), ("dentist", RangeOperators.EQUAL)], condition=Q(is_active=True)),

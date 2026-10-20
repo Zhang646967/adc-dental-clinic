@@ -58,7 +58,7 @@ def create_resource_plan(actor,clinic_id):
             for r in bundle['resources']:calendar.busy[r['id']].append((start,end))
         else:unassigned.append(entry.pk)
     plan=SchedulePlan.objects.create(clinic_id=clinic_id,created_by=actor,suggestions=suggestions,
-        metadata={'algorithm':'RESOURCE_GREEDY_V1','status':'BOUNDED_GREEDY','bounded':True,'request_count':len(entries),
+        metadata={'scheduling_contract':SchedulePlan.CONTRACT,'algorithm':'RESOURCE_GREEDY_V1','status':'BOUNDED_GREEDY','bounded':True,'request_count':len(entries),
             'slot_count':len(slots),'checked_cells':checked,'unassigned':unassigned,'as_of':now.isoformat(),
             'limits':{'requests':60,'slots':80,'starts_per_slot':200},
             'request_limit_hit':len(entries)==60,'slot_limit_hit':len(slots)==80,

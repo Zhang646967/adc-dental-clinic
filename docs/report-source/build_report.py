@@ -50,6 +50,13 @@ def build(folder,repo,output=None):
    for cell,value in zip(row.cells,['总部','全链汇总、季度核对与设备查阅','只读汇总；不代办财务写入或审核']):cell.text=value
    finance_row=next(r for r in Table(old_roles,D._body).rows if r._tr is copy_row)
    for cell,value in zip(finance_row.cells,['财务','渠道账户、成本、资金及匹配复核','经授权办理；不同账号独立复核']):cell.text=value
+ for row in Table(old_roles,D._body).rows:
+  if row.cells[0].text.strip()=='诊所主管':
+   row.cells[1].text='资源规则、维修协调、独立复核与本店经营汇总'
+   row.cells[2].text='当前店汇总及独立复核；日常排班由前台办理'
+  if row.cells[0].text.strip()=='前台':
+   row.cells[1].text='电话接待、患者档案、日周排班、出诊维护、候补发布、调班联系与到诊'
+   row.cells[2].text='仅当前店；保护原承诺，不审核治疗、资产验收或资金'
  old_refs=[p.text for p in paras[197:212]]
  uc=[]
  for a,p in enumerate(paras):
@@ -177,6 +184,7 @@ def build(folder,repo,output=None):
    text=text.replace('本图保留既有的','本图表达')
   if text.startswith('发布门槛：'):
    return '质量评价覆盖核心业务完整性、权限、重复提交、回滚及历史金额。公开服务和更大规模需要独立验证，不能仅凭模型或功能数量作出结论。'
+  text=text.replace('主管发布后形成有限期的保留','前台发布后形成有限期的保留').replace('主管先明确暂停新增，前台协商并通过原业务流程处理','前台先明确暂停新增，再协商并通过原业务流程处理')
   text=text.replace('本轮再统一全角色只读提示及表单错误定位','界面统一提示当前只读状态并定位表单错误')
   return text
  def append_nodes(nodes,mapping=None,system=False,design=False):
@@ -205,6 +213,18 @@ def build(folder,repo,output=None):
     if x.style.name=='Normal':pf.line_spacing=Pt(22);pf.keep_with_next=False
     pf.page_break_before=False;pf.space_before=Pt(0);pf.space_after=Pt(5) if x.style.name=='Caption' else Pt(0)
     if node.xpath('.//w:drawing'):
+     current_models=folder/'scheduling-models'
+     old_models=repo/'docs/release_report/models'
+     substitutions={hashlib.sha256((old_models/(key+'.png')).read_bytes()).hexdigest():current_models/(key+'.png') for key in ('S02','S04','S05','B06','B07')}
+     for blip in node.xpath('.//a:blip'):
+      rid=blip.get(qn('r:embed'));part=D.part.related_parts.get(rid)
+      target=substitutions.get(hashlib.sha256(part.blob).hexdigest()) if part else None
+      if target:
+       new_rid,image=D.part.get_or_add_image(str(target));blip.set(qn('r:embed'),new_rid)
+       from PIL import Image
+       with Image.open(target) as im:width=min(16,18*im.width/im.height);height=width*im.height/im.width
+       for e in node.xpath('.//wp:extent')+node.xpath('.//a:xfrm/a:ext'):
+        e.set('cx',str(int(Cm(width))));e.set('cy',str(int(Cm(height))))
      pf.first_line_indent=Pt(0);pf.keep_with_next=True;pf.line_spacing=1.0
      for extent in node.xpath('.//wp:extent'):
       cx,cy=int(extent.get('cx')),int(extent.get('cy'));ratio=min(1,Cm(16)/cx,Cm(18)/cy)
@@ -283,11 +303,11 @@ def build(folder,repo,output=None):
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例清单与业务完整性');p('系统共定义57项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—57。电话接待关注咨询与联系，SU-04关注正式成约；网站和未来小程序属于SU-04的渠道路径，不按页面数量重复计数。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义58项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—58。电话接待关注咨询与联系，SU-04关注正式成约；网站和未来小程序属于SU-04的渠道路径，不按页面数量重复计数。')
  p('表3-4 用例分组及业务目标',10.5,False,True)
  table(['业务范围','编号','使用者目标'],[
  ['身份与资料','SU-01—03、21—23、25—28','登录选店、患者资料、账号与基础目录。'],
- ['预约与接诊','SU-04—10、19、29—33\nSU-39—40、54、57','预约、变更、到诊、治疗、结算与资源核对。'],
+ ['预约与接诊','SU-04—10、19、29—33\nSU-39—40、54、57—58','预约、变更、到诊、治疗、结算与资源核对。'],
  ['候补与协作','SU-13—17、24、31、34—38','候补、邀约、任务办理、独立复核及消息。'],
  ['经营与引导','SU-11—12、18、20、41、55—56','成本利润、取消分析和操作协助。'],
  ['资金与对账','SU-42—49、53','渠道、收退款、凭据、流水、对账及日结。'],
@@ -329,7 +349,7 @@ def build(folder,repo,output=None):
    p('执行与复核采用不同账号；后续观察窗口完整结束且不早于最近执行开始日。样本不足、不可比和变化待观察分别记录，不把统计变化当作措施的因果效果。')
   if item['heading'].startswith('4.13'):
    manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
-   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance'],15):
+   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination'],15):
     if number>15:page()
     heading('4.13.'+str(number-14)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number)+' '+manifest[name]['title']+'数据库ER图',16,max_height=14 if number==15 else 18)
@@ -355,6 +375,7 @@ def build(folder,repo,output=None):
    page();heading('附录B 维护 协调与通知用例规约',1);appendix_b=True
    p('SU-26—38说明资料维护、出诊协调和站内任务消息。消息仅提示办理，不代替患者同意、任务受理或资金事实；资料更正、出诊维护及重试按各自业务流程办理。',10.5)
   texts=source.get('use_case_overrides',{}).get(title[:5],texts)
+  title=source.get('use_case_titles',{}).get(title[:5],title)
   heading(title,3,False);rows=[['用例名称',title]];group='说明';buffer=[]
   def flush():
    if buffer:rows.append([group,'\n'.join(buffer)]);buffer.clear()
@@ -372,7 +393,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 预约完善 财务与设备用例规约',1)
- p('本附录补充SU-39—57。电话接待、多资源核对及资源目录规约说明现有业务；患者自助改期仍待实现。取消分析、财务与设备的原规则继续保留。每项的实现状态及验收目标分别列明。',10.5)
+ p('本附录补充SU-39—58。电话接待、多资源核对及资源目录规约说明现有业务；患者自助改期仍待实现。取消分析、财务与设备的原规则继续保留。每项的实现状态及验收目标分别列明。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

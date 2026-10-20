@@ -208,8 +208,8 @@ class FrontCoordinationTests(FixtureMixin, TransactionTestCase):
     def test_http_manager_still_sees_counts_not_front_detail(self):
         self.book();c=WorkspaceClient();c.force_login(self.manager)
         self.assertEqual(c.get(reverse('front_coordination_detail',args=[self.slot1.pk])).status_code,403)
-        r=c.get(reverse('availability_detail',args=[self.slot1.pk]));self.assertContains(r,'出诊编号')
-        self.assertNotContains(r,self.p1.patient_no)
+        r=c.get(reverse('availability_detail',args=[self.slot1.pk]));self.assertEqual(r.status_code,403)
+        r=c.get(reverse('visits'));self.assertEqual(r.status_code,200);self.assertNotContains(r,self.p1.patient_no)
 
 class CoordinationReadLockTests(FixtureMixin, TransactionTestCase):
     def setUp(self):

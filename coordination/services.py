@@ -72,7 +72,7 @@ def withdraw(*,actor,entry_id):
 @business_errors
 @transaction.atomic
 def create_plan(*,actor,clinic_id):
-    lock_clinic_grant(actor,clinic_id,roles=('MANAGER',))
+    lock_clinic_grant(actor,clinic_id,roles=('FRONT_DESK',))
     from scheduling.resources import policy
     resource_policy=policy(clinic_id)
     if resource_policy:
@@ -109,7 +109,7 @@ def create_plan(*,actor,clinic_id):
     suggestions=[{'request_id':i,'request_revision':byid[i].revision,'slot_id':cell[0],'start':cell[1],
         'end':cells[cell][2].isoformat(),'intake_revision':cells[cell][0].intake_revision} for i,cell in result.pairs]
     plan=SchedulePlan.objects.create(clinic_id=clinic_id,created_by=actor,suggestions=suggestions,
-        metadata={'algorithm':result.algorithm,'status':result.status,'unassigned':list(result.unassigned),
+        metadata={'scheduling_contract':SchedulePlan.CONTRACT,'algorithm':result.algorithm,'status':result.status,'unassigned':list(result.unassigned),
         'request_count':len(entries),'cell_count':len(cells),'request_limit_hit':len(entries)==60,'slot_limit_hit':len(slots)==80,'bounded':True,'cell_limit_hit':limit_hit,
         'limits':{'requests':60,'slots':80,'cells':200},'duration_minutes':30,'as_of':now.isoformat(),
         'notice':'仅对当前枚举的固定30分钟候选图最大化安排数；不含椅位、医学资格或通勤优化。'})
@@ -121,7 +121,7 @@ def create_plan(*,actor,clinic_id):
 def publish_plan(*,actor,plan_id):
     require_writable(actor)
     preview=SchedulePlan.objects.get(pk=plan_id)
-    lock_clinic_grant(actor,preview.clinic_id,roles=('MANAGER',))
+    lock_clinic_grant(actor,preview.clinic_id,roles=('FRONT_DESK',))
     slots=lock_slots([s['slot_id'] for s in preview.suggestions])
     ids=[s['request_id'] for s in preview.suggestions]
     entries={e.pk:e for e in WaitRequest.objects.filter(pk__in=ids)}
@@ -130,6 +130,8 @@ def publish_plan(*,actor,plan_id):
     lock_physical(preview.clinic_id);release_expired_locked(preview.clinic_id)
     plan=SchedulePlan.objects.select_for_update().get(pk=plan_id)
     if plan.state=='PUBLISHED':return plan
+    if plan.metadata.get('scheduling_contract')!=SchedulePlan.CONTRACT:
+        raise RuleError('这是旧版本排程草案，请由前台重新生成并核对；原邀约和预约保留。')
     if not plan.suggestions:raise RuleError('没有可发布的候选安排。请调整出诊或候补范围。')
     if timezone.now()-plan.created_at>timedelta(minutes=15):raise RuleError('建议已超过15分钟，请重新生成。')
     now=timezone.now()
@@ -152,7 +154,7 @@ def publish_plan(*,actor,plan_id):
         from scheduling.resources import choose_bundle,claim_locked
         bundle=choose_bundle(slot=s,start=start,end=end,service_id=row.get('service_id'),expected=row.get('resources'),locked=True)
         offer=WaitOffer.objects.create(request=e,plan=plan,slot=s,starts_at=start,ends_at=end,expires_at=min(now+timedelta(minutes=15),start))
-        claim_locked(actor=actor,snapshot=bundle,start=start,end=end,offer=offer,reason='主管发布限时邀约')
+        claim_locked(actor=actor,snapshot=bundle,start=start,end=end,offer=offer,reason='前台发布限时邀约')
         e.state='OFFERED';e.revision+=1;e.save(update_fields=['state','revision'])
     plan.state='PUBLISHED';plan.published_at=now;plan.save(update_fields=['state','published_at'])
     emit(actor,'SCHEDULE_OFFERS_PUBLISHED',plan,summary={'offers':len(plan.suggestions)})

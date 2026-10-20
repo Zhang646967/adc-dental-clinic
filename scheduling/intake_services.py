@@ -18,7 +18,7 @@ from scheduling.intake_rules import (CONTRACT, ACTIONS, REASONS, IntakeError,
                                     validate_payload, validate_transition)
 from scheduling.availability_rules import display_time
 
-SALT = 'adc.slot.intake.09a8'
+SALT = 'adc.slot.intake.b131'
 MAX_AGE = 900
 EVENTS = ('SLOT_INTAKE_PAUSED', 'SLOT_INTAKE_RESUMED')
 
@@ -101,7 +101,7 @@ def prepare_intake(*, actor, slot_id, state_token, action, reason):
 def confirm_intake(*, actor, slot_id, proposal_token, confirmed):
     if confirmed is not True: raise RuleError('请明确核对本次接收控制的影响后再确认。')
     ctx = require_availability_actor(actor)
-    lock_clinic_grant(actor, ctx.clinic_id, roles=('MANAGER',))
+    lock_clinic_grant(actor, ctx.clinic_id, roles=('FRONT_DESK',))
     data = _load(proposal_token, proposal=True)
     _bound(actor, data, slot_id)
     snapshot,_ = inspect_availability(actor=actor, slot_id=slot_id)

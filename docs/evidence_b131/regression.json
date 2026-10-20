@@ -1,0 +1,10 @@
+{
+  "project": "adc_b131_verify_eef2ba9327",
+  "exit": 0,
+  "cleanup_exit": 0,
+  "passed": true,
+  "rule_checks": 1046,
+  "postgresql_http_concurrency_tests": 1299,
+  "new_tests": 43,
+  "scope": "complete isolated local regression; final four wording-only corrections are covered by the exact implementation CI and final browser smoke"
+}

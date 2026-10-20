@@ -1,7 +1,9 @@
 from django.urls import path
 from scheduling import availability_views as views
 from scheduling import intake_views
+from scheduling import calendar_views
 urlpatterns=[
+    path('scheduling/calendar/',calendar_views.calendar,name='schedule_calendar'),
     path('slots/<int:pk>/intake/<str:action>/',intake_views.change,name='intake_change'),
     path('slots/<int:pk>/intake-confirm/',intake_views.confirm,name='intake_confirm'),
     path('slots/',views.listing,name='availability_list'),

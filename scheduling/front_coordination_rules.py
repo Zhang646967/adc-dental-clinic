@@ -46,9 +46,9 @@ def assessment(slot: dict, impact: Impact, now: datetime, *, clinical_count: int
             '已到诊、治疗完成或无治疗关闭不走普通取消／改期。其他确需协调的预约仍须逐条核实患者意思。', False, blockers)
     if impact.blocking_visits or impact.effective_offers:
         return CoordinationAssessment('COORDINATE', '仍有关联承诺需要逐条核对',
-            '列表表示关联业务，不表示已经下达停诊指令。前台须先与主管和患者核实，再通过原有入口分别处理。', False, blockers)
-    return CoordinationAssessment('RECHECK', '当前未发现维护阻断，可请主管重新核对',
-        '这是本次读取时点的结果，不是停用许可。本页未暂停接收新预约；主管提交变更时仍须重新核验。', True, blockers)
+            '列表表示关联业务，不表示已经下达停诊指令。前台须先核对调班依据和患者意思，再通过原有入口分别处理。', False, blockers)
+    return CoordinationAssessment('RECHECK', '当前未发现维护阻断，可回到出诊维护核对',
+        '这是本次读取时点的结果，不是停用许可。本页未暂停接收新预约；前台提交变更时仍须重新核验。', True, blockers)
 
 
 def visit_instruction(status: str, *, starts_at: datetime, now: datetime) -> dict:

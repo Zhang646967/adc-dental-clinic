@@ -177,9 +177,9 @@ class EquipmentFeeFollowupTests(CFEFixture,TransactionTestCase):
 class MaintenanceHandoffFollowupTests(CFEFixture,TransactionTestCase):
     def setUp(self):self.setup_cfe();self.a1=self.asset()
     def pause(self):
-        _,token=inspect_intake(actor=self.manager,slot_id=self.slot1.pk)
-        p=prepare_intake(actor=self.manager,slot_id=self.slot1.pk,state_token=token,action='pause',reason='COORDINATION')
-        confirm_intake(actor=self.manager,slot_id=self.slot1.pk,proposal_token=p['proposal_token'],confirmed=True)
+        _,token=inspect_intake(actor=self.front,slot_id=self.slot1.pk)
+        p=prepare_intake(actor=self.front,slot_id=self.slot1.pk,state_token=token,action='pause',reason='COORDINATION')
+        confirm_intake(actor=self.front,slot_id=self.slot1.pk,proposal_token=p['proposal_token'],confirmed=True)
     def test_planning_lists_current_clinic_only(self):
         d=maintenance_schedule(self.manager,self.a1.pk)
         self.assertIn(self.slot1.pk,[s.pk for s in d['rows']]);self.assertNotIn(self.slot2.pk,[s.pk for s in d['rows']])
@@ -243,4 +243,4 @@ class MaintenanceHandoffFollowupTests(CFEFixture,TransactionTestCase):
         self.book();c=WorkspaceClient();c.force_login(self.manager)
         r=c.get(reverse('equipment_schedule',args=[self.a1.pk]),{'slot':self.slot1.pk})
         self.assertEqual(r.status_code,200);self.assertNotContains(r,self.p1.name);self.assertNotContains(r,self.p1.patient_no)
-        self.assertContains(r,'核对出诊与接收状态')
+        self.assertContains(r,'由本店前台维护')

@@ -88,7 +88,7 @@ def main():
                 visits.append(Visit(patient=patients[(index*10+k)%400],dentist=slot.dentist,clinic=clinic,availability_slot=slot,scheduled_start=start,scheduled_end=start+timedelta(minutes=30),status='NO_SHOW'))
         Visit.objects.bulk_create(visits)
         start=datetime.combine(today+timedelta(days=10),time(8),BUSINESS_TZ)
-        future=create_slot(actor=manager,clinic_id=clinic.pk,dentist_id=dentists[0].pk,start=start,end=start+timedelta(days=4))
+        future=create_slot(actor=front,clinic_id=clinic.pk,dentist_id=dentists[0].pk,start=start,end=start+timedelta(days=4))
         first_invoice=None
         for j in range(100):
             at=start+timedelta(minutes=30*j)

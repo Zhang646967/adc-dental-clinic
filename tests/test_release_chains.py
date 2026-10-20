@@ -109,9 +109,9 @@ class ReleaseCoordinationChainTests(FixtureMixin,TransactionTestCase):
             proposal_token=p['proposal_token'],confirmed=True)
         return CoordinationTask.objects.get(pk=result.task_id)
     def pause(self):
-        _,s=inspect_intake(actor=self.manager,slot_id=self.slot1.pk)
-        p=prepare_intake(actor=self.manager,slot_id=self.slot1.pk,state_token=s,action='pause',reason='COORDINATION')
-        confirm_intake(actor=self.manager,slot_id=self.slot1.pk,proposal_token=p['proposal_token'],confirmed=True)
+        _,s=inspect_intake(actor=self.front,slot_id=self.slot1.pk)
+        p=prepare_intake(actor=self.front,slot_id=self.slot1.pk,state_token=s,action='pause',reason='COORDINATION')
+        confirm_intake(actor=self.front,slot_id=self.slot1.pk,proposal_token=p['proposal_token'],confirmed=True)
     def test_pause_task_real_cancellation_notifications_review_and_deactivate(self):
         visit=self.book();self.pause();task=self.task(self.manager,'open')
         self.assertTrue(NotificationOutbox.objects.exists());self.assertFalse(InboxMessage.objects.exists())
@@ -122,10 +122,10 @@ class ReleaseCoordinationChainTests(FixtureMixin,TransactionTestCase):
             party='PATIENT',reason='合成场景：已单独核对患者取消意愿')
         task=self.task(self.front,'submit',task);task=self.task(self.manager,'approve',task)
         self.assertEqual(task.state,'CLOSED');self.slot1.refresh_from_db();self.assertTrue(self.slot1.is_active)
-        _,s=inspect_availability(actor=self.manager,slot_id=self.slot1.pk)
-        p=prepare_availability_change(actor=self.manager,slot_id=self.slot1.pk,state_token=s,
+        _,s=inspect_availability(actor=self.front,slot_id=self.slot1.pk)
+        p=prepare_availability_change(actor=self.front,slot_id=self.slot1.pk,state_token=s,
             action='deactivate',reason_code='PLAN_CHANGED')
-        confirm_availability_change(actor=self.manager,slot_id=self.slot1.pk,proposal_token=p.proposal_token,confirmed=True)
+        confirm_availability_change(actor=self.front,slot_id=self.slot1.pk,proposal_token=p.proposal_token,confirmed=True)
         self.slot1.refresh_from_db();self.assertFalse(self.slot1.is_active)
         visit.refresh_from_db();self.assertEqual(visit.status,'CANCELLED')
         dispatch_batch(25);n=InboxMessage.objects.count();dispatch_batch(25);self.assertEqual(InboxMessage.objects.count(),n)

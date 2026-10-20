@@ -11,6 +11,19 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_schedule_coordination': {
+        'title': '前台排班与调班责任',
+        'tables': {
+            'adc_clinic': ['id', 'clinic_code'],
+            'adc_dentist': ['id', 'employee_no'],
+            'adc_availability_slot': ['id', 'clinic_id', 'dentist_id', 'starts_at', 'ends_at', 'booking_paused'],
+            'adc_visit': ['id', 'availability_slot_id', 'status'],
+            'adc_wait_offer': ['id', 'slot_id', 'state', 'expires_at'],
+            'adc_coordination_task': ['id', 'slot_id', 'assignee_id', 'due_at', 'state'],
+            'adc_user': ['id', 'username'],
+        },
+        'note': '出诊是医师供给，预约与有效邀约是承诺；协调任务经slot_id归店，assignee_id可空，due_at历史可空。每个出诊至多一个活动任务；独立复核与具体预约变更另行办理。',
+    },
     'er_booking': {
         'title': '预约与电话接待',
         'tables': {
@@ -123,13 +136,16 @@ def build():
             dbml += ['  '+f['column']+' '+json.dumps(actual_type)+' ['+', '.join(dbflags)+']']
         for diff in type_differences:
             if diff['table']==name:
-                catalog += ['', '待设计核对：`'+diff['column']+'`的模型类型为`'+diff['model_type']+'`，实际数据库类型为`'+diff['database_type']+'`。本目录按实际类型记录；未执行缩窄字段或改写历史。']
+                catalog += ['', '兼容性记录：`'+diff['column']+'`的模型类型为`'+diff['model_type']+'`，实际数据库类型为`'+diff['database_type']+'`。本目录按实际类型记录；未执行缩窄字段或改写历史。']
         catalog += ['', '数据库约束：', '']
         catalog += ['- `'+c['name']+'`：`'+c['definition'].replace('|','\\|')+'`。'
                     for c in data['constraints'] if c['table']==name]
         catalog += ['', '索引（含条件唯一索引）：', '']
         catalog += ['- `'+i['name']+'`：`'+i['definition'].replace('|','\\|')+'`。'
                     for i in data['indexes'] if i['table']==name]
+        catalog += ['', '跨表及历史触发器：', '']
+        catalog += ['- `'+t['name']+'`：`'+t['definition'].replace('|','\\|')+'`。'
+                    for t in data.get('triggers',[]) if t['table']==name]
         catalog += ['']
         composite=[]
         for c in data['constraints']:

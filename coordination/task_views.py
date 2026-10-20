@@ -3,6 +3,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError
+from datetime import timedelta
+from django.utils import timezone
 from django.http import Http404
 from django.shortcuts import render,redirect
 from django.views.decorators.cache import never_cache
@@ -58,12 +60,13 @@ def change(request,slot_id,task_id=None,action='open'):
     if not allowed:
         problem=next((r['reason'] for r in data['blocked'] if r['action']==ACTIONS[action]),'当前身份或任务状态不允许此操作。')
         return recovery(request,slot_id,task_id,problem=problem,status=409)
-    form=TaskChangeForm(request.POST if request.method=='POST' else None,action=action,initial={'state_token':token})
+    form=TaskChangeForm(request.POST if request.method=='POST' else None,action=action,initial={
+        'state_token':token,'due_at':data.get('due_at') or timezone.now()+timedelta(hours=4)})
     if request.method=='POST' and form.is_valid():
         d=form.cleaned_data
         try:
             preview=prepare_task(actor=request.user,slot_id=slot_id,task_id=task_id,state_token=d['state_token'],
-                action=action,reason=d['reason'],purpose=d.get('purpose',''),target_kind=d.get('target_kind',''),target_id=d.get('target_id'))
+                action=action,reason=d['reason'],purpose=d.get('purpose',''),target_kind=d.get('target_kind',''),target_id=d.get('target_id'),due_at=d.get('due_at'))
         except EXPECTED_ERRORS as exc: add_error(form,exc)
         except DatabaseError: return recovery(request,slot_id,task_id,problem='预览读取不可用，尚未保存；请重新查询。',status=503)
         else:

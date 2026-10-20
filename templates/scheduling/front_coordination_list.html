@@ -1,7 +1,7 @@
 {% extends 'base.html' %}{% block title %}出诊协调 · 前台 · ADC{% endblock %}{% block content %}
 <div class="coordination-desk">
 <p class="eyebrow">前台 · 当前诊所 · 只读核对</p><h1>按出诊协调预约</h1>
-<p>输入主管提供的出诊编号，集中核对该安排关联的预约和邀约。这里不是自动生成的停诊任务列表。</p>
+<p>从日周排班选择或输入需要协调的出诊编号，集中核对该安排关联的预约和邀约。这里不是自动生成的停诊任务列表。</p>
 <form method="get" class="panel coord-query" action="{% url 'front_coordination_list' %}">
 {{ form.as_p }}<button class="button" type="submit">查找本店出诊</button>
 <p class="muted">精确编号查询包含历史；不输入编号时使用所选查询范围。每页20条。</p></form>

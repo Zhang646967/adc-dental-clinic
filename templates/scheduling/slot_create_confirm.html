@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="availability"><a href="{% url 'slot_create' %}">返回重新填写出诊</a><p class="eyebrow">前台排班 · 核对后保存</p><h1>确认新增出诊安排</h1><p class="notice">尚未保存。请核对医师工作安排和完整日期，再明确确认。</p>
+{% if preview %}<section class="panel"><dl class="av-facts"><dt>诊所</dt><dd>{{ preview.clinic }}</dd><dt>医师</dt><dd>{{ preview.dentist }}</dd><dt>北京时间</dt><dd>{{ preview.start|date:'Y-m-d H:i' }} — {{ preview.end|date:'Y-m-d H:i' }}</dd></dl><p>请确认已核对医师工作安排。本次只登记出诊，患者预约仍须另行核对服务、椅位和必要设备。</p></section>{% endif %}
+<form method="post" action="{% url 'slot_create' %}" class="panel">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button type="submit">确认保存出诊安排</button></form>
+</div>{% endblock %}

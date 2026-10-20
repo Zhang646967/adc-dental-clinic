@@ -1,0 +1,1180 @@
+{
+  "scope": "B1.3.1 five-clinic real Chrome scheduling and coordination, isolated synthetic fixture",
+  "checks": [
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager has no front-desk calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager cannot maintain daily availability",
+      "passed": true
+    },
+    {
+      "name": "Reuse identified earlier browser slot",
+      "passed": true
+    },
+    {
+      "name": "Reuse identified earlier browser slot",
+      "passed": true
+    },
+    {
+      "name": "Reuse prior successful browser booking",
+      "passed": true
+    },
+    {
+      "name": "Calendar shows complete service and original promise",
+      "passed": true
+    },
+    {
+      "name": "Original patient business code shown",
+      "passed": true
+    },
+    {
+      "name": "b131-day-390 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Calendar filters keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "pause intake form",
+      "passed": true
+    },
+    {
+      "name": "pause intake preview status",
+      "passed": true
+    },
+    {
+      "name": "pause intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "pause intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task open page",
+      "passed": true
+    },
+    {
+      "name": "Task open preview status",
+      "passed": true
+    },
+    {
+      "name": "Task open server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task open duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task claim page",
+      "passed": true
+    },
+    {
+      "name": "Task claim preview status",
+      "passed": true
+    },
+    {
+      "name": "Task claim server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task claim duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task progress page",
+      "passed": true
+    },
+    {
+      "name": "Task progress preview status",
+      "passed": true
+    },
+    {
+      "name": "Task progress server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task progress duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "No-response retains original appointment",
+      "passed": true
+    },
+    {
+      "name": "Patient promise retained after failed contact",
+      "passed": true
+    },
+    {
+      "name": "Cannot review unresolved original promise",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule form",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule preview status",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Preserve original and reschedule duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task submit page",
+      "passed": true
+    },
+    {
+      "name": "Task submit preview status",
+      "passed": true
+    },
+    {
+      "name": "Task submit server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task submit duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task approve page",
+      "passed": true
+    },
+    {
+      "name": "Task approve preview status",
+      "passed": true
+    },
+    {
+      "name": "Task approve server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task approve duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Front desk maintains reviewed empty slot",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement preview status",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "resume intake form",
+      "passed": true
+    },
+    {
+      "name": "resume intake preview status",
+      "passed": true
+    },
+    {
+      "name": "resume intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "resume intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Coordination responsibility history",
+      "passed": true
+    },
+    {
+      "name": "b131-task-390 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager has no front-desk calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager cannot maintain daily availability",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Appointment form",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent preview status",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Book source promise duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Calendar shows complete service and original promise",
+      "passed": true
+    },
+    {
+      "name": "Original patient business code shown",
+      "passed": true
+    },
+    {
+      "name": "pause intake form",
+      "passed": true
+    },
+    {
+      "name": "pause intake preview status",
+      "passed": true
+    },
+    {
+      "name": "pause intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "pause intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task open page",
+      "passed": true
+    },
+    {
+      "name": "Task open preview status",
+      "passed": true
+    },
+    {
+      "name": "Task open server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task open duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task claim page",
+      "passed": true
+    },
+    {
+      "name": "Task claim preview status",
+      "passed": true
+    },
+    {
+      "name": "Task claim server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task claim duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task progress page",
+      "passed": true
+    },
+    {
+      "name": "Task progress preview status",
+      "passed": true
+    },
+    {
+      "name": "Task progress server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task progress duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "No-response retains original appointment",
+      "passed": true
+    },
+    {
+      "name": "Patient promise retained after failed contact",
+      "passed": true
+    },
+    {
+      "name": "Cannot review unresolved original promise",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule form",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule preview status",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Preserve original and reschedule duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task submit page",
+      "passed": true
+    },
+    {
+      "name": "Task submit preview status",
+      "passed": true
+    },
+    {
+      "name": "Task submit server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task submit duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task approve page",
+      "passed": true
+    },
+    {
+      "name": "Task approve preview status",
+      "passed": true
+    },
+    {
+      "name": "Task approve server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task approve duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Front desk maintains reviewed empty slot",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement preview status",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "resume intake form",
+      "passed": true
+    },
+    {
+      "name": "resume intake preview status",
+      "passed": true
+    },
+    {
+      "name": "resume intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "resume intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Coordination responsibility history",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager has no front-desk calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager cannot maintain daily availability",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Appointment form",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent preview status",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Book source promise duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Calendar shows complete service and original promise",
+      "passed": true
+    },
+    {
+      "name": "Original patient business code shown",
+      "passed": true
+    },
+    {
+      "name": "pause intake form",
+      "passed": true
+    },
+    {
+      "name": "pause intake preview status",
+      "passed": true
+    },
+    {
+      "name": "pause intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "pause intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task open page",
+      "passed": true
+    },
+    {
+      "name": "Task open preview status",
+      "passed": true
+    },
+    {
+      "name": "Task open server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task open duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task claim page",
+      "passed": true
+    },
+    {
+      "name": "Task claim preview status",
+      "passed": true
+    },
+    {
+      "name": "Task claim server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task claim duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task progress page",
+      "passed": true
+    },
+    {
+      "name": "Task progress preview status",
+      "passed": true
+    },
+    {
+      "name": "Task progress server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task progress duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "No-response retains original appointment",
+      "passed": true
+    },
+    {
+      "name": "Patient promise retained after failed contact",
+      "passed": true
+    },
+    {
+      "name": "Cannot review unresolved original promise",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule form",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule preview status",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Preserve original and reschedule duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task submit page",
+      "passed": true
+    },
+    {
+      "name": "Task submit preview status",
+      "passed": true
+    },
+    {
+      "name": "Task submit server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task submit duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task approve page",
+      "passed": true
+    },
+    {
+      "name": "Task approve preview status",
+      "passed": true
+    },
+    {
+      "name": "Task approve server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task approve duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Front desk maintains reviewed empty slot",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement preview status",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "resume intake form",
+      "passed": true
+    },
+    {
+      "name": "resume intake preview status",
+      "passed": true
+    },
+    {
+      "name": "resume intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "resume intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Coordination responsibility history",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager has no front-desk calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager cannot maintain daily availability",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Appointment form",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent preview status",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Book source promise duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Calendar shows complete service and original promise",
+      "passed": true
+    },
+    {
+      "name": "Original patient business code shown",
+      "passed": true
+    },
+    {
+      "name": "pause intake form",
+      "passed": true
+    },
+    {
+      "name": "pause intake preview status",
+      "passed": true
+    },
+    {
+      "name": "pause intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "pause intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task open page",
+      "passed": true
+    },
+    {
+      "name": "Task open preview status",
+      "passed": true
+    },
+    {
+      "name": "Task open server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task open duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task claim page",
+      "passed": true
+    },
+    {
+      "name": "Task claim preview status",
+      "passed": true
+    },
+    {
+      "name": "Task claim server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task claim duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task progress page",
+      "passed": true
+    },
+    {
+      "name": "Task progress preview status",
+      "passed": true
+    },
+    {
+      "name": "Task progress server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task progress duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "No-response retains original appointment",
+      "passed": true
+    },
+    {
+      "name": "Patient promise retained after failed contact",
+      "passed": true
+    },
+    {
+      "name": "Cannot review unresolved original promise",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule form",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule preview status",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Preserve original and reschedule duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task submit page",
+      "passed": true
+    },
+    {
+      "name": "Task submit preview status",
+      "passed": true
+    },
+    {
+      "name": "Task submit server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task submit duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task approve page",
+      "passed": true
+    },
+    {
+      "name": "Task approve preview status",
+      "passed": true
+    },
+    {
+      "name": "Task approve server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task approve duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Front desk maintains reviewed empty slot",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement preview status",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "resume intake form",
+      "passed": true
+    },
+    {
+      "name": "resume intake preview status",
+      "passed": true
+    },
+    {
+      "name": "resume intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "resume intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Coordination responsibility history",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager has no front-desk calendar",
+      "passed": true
+    },
+    {
+      "name": "Manager cannot maintain daily availability",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Create slot form",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot preview status",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Create front-desk slot duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Appointment form",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent preview status",
+      "passed": true
+    },
+    {
+      "name": "Explicit booking consent server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Book source promise duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Calendar shows complete service and original promise",
+      "passed": true
+    },
+    {
+      "name": "Original patient business code shown",
+      "passed": true
+    },
+    {
+      "name": "pause intake form",
+      "passed": true
+    },
+    {
+      "name": "pause intake preview status",
+      "passed": true
+    },
+    {
+      "name": "pause intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "pause intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task open page",
+      "passed": true
+    },
+    {
+      "name": "Task open preview status",
+      "passed": true
+    },
+    {
+      "name": "Task open server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task open duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task claim page",
+      "passed": true
+    },
+    {
+      "name": "Task claim preview status",
+      "passed": true
+    },
+    {
+      "name": "Task claim server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task claim duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task progress page",
+      "passed": true
+    },
+    {
+      "name": "Task progress preview status",
+      "passed": true
+    },
+    {
+      "name": "Task progress server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task progress duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "No-response retains original appointment",
+      "passed": true
+    },
+    {
+      "name": "Patient promise retained after failed contact",
+      "passed": true
+    },
+    {
+      "name": "Cannot review unresolved original promise",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule form",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule preview status",
+      "passed": true
+    },
+    {
+      "name": "Consented reschedule server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Preserve original and reschedule duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task submit page",
+      "passed": true
+    },
+    {
+      "name": "Task submit preview status",
+      "passed": true
+    },
+    {
+      "name": "Task submit server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task submit duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Task approve page",
+      "passed": true
+    },
+    {
+      "name": "Task approve preview status",
+      "passed": true
+    },
+    {
+      "name": "Task approve server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Task approve duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Front desk maintains reviewed empty slot",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement preview status",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Reviewed shift replacement duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "resume intake form",
+      "passed": true
+    },
+    {
+      "name": "resume intake preview status",
+      "passed": true
+    },
+    {
+      "name": "resume intake server-held preview",
+      "passed": true
+    },
+    {
+      "name": "resume intake duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Coordination responsibility history",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Cross-clinic scheduling is rejected",
+      "passed": true
+    },
+    {
+      "name": "Cross-clinic task is rejected",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "passed": true
+}

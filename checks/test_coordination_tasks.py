@@ -35,8 +35,8 @@ class TaskPolicyTests(unittest.TestCase):
         with self.assertRaises(TaskError):self.step(None,'open',role='MANAGER',impact=Impact(0,0,0,0,0,1,False))
     def test_open_truncated_fails(self):
         with self.assertRaises(TaskError):self.step(None,'open',role='MANAGER',impact=Impact(1001,0,0,0,0,0,True))
-    def test_front_cannot_open(self):
-        with self.assertRaises(TaskError):self.step(None,'open')
+    def test_front_can_open(self):
+        self.assertEqual(self.step(None,'open'),'OPEN')
     def test_front_claims_self(self):self.assertEqual(self.step(task('OPEN'),'claim'),'IN_PROGRESS')
     def test_second_claim_fails(self):
         with self.assertRaises(TaskError):self.step(task(),'claim')
@@ -111,7 +111,7 @@ class TaskPolicyTests(unittest.TestCase):
 class TaskPayloadTests(unittest.TestCase):
     def payload(self,proposal=False):
         d=dict(contract=CONTRACT,kind='state',actor=2,role='MANAGER',context=str(uuid4()),context_revision=1,clinic=1,slot=4,task=None,state='a'*64)
-        if proposal:d.update(kind='proposal',operation=str(uuid4()),action='open',reason='PLAN_CHANGE',purpose='REPLACE',target_kind='',target_id=None)
+        if proposal:d.update(kind='proposal',operation=str(uuid4()),action='open',reason='PLAN_CHANGE',purpose='REPLACE',target_kind='',target_id=None,due_at=(NOW+timedelta(hours=2)).isoformat())
         return d
     def test_valid_state(self):validate_payload(self.payload(),proposal=False)
     def test_valid_proposal(self):validate_payload(self.payload(True),proposal=True)
@@ -164,8 +164,8 @@ class TaskSourceContracts(unittest.TestCase):
     def test_migration_matches_model_field_names(self):
         tree=ast.parse(self.text('coordination/models.py'));c=next(n for n in tree.body if isinstance(n,ast.ClassDef) and n.name=='CoordinationTask')
         names=[n.targets[0].id for n in c.body if isinstance(n,ast.Assign)]
-        s=self.text('coordination/migrations/0002_coordination_tasks.py')
-        for n in names:self.assertIn('('+repr(n)+',',s)
+        s=''.join(p.read_text() for p in sorted((ROOT/'coordination/migrations').glob('0*.py')))
+        for n in names:self.assertTrue('('+repr(n)+',' in s or 'name='+repr(n) in s,n)
     def test_readonly_does_not_allow_task_posts(self):
         s=self.text('adc_core/middleware.py');self.assertNotIn('coordination_task_confirm',s)
     def test_confirmation_has_both_tokens_and_no_get_save(self):
