@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "application_commit": "2c45d6dee850063481e98aac872381186392f707",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39464670340",
+  "image": "sha256:06ffd0ea0fcb5c9dbf2487ff9022ef387f82908a763805b132eefd1f4019b820",
+  "architecture": "arm64",
+  "exact_business_tested_image": true,
+  "original_row_groups_preserved": 66,
+  "private_configurations_preserved": 70,
+  "original_database_container_and_volume_preserved": true,
+  "original_rc_tag_preserved": true,
+  "seven_role_nine_account_browser_checks": 233,
+  "business_test_writes_into_Mac": false,
+  "six_application_conditions": "HEALTHY",
+  "host_collector": "HEALTHY",
+  "old_observations_encrypted": true,
+  "old_observation_status": "UNKNOWN_OBSERVER_UNAVAILABLE",
+  "before_and_after_encrypted_backups_verified": true,
+  "after_backup_sha256": "4de68090e5e8ee10b32e1186e41227e86f0a01f7c8a2bfb464551900b2150ab6",
+  "course_report_sha256": {
+    ".docx": "84e2d4684e14641668d38b77d9a3b059527b0eae81b3408c08b6e4bfd171e494",
+    ".pdf": "19081f8f846dc320765a4dacd7353cdaab2c9fd82ab1e44dc80e764c7c21cd46"
+  },
+  "scope_limits": [
+    "capacity was measured on isolated Mac containers, not independent cloud",
+    "24-hour operation not established",
+    "server not purchased; public acceptance pending",
+    "historical Windows original-data recovery unresolved"
+  ]
+}

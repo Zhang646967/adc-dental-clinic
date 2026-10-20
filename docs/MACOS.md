@@ -11,7 +11,7 @@ The migration instructions and dated evidence below retain their original scope.
 
 ## Current B1.3.1 course update
 
-Front-desk availability/intake/waitlist planning, day/week observations and follow-up deadlines replace the former manager-owned daily workflow. Managers retain resource catalogues and independent review. [Business and execution evidence](evidence_b131/README.md) records the tested commit and local delivery separately. Preserve the original instance identity, data volume, private configuration and RC tag; use an encrypted backup and additive migrations before updating.
+Front-desk availability/intake/waitlist planning, day/week observations and follow-up deadlines replace the former manager-owned daily workflow. Managers retain resource catalogues and independent review. Application `2c45d6d` passed exact-commit CI and is installed; [execution and delivery evidence](evidence_b131/README.md) keeps the measured workload and final image separate. Preserve the original instance identity, data volume, private configuration and RC tag; use an encrypted backup and additive migrations before updating.
 
 ## Source baseline
 

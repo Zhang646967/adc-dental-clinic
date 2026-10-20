@@ -1,0 +1,15 @@
+{
+  "conclusion": "success",
+  "headSha": "2c45d6dee850063481e98aac872381186392f707",
+  "status": "completed",
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39464670340",
+  "executed_test_counts": {
+    "rules": 1046,
+    "postgresql_http_concurrency": 1299
+  },
+  "test_seconds": {
+    "rules": 11.055,
+    "postgresql_http_concurrency": 324.776
+  },
+  "all_gates_passed": true
+}

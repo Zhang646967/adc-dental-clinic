@@ -1,0 +1,273 @@
+{
+  "scope": "B1.3.1 exact committed ARM image, final four wording repairs and browser permissions",
+  "checks": [
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact image scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Current front desk navigation",
+      "passed": true
+    },
+    {
+      "name": "Exact image availability",
+      "passed": true
+    },
+    {
+      "name": "Availability front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image intake ownership",
+      "passed": true
+    },
+    {
+      "name": "Intake front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image coordination search",
+      "passed": true
+    },
+    {
+      "name": "Coordination day/week route wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image new slot form",
+      "passed": true
+    },
+    {
+      "name": "Final signed slot preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Preview explicitly unsaved",
+      "passed": true
+    },
+    {
+      "name": "Confirmation has signed proposal",
+      "passed": true
+    },
+    {
+      "name": "b131-exact-preview-390 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot assume front desk scheduling",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot create daily slots",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact image scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Current front desk navigation",
+      "passed": true
+    },
+    {
+      "name": "Exact image availability",
+      "passed": true
+    },
+    {
+      "name": "Availability front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image intake ownership",
+      "passed": true
+    },
+    {
+      "name": "Intake front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image coordination search",
+      "passed": true
+    },
+    {
+      "name": "Coordination day/week route wording",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot assume front desk scheduling",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot create daily slots",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact image scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Current front desk navigation",
+      "passed": true
+    },
+    {
+      "name": "Exact image availability",
+      "passed": true
+    },
+    {
+      "name": "Availability front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image intake ownership",
+      "passed": true
+    },
+    {
+      "name": "Intake front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image coordination search",
+      "passed": true
+    },
+    {
+      "name": "Coordination day/week route wording",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot assume front desk scheduling",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot create daily slots",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact image scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Current front desk navigation",
+      "passed": true
+    },
+    {
+      "name": "Exact image availability",
+      "passed": true
+    },
+    {
+      "name": "Availability front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image intake ownership",
+      "passed": true
+    },
+    {
+      "name": "Intake front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image coordination search",
+      "passed": true
+    },
+    {
+      "name": "Coordination day/week route wording",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot assume front desk scheduling",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot create daily slots",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact image scoped week calendar",
+      "passed": true
+    },
+    {
+      "name": "Current front desk navigation",
+      "passed": true
+    },
+    {
+      "name": "Exact image availability",
+      "passed": true
+    },
+    {
+      "name": "Availability front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image intake ownership",
+      "passed": true
+    },
+    {
+      "name": "Intake front desk wording",
+      "passed": true
+    },
+    {
+      "name": "Exact image coordination search",
+      "passed": true
+    },
+    {
+      "name": "Coordination day/week route wording",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot assume front desk scheduling",
+      "passed": true
+    },
+    {
+      "name": "Exact image manager cannot create daily slots",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "application_commit": "2c45d6dee850063481e98aac872381186392f707",
+  "passed": true
+}

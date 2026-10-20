@@ -103,7 +103,7 @@
         "6.2"
       ],
       "evidence": "database/README.md",
-      "status": "five actual ER views; 69 tables, 618 columns, 170 foreign keys and 42 triggers; additive relation guards and direct PostgreSQL counterexamples verified"
+      "status": "five actual ER views; 69 SQL tables, 618 ORM columns plus 4 migration-journal columns, 170 foreign keys and 42 triggers; additive relation guards and direct PostgreSQL counterexamples verified"
     }
   ],
   "validation": "report-source/validation.json",

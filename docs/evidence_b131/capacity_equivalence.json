@@ -10,5 +10,7 @@
     "templates/scheduling/intake_change.html"
   ],
   "full_thirty_minute_measurement": "capacity.json",
-  "final_wording_requires_real_browser_smoke": true
+  "final_wording_requires_real_browser_smoke": false,
+  "final_wording_verification": "exact_browser.json",
+  "delivery_application_commit": "2c45d6dee850063481e98aac872381186392f707"
 }
