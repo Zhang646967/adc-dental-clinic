@@ -6,6 +6,8 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
+**下一阶段重点：前台排班与数据库设计。** 日常出诊及候补排班由前台负责，现有主管权限的岗位调整待实施；[实施规划](docs/FRONT_DESK_SCHEDULING_PLAN.md)已更新。新增[数据库ER与完整字段目录](docs/database/README.md)，覆盖当前69张表和170条实际外键，四幅ER同时纳入课程报告。
+
 ## 仓库分类
 
 | 分类 | 入口 | 内容 |
@@ -19,7 +21,7 @@
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告108页，含57项业务用例和1项共享核验；领域图分为诊疗结算、接待成约和资源占用，接待与资源协调状态分别表达。1,046项源码检查及1,256项PostgreSQL／请求／并发测试通过；五店二十账号三十分钟9,000次请求p95为0.352秒，最终小修采用明确限定的[有效负载路径等价核对](docs/evidence_b12_b13/capacity_equivalence.json)。患者自助改期、小程序和独立公网仍在后续范围。
+正式报告113页，含57项业务用例和1项共享核验、32幅图；领域、状态和数据库ER分别表达，前台排班岗位调整列为下一阶段。B1.2＋B1.3已通过1,046项源码检查及1,256项PostgreSQL／请求／并发测试；五店二十账号三十分钟9,000次请求p95为0.352秒，最终小修采用明确限定的[有效负载路径等价核对](docs/evidence_b12_b13/capacity_equivalence.json)。本次设计与报告更新没有新增应用、容量或公网验收结论。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

@@ -1,0 +1,1071 @@
+// Current database ER source; selected view diagrams are projections.
+// All 68 ORM tables; django_migrations is a framework migration journal.
+// Partial uniqueness, exclusions and triggers are documented separately.
+
+Table adc_ai_usage_bucket {
+  id "bigint" [pk, not null]
+  key "character varying(100)" [unique, not null]
+  used "integer" [not null]
+}
+
+Table adc_allergy {
+  id "bigint" [pk, not null]
+  code "character varying(24)" [unique, not null]
+  name "character varying(120)" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_appointment_action_event {
+  id "bigint" [pk, not null]
+  followup_id "bigint" [null]
+  improvement_id "bigint" [null]
+  operation_id "uuid" [unique, not null]
+  actor_id "bigint" [not null]
+  action "character varying(16)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_appointment_improvement {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  weekday "smallint" [not null]
+  band "character varying(8)" [not null]
+  baseline_start "date" [not null]
+  baseline_end "date" [not null]
+  kind "character varying(16)" [not null]
+  plan "character varying(500)" [not null]
+  assigned_to_id "bigint" [not null]
+  due_on "date" [not null]
+  state "character varying(12)" [not null]
+  execution "character varying(500)" [not null]
+  submitted_by_id "bigint" [null]
+  reviewed_by_id "bigint" [null]
+  review_start "date" [null]
+  review_end "date" [null]
+  assessment "character varying(16)" [not null]
+  review_note "character varying(500)" [not null]
+  baseline "jsonb" [not null]
+  comparison "jsonb" [not null]
+  lock_version "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_assistant_event {
+  id "bigint" [pk, not null]
+  request_id "uuid" [unique, not null]
+  user_id "bigint" [not null]
+  audience "character varying(12)" [not null]
+  intent "character varying(32)" [not null]
+  mode "character varying(24)" [not null]
+  result_code "character varying(40)" [not null]
+  input_chars "integer" [not null]
+  duration_ms "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_audit_event {
+  id "bigint" [pk, not null]
+  actor_id "bigint" [null]
+  visit_id "bigint" [null]
+  correction_request_id "bigint" [null]
+  event_type "character varying(48)" [not null]
+  occurred_at "timestamp with time zone" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  subject_type "character varying(32)" [not null]
+  subject_key "character varying(80)" [not null]
+  reason "character varying(500)" [not null]
+  change_summary "jsonb" [not null]
+}
+
+Table adc_availability_slot {
+  id "bigint" [pk, not null]
+  dentist_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  starts_at "timestamp with time zone" [not null]
+  ends_at "timestamp with time zone" [not null]
+  is_active "boolean" [not null]
+  booking_paused "boolean" [not null]
+  intake_revision "integer" [not null]
+}
+
+Table adc_booking_service {
+  id "bigint" [pk, not null]
+  department_id "bigint" [not null]
+  code "character varying(40)" [not null]
+  name "character varying(100)" [not null]
+  duration_minutes "smallint" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (department_id, code) [unique, name: 'service_department_code']
+  }
+}
+
+Table adc_booking_service_dentists {
+  id "bigint" [pk, not null]
+  bookingservice_id "bigint" [not null]
+  dentist_id "bigint" [not null]
+  indexes {
+    (bookingservice_id, dentist_id) [unique, name: 'adc_booking_service_dent_bookingservice_id_dentis_13f7641e_uniq']
+  }
+}
+
+Table adc_cancellation_followup {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [unique, not null]
+  reason_code "character varying(16)" [not null]
+  state "character varying(16)" [not null]
+  assigned_to_id "bigint" [not null]
+  due_on "date" [null]
+  replacement_visit_id "bigint" [null]
+  note "character varying(500)" [not null]
+  lock_version "integer" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table adc_cash_entry {
+  id "bigint" [pk, not null]
+  operation_id "uuid" [unique, not null]
+  clinic_id "bigint" [not null]
+  invoice_id "bigint" [null]
+  based_record_version_id "bigint" [null]
+  equipment_event_id "bigint" [null]
+  equipment_cost_amendment_id "bigint" [null]
+  reversal_of_id "bigint" [null]
+  kind "character varying(24)" [not null]
+  amount "numeric(16,2)" [not null]
+  occurred_on "date" [not null]
+  reason "character varying(500)" [not null]
+  state "character varying(12)" [not null]
+  lock_version "integer" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+}
+
+Table adc_cash_evidence {
+  id "bigint" [pk, not null]
+  cash_entry_id "bigint" [not null]
+  account_id "bigint" [not null]
+  reference "character varying(80)" [not null]
+  version "integer" [not null]
+  previous_id "bigint" [unique, null]
+  initial "boolean" [not null]
+  state "character varying(12)" [not null]
+  operation_id "uuid" [unique, not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reason "character varying(500)" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  indexes {
+    (cash_entry_id, version) [unique, name: 'cash_evidence_version_unique']
+  }
+}
+
+Table adc_clinic {
+  id "bigint" [pk, not null]
+  clinic_code "character varying(24)" [unique, not null]
+  name "character varying(120)" [not null]
+  postal_address "character varying(255)" [not null]
+  supervisor_name "character varying(80)" [not null]
+  phone "character varying(32)" [not null]
+  email "character varying(254)" [not null]
+  area_sqm "numeric(10,2)" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_coordination_task {
+  id "bigint" [pk, not null]
+  slot_id "bigint" [not null]
+  purpose "character varying(12)" [not null]
+  opening_reason "character varying(24)" [not null]
+  creation_operation "uuid" [unique, not null]
+  state "character varying(12)" [not null]
+  created_by_id "bigint" [not null]
+  assignee_id "bigint" [null]
+  submitted_by_id "bigint" [null]
+  submitted_at "timestamp with time zone" [null]
+  submitted_digest "character varying(64)" [not null]
+  closed_by_id "bigint" [null]
+  closed_at "timestamp with time zone" [null]
+  revision "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table adc_correction_request {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [not null]
+  kind "character varying(24)" [not null]
+  base_record_version_id "bigint" [null]
+  expected_visit_lock_version "integer" [not null]
+  requester_id "bigint" [not null]
+  reviewer_id "bigint" [null]
+  dentist_confirmed_by_id "bigint" [null]
+  status "character varying(12)" [not null]
+  reason "text" [not null]
+  proposed_change "jsonb" [not null]
+  requested_at "timestamp with time zone" [not null]
+  applied_at "timestamp with time zone" [null]
+}
+
+Table adc_daily_close {
+  id "bigint" [pk, not null]
+  operation_id "uuid" [unique, not null]
+  clinic_id "bigint" [not null]
+  business_date "date" [not null]
+  version "integer" [not null]
+  previous_id "bigint" [unique, null]
+  snapshot "jsonb" [not null]
+  declared "jsonb" [not null]
+  evidence "character varying(500)" [not null]
+  reason "character varying(500)" [not null]
+  state "character varying(10)" [not null]
+  lock_version "integer" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  indexes {
+    (clinic_id, business_date, version) [unique, name: 'daily_version_unique']
+  }
+}
+
+Table adc_dentist {
+  id "bigint" [pk, not null]
+  employee_no "character varying(24)" [unique, not null]
+  name "character varying(80)" [not null]
+  date_of_birth "date" [not null]
+  home_address "character varying(255)" [not null]
+  phone "character varying(32)" [not null]
+  email "character varying(254)" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_dentist_qualification {
+  id "bigint" [pk, not null]
+  dentist_id "bigint" [not null]
+  qualification_id "bigint" [not null]
+  notes "text" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (dentist_id, qualification_id) [unique, name: 'dentist_qualification_unique']
+  }
+}
+
+Table adc_dentist_quarter_cost {
+  id "bigint" [pk, not null]
+  quarter_id "bigint" [not null]
+  dentist_id "bigint" [not null]
+  cost_status "character varying(12)" [not null]
+  supply_cost "numeric(16,2)" [null]
+  operating_expense "numeric(16,2)" [null]
+  confirmed_by_id "bigint" [null]
+  confirmed_at "timestamp with time zone" [null]
+  notes "text" [not null]
+  indexes {
+    (quarter_id, dentist_id) [unique, name: 'dentist_quarter_unique']
+  }
+}
+
+Table adc_department {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  code "character varying(40)" [not null]
+  name "character varying(100)" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (clinic_id, code) [unique, name: 'department_clinic_code']
+  }
+}
+
+Table adc_department_hours {
+  id "bigint" [pk, not null]
+  department_id "bigint" [not null]
+  weekday "smallint" [not null]
+  opens_at "time without time zone" [not null]
+  closes_at "time without time zone" [not null]
+}
+
+Table adc_equipment_asset {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  asset_code "character varying(40)" [not null]
+  name "character varying(120)" [not null]
+  category "character varying(16)" [not null]
+  location "character varying(120)" [not null]
+  acquired_on "date" [not null]
+  acquisition_cost "numeric(16,2)" [null]
+  next_service_due "date" [null]
+  state "character varying(16)" [not null]
+  lock_version "integer" [not null]
+  registered_by_id "bigint" [not null]
+  registered_at "timestamp with time zone" [not null]
+}
+
+Table adc_equipment_cost_amendment {
+  id "bigint" [pk, not null]
+  event_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  based_amendment_id "bigint" [null]
+  previous_cost "numeric(16,2)" [null]
+  proposed_cost "numeric(16,2)" [not null]
+  reason "character varying(500)" [not null]
+  state "character varying(12)" [not null]
+  lock_version "integer" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+}
+
+Table adc_equipment_event {
+  id "bigint" [pk, not null]
+  asset_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  sequence "integer" [not null]
+  kind "character varying(16)" [not null]
+  previous_state "character varying(16)" [not null]
+  next_state "character varying(16)" [not null]
+  performed_on "date" [not null]
+  next_service_due "date" [null]
+  cost "numeric(16,2)" [null]
+  note "character varying(500)" [not null]
+  recorded_by_id "bigint" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  indexes {
+    (asset_id, sequence) [unique, name: 'equipment_event_sequence_unique']
+  }
+}
+
+Table adc_inbox_message {
+  id "bigint" [pk, not null]
+  event_id "bigint" [not null]
+  recipient_id "bigint" [not null]
+  grant_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  role "character varying(16)" [not null]
+  delivered_at "timestamp with time zone" [not null]
+  read_at "timestamp with time zone" [null]
+  indexes {
+    (event_id, grant_id) [unique, name: 'inbox_event_grant_unique']
+  }
+}
+
+Table adc_invoice {
+  id "bigint" [pk, not null]
+  invoice_no "character varying(40)" [unique, not null]
+  visit_id "bigint" [unique, not null]
+  current_record_version_id "bigint" [unique, not null]
+  first_issued_at "timestamp with time zone" [not null]
+}
+
+Table adc_maintenance_action {
+  id "bigint" [pk, not null]
+  order_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  sequence "integer" [not null]
+  action "character varying(10)" [not null]
+  actor_id "bigint" [not null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (order_id, sequence) [unique, name: 'maintenance_action_sequence']
+  }
+}
+
+Table adc_maintenance_order {
+  id "bigint" [pk, not null]
+  asset_id "bigint" [not null]
+  maintenance_event_id "bigint" [not null]
+  issue "character varying(500)" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  assigned_to_id "bigint" [not null]
+  due_on "date" [not null]
+  state "character varying(12)" [not null]
+  lock_version "integer" [not null]
+  performed_on "date" [null]
+  cost "numeric(16,2)" [null]
+  next_service_due "date" [null]
+  completion_note "character varying(500)" [not null]
+  schedule_checked "boolean" [not null]
+  submitted_by_id "bigint" [null]
+  submitted_at "timestamp with time zone" [null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  service_event_id "bigint" [unique, null]
+}
+
+Table adc_notification_outbox {
+  id "bigint" [pk, not null]
+  source_event_id "bigint" [unique, not null]
+  task_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  task_revision "bigint" [not null]
+  action "character varying(12)" [not null]
+  event_state "character varying(12)" [not null]
+  occurred_at "timestamp with time zone" [not null]
+  recipients "jsonb" [not null]
+  state "character varying(16)" [not null]
+  attempts "smallint" [not null]
+  retry_round "integer" [not null]
+  next_attempt_at "timestamp with time zone" [null]
+  completed_at "timestamp with time zone" [null]
+  delivered_count "integer" [not null]
+  suppressed_count "integer" [not null]
+  error_code "character varying(24)" [not null]
+}
+
+Table adc_patient {
+  id "bigint" [pk, not null]
+  patient_no "character varying(40)" [unique, not null]
+  name "character varying(80)" [not null]
+  date_of_birth "date" [not null]
+  billing_address "character varying(255)" [not null]
+  phone "character varying(32)" [not null]
+  email "character varying(254)" [not null]
+  emergency_name "character varying(80)" [not null]
+  emergency_phone "character varying(32)" [not null]
+  allergy_status "character varying(12)" [not null]
+  allergy_info_version "integer" [not null]
+  created_in_clinic_id "bigint" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_patient_access {
+  id "bigint" [pk, not null]
+  user_id "bigint" [unique, not null]
+  patient_id "bigint" [unique, not null]
+  is_active "boolean" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_patient_allergy {
+  id "bigint" [pk, not null]
+  patient_id "bigint" [not null]
+  allergy_id "bigint" [not null]
+  notes "text" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (patient_id, allergy_id) [unique, name: 'patient_allergy_unique']
+  }
+}
+
+Table adc_payment_account {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  code "character varying(40)" [not null]
+  method "character varying(16)" [not null]
+  is_active "boolean" [not null]
+  lock_version "integer" [not null]
+  operation_id "uuid" [unique, not null]
+  last_operation_id "uuid" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (clinic_id, code) [unique, name: 'payment_account_code_unique']
+  }
+}
+
+Table adc_portal_booking_receipt {
+  id "bigint" [pk, not null]
+  nonce "uuid" [unique, not null]
+  access_id "bigint" [not null]
+  visit_id "bigint" [unique, not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_qualification {
+  id "bigint" [pk, not null]
+  code "character varying(24)" [unique, not null]
+  name "character varying(120)" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_quarter {
+  id "bigint" [pk, not null]
+  lock_version "integer" [not null]
+  year "smallint" [not null]
+  quarter_no "smallint" [not null]
+  roster_status "character varying(12)" [not null]
+  roster_confirmed_by_id "bigint" [null]
+  roster_confirmed_at "timestamp with time zone" [null]
+  indexes {
+    (year, quarter_no) [unique, name: 'quarter_unique']
+  }
+}
+
+Table adc_reception_case {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  caller_name "character varying(80)" [not null]
+  relationship "character varying(80)" [not null]
+  contact "character varying(120)" [not null]
+  patient_hint "character varying(80)" [not null]
+  patient_id "bigint" [null]
+  service_id "bigint" [null]
+  preferred_dentist_id "bigint" [null]
+  preferred_day "date" [null]
+  state "character varying(12)" [not null]
+  owner_id "bigint" [not null]
+  due_at "timestamp with time zone" [null]
+  reason_code "character varying(20)" [not null]
+  wait_request_id "bigint" [unique, null]
+  visit_id "bigint" [unique, null]
+  revision "integer" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_reception_communication {
+  id "bigint" [pk, not null]
+  case_id "bigint" [not null]
+  sequence "integer" [not null]
+  kind "character varying(24)" [not null]
+  note "character varying(2000)" [not null]
+  actor_id "bigint" [not null]
+  snapshot "jsonb" [not null]
+  operation_id "uuid" [unique, not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (case_id, sequence) [unique, name: 'reception_history_sequence']
+  }
+}
+
+Table adc_reconciliation_match {
+  id "bigint" [pk, not null]
+  cash_entry_id "bigint" [not null]
+  evidence_id "bigint" [not null]
+  line_id "bigint" [not null]
+  state "character varying(12)" [not null]
+  operation_id "uuid" [unique, not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  invalidated_by_id "bigint" [null]
+  invalidated_at "timestamp with time zone" [null]
+}
+
+Table adc_resource_action {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  actor_id "bigint" [not null]
+  kind "character varying(40)" [not null]
+  result "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_resource_binding {
+  id "bigint" [pk, not null]
+  asset_id "bigint" [unique, not null]
+  room_id "bigint" [null]
+  shared "boolean" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_resource_block {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  department_id "bigint" [null]
+  room_id "bigint" [null]
+  asset_id "bigint" [null]
+  starts_at "timestamp with time zone" [not null]
+  ends_at "timestamp with time zone" [not null]
+  reason "character varying(500)" [not null]
+  is_active "boolean" [not null]
+  recorded_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_resource_claim {
+  id "bigint" [pk, not null]
+  plan_id "bigint" [not null]
+  asset_id "bigint" [not null]
+  starts_at "timestamp with time zone" [not null]
+  ends_at "timestamp with time zone" [not null]
+  kind "character varying(8)" [not null]
+  expires_at "timestamp with time zone" [null]
+  active "boolean" [not null]
+  released_at "timestamp with time zone" [null]
+  release_reason "character varying(40)" [not null]
+  indexes {
+    (plan_id, asset_id) [unique, name: 'resource_plan_asset_unique']
+  }
+}
+
+Table adc_resource_coordination {
+  id "bigint" [pk, not null]
+  plan_id "bigint" [not null]
+  asset_id "bigint" [not null]
+  state "character varying(16)" [not null]
+  owner_id "bigint" [null]
+  due_at "timestamp with time zone" [null]
+  reason "character varying(500)" [not null]
+  revision "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_resource_plan {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [null]
+  offer_id "bigint" [null]
+  service_id "bigint" [not null]
+  room_id "bigint" [not null]
+  snapshot "jsonb" [not null]
+  version "integer" [not null]
+  is_current "boolean" [not null]
+  reason "character varying(500)" [not null]
+  recorded_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_resource_policy {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [unique, not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  activated_at "timestamp with time zone" [null]
+}
+
+Table adc_role_assignment {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  role "character varying(16)" [not null]
+  scope_kind "character varying(16)" [not null]
+  clinic_id "bigint" [null]
+  is_active "boolean" [not null]
+}
+
+Table adc_schedule_plan {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  suggestions "jsonb" [not null]
+  metadata "jsonb" [not null]
+  state "character varying(12)" [not null]
+  published_at "timestamp with time zone" [null]
+}
+
+Table adc_service_requirement {
+  id "bigint" [pk, not null]
+  service_id "bigint" [not null]
+  category "character varying(16)" [not null]
+  quantity "smallint" [not null]
+  indexes {
+    (service_id, category) [unique, name: 'service_category_unique']
+  }
+}
+
+Table adc_statement_batch {
+  id "bigint" [pk, not null]
+  account_id "bigint" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  source_bytes "bytea" [not null]
+  digest "character varying(64)" [not null]
+  parser_version "character varying(12)" [not null]
+  normalized_rows "jsonb" [not null]
+  state "character varying(12)" [not null]
+  operation_id "uuid" [unique, null]
+  imported_at "timestamp with time zone" [null]
+  new_count "integer" [not null]
+  skipped_count "integer" [not null]
+}
+
+Table adc_statement_line {
+  id "bigint" [pk, not null]
+  batch_id "bigint" [not null]
+  account_id "bigint" [not null]
+  transaction_id "character varying(80)" [not null]
+  booked_on "date" [not null]
+  direction "character varying(3)" [not null]
+  amount "numeric(16,2)" [not null]
+  currency "character varying(3)" [not null]
+  reference "character varying(80)" [not null]
+  indexes {
+    (account_id, transaction_id) [unique, name: 'statement_transaction_unique']
+  }
+}
+
+Table adc_treatment_record {
+  id "bigint" [pk, not null]
+  record_version_id "bigint" [not null]
+  line_no "integer" [not null]
+  treatment_type_id "bigint" [not null]
+  name_snapshot "character varying(120)" [not null]
+  unit_snapshot "character varying(120)" [not null]
+  quantity "numeric(12,3)" [not null]
+  unit_price "numeric(12,2)" [not null]
+  line_amount "numeric(16,2)" [not null]
+  confirmed_by_id "bigint" [null]
+  confirmed_at "timestamp with time zone" [null]
+  price_reason "character varying(500)" [not null]
+  indexes {
+    (record_version_id, line_no) [unique, name: 'record_line_unique']
+  }
+}
+
+Table adc_treatment_room {
+  id "bigint" [pk, not null]
+  department_id "bigint" [not null]
+  code "character varying(40)" [not null]
+  name "character varying(100)" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (department_id, code) [unique, name: 'room_department_code']
+  }
+}
+
+Table adc_treatment_type {
+  id "bigint" [pk, not null]
+  code "character varying(24)" [unique, not null]
+  name "character varying(120)" [not null]
+  unit_definition "character varying(120)" [not null]
+  standard_unit_price "numeric(12,2)" [not null]
+  is_active "boolean" [not null]
+}
+
+Table adc_user {
+  id "bigint" [pk, not null]
+  password "character varying(128)" [not null]
+  last_login "timestamp with time zone" [null]
+  is_superuser "boolean" [not null]
+  username "character varying(150)" [unique, not null]
+  first_name "character varying(150)" [not null]
+  last_name "character varying(150)" [not null]
+  email "character varying(254)" [not null]
+  is_staff "boolean" [not null]
+  is_active "boolean" [not null]
+  date_joined "timestamp with time zone" [not null]
+  dentist_id "bigint" [unique, null]
+}
+
+Table adc_user_groups {
+  id "bigint" [pk, not null]
+  useraccount_id "bigint" [not null]
+  group_id "integer" [not null]
+  indexes {
+    (useraccount_id, group_id) [unique, name: 'adc_user_groups_useraccount_id_group_id_a85dd0fa_uniq']
+  }
+}
+
+Table adc_user_user_permissions {
+  id "bigint" [pk, not null]
+  useraccount_id "bigint" [not null]
+  permission_id "integer" [not null]
+  indexes {
+    (useraccount_id, permission_id) [unique, name: 'adc_user_user_permission_useraccount_id_permissio_60b10b3a_uniq']
+  }
+}
+
+Table adc_visit {
+  id "bigint" [pk, not null]
+  visit_no "character varying(40)" [unique, not null]
+  patient_id "bigint" [not null]
+  dentist_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  availability_slot_id "bigint" [not null]
+  scheduled_start "timestamp with time zone" [not null]
+  scheduled_end "timestamp with time zone" [not null]
+  status "character varying(24)" [not null]
+  attended "boolean" [not null]
+  attended_at "timestamp with time zone" [null]
+  completed_at "timestamp with time zone" [null]
+  chief_complaint "text" [not null]
+  special_needs "text" [not null]
+  cancellation_party "character varying(8)" [not null]
+  cancellation_reason "text" [not null]
+  replaces_visit_id "bigint" [unique, null]
+  lock_version "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_visit_record_version {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [not null]
+  revision_no "integer" [not null]
+  state "character varying(12)" [not null]
+  outcome "character varying(16)" [not null]
+  previous_version_id "bigint" [null]
+  correction_request_id "bigint" [unique, null]
+  prepared_by_id "bigint" [not null]
+  reviewed_by_id "bigint" [null]
+  created_at "timestamp with time zone" [not null]
+  published_at "timestamp with time zone" [null]
+  allergy_review_snapshot "jsonb" [not null]
+  billing_header_snapshot "jsonb" [not null]
+  clinical_note "text" [not null]
+  no_treatment_reason "text" [not null]
+  total_amount "numeric(16,2)" [not null]
+  currency "character varying(3)" [not null]
+  indexes {
+    (id, visit_id) [unique, name: 'version_id_visit_unique']
+    (visit_id, revision_no) [unique, name: 'visit_revision_unique']
+  }
+}
+
+Table adc_visit_request {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [not null]
+  description "character varying(500)" [not null]
+  treatment_type_id "bigint" [null]
+}
+
+Table adc_wait_offer {
+  id "bigint" [pk, not null]
+  request_id "bigint" [not null]
+  plan_id "bigint" [not null]
+  slot_id "bigint" [not null]
+  starts_at "timestamp with time zone" [not null]
+  ends_at "timestamp with time zone" [not null]
+  expires_at "timestamp with time zone" [not null]
+  state "character varying(12)" [not null]
+  visit_id "bigint" [unique, null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_wait_request {
+  id "bigint" [pk, not null]
+  patient_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  service_id "bigint" [null]
+  preferred_dentist_id "bigint" [null]
+  earliest "timestamp with time zone" [not null]
+  latest "timestamp with time zone" [not null]
+  state "character varying(12)" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  revision "integer" [not null]
+}
+
+Table adc_workspace_context {
+  id "uuid" [pk, not null]
+  user_id "bigint" [not null]
+  role "character varying(16)" [not null]
+  clinic_id "bigint" [null]
+  revision "integer" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table auth_group {
+  id "integer" [pk, not null]
+  name "character varying(150)" [unique, not null]
+}
+
+Table auth_group_permissions {
+  id "bigint" [pk, not null]
+  group_id "integer" [not null]
+  permission_id "integer" [not null]
+  indexes {
+    (group_id, permission_id) [unique, name: 'auth_group_permissions_group_id_permission_id_0cd325b0_uniq']
+  }
+}
+
+Table auth_permission {
+  id "integer" [pk, not null]
+  name "character varying(255)" [not null]
+  content_type_id "integer" [not null]
+  codename "character varying(100)" [not null]
+  indexes {
+    (content_type_id, codename) [unique, name: 'auth_permission_content_type_id_codename_01ab375a_uniq']
+  }
+}
+
+Table django_content_type {
+  id "integer" [pk, not null]
+  app_label "character varying(100)" [not null]
+  model "character varying(100)" [not null]
+  indexes {
+    (app_label, model) [unique, name: 'django_content_type_app_label_model_76bd3d3b_uniq']
+  }
+}
+
+Table django_session {
+  session_key "character varying(40)" [pk, not null]
+  session_data "text" [not null]
+  expire_date "timestamp with time zone" [not null]
+}
+
+Ref: adc_appointment_action_event.followup_id > adc_cancellation_followup.id
+Ref: adc_appointment_action_event.improvement_id > adc_appointment_improvement.id
+Ref: adc_appointment_action_event.actor_id > adc_user.id
+Ref: adc_appointment_improvement.assigned_to_id > adc_user.id
+Ref: adc_appointment_improvement.reviewed_by_id > adc_user.id
+Ref: adc_appointment_improvement.submitted_by_id > adc_user.id
+Ref: adc_appointment_improvement.clinic_id > adc_clinic.id
+Ref: adc_assistant_event.user_id > adc_user.id
+Ref: adc_audit_event.actor_id > adc_user.id
+Ref: adc_audit_event.correction_request_id > adc_correction_request.id
+Ref: adc_audit_event.visit_id > adc_visit.id
+Ref: adc_availability_slot.clinic_id > adc_clinic.id
+Ref: adc_availability_slot.dentist_id > adc_dentist.id
+Ref: adc_booking_service.department_id > adc_department.id
+Ref: adc_booking_service_dentists.bookingservice_id > adc_booking_service.id
+Ref: adc_booking_service_dentists.dentist_id > adc_dentist.id
+Ref: adc_cancellation_followup.assigned_to_id > adc_user.id
+Ref: adc_cancellation_followup.replacement_visit_id > adc_visit.id
+Ref: adc_cancellation_followup.visit_id - adc_visit.id
+Ref: adc_cash_entry.based_record_version_id > adc_visit_record_version.id
+Ref: adc_cash_entry.clinic_id > adc_clinic.id
+Ref: adc_cash_entry.equipment_cost_amendment_id > adc_equipment_cost_amendment.id
+Ref: adc_cash_entry.equipment_event_id > adc_equipment_event.id
+Ref: adc_cash_entry.invoice_id > adc_invoice.id
+Ref: adc_cash_entry.prepared_by_id > adc_user.id
+Ref: adc_cash_entry.reversal_of_id > adc_cash_entry.id
+Ref: adc_cash_entry.reviewed_by_id > adc_user.id
+Ref: adc_cash_evidence.account_id > adc_payment_account.id
+Ref: adc_cash_evidence.cash_entry_id > adc_cash_entry.id
+Ref: adc_cash_evidence.prepared_by_id > adc_user.id
+Ref: adc_cash_evidence.previous_id - adc_cash_evidence.id
+Ref: adc_cash_evidence.reviewed_by_id > adc_user.id
+Ref: adc_coordination_task.slot_id > adc_availability_slot.id
+Ref: adc_coordination_task.assignee_id > adc_user.id
+Ref: adc_coordination_task.closed_by_id > adc_user.id
+Ref: adc_coordination_task.created_by_id > adc_user.id
+Ref: adc_coordination_task.submitted_by_id > adc_user.id
+Ref: adc_correction_request.base_record_version_id > adc_visit_record_version.id
+Ref: adc_correction_request.dentist_confirmed_by_id > adc_user.id
+Ref: adc_correction_request.requester_id > adc_user.id
+Ref: adc_correction_request.reviewer_id > adc_user.id
+Ref: adc_correction_request.visit_id > adc_visit.id
+Ref: adc_daily_close.clinic_id > adc_clinic.id
+Ref: adc_daily_close.prepared_by_id > adc_user.id
+Ref: adc_daily_close.previous_id - adc_daily_close.id
+Ref: adc_daily_close.reviewed_by_id > adc_user.id
+Ref: adc_dentist_qualification.qualification_id > adc_qualification.id
+Ref: adc_dentist_qualification.dentist_id > adc_dentist.id
+Ref: adc_dentist_quarter_cost.confirmed_by_id > adc_user.id
+Ref: adc_dentist_quarter_cost.dentist_id > adc_dentist.id
+Ref: adc_dentist_quarter_cost.quarter_id > adc_quarter.id
+Ref: adc_department.clinic_id > adc_clinic.id
+Ref: adc_department_hours.department_id > adc_department.id
+Ref: adc_equipment_asset.clinic_id > adc_clinic.id
+Ref: adc_equipment_asset.registered_by_id > adc_user.id
+Ref: adc_equipment_cost_amendment.based_amendment_id > adc_equipment_cost_amendment.id
+Ref: adc_equipment_cost_amendment.event_id > adc_equipment_event.id
+Ref: adc_equipment_cost_amendment.prepared_by_id > adc_user.id
+Ref: adc_equipment_cost_amendment.reviewed_by_id > adc_user.id
+Ref: adc_equipment_event.asset_id > adc_equipment_asset.id
+Ref: adc_equipment_event.recorded_by_id > adc_user.id
+Ref: adc_inbox_message.clinic_id > adc_clinic.id
+Ref: adc_inbox_message.event_id > adc_notification_outbox.id
+Ref: adc_inbox_message.grant_id > adc_role_assignment.id
+Ref: adc_inbox_message.recipient_id > adc_user.id
+Ref: adc_invoice.current_record_version_id - adc_visit_record_version.id
+Ref: adc_invoice.visit_id - adc_visit.id
+Ref: adc_invoice.(current_record_version_id, visit_id) - adc_visit_record_version.(id, visit_id)
+Ref: adc_maintenance_action.order_id > adc_maintenance_order.id
+Ref: adc_maintenance_action.actor_id > adc_user.id
+Ref: adc_maintenance_order.asset_id > adc_equipment_asset.id
+Ref: adc_maintenance_order.maintenance_event_id > adc_equipment_event.id
+Ref: adc_maintenance_order.service_event_id - adc_equipment_event.id
+Ref: adc_maintenance_order.assigned_to_id > adc_user.id
+Ref: adc_maintenance_order.created_by_id > adc_user.id
+Ref: adc_maintenance_order.reviewed_by_id > adc_user.id
+Ref: adc_maintenance_order.submitted_by_id > adc_user.id
+Ref: adc_notification_outbox.source_event_id - adc_audit_event.id
+Ref: adc_notification_outbox.task_id > adc_coordination_task.id
+Ref: adc_notification_outbox.clinic_id > adc_clinic.id
+Ref: adc_patient.created_in_clinic_id > adc_clinic.id
+Ref: adc_patient_access.patient_id - adc_patient.id
+Ref: adc_patient_access.user_id - adc_user.id
+Ref: adc_patient_allergy.allergy_id > adc_allergy.id
+Ref: adc_patient_allergy.patient_id > adc_patient.id
+Ref: adc_payment_account.clinic_id > adc_clinic.id
+Ref: adc_payment_account.created_by_id > adc_user.id
+Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
+Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
+Ref: adc_quarter.roster_confirmed_by_id > adc_user.id
+Ref: adc_reception_case.clinic_id > adc_clinic.id
+Ref: adc_reception_case.created_by_id > adc_user.id
+Ref: adc_reception_case.owner_id > adc_user.id
+Ref: adc_reception_case.patient_id > adc_patient.id
+Ref: adc_reception_case.preferred_dentist_id > adc_dentist.id
+Ref: adc_reception_case.service_id > adc_booking_service.id
+Ref: adc_reception_case.visit_id - adc_visit.id
+Ref: adc_reception_case.wait_request_id - adc_wait_request.id
+Ref: adc_reception_communication.case_id > adc_reception_case.id
+Ref: adc_reception_communication.actor_id > adc_user.id
+Ref: adc_reconciliation_match.cash_entry_id > adc_cash_entry.id
+Ref: adc_reconciliation_match.evidence_id > adc_cash_evidence.id
+Ref: adc_reconciliation_match.invalidated_by_id > adc_user.id
+Ref: adc_reconciliation_match.line_id > adc_statement_line.id
+Ref: adc_reconciliation_match.prepared_by_id > adc_user.id
+Ref: adc_reconciliation_match.reviewed_by_id > adc_user.id
+Ref: adc_resource_action.actor_id > adc_user.id
+Ref: adc_resource_action.clinic_id > adc_clinic.id
+Ref: adc_resource_binding.asset_id - adc_equipment_asset.id
+Ref: adc_resource_binding.room_id > adc_treatment_room.id
+Ref: adc_resource_block.asset_id > adc_equipment_asset.id
+Ref: adc_resource_block.clinic_id > adc_clinic.id
+Ref: adc_resource_block.department_id > adc_department.id
+Ref: adc_resource_block.recorded_by_id > adc_user.id
+Ref: adc_resource_block.room_id > adc_treatment_room.id
+Ref: adc_resource_claim.asset_id > adc_equipment_asset.id
+Ref: adc_resource_claim.plan_id > adc_resource_plan.id
+Ref: adc_resource_coordination.asset_id > adc_equipment_asset.id
+Ref: adc_resource_coordination.plan_id > adc_resource_plan.id
+Ref: adc_resource_coordination.owner_id > adc_user.id
+Ref: adc_resource_plan.offer_id > adc_wait_offer.id
+Ref: adc_resource_plan.recorded_by_id > adc_user.id
+Ref: adc_resource_plan.room_id > adc_treatment_room.id
+Ref: adc_resource_plan.service_id > adc_booking_service.id
+Ref: adc_resource_plan.visit_id > adc_visit.id
+Ref: adc_resource_policy.clinic_id - adc_clinic.id
+Ref: adc_role_assignment.clinic_id > adc_clinic.id
+Ref: adc_role_assignment.user_id > adc_user.id
+Ref: adc_schedule_plan.clinic_id > adc_clinic.id
+Ref: adc_schedule_plan.created_by_id > adc_user.id
+Ref: adc_service_requirement.service_id > adc_booking_service.id
+Ref: adc_statement_batch.account_id > adc_payment_account.id
+Ref: adc_statement_batch.created_by_id > adc_user.id
+Ref: adc_statement_line.account_id > adc_payment_account.id
+Ref: adc_statement_line.batch_id > adc_statement_batch.id
+Ref: adc_treatment_record.confirmed_by_id > adc_user.id
+Ref: adc_treatment_record.record_version_id > adc_visit_record_version.id
+Ref: adc_treatment_record.treatment_type_id > adc_treatment_type.id
+Ref: adc_treatment_room.department_id > adc_department.id
+Ref: adc_user.dentist_id - adc_dentist.id
+Ref: adc_user_groups.group_id > auth_group.id
+Ref: adc_user_groups.useraccount_id > adc_user.id
+Ref: adc_user_user_permissions.permission_id > auth_permission.id
+Ref: adc_user_user_permissions.useraccount_id > adc_user.id
+Ref: adc_visit.availability_slot_id > adc_availability_slot.id
+Ref: adc_visit.clinic_id > adc_clinic.id
+Ref: adc_visit.dentist_id > adc_dentist.id
+Ref: adc_visit.patient_id > adc_patient.id
+Ref: adc_visit.replaces_visit_id - adc_visit.id
+Ref: adc_visit_record_version.correction_request_id - adc_correction_request.id
+Ref: adc_visit_record_version.previous_version_id > adc_visit_record_version.id
+Ref: adc_visit_record_version.prepared_by_id > adc_user.id
+Ref: adc_visit_record_version.reviewed_by_id > adc_user.id
+Ref: adc_visit_record_version.visit_id > adc_visit.id
+Ref: adc_visit_request.treatment_type_id > adc_treatment_type.id
+Ref: adc_visit_request.visit_id > adc_visit.id
+Ref: adc_wait_offer.plan_id > adc_schedule_plan.id
+Ref: adc_wait_offer.request_id > adc_wait_request.id
+Ref: adc_wait_offer.slot_id > adc_availability_slot.id
+Ref: adc_wait_offer.visit_id - adc_visit.id
+Ref: adc_wait_request.clinic_id > adc_clinic.id
+Ref: adc_wait_request.created_by_id > adc_user.id
+Ref: adc_wait_request.patient_id > adc_patient.id
+Ref: adc_wait_request.preferred_dentist_id > adc_dentist.id
+Ref: adc_wait_request.service_id > adc_booking_service.id
+Ref: adc_workspace_context.clinic_id > adc_clinic.id
+Ref: adc_workspace_context.user_id > adc_user.id
+Ref: auth_group_permissions.permission_id > auth_permission.id
+Ref: auth_group_permissions.group_id > auth_group.id
+Ref: auth_permission.content_type_id > django_content_type.id

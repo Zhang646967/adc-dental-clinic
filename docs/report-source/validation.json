@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "scope": "formal report content and layout; executed business evidence is recorded separately in evidence_b12_b13",
-  "pdf_pages": 108,
+  "scope": "current database ER and formal report content/layout; no new application acceptance claimed",
+  "pdf_pages": 113,
   "business_use_cases": 57,
   "shared_subfunctions": 1,
   "complete_specifications": 58,
-  "tables": 75,
-  "figures": 28,
+  "tables": 76,
+  "figures": 32,
   "mind_maps": 6,
-  "contents_entries": 52,
-  "legacy_substantive_fields_preserved": 209,
+  "contents_entries": 54,
+  "legacy_substantive_fields_preserved": 229,
   "SU04_channel_expansion_explicit": true,
   "all_AT_01_25_retained": true,
   "pending_cases": [
@@ -24,17 +24,31 @@
   "media_parts_preserved": 39,
   "original_migrations_preserved": 31,
   "frozen_reports_unchanged": true,
-  "private_values_absent": 36,
-  "word_sha256": "509e01cb93734cbbb39c08d73ff1fe8e4ad0b982ae5870295e2274209e0081d4",
-  "pdf_sha256": "a584810ea896ca68f19e065a6bc244e2c0edf7d741a97ca09f0ec5d60b9b1666",
+  "private_values_absent": 11,
+  "word_sha256": "e806cde614d5e79635426a22015ba9443475224c7d2767302f29c3910c70b1c6",
+  "pdf_sha256": "9a331a53c8e08f330fb6a1ff2a982855a55f01ab64322b4d7d5ba396ae069505",
+  "database_er_views": 4,
+  "front_desk_scheduling_role_migration": "pending",
   "visual_review": {
-    "pages": 108,
-    "new_or_changed_bodies_reviewed": 43,
-    "previously_reviewed_body_pixel_matches": 65,
-    "final_render_changed_pages": [
-      23
+    "pages": 113,
+    "new_or_changed_bodies_reviewed": 12,
+    "previously_reviewed_body_pixel_matches": 101,
+    "reviewed_pages": [
+      1,
+      4,
+      5,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      57,
+      58
     ],
-    "final_changed_page_reviewed": true,
-    "clipping_or_label_collisions_observed": false
-  }
+    "clipping_or_label_collisions_observed": false,
+    "header_footer_page_numbers_verified": true
+  },
+  "structure_validation": "../database/view_manifest.json"
 }

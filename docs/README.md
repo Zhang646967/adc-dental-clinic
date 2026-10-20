@@ -12,7 +12,7 @@
 | 设备费用及维护 | [费用更正](EQUIPMENT_COST_AMENDMENTS.md)、[维护工单](MAINTENANCE_WORK_ORDERS.md) |
 | 电话接待与统一资源 | [B1.2＋B1.3业务合同](B12_B13_RECEPTION_RESOURCES.md)、[场景追踪](evidence_b12_b13/traceability.md) |
 | 取消分析与服务改进 | [B1.1业务合同](B11_APPOINTMENT_IMPROVEMENT.md)、[领域及状态图](diagrams/)、[已执行追踪](evidence_b11/traceability.md) |
-| 预约业务下一阶段 | [取消时段、电话接待、自助预约与科室资源](APPOINTMENT_BUSINESS_PLAN.md) |
+| 预约业务下一阶段 | [前台排班与数据库设计优先计划](FRONT_DESK_SCHEDULING_PLAN.md)、[预约业务总计划](APPOINTMENT_BUSINESS_PLAN.md) |
 | 预约与排班 | [预约改期](RESCHEDULING_OPTIMIZATION.md)、[出诊维护](SU29_SU30_AVAILABILITY.md)、[前台协调](SU31_FRONT_COORDINATION.md) |
 | 接诊控制、任务和通知 | [接诊控制](SU32_SU33_INTAKE_CONTROL.md)、[协调任务](SU34_SU35_SU36_COORDINATION_TASKS.md)、[通知](SU37_SU38_NOTIFICATIONS.md) |
 | 基础目录与权限 | [目录规约](SU27_SU28_DIRECTORY.md)、[字段目录](FIELD_CATALOG.md) |
@@ -20,7 +20,8 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [需求追踪](TRACEABILITY.md)、[物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)、[模型图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[170条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [成熟系统学习与差距](MATURE_SYSTEM_STUDY.md)、[后续开发方向](COMMERCIAL_DEVELOPMENT.md)。
 - [AI 接口与边界](AI_INTERFACE.md)、[版本范围](V1_SCOPE_AND_REMAINING.md)。

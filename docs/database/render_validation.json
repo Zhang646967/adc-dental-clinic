@@ -1,0 +1,30 @@
+{
+  "er_booking": {
+    "nodes": 7,
+    "edges": 8,
+    "width": 471,
+    "height": 458,
+    "minPrintedFontPt": 13.481019108280256
+  },
+  "er_catalogue": {
+    "nodes": 8,
+    "edges": 7,
+    "width": 786,
+    "height": 596,
+    "minPrintedFontPt": 8.078320610687024
+  },
+  "er_resource_claims": {
+    "nodes": 8,
+    "edges": 9,
+    "width": 751,
+    "height": 671,
+    "minPrintedFontPt": 8.454806924101199
+  },
+  "er_finance": {
+    "nodes": 9,
+    "edges": 11,
+    "width": 628,
+    "height": 873,
+    "minPrintedFontPt": 10.110764331210191
+  }
+}

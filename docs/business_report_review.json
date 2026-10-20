@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "date": "2026-10-19",
-  "scope": "formal report and implemented B1.1/B1.2/B1.3 workflows; historical results retain their original scope",
+  "date": "2026-10-20",
+  "scope": "formal report, current database ER and next-stage front-desk scheduling; historical business results retain their original scope",
   "user_requests": [
     {
       "id": "U1",
@@ -82,9 +82,31 @@
         "chapter6"
       ],
       "status": "formal report rewritten; engineering history retained outside report"
+    },
+    {
+      "id": "U7",
+      "request": "front desk is responsible for scheduling",
+      "report": [
+        "4.14",
+        "5.1",
+        "6.2"
+      ],
+      "plan": "FRONT_DESK_SCHEDULING_PLAN.md",
+      "status": "target responsibility and acceptance planned; current manager-only scheduling permissions still await implementation"
+    },
+    {
+      "id": "U8",
+      "request": "add database ER and prioritize database design optimization",
+      "report": [
+        "4.13",
+        "6.2"
+      ],
+      "evidence": "database/README.md",
+      "status": "four ER views, complete field/foreign-key catalogue and 69-table/170-FK metadata baseline added; database optimization is a next-stage gate"
     }
   ],
   "validation": "report-source/validation.json",
-  "application_changes": true,
-  "domain_and_state_models": "three core views: care/billing, telephone conversion and resource occupation; separate reception and resource-coordination states"
+  "domain_and_state_models": "three core views: care/billing, telephone conversion and resource occupation; separate reception and resource-coordination states",
+  "historical_application_changes": true,
+  "this_update_application_changes": false
 }

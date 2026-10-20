@@ -1,0 +1,217 @@
+{
+  "er_booking": {
+    "title": "预约与电话接待",
+    "tables": 7,
+    "relationships": 8,
+    "note": "接待可以尚未建档；visit_id唯一且可空，沟通按case_id与sequence保留历史。诊所与医师等未展开外键见字段目录。",
+    "columns": {
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_dentist": [
+        "id",
+        "employee_no"
+      ],
+      "adc_patient": [
+        "id",
+        "patient_no"
+      ],
+      "adc_availability_slot": [
+        "id",
+        "clinic_id",
+        "dentist_id",
+        "starts_at",
+        "ends_at"
+      ],
+      "adc_visit": [
+        "id",
+        "patient_id",
+        "availability_slot_id",
+        "status"
+      ],
+      "adc_reception_case": [
+        "id",
+        "clinic_id",
+        "patient_id",
+        "visit_id",
+        "state"
+      ],
+      "adc_reception_communication": [
+        "id",
+        "case_id",
+        "sequence"
+      ]
+    }
+  },
+  "er_catalogue": {
+    "title": "排班服务与医师适配",
+    "tables": 8,
+    "relationships": 7,
+    "note": "服务与医师的多对多关系通过真实连接表实现；科室开放区间与医师出诊区间分别保存，共同参与预约核验。",
+    "columns": {
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_department": [
+        "id",
+        "clinic_id",
+        "code"
+      ],
+      "adc_department_hours": [
+        "id",
+        "department_id",
+        "weekday",
+        "opens_at",
+        "closes_at"
+      ],
+      "adc_treatment_room": [
+        "id",
+        "department_id",
+        "code"
+      ],
+      "adc_booking_service": [
+        "id",
+        "department_id",
+        "duration_minutes"
+      ],
+      "adc_service_requirement": [
+        "id",
+        "service_id",
+        "category",
+        "quantity"
+      ],
+      "adc_booking_service_dentists": [
+        "id",
+        "bookingservice_id",
+        "dentist_id"
+      ],
+      "adc_dentist": [
+        "id",
+        "employee_no"
+      ]
+    }
+  },
+  "er_resource_claims": {
+    "title": "设备位置与资源占用",
+    "tables": 8,
+    "relationships": 9,
+    "note": "方案必须引用预约或邀约，接受邀约后允许两者同时存在；每个来源至多一个当前方案。牙椅使用设备资产，每项有效占用受时间排斥约束保护。",
+    "columns": {
+      "adc_visit": [
+        "id"
+      ],
+      "adc_wait_offer": [
+        "id",
+        "visit_id"
+      ],
+      "adc_booking_service": [
+        "id"
+      ],
+      "adc_treatment_room": [
+        "id"
+      ],
+      "adc_resource_plan": [
+        "id",
+        "visit_id",
+        "offer_id",
+        "service_id",
+        "room_id",
+        "version",
+        "is_current"
+      ],
+      "adc_resource_claim": [
+        "id",
+        "plan_id",
+        "asset_id",
+        "starts_at",
+        "ends_at",
+        "active"
+      ],
+      "adc_equipment_asset": [
+        "id",
+        "asset_code",
+        "state"
+      ],
+      "adc_resource_binding": [
+        "id",
+        "asset_id",
+        "room_id",
+        "shared"
+      ]
+    }
+  },
+  "er_finance": {
+    "title": "诊疗结算与资金凭据",
+    "tables": 9,
+    "relationships": 11,
+    "note": "每次就诊至多一个逻辑账单；账单另有复合外键保证当前记录版本属于同一次就诊。凭据与匹配保留多次历史，活动匹配的唯一性由条件约束限定。",
+    "columns": {
+      "adc_visit": [
+        "id"
+      ],
+      "adc_visit_record_version": [
+        "id",
+        "visit_id",
+        "revision_no"
+      ],
+      "adc_treatment_record": [
+        "id",
+        "record_version_id",
+        "line_no"
+      ],
+      "adc_invoice": [
+        "id",
+        "visit_id",
+        "current_record_version_id"
+      ],
+      "adc_cash_entry": [
+        "id",
+        "invoice_id",
+        "amount",
+        "state"
+      ],
+      "adc_cash_evidence": [
+        "id",
+        "cash_entry_id",
+        "account_id",
+        "version"
+      ],
+      "adc_payment_account": [
+        "id"
+      ],
+      "adc_statement_line": [
+        "id",
+        "account_id",
+        "transaction_id"
+      ],
+      "adc_reconciliation_match": [
+        "id",
+        "cash_entry_id",
+        "evidence_id",
+        "line_id",
+        "state"
+      ]
+    }
+  },
+  "validation": {
+    "passed": true,
+    "tables": 69,
+    "orm_tables": 68,
+    "columns_types_and_nullability_checked": 617,
+    "model_database_type_differences": [
+      {
+        "table": "auth_group_permissions",
+        "column": "id",
+        "model_type": "integer",
+        "database_type": "bigint"
+      }
+    ],
+    "orm_foreign_keys": 169,
+    "sql_foreign_keys": 170,
+    "sql_only_composite_foreign_keys": 1,
+    "snapshot_sha256": "e034f68a7f9eb831f9d80c2747ff012d41e72ce566d2f6f1d8cb9197c442aba2",
+    "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
+  }
+}

@@ -1,4 +1,4 @@
-> 历史 v0.3 基础资料；新增功能、字段与证据请看 CHANGELOG_v0.4.md、AI_INTERFACE.md、TEST_REPORT.md。本文件的“尚未运行”仅指原编制时点。
+> 历史 v0.3 基础资料；当前字段及主外键请看[真实数据库目录](database/README.md)和[当前完整字段清单](database/FIELD_CATALOG.md)。本文件的“尚未运行”仅指原编制时点，不作为当前功能状态。
 
 # 全字段清单 v0.3
 

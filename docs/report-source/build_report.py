@@ -137,8 +137,11 @@ def build(folder,repo,output=None):
   if spec.get('table'):
    v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','5.7':'表5-3 页面调研与落实','5.8':'表5-4 业务体验问题与可验证行为','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
    p(spec.get('caption') or label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
- def figure(path,caption,width=16):
+ def figure(path,caption,width=16,max_height=None):
   if not path.exists():raise FileNotFoundError(path)
+  if max_height is not None:
+   from PIL import Image
+   with Image.open(path) as im:width=min(width,max_height*im.width/im.height)
   x=D.add_paragraph();x.paragraph_format.first_line_indent=Pt(0);x.alignment=WD_ALIGN_PARAGRAPH.CENTER;x.paragraph_format.keep_with_next=True;x.paragraph_format.line_spacing=1.0
   x.add_run().add_picture(str(path),width=Cm(width));p(caption,10.5,False,True);markdown.extend(['!['+caption+']('+Path(os.path.relpath(path,folder)).as_posix()+')',''])
  def mind(n):p('思维导图  '+source['mind_maps'][str(n)],size=10.5,indent=False,space=6)
@@ -324,6 +327,13 @@ def build(folder,repo,output=None):
    p('每个取消预约至多一个当前原因跟进，可引用正式另约；措施按诊所、星期和时段建立，不占用患者资源。每条办理历史只能属于跟进或措施之一，不能覆盖原预约和统计事实。')
    figure(repo/'docs/diagrams/improvement_state.png','图4-14 改进措施状态与独立复核',16)
    p('执行与复核采用不同账号；后续观察窗口完整结束且不早于最近执行开始日。样本不足、不可比和变化待观察分别记录，不把统计变化当作措施的因果效果。')
+  if item['heading'].startswith('4.13'):
+   manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
+   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance'],15):
+    if number>15:page()
+    heading('4.13.'+str(number-14)+' '+manifest[name]['title'],3,False)
+    figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number)+' '+manifest[name]['title']+'数据库ER图',16,max_height=14 if number==15 else 18)
+    p(manifest[name]['note'],10.5)
  mind(4)
  page();heading('第5章 系统实现与测试',1)
  for item in source['implementation']:
