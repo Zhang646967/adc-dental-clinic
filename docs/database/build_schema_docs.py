@@ -145,8 +145,8 @@ def build():
         side=lambda table,columns: table+'.'+(columns[0] if len(columns)==1 else '('+', '.join(columns)+')')
         unique=any(f['column'] in cols and f['unique'] for f in models[t]['fields'])
         dbml += ['Ref: '+side(t,cols)+(' - ' if unique else ' > ')+side(parent,targets)]
-    (ROOT/'schema.dbml').write_text('\n'.join(dbml)+'\n')
-    (ROOT/'FIELD_CATALOG.md').write_text('\n'.join(catalog)+'\n')
+    (ROOT/'schema.dbml').write_text('\n'.join(dbml).rstrip()+'\n')
+    (ROOT/'FIELD_CATALOG.md').write_text('\n'.join(catalog).rstrip()+'\n')
     relation_lines=['# 当前数据库外键关系', '',
         '170条实际SQL外键，其中169条对应ORM单列关系，1条为账单同次就诊复合外键。', '',
         '| 子表 | 外键列 | 父表 | 被引用列 |', '|---|---|---|---|']

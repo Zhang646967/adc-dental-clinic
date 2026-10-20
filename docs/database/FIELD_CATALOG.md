@@ -2328,4 +2328,3 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `django_session_expire_date_a5c62663`：`CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING btree (expire_date)`。
 - `django_session_pkey`：`CREATE UNIQUE INDEX django_session_pkey ON public.django_session USING btree (session_key)`。
 - `django_session_session_key_c0390e0f_like`：`CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session USING btree (session_key varchar_pattern_ops)`。
-
