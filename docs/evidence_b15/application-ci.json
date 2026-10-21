@@ -1,4 +1,15 @@
 {
-  "status": "pending",
-  "scope": "Exact implementation commit CI will be recorded after push"
+  "conclusion": "success",
+  "headSha": "f2777d94c72df79514c4ffd9f2bb4fea11be2985",
+  "status": "completed",
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39554933826",
+  "executed_test_counts": {
+    "rules": 1052,
+    "postgresql_http_concurrency": 1377
+  },
+  "test_durations": {
+    "1052": 18.178,
+    "1377": 658.196
+  },
+  "all_gates_passed": true
 }

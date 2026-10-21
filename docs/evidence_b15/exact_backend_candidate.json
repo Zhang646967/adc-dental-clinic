@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "application_commit": "f2777d94c72df79514c4ffd9f2bb4fea11be2985",
+  "image": "sha256:af7374075f821334f3f96271258ba4b6243a830d6805d49a1b81a7e846eb3b44",
+  "native_client_files_equal_commit": true,
+  "actual_native_page_handlers": 65,
+  "clinics": 5,
+  "application_conditions": {
+    "backlog": "HEALTHY",
+    "database": "HEALTHY",
+    "failed_delivery": "HEALTHY",
+    "storage": "HEALTHY",
+    "web": "HEALTHY",
+    "worker": "HEALTHY"
+  },
+  "scope": "Exact committed server image. Native stylesheet subsequently corrected and compiled separately; see native_compiler.json."
+}

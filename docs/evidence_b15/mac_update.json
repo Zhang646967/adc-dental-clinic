@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "application_commit": "f2777d94c72df79514c4ffd9f2bb4fea11be2985",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39554933826",
+  "architecture": "arm64",
+  "image": "sha256:af7374075f821334f3f96271258ba4b6243a830d6805d49a1b81a7e846eb3b44",
+  "deployment_uses_exact_business_tested_image": true,
+  "database_container_preserved": true,
+  "original_volume": "adc_rc1_c65a09cf5683_rc_data",
+  "private_configurations_preserved": 70,
+  "business_fingerprints_preserved": 66,
+  "migration_additions": {
+    "original_models": 66,
+    "new_empty_business_tables": 0,
+    "additive_permission_rows": 0,
+    "additive_content_type_rows": 0
+  },
+  "rc_tag_preserved": true,
+  "planned_restarts": [
+    "web",
+    "notification-worker",
+    "operations",
+    "gateway"
+  ],
+  "new_observation_identity": "f2777d94c72df79514c4ffd9f2bb4fea11be2985",
+  "old_observations_encrypted": {
+    "file": "previous-observations.tar.age",
+    "sha256": "f767f7f4f2e5ab2aa98900c79c40faa9dc5e5a83174e3505d4111196972721e7",
+    "decryption_verified": true
+  },
+  "old_host_journal_encrypted": {
+    "file": "previous-host-events.tar.age",
+    "sha256": "3a36731dca0132c37d653876ec40c7e0854479410cef975cb477d003c5332d41",
+    "decryption_verified": true
+  },
+  "old_observer_preexisting_exit_recorded": true,
+  "old_observation_status": "UNKNOWN_OBSERVER_UNAVAILABLE",
+  "six_application_conditions": "HEALTHY",
+  "host_state": "HEALTHY",
+  "new_launchd_job": false,
+  "nginx_configuration_loaded_and_valid": true,
+  "new_ui_and_static_served": true,
+  "original_business_test_data_injected": false,
+  "services": {
+    "db": {
+      "id": "b1b8fec1bb4d0899698dbf832e6f829ff04961e9f30077d08f1c63481117d34d",
+      "image": "sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3",
+      "running": true
+    },
+    "gateway": {
+      "id": "87cae071728f571539ca7dbf22a8178adaec9091c59d9b7c2bd0a48f62a9ccc2",
+      "image": "sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94",
+      "running": true
+    },
+    "notification-worker": {
+      "id": "03c391f6c5061f33d02419d88c2ace745ae06753f5a7c88f9fde6c32b9dc52cc",
+      "image": "sha256:af7374075f821334f3f96271258ba4b6243a830d6805d49a1b81a7e846eb3b44",
+      "running": true
+    },
+    "operations": {
+      "id": "e33c5e4ff19eb977488a30fbaa7b30def3724eabd91e86853b17d478a3c2f613",
+      "image": "sha256:af7374075f821334f3f96271258ba4b6243a830d6805d49a1b81a7e846eb3b44",
+      "running": true
+    },
+    "web": {
+      "id": "9039766aac3f2a80aed20100eb4cb031620f682e3d1896c7b3585521062b9906",
+      "image": "sha256:af7374075f821334f3f96271258ba4b6243a830d6805d49a1b81a7e846eb3b44",
+      "running": true
+    }
+  }
+}

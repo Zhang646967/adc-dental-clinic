@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "official_tool": "WeChat developer tools stable 2.02.2609231 Apple silicon",
+  "download": "https://servicewechat.com/wxa-dev-logic/download_redirect?type=darwin_arm64&from=mpwiki&download_version=stable&version_type=1",
+  "installer_sha256": "715a1b88cfc3ce5adab0e1d96ace92a61837e905c11a6650afd27fbe8bc8f3df",
+  "compilers": [
+    {
+      "kind": "WXML",
+      "exit": 0,
+      "diagnostic": "",
+      "input_files": 6
+    },
+    {
+      "kind": "WXSS",
+      "exit": 0,
+      "diagnostic": "",
+      "input_files": 1
+    }
+  ],
+  "scope": "Official offline WXML/WXSS compiler syntax check only; not IDE preview, JS bridge, WeChat device or experience upload",
+  "corrected_issue": "Official WXSS rejected the universal selector; replaced with supported descendant selectors.",
+  "inputs_sha256": {
+    "app.js": "969f318d96b0753cd92be6963b820d2e620f474309f57a913af6f34640744330",
+    "app.json": "f531fe0efaceb6b45e1021b5d24d262202c81ba499e79a0f0489b227de351d29",
+    "app.wxss": "4fc102599bf9629a4ab6b9461de30c5e2e4d92d14413ba6131c5b1807e6b4767",
+    "config.js": "0de32caf3b841c8430d77c5637a1bc6f61d6a29025bf140c39e64aefd534bf17",
+    "pages/booking/index.js": "3f6d96de8e83cd62b17f75400980d437b672f91d569321ca3a4202e767388000",
+    "pages/booking/index.wxml": "84ca7c51b2c7d9e7493a5b687b79d7d345c2796243d633238244db1d5d52fe32",
+    "pages/confirm/index.js": "cda6db50f6c4d2f8c4168df0c3f382b370ad20f3dd362789a56f5e85ea4c2535",
+    "pages/confirm/index.wxml": "3047d8f537e6a4f43265af70a1f8324afa9bbfc40def1f8a3457691a5292989f",
+    "pages/help/index.js": "6ef3ead69c4a3da4172deff179409ce28fea8064885856d62455069bf9ad39c6",
+    "pages/help/index.wxml": "5670dd76d863e75aed2c28dbe7cacea63b006bcaba4d2fefcd6f3f7992c752e5",
+    "pages/home/index.js": "3a5b220e95fb7a1781708ef5ded6d00c48a2ba22a3404220b2220f3634f11b79",
+    "pages/home/index.wxml": "6849575c5e5fc20d08485febfc55c81aec173fca0d26229d8c471783b22f5d7e",
+    "pages/login/index.js": "be9e7d6c091133157dd9d72245f2ecf0840f2388c5d62af28d776664eb637b0e",
+    "pages/login/index.wxml": "49a590e7312eceba2e97c3160af5ab150f8020c49491e74217d72c73c52a49eb",
+    "pages/visit/index.js": "bf6a9eaebc2dbcd3ed80755a0eafdf703dfe5b3247b68cdf33a4693fcce1dc10",
+    "pages/visit/index.wxml": "5e41cf63c990130221de77959c407973ecb98d732621c969954d6d3444531587",
+    "sitemap.json": "89c5bad7b12bfbdd62daa83a0e6f3a8304f99755ffb369b5bd17d8b7253d1d7b",
+    "utils/api.js": "335130cc32889c98b08b69e251f18d9d27da99e69a1f9282d2d2aece83e7a058",
+    "utils/format.js": "cd596d68a3c6d0a7c62b148421d2ffd539ce890f94fc9e75a85e2552304932e0"
+  }
+}

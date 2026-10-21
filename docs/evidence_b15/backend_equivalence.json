@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "server_commit": "f2777d94c72df79514c4ffd9f2bb4fea11be2985",
+  "changed_tracked_files": [
+    "RELEASE_CURRENT.md",
+    "clients/wechat/README.md",
+    "clients/wechat/miniprogram/app.wxss",
+    "docs/MACOS.md",
+    "docs/evidence_b15/README.md",
+    "docs/evidence_b15/application-ci.json",
+    "docs/evidence_b15/readiness.json",
+    "docs/evidence_b15/regression.json",
+    "docs/evidence_b15/traceability.md",
+    "docs/report-source/validation.json",
+    "scripts/verify_wechat.cjs"
+  ],
+  "server_business_and_deployment_code_unchanged": true,
+  "native_js_and_wxml_unchanged": true,
+  "style_fix": "app.wxss only; compiled by official compiler",
+  "new_migrations": 0
+}

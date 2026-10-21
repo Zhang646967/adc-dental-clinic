@@ -36,6 +36,8 @@ python scripts/prepare_wechat.py --mode experience --appid wx0123456789abcdef --
 
 ## 验证范围
 
-`node scripts/verify_wechat.cjs`检查原生源文件、事件绑定、北京时间及会话传输；Django真实PostgreSQL测试检查API、CSRF、权限和资源竞争。客户端与真实后端联调证据另见[本阶段记录](../../docs/evidence_b15/README.md)。这些检查不等同于微信开发者工具编译、手机实际运行或体验版扫码验收。
+`node scripts/verify_wechat.cjs`检查原生源文件、事件绑定、北京时间、会话传输及已知不兼容选择器；Django真实PostgreSQL测试检查API、CSRF、权限和资源竞争。设置 `ADC_WECHAT_COMPILER_DIR` 为官方开发工具中的 `wcc-exec` 目录，可以同时运行官方WXML／WXSS语法编译。六页模板和样式已通过该官方离线编译，修复了一处通配选择器兼容问题。
+
+客户端与真实后端联调证据另见[本阶段记录](../../docs/evidence_b15/README.md)。离线语法编译不等同于开发者工具界面预览、手机实际运行或体验版扫码验收。
 
 官方依据：[网络与域名](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/network.html)、[成员与版本发布](https://developers.weixin.qq.com/miniprogram/dev/framework/quickstart/release.html)。

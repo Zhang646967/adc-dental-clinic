@@ -73,7 +73,9 @@
   "working_tree_base": "7e96c6babc9d197726bda37ab1221450679f4d11",
   "source_digest": "bf1c82cce6d4143612b4815c5291207360e72004c994d28a996b93d438aae27e",
   "native_focused": 32,
-  "native_source_checks": 59,
+  "native_source_checks": 60,
   "new_package_checks": 6,
-  "exact_commit_ci": "pending"
+  "exact_commit_ci": "passed",
+  "exact_commit_ci_file": "application-ci.json",
+  "official_native_syntax": "Six WXML pages and one WXSS stylesheet passed official compilers"
 }

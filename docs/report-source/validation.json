@@ -60,5 +60,5 @@
     "render_iteration8_reviewed": true
   },
   "structure_validation": "../database/view_manifest.json",
-  "native_program_platform_validation": "Pending WeChat tool/device/experience; local client/backend checks separate"
+  "native_program_platform_validation": "Official offline WXML/WXSS syntax passed; integrated IDE preview, device and experience upload remain pending"
 }

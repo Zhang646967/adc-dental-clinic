@@ -1,0 +1,299 @@
+{
+  "passed": true,
+  "scope": "Native Page JavaScript handlers on exact committed server image through real HTTP; no WeChat runtime or visual rendering. Later stylesheet fix recorded separately.",
+  "clinics": 5,
+  "checks": [
+    {
+      "name": "native login clears password 1",
+      "passed": true
+    },
+    {
+      "name": "native own original 1",
+      "passed": true
+    },
+    {
+      "name": "native candidates 1",
+      "passed": true
+    },
+    {
+      "name": "native preview only 1",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 1",
+      "passed": true
+    },
+    {
+      "name": "native booking 1",
+      "passed": true
+    },
+    {
+      "name": "lost-response replay 1",
+      "passed": true
+    },
+    {
+      "name": "native replacement available 1",
+      "passed": true
+    },
+    {
+      "name": "native reschedule 1",
+      "passed": true
+    },
+    {
+      "name": "same shared predecessor 1",
+      "passed": true
+    },
+    {
+      "name": "native cancellation 1",
+      "passed": true
+    },
+    {
+      "name": "native retained history 1",
+      "passed": true
+    },
+    {
+      "name": "logout clears private review 1",
+      "passed": true
+    },
+    {
+      "name": "native login clears password 2",
+      "passed": true
+    },
+    {
+      "name": "native own original 2",
+      "passed": true
+    },
+    {
+      "name": "native candidates 2",
+      "passed": true
+    },
+    {
+      "name": "native preview only 2",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 2",
+      "passed": true
+    },
+    {
+      "name": "native booking 2",
+      "passed": true
+    },
+    {
+      "name": "lost-response replay 2",
+      "passed": true
+    },
+    {
+      "name": "native replacement available 2",
+      "passed": true
+    },
+    {
+      "name": "native reschedule 2",
+      "passed": true
+    },
+    {
+      "name": "same shared predecessor 2",
+      "passed": true
+    },
+    {
+      "name": "native cancellation 2",
+      "passed": true
+    },
+    {
+      "name": "native retained history 2",
+      "passed": true
+    },
+    {
+      "name": "logout clears private review 2",
+      "passed": true
+    },
+    {
+      "name": "native login clears password 3",
+      "passed": true
+    },
+    {
+      "name": "native own original 3",
+      "passed": true
+    },
+    {
+      "name": "native candidates 3",
+      "passed": true
+    },
+    {
+      "name": "native preview only 3",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 3",
+      "passed": true
+    },
+    {
+      "name": "native booking 3",
+      "passed": true
+    },
+    {
+      "name": "lost-response replay 3",
+      "passed": true
+    },
+    {
+      "name": "native replacement available 3",
+      "passed": true
+    },
+    {
+      "name": "native reschedule 3",
+      "passed": true
+    },
+    {
+      "name": "same shared predecessor 3",
+      "passed": true
+    },
+    {
+      "name": "native cancellation 3",
+      "passed": true
+    },
+    {
+      "name": "native retained history 3",
+      "passed": true
+    },
+    {
+      "name": "logout clears private review 3",
+      "passed": true
+    },
+    {
+      "name": "native login clears password 4",
+      "passed": true
+    },
+    {
+      "name": "native own original 4",
+      "passed": true
+    },
+    {
+      "name": "native candidates 4",
+      "passed": true
+    },
+    {
+      "name": "native preview only 4",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 4",
+      "passed": true
+    },
+    {
+      "name": "native booking 4",
+      "passed": true
+    },
+    {
+      "name": "lost-response replay 4",
+      "passed": true
+    },
+    {
+      "name": "native replacement available 4",
+      "passed": true
+    },
+    {
+      "name": "native reschedule 4",
+      "passed": true
+    },
+    {
+      "name": "same shared predecessor 4",
+      "passed": true
+    },
+    {
+      "name": "native cancellation 4",
+      "passed": true
+    },
+    {
+      "name": "native retained history 4",
+      "passed": true
+    },
+    {
+      "name": "logout clears private review 4",
+      "passed": true
+    },
+    {
+      "name": "native login clears password 5",
+      "passed": true
+    },
+    {
+      "name": "native own original 5",
+      "passed": true
+    },
+    {
+      "name": "native candidates 5",
+      "passed": true
+    },
+    {
+      "name": "native preview only 5",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 5",
+      "passed": true
+    },
+    {
+      "name": "native booking 5",
+      "passed": true
+    },
+    {
+      "name": "lost-response replay 5",
+      "passed": true
+    },
+    {
+      "name": "native replacement available 5",
+      "passed": true
+    },
+    {
+      "name": "native reschedule 5",
+      "passed": true
+    },
+    {
+      "name": "same shared predecessor 5",
+      "passed": true
+    },
+    {
+      "name": "native cancellation 5",
+      "passed": true
+    },
+    {
+      "name": "native retained history 5",
+      "passed": true
+    },
+    {
+      "name": "logout clears private review 5",
+      "passed": true
+    }
+  ],
+  "results": [
+    {
+      "clinic": 1,
+      "original": 10510,
+      "created": 10541,
+      "replacement": 10542
+    },
+    {
+      "clinic": 2,
+      "original": 10515,
+      "created": 10543,
+      "replacement": 10544
+    },
+    {
+      "clinic": 3,
+      "original": 10520,
+      "created": 10545,
+      "replacement": 10546
+    },
+    {
+      "clinic": 4,
+      "original": 10525,
+      "created": 10547,
+      "replacement": 10548
+    },
+    {
+      "clinic": 5,
+      "original": 10530,
+      "created": 10549,
+      "replacement": 10550
+    }
+  ]
+}

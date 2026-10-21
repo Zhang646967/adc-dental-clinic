@@ -1,3 +1,11 @@
+# 当前本机运行版本 2026-10-21
+
+B1.5.1受控患者接口已随准确提交CI通过的镜像更新，原生工程位于 `clients/wechat/`，使用现有课程患者账号连接 `http://127.0.0.1:18000`。七角色网站、资源目录、未来时段及患者预览已核对。原数据库卷、66组原业务记录、70份私密配置和RC标签保留；无新增表或迁移。
+
+官方离线WXML／WXSS编译发现并修复了一处客户端选择器兼容问题。原生客户端随最终源码同步；后端业务代码与已验证镜像保持一致。开发者工具界面预览、手机微信、体验版及独立云端尚未验收。账号与试用说明留在 `.course-private/b15-20261021/`，公开仓库不包含密码。
+
+[本阶段交付证据](evidence_b15/delivery.json)及[教师试用顺序](COURSE_TEACHER_DELIVERY.md)说明当前范围。以下为以前运行记录，按原版本阅读。
+
 # macOS continuation guide
 
 Logic chain: preserve RC1 → verify PostgreSQL behavior → create a fresh

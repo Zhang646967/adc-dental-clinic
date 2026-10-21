@@ -6,6 +6,11 @@ const vm=require('node:vm');
 const root=path.resolve(__dirname,'../clients/wechat/miniprogram');
 const app=JSON.parse(fs.readFileSync(path.join(root,'app.json')));
 let checks=0;
+const css=fs.readFileSync(path.join(root,'app.wxss'),'utf8');
+for(const selector of css.matchAll(/(?:^|})\s*([^{}]+)\{/g)) {
+  assert(!selector[1].includes('*'),'WeChat WXSS rejects universal selectors; use class or descendant selectors.');
+}
+checks++;
 for(const page of app.pages){
   for(const ext of ['.js','.wxml']){assert(fs.existsSync(path.join(root,page+ext)));checks++;}
   const source=fs.readFileSync(path.join(root,page+'.js'),'utf8');new vm.Script(source,{filename:page});checks++;
@@ -30,5 +35,17 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   p=api.request('visits/');last.success({statusCode:403,data:{ok:false,message:'当前授权失效',request_id:'123'}});await assert.rejects(p,/当前授权失效/);checks++;
   p=api.request('booking/confirm/','POST',{});last.fail({errMsg:'sensitive implementation details'});await assert.rejects(p,/结果尚未确认/);checks++;
   p=api.signOut();success({csrf_token:'new'},['sessionid=; Max-Age=0']);await p;assert.deepEqual(api.sessionInfo(),{});assert.equal(appState.globalData.review,null);checks+=2;
-  console.log(JSON.stringify({passed:true,checks,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  let compiler={status:'not_run'};
+  if(process.env.ADC_WECHAT_COMPILER_DIR){
+    const os=require('node:os'),{spawnSync}=require('node:child_process');
+    const output=fs.mkdtempSync(path.join(os.tmpdir(),'adc-wechat-compile-'));
+    try{
+      for(const [binary,args] of [['wcc',['-o',path.join(output,'wxml.js'),...app.pages.map(p=>p+'.wxml')]],['wcsc',['-lc','-js','-o',path.join(output,'wxss.js'),'app.wxss']]]){
+        const result=spawnSync(path.join(process.env.ADC_WECHAT_COMPILER_DIR,binary),args,{cwd:root,encoding:'utf8',timeout:30000});
+        assert.equal(result.status,0,binary+': '+result.stderr);
+      }
+      compiler={status:'passed',wxml_pages:app.pages.length,wxss_files:1,scope:'Official offline syntax only; not an IDE preview or WeChat runtime'};
+    }finally{fs.rmSync(output,{recursive:true,force:true});}
+  }
+  console.log(JSON.stringify({passed:true,checks,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});
