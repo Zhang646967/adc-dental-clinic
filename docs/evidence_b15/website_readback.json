@@ -1,0 +1,147 @@
+{
+  "passed": true,
+  "browser": "155.0.8059.85",
+  "scope": "Real Chrome website reads native-client booking/rescheduling/cancellation results in five clinics; narrow large text",
+  "checks": [
+    {
+      "name": "Shared website record 1 10531",
+      "passed": true
+    },
+    {
+      "name": "Saved state 1 已改期",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 1 10532",
+      "passed": true
+    },
+    {
+      "name": "Saved state 1 已取消",
+      "passed": true
+    },
+    {
+      "name": "Website links native successor 1",
+      "passed": true
+    },
+    {
+      "name": "390px large text remains within viewport 1",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors 1",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 2 10533",
+      "passed": true
+    },
+    {
+      "name": "Saved state 2 已改期",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 2 10534",
+      "passed": true
+    },
+    {
+      "name": "Saved state 2 已取消",
+      "passed": true
+    },
+    {
+      "name": "Website links native successor 2",
+      "passed": true
+    },
+    {
+      "name": "390px large text remains within viewport 2",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors 2",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 3 10535",
+      "passed": true
+    },
+    {
+      "name": "Saved state 3 已改期",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 3 10536",
+      "passed": true
+    },
+    {
+      "name": "Saved state 3 已取消",
+      "passed": true
+    },
+    {
+      "name": "Website links native successor 3",
+      "passed": true
+    },
+    {
+      "name": "390px large text remains within viewport 3",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors 3",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 4 10537",
+      "passed": true
+    },
+    {
+      "name": "Saved state 4 已改期",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 4 10538",
+      "passed": true
+    },
+    {
+      "name": "Saved state 4 已取消",
+      "passed": true
+    },
+    {
+      "name": "Website links native successor 4",
+      "passed": true
+    },
+    {
+      "name": "390px large text remains within viewport 4",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors 4",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 5 10539",
+      "passed": true
+    },
+    {
+      "name": "Saved state 5 已改期",
+      "passed": true
+    },
+    {
+      "name": "Shared website record 5 10540",
+      "passed": true
+    },
+    {
+      "name": "Saved state 5 已取消",
+      "passed": true
+    },
+    {
+      "name": "Website links native successor 5",
+      "passed": true
+    },
+    {
+      "name": "390px large text remains within viewport 5",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors 5",
+      "passed": true
+    }
+  ]
+}

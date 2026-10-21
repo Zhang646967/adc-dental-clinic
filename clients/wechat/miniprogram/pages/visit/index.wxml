@@ -1,0 +1,8 @@
+<view class="page"><view class="brand">预约详情</view><view class="title">就诊安排</view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
+  <view wx:if="{{visit}}" class="card"><view class="pill">{{visit.status_label}} · #{{visit.id}}</view><view class="time">{{visit.startLabel}}</view><view>至 {{visit.endLabel}}</view><view class="line">{{visit.clinic}} · {{visit.dentist}}</view><view>{{visit.service}}</view><view class="divider"></view><view>{{visit.address}}</view><view class="line">前台电话 {{visit.phone}}</view><view class="muted">请按原安排到诊，接诊时复核过敏等资料。课程电话与资料为合成示例。</view></view>
+  <view wx:if="{{visit.can_change && !readOnly}}"><button class="primary" bindtap="reschedule">选择新的就诊安排</button><button class="danger" bindtap="cancel">{{cancelOpen?'保留预约，收起取消':'需要取消这次预约'}}</button></view>
+  <view wx:if="{{cancelOpen}}" class="card"><label class="label" for="reason">取消原因</label><textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="取消原因"/><button class="danger" bindtap="previewCancel" disabled="{{busy}}" loading="{{busy}}">核对取消内容</button></view>
+  <button wx:if="{{visit.predecessor}}" class="secondary" data-id="{{visit.predecessor}}" bindtap="related">查看改期前的预约</button><button wx:if="{{visit.successor}}" class="secondary" data-id="{{visit.successor}}" bindtap="related">查看改期后的预约</button>
+  <navigator class="link" url="/pages/help/index">联系前台协助</navigator><button bindtap="home">返回我的预约</button>
+</view>

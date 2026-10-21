@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "independent_checks": 48,
+  "clinics": 5,
+  "new_bookings": 5,
+  "new_successors": 5,
+  "cancelled_successors": 5,
+  "baseline_invoices": 500,
+  "baseline_cash_entries": 500,
+  "baseline_gross_receipts": "50000.00",
+  "new_clinical_financial_records": 0,
+  "scope": "Independent DB facts and synthetic seed ledger oracle; not a pre/post full-database fingerprint"
+}

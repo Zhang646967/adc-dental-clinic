@@ -1,0 +1,13 @@
+<view class="page"><view class="brand">核对后再提交</view><view class="title">{{done?'办理结果':review.kind==='cancel'?'确认取消':'确认就诊安排'}}</view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
+  <view wx:if="{{done}}" class="card"><view class="pill">{{done.status_label}}</view><view class="time">{{done.startLabel}}</view><view>{{done.clinic}} · {{done.dentist}}</view><view>预约编号 #{{done.id}}</view><button class="primary" bindtap="result">查看这条预约</button></view>
+  <block wx:elif="{{review}}">
+    <view wx:if="{{review.preview.original}}" class="card"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}}</view><view>{{review.preview.original.clinic}} · {{review.preview.original.dentist}}</view><view>{{review.preview.original.startLabel}} 至 {{review.preview.original.endLabel}}</view></view>
+    <view wx:if="{{review.kind!=='cancel'}}" class="card"><view class="pill">{{review.kind==='reschedule'?'新的安排':'本次安排'}}</view><view>{{review.preview.clinic}} · {{review.preview.dentist}}</view><view class="time">{{review.preview.startLabel}}</view><view>至 {{review.preview.endLabel}}</view><view>{{review.preview.service}}</view></view>
+    <view wx:if="{{review.preview.reason}}" class="notice">办理原因：{{review.preview.reason}}</view>
+    <view wx:if="{{review.preview.duration_changed}}" class="notice">当前服务时长与原预约不同，请特别核对结束时间。</view>
+    <view class="muted">时间均为北京时间。确认时重新核对资源；预约不产生治疗或收费。</view>
+    <checkbox-group bindchange="checked"><label class="check"><checkbox value="yes" checked="{{checked}}"/><text>{{review.kind==='cancel'?'我确认取消这一次预约，保留历史记录。':review.kind==='reschedule'?'我已核对原、新医师和时间，同意用新安排替代原预约。':'我已核对诊所、服务、医师和起止时间，同意提交预约。'}}</text></label></checkbox-group>
+    <button class="{{review.kind==='cancel'?'danger':'primary'}}" disabled="{{!checked || busy}}" loading="{{busy}}" bindtap="submit">{{review.kind==='cancel'?'确认取消这次预约':review.kind==='reschedule'?'确认改期':'确认提交预约'}}</button>
+  </block><button class="secondary" bindtap="home">返回我的预约核对结果</button>
+</view>

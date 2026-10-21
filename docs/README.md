@@ -6,6 +6,7 @@
 
 | 范围 | 文档 |
 |---|---|
+| 微信小程序与教师试用 | [原生工程与本地导入](../clients/wechat/README.md)、[本地／微信／云端交付](COURSE_TEACHER_DELIVERY.md) |
 | 业务演示、岗位与跟进 | [演示路线](DEMO_ROUTES_RC1.md)、[业务跟进](BUSINESS_FOLLOW_UP.md) |
 | 接诊、治疗、结算与设备衔接 | [完整流程](CARE_FINANCE_EQUIPMENT_WORKFLOWS.md)、[交接规则](FINANCE_EQUIPMENT_HANDOFFS.md) |
 | 收退款、资金凭据与逐笔对账 | [财务凭据](FINANCIAL_EVIDENCE_RECONCILIATION.md)、[账内日结](DAILY_RECONCILIATION.md) |
@@ -36,7 +37,7 @@
 
 ## 测试与验收
 
-当前[B1.4患者自助改期、候补替换与资源衔接验收](evidence_b14/README.md)；此前各阶段按原范围保留。
+当前[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
 
 | 验证范围 | 实际记录 |
 |---|---|

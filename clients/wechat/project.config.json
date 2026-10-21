@@ -1,0 +1,8 @@
+{
+  "description": "ADC课程患者小程序",
+  "miniprogramRoot": "miniprogram/",
+  "projectname": "adc-patient-course",
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "setting": {"es6": true, "urlCheck": false, "minified": true, "postcss": true}
+}

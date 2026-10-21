@@ -6,6 +6,8 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
+**新增课程交付：原生微信小程序与教师云端演示。** [小程序工程与本地导入](clients/wechat/README.md)支持课程患者登录、查询、预约、普通改期、取消及历史，复用网站预约数据。[交付安排](docs/COURSE_TEACHER_DELIVERY.md)区分本地联调、微信体验版与云端验收：小程序账号尚未注册，服务器尚未购买，暂不宣称微信或云端已上线。
+
 **B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步69表、170条外键、42项触发器，六幅ER纳入课程报告；前台继续负责日常排班。
 
 ## 仓库分类
@@ -21,7 +23,7 @@
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告包含58项业务用例及1项共享核验、77张表和35幅图。最新1046项规则及1345项PostgreSQL／HTTP／并发通过；五店20患者连续30分钟9000请求p95 0.453秒。业务、容量、恢复及准确版本范围见[完整证据](docs/evidence_b14/README.md)，历史结果独立保留，不等同于公网或商业化认证。
+正式报告包含58项业务用例及1项共享核验、77张表和35幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[当前证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

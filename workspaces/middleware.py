@@ -8,7 +8,7 @@ from workspaces.context import (ensure_context, attach, valid_context, check_tok
 from workspaces.models import WorkspaceContext
 from workspaces.rules import CLINIC_ROLES
 
-PUBLIC={'login','portal_login','logout','health'}
+PUBLIC={'login','portal_login','logout','health','mini_session','mini_login','mini_logout'}
 ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
@@ -81,12 +81,15 @@ ROUTES={
 def route_roles(name,kwargs):
     if name=='assistant_api':
         return {'PATIENT'} if kwargs.get('audience')=='patient' else {'FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE'}
-    if name and name.startswith('portal_'): return {'PATIENT'}
+    if name and name.startswith(('portal_', 'mini_')): return {'PATIENT'}
     return ROUTES.get(name,set())
 
 class WorkspaceMiddleware:
     def __init__(self,get_response):self.get_response=get_response
     def error(self,request,text,status=403):
+        if request.path.startswith('/api/mini/v1/'):
+            from portal.mini_api import result
+            return result(request,status=status,code='WORKSPACE_CHANGED',message=text)
         if request.path.startswith('/api/'):
             return JsonResponse({'error':text},status=status)
         return render(request,'workspaces/error.html',{'problem':text},status=status)
@@ -106,6 +109,8 @@ class WorkspaceMiddleware:
         if name not in ROLE_FREE:
             if not valid_context(request.user,ctx):
                 if unsafe:return self.error(request,'身份已失效或未选择。请返回身份选择页。',409)
+                if request.path.startswith('/api/'):
+                    return self.error(request,'患者身份已失效，请重新登录后核对。',409)
                 return redirect('select_role')
             if ctx.role not in route_roles(name,match.kwargs):
                 return self.error(request,'此页面不属于当前工作台。请通过“切换身份”选择已授权身份。')
@@ -113,7 +118,7 @@ class WorkspaceMiddleware:
                 if unsafe:return self.error(request,'尚未选择诊所；本次操作未执行。',409)
                 return redirect('manager_home' if ctx.role=='MANAGER' else 'frontdesk_home')
         if unsafe:
-            token=request.headers.get('X-ADC-Workspace','') if name=='assistant_api' else request.POST.get('workspace_token','')
+            token=request.headers.get('X-ADC-Workspace','') if name=='assistant_api' or (name and name.startswith('mini_')) else request.POST.get('workspace_token','')
             if not check_token(ctx,token):
                 return self.error(request,'工作身份或诊所已切换，或页面已过期。本次操作未执行；请刷新后核对再提交。',409)
         return self.get_response(request)

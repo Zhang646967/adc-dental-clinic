@@ -1,0 +1,14 @@
+{
+  "local_api": "VERIFIED",
+  "native_page_handlers_with_real_backend": "VERIFIED",
+  "native_source_transport": "VERIFIED",
+  "website_readback": "VERIFIED",
+  "wechat_devtools_compilation": "NOT_RUN_TOOL_NOT_INSTALLED",
+  "wechat_device": "NOT_RUN",
+  "wechat_upload": "NOT_RUN_APPID_NOT_REGISTERED",
+  "wechat_teacher_experience": "NOT_RUN",
+  "cloud_teacher_site": "NOT_RUN_SERVER_NOT_PURCHASED",
+  "synthetic_data_only": true,
+  "windows_data_recovery": "UNRESOLVED",
+  "capacity": "Existing B1.4 workload remains historical; no new 30-minute capacity claim"
+}

@@ -50,6 +50,9 @@ def server_error(request):
 
 
 def csrf_failure(request, reason=''):
+    if request.path.startswith('/api/mini/v1/'):
+        from portal.mini_api import result
+        return result(request, status=403, code='CSRF_FAILED', message='会话校验已失效，请重新登录后核对办理结果。')
     from django.http import HttpResponse
     from django.template.loader import get_template
     return HttpResponse(get_template('403.html').render(support_context(request)), status=403)

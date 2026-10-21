@@ -16,5 +16,8 @@ class ReadOnlyDemoMiddleware:
         match = getattr(request, "resolver_match", None)
         name = getattr(match, "view_name", None)
         if settings.ADC_READ_ONLY and not allowed_in_read_only(request.method, name):
+            if request.path.startswith('/api/mini/v1/'):
+                from portal.mini_api import result
+                return result(request, status=403, code='READ_ONLY', message='当前实例仅供查看，暂不办理预约变更。')
             return render(request, '403.html', {'read_only_denial': True}, status=403)
         return None

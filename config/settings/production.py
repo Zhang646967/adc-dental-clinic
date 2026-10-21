@@ -13,7 +13,7 @@ from .base import *
 
 DEBUG = False
 ALLOWED_HOSTS = [_deployment.host]
-CSRF_TRUSTED_ORIGINS = ['https://' + _deployment.host]
+CSRF_TRUSTED_ORIGINS = ['https://' + _deployment.host, 'https://servicewechat.com']
 ADC_READ_ONLY = _deployment.read_only
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

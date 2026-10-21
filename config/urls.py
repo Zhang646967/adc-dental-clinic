@@ -13,6 +13,7 @@ from care import correction_views
 handler500 = 'adc_core.request_trace.server_error'
 
 urlpatterns = [
+    path('api/mini/v1/', include('portal.mini_urls')),
     path("", include("reception.urls")),
     path("", include("scheduling.resource_urls")),
     path("", include("operations.urls")),

@@ -32,3 +32,6 @@ private_migration/
 .course-private/
 *.tar.age
 *.tar.age.json
+
+# Local WeChat developer-tool settings; never keep account sessions in source.
+project.private.config.json

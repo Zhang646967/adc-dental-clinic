@@ -85,3 +85,9 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 - PatientAccess and active PATIENT context authorize only own source. Same-clinic, same-service replacements use existing resource rules; ordinary candidates use current duration, valid held offers retain promised duration.
 - Shared locked rescheduling owns the original terminal state, unique successor and claims; portal adds BookingReceipt in the same transaction. Offer acceptance stays in coordination and links the same reception result. Preserve all39 migrations.
 - Replay returns saved result current state; never revive later cancellation. Rescheduling is not a cancellation or a clinical/financial fact. Old offer and follow-up evidence links remain historical.
+
+## Native patient mini-program (B1.5.1)
+- The user requires a native WeChat course client and later a teacher-only cloud demonstration. `clients/wechat` and `/api/mini/v1/` are the narrow assigned-patient channel; they reuse existing commands, PatientAccess, session/CSRF and workspace signatures. No alternate booking inventory or automatic phone/OpenID binding.
+- Login explicitly activates only authorized PATIENT, even for a multi-role person. Business confirmation still rechecks authorization and resources under existing locks. Session cookies/passwords stay out of client persistent storage and logs.
+- Preserve all39 migrations and actual ER relations. Source/transport/HTTP tests and real backend Page-handler runs do not establish WeChat-tool compilation, device operation, upload or cloud acceptance. Keep those readiness fields separate.
+- Local loopback packages are for the developer-tool simulator. Experience packages require a registered AppID and verified HTTPS request domain with domain checks enabled. No AppSecret in the client; cloud hosting and platform inputs are still pending.

@@ -1,0 +1,18 @@
+<view class="page">
+  <view class="brand">ADC DENTAL CARE</view><view class="title">我的预约</view>
+  <view class="account">{{patient}}，欢迎回来</view><view class="muted">日期和时间均为北京时间。</view>
+  <view wx:if="{{readOnly}}" class="notice">当前演示仅供查看，暂不办理预约变更。</view>
+  <button class="primary" bindtap="book" disabled="{{readOnly}}">预约一次就诊</button>
+  <view class="row tabs"><button class="{{queue==='active'?'selected':''}}" data-queue="active" bindtap="changeQueue">待就诊与在诊</button><button class="{{queue==='history'?'selected':''}}" data-queue="history" bindtap="changeQueue">历史记录</button><button class="{{queue==='all'?'selected':''}}" data-queue="all" bindtap="changeQueue">全部</button></view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
+  <view wx:if="{{busy}}" class="notice">正在核对预约…</view>
+  <view wx:for="{{rows}}" wx:key="id" class="card">
+    <view class="pill">{{item.status_label}}</view><view class="time">{{item.startLabel}}</view><view>至 {{item.endLabel}}</view>
+    <view class="line">{{item.clinic}} · {{item.dentist}}</view><view>{{item.service}}</view>
+    <button class="secondary" data-id="{{item.id}}" bindtap="open">查看预约 #{{item.id}}</button>
+  </view>
+  <view wx:if="{{!busy && !rows.length}}" class="card empty">这里暂时没有预约。可以查询服务和可用时段；无合适安排时联系前台协调候补。</view>
+  <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view>
+  <button class="secondary" bindtap="load" disabled="{{busy}}">刷新办理结果</button>
+  <navigator class="link" url="/pages/help/index">无合适时段或需要协助</navigator><button bindtap="logout">退出账号</button>
+</view>

@@ -61,6 +61,9 @@ ADC_VERSION = "1.0.0-rc.1"
 from adc_core.operational_logging import logging_config
 LOGGING = logging_config()
 CSRF_FAILURE_VIEW = 'adc_core.request_trace.csrf_failure'
+# WeChat supplies this fixed Referer host; it is transport metadata, never login
+# authority. CSRF secrets, sessions and workspace signatures are still required.
+CSRF_TRUSTED_ORIGINS = ['https://servicewechat.com']
 
 # AI is a server-side intent classifier, not a clinical or autonomous agent.
 AI_MODE = os.environ.get("AI_MODE", "demo")

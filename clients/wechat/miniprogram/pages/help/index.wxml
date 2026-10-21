@@ -1,0 +1,3 @@
+<view class="page"><view class="brand">就诊协助</view><view class="title">让前台帮您协调</view><view class="card"><view class="label">没有合适时段</view><view>可调整日期、医师偏好，或请前台记录候补意向。候补是等待协调，收到邀约并明确接受后才成约。</view><view class="label">提交后连接中断</view><view>先刷新“我的预约”，核对是否已经保存。不要为了重试另选时段重复预约。</view><view class="label">已经到诊或接近就诊时间</view><view>请联系原诊所前台协助，不自行更改治疗记录或费用。</view></view>
+<view wx:for="{{clinics}}" wx:key="id" class="card"><view class="time">{{item.name}}</view><view>{{item.postal_address}}</view><view>前台电话 {{item.phone}}</view></view>
+<view wx:if="{{error}}" class="error">{{error}}</view><view class="notice">课程试用仅使用分配账号和合成资料；联系电话为课程示例。请通过任课教师约定的方式联系演示人员。</view><navigator class="link" open-type="reLaunch" url="/pages/login/index">返回登录或我的预约</navigator></view>
