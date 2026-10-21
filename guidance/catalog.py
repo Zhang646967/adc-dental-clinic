@@ -1,6 +1,6 @@
 """Versioned, reviewed page/button directory; LLMs cannot invent these steps."""
 from dataclasses import dataclass
-VERSION='NAV-B131.1'
+VERSION='NAV-B14.1'
 @dataclass(frozen=True)
 class Step:
     title:str
@@ -37,7 +37,7 @@ GUIDES={g.key:g for g in [
  Guide('patient-wait','登记或确认候补',('PATIENT',),'候补登记不是预约，邀约过期也不会自动预约。',(
  S('登记偏好','进入“我的候补”，点击“登记候补”，填写未来14天内的可接受时间与诊所。','waitlist'),
  S('查看邀约','在候补列表查看工作人员发出的邀约，核对医生、诊所、日期和到期时间。','waitlist'),
- S('明确接受或拒绝','打开邀约，勾选核对后，点击“接受并创建预约”或“拒绝本次邀约”。只有成功接受才会创建预约。','waitlist'),
+ S('明确接受或拒绝','打开邀约；若是调整已有预约，先选择原约，再核对改期。另约则勾选核对，点击“接受并创建预约”；也可拒绝本次邀约。只有本人明确确认才办理。','waitlist'),
  S('核对预约','在“我的候补”选择目标记录，点击“核对这条候补是否已转预约”。不确定上一操作结果时也先核对，不重新接受；有对应预约时再打开其详情。','portal_appointments'))),
  Guide('front-create','为患者创建预约',('FRONT_DESK',),'当前诊所范围内办理，提交前再次检查冲突。',(
  S('定位患者','先在“患者档案”或“跨店患者识别”查询。确为新患者，再选择“建立患者档案”。','patients'),
@@ -108,6 +108,13 @@ GUIDES['front-wait']=Guide('front-wait','帮助患者办理候补',('FRONT_DESK'
  S('核对邀约','在候补列表打开有效邀约，向患者说明具体日期、医生和确认期限。','waitlist'),
  S('明确确认','取得患者明确同意后亲自点击“接受并创建预约”。不确定保存结果时，从本店候补点击只读核对按钮；不要重复办理。拒绝不会产生预约。','waitlist')))
 
+GUIDES['patient-reschedule']=Guide('patient-reschedule','调整本人未开始的预约',('PATIENT',),
+ '本人明确确认后才替代原约；普通改期或本人同服务邀约都先核对。',(
+ S('打开本人原预约','在“我的预约”打开未开始的记录，点击“调整这次预约”；不能改动他人预约。','portal_appointments'),
+ S('选择新安排','按日期和医师查看同店同服务的可改时段。已有本人有效邀约时可选择“用这条邀约改期”，不会另建并行预约。','portal_appointments'),
+ S('核对并明确确认','说明原因，核对原新日期、医师和起止时间；勾选同意后确认。查询与助手均不会替你提交。','portal_appointments'),
+ S('核对保存结果','成功后查看后继预约；断网或提示失效时先打开原预约的关联结果。未办成保留原约，无合适时间可候补或请前台协助。','portal_appointments')))
+
 ROLE_INTENT={
  'PATIENT':{'book':'patient-book','appointments':'patient-appointments','cancel':'patient-cancel','bill':'patient-bill','waitlist':'patient-wait'},
  'FRONT_DESK':{'appointment_policy':'front-change','overview':'front-arrive','waitlist':'front-wait','book':'front-create','planning':'front-plan'},
@@ -119,6 +126,7 @@ ROLE_INTENT={
 
 def choose_guide(role,intent,message=''):
     if intent=='clinical':return None
+    if role=='PATIENT' and any(x in message for x in ('改期','改预约','调整预约','换个时间')):return 'patient-reschedule'
     if role in ('MANAGER','FRONT_DESK') and any(x in message for x in ('协调任务','受理任务','任务复核','办理声明')):return 'manager-task' if role=='MANAGER' else 'front-task'
     if role=='FRONT_DESK' and any(x in message for x in ('暂停新增','暂停接收','恢复接收','停止接收','停止新增')):return 'front-intake'
     if role=='FRONT_DESK' and '出诊' in message and any(w in message for w in ('协调','停用','停诊','调整','改期','关联')):return 'front-coordination'

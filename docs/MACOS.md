@@ -9,9 +9,9 @@ evidence. [Mac application delivery](evidence_r22/delivery.json) verifies origin
 configuration. R2.3 independent recovery tools are delivered separately; [R2.4.1 host events](R241_HOST_EVENTS.md) are now delivered; R2.4.2 dependency exercises and UX1 are [delivered](evidence_r242/README.md); equivalent capacity and true 24h/security are next.
 The migration instructions and dated evidence below retain their original scope.
 
-## Current B1.3.1 course update
+## Current B1.4 course update
 
-Front-desk availability/intake/waitlist planning, day/week observations and follow-up deadlines replace the former manager-owned daily workflow. Managers retain resource catalogues and independent review. Application `2c45d6d` passed exact-commit CI and is installed; [execution and delivery evidence](evidence_b131/README.md) keeps the measured workload and final image separate. Preserve the original instance identity, data volume, private configuration and RC tag; use an encrypted backup and additive migrations before updating.
+Patient-owned replacement preserves the original until atomic confirmation; own retained offers, resource claims, reception and cancellation history remain linked. Front desk keeps daily scheduling. All39 migrations are unchanged. [Business and execution evidence](evidence_b14/README.md) records the tested commit and local delivery separately. Preserve the original instance, database volume, private configuration and RC tag; use the verified encrypted backup before updating.
 
 ## Source baseline
 

@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "runtime_files_equal": 502,
+  "local_full_regression": "gate-1.json",
+  "measured_files": "capacity-equivalence.json"
+}

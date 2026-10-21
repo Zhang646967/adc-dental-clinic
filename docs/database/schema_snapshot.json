@@ -17600,7 +17600,7 @@
       "name": "0001_initial"
     }
   ],
-  "application_base_commit": "459a024da2f0352271bead0dd95140644773b185",
-  "observed_on": "2026-10-20",
-  "scope": "B1.3.1 isolated schema metadata; no business rows, credentials or field defaults"
+  "application_base_commit": "01fcb1ad24f73d49bf5a2a41940b5689602018ba",
+  "observed_on": "2026-10-21",
+  "scope": "B1.4 isolated working-tree schema metadata; no business rows, credentials or field defaults"
 }

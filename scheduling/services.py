@@ -29,7 +29,9 @@ def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="",
     ignore_offer = None
     if honor_offer_id is not None:
         # Not a client-provided bypass. Re-read the locked promise and check ALL exact fields.
-        if type(honor_offer_id) is not int or honor_offer_id <= 0 or replaces is not None:
+        if (type(honor_offer_id) is not int or honor_offer_id <= 0 or
+                replaces is not None and (replaces.status != 'RESCHEDULED' or
+                    replaces.patient_id != patient.pk or replaces.clinic_id != slot.clinic_id)):
             raise RuleError('原邀约编号或预约来源无效。')
         from coordination.models import WaitOffer
         from coordination.policies import require_owner_or_front
@@ -164,11 +166,22 @@ def reschedule(*, actor, visit_id, expected_version, new_slot_id, start, end, re
     lock_resources(patients=[preview.patient_id], dentists=[s.dentist_id for s in slots.values()])
     for clinic_id in sorted({s.clinic_id for s in slots.values()}): lock_physical(clinic_id)
     old = Visit.objects.select_for_update().get(pk=visit_id)
-    _assert_current(old, expected_version)
-    validate_transition(old.status, "RESCHEDULED")
     slot = slots[new_slot_id]
     lock_clinic_grant(actor, old.clinic_id)
     lock_clinic_grant(actor, slot.clinic_id)
+    return reschedule_visit_locked(actor=actor, old=old, slot=slot, expected_version=expected_version,
+        start=start, end=end, reason=reason, service_id=service_id, resource_snapshot=resource_snapshot)
+
+
+def reschedule_visit_locked(*, actor, old, slot, expected_version, start, end, reason,
+                            service_id=None, resource_snapshot=None, honor_offer_id=None):
+    """Shared atomic effect; callers own authorization and ordered source/resource locks."""
+    if not connection.in_atomic_block:
+        raise RuntimeError('Rescheduling requires an authorized locked transaction')
+    _assert_current(old, expected_version)
+    validate_transition(old.status, "RESCHEDULED")
+    if not isinstance(reason, str) or not reason.strip():
+        raise RuleError('改期必须记录原因。')
     # Release only within this transaction; any failure restores the original booking.
     from scheduling.resources import release_visit_locked, current_plan
     original_plan = current_plan(old)
@@ -178,7 +191,8 @@ def reschedule(*, actor, visit_id, expected_version, new_slot_id, start, end, re
     old.lock_version += 1
     old.save(update_fields=["status", "lock_version"])
     new = create_visit_locked(actor=actor, patient=old.patient, slot=slot, start=start, end=end,
-                    chief_complaint=old.chief_complaint, special_needs=old.special_needs, replaces=old, service_id=service_id, resource_snapshot=resource_snapshot)
+                    chief_complaint=old.chief_complaint, special_needs=old.special_needs, replaces=old,
+                    service_id=service_id, resource_snapshot=resource_snapshot, honor_offer_id=honor_offer_id)
     VisitRequest.objects.bulk_create([VisitRequest(visit=new, description=r.description, treatment_type_id=r.treatment_type_id) for r in old.requests.all()])
     emit(actor, "VISIT_RESCHEDULED", old, visit=old, reason=reason, summary={"replacement_id": new.pk})
     return new

@@ -1,0 +1,96 @@
+{
+  "scope": "B1.4 after-load cancellation follow-up: real additional booking, retained REBOOKED evidence, later patient replacement",
+  "checks": [
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Patient books acceptable new appointment after genuine cancellation",
+      "passed": true
+    },
+    {
+      "name": "Real free additional booking offered",
+      "passed": true
+    },
+    {
+      "name": "Patient reads actual booking confirmation",
+      "passed": true
+    },
+    {
+      "name": "Additional booking duplicate confirmations one result",
+      "passed": true
+    },
+    {
+      "name": "Front desk records actual contact and successful rebooking",
+      "passed": true
+    },
+    {
+      "name": "Current authorized front desk responsibility available",
+      "passed": true
+    },
+    {
+      "name": "Retained cancellation follow-up preview status",
+      "passed": true
+    },
+    {
+      "name": "Retained cancellation follow-up server-held preview",
+      "passed": true
+    },
+    {
+      "name": "Retained cancellation follow-up duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Patient later explicitly changes rebooked appointment",
+      "passed": true
+    },
+    {
+      "name": "Real later replacement available",
+      "passed": true
+    },
+    {
+      "name": "Patient selects exact actual candidate",
+      "passed": true
+    },
+    {
+      "name": "Patient later replacement preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Patient later replacement signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-followup-reschedule concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Front desk sees both retained evidence and current successor",
+      "passed": true
+    },
+    {
+      "name": "Original rebooking evidence link preserved",
+      "passed": true
+    },
+    {
+      "name": "Later successor shown separately",
+      "passed": true
+    },
+    {
+      "name": "History distinction explained",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "passed": true
+}

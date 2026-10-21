@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "date": "2026-10-20",
-  "scope": "B1.3.1 front-desk scheduling, day/week coordination, actual schema ER and formal course report",
+  "date": "2026-10-21",
+  "scope": "B1.4 patient self-rescheduling, own retained offers, resource/cancellation continuity and six actual ER views",
   "user_requests": [
     {
       "id": "U1",
@@ -31,7 +31,8 @@
         "portal/views.py",
         "portal/services.py"
       ],
-      "status": "website booking/cancellation implemented; mini-program and self-rescheduling pending"
+      "status": "website booking, cancellation, self-rescheduling and own offer replacement implemented; mini-program pending",
+      "evidence": "evidence_b14/README.md"
     },
     {
       "id": "U3",
@@ -103,7 +104,20 @@
         "6.2"
       ],
       "evidence": "database/README.md",
-      "status": "five actual ER views; 69 SQL tables, 618 ORM columns plus 4 migration-journal columns, 170 foreign keys and 42 triggers; additive relation guards and direct PostgreSQL counterexamples verified"
+      "status": "six actual ER views; 69 SQL tables, 618 ORM columns plus 4 migration-journal columns, 170 foreign keys and 42 triggers; additive relation guards and direct PostgreSQL counterexamples verified"
+    },
+    {
+      "id": "U9",
+      "request": "patient self-rescheduling with scheduling resources, waitlist and cancellation follow-up",
+      "report": [
+        "3.8",
+        "4.13",
+        "5.5",
+        "5.7",
+        "SU-40"
+      ],
+      "status": "implemented; source retained, unique successor/receipt and own-offer acceptance atomic",
+      "evidence": "evidence_b14/README.md"
     }
   ],
   "validation": "report-source/validation.json",

@@ -10,7 +10,7 @@ class PatientAccess(models.Model):
         db_table = "adc_patient_access"
 
 class BookingReceipt(models.Model):
-    """One confirmed request per signed nonce; safe on refresh and double submission."""
+    """A booking or rescheduling confirmation receipt; one request and one resulting visit."""
     nonce = models.UUIDField(unique=True, editable=False)
     access = models.ForeignKey(PatientAccess, on_delete=models.PROTECT)
     visit = models.OneToOneField("scheduling.Visit", on_delete=models.PROTECT)

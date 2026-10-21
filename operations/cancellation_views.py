@@ -27,6 +27,7 @@ from operations.forms import CancellationFilterForm, FollowUpForm, ImprovementFo
 from operations.models import CancellationFollowUp
 from accounts.models import UserAccount
 from django.utils.dateparse import parse_datetime
+from scheduling.models import Visit
 
 @login_required
 @never_cache
@@ -136,7 +137,12 @@ def followup(request,pk):
     names=dict(UserAccount.objects.filter(pk__in=[h.snapshot['owner'] for h in history]).values_list('pk','username'))
     for h in history:
         h.reason_label=dict(REASONS).get(h.snapshot['reason_code']);h.state_label=dict(FOLLOW_STATES).get(h.snapshot['state']);h.owner_label=names.get(h.snapshot['owner'],'历史经办账号')
-    return render(request,'operations/followup.html',dict(visit=visit,row=row,form=form,history=history))
+    replacement = Visit.objects.filter(pk=row.replacement_visit_id, patient_id=visit.patient_id,
+        clinic_id=visit.clinic_id).first() if row and row.replacement_visit_id else None
+    successor = Visit.objects.filter(replaces_visit=replacement, patient_id=visit.patient_id,
+        clinic_id=visit.clinic_id).first() if replacement else None
+    return render(request,'operations/followup.html',dict(visit=visit,row=row,form=form,history=history,
+        retained_replacement=replacement,replacement_successor=successor))
 
 def serialize_form(data):
     from operations.cancellation_services import serialize

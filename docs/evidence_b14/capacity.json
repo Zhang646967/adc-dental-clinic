@@ -1,0 +1,98 @@
+{
+  "scope": "Five-clinic patient HTTP workload; distinct from earlier staff workload. Preview and confirmation are separate POST requests.",
+  "started_utc": "2026-10-21T02:31:21.954778+00:00",
+  "seconds": 1800,
+  "target_rps": 5,
+  "elapsed_seconds": 1800.005,
+  "wall_elapsed_seconds": 1800.022,
+  "max_offer_gap_seconds": 4.01,
+  "actual_rps": 5.0,
+  "distinct_users": 20,
+  "clinics": 5,
+  "offered": 9000,
+  "max_in_flight": 20,
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.453,
+    "max_seconds": 1.345
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.441,
+    "max_seconds": 1.345
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.492,
+    "max_seconds": 1.3423
+  },
+  "previews": {
+    "requests": 900,
+    "failures": 0,
+    "p95_seconds": 0.469,
+    "max_seconds": 0.9563
+  },
+  "confirmations": {
+    "requests": 900,
+    "failures": 0,
+    "p95_seconds": 0.503,
+    "max_seconds": 1.3423
+  },
+  "committed_reschedules": 900,
+  "by_clinic": {
+    "1": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.375,
+      "max_seconds": 0.9588
+    },
+    "2": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.393,
+      "max_seconds": 0.6902
+    },
+    "3": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.451,
+      "max_seconds": 1.345
+    },
+    "4": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.46,
+      "max_seconds": 1.2036
+    },
+    "5": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.493,
+      "max_seconds": 1.3423
+    }
+  },
+  "http_passed": true,
+  "continuity_passed": true,
+  "passed": true,
+  "database_checked": true,
+  "database_assertions": 55,
+  "original_row_groups_compared": 66,
+  "original_row_hashes_unchanged": 29693,
+  "expected_original_source_and_claim_updates": 40,
+  "resource_samples": 148,
+  "observation_samples": 50,
+  "sampling_errors": [],
+  "oom_events": 0,
+  "unexpected_restarts": 0,
+  "deadlock_delta": 0,
+  "commit_identity": "working-tree execution; exact delivered application equivalence and CI recorded separately",
+  "docker_event_query": {
+    "since": "2026-10-21T02:31:21.954778+00:00",
+    "until": "2026-10-21T03:01:21.976778+00:00",
+    "oom_restart_die_events": 0,
+    "scope": "Docker daemon retained events plus sampled OOM flags, restart counters and service/worker observations"
+  }
+}

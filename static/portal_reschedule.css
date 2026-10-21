@@ -1,0 +1,7 @@
+.portal-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.portal-comparison .panel{min-width:0;margin-top:0}.portal-source{overflow-wrap:anywhere}
+.portal-reschedule-filter{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:end}
+.portal-reschedule-filter label{display:block}.portal-reschedule-filter select,.portal-reschedule-filter input{width:100%;min-width:0}
+.patient-main .errorlist{overflow-wrap:anywhere}.patient-main .actions{flex-wrap:wrap}
+@media(max-width:650px){.portal-comparison,.portal-reschedule-filter{grid-template-columns:1fr}.patient-main .actions .button{width:100%}}
+html[data-display="comfortable"] .portal-comparison{grid-template-columns:1fr}

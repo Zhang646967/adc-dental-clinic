@@ -12,6 +12,7 @@
 | 设备费用及维护 | [费用更正](EQUIPMENT_COST_AMENDMENTS.md)、[维护工单](MAINTENANCE_WORK_ORDERS.md) |
 | 电话接待与统一资源 | [B1.2＋B1.3业务合同](B12_B13_RECEPTION_RESOURCES.md)、[场景追踪](evidence_b12_b13/traceability.md) |
 | 取消分析与服务改进 | [B1.1业务合同](B11_APPOINTMENT_IMPROVEMENT.md)、[领域及状态图](diagrams/)、[已执行追踪](evidence_b11/traceability.md) |
+| 患者自助改期 | [B1.4业务合同](B14_PATIENT_RESCHEDULING.md)、[执行证据](evidence_b14/README.md) |
 | 前台排班与数据库关系 | [B1.3.1实现及后续安排](FRONT_DESK_SCHEDULING_PLAN.md)、[预约业务总计划](APPOINTMENT_BUSINESS_PLAN.md) |
 | 预约与排班 | [预约改期](RESCHEDULING_OPTIMIZATION.md)、[出诊维护](SU29_SU30_AVAILABILITY.md)、[前台协调](SU31_FRONT_COORDINATION.md) |
 | 接诊控制、任务和通知 | [接诊控制](SU32_SU33_INTAKE_CONTROL.md)、[协调任务](SU34_SU35_SU36_COORDINATION_TASKS.md)、[通知](SU37_SU38_NOTIFICATIONS.md) |
@@ -35,7 +36,7 @@
 
 ## 测试与验收
 
-当前[B1.3.1前台排班、日周视图与数据库关系验收](evidence_b131/README.md)；此前各阶段按原范围保留。
+当前[B1.4患者自助改期、候补替换与资源衔接验收](evidence_b14/README.md)；此前各阶段按原范围保留。
 
 | 验证范围 | 实际记录 |
 |---|---|

@@ -1,0 +1,10 @@
+{% extends 'portal/base.html' %}{% load workspace_tags %}{% block title %}调整我的预约 · ADC{% endblock %}{% block content %}
+<a href="{% url 'portal_visit' visit.pk %}">返回原预约详情</a><div class="eyebrow">本人预约 · 先选择，再核对</div><h1>调整这次预约</h1>
+{% include 'portal/reschedule_source.html' %}
+<p class="notice">原预约仍保留。查询和选择不占位；只有最后确认成功，才换成新的安排。同店、同服务开放未来十四天；跨店或更换服务请联系前台。</p>
+<section class="panel"><h2>查找新时间</h2><form method="get" class="portal-reschedule-filter">{{ search.as_div }}<button type="submit">查看可改时段</button></form>
+{% if result %}<p class="muted">按服务完整时长、科室开放、医师和椅位设备核对；实际确认时会再核对。{% if result.limited %}{{ result.limit_reason }}{% endif %}</p>{% endif %}</section>
+{% if offers %}<section class="panel"><h2>你还有可核对的候补邀约</h2><p>如要用邀约替代本预约，请在这里选择；不会另建一条并行预约。</p>{% for offer in offers %}<p>{{ offer.slot.dentist.name }} · {{ offer.starts_at|date:'Y-m-d H:i' }} — {{ offer.ends_at|date:'H:i' }}；确认期限 {{ offer.expires_at|date:'m-d H:i' }}</p><a class="button secondary" href="{% url 'portal_reschedule' visit.pk %}?offer={{ offer.pk }}">用这条邀约改期</a>{% endfor %}</section>{% endif %}
+{% if selection %}<section class="panel" id="selected-arrangement"><h2>拟选安排</h2><p><strong>{{ selection.dentist }}</strong> · {{ selection.start|date:'Y-m-d H:i' }} — {{ selection.end|date:'H:i' }}（北京时间）</p>{% if selection.offer %}<p>将接受本人邀约 #{{ selection.offer.pk }} 并替代原约；以邀约原定时长和资源为准。</p>{% endif %}<form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit"{% if read_only %} disabled{% endif %}>核对原安排与新安排</button></form></section>{% endif %}
+<div class="slot-grid">{% if result %}{% for row in result.rows %}<section class="slot-card"><h2>{{ row.start|date:'H:i' }} — {{ row.end|date:'H:i' }}</h2><p>{{ row.dentist }}</p><p>{{ row.start|date:'Y年m月d日' }} · 北京时间</p><a class="button secondary" href="{{ row.choose_url }}#selected-arrangement">选择这个时间</a></section>{% empty %}<section class="panel"><h2>这一天未找到可改时段</h2><p>可以换日期或医师继续查找；未返回候选不表示所有时间都不可用。原预约仍保留。</p></section>{% endfor %}{% endif %}</div>
+{% include 'portal/reschedule_help.html' %}{% endblock %}

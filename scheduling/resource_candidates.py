@@ -19,7 +19,7 @@ def candidates(*,clinic_id,service_id,day,patient_id,dentist_id=None,ignore_visi
         clinic__is_active=True,dentist__is_active=True,dentist__in=service.dentists.all(),
         starts_at__lt=finish,ends_at__gt=max(begin,now)).select_related('clinic','dentist')
     if dentist_id:slots=slots.filter(dentist_id=dentist_id)
-    calendar=ResourceCalendar(clinic_id,begin,finish)
+    calendar=ResourceCalendar(clinic_id,begin,finish,ignore_visit=ignore_visit)
     busy=list(Visit.objects.filter(status__in=OCCUPYING_STATUSES,clinic_id=clinic_id,
         scheduled_start__lt=finish+duration,scheduled_end__gt=begin).exclude(pk=ignore_visit).values_list(
             'patient_id','dentist_id','scheduled_start','scheduled_end'))

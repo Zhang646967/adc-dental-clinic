@@ -1,0 +1,233 @@
+{
+  "passed": true,
+  "assertions": 55,
+  "checks": [
+    {
+      "name": "900 acknowledged unique replacements",
+      "passed": true
+    },
+    {
+      "name": "Every successor retains patient clinic and original link",
+      "passed": true
+    },
+    {
+      "name": "One direct successor for each source",
+      "passed": true
+    },
+    {
+      "name": "900 durable patient confirmation receipts",
+      "passed": true
+    },
+    {
+      "name": "900 portal effects audited exactly once",
+      "passed": true
+    },
+    {
+      "name": "Every source rescheduling audit retained",
+      "passed": true
+    },
+    {
+      "name": "Twenty final appointments still scheduled",
+      "passed": true
+    },
+    {
+      "name": "Every source resource released",
+      "passed": true
+    },
+    {
+      "name": "Every result keeps service plan",
+      "passed": true
+    },
+    {
+      "name": "Twenty final appointments have active firm claims",
+      "passed": true
+    },
+    {
+      "name": "No overlapping active physical claims",
+      "passed": true
+    },
+    {
+      "name": "No occupied overlap for patient_id",
+      "passed": true
+    },
+    {
+      "name": "No occupied overlap for dentist_id",
+      "passed": true
+    },
+    {
+      "name": "502 invoices and original money unchanged",
+      "passed": true
+    },
+    {
+      "name": "502 posted receipts and original cash unchanged",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10543",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10544",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10541",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10542",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10547",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10545",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10548",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10546",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10551",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10550",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10549",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10552",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10554",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10556",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10555",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10553",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10559",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10557",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10558",
+      "passed": true
+    },
+    {
+      "name": "Original source changed only status and version 10560",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 47",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 43",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 41",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 44",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 42",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 46",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 45",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 48",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 50",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 52",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 51",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 49",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 55",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 53",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 56",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 54",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 59",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 60",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 58",
+      "passed": true
+    },
+    {
+      "name": "Original resource released exactly for rescheduling 57",
+      "passed": true
+    }
+  ],
+  "matched_results": 900,
+  "final_active_patients": 20,
+  "all_invoice_total": "50200.00",
+  "all_posted_receipt_total": "50200.00",
+  "original_row_hashes_unchanged": 29693,
+  "expected_original_source_and_claim_updates": 40,
+  "original_row_groups_compared": 66
+}

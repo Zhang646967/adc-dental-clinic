@@ -1,0 +1,193 @@
+{
+  "passed": true,
+  "assertions": 45,
+  "checks": [
+    {
+      "name": "Original retained and unique successor clinic 1",
+      "passed": true
+    },
+    {
+      "name": "Own retained offer creates same unique successor 1",
+      "passed": true
+    },
+    {
+      "name": "Historical source identity and service retained 1",
+      "passed": true
+    },
+    {
+      "name": "Old resource claims released 1",
+      "passed": true
+    },
+    {
+      "name": "Two signed confirmations have distinct durable receipts 1",
+      "passed": true
+    },
+    {
+      "name": "Rescheduling alone is not cancellation follow-up 1",
+      "passed": true
+    },
+    {
+      "name": "Original retained and unique successor clinic 2",
+      "passed": true
+    },
+    {
+      "name": "Own retained offer creates same unique successor 2",
+      "passed": true
+    },
+    {
+      "name": "Historical source identity and service retained 2",
+      "passed": true
+    },
+    {
+      "name": "Old resource claims released 2",
+      "passed": true
+    },
+    {
+      "name": "Two signed confirmations have distinct durable receipts 2",
+      "passed": true
+    },
+    {
+      "name": "Rescheduling alone is not cancellation follow-up 2",
+      "passed": true
+    },
+    {
+      "name": "Original retained and unique successor clinic 3",
+      "passed": true
+    },
+    {
+      "name": "Own retained offer creates same unique successor 3",
+      "passed": true
+    },
+    {
+      "name": "Historical source identity and service retained 3",
+      "passed": true
+    },
+    {
+      "name": "Old resource claims released 3",
+      "passed": true
+    },
+    {
+      "name": "Two signed confirmations have distinct durable receipts 3",
+      "passed": true
+    },
+    {
+      "name": "Rescheduling alone is not cancellation follow-up 3",
+      "passed": true
+    },
+    {
+      "name": "True cancellation retained separately 3",
+      "passed": true
+    },
+    {
+      "name": "Original retained and unique successor clinic 4",
+      "passed": true
+    },
+    {
+      "name": "Own retained offer creates same unique successor 4",
+      "passed": true
+    },
+    {
+      "name": "Historical source identity and service retained 4",
+      "passed": true
+    },
+    {
+      "name": "Old resource claims released 4",
+      "passed": true
+    },
+    {
+      "name": "Two signed confirmations have distinct durable receipts 4",
+      "passed": true
+    },
+    {
+      "name": "Rescheduling alone is not cancellation follow-up 4",
+      "passed": true
+    },
+    {
+      "name": "True cancellation retained separately 4",
+      "passed": true
+    },
+    {
+      "name": "Original retained and unique successor clinic 5",
+      "passed": true
+    },
+    {
+      "name": "Own retained offer creates same unique successor 5",
+      "passed": true
+    },
+    {
+      "name": "Historical source identity and service retained 5",
+      "passed": true
+    },
+    {
+      "name": "Old resource claims released 5",
+      "passed": true
+    },
+    {
+      "name": "Two signed confirmations have distinct durable receipts 5",
+      "passed": true
+    },
+    {
+      "name": "Rescheduling alone is not cancellation follow-up 5",
+      "passed": true
+    },
+    {
+      "name": "True cancellation retained separately 5",
+      "passed": true
+    },
+    {
+      "name": "Patient doctor change retained old accepted promise 1",
+      "passed": true
+    },
+    {
+      "name": "Actual treatment independently produces CNY100 bill 1",
+      "passed": true
+    },
+    {
+      "name": "Independent receipt review CNY100 1",
+      "passed": true
+    },
+    {
+      "name": "Chair replacement history retained 1",
+      "passed": true
+    },
+    {
+      "name": "Patient doctor change retained old accepted promise 2",
+      "passed": true
+    },
+    {
+      "name": "Actual treatment independently produces CNY100 bill 2",
+      "passed": true
+    },
+    {
+      "name": "Independent receipt review CNY100 2",
+      "passed": true
+    },
+    {
+      "name": "Chair replacement history retained 2",
+      "passed": true
+    },
+    {
+      "name": "Only two new invoices after actual care",
+      "passed": true
+    },
+    {
+      "name": "Only two new receipts after independent review",
+      "passed": true
+    },
+    {
+      "name": "All invoice totals independently summed",
+      "passed": true
+    },
+    {
+      "name": "All posted receipt totals independently summed",
+      "passed": true
+    }
+  ],
+  "browser_clinics": 5,
+  "new_browser_invoices": 2,
+  "new_posted_receipts": 2,
+  "new_invoice_total": "200.00",
+  "new_posted_receipt_total": "200.00",
+  "all_invoice_total": "50200.00",
+  "all_posted_receipt_total": "50200.00"
+}

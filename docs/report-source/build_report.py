@@ -131,7 +131,8 @@ def build(folder,repo,output=None):
     cp.append(m)
     if i==0:s=OxmlElement('w:shd');s.set(qn('w:fill'),'F2F2F2');cp.append(s)
     pp=c.paragraphs[0];pp.paragraph_format.first_line_indent=Pt(0);pp.paragraph_format.line_spacing=Pt(15.5);pp.paragraph_format.space_after=Pt(0)
-    pp.paragraph_format.keep_with_next=(i < len(rows) if case_label=='C' else i==0)
+    # The long patient-replacement case spans pages; its field rows must flow.
+    pp.paragraph_format.keep_with_next=(i < len(rows) if case_label=='C' and not case.startswith('SU-40') else i==0)
     run=pp.add_run(str(text));font(run,10.5,i==0)
     lang=OxmlElement('w:lang');lang.set(qn('w:val'),'en-US');lang.set(qn('w:eastAsia'),'en-US');run._element.get_or_add_rPr().append(lang)
   p('',size=1,indent=False)
@@ -320,6 +321,8 @@ def build(folder,repo,output=None):
   if item['heading'].startswith('3.8'):
    figure(folder/'appointment-sequence.png','图3-13 电话预约接待与最终确认的业务序列',16)
    p('接待、完整建档、服务及资源核验、明确同意与最终成约分别办理。图中查询候选不是占用；同意后仍须重检资源，接待与成约结果一并关联。',10.5)
+   figure(folder/'scheduling-models/B14.png','图3-14 患者自助改期与候补替换的业务序列',16)
+   p('患者选择与明确确认分开；原预约在确认成功前保留。统一资源核验、唯一后继、确认回执及必要的邀约接受在同一事务保存。真正取消仍通过原取消及原因跟进流程办理。',10.5)
  mind(3)
  page();heading('第4章 系统设计',1)
  heading('4.1 领域关系与状态模型')
@@ -349,7 +352,7 @@ def build(folder,repo,output=None):
    p('执行与复核采用不同账号；后续观察窗口完整结束且不早于最近执行开始日。样本不足、不可比和变化待观察分别记录，不把统计变化当作措施的因果效果。')
   if item['heading'].startswith('4.13'):
    manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
-   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination'],15):
+   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination','er_portal_reschedule'],15):
     if number>15:page()
     heading('4.13.'+str(number-14)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number)+' '+manifest[name]['title']+'数据库ER图',16,max_height=14 if number==15 else 18)
@@ -393,7 +396,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 预约完善 财务与设备用例规约',1)
- p('本附录补充SU-39—58。电话接待、多资源核对及资源目录规约说明现有业务；患者自助改期仍待实现。取消分析、财务与设备的原规则继续保留。每项的实现状态及验收目标分别列明。',10.5)
+ p('本附录补充SU-39—58。电话接待、多资源核对、患者自助改期及资源目录规约说明现有业务。取消分析、财务与设备的原规则继续保留；每项实现范围与验收目标分别列明。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

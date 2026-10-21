@@ -1,0 +1,700 @@
+{
+  "scope": "B1.4 five-clinic real Chrome: patient replacement, own retained offer, stale result, follow-up and keyboard",
+  "checks": [
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Retained predecessor",
+      "passed": true
+    },
+    {
+      "name": "Patient sees saved successor link",
+      "passed": true
+    },
+    {
+      "name": "Released original time returns to front-desk resource observation",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait patient wait registration",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait explicit preference",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait front desk planning",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait new suggestions",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait suggestion review",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait publish retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait own offer list",
+      "passed": true
+    },
+    {
+      "name": "B14-1-wait own pending offer available",
+      "passed": true
+    },
+    {
+      "name": "Own offer distinguishes replacement from additional appointment",
+      "passed": true
+    },
+    {
+      "name": "Offer page links own original for replacement",
+      "passed": true
+    },
+    {
+      "name": "B14-1-own-offer retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-1-own-offer preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-1-own-offer signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-1-own-offer concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Accepted retained offer remains history",
+      "passed": true
+    },
+    {
+      "name": "Offer now links exact replacement",
+      "passed": true
+    },
+    {
+      "name": "Narrow keyboard filters",
+      "passed": true
+    },
+    {
+      "name": "Keyboard Enter submits date filter",
+      "passed": true
+    },
+    {
+      "name": "390px large text has no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "Retained history queue",
+      "passed": true
+    },
+    {
+      "name": "Predecessor present in own history",
+      "passed": true
+    },
+    {
+      "name": "b14-result-390 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "B14-2-ordinary available choices",
+      "passed": true
+    },
+    {
+      "name": "B14-2-ordinary desired time is offered",
+      "passed": true
+    },
+    {
+      "name": "B14-2-ordinary selected actual candidate link",
+      "passed": true
+    },
+    {
+      "name": "B14-2-ordinary preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-2-ordinary signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-2-ordinary concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Retained predecessor",
+      "passed": true
+    },
+    {
+      "name": "Patient sees saved successor link",
+      "passed": true
+    },
+    {
+      "name": "Released original time returns to front-desk resource observation",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait patient wait registration",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait explicit preference",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait front desk planning",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait new suggestions",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait suggestion review",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait publish retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait own offer list",
+      "passed": true
+    },
+    {
+      "name": "B14-2-wait own pending offer available",
+      "passed": true
+    },
+    {
+      "name": "Own offer distinguishes replacement from additional appointment",
+      "passed": true
+    },
+    {
+      "name": "Offer page links own original for replacement",
+      "passed": true
+    },
+    {
+      "name": "B14-2-own-offer retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-2-own-offer preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-2-own-offer signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-2-own-offer concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Accepted retained offer remains history",
+      "passed": true
+    },
+    {
+      "name": "Offer now links exact replacement",
+      "passed": true
+    },
+    {
+      "name": "Retained history queue",
+      "passed": true
+    },
+    {
+      "name": "Predecessor present in own history",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "B14-3-ordinary available choices",
+      "passed": true
+    },
+    {
+      "name": "B14-3-ordinary desired time is offered",
+      "passed": true
+    },
+    {
+      "name": "B14-3-ordinary selected actual candidate link",
+      "passed": true
+    },
+    {
+      "name": "B14-3-ordinary preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-3-ordinary signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-3-ordinary concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Retained predecessor",
+      "passed": true
+    },
+    {
+      "name": "Patient sees saved successor link",
+      "passed": true
+    },
+    {
+      "name": "Released original time returns to front-desk resource observation",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait patient wait registration",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait explicit preference",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait front desk planning",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait new suggestions",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait suggestion review",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait publish retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait own offer list",
+      "passed": true
+    },
+    {
+      "name": "B14-3-wait own pending offer available",
+      "passed": true
+    },
+    {
+      "name": "Own offer distinguishes replacement from additional appointment",
+      "passed": true
+    },
+    {
+      "name": "Offer page links own original for replacement",
+      "passed": true
+    },
+    {
+      "name": "B14-3-own-offer retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-3-own-offer preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-3-own-offer signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-3-own-offer concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Accepted retained offer remains history",
+      "passed": true
+    },
+    {
+      "name": "Offer now links exact replacement",
+      "passed": true
+    },
+    {
+      "name": "Patient cancellation remains separate from rescheduling",
+      "passed": true
+    },
+    {
+      "name": "Patient cancellation explicitly recorded",
+      "passed": true
+    },
+    {
+      "name": "Front desk sees genuine cancellation follow-up",
+      "passed": true
+    },
+    {
+      "name": "Retained history queue",
+      "passed": true
+    },
+    {
+      "name": "Predecessor present in own history",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "B14-4-ordinary available choices",
+      "passed": true
+    },
+    {
+      "name": "B14-4-ordinary desired time is offered",
+      "passed": true
+    },
+    {
+      "name": "B14-4-ordinary selected actual candidate link",
+      "passed": true
+    },
+    {
+      "name": "B14-4-ordinary preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-4-ordinary signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-4-ordinary concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Retained predecessor",
+      "passed": true
+    },
+    {
+      "name": "Patient sees saved successor link",
+      "passed": true
+    },
+    {
+      "name": "Released original time returns to front-desk resource observation",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait patient wait registration",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait explicit preference",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait front desk planning",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait new suggestions",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait suggestion review",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait publish retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait own offer list",
+      "passed": true
+    },
+    {
+      "name": "B14-4-wait own pending offer available",
+      "passed": true
+    },
+    {
+      "name": "Own offer distinguishes replacement from additional appointment",
+      "passed": true
+    },
+    {
+      "name": "Offer page links own original for replacement",
+      "passed": true
+    },
+    {
+      "name": "B14-4-own-offer retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-4-own-offer preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-4-own-offer signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-4-own-offer concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Accepted retained offer remains history",
+      "passed": true
+    },
+    {
+      "name": "Offer now links exact replacement",
+      "passed": true
+    },
+    {
+      "name": "Patient cancellation remains separate from rescheduling",
+      "passed": true
+    },
+    {
+      "name": "Patient cancellation explicitly recorded",
+      "passed": true
+    },
+    {
+      "name": "Front desk sees genuine cancellation follow-up",
+      "passed": true
+    },
+    {
+      "name": "Retained history queue",
+      "passed": true
+    },
+    {
+      "name": "Predecessor present in own history",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "B14-5-ordinary available choices",
+      "passed": true
+    },
+    {
+      "name": "B14-5-ordinary desired time is offered",
+      "passed": true
+    },
+    {
+      "name": "B14-5-ordinary selected actual candidate link",
+      "passed": true
+    },
+    {
+      "name": "B14-5-ordinary preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-5-ordinary signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-5-ordinary concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Retained predecessor",
+      "passed": true
+    },
+    {
+      "name": "Patient sees saved successor link",
+      "passed": true
+    },
+    {
+      "name": "Released original time returns to front-desk resource observation",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait patient wait registration",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait explicit preference",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait front desk planning",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait new suggestions",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait suggestion review",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait publish retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait own offer list",
+      "passed": true
+    },
+    {
+      "name": "B14-5-wait own pending offer available",
+      "passed": true
+    },
+    {
+      "name": "Own offer distinguishes replacement from additional appointment",
+      "passed": true
+    },
+    {
+      "name": "Offer page links own original for replacement",
+      "passed": true
+    },
+    {
+      "name": "B14-5-own-offer retained offer",
+      "passed": true
+    },
+    {
+      "name": "B14-5-own-offer preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-5-own-offer signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-5-own-offer concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Accepted retained offer remains history",
+      "passed": true
+    },
+    {
+      "name": "Offer now links exact replacement",
+      "passed": true
+    },
+    {
+      "name": "Patient cancellation remains separate from rescheduling",
+      "passed": true
+    },
+    {
+      "name": "Patient cancellation explicitly recorded",
+      "passed": true
+    },
+    {
+      "name": "Front desk sees genuine cancellation follow-up",
+      "passed": true
+    },
+    {
+      "name": "Retained history queue",
+      "passed": true
+    },
+    {
+      "name": "Predecessor present in own history",
+      "passed": true
+    },
+    {
+      "name": "Role fixture FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Only active patient role can use self-rescheduling FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Role fixture MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Only active patient role can use self-rescheduling MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Role fixture DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Login form DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Only active patient role can use self-rescheduling DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Role fixture FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Login form FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Only active patient role can use self-rescheduling FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Role fixture HQ",
+      "passed": true
+    },
+    {
+      "name": "Login form HQ",
+      "passed": true
+    },
+    {
+      "name": "Only active patient role can use self-rescheduling HQ",
+      "passed": true
+    },
+    {
+      "name": "Role fixture SYSADMIN",
+      "passed": true
+    },
+    {
+      "name": "Login form SYSADMIN",
+      "passed": true
+    },
+    {
+      "name": "Only active patient role can use self-rescheduling SYSADMIN",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Other patient cannot inspect replacement source",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "passed": true
+}

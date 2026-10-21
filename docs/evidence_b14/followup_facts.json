@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "scope": "supplemental real-browser follow-up after completion of the measured load",
+  "assertions": 8,
+  "checks": [
+    {
+      "name": "Genuine cancellation unchanged",
+      "passed": true
+    },
+    {
+      "name": "Actual rebooking evidence retained",
+      "passed": true
+    },
+    {
+      "name": "One append-only follow-up history retains original result",
+      "passed": true
+    },
+    {
+      "name": "Patient later successor distinct from rebooking evidence",
+      "passed": true
+    },
+    {
+      "name": "Same patient and clinic throughout",
+      "passed": true
+    },
+    {
+      "name": "Only current successor retains active resources",
+      "passed": true
+    },
+    {
+      "name": "No extra treatment bills",
+      "passed": true
+    },
+    {
+      "name": "No extra money",
+      "passed": true
+    }
+  ],
+  "followup_history_rows": 1,
+  "original_cash_unchanged": true
+}

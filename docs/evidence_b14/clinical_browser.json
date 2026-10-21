@@ -1,0 +1,280 @@
+{
+  "scope": "B1.4 explicit patient doctor change after retained offer; compatible chair, arrival, actual treatment, invoice, independent financial review",
+  "checks": [
+    {
+      "name": "Login form FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Patient sees responsible doctor choices",
+      "passed": true
+    },
+    {
+      "name": "Exact same-time doctor change is available",
+      "passed": true
+    },
+    {
+      "name": "Patient selects real offered resource combination",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1 preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1 signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-doctor concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Responsible front desk reads successor",
+      "passed": true
+    },
+    {
+      "name": "Compatible chair coordination",
+      "passed": true
+    },
+    {
+      "name": "Alternate compatible chair identified",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1 chair preview status",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1 chair server-held preview",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1 chair duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Arrival rechecks actual chair occupancy",
+      "passed": true
+    },
+    {
+      "name": "Actual arrival registered",
+      "passed": true
+    },
+    {
+      "name": "Only responsible doctor enters care",
+      "passed": true
+    },
+    {
+      "name": "Allergy facts explicitly reviewed",
+      "passed": true
+    },
+    {
+      "name": "Actual completed treatment recorded",
+      "passed": true
+    },
+    {
+      "name": "Doctor confirms actual treatment completion",
+      "passed": true
+    },
+    {
+      "name": "Bill originates from actual treatment",
+      "passed": true
+    },
+    {
+      "name": "Front desk reads completed care",
+      "passed": true
+    },
+    {
+      "name": "Actual invoice",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-receipt source",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-receipt preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-receipt signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-receipt concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-review review page",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-review preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-review signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-review concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-1-review posted cash",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Login form DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Patient sees responsible doctor choices",
+      "passed": true
+    },
+    {
+      "name": "Exact same-time doctor change is available",
+      "passed": true
+    },
+    {
+      "name": "Patient selects real offered resource combination",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2 preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2 signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-doctor concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "Responsible front desk reads successor",
+      "passed": true
+    },
+    {
+      "name": "Compatible chair coordination",
+      "passed": true
+    },
+    {
+      "name": "Alternate compatible chair identified",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2 chair preview status",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2 chair server-held preview",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2 chair duplicate submissions one result",
+      "passed": true
+    },
+    {
+      "name": "Arrival rechecks actual chair occupancy",
+      "passed": true
+    },
+    {
+      "name": "Actual arrival registered",
+      "passed": true
+    },
+    {
+      "name": "Only responsible doctor enters care",
+      "passed": true
+    },
+    {
+      "name": "Allergy facts explicitly reviewed",
+      "passed": true
+    },
+    {
+      "name": "Actual completed treatment recorded",
+      "passed": true
+    },
+    {
+      "name": "Doctor confirms actual treatment completion",
+      "passed": true
+    },
+    {
+      "name": "Bill originates from actual treatment",
+      "passed": true
+    },
+    {
+      "name": "Front desk reads completed care",
+      "passed": true
+    },
+    {
+      "name": "Actual invoice",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-receipt source",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-receipt preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-receipt signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-receipt concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-review review page",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-review preview accepted",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-review signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-review concurrent duplicate confirmations return same result",
+      "passed": true
+    },
+    {
+      "name": "B14-clinical-2-review posted cash",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "passed": true
+}

@@ -183,8 +183,14 @@ def accept_offer_resources_locked(actor, offer, visit):
 def validate_reserved_resources_locked(offer):
     """An offer retains its promised duration/catalogue snapshot, even after edits."""
     clinic_id = offer.request.clinic_id
-    if policy(clinic_id) is None: return
     lock_physical(clinic_id)
+    return inspect_reserved_resources(offer)
+
+
+def inspect_reserved_resources(offer):
+    """Read-only inspection; confirmation obtains the physical locks before repeating it."""
+    clinic_id = offer.request.clinic_id
+    if policy(clinic_id) is None: return None
     plan = ResourcePlan.objects.filter(offer=offer, is_current=True).select_related('service').first()
     if plan is None:
         raise RuleError('原邀约尚未核实资源，请联系前台协调；原承诺仍保留。')
@@ -196,6 +202,7 @@ def validate_reserved_resources_locked(offer):
                 starts_at__lt=offer.ends_at, ends_at__gt=offer.starts_at).filter(
                 Q(asset_id__in=ids) | Q(room_id=plan.room_id) | Q(department_id=plan.service.department_id)).exists()):
         raise RuleError('原邀约资源当前不可用，请联系前台协调；没有改变患者意愿或创建额外预约。')
+    return plan
 
 
 def current_plan(visit):

@@ -11,6 +11,19 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_portal_reschedule': {
+        'title': '患者授权与预约改期来源',
+        'tables': {
+            'adc_user': ['id', 'username'],
+            'adc_patient_access': ['id', 'user_id', 'patient_id', 'is_active'],
+            'adc_patient': ['id', 'patient_no'],
+            'adc_portal_booking_receipt': ['id', 'nonce', 'access_id', 'visit_id'],
+            'adc_visit': ['id', 'patient_id', 'replaces_visit_id', 'status'],
+            'adc_wait_offer': ['id', 'visit_id', 'state'],
+            'adc_cancellation_followup': ['id', 'visit_id', 'replacement_visit_id', 'state'],
+        },
+        'note': '患者授权与网站确认回执复用既有表；nonce唯一，visit_id唯一。预约自引用可空且唯一，构成原约与后继。邀约和取消跟进保留各自原关联，不因后续改期改写；同店本人范围和活动状态由事务命令核验，不能从外键推定权限。',
+    },
     'er_schedule_coordination': {
         'title': '前台排班与调班责任',
         'tables': {
@@ -120,7 +133,7 @@ def build():
             '// All 68 ORM tables; django_migrations is a framework migration journal.',
             '// Partial uniqueness, exclusions and triggers are documented separately.', '']
     catalog = ['# 当前数据库字段目录', '',
-        '结构基线日期：2026-10-20。本目录列出68张ORM业务／框架表；另1张django_migrations为框架迁移日志。', '',
+        '结构基线日期：'+data['observed_on']+'。本目录列出68张ORM业务／框架表；另1张django_migrations为框架迁移日志。', '',
         '字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。', '',
         'PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯一和排斥约束另列，不用单列UK代替。', '']
     for name,m in models.items():

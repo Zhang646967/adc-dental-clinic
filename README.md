@@ -6,7 +6,7 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**B1.3.1已实现：前台排班、日周视图与调班协调。** 出诊维护及候补发布由本店前台办理，主管继续资源规则和独立复核；[业务与后续安排](docs/FRONT_DESK_SCHEDULING_PLAN.md)及[验收](docs/evidence_b131/README.md)可直接查阅。[数据库ER及完整字段目录](docs/database/README.md)同步69表、170条外键和42项实际触发器，五幅ER纳入课程报告。
+**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步69表、170条外键、42项触发器，六幅ER纳入课程报告；前台继续负责日常排班。
 
 ## 仓库分类
 
@@ -21,7 +21,7 @@
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告包含58项业务用例及1项共享核验、77张表和33幅图。最新1046项规则及1299项PostgreSQL／HTTP／并发检查通过；五店20账号连续30分钟9000请求p95 0.349秒，范围及最终提示核验见[完整证据](docs/evidence_b131/README.md)。历史验收独立保留，不等同于公网或商业化认证。
+正式报告包含58项业务用例及1项共享核验、77张表和35幅图。最新1046项规则及1345项PostgreSQL／HTTP／并发通过；五店20患者连续30分钟9000请求p95 0.453秒。业务、容量、恢复及准确版本范围见[完整证据](docs/evidence_b14/README.md)，历史结果独立保留，不等同于公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

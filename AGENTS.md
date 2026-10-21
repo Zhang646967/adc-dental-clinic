@@ -80,3 +80,8 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 - Event history and current task state are distinct. A completed delivery is an inbox-row commit, not a human receipt. No FIFO/external exactly-once promise.
 - Preserve previous15 migrations. New notification data blocks destructive reverse. Old writers cannot coexist with the current task/notice workflow.
 - v1.0 scope is bounded by docs/V1_SCOPE_AND_REMAINING.md. After this batch only operations/UX closure and RC assembly remain in plan; user validation begins at RC.
+
+## Patient self-rescheduling (B1.4)
+- PatientAccess and active PATIENT context authorize only own source. Same-clinic, same-service replacements use existing resource rules; ordinary candidates use current duration, valid held offers retain promised duration.
+- Shared locked rescheduling owns the original terminal state, unique successor and claims; portal adds BookingReceipt in the same transaction. Offer acceptance stays in coordination and links the same reception result. Preserve all39 migrations.
+- Replay returns saved result current state; never revive later cancellation. Rescheduling is not a cancellation or a clinical/financial fact. Old offer and follow-up evidence links remain historical.

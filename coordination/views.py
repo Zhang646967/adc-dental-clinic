@@ -85,7 +85,16 @@ def offer(request,pk):
         else:
             messages.success(request,'已处理候补邀约；接受时产生正式预约，可在预约页面核对。')
             return redirect('front_coordination_detail',pk=origin) if origin else redirect('waitlist')
+    replacement_sources=[]
+    if request.workspace.role=='PATIENT':
+        from scheduling.models import Visit
+        sources=Visit.objects.filter(patient_id=o.request.patient_id,clinic_id=o.request.clinic_id,
+            status='SCHEDULED',scheduled_start__gt=timezone.now())
+        if o.request.service_id:
+            sources=sources.filter(resource_plans__is_current=True,resource_plans__service_id=o.request.service_id)
+        replacement_sources=list(sources.distinct().order_by('scheduled_start','pk')[:10])
     return render(request,'coordination/offer.html',{'offer':o,'form':form,'base_template':template_for(request),
+        'replacement_sources':replacement_sources,
         'active':o.state=='PENDING' and o.expires_at>timezone.now(),**return_context(origin)})
 
 @login_required

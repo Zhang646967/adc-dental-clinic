@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "resource_samples": 148,
+  "observations": 50,
+  "all_six_conditions_healthy": true,
+  "sampling_errors": [],
+  "services": {
+    "db": {
+      "memory_limit_mib": 768.0,
+      "cpus": 0.75,
+      "peak_observed_memory_mib": 99.75,
+      "peak_observed_cpu_percent": 40.85,
+      "restart_delta": 0,
+      "running_before_and_after": true,
+      "oom_killed_before_or_after": false
+    },
+    "web": {
+      "memory_limit_mib": 768.0,
+      "cpus": 1.0,
+      "peak_observed_memory_mib": 131.6,
+      "peak_observed_cpu_percent": 80.16,
+      "restart_delta": 0,
+      "running_before_and_after": true,
+      "oom_killed_before_or_after": false
+    },
+    "notification-worker": {
+      "memory_limit_mib": 128.0,
+      "cpus": 0.125,
+      "peak_observed_memory_mib": 55.48,
+      "peak_observed_cpu_percent": 1.42,
+      "restart_delta": 0,
+      "running_before_and_after": true,
+      "oom_killed_before_or_after": false
+    },
+    "gateway": {
+      "memory_limit_mib": 64.0,
+      "cpus": 0.125,
+      "peak_observed_memory_mib": 16.12,
+      "peak_observed_cpu_percent": 0.74,
+      "restart_delta": 0,
+      "running_before_and_after": true,
+      "oom_killed_before_or_after": false
+    },
+    "operations": {
+      "memory_limit_mib": 128.0,
+      "cpus": 0.1,
+      "peak_observed_memory_mib": 54.2,
+      "peak_observed_cpu_percent": 0.98,
+      "restart_delta": 0,
+      "running_before_and_after": true,
+      "oom_killed_before_or_after": false
+    }
+  },
+  "postgresql_deadlock_delta": 0,
+  "postgresql_conflict_delta": 0,
+  "scope": "Docker service quotas and observed peaks on a shared Mac; not an independent cloud host"
+}

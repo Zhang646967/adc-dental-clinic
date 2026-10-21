@@ -35,8 +35,8 @@ def check_source(visit):
         raise RuleError('患者资料已停用，不能办理新预约；原记录仍保留。')
 
 
-def check_target(visit, slot, start, end, now):
-    if (slot.clinic_id != visit.clinic_id or not slot.is_active or slot.booking_paused or
+def check_target(visit, slot, start, end, now, *, ignore_offer=None):
+    if (slot.clinic_id != visit.clinic_id or not slot.is_active or (slot.booking_paused and ignore_offer is None) or
             not slot.clinic.is_active or not slot.dentist.is_active):
         raise RuleError('新的出诊不属于当前诊所，或已停止接收，请重新选择。')
     validate_slot(start, end, slot.starts_at, slot.ends_at, now)
@@ -49,13 +49,18 @@ def check_target(visit, slot, start, end, now):
     held = WaitOffer.objects.filter(state='PENDING', expires_at__gt=now,
         starts_at__lt=end, ends_at__gt=start).filter(
         Q(request__patient_id=visit.patient_id) | Q(slot__dentist_id=slot.dentist_id))
+    if ignore_offer is not None: held = held.exclude(pk=ignore_offer)
     if busy.exists() or held.exists():
         raise RuleError('该时间已有患者／牙医安排或有效候补保留，请重新选择；原预约未改变。')
 
 
 def replacement_options(*, actor, visit_id, day, dentist_id=None):
+    return options_for_visit(visit=owned_source(actor, visit_id), day=day, dentist_id=dentist_id)
+
+
+def options_for_visit(*, visit, day, dentist_id=None):
+    """Observation for a source already scoped by its front-desk or patient caller."""
     with reporting_snapshot():
-        visit = owned_source(actor, visit_id)
         check_source(visit)
         now = timezone.now()
         today = now.astimezone(BUSINESS_TZ).date()
@@ -80,7 +85,9 @@ def replacement_options(*, actor, visit_id, day, dentist_id=None):
         earliest = max(begin, now)
         horizon = now + timedelta(days=HORIZON_DAYS)
         latest_start = min(finish, horizon)
-        slots = booking_slots(actor).filter(starts_at__lt=finish, ends_at__gt=earliest)
+        slots = AvailabilitySlot.objects.filter(clinic_id=visit.clinic_id, is_active=True,
+            booking_paused=False, clinic__is_active=True, dentist__is_active=True,
+            starts_at__lt=finish, ends_at__gt=earliest).select_related('clinic', 'dentist')
         if dentist_id is not None:
             slots = slots.filter(dentist_id=dentist_id)
         slots = list(slots.order_by('starts_at', 'dentist_id', 'pk')[:MAX_SLOTS + 1])

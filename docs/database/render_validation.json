@@ -1,4 +1,11 @@
 {
+  "er_portal_reschedule": {
+    "nodes": 7,
+    "edges": 9,
+    "width": 597,
+    "height": 433,
+    "minPrintedFontPt": 10.635778894472363
+  },
   "er_schedule_coordination": {
     "nodes": 7,
     "edges": 6,

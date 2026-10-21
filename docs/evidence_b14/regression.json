@@ -1,0 +1,10 @@
+{
+  "project": "adc_b14_verify_7177b2e33d",
+  "exit": 0,
+  "cleanup_exit": 0,
+  "passed": true,
+  "rule_checks": 1046,
+  "postgresql_http_concurrency_tests": 1345,
+  "new_tests": 46,
+  "scope": "complete local rules and actual PostgreSQL/HTTP/concurrency regression; application files equal capacity-equivalence hashes"
+}

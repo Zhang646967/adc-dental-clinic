@@ -37,7 +37,14 @@ def home(request):
 def appointments(request):
     access=patient_access(request.user)
     qs=Visit.objects.filter(patient_id=access.patient_id).select_related("clinic","dentist")
-    return render(request,"portal/appointments.html",{"page":Paginator(qs,10).get_page(request.GET.get("page"))})
+    queue=request.GET.get('queue','active')
+    if queue not in ('active','history','all'): raise Http404
+    counts={'active':qs.filter(status__in=['SCHEDULED','CHECKED_IN']).count(),'all':qs.count()}
+    counts['history']=counts['all']-counts['active']
+    if queue=='active':qs=qs.filter(status__in=['SCHEDULED','CHECKED_IN']).order_by('scheduled_start','pk')
+    elif queue=='history':qs=qs.exclude(status__in=['SCHEDULED','CHECKED_IN'])
+    return render(request,"portal/appointments.html",{"page":Paginator(qs,10).get_page(request.GET.get("page")),
+        'queue':queue,'queues':[(k,n,counts[k]) for k,n in [('active','待就诊与在诊'),('history','历史与改期记录'),('all','全部')]]})
 
 @login_required(login_url="portal_login")
 @require_GET
@@ -81,7 +88,9 @@ def booking_preview(request):
 def visit(request,pk):
     access=patient_access(request.user)
     v=get_object_or_404(Visit.objects.select_related("clinic","dentist"),pk=pk,patient_id=access.patient_id)
-    return render(request,"portal/visit.html",{"visit":v,"can_cancel":v.status=="SCHEDULED" and v.scheduled_start>timezone.now()})
+    from portal.rescheduling import related_context
+    return render(request,"portal/visit.html",dict(related_context(request.user,v),visit=v,
+        can_cancel=v.status=="SCHEDULED" and v.scheduled_start>timezone.now()))
 
 @login_required(login_url="portal_login")
 @require_http_methods(["GET","POST"])
@@ -100,5 +109,6 @@ def cancel(request,pk):
 @login_required(login_url="portal_login")
 @require_GET
 def help_page(request):
-    patient_access(request.user)
-    return render(request,"portal/help.html",{})
+    access=patient_access(request.user)
+    own=Visit.objects.filter(patient_id=access.patient_id,pk=request.GET.get('visit')).select_related('clinic').first() if request.GET.get('visit','').isdigit() else None
+    return render(request,"portal/help.html",{'help_visit':own})

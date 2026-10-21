@@ -45,5 +45,15 @@ module=ast.parse(text)
 expr=next(n for n in module.body if isinstance(n,ast.Expr) and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name) and n.value.func.id=='seq' and n.value.args and isinstance(n.value.args[0],ast.Constant) and n.value.args[0].value=='B06')
 block=ast.get_source_segment(text,expr).replace('诊所主管','前台')
 exec(compile(block,'current waitlist sequence','exec'),ns)
+seq('B14',[('患者','actor'),('患者网站','business_entity'),('预约与资源','business_entity'),('候补协同','business_entity')],[
+ ('msg',0,1,'查询本人原预约及可改方案'),('msg',1,2,'核对同店同服务、排班与当前资源'),
+ ('reply',2,1,'候选不占位；原预约继续保留'),('reply',1,0,'展示原新医师、起止时间与时长'),
+ ('msg',0,1,'填写原因并明确确认'),('msg',1,2,'重检本人权限、原版本和资源'),
+ ('alt','冲突、撤权、失效预览或原状态变化'),('reply',2,1,'失败回滚；不丢失原预约'),('reply',1,0,'显示当前结果与重新核对入口'),
+ ('branch','核验通过'),('ref','同一事务：释放原占用、保留原约、保存唯一后继和确认回执'),
+ ('msg',2,3,'若选择本人有效邀约，一并接受并关联同一结果'),('reply',3,2,'原候补与接待成约事实可追溯'),
+ ('reply',2,1,'唯一改期结果；旧新关系可查'),('reply',1,0,'待就诊、历史及人工协助'),('endalt',),
+ ('ref','改期不生成治疗或资金；后继另行取消才进入取消原因跟进')
+],[],bottom='重复确认返回原保存结果的当前状态；原接待与接受邀约关联保留。')
 (M/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'updated_models':list(manifest)},ensure_ascii=False))

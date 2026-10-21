@@ -33,5 +33,12 @@
     "width": 1050,
     "height": 1170,
     "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
+  },
+  "B14": {
+    "description": "消息为接收者承担的责任；实例、生命线和返回分开；无额外业务能力。",
+    "kind": "business-sequence",
+    "width": 1050,
+    "height": 1183,
+    "source_sha256": "7a1d3832e93f52a73db2265a7222901370c12f7ffb30dcf41cbbf4db799c7019"
   }
 }
