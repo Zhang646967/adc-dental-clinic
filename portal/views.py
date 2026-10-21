@@ -25,12 +25,10 @@ class PortalLoginView(LoginView):
 @login_required(login_url="portal_login")
 @require_GET
 def home(request):
-    access=patient_access(request.user)
-    visits=Visit.objects.filter(patient_id=access.patient_id).select_related("clinic","dentist")
+    from portal.patient_dashboard import dashboard
+    overview=dashboard(request.user)
     from workspaces.worklists import workspace_worklist
-    return render(request,"portal/home.html",{"patient":access.patient,"worklist":workspace_worklist(request.user),
-        "upcoming":visits.filter(status="SCHEDULED", scheduled_start__gte=timezone.now()).order_by("scheduled_start")[:3],
-        "visits_total":visits.count()})
+    return render(request,"portal/home.html",dict(overview, worklist=workspace_worklist(request.user)))
 
 @login_required(login_url="portal_login")
 @require_GET

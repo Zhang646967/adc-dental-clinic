@@ -1,0 +1,200 @@
+{
+  "passed": true,
+  "scope": "Independent ORM verification against known synthetic seed facts; not a full pre/post row fingerprint",
+  "checks": [
+    {
+      "name": "unique same-patient successor 1",
+      "passed": true
+    },
+    {
+      "name": "same-clinic current bookings 1",
+      "passed": true
+    },
+    {
+      "name": "final wait states 1",
+      "passed": true
+    },
+    {
+      "name": "final offer states 1",
+      "passed": true
+    },
+    {
+      "name": "accepted results are same visits 1",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed holds gone 1",
+      "passed": true
+    },
+    {
+      "name": "one firm chair each 1",
+      "passed": true
+    },
+    {
+      "name": "retained registration receipts 1",
+      "passed": true
+    },
+    {
+      "name": "no clinical or financial facts 1",
+      "passed": true
+    },
+    {
+      "name": "unique same-patient successor 2",
+      "passed": true
+    },
+    {
+      "name": "same-clinic current bookings 2",
+      "passed": true
+    },
+    {
+      "name": "final wait states 2",
+      "passed": true
+    },
+    {
+      "name": "final offer states 2",
+      "passed": true
+    },
+    {
+      "name": "accepted results are same visits 2",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed holds gone 2",
+      "passed": true
+    },
+    {
+      "name": "one firm chair each 2",
+      "passed": true
+    },
+    {
+      "name": "retained registration receipts 2",
+      "passed": true
+    },
+    {
+      "name": "no clinical or financial facts 2",
+      "passed": true
+    },
+    {
+      "name": "unique same-patient successor 3",
+      "passed": true
+    },
+    {
+      "name": "same-clinic current bookings 3",
+      "passed": true
+    },
+    {
+      "name": "final wait states 3",
+      "passed": true
+    },
+    {
+      "name": "final offer states 3",
+      "passed": true
+    },
+    {
+      "name": "accepted results are same visits 3",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed holds gone 3",
+      "passed": true
+    },
+    {
+      "name": "one firm chair each 3",
+      "passed": true
+    },
+    {
+      "name": "retained registration receipts 3",
+      "passed": true
+    },
+    {
+      "name": "no clinical or financial facts 3",
+      "passed": true
+    },
+    {
+      "name": "unique same-patient successor 4",
+      "passed": true
+    },
+    {
+      "name": "same-clinic current bookings 4",
+      "passed": true
+    },
+    {
+      "name": "final wait states 4",
+      "passed": true
+    },
+    {
+      "name": "final offer states 4",
+      "passed": true
+    },
+    {
+      "name": "accepted results are same visits 4",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed holds gone 4",
+      "passed": true
+    },
+    {
+      "name": "one firm chair each 4",
+      "passed": true
+    },
+    {
+      "name": "retained registration receipts 4",
+      "passed": true
+    },
+    {
+      "name": "no clinical or financial facts 4",
+      "passed": true
+    },
+    {
+      "name": "unique same-patient successor 5",
+      "passed": true
+    },
+    {
+      "name": "same-clinic current bookings 5",
+      "passed": true
+    },
+    {
+      "name": "final wait states 5",
+      "passed": true
+    },
+    {
+      "name": "final offer states 5",
+      "passed": true
+    },
+    {
+      "name": "accepted results are same visits 5",
+      "passed": true
+    },
+    {
+      "name": "unconfirmed holds gone 5",
+      "passed": true
+    },
+    {
+      "name": "one firm chair each 5",
+      "passed": true
+    },
+    {
+      "name": "retained registration receipts 5",
+      "passed": true
+    },
+    {
+      "name": "no clinical or financial facts 5",
+      "passed": true
+    },
+    {
+      "name": "all original seeded invoices remain",
+      "passed": true
+    },
+    {
+      "name": "all original cash entries remain",
+      "passed": true
+    },
+    {
+      "name": "independent posted receipt total",
+      "passed": true
+    }
+  ],
+  "clinics": 5,
+  "money_created": false
+}

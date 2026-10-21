@@ -1,0 +1,1 @@
+{"passed":true,"checks":93,"compiler":{"status":"passed","wxml_pages":9,"wxss_files":1,"scope":"Official offline syntax only; not an IDE preview or WeChat runtime"},"scope":"native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution"}

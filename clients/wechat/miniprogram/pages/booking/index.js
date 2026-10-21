@@ -30,6 +30,10 @@ Page({
   pickDoctor(e) { this.setData({doctorIndex:Number(e.detail.value),rows:[],searched:false}); },
   pickDay(e) { this.setData({day:e.detail.value,rows:[],searched:false}); },
   reason(e) { this.setData({reason:e.detail.value}); },
+  waitlist() {
+    const c=this.data.clinics[this.data.clinicIndex],s=this.data.services[this.data.serviceIndex];
+    wx.navigateTo({url:`/pages/waitjoin/index?clinic=${c?c.id:''}&service=${s?s.id:''}&day=${this.data.day}`});
+  },
   async search() {
     if (this.data.busy) return;
     const c=this.data.clinics[this.data.clinicIndex], s=this.data.services[this.data.serviceIndex], d=this.data.doctors[this.data.doctorIndex];

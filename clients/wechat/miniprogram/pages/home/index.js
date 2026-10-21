@@ -1,7 +1,7 @@
 const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 Page({
-  data:{rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false},
+  data:{rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null},
   async onShow() {
     try {
       const session = await api.bootstrap();
@@ -11,7 +11,11 @@ Page({
   },
   async load() {
     this.setData({busy:true, error:''});
-    try { const d = await api.request('visits/', 'GET', {queue:this.data.queue, page:this.data.page}); this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, busy:false}); }
+    try {
+      const [d,overview] = await Promise.all([api.request('visits/', 'GET', {queue:this.data.queue, page:this.data.page}), api.request('overview/')]);
+      if(overview.next_visit)overview.next_visit=arrangement(overview.next_visit);
+      this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, busy:false});
+    }
     catch (e) { showError(this,e); }
   },
   changeQueue(e) { if (this.data.busy) return; this.setData({queue:e.currentTarget.dataset.queue, page:1}); this.load(); },

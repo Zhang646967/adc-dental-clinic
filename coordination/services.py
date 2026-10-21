@@ -52,7 +52,7 @@ def join_waitlist(*,actor,clinic_id,earliest,latest,patient_no=None,dentist_id=N
 
 @business_errors
 @transaction.atomic
-def withdraw(*,actor,entry_id):
+def withdraw(*,actor,entry_id,expected_revision=None):
     require_writable(actor)
     entry=WaitRequest.objects.get(pk=entry_id);require_owner_or_front(actor,entry,lock=True)
     pending=list(WaitOffer.objects.filter(request=entry,state='PENDING'))
@@ -63,6 +63,8 @@ def withdraw(*,actor,entry_id):
     entry=WaitRequest.objects.select_for_update().get(pk=entry_id)
     if entry.state=='WITHDRAWN':return entry
     if entry.state=='BOOKED':raise RuleError('候补已形成预约。请在预约页面办理取消。')
+    if expected_revision is not None and entry.revision != expected_revision:
+        raise RuleError('候补已经变化，请重新核对；没有退出当前候补。')
     from scheduling.resources import release_offer_locked
     for offer in WaitOffer.objects.filter(request=entry,state='PENDING'):release_offer_locked(offer,'WITHDRAWN')
     WaitOffer.objects.filter(request=entry,state='PENDING').update(state='REVOKED')
@@ -162,7 +164,7 @@ def publish_plan(*,actor,plan_id):
 
 @business_errors
 @transaction.atomic
-def answer_offer(*,actor,offer_id,accept):
+def answer_offer(*,actor,offer_id,accept,expected_revision=None):
     require_writable(actor)
     if type(accept) is not bool:raise RuleError('必须明确接受或拒绝。')
     preview=WaitOffer.objects.select_related('request').get(pk=offer_id)
@@ -177,6 +179,8 @@ def answer_offer(*,actor,offer_id,accept):
     o=WaitOffer.objects.select_for_update().get(pk=offer_id)
     if o.state=='ACCEPTED' and accept:return o
     if o.state=='DECLINED' and not accept:return o
+    if expected_revision is not None and e.revision != expected_revision:
+        raise RuleError('候补或邀约已经变化，请重新核对；没有创建预约。')
     if o.state!='PENDING' or e.state!='OFFERED' or o.expires_at<=timezone.now():
         raise RuleError('邀约已失效；没有创建预约。请刷新候补页面或联系前台。')
     if accept:

@@ -30,7 +30,10 @@ function request(path, method = 'GET', data = {}) {
         absorb(response);
         const body = response.data || {};
         if (response.statusCode >= 200 && response.statusCode < 300 && body.ok === true) {
-          if (body.data && body.data.csrf_token) session = body.data;
+          if (body.data && body.data.csrf_token) {
+            session = body.data;
+            if (!session.authenticated) getApp().globalData.review = null;
+          }
           resolve(body.data);
         } else {
           const message = body.message || body.error || (response.statusCode === 429 ? '操作频繁，请稍后重试。' : '服务暂时无法办理，请稍后核对。');
@@ -38,10 +41,11 @@ function request(path, method = 'GET', data = {}) {
           const requestId = body.request_id || responseHeaders['X-Request-ID'] || responseHeaders['x-request-id'];
           const error = new Error(message + (requestId ? `（查询编号 ${requestId}）` : ''));
           error.status = response.statusCode;
+          if (response.statusCode === 401) { session = {}; getApp().globalData.review = null; }
           reject(error);
         }
       },
-      fail() { reject(new Error('连接中断，结果尚未确认。若刚刚提交，请先查看“我的预约”，再核对是否需要重试。')); }
+      fail() { reject(new Error('连接中断，结果尚未确认。若刚刚提交，请先查看“我的预约”或“我的候补”，再核对是否需要重试。')); }
     });
   });
 }

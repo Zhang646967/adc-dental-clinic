@@ -1,5 +1,5 @@
 {
-  "pages": ["pages/login/index", "pages/home/index", "pages/booking/index", "pages/visit/index", "pages/confirm/index", "pages/help/index"],
+  "pages": ["pages/login/index", "pages/home/index", "pages/booking/index", "pages/visit/index", "pages/confirm/index", "pages/help/index", "pages/waitlist/index", "pages/waitjoin/index", "pages/offer/index"],
   "window": {"navigationBarTitleText": "ADC 口腔预约", "navigationBarBackgroundColor": "#f4faf8", "navigationBarTextStyle": "black", "backgroundColor": "#f4f7f9"},
   "networkTimeout": {"request": 15000},
   "style": "v2",

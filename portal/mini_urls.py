@@ -1,11 +1,21 @@
 from django.urls import path
 from portal import mini_api as api
+from portal import mini_waitlist as wait
 
 urlpatterns = [
     path('session/', api.session, name='mini_session'),
     path('login/', api.sign_in, name='mini_login'),
     path('logout/', api.sign_out, name='mini_logout'),
     path('catalogue/', api.catalogue, name='mini_catalogue'),
+    path('overview/', api.overview, name='mini_overview'),
+    path('waitlist/', wait.listing, name='mini_waitlist'),
+    path('waitlist/join/preview/', wait.join_preview, name='mini_wait_join_preview'),
+    path('waitlist/join/confirm/', wait.join_confirm, name='mini_wait_join_confirm'),
+    path('waitlist/<int:pk>/withdraw/preview/', wait.withdraw_preview, name='mini_wait_withdraw_preview'),
+    path('waitlist/<int:pk>/withdraw/confirm/', wait.withdraw_confirm, name='mini_wait_withdraw_confirm'),
+    path('offers/<int:pk>/', wait.detail, name='mini_offer'),
+    path('offers/<int:pk>/preview/', wait.answer_preview, name='mini_offer_preview'),
+    path('offers/<int:pk>/confirm/', wait.answer_confirm, name='mini_offer_confirm'),
     path('candidates/', api.candidates, name='mini_candidates'),
     path('visits/', api.visits, name='mini_visits'),
     path('visits/<int:pk>/', api.detail, name='mini_visit'),

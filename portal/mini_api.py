@@ -122,7 +122,7 @@ def visit_data(visit):
     return dict(id=visit.pk, clinic_id=visit.clinic_id, clinic=visit.clinic.name,
         dentist=visit.dentist.name, start=visit.scheduled_start.isoformat(), end=visit.scheduled_end.isoformat(),
         status=visit.status, status_label=visit.get_status_display(), version=visit.lock_version,
-        service=plan.service.name if plan else '常规预约',
+        service=(plan.snapshot.get('service', {}).get('name') or plan.service.name) if plan else '常规预约',
         service_id=plan.service_id if plan else None, predecessor=visit.replaces_visit_id, successor=successor,
         can_change=visit.status == 'SCHEDULED' and visit.scheduled_start > timezone.now(),
         address=visit.clinic.postal_address, phone=visit.clinic.phone)
@@ -147,6 +147,15 @@ def catalogue(request):
             department=service.department.name, duration=service.duration_minutes,
             dentists=list(service.dentists.filter(is_active=True).values('id', 'name'))))
     return result(request, dict(clinics=clinics, services=data, resource_clinics=list(enabled)))
+
+
+@endpoint()
+def overview(request):
+    from portal.patient_dashboard import dashboard
+    d = dashboard(request.user)
+    return result(request, dict(next_visit=visit_data(d['next_visit']) if d['next_visit'] else None,
+        active_count=d['active_count'], history_count=d['history_count'],
+        waiting_count=d['waiting_count'], offer_count=d['offer_count']))
 
 
 @endpoint()

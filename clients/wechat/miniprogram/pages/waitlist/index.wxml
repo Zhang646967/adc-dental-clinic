@@ -1,0 +1,11 @@
+<view class="page"><view class="brand">ADC · 候补与邀约</view><view class="title">等一个合适的安排</view><view class="subtitle">登记偏好 → 前台协调 → 核对邀约 → 明确成约</view>
+  <view class="notice">候补登记不等于预约。接受邀约前请核对用途：新增一次就诊，或替换原预约。</view>
+  <navigator wx:if="{{!hasOpen && !readOnly}}" class="link" url="/pages/waitjoin/index">＋ 登记候补偏好</navigator>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><view wx:if="{{busy}}" class="notice">正在核对候补进展…</view>
+  <view wx:for="{{rows}}" wx:key="id" class="card"><view class="pill">{{item.status_label}} · #{{item.id}}</view><view class="section-title">{{item.clinic}} · {{item.service}}</view><view class="line">{{item.startLabel}} 至 {{item.endLabel}}</view><view class="muted">医师偏好：{{item.dentist}}</view>
+    <view wx:for="{{item.offers}}" wx:for-item="offer" wx:key="id" class="offer-block"><view class="pill">{{offer.status_label}}</view><view class="time">{{offer.startLabel}}</view><view>至 {{offer.endLabel}} · {{offer.dentist}}</view><view wx:if="{{offer.active}}" class="deadline">请在 {{offer.expiresLabel}} 前确认</view><button wx:if="{{offer.active && !readOnly}}" class="primary" data-id="{{offer.id}}" bindtap="offer">查看并决定</button><button wx:if="{{offer.visit}}" class="secondary" data-id="{{offer.visit.id}}" bindtap="visit">查看正式预约 · {{offer.visit.status_label}}</button></view>
+    <view wx:if="{{!item.offers.length && item.can_withdraw}}" class="empty">前台核对后会提供限时邀约，你可以稍后刷新查看。</view><button wx:if="{{item.can_withdraw && !readOnly}}" class="secondary" data-id="{{item.id}}" bindtap="withdraw" disabled="{{busy}}">退出这条候补</button>
+  </view>
+  <view wx:if="{{!busy && !rows.length && !error}}" class="card empty"><view class="section-title">还没有候补记录</view><view>暂无合适时段时，登记可接受的日期、时间和医师偏好，交由前台协调。</view></view>
+  <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view><button class="secondary" disabled="{{busy}}" bindtap="load">刷新候补进展</button><navigator class="link" open-type="reLaunch" url="/pages/home/index">返回我的预约</navigator><navigator class="link" url="/pages/help/index">联系前台协助</navigator>
+</view>

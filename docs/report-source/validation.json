@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_b15",
+  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_b153",
   "pdf_pages": 119,
   "business_use_cases": 58,
   "shared_subfunctions": 1,
@@ -23,42 +23,32 @@
   "original_migrations_preserved": 39,
   "frozen_reports_unchanged": true,
   "private_values_absent": 31,
-  "word_sha256": "ddd1a3af6393b8e578dde86d96a95ff597ea9feeb500ccda6fee6fa9d44b4be4",
-  "pdf_sha256": "eec944aab5f16929e7b37a6c56148dbc7102664faa6841ace2c4521a9b2e3430",
+  "word_sha256": "acb43d41c9907a2f6898165428d46a02ad587d33926db793a79e4e66c13d0e5d",
+  "pdf_sha256": "03a813951b7e3868106794b67285f836ec64d94856663ba958c6c3b5ab3ce185",
   "database_er_views": 6,
   "front_desk_scheduling_role_migration": "implemented",
   "visual_review": {
     "pages": 119,
-    "new_or_changed_bodies_reviewed": 22,
-    "previously_reviewed_body_pixel_matches": 97,
+    "new_or_changed_bodies_reviewed": 9,
+    "previously_reviewed_body_pixel_matches": 110,
     "reviewed_pages": [
-      2,
-      3,
-      4,
-      7,
       8,
+      22,
       23,
-      26,
+      24,
       44,
-      48,
       55,
       58,
       59,
-      60,
-      61,
-      62,
-      67,
-      68,
-      69,
-      70,
-      71,
-      72,
       100
     ],
+    "final_contents_pages_reviewed": [
+      4,
+      5
+    ],
     "clipping_or_label_collisions_observed": false,
-    "header_footer_page_numbers_verified": true,
-    "render_iteration8_reviewed": true
+    "header_footer_page_numbers_verified": true
   },
   "structure_validation": "../database/view_manifest.json",
-  "native_program_platform_validation": "Official offline WXML/WXSS syntax passed; integrated IDE preview, device and experience upload remain pending"
+  "native_program_platform_validation": "Pending IDE preview, WeChat runtime, device and experience; official offline nine-page syntax and local backend verified separately"
 }

@@ -1,0 +1,16 @@
+{
+  "local_native_source": "PASSED",
+  "official_offline_wxml_wxss": "PASSED",
+  "real_http_postgresql_page_handlers": "PASSED",
+  "website_frontdesk_patient_bridge": "PASSED",
+  "wechat_ide_preview": "NOT_RUN",
+  "wechat_device": "NOT_RUN",
+  "wechat_experience_upload": "NOT_RUN",
+  "appid_registered": false,
+  "cloud_server_purchased": false,
+  "cloud_acceptance": "NOT_RUN",
+  "historical_windows_recovery": "UNRESOLVED",
+  "new_capacity_test": "NOT_RUN",
+  "schema_changed": false,
+  "migration_files_preserved": 39
+}

@@ -29,3 +29,15 @@ class CancellationPreviewForm(forms.Form):
 class PageForm(forms.Form):
     page = forms.IntegerField(min_value=1, max_value=100000, required=False)
     queue = forms.ChoiceField(choices=[(s, s) for s in ('active', 'history', 'all')], required=False)
+
+
+class WaitJoinForm(forms.Form):
+    clinic = forms.IntegerField(min_value=1)
+    service = forms.IntegerField(min_value=1, required=False)
+    dentist = forms.IntegerField(min_value=1, required=False)
+    earliest = forms.DateTimeField()
+    latest = forms.DateTimeField()
+
+
+class OfferAnswerForm(forms.Form):
+    action = forms.ChoiceField(choices=[('accept', '接受并新增一次预约'), ('decline', '拒绝本次邀约')])

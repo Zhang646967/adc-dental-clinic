@@ -91,3 +91,9 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 - Login explicitly activates only authorized PATIENT, even for a multi-role person. Business confirmation still rechecks authorization and resources under existing locks. Session cookies/passwords stay out of client persistent storage and logs.
 - Preserve all39 migrations and actual ER relations. Source/transport/HTTP tests and real backend Page-handler runs do not establish WeChat-tool compilation, device operation, upload or cloud acceptance. Keep those readiness fields separate.
 - Local loopback packages are for the developer-tool simulator. Experience packages require a registered AppID and verified HTTPS request domain with domain checks enabled. No AppSecret in the client; cloud hosting and platform inputs are still pending.
+
+## Native waitlist and service centre (B1.5.3)
+- Website and native summaries remain own-patient projections. Front desk owns publication; patients explicitly choose additional booking or exact-source replacement. Decline/withdraw never cancel an existing visit.
+- Native registration uses the existing patient lock and immutable audit receipt for operation replay; a withdrawn result is returned as current history and never revived. No new table or migration.
+- Native offer/withdraw confirmations recheck request revisions under the coordination module's existing locks; shared rescheduling owns unique successors and receipts. Preserve retained service labels from resource snapshots.
+- Page handlers plus real HTTP/Chrome and offline compilation do not establish WeChat runtime or cloud acceptance.

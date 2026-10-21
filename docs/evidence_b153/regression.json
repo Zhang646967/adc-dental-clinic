@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "rules": 1052,
+  "postgresql_http_concurrency": 1402,
+  "new_waitlist_tests": 25,
+  "focused_native_tests": 57,
+  "native_source_and_transport": 93,
+  "test_times": [
+    {
+      "count": 1052,
+      "seconds": 7.358
+    },
+    {
+      "count": 1402,
+      "seconds": 202.054
+    }
+  ],
+  "full_gate": {
+    "project": "adc_b153_verify_d9d9da6aff",
+    "exit": 0,
+    "cleanup_exit": 0,
+    "passed": true
+  },
+  "scope": "Isolated local working copy. Exact implementation commit CI is a separate delivery gate; no WeChat runtime or new capacity claim."
+}
