@@ -1,0 +1,305 @@
+{
+  "scope": "B1.4 exact committed ARM image; current patient replacement preview, history, scoped front desk and nonpatient denial",
+  "checks": [
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Exact patient replacement candidates",
+      "passed": true
+    },
+    {
+      "name": "Current same-service candidate links",
+      "passed": true
+    },
+    {
+      "name": "Exact patient candidate selection",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Original promise explicitly retained",
+      "passed": true
+    },
+    {
+      "name": "b14-exact-preview-390 390px large text layout",
+      "passed": true
+    },
+    {
+      "name": "Exact active appointment queue",
+      "passed": true
+    },
+    {
+      "name": "Three appointment queues",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact front desk calendar remains available",
+      "passed": true
+    },
+    {
+      "name": "Front desk cannot impersonate patient",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Exact patient replacement candidates",
+      "passed": true
+    },
+    {
+      "name": "Current same-service candidate links",
+      "passed": true
+    },
+    {
+      "name": "Exact patient candidate selection",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Original promise explicitly retained",
+      "passed": true
+    },
+    {
+      "name": "Exact active appointment queue",
+      "passed": true
+    },
+    {
+      "name": "Three appointment queues",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact front desk calendar remains available",
+      "passed": true
+    },
+    {
+      "name": "Front desk cannot impersonate patient",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Exact patient replacement candidates",
+      "passed": true
+    },
+    {
+      "name": "Current same-service candidate links",
+      "passed": true
+    },
+    {
+      "name": "Exact patient candidate selection",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Original promise explicitly retained",
+      "passed": true
+    },
+    {
+      "name": "Exact active appointment queue",
+      "passed": true
+    },
+    {
+      "name": "Three appointment queues",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact front desk calendar remains available",
+      "passed": true
+    },
+    {
+      "name": "Front desk cannot impersonate patient",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Exact patient replacement candidates",
+      "passed": true
+    },
+    {
+      "name": "Current same-service candidate links",
+      "passed": true
+    },
+    {
+      "name": "Exact patient candidate selection",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Original promise explicitly retained",
+      "passed": true
+    },
+    {
+      "name": "Exact active appointment queue",
+      "passed": true
+    },
+    {
+      "name": "Three appointment queues",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact front desk calendar remains available",
+      "passed": true
+    },
+    {
+      "name": "Front desk cannot impersonate patient",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Exact patient replacement candidates",
+      "passed": true
+    },
+    {
+      "name": "Current same-service candidate links",
+      "passed": true
+    },
+    {
+      "name": "Exact patient candidate selection",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview preview accepted",
+      "passed": true
+    },
+    {
+      "name": "Exact patient preview signed confirmation visible",
+      "passed": true
+    },
+    {
+      "name": "Original promise explicitly retained",
+      "passed": true
+    },
+    {
+      "name": "Exact active appointment queue",
+      "passed": true
+    },
+    {
+      "name": "Three appointment queues",
+      "passed": true
+    },
+    {
+      "name": "Login form FRONT_DESK",
+      "passed": true
+    },
+    {
+      "name": "Exact front desk calendar remains available",
+      "passed": true
+    },
+    {
+      "name": "Front desk cannot impersonate patient",
+      "passed": true
+    },
+    {
+      "name": "Login form MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Exact nonpatient role denied MANAGER",
+      "passed": true
+    },
+    {
+      "name": "Login form DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Exact nonpatient role denied DENTIST",
+      "passed": true
+    },
+    {
+      "name": "Login form FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Exact nonpatient role denied FINANCE",
+      "passed": true
+    },
+    {
+      "name": "Login form HQ",
+      "passed": true
+    },
+    {
+      "name": "Exact nonpatient role denied HQ",
+      "passed": true
+    },
+    {
+      "name": "Login form SYSADMIN",
+      "passed": true
+    },
+    {
+      "name": "Exact nonpatient role denied SYSADMIN",
+      "passed": true
+    },
+    {
+      "name": "Login form PATIENT",
+      "passed": true
+    },
+    {
+      "name": "Exact other patient source hidden",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "browser_version": "155.0.8059.85",
+  "application_commit": "428070b59fb4167f01e63128b9bceafd19bfb742",
+  "passed": true
+}

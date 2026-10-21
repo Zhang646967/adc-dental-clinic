@@ -508,5 +508,9 @@
     "static/coordination_tasks.css": "4c5ca92ab4a4c7ac8793c5e3e34388aabd8f39a0ab525756690014c91a7d7e3d",
     "static/scheduling_calendar.css": "a4fc216f1c4769575e4722d3f5c626c7005153c926c688636506331f66e31b4a"
   },
-  "full_thirty_minute_measurement": "capacity.json"
+  "full_thirty_minute_measurement": "capacity.json",
+  "delivery_application_commit": "428070b59fb4167f01e63128b9bceafd19bfb742",
+  "final_runtime_comparison": "exact_file_equivalence.json",
+  "final_browser_verification": "exact_browser.json",
+  "second_full_binary_thirty_minute_run": false
 }

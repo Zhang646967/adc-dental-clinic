@@ -1,0 +1,70 @@
+{
+  "passed": true,
+  "application_commit": "428070b59fb4167f01e63128b9bceafd19bfb742",
+  "incident": "COLLECTOR_UNAVAILABLE",
+  "cause": "An earlier sampling attempt failed; exception detail was not retained, so the specific Docker-call cause remains unknown.",
+  "collector_process_running": true,
+  "fresh_dependency_samples": [
+    {
+      "sampled_at": 1792553279,
+      "containers": 5,
+      "source_and_identity_equal": true,
+      "no_events": true
+    },
+    {
+      "sampled_at": 1792553280,
+      "containers": 5,
+      "source_and_identity_equal": true,
+      "no_events": true
+    }
+  ],
+  "six_application_conditions": "HEALTHY",
+  "retained_closed_incidents": [
+    {
+      "acknowledged_at": {
+        "mono": 510955.820700291,
+        "utc": 1792553282.0930078
+      },
+      "acknowledged_by": "codex-b14",
+      "actions": [
+        {
+          "at": {
+            "mono": 510955.820700291,
+            "utc": 1792553282.0930078
+          },
+          "code": "inspect_dependencies"
+        },
+        {
+          "at": {
+            "mono": 510955.822925291,
+            "utc": 1792553282.0952342
+          },
+          "code": "verify_health"
+        },
+        {
+          "at": {
+            "mono": 510955.823660666,
+            "utc": 1792553282.0959702
+          },
+          "code": "accept_observation_gap"
+        }
+      ],
+      "closed": {
+        "mono": 510955.824378875,
+        "utc": 1792553282.096688
+      },
+      "code": "COLLECTOR_UNAVAILABLE",
+      "id": "83f9001ac15b4ebb939df589238f6b98",
+      "opened": {
+        "mono": 510678.424672875,
+        "utc": 1792553004.697325
+      },
+      "service": "collector",
+      "severity": "UNKNOWN"
+    }
+  ],
+  "unknown_interval_retained": true,
+  "observations_reset": false,
+  "application_or_database_restarted": false,
+  "current_host_state": "HEALTHY"
+}

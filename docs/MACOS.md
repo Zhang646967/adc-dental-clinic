@@ -11,7 +11,7 @@ The migration instructions and dated evidence below retain their original scope.
 
 ## Current B1.4 course update
 
-Patient-owned replacement preserves the original until atomic confirmation; own retained offers, resource claims, reception and cancellation history remain linked. Front desk keeps daily scheduling. All39 migrations are unchanged. [Business and execution evidence](evidence_b14/README.md) records the tested commit and local delivery separately. Preserve the original instance, database volume, private configuration and RC tag; use the verified encrypted backup before updating.
+Patient-owned replacement preserves the original until atomic confirmation; own retained offers, resource claims, reception and cancellation history remain linked. Front desk keeps daily scheduling. All39 migrations are unchanged. Application `428070b` passed exact-commit CI and is installed; [execution and delivery](evidence_b14/README.md) distinguishes the measured workload, exact image and protected local update. Preserve the original instance, database volume, private configuration and RC tag; use the verified encrypted backup before updating.
 
 ## Source baseline
 

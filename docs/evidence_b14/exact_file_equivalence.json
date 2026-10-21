@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "application_commit": "428070b59fb4167f01e63128b9bceafd19bfb742",
+  "image": "sha256:92b9b08cc02cea1086171fffc19b55ea8a5f5b342e0acba2db46e70f8b033ada",
+  "runtime_files_identical": 502,
+  "full_second_thirty_minute_binary_run": false,
+  "measurement": "capacity.json",
+  "measured_working_tree_fingerprints": "capacity_equivalence.json"
+}

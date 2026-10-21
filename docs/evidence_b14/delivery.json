@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "application_commit": "428070b59fb4167f01e63128b9bceafd19bfb742",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39536764923",
+  "image": "sha256:92b9b08cc02cea1086171fffc19b55ea8a5f5b342e0acba2db46e70f8b033ada",
+  "architecture": "arm64",
+  "exact_business_tested_image": true,
+  "original_row_groups_preserved": 66,
+  "private_configurations_preserved": 70,
+  "original_database_container_and_volume_preserved": true,
+  "original_rc_tag_preserved": true,
+  "existing_accounts": 9,
+  "active_roles": 7,
+  "mac_browser_checks": 252,
+  "business_test_writes_into_Mac": false,
+  "existing_patient_appointment_count_before_update": 0,
+  "six_application_conditions": "HEALTHY",
+  "host_collector": "HEALTHY",
+  "old_observations_encrypted": true,
+  "old_observation_status": "UNKNOWN_OBSERVER_UNAVAILABLE",
+  "before_and_after_encrypted_backups_verified": true,
+  "after_backup_sha256": "e6bfeb7c214fe3f1e7d849447406afb92553247f1be4895a3b310d57895470c7",
+  "report_sha256": {
+    ".docx": "09ec7b74496c325c25d6645e5110f5aaf04ce5e1d1556ad4c75cd52dfb74a77b",
+    ".pdf": "620e60d04399668eac8c0de949e2a3b65e373eeb95b89afc3e1f1fd6acc61104"
+  },
+  "scope_limits": [
+    "capacity is a synthetic patient workload in isolated capped Mac containers, separate from earlier staff workload",
+    "30-minute measured binary uses working tree; delivered runtime files match exactly",
+    "24-hour independent-host operation not established",
+    "cloud server not purchased",
+    "historical Windows original-data recovery unresolved"
+  ],
+  "post_update_host_gap_retained": true,
+  "host_event_resolution": "host_resolution.json"
+}
