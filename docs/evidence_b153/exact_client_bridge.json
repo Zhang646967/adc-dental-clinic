@@ -1,0 +1,1122 @@
+{
+  "passed": true,
+  "scope": "Real native Page handlers using wx.request HTTP adapter; actual Chrome frontdesk publishes and patient website reads same PostgreSQL facts. This is not a WeChat runtime or native visual test.",
+  "clinics": 5,
+  "browser": "155.0.8059.85",
+  "checks": [
+    {
+      "name": "one shared initial arrangement 1",
+      "passed": true
+    },
+    {
+      "name": "known assigned frontdesk 1",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 3",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 4",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 1",
+      "passed": true
+    },
+    {
+      "name": "website sees native registration 1",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 1",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 1",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 1",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 1",
+      "passed": true
+    },
+    {
+      "name": "native service centre has pending offer 1",
+      "passed": true
+    },
+    {
+      "name": "website same pending count 1",
+      "passed": true
+    },
+    {
+      "name": "purpose is explicitly chosen 1",
+      "passed": true
+    },
+    {
+      "name": "own source offered 1",
+      "passed": true
+    },
+    {
+      "name": "native offer replacement preview 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 16",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 17",
+      "passed": true
+    },
+    {
+      "name": "native held offer becomes successor 1",
+      "passed": true
+    },
+    {
+      "name": "replacement replay keeps successor 1",
+      "passed": true
+    },
+    {
+      "name": "website old result links successor 1",
+      "passed": true
+    },
+    {
+      "name": "website current result 1",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 23",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 24",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 1",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 1",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 1",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 1",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 30",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 31",
+      "passed": true
+    },
+    {
+      "name": "explicit additional booking 1",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 34",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 35",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 1",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 1",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 1",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 1",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 41",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 42",
+      "passed": true
+    },
+    {
+      "name": "declined offer remains waiting 1",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 44",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 45",
+      "passed": true
+    },
+    {
+      "name": "explicit withdrawal 1",
+      "passed": true
+    },
+    {
+      "name": "withdrawn registration replay stays withdrawn 1",
+      "passed": true
+    },
+    {
+      "name": "unrelated bookings protected 1",
+      "passed": true
+    },
+    {
+      "name": "website shared active count 1",
+      "passed": true
+    },
+    {
+      "name": "large text 390px reflow",
+      "passed": true
+    },
+    {
+      "name": "keyboard has visible focus",
+      "passed": true
+    },
+    {
+      "name": "waitlist 390px large text reflow",
+      "passed": true
+    },
+    {
+      "name": "no browser script error 1",
+      "passed": true
+    },
+    {
+      "name": "one shared initial arrangement 2",
+      "passed": true
+    },
+    {
+      "name": "known assigned frontdesk 2",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 57",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 58",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 2",
+      "passed": true
+    },
+    {
+      "name": "website sees native registration 2",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 2",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 2",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 2",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 2",
+      "passed": true
+    },
+    {
+      "name": "native service centre has pending offer 2",
+      "passed": true
+    },
+    {
+      "name": "website same pending count 2",
+      "passed": true
+    },
+    {
+      "name": "purpose is explicitly chosen 2",
+      "passed": true
+    },
+    {
+      "name": "own source offered 2",
+      "passed": true
+    },
+    {
+      "name": "native offer replacement preview 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 70",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 71",
+      "passed": true
+    },
+    {
+      "name": "native held offer becomes successor 2",
+      "passed": true
+    },
+    {
+      "name": "replacement replay keeps successor 2",
+      "passed": true
+    },
+    {
+      "name": "website old result links successor 2",
+      "passed": true
+    },
+    {
+      "name": "website current result 2",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 77",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 78",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 2",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 2",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 2",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 2",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 84",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 85",
+      "passed": true
+    },
+    {
+      "name": "explicit additional booking 2",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 88",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 89",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 2",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 2",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 2",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 2",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 95",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 96",
+      "passed": true
+    },
+    {
+      "name": "declined offer remains waiting 2",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 98",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 99",
+      "passed": true
+    },
+    {
+      "name": "explicit withdrawal 2",
+      "passed": true
+    },
+    {
+      "name": "withdrawn registration replay stays withdrawn 2",
+      "passed": true
+    },
+    {
+      "name": "unrelated bookings protected 2",
+      "passed": true
+    },
+    {
+      "name": "website shared active count 2",
+      "passed": true
+    },
+    {
+      "name": "no browser script error 2",
+      "passed": true
+    },
+    {
+      "name": "one shared initial arrangement 3",
+      "passed": true
+    },
+    {
+      "name": "known assigned frontdesk 3",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 108",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 109",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 3",
+      "passed": true
+    },
+    {
+      "name": "website sees native registration 3",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 3",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 3",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 3",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 3",
+      "passed": true
+    },
+    {
+      "name": "native service centre has pending offer 3",
+      "passed": true
+    },
+    {
+      "name": "website same pending count 3",
+      "passed": true
+    },
+    {
+      "name": "purpose is explicitly chosen 3",
+      "passed": true
+    },
+    {
+      "name": "own source offered 3",
+      "passed": true
+    },
+    {
+      "name": "native offer replacement preview 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 121",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 122",
+      "passed": true
+    },
+    {
+      "name": "native held offer becomes successor 3",
+      "passed": true
+    },
+    {
+      "name": "replacement replay keeps successor 3",
+      "passed": true
+    },
+    {
+      "name": "website old result links successor 3",
+      "passed": true
+    },
+    {
+      "name": "website current result 3",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 128",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 129",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 3",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 3",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 3",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 3",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 135",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 136",
+      "passed": true
+    },
+    {
+      "name": "explicit additional booking 3",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 139",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 140",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 3",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 3",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 3",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 3",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 146",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 147",
+      "passed": true
+    },
+    {
+      "name": "declined offer remains waiting 3",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 149",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 150",
+      "passed": true
+    },
+    {
+      "name": "explicit withdrawal 3",
+      "passed": true
+    },
+    {
+      "name": "withdrawn registration replay stays withdrawn 3",
+      "passed": true
+    },
+    {
+      "name": "unrelated bookings protected 3",
+      "passed": true
+    },
+    {
+      "name": "website shared active count 3",
+      "passed": true
+    },
+    {
+      "name": "no browser script error 3",
+      "passed": true
+    },
+    {
+      "name": "one shared initial arrangement 4",
+      "passed": true
+    },
+    {
+      "name": "known assigned frontdesk 4",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 159",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 160",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 4",
+      "passed": true
+    },
+    {
+      "name": "website sees native registration 4",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 4",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 4",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 4",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 4",
+      "passed": true
+    },
+    {
+      "name": "native service centre has pending offer 4",
+      "passed": true
+    },
+    {
+      "name": "website same pending count 4",
+      "passed": true
+    },
+    {
+      "name": "purpose is explicitly chosen 4",
+      "passed": true
+    },
+    {
+      "name": "own source offered 4",
+      "passed": true
+    },
+    {
+      "name": "native offer replacement preview 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 172",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 173",
+      "passed": true
+    },
+    {
+      "name": "native held offer becomes successor 4",
+      "passed": true
+    },
+    {
+      "name": "replacement replay keeps successor 4",
+      "passed": true
+    },
+    {
+      "name": "website old result links successor 4",
+      "passed": true
+    },
+    {
+      "name": "website current result 4",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 179",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 180",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 4",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 4",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 4",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 4",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 186",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 187",
+      "passed": true
+    },
+    {
+      "name": "explicit additional booking 4",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 190",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 191",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 4",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 4",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 4",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 4",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 197",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 198",
+      "passed": true
+    },
+    {
+      "name": "declined offer remains waiting 4",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 200",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 201",
+      "passed": true
+    },
+    {
+      "name": "explicit withdrawal 4",
+      "passed": true
+    },
+    {
+      "name": "withdrawn registration replay stays withdrawn 4",
+      "passed": true
+    },
+    {
+      "name": "unrelated bookings protected 4",
+      "passed": true
+    },
+    {
+      "name": "website shared active count 4",
+      "passed": true
+    },
+    {
+      "name": "no browser script error 4",
+      "passed": true
+    },
+    {
+      "name": "one shared initial arrangement 5",
+      "passed": true
+    },
+    {
+      "name": "known assigned frontdesk 5",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 210",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 211",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 5",
+      "passed": true
+    },
+    {
+      "name": "website sees native registration 5",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 5",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 5",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 5",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 5",
+      "passed": true
+    },
+    {
+      "name": "native service centre has pending offer 5",
+      "passed": true
+    },
+    {
+      "name": "website same pending count 5",
+      "passed": true
+    },
+    {
+      "name": "purpose is explicitly chosen 5",
+      "passed": true
+    },
+    {
+      "name": "own source offered 5",
+      "passed": true
+    },
+    {
+      "name": "native offer replacement preview 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 223",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 224",
+      "passed": true
+    },
+    {
+      "name": "native held offer becomes successor 5",
+      "passed": true
+    },
+    {
+      "name": "replacement replay keeps successor 5",
+      "passed": true
+    },
+    {
+      "name": "website old result links successor 5",
+      "passed": true
+    },
+    {
+      "name": "website current result 5",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 230",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 231",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 5",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 5",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 5",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 5",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 237",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 238",
+      "passed": true
+    },
+    {
+      "name": "explicit additional booking 5",
+      "passed": true
+    },
+    {
+      "name": "native preference preview 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 241",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 242",
+      "passed": true
+    },
+    {
+      "name": "wait registration not booking 5",
+      "passed": true
+    },
+    {
+      "name": "frontdesk plans 5",
+      "passed": true
+    },
+    {
+      "name": "frontdesk sees request 5",
+      "passed": true
+    },
+    {
+      "name": "explicit website publication 5",
+      "passed": true
+    },
+    {
+      "name": "native reads frontdesk offer 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 248",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 249",
+      "passed": true
+    },
+    {
+      "name": "declined offer remains waiting 5",
+      "passed": true
+    },
+    {
+      "name": "no implicit consent 251",
+      "passed": true
+    },
+    {
+      "name": "explicit confirmation result 252",
+      "passed": true
+    },
+    {
+      "name": "explicit withdrawal 5",
+      "passed": true
+    },
+    {
+      "name": "withdrawn registration replay stays withdrawn 5",
+      "passed": true
+    },
+    {
+      "name": "unrelated bookings protected 5",
+      "passed": true
+    },
+    {
+      "name": "website shared active count 5",
+      "passed": true
+    },
+    {
+      "name": "no browser script error 5",
+      "passed": true
+    }
+  ],
+  "results": [
+    {
+      "clinic": 1,
+      "original": 10507,
+      "successor": 10551,
+      "additional": 10552,
+      "waits": [
+        31,
+        32,
+        33
+      ],
+      "offers": [
+        31,
+        32,
+        33
+      ]
+    },
+    {
+      "clinic": 2,
+      "original": 10512,
+      "successor": 10553,
+      "additional": 10554,
+      "waits": [
+        34,
+        35,
+        36
+      ],
+      "offers": [
+        34,
+        35,
+        36
+      ]
+    },
+    {
+      "clinic": 3,
+      "original": 10517,
+      "successor": 10555,
+      "additional": 10556,
+      "waits": [
+        37,
+        38,
+        39
+      ],
+      "offers": [
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "clinic": 4,
+      "original": 10522,
+      "successor": 10557,
+      "additional": 10558,
+      "waits": [
+        40,
+        41,
+        42
+      ],
+      "offers": [
+        40,
+        41,
+        42
+      ]
+    },
+    {
+      "clinic": 5,
+      "original": 10527,
+      "successor": 10559,
+      "additional": 10560,
+      "waits": [
+        43,
+        44,
+        45
+      ],
+      "offers": [
+        43,
+        44,
+        45
+      ]
+    }
+  ]
+}

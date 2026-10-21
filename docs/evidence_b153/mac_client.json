@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Mac instance pinned",
+      "passed": true
+    },
+    {
+      "name": "Existing assigned patient account accepted",
+      "passed": true
+    },
+    {
+      "name": "Native patient queue reads existing Mac",
+      "passed": true
+    },
+    {
+      "name": "Existing two-clinic catalogue",
+      "passed": true
+    },
+    {
+      "name": "Existing published resource-backed slots selectable",
+      "passed": true
+    },
+    {
+      "name": "Native signed review available without business confirmation",
+      "passed": true
+    },
+    {
+      "name": "Native waitlist shares original Mac without error",
+      "passed": true
+    },
+    {
+      "name": "Patient service centre reads authoritative summary",
+      "passed": true
+    },
+    {
+      "name": "Wait registration signed preview only",
+      "passed": true
+    },
+    {
+      "name": "Preview created no wait record",
+      "passed": true
+    },
+    {
+      "name": "Session and review cleared",
+      "passed": true
+    }
+  ],
+  "business_writes": false,
+  "scope": "Actual Mac native Page handlers and API read/preview using existing assigned account; no booking confirmation; WeChat runtime not executed"
+}

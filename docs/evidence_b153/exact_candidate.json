@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "application_commit": "72b613ef4b1e10e8f40902abc496280db021f5ad",
+  "image": "sha256:590adfeeeacd993055f5dc00f8e7a2d22fbb9dce4cb3f00c954430b69bff6f54",
+  "source_equivalent": true,
+  "native_page_http_chrome_checks": 258,
+  "database_fact_checks": 48,
+  "wechat_runtime": false
+}

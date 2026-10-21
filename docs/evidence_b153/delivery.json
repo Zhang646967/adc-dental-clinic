@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "application_commit": "72b613ef4b1e10e8f40902abc496280db021f5ad",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39565962105",
+  "image": "sha256:590adfeeeacd993055f5dc00f8e7a2d22fbb9dce4cb3f00c954430b69bff6f54",
+  "original_row_groups_preserved": 66,
+  "private_configurations_unchanged": 70,
+  "database_container_and_volume_preserved": true,
+  "original_business_test_data_injected": false,
+  "mac_browser_checks": 255,
+  "mac_client_checks": 11,
+  "all_six_conditions": "HEALTHY",
+  "host": "HEALTHY",
+  "wechat_ide_runtime_device_experience": "NOT_RUN",
+  "cloud": "NOT_RUN",
+  "windows_recovery": "UNRESOLVED"
+}

@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "original_row_groups_preserved": 66,
+  "private_configurations_unchanged": 70,
+  "new_resource_model_groups": 0,
+  "original_patients_clinical_money_and_permissions_preserved": true,
+  "service_count": 5,
+  "source": "72b613ef4b1e10e8f40902abc496280db021f5ad",
+  "all_six_conditions": "HEALTHY",
+  "host": "HEALTHY",
+  "original_database_container_preserved": true
+}
