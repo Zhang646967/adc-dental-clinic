@@ -1,4 +1,4 @@
-"""Real Django entry checks; no business database is needed for these cases."""
+"""Real Django public-boundary checks; catalogue reads are stubbed here."""
 from types import SimpleNamespace
 from unittest.mock import patch
 from django.test import Client, RequestFactory, SimpleTestCase
@@ -8,10 +8,15 @@ from workspaces.middleware import WorkspaceMiddleware
 
 
 class SystemEntryHTTPTests(SimpleTestCase):
+    def setUp(self):
+        self.catalogue=patch('portal.service_views.public_profiles',return_value=[])
+        self.catalogue.start();self.addCleanup(self.catalogue.stop)
+
     def test_anonymous_entry_does_not_need_a_workspace_or_database(self):
         response = Client().get(reverse('system_entry'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '六条路线，亲自核验')
+        self.assertContains(response, '每一次就诊。')
+        self.assertNotContains(response,'亲自核验')
         self.assertEqual(response['Cache-Control'], 'no-store')
         self.assertIn("script-src 'self'", response['Content-Security-Policy'])
 

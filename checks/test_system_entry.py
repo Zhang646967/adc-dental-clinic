@@ -70,10 +70,12 @@ class SystemEntryTests(unittest.TestCase):
         self.assertFalse(page.forms)
         self.assertNotIn('demo-credentials.txt', render_entry(self.routes))
 
-    def test_entry_is_the_only_added_public_route(self):
+    def test_public_routes_are_explicit_customer_read_pages_and_existing_auth_endpoints(self):
         tree = ast.parse((ROOT / 'workspaces/middleware.py').read_text())
         node = next(n for n in tree.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'PUBLIC' for t in n.targets))
-        self.assertEqual(ast.literal_eval(node.value), {'system_entry','login','portal_login','logout','health','mini_session','mini_login','mini_logout'})
+        self.assertEqual(ast.literal_eval(node.value), {'system_entry','public_home','public_services',
+            'public_service_detail','public_service_guide','public_clinics','login','portal_login','logout',
+            'health','mini_session','mini_login','mini_logout'})
 
     def test_renderer_has_no_framework_or_business_service_imports(self):
         tree = ast.parse((ROOT / 'adc_core/entry_catalog.py').read_text())

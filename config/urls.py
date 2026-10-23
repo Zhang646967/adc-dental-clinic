@@ -4,6 +4,8 @@ from workspaces.views import WorkspaceLoginView
 from adc_core import views
 from adc_core.entry_views import system_entry
 from portal import views as portal_views
+from portal import service_views
+from scheduling import service_content_views
 from portal import reschedule_views as portal_reschedule_views
 from care import views as care_views
 from assistants import views as ai_views
@@ -15,6 +17,12 @@ handler500 = 'adc_core.request_trace.server_error'
 
 urlpatterns = [
     path('start/', system_entry, name='system_entry'),
+    path('services/', service_views.catalogue, name='public_services'),
+    path('services/<int:service_id>/', service_views.detail, name='public_service_detail'),
+    path('care/<str:category>/', service_views.guide, name='public_service_guide'),
+    path('clinics/', service_views.clinics, name='public_clinics'),
+    path('scheduling/service-content/', service_content_views.home, name='service_content_home'),
+    path('scheduling/service-content/<int:pk>/preview/', service_content_views.preview, name='service_content_preview'),
     path('api/mini/v1/', include('portal.mini_urls')),
     path("", include("reception.urls")),
     path("", include("scheduling.resource_urls")),
@@ -61,7 +69,8 @@ urlpatterns = [
     path("health/", views.health, name="health"),
     path("accounts/login/", WorkspaceLoginView.as_view(template_name="registration/login.html"), name="login"),
     path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
-    path("", views.dashboard, name="dashboard"),
+    path('workspace/', views.dashboard, name='dashboard'),
+    path('', service_views.landing, name='public_home'),
     path("patients/", views.patient_list, name="patients"),
     path("patients/new/", views.patient_create, name="patient_create"),
     path("patients/lookup/", views.patient_lookup, name="patient_lookup"),

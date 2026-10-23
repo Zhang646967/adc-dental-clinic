@@ -71,5 +71,5 @@ class VisitRequest(models.Model):
 
 # Scheduling owns resource calendars; assets remain owned by equipment.
 from scheduling.resource_models import (ResourcePolicy, Department, DepartmentHours, TreatmentRoom,
-    BookingService, ServiceRequirement, ResourceBinding, ResourceBlock, ResourcePlan,
+    BookingService, ServicePresentation, ServiceRequirement, ResourceBinding, ResourceBlock, ResourcePlan,
     ResourceClaim, ResourceCoordination, ResourceAction)

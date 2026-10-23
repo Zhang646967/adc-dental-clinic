@@ -17,8 +17,9 @@ from scheduling.resource_coordination import scope,plans_for,replacement_options
 from scheduling.resource_candidates import candidates
 from reception.services import contact_owners
 from reception.models import ReceptionCase
+from scheduling.service_content import GUIDES, positive_id, draft_from_guide
 
-LABELS={'department':'科室','hours':'开放时间','room':'诊室','service':'预约服务','binding':'椅位与设备位置','block':'临时停用'}
+LABELS={'department':'科室','hours':'开放时间','room':'诊室','service':'预约服务','service_profile':'患者服务内容与发布','binding':'椅位与设备位置','block':'临时停用'}
 
 @login_required
 @require_GET
@@ -35,12 +36,22 @@ def configuration(request,kind):
     if target and not str(target).isdigit():raise Http404
     instance=get_object_or_404(scoped_model(clinic,kind),pk=target) if kind in FORMS and target else None
     form=config_form(clinic,kind,request.POST or None,instance=instance) if kind in FORMS else forms.Form(request.POST or None)
+    if request.method=='GET' and kind=='service_profile' and not target:
+        initial=draft_from_guide(request.GET.get('category',''))
+        form.initial.update(initial)
+        selected=positive_id(request.GET.get('service',''))
+        service=BookingService.objects.filter(pk=selected,department__clinic_id=clinic).first() if selected else None
+        if service:
+            form.initial['service']=service.pk
+            form.initial.setdefault('title',service.name)
     if request.method=='POST' and request.POST.get('action')=='confirm':
         cf=ConfirmForm(request.POST)
         if cf.is_valid():
             try:confirm_config(actor=request.user,proposal_token=cf.cleaned_data['proposal_token'],confirmed=cf.cleaned_data['confirmed'])
             except EXPECTED_ERRORS as exc:add_error(cf,exc)
-            else:messages.success(request,'资源配置已保存；原预约和邀约继续保留。');return redirect('resource_catalogue')
+            else:
+                messages.success(request,'配置已保存；原预约和邀约继续保留。')
+                return redirect('service_content_home' if kind=='service_profile' else 'resource_catalogue')
         return render(request,'scheduling/resource_confirm.html',{'form':cf,'failed':True},status=409)
     if request.method=='POST' and form.is_valid():
         # The public command validates a fresh clinic-scoped form again. Browser
@@ -51,7 +62,7 @@ def configuration(request,kind):
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:return render(request,'scheduling/resource_confirm.html',{'preview':preview,'form':ConfirmForm(initial={'proposal_token':preview['proposal_token']}),'target':target})
     return render(request,'scheduling/resource_form.html',{'title':LABELS.get(kind,{'start':'开始资源核对','activate':'启用统一资源控制','release_block':'结束临时停用'}.get(kind,'资源维护')),
-        'form':form,'target':target,'kind':kind})
+        'form':form,'target':target,'kind':kind,'service_guides':GUIDES})
 
 class CandidateForm(forms.Form):
     patient_no=forms.CharField(label='患者业务编号（咨询可留空）',required=False,max_length=40)

@@ -8,11 +8,13 @@ from workspaces.context import (ensure_context, attach, valid_context, check_tok
 from workspaces.models import WorkspaceContext
 from workspaces.rules import CLINIC_ROLES
 
-PUBLIC={'system_entry','login','portal_login','logout','health','mini_session','mini_login','mini_logout'}
+PUBLIC={'system_entry','public_home','public_services','public_service_detail','public_service_guide','public_clinics',
+        'login','portal_login','logout','health','mini_session','mini_login','mini_logout'}
 ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'service_content_home':{'MANAGER'},'service_content_preview':{'MANAGER'},
  'schedule_calendar':{'FRONT_DESK'},
  'reception_list':{'FRONT_DESK'},'reception_create':{'FRONT_DESK'},'reception_detail':{'FRONT_DESK'},
  'resource_mapping':{'MANAGER'},'resource_catalogue':{'MANAGER'},'resource_config':{'MANAGER'},'resource_candidates':{'FRONT_DESK'},

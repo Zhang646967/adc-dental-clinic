@@ -7,12 +7,12 @@
 <a class="brand" href="{% url 'login' %}"><span class="brand-symbol" aria-hidden="true">A</span><span>ADC<small>牙科连锁运营管理</small></span></a>
 <div class="login-story"><p class="eyebrow">诊所的日常工作，有序衔接</p><h2 id="login-intro-title">从预约到结算<br>让每次交接有据可查</h2><p>在自己的工作范围内，处理待办、记录实际服务、核对办理结果。</p></div>
 <ol class="login-steps"><li><span>01</span><div><strong>预约与到诊</strong><small>核对安排，清楚交接</small></div></li><li><span>02</span><div><strong>接诊与治疗记录</strong><small>记录事实，保留历史</small></div></li><li><span>03</span><div><strong>结算与财务核对</strong><small>明确凭据，独立复核</small></div></li></ol>
-<p class="login-intro-note">系统分析与设计课程项目</p></section>
+<p class="login-intro-note">ADC · 连锁口腔诊所工作平台</p></section>
 <section class="login-card"><div class="login-card-heading"><span class="eyebrow">欢迎回来</span><button class="button secondary mode-toggle" type="button" aria-pressed="false">大字简明模式</button></div>
 <h1>登录运营工作台</h1><p class="muted">使用分配给你的账号，进入对应工作台。</p>
 <form method="post" id="login-form">{% csrf_token %}{% workspace_token %}{{ form.non_field_errors }}
 {% for field in form %}<div class="field">{{ field.label_tag }}{% if field.name == 'password' %}<div class="password-control">{{ field }}<button class="password-toggle secondary" type="button" data-password-toggle aria-controls="{{ field.id_for_label }}" aria-pressed="false" hidden>显示密码</button></div>{% else %}{{ field }}{% endif %}{{ field.errors }}</div>{% endfor %}
 <input type="hidden" name="next" value="{{ next }}"><button class="login-submit" type="submit">登录工作台 <span aria-hidden="true">→</span></button></form>
 <a class="patient-entry" href="{% url 'portal_login' %}"><span>我是患者</span><strong>前往患者服务 <span aria-hidden="true">→</span></strong></a>
-<p class="login-safety"><a href="{% url 'system_entry' %}">系统入口与六条业务核验路线</a></p>
-<p class="login-safety">课程演示使用合成数据，请勿录入真实患者信息或办理真实付款。</p></section></main></body></html>
+<p class="login-safety"><a href="{% url 'system_entry' %}">了解诊疗服务与患者入口</a></p>
+{% if environment_label %}<p class="login-safety">{{ environment_label }} · 请使用分配的测试账号。</p>{% endif %}</section></main></body></html>

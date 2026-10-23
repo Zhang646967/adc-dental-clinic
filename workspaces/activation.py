@@ -28,6 +28,7 @@ def begin_login_workspace(request):
     # New authenticated session context; old browser sessions retain their own contexts.
     request.session.pop(SESSION_KEY, None)
     request.session.pop('adc_guide', None)
+    request.session.pop('adc_booking_intent', None)
     ctx = ensure_context(request)
     attach(request, ctx)
     role = sole_role(available_roles(request.user))

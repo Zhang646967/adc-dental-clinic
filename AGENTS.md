@@ -40,6 +40,26 @@ between target requirements, implementation, actual verification and release.
   real-data import, live prescribing/payment or a previously rejected upload.
   Continue authorized implementation and record concrete environment blockers.
 
+## C0 service-content source candidate
+
+- `docs/C0_SERVICE_RELEASE.md` and `docs/evidence_c0/verification.json` distinguish
+  source implementation, executed rules and unexecuted target acceptance.
+  `SERVICE-01` is implemented; broader C0/clinical requirements remain incomplete.
+- `scheduling/0006_servicepresentation` is an additive migration; the original
+  39 migrations and observed schema snapshots remain unchanged. Reverse refuses
+  populated service descriptions. Do not label design-derived table counts as observed.
+- Public guides do not imply clinic capability. Only complete explicitly published
+  operational offerings appear; unknown fees remain NULL. No template auto-publishes.
+- Only the current-clinic manager edits/previews/publishes content through normal
+  signed preview/confirmation and audit. Authorized draft preview cannot book.
+- Patient service hints bind user, login workspace and typed service ID, expire
+  after ten minutes and resume only after ordinary valid PATIENT activation.
+  GET can read an existing context but cannot create or select one for this handoff.
+- Child descriptions do not authorize guardian self-booking. Preserve the explicit
+  front-desk verification path until separately implemented authorization exists.
+- Port 18000 remains the prior installed baseline until a protected target update
+  actually succeeds. Do not present candidate routes as a working new deployment.
+
 1. Preserve old migrations, historical snapshots, .env, Compose identity and database volumes. New schema changes need additive migrations and actual PostgreSQL validation.
 2. After authenticated login POST, exactly one valid role is activated server-side and routed directly; zero or multiple roles see selection. Never bypass context creation, grant checks or stale-token protection. Role and clinic are separate choices. Manager/frontdesk choose clinic inside their workspace. Doctor sees assigned visits; patient uses PatientAccess.
 3. WorkspaceContext in DB is authoritative; session contains an opaque key only. Unsafe HTTP requests need CSRF plus signed context token (AI uses X-ADC-Workspace); writes re-lock/recheck context and grants. Never use hidden menus as authorization.

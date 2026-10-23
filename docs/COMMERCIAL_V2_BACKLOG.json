@@ -22,7 +22,8 @@
     {
       "id": "C0",
       "title": "Product and environment foundation",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "progress_note": "SERVICE-01 source implemented; full C0 requirements and execution/release acceptance remain incomplete."
     },
     {
       "id": "C1",
@@ -86,7 +87,42 @@
         "reviewed page inventory",
         "actual browser ordinary and exception journeys",
         "390px keyboard and non-JS checks"
-      ]
+      ],
+      "implementation_notes": "C0 customer entry, service pages, login and ordinary shell framing implemented; complete UI inventory and browser acceptance pending. See C0_SERVICE_RELEASE.md."
+    },
+    {
+      "id": "SERVICE-01",
+      "batch": "C0",
+      "title": "Patient service discovery, content publication and booking continuation",
+      "status": "IMPLEMENTED",
+      "dependencies": [],
+      "owner_roles_to_assign": [
+        "clinic service owner",
+        "clinic clinical director",
+        "developer"
+      ],
+      "acceptance": [
+        "Public service descriptions explain purpose, appointment contents, exclusions, preparation and explicit fee terms; general guides do not imply clinic availability.",
+        "Only complete, explicitly published, operationally enabled clinic offerings are projected; missing fees are never zero and private clinician/patient fields stay private.",
+        "Current-clinic managers can create, preview, publish or withdraw with scoped confirmation, audit, stale revision and replay guards; draft previews cannot book.",
+        "Typed service selection survives normal patient activation and multi-role selection without selecting authority or arbitrary URLs; expiry, revocation and new-login behavior are explicit.",
+        "Availability searches the bounded existing horizon, enforces compatible clinicians, and confirmation records an optional own-patient visit reason without changing clinical or billing authority.",
+        "Children requiring guardian/delegate verification use a front-desk path until the separate authorization requirement is implemented."
+      ],
+      "required_evidence": [
+        "C0_SERVICE_RELEASE.md",
+        "exact-source PostgreSQL/migration/HTTP regression",
+        "ordinary and negative customer/manager browser journeys at 390px and with keyboard/non-JS",
+        "protected upgrade-copy reconciliation"
+      ],
+      "execution_status": {
+        "local_rule_suite": "1090 passed",
+        "new_django_cases": "41 authored, not run",
+        "entry_http_cases": "5 updated, not run",
+        "postgresql": "not executed",
+        "browser": "not executed for this source",
+        "deployment": "not deployed"
+      }
     },
     {
       "id": "ENV-01",
@@ -107,7 +143,8 @@
         "environment and bootstrap negative tests",
         "clean customer installation rehearsal",
         "historical document comparison"
-      ]
+      ],
+      "implementation_notes": "Compact environment presentation implemented; clean production initialization and environment acceptance remain planned."
     },
     {
       "id": "SCOPE-01",

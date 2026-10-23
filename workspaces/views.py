@@ -42,7 +42,8 @@ def select_role(request):
 def activate_role(request):
     from workspaces.activation import select_authorized_role
     route = select_authorized_role(request, request.POST.get('role'), request.POST.get('workspace_token', ''))
-    return redirect(route)
+    from portal.booking_intent import destination_after_activation
+    return redirect(destination_after_activation(request) or route)
 
 @login_required
 @require_GET

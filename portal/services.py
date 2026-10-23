@@ -28,14 +28,20 @@ def public_options(user, clinic_id=None, day=None, service_id=None, dentist_id=N
         from scheduling.resource_models import BookingService
         service = BookingService.objects.select_related('department').get(pk=service_id,department__clinic__is_active=True)
         if clinic_id and clinic_id != service.department.clinic_id: raise RuleError('服务与所选诊所不一致，请重新选择。')
-        return candidates(clinic_id=service.department.clinic_id,service_id=service_id,day=day or timezone.localdate(),
-            patient_id=access.patient_id,dentist_id=dentist_id)
+        if day:
+            return candidates(clinic_id=service.department.clinic_id,service_id=service_id,day=day,
+                patient_id=access.patient_id,dentist_id=dentist_id)
+        from portal.availability_search import future_options
+        return future_options(lambda selected_day:candidates(clinic_id=service.department.clinic_id,
+            service_id=service_id,day=selected_day,patient_id=access.patient_id,dentist_id=dentist_id),
+            first_day=timezone.localdate(),horizon_days=HORIZON_DAYS)
     from scheduling.resource_models import ResourcePolicy
     if clinic_id and ResourcePolicy.objects.filter(clinic_id=clinic_id).exists():raise RuleError('请先选择该诊所的预约服务，再查询可用组合。')
     slots = AvailabilitySlot.objects.filter(is_active=True, booking_paused=False, clinic__is_active=True,
         dentist__is_active=True, ends_at__gt=now, starts_at__lt=now+timedelta(days=HORIZON_DAYS)).select_related("clinic","dentist")
     slots = slots.exclude(clinic_id__in=ResourcePolicy.objects.values("clinic_id"))
     if clinic_id: slots = slots.filter(clinic_id=clinic_id)
+    if dentist_id: slots = slots.filter(dentist_id=dentist_id)
     if day:
         from datetime import time
         from adc_core.rules import BUSINESS_TZ
@@ -102,13 +108,16 @@ def _read_token(token, user):
 
 @business_errors
 @transaction.atomic
-def confirm_booking(*, actor, token):
+def confirm_booking(*, actor, token, patient_request=''):
     require_writable(actor)
     access = patient_access(actor, lock=True)
     data = _read_token(token, actor)
     if data.get("access") != access.pk: raise RuleError("患者端授权已变化，请重新确认。")
     receipt = BookingReceipt.objects.filter(nonce=data["nonce"], access=access).select_related("visit").first()
     if receipt: return receipt.visit
+    from scheduling.service_content import patient_request as normalize_request
+    try:reason=normalize_request(patient_request)
+    except ValueError as exc:raise RuleError(str(exc)) from exc
     slot = _lock_slots([data["slot"]])[data["slot"]]
     revision = data.get('intake_revision', 0)  # Legacy previews valid only before intake has ever changed.
     if type(revision) is not int or revision != slot.intake_revision:
@@ -122,7 +131,7 @@ def confirm_booking(*, actor, token):
         end=datetime.fromisoformat(data['end']);_resource_public_time(start,end,slot)
     else:end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
     visit = create_visit_locked(actor=actor, patient=patient, slot=slot, start=start, end=end,
-                       chief_complaint="患者端预约；具体需求由接诊人员确认。",
+                       chief_complaint=reason or "患者端预约；具体需求由接诊人员确认。",
                        service_id=data.get("service"),resource_snapshot=data.get("resources"))
     BookingReceipt.objects.create(nonce=data["nonce"], access=access, visit=visit)
     emit(actor, "PORTAL_BOOKING_CONFIRMED", visit, visit=visit, summary={"source":"patient_portal"})

@@ -4,7 +4,7 @@ from django.db.models import Q
 from equipment.models import EquipmentAsset
 from registry.models import Dentist
 from scheduling.resource_models import (Department, DepartmentHours, TreatmentRoom, BookingService,
-    ResourceBinding, ResourceBlock)
+    ResourceBinding, ResourceBlock, ServicePresentation, ResourcePolicy)
 
 DATE_TIME = forms.DateTimeInput(format='%Y-%m-%dT%H:%M', attrs={'type':'datetime-local'})
 
@@ -45,6 +45,39 @@ class ServiceForm(forms.ModelForm):
         if not q.exists():raise forms.ValidationError('至少配置一名可接收医师。')
         return q
 
+class ServicePresentationForm(forms.ModelForm):
+    class Meta:
+        model = ServicePresentation
+        fields = ['service', 'category', 'title', 'summary', 'suitable_for', 'visit_content',
+                  'limitations', 'preparation', 'fee_mode', 'fee_amount', 'fee_note', 'is_published']
+        labels = {'service': '对应的预约服务', 'category': '患者服务分类', 'title': '患者看到的名称',
+            'summary': '为什么选择这项服务', 'suitable_for': '适合咨询的需求',
+            'visit_content': '本次预约具体包含什么', 'limitations': '不包含的内容与服务边界',
+            'preparation': '到诊前准备', 'fee_mode': '费用说明方式', 'fee_amount': '人民币金额',
+            'fee_note': '费用包含范围与另计项目', 'is_published': '内容及费用已核对，向患者公开展示'}
+        help_texts = {'fee_amount': '评估后确认时留空。明确免费才填0；起价需说明费用变动条件。',
+            'is_published': '未勾选时保存为草稿；公开后仍按门店、服务、医师启用状态决定是否展示。',
+            'visit_content': '写本次预约能提供的服务，不将整套治疗承诺为一次完成。'}
+        widgets = {key: forms.Textarea(attrs={'rows': 3}) for key in
+            ('suitable_for', 'visit_content', 'limitations', 'preparation', 'fee_note')}
+
+    def clean(self):
+        data = super().clean()
+        from scheduling.service_content import CONTENT_LIMITS
+        for key in CONTENT_LIMITS:
+            if isinstance(data.get(key), str):
+                data[key] = data[key].strip()
+        service = data.get('service')
+        if data.get('is_published') and service:
+            from scheduling.service_content import operational_blockers
+            issues=operational_blockers(service_active=service.is_active,
+                department_active=service.department.is_active,clinic_active=service.department.clinic.is_active,
+                has_dentists=service.dentists.filter(is_active=True).exists(),
+                policy_enabled=ResourcePolicy.objects.filter(clinic_id=service.department.clinic_id,state='ENABLED').exists())
+            if issues:self.add_error('is_published','；'.join(issues))
+        return data
+
+
 class BindingForm(forms.ModelForm):
     class Meta:
         model=ResourceBinding;fields=['asset','room','shared','is_active']
@@ -69,12 +102,14 @@ class ConfirmForm(forms.Form):
     proposal_token=forms.CharField(widget=forms.HiddenInput)
     confirmed=forms.BooleanField(label='已核对，确认办理')
 
-FORMS={'department':DepartmentForm,'hours':HoursForm,'room':RoomForm,'service':ServiceForm,'binding':BindingForm,'block':BlockForm}
+FORMS={'department':DepartmentForm,'hours':HoursForm,'room':RoomForm,'service':ServiceForm,
+       'service_profile':ServicePresentationForm,'binding':BindingForm,'block':BlockForm}
 MODELS={k:f._meta.model for k,f in FORMS.items()}
 
 def config_form(clinic,kind,data=None,instance=None):
     form=FORMS[kind](data,instance=instance)
     for name,qs in [('department',Department.objects.filter(clinic_id=clinic)),('room',TreatmentRoom.objects.filter(department__clinic_id=clinic)),
+        ('service',BookingService.objects.filter(department__clinic_id=clinic).select_related('department__clinic')),
         ('asset',EquipmentAsset.objects.filter(clinic_id=clinic)),('dentists',Dentist.objects.filter(is_active=True))]:
         if name in form.fields:form.fields[name].queryset=qs
     if instance and kind=='service' and not data:
@@ -84,5 +119,6 @@ def config_form(clinic,kind,data=None,instance=None):
 
 def scoped_model(clinic,kind):
     qs=MODELS[kind].objects.all()
-    lookup={'department':'clinic_id','hours':'department__clinic_id','room':'department__clinic_id','service':'department__clinic_id','binding':'asset__clinic_id','block':'clinic_id'}[kind]
+    lookup={'department':'clinic_id','hours':'department__clinic_id','room':'department__clinic_id','service':'department__clinic_id',
+            'service_profile':'service__department__clinic_id','binding':'asset__clinic_id','block':'clinic_id'}[kind]
     return qs.filter(**{lookup:clinic})

@@ -22,6 +22,40 @@ class PortalLoginView(LoginView):
     def get_success_url(self):
         return reverse("select_role")
 
+    def chosen_service(self):
+        from scheduling.service_content import positive_id
+        from portal.service_catalogue import public_profiles
+        raw=self.request.POST.get('booking_service','') if self.request.method=='POST' else self.request.GET.get('service','')
+        selected=positive_id(raw)
+        return next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
+
+    def get_context_data(self,**kwargs):
+        return dict(super().get_context_data(**kwargs),booking_service=self.chosen_service())
+
+    def get(self,request,*args,**kwargs):
+        # A signed-in patient can continue without another password prompt.
+        # Only read an existing context: GET never activates a role or creates it.
+        if request.user.is_authenticated:
+            from workspaces.context import existing_context,valid_context
+            ctx=existing_context(request)
+            if ctx and ctx.role=='PATIENT' and valid_context(request.user,ctx):
+                profile=self.chosen_service()
+                if profile and profile.category!='CHILDREN':
+                    return redirect(reverse('portal_slots')+'?service='+str(profile.service_id))
+        return super().get(request,*args,**kwargs)
+
+    def form_valid(self,form):
+        response=super().form_valid(form)
+        # The ordinary authenticated activation completes first. This typed
+        # service hint cannot choose a role, clinic scope or arbitrary URL.
+        from portal.booking_intent import remember_service,destination_after_activation
+        profile=self.chosen_service()
+        if profile and profile.category!='CHILDREN':
+            remember_service(self.request,profile.service_id)
+            destination=destination_after_activation(self.request)
+            if destination:return redirect(destination)
+        return response
+
 @login_required(login_url="portal_login")
 @require_GET
 def home(request):
@@ -48,14 +82,18 @@ def appointments(request):
 @require_GET
 def slots(request):
     patient_access(request.user)
-    form=SlotFilterForm(request.GET)
-    rows=[]
+    form=SlotFilterForm(request.GET or None)
+    rows=[];profile=None;searched=False;query_failed=False
     if form.is_valid():
-        try: rows=public_options(request.user,form.cleaned_data["clinic"],form.cleaned_data["day"],
+        searched=True
+        profile=form.cleaned_data['service'].patient_presentation
+        try: rows=public_options(request.user,form.cleaned_data['clinic'].pk if form.cleaned_data.get('clinic') else None,form.cleaned_data["day"],
             form.cleaned_data['service'].pk if form.cleaned_data.get('service') else None,
             form.cleaned_data['dentist'].pk if form.cleaned_data.get('dentist') else None)
-        except EXPECTED_ERRORS as exc:add_error(form,exc)
-    return render(request,"portal/slots.html",{"rows":rows,"form":form,"clinics":Clinic.objects.filter(is_active=True)})
+        except EXPECTED_ERRORS as exc:
+            add_error(form,exc);query_failed=True
+    return render(request,"portal/slots.html",{'rows':rows,'form':form,'selected_profile':profile,
+        'searched':searched,'query_failed':query_failed})
 
 @login_required(login_url="portal_login")
 @require_http_methods(["GET","POST"])
@@ -64,13 +102,19 @@ def booking_preview(request):
     if request.method=="POST":
         form=BookingConfirmationForm(request.POST)
         if form.is_valid():
-            try: v=confirm_booking(actor=request.user,token=form.cleaned_data["token"])
+            try: v=confirm_booking(actor=request.user,token=form.cleaned_data["token"],patient_request=form.cleaned_data['patient_request'])
             except EXPECTED_ERRORS as exc: add_error(form,exc)
             else:
                 messages.success(request,"预约已经保存。相同确认页的重复提交不会再建一条。")
                 return redirect("portal_visit",pk=v.pk)
         return render(request,"portal/confirm.html",{"form":form,"failed":True})
     try:
+        from portal.service_catalogue import public_profiles
+        from scheduling.service_content import positive_id
+        selected=positive_id(request.GET.get('service',''))
+        profile=next((p for p in public_profiles() if p.service_id==selected),None)
+        if not profile:raise RuleError('请先选择已开放的预约服务。')
+        if profile.category=='CHILDREN':raise RuleError('儿童代办请先联系门店核验接诊安排。')
         start=parse_datetime(request.GET.get("start",""))
         if start is None or timezone.is_naive(start): raise RuleError("请选择有效时段。")
         slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start,service_id=int(request.GET["service"]) if request.GET.get("service") else None)
@@ -78,7 +122,7 @@ def booking_preview(request):
         messages.error(request,"该时段已变化，请重新选择。")
         return redirect("portal_slots")
     return render(request,"portal/confirm.html",{"slot":slot,"start":start,"end":end,
-        "service_label": service_for(slot.clinic_id,int(request.GET["service"])) if request.GET.get("service") else None,
+        "service_label":profile.title,"selected_profile":profile,
         "form":BookingConfirmationForm(initial={"token":token})})
 
 @login_required(login_url="portal_login")

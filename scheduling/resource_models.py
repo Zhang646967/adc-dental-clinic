@@ -79,6 +79,48 @@ class ServiceRequirement(models.Model):
             models.CheckConstraint(condition=Q(quantity__gte=1, quantity__lte=8), name='requirement_quantity_valid')]
 
 
+class ServicePresentation(models.Model):
+    """Published patient information, separate from treatment and billing facts."""
+    from scheduling.service_content import CATEGORY_CHOICES, FEE_CHOICES
+    service = models.OneToOneField(BookingService, on_delete=models.PROTECT, related_name='patient_presentation')
+    category = models.CharField(max_length=24, choices=CATEGORY_CHOICES, default='OTHER')
+    title = models.CharField(max_length=100, blank=True, default='')
+    summary = models.CharField(max_length=240, blank=True, default='')
+    suitable_for = models.TextField(max_length=1600, blank=True, default='')
+    visit_content = models.TextField(max_length=2400, blank=True, default='')
+    limitations = models.TextField(max_length=1600, blank=True, default='')
+    preparation = models.TextField(max_length=1600, blank=True, default='')
+    fee_mode = models.CharField(max_length=12, choices=FEE_CHOICES, default='ASSESSED')
+    fee_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    fee_note = models.TextField(max_length=1600, blank=True, default='')
+    is_published = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'adc_service_presentation'
+        ordering = ['category', 'title', 'pk']
+        constraints = [models.CheckConstraint(condition=(
+            Q(fee_mode='ASSESSED', fee_amount__isnull=True) |
+            Q(fee_mode__in=['FIXED', 'FROM'], fee_amount__isnull=False, fee_amount__gte=0)),
+            name='service_presentation_fee_valid')]
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from scheduling.service_content import CONTENT_LIMITS, validate_presentation
+        errors = validate_presentation({key: getattr(self, key) for key in
+            (*CONTENT_LIMITS, 'category', 'fee_mode', 'fee_amount', 'is_published')})
+        if errors:
+            raise ValidationError(errors)
+
+    @property
+    def fee_display(self):
+        from scheduling.service_content import fee_label
+        return fee_label(self.fee_mode, self.fee_amount)
+
+    def __str__(self):
+        return (self.title or self.service.name) + (' · 已公开' if self.is_published else ' · 草稿')
+
+
 class ResourceBinding(models.Model):
     asset = models.OneToOneField('equipment.EquipmentAsset', on_delete=models.PROTECT, related_name='scheduling_binding')
     room = models.ForeignKey(TreatmentRoom, on_delete=models.PROTECT, null=True, blank=True, related_name='resources')
@@ -168,6 +210,6 @@ class ResourceAction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     @property
     def kind_label(self):
-        return {'department':'科室维护','hours':'开放时间维护','room':'诊室维护','service':'预约服务维护','binding':'设备排程位置维护','block':'临时停用','release_block':'结束停用','start':'开始核对','activate':'启用资源控制','MAP_EXISTING':'核实原承诺','FRONT_BOOKING':'预约确认','COORD_REPLACE':'资源替换','COORD_CONTACT':'联系交接','COORD_OPEN':'登记资源协调','COORD_RESOLVE':'核实协调解决'}.get(self.kind,self.kind)
+        return {'department':'科室维护','hours':'开放时间维护','room':'诊室维护','service':'预约服务维护','service_profile':'患者服务内容与发布','binding':'设备排程位置维护','block':'临时停用','release_block':'结束停用','start':'开始核对','activate':'启用资源控制','MAP_EXISTING':'核实原承诺','FRONT_BOOKING':'预约确认','COORD_REPLACE':'资源替换','COORD_CONTACT':'联系交接','COORD_OPEN':'登记资源协调','COORD_RESOLVE':'核实协调解决'}.get(self.kind,self.kind)
     class Meta:
         db_table = 'adc_resource_action'

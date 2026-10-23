@@ -1,13 +1,6 @@
-"""Public entry, containing curated instructions and links only."""
-from django.http import HttpResponse
-from django.urls import reverse
-from django.views.decorators.http import require_safe
-from adc_core.entry_catalog import ENTRY_ROUTES, render_entry
+"""Legacy entry URL now opens the customer service homepage.
 
-
-@require_safe
-def system_entry(request):
-    # No RequestContext: a public walkthrough must not query workspace or patient
-    # context processors, create a scope, or change guide/session progress.
-    return HttpResponse(render_entry({name: reverse(name) for name in ENTRY_ROUTES}),
-        headers={"Cache-Control": "no-store"})
+The portable acceptance catalogue remains an operator handover artifact; it is
+not a public product page and is not linked from patient navigation.
+"""
+from portal.service_views import landing as system_entry

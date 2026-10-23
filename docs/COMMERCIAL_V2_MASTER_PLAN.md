@@ -24,6 +24,8 @@ The requirements structure follows the uploaded requirements/design notes: obser
 
 ## Customer experience and onboarding
 
+The [C0 service-centre implementation](C0_SERVICE_RELEASE.md) now provides patient needs, clinic-published service content, fee terms and service-first booking continuation. Manager readiness and draft preview are implemented. Source checks have run; PostgreSQL, browser acceptance and installation remain pending. This is implementation progress, not a commercial release or completed clinical scope contract.
+
 The staff front door opens into that person's work: today's schedule, waiting patients, unsigned records, orders awaiting action, exceptions and responsible colleagues. The patient front door offers clinic/service selection, appointments, treatment progress, approved documents, balances and a contact path. An owner or platform evaluator is not the default persona for either interface.
 
 The visual system covers typography, spacing, form controls, tables, status wording, tooth-chart symbols, keyboard operation and narrow layouts. Clinical alerts such as unreviewed allergies or unsigned prescriptions remain prominent. Their purpose is specific action and patient safety, rather than a generic product disclaimer. No fake certifications, clinic addresses, testimonials, uptime figures or clinical capability claims may appear in sales or product pages.

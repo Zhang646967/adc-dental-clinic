@@ -1,3 +1,9 @@
+# C0 patient service implementation 2026-10-22
+
+Patient needs → published service scope and fees → clinic/team → available time → explicit booking.
+
+[C0 implementation and release status](docs/C0_SERVICE_RELEASE.md) records the customer service pages, clinic-owned publication/preview, multi-role continuation and visit reason. 1,090 local rule/source checks pass. Forty-one new Django cases and five updated entry cases are authored but unrun. Docker access and dependency-network restrictions block framework/database execution here; the running local system has not been updated. This is a source candidate, not a commercial release. All 39 historic migrations remain unchanged; one additive migration is pending execution.
+
 # Commercial V2 product program 2026-10-22
 
 The user selected independent deployment per dental chain and full clinical

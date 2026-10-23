@@ -34,12 +34,16 @@ def authorized_clinics(user, role):
     return Clinic.objects.filter(is_active=True,pk__in=raw_bindings(user).filter(
         role=role,scope_kind='CLINIC').values('clinic_id')).order_by('clinic_code')
 
-def ensure_context(request):
+def existing_context(request):
+    """Read a context owned by this user; public navigation must never create one."""
     key=request.session.get(SESSION_KEY)
     try:
-        ctx=WorkspaceContext.objects.filter(pk=key,user_id=request.user.pk).first() if key else None
+        return WorkspaceContext.objects.filter(pk=key,user_id=request.user.pk).first() if key else None
     except (ValueError,TypeError,ValidationError,signing.BadSignature):
-        ctx=None
+        return None
+
+def ensure_context(request):
+    ctx=existing_context(request)
     if ctx is None:
         ctx=WorkspaceContext.objects.create(user=request.user)
         request.session[SESSION_KEY]=str(ctx.pk)

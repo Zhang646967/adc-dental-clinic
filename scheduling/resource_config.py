@@ -21,6 +21,9 @@ def _serialized(form):
         if hasattr(v,'values_list'):v=list(v.values_list('pk',flat=True))
         elif hasattr(v,'pk'):v=v.pk
         elif isinstance(v,(date,time,datetime)):v=v.isoformat()
+        else:
+            from decimal import Decimal
+            if isinstance(v,Decimal):v=str(v)
         result[k]=v
     return result
 
@@ -35,10 +38,10 @@ def _validated(clinic,kind,fields,target):
     if obj:
         # Identity/location changes use an explicit binding update, not moving
         # rooms/services into a new clinic or rewriting stable catalogue codes.
-        for key in ('code','department'):
+        for key in ('code','department','service'):
             original=type(obj).objects.get(pk=obj.pk)
             if key in form.cleaned_data and getattr(original,key)!=form.cleaned_data[key]:
-                raise RuleError('已有目录的代码和所属科室保持不变，请新增目录并停用原项。')
+                raise RuleError('已有目录的代码、所属科室和对应服务保持不变，请新增目录并停用原项。')
     return form
 
 def readiness(clinic):
@@ -81,7 +84,7 @@ def prepare_config(*,actor,kind,fields=None,target=None):
             elif isinstance(value,datetime):value=timezone.localtime(value).strftime('%Y-%m-%d %H:%M')
             elif value is None:value='未提供'
             display.append((form.fields[key].label or key,value))
-    label={'department':'维护科室','hours':'维护开放时间','room':'维护诊室','service':'维护预约服务','binding':'核对设备排程位置','block':'登记临时停用','release_block':'结束临时停用','start':'开始本店资源核对','activate':'启用统一资源控制'}[kind]
+    label={'department':'维护科室','hours':'维护开放时间','room':'维护诊室','service':'维护预约服务','service_profile':'核对患者服务内容与发布','binding':'核对设备排程位置','block':'登记临时停用','release_block':'结束临时停用','start':'开始本店资源核对','activate':'启用统一资源控制'}[kind]
     return {'kind':kind,'kind_label':label,'fields':clean,'display_fields':display,'proposal_token':proposal(actor,CONTRACT,('MANAGER',),data)}
 
 @business_errors
