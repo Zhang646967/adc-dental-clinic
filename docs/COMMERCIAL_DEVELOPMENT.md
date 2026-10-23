@@ -1,6 +1,6 @@
 # Commercial development roadmap 商用化开发路线
 
-当前优先顺序已根据课程业务评价调整：先实施[预约业务完善计划](APPOINTMENT_BUSINESS_PLAN.md)，完成取消时段分析、电话接待、科室资源和患者自助服务。下文工程门槛及历史路线继续保留，未执行项不作通过；小程序在移动网站主链后接入。
+当前方向已于2026-10-22调整为商业产品：**单连锁独立部署，完整替代诊疗系统，包含电子病历和处方。** 新开发以[商业V2总计划](COMMERCIAL_V2_MASTER_PLAN.md)、[已检查基线](COMMERCIAL_V2_BASELINE.md)和[验收待办](COMMERCIAL_V2_BACKLOG.json)为准。客户界面转向真实岗位任务，完整临床能力纳入首发门槛。以下路线和执行状态保留为历史工程记录，不再限定新的产品范围。
 
 Business integrity → accountable daily operations → independent infrastructure
 → measured scale → controlled commercial pilot. The present system is a synthetic

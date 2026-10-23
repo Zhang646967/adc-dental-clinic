@@ -1,5 +1,13 @@
 # ADC — Dental Clinic Management
 
+**Commercial V2 direction:** an independently deployed platform for a dental
+chain, covering patient services, operations and full clinical replacement
+including electronic records and prescribing. [Product and release plan](docs/COMMERCIAL_V2_MASTER_PLAN.md)
+· [Inspected baseline](docs/COMMERCIAL_V2_BASELINE.md)
+· [Acceptance backlog](docs/COMMERCIAL_V2_BACKLOG.json).
+Clinical V2 is planned; the current local baseline has not been qualified for
+production patient care. Historical engineering and academic materials follow.
+
 **系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；新`/start/`页面尚待本机更新。
 
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**

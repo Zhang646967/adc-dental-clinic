@@ -1,0 +1,758 @@
+{
+  "program": "ADC commercial V2",
+  "date": "2026-10-22",
+  "baseline_commit": "c750e7ebabc6bfa90769570a8468972ae7b94b14",
+  "master_plan": "COMMERCIAL_V2_MASTER_PLAN.md",
+  "user_confirmed_decisions": {
+    "deployment": "independent deployment per dental chain",
+    "clinical_scope": "full replacement of clinical records prescribing and contracted outpatient dental workflows"
+  },
+  "planning_assumptions": {
+    "jurisdiction": "mainland China, to confirm for first customer",
+    "branch_envelope": "5–20 clinics, sizing hypothesis",
+    "initial_pilot_observation": "proposed 30 days, to agree with the clinic"
+  },
+  "status_semantics": {
+    "PLANNED": "Requirement and acceptance definition only; not implemented or tested",
+    "IMPLEMENTED": "Source implementation exists; execution evidence still recorded separately",
+    "VERIFIED": "Specified acceptance executed for an identified version/environment",
+    "RELEASED": "Verified artifact deployed to an identified permitted target with recorded acceptance"
+  },
+  "batches": [
+    {
+      "id": "C0",
+      "title": "Product and environment foundation",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C1",
+      "title": "Organization identity and authority",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C2",
+      "title": "Complete dental encounters",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C3",
+      "title": "Signed records consent and archive",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C4",
+      "title": "Prescribing pharmacy and orders",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C5",
+      "title": "Nursing materials and clinical interfaces",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C6",
+      "title": "Commercial financial closure",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C7",
+      "title": "Production security recovery and migration",
+      "status": "PLANNED"
+    },
+    {
+      "id": "C8",
+      "title": "Supervised pilot and commercial handover",
+      "status": "PLANNED"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "UX-01",
+      "batch": "C0",
+      "title": "Customer product interfaces and internal acceptance separation",
+      "status": "PLANNED",
+      "dependencies": [],
+      "owner_roles_to_assign": [
+        "product owner",
+        "designer",
+        "developer"
+      ],
+      "acceptance": [
+        "Staff and patient entry and everyday workspaces use reviewed product/clinic information, with no academic or developer acceptance framing.",
+        "Internal acceptance routes have their own authorization; ordinary users are not directed to them.",
+        "Unavailable clinical capabilities are not rendered as working or certified."
+      ],
+      "required_evidence": [
+        "reviewed page inventory",
+        "actual browser ordinary and exception journeys",
+        "390px keyboard and non-JS checks"
+      ]
+    },
+    {
+      "id": "ENV-01",
+      "batch": "C0",
+      "title": "Separate presentation data provenance and production qualification",
+      "status": "PLANNED",
+      "dependencies": [],
+      "owner_roles_to_assign": [
+        "developer",
+        "operations owner"
+      ],
+      "acceptance": [
+        "Brand presentation cannot grant authority or mark a release accepted.",
+        "Isolated test environments retain an accurate environment indicator and synthetic-document provenance.",
+        "Clean production initialization refuses demo bootstrap/accounts/configuration and does not overwrite existing installations."
+      ],
+      "required_evidence": [
+        "environment and bootstrap negative tests",
+        "clean customer installation rehearsal",
+        "historical document comparison"
+      ]
+    },
+    {
+      "id": "SCOPE-01",
+      "batch": "C0",
+      "title": "First clinic complete service and integration contract",
+      "status": "PLANNED",
+      "dependencies": [],
+      "owner_roles_to_assign": [
+        "product owner",
+        "clinic clinical director",
+        "pharmacist",
+        "nursing lead",
+        "finance owner"
+      ],
+      "acceptance": [
+        "Each contracted dental service maps to required record, consent, order, execution, material, imaging, follow-up and financial behavior.",
+        "Every required first-customer interface and legal jurisdiction has an accountable reviewer.",
+        "No clinical replacement claim is made while a required service or interface is incomplete."
+      ],
+      "required_evidence": [
+        "signed service matrix",
+        "requirements and exception catalogue",
+        "integration and clinical authority inventory"
+      ]
+    },
+    {
+      "id": "ID-01",
+      "batch": "C1",
+      "title": "Verified patients guardians and source-aware import",
+      "status": "PLANNED",
+      "dependencies": [
+        "SCOPE-01",
+        "ENV-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinic records owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Patient binding and recovery do not authenticate through phone number or business ID alone.",
+        "Guardian/delegate access is separately verified, bounded and revocable.",
+        "Duplicate and ambiguous imports are reviewed rather than silently merged."
+      ],
+      "required_evidence": [
+        "identity and guardian policy",
+        "cross-patient and revocation HTTP tests",
+        "migration mismatch reconciliation"
+      ]
+    },
+    {
+      "id": "AUTH-01",
+      "batch": "C1",
+      "title": "Clinical professional scope and attributable permissions",
+      "status": "PLANNED",
+      "dependencies": [
+        "SCOPE-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinic clinical director",
+        "pharmacist",
+        "nursing lead",
+        "security owner"
+      ],
+      "acceptance": [
+        "Nursing, pharmacy, records and inventory responsibilities have explicit patient/object/action scope.",
+        "Qualification validity, evidence source and verifier are recorded; directory associations do not auto-qualify staff.",
+        "Changing clinic or role cannot self-approve, expand access or revive stale forms."
+      ],
+      "required_evidence": [
+        "authority matrix",
+        "professional review record",
+        "revocation concurrency and negative-role tests"
+      ]
+    },
+    {
+      "id": "IAM-01",
+      "batch": "C1",
+      "title": "Customer account activation recovery and session governance",
+      "status": "PLANNED",
+      "dependencies": [
+        "ENV-01",
+        "AUTH-01"
+      ],
+      "owner_roles_to_assign": [
+        "security owner",
+        "operations owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Production accounts are attributable and use reviewed activation/reset procedures with no reused public demo credentials.",
+        "Privileged MFA, inactivity/absolute lifetime and session inspection/revocation have a documented threat model.",
+        "Account departure and credential changes invalidate applicable sessions and capabilities."
+      ],
+      "required_evidence": [
+        "authentication policy",
+        "real authentication/session HTTP tests",
+        "recovery misuse and lockout review"
+      ]
+    },
+    {
+      "id": "CLIN-01",
+      "batch": "C2",
+      "title": "Structured dental encounters and quality worklists",
+      "status": "PLANNED",
+      "dependencies": [
+        "ID-01",
+        "AUTH-01",
+        "SCOPE-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinical director",
+        "dentists",
+        "developer"
+      ],
+      "acceptance": [
+        "Contracted first/follow-up record templates support complaint/history, examination, diagnosis, plan, performed facts and follow-up.",
+        "Patient-reported and professionally confirmed facts, unknown and reviewed-negative histories remain distinct.",
+        "Missing required content, wrong encounter and conflicting revisions have understandable safe outcomes."
+      ],
+      "required_evidence": [
+        "clinician-approved templates",
+        "independent synthetic encounter cases",
+        "HTTP concurrency and browser record tests"
+      ]
+    },
+    {
+      "id": "CLIN-02",
+      "batch": "C2",
+      "title": "Odontogram periodontal data and service-specific dental findings",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-01"
+      ],
+      "owner_roles_to_assign": [
+        "dentists",
+        "nursing lead",
+        "designer"
+      ],
+      "acceptance": [
+        "The approved tooth/surface and dentition conventions are stored explicitly and have an accessible structured input path.",
+        "Contracted periodontal, restorative, endodontic, orthodontic or implant fields are captured where applicable.",
+        "Graphical changes preserve actor/time/version and cannot invent completed treatment or charges."
+      ],
+      "required_evidence": [
+        "dental data dictionary",
+        "specialty review cases",
+        "graphical and keyboard input verification"
+      ]
+    },
+    {
+      "id": "CLIN-03",
+      "batch": "C2",
+      "title": "Longitudinal treatment plans and safe draft saving",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-01",
+        "CLIN-02"
+      ],
+      "owner_roles_to_assign": [
+        "dentists",
+        "developer"
+      ],
+      "acceptance": [
+        "Multi-encounter plans preserve proposed/completed/cancelled steps and revision history.",
+        "Draft saves bind author, patient, encounter and revision; switching patients cannot transfer note content.",
+        "Acknowledge a save only after durable commit; handle response loss and conflicts without duplicate or lost accepted changes in the tested model."
+      ],
+      "required_evidence": [
+        "plan state model",
+        "patient-switch and lost-response tests",
+        "real database draft concurrency tests"
+      ]
+    },
+    {
+      "id": "REC-01",
+      "batch": "C3",
+      "title": "Clinical signatures and immutable amendment lifecycle",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-03",
+        "IAM-01"
+      ],
+      "owner_roles_to_assign": [
+        "medical records owner",
+        "clinical director",
+        "signature specialist"
+      ],
+      "acceptance": [
+        "Writing, review, signing and archive permissions/deadlines are explicit.",
+        "Original signed content, signer evidence, authoritative time and verification remain recoverable after amendment.",
+        "A typed name or signature picture is not represented as a verified reliable-signature integration."
+      ],
+      "required_evidence": [
+        "signature provider and applicability review",
+        "original/changed-content verification",
+        "amendment and financial-independence tests"
+      ]
+    },
+    {
+      "id": "REC-02",
+      "batch": "C3",
+      "title": "Consent archive controlled copies and retention",
+      "status": "PLANNED",
+      "dependencies": [
+        "REC-01",
+        "ID-01"
+      ],
+      "owner_roles_to_assign": [
+        "medical records owner",
+        "privacy owner",
+        "clinical director"
+      ],
+      "acceptance": [
+        "Consent binds the correct person/procedure/version and supports applicable guardian authority.",
+        "Archive, independently readable copies, permitted amendment, legal holds and required retention are enforced.",
+        "Optional-consent withdrawal and customer exit cannot erase records with a remaining lawful retention obligation."
+      ],
+      "required_evidence": [
+        "retention and consent register",
+        "copy and hold negative tests",
+        "archive and signature recovery rehearsal"
+      ]
+    },
+    {
+      "id": "FILE-01",
+      "batch": "C3",
+      "title": "Protected clinical attachments and imaging identity",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-01",
+        "ID-01"
+      ],
+      "owner_roles_to_assign": [
+        "imaging reviewer",
+        "security owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Files and imaging references bind the authorized patient/encounter and source identity, with controlled retrieval and no public objects.",
+        "Upload bounds/content checks and malware-handling behavior are defined and tested.",
+        "Diagnostic viewing and PACS requirements are reviewed independently of a generic image upload."
+      ],
+      "required_evidence": [
+        "object-level authorization tests",
+        "attachment integrity and recovery comparison",
+        "PACS/interface identity and failure tests"
+      ]
+    },
+    {
+      "id": "RX-01",
+      "batch": "C4",
+      "title": "Reviewed medication dictionaries and prescriber authority",
+      "status": "PLANNED",
+      "dependencies": [
+        "AUTH-01",
+        "REC-01"
+      ],
+      "owner_roles_to_assign": [
+        "pharmacist",
+        "clinical director",
+        "developer"
+      ],
+      "acceptance": [
+        "Drug identity/strength/units/routes and all required prescription fields use reviewed controlled dictionaries.",
+        "Prescriber scopes and validity are checked again when a prescription is signed.",
+        "Safety rules use a licensed maintained reviewed knowledge source, retain its version and show unknown coverage."
+      ],
+      "required_evidence": [
+        "drug dictionary review",
+        "knowledge licence/version record",
+        "unit and authority negative tests"
+      ]
+    },
+    {
+      "id": "RX-02",
+      "batch": "C4",
+      "title": "Prescription review corrections and charge prerequisites",
+      "status": "PLANNED",
+      "dependencies": [
+        "RX-01",
+        "REC-02"
+      ],
+      "owner_roles_to_assign": [
+        "pharmacist",
+        "dentists",
+        "finance reviewer",
+        "developer"
+      ],
+      "acceptance": [
+        "Approved review precedes corresponding medication pricing/charging and dispensing in the adopted workflow.",
+        "Rejection, corrected revision, cancellation and stale/revoked professional context retain prior history and cannot bypass review.",
+        "Any applicable lawful exception has its own reviewed attributable workflow rather than a generic bypass."
+      ],
+      "required_evidence": [
+        "professionally reviewed state machine",
+        "real HTTP/PG review races",
+        "independent prescription-to-charge assertions"
+      ]
+    },
+    {
+      "id": "RX-03",
+      "batch": "C4",
+      "title": "Dispensing administration and partial fulfilment",
+      "status": "PLANNED",
+      "dependencies": [
+        "RX-02"
+      ],
+      "owner_roles_to_assign": [
+        "pharmacist",
+        "nursing lead",
+        "developer"
+      ],
+      "acceptance": [
+        "Dispensing and administration have distinct accountable professional events.",
+        "Partial fulfilment, returns, cancellations and replay cannot double-dispense or erase completed use.",
+        "External prescription delivery and required paper/electronic documents are tested for the actual clinic."
+      ],
+      "required_evidence": [
+        "fulfilment event model",
+        "duplicate and partial-fulfilment races",
+        "pharmacy/nursing observed tasks"
+      ]
+    },
+    {
+      "id": "MAT-01",
+      "batch": "C5",
+      "title": "Drug material implant lots and stock movements",
+      "status": "PLANNED",
+      "dependencies": [
+        "RX-03"
+      ],
+      "owner_roles_to_assign": [
+        "pharmacist",
+        "inventory owner",
+        "infection-control lead"
+      ],
+      "acceptance": [
+        "Receipt, expiry, issue/use, return and recall preserve source and patient/order linkage for applicable items.",
+        "Concurrent use cannot over-issue or produce negative stock under the defined command protocol.",
+        "Corrections append attributable reversing/new movements and do not delete earlier events."
+      ],
+      "required_evidence": [
+        "lot/use reconciliation",
+        "expiry recall and concurrency cases",
+        "stock-to-finance independent oracle"
+      ]
+    },
+    {
+      "id": "CARE-01",
+      "batch": "C5",
+      "title": "Nursing execution sterilization and specialty follow-up",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-03",
+        "AUTH-01",
+        "MAT-01"
+      ],
+      "owner_roles_to_assign": [
+        "nursing lead",
+        "infection-control lead",
+        "dentists"
+      ],
+      "acceptance": [
+        "Applicable instrument/package/sterilization evidence links to actual use and patient care.",
+        "Nursing records actual execution and escalation instead of merely copying planned orders.",
+        "Contracted specialty follow-ups and incomplete external results have owners and deadlines."
+      ],
+      "required_evidence": [
+        "clinic workflow review",
+        "traceability walkthroughs",
+        "independent event-chain comparison"
+      ]
+    },
+    {
+      "id": "INT-01",
+      "batch": "C5",
+      "title": "Lab prosthetic and imaging integration lifecycle",
+      "status": "PLANNED",
+      "dependencies": [
+        "FILE-01",
+        "CLIN-03"
+      ],
+      "owner_roles_to_assign": [
+        "clinic integration owner",
+        "external system provider",
+        "developer"
+      ],
+      "acceptance": [
+        "Patient/study/order identity, source result/version and authorizations are preserved end-to-end.",
+        "Send/acknowledge/result/correction and provider outage/replay outcomes are visible and reconciled.",
+        "A required first-customer interface is not marked available based on a local mock or screenshot."
+      ],
+      "required_evidence": [
+        "provider contract",
+        "real authorized sandbox or target integration evidence",
+        "outage replay and wrong-patient negative cases"
+      ]
+    },
+    {
+      "id": "FIN-01",
+      "batch": "C6",
+      "title": "Clinical source charges and treatment-course allocations",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-03",
+        "RX-02"
+      ],
+      "owner_roles_to_assign": [
+        "finance owner",
+        "clinical director",
+        "developer"
+      ],
+      "acceptance": [
+        "Performed events, estimates, prescription approvals, bills and deposits are different attributed facts.",
+        "Existing invoice/version amounts are preserved; plan revisions cannot silently charge/refund or create an independent duplicate line source.",
+        "Required deposits, split settlements and refunds have reviewed allocation and reversal rules."
+      ],
+      "required_evidence": [
+        "financial model ADR",
+        "independent amount/source oracles",
+        "clinical correction and historical version regression"
+      ]
+    },
+    {
+      "id": "PAY-01",
+      "batch": "C6",
+      "title": "Real payment refunds reconciliation and required fiscal interfaces",
+      "status": "PLANNED",
+      "dependencies": [
+        "FIN-01"
+      ],
+      "owner_roles_to_assign": [
+        "finance owner",
+        "payment provider",
+        "developer"
+      ],
+      "acceptance": [
+        "Server-verified provider events bind correct merchant/order/amount; duplicate callbacks do not duplicate posting.",
+        "Timeout, unknown result, refund and later reconciliation stay attributable; client success never counts as receipt evidence.",
+        "Required insurance/tax interfaces are accepted with actual access; documents describe their legal status accurately."
+      ],
+      "required_evidence": [
+        "provider integration contract",
+        "signature callback replay/outage evidence",
+        "external-to-internal independent money reconciliation"
+      ]
+    },
+    {
+      "id": "MSG-01",
+      "batch": "C6",
+      "title": "Patient communication delivery support and permissions",
+      "status": "PLANNED",
+      "dependencies": [
+        "ID-01",
+        "SCOPE-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinic service owner",
+        "privacy owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Care communication and optional marketing use reviewed permission handling and message content.",
+        "Queued/sent/provider-delivered/failed states reflect actual provider evidence and never promise human receipt without it.",
+        "Support and complaint handling have explicit ownership and minimum necessary record access."
+      ],
+      "required_evidence": [
+        "message/provider contract",
+        "delivery/failure tests",
+        "support access and incident workflow review"
+      ]
+    },
+    {
+      "id": "PRIV-01",
+      "batch": "C7",
+      "title": "Sensitive read export retention and processor governance",
+      "status": "PLANNED",
+      "dependencies": [
+        "SCOPE-01",
+        "AUTH-01"
+      ],
+      "owner_roles_to_assign": [
+        "privacy owner",
+        "security owner",
+        "medical records owner"
+      ],
+      "acceptance": [
+        "Lawful bases/notices/consent where applicable, data categories/purposes/retention and processor/subprocessor responsibilities are mapped.",
+        "Reads, copies, bulk export and emergency-access proposals have enforceable purpose/object/role controls and bounded safe audit.",
+        "Routine logs/telemetry and external AI do not receive raw medical records, credentials or tokens."
+      ],
+      "required_evidence": [
+        "data-flow and processing register",
+        "jurisdiction applicability review",
+        "cross-patient and marker-secret tests"
+      ]
+    },
+    {
+      "id": "OPS-01",
+      "batch": "C7",
+      "title": "Independent deployment customer isolation and monitored recovery",
+      "status": "PLANNED",
+      "dependencies": [
+        "ENV-01"
+      ],
+      "owner_roles_to_assign": [
+        "operations owner",
+        "security owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Customer deployments isolate database/objects/secrets/keys/sessions/backups and operate independently of the Mac.",
+        "HTTPS/private DB/least privilege/workers/monitoring/off-host encrypted recovery have responsible operators.",
+        "Restore covers SQL, objects, signature/key dependencies and measured full-service recovery with business-approved RPO/RTO."
+      ],
+      "required_evidence": [
+        "two-customer isolation rehearsal",
+        "real target deployment and fault evidence",
+        "off-host empty-target full-service restore"
+      ]
+    },
+    {
+      "id": "MIG-01",
+      "batch": "C7",
+      "title": "Additive clinical migration and rehearsed replacement cutover",
+      "status": "PLANNED",
+      "dependencies": [
+        "REC-02",
+        "RX-03",
+        "CARE-01",
+        "INT-01",
+        "PAY-01",
+        "OPS-01"
+      ],
+      "owner_roles_to_assign": [
+        "medical records owner",
+        "finance owner",
+        "operations owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Existing 39 migrations/history remain preserved and old free-text/billing data is not fabricated into missing clinical facts.",
+        "Real source records are mapped with provenance and reviewed ambiguities; row/version/signature/attachment/amount comparisons are independent.",
+        "Write freeze, final delta, downtime procedure, named acceptance and data-preserving rollback/forward recovery are rehearsed."
+      ],
+      "required_evidence": [
+        "additive migration ADR",
+        "independent copy conversion and reconciliation",
+        "cutover and rollback rehearsal"
+      ]
+    },
+    {
+      "id": "QA-01",
+      "batch": "C7",
+      "title": "Clinical safety security usability and commercial capacity qualification",
+      "status": "PLANNED",
+      "dependencies": [
+        "RX-03",
+        "CARE-01",
+        "INT-01",
+        "PAY-01",
+        "PRIV-01",
+        "OPS-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinical director",
+        "pharmacist",
+        "security reviewer",
+        "QA",
+        "operations owner"
+      ],
+      "acceptance": [
+        "Every contracted clinical service passes ordinary and failure workflows with the relevant professionals.",
+        "Exact release passes current PG/HTTP/concurrency, browser, sensitive-access, load and recovery gates; no unresolved critical defects.",
+        "Capacity/SLO/usability measurements use the stated workload/sample and are not represented as market-wide or compliance certification."
+      ],
+      "required_evidence": [
+        "traceable release qualification pack",
+        "independent security/clinical review",
+        "real workload 24 h soak and observed user tasks"
+      ]
+    },
+    {
+      "id": "DEL-01",
+      "batch": "C8",
+      "title": "Repeatable licence support exit and customer handover",
+      "status": "PLANNED",
+      "dependencies": [
+        "QA-01",
+        "MIG-01"
+      ],
+      "owner_roles_to_assign": [
+        "product owner",
+        "clinic owner",
+        "operations owner",
+        "privacy owner"
+      ],
+      "acceptance": [
+        "Licence/service/support scope, external supplier costs and responsibilities are explicit and funded.",
+        "Installation, onboarding, training, updates, incidents, key custody and customer-readable export/exit are rehearsed.",
+        "No unsupported price, support-hours, uptime or certification promise is used in product/sales material."
+      ],
+      "required_evidence": [
+        "customer contract and service catalogue",
+        "operator/user guides",
+        "fresh independent installation and export rehearsal"
+      ]
+    },
+    {
+      "id": "PILOT-01",
+      "batch": "C8",
+      "title": "Supervised full-workflow first-customer commercial pilot",
+      "status": "PLANNED",
+      "dependencies": [
+        "DEL-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinic clinical director",
+        "pharmacist",
+        "finance owner",
+        "operations owner",
+        "customer owner"
+      ],
+      "acceptance": [
+        "All critical clinical/privacy/prescription/recovery controls work before any real patient pilot.",
+        "Agreed service scope and observation period run with support, defect handling and retained business evidence.",
+        "Wider branch rollout follows named clinical/operational/customer acceptance rather than a version label."
+      ],
+      "required_evidence": [
+        "pilot agreement and accountable contacts",
+        "observed outcome and incident register",
+        "wider-rollout authorization"
+      ]
+    }
+  ],
+  "scheduling_dependencies": [
+    "first customer and applicable clinical service matrix",
+    "jurisdiction and professional/legal reviewers",
+    "signature and medication-knowledge choices",
+    "required imaging/lab/payment/tax/insurance provider contracts",
+    "validated independent hosting and support coverage"
+  ],
+  "current_execution_constraints": [
+    "Latest local entry source has not been deployed to the Mac.",
+    "Previous Docker/preview access and GitHub publication authorization limits retain their recorded status; no new bypass or upload is authorized by this plan."
+  ],
+  "commercial_release_requirement": "Complete first-customer contracted outpatient clinical replacement plus verified identity/privacy/money/recovery/migration/support; an operational-only preview is not the selected finished product."
+}

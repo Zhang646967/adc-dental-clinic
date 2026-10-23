@@ -7,7 +7,38 @@ backup. Preserve tag `v1.0.0-rc.1`; develop on `main`. Use a fresh synthetic dem
 Current host instructions are in `docs/MACOS.md`; older Windows reports retain
 their historical validation status.
 
-Synthetic local course demonstrator; not a medical, payment or public-production product.
+Development target: a commercial outpatient dental platform, independently
+deployed per dental chain, with full replacement of clinical records and
+prescribing in the contracted clinic scope. The user selected this direction
+on 2026-10-22. The existing implemented/running baseline remains synthetic and
+has not been qualified for production clinical use. Preserve the distinction
+between target requirements, implementation, actual verification and release.
+
+## Current commercial V2 direction
+
+- `docs/COMMERCIAL_V2_MASTER_PLAN.md` and its linked baseline/backlog govern new
+  development. This supersedes the old RC feature freeze and teacher-only
+  delivery priority; historical records keep their original scope.
+- Customer interfaces foreground clinic/product identity and actual business
+  tasks. Academic labels and developer acceptance checklists belong in separate
+  engineering materials. Isolated test environments retain accurate provenance.
+- Full clinical replacement includes reviewed dental records/plans, consent,
+  signatures/amendments/archive, prescribing/pharmacy and the contracted
+  nursing/material/imaging/lab flows. Billing notes alone do not establish it.
+- Existing seven-role authority is the implemented baseline. New professional
+  roles/scopes need explicit policy, additive implementation and negative tests;
+  planning them must not grant privileges or certify professional qualifications.
+- Reuse established booking/resource locks, immutable financial history and
+  independent reviewer boundaries. Preserve all 39 migrations; clinical model
+  extensions require reviewed ADRs, additive migrations and actual PG evidence.
+- Keep synthetic accounts/data separate from production initialization. Demo
+  credentials already disclosed for local testing must never become customer
+  credentials. No real medical records, private keys or backups in source/GitHub.
+- Clinical/pharmacy/privacy acceptance requires the relevant qualified people.
+  Do not invent their participation or equate code/fixtures with their approval.
+- Commercial planning does not authorize procurement, broader public exposure,
+  real-data import, live prescribing/payment or a previously rejected upload.
+  Continue authorized implementation and record concrete environment blockers.
 
 1. Preserve old migrations, historical snapshots, .env, Compose identity and database volumes. New schema changes need additive migrations and actual PostgreSQL validation.
 2. After authenticated login POST, exactly one valid role is activated server-side and routed directly; zero or multiple roles see selection. Never bypass context creation, grant checks or stale-token protection. Role and clinic are separate choices. Manager/frontdesk choose clinic inside their workspace. Doctor sees assigned visits; patient uses PatientAccess.
@@ -83,13 +114,13 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 
 ## Patient self-rescheduling (B1.4)
 - PatientAccess and active PATIENT context authorize only own source. Same-clinic, same-service replacements use existing resource rules; ordinary candidates use current duration, valid held offers retain promised duration.
-- Shared locked rescheduling owns the original terminal state, unique successor and claims; portal adds BookingReceipt in the same transaction. Offer acceptance stays in coordination and links the same reception result. Preserve all39 migrations.
+- Shared locked rescheduling owns the original terminal state, unique successor and claims; portal adds BookingReceipt in the same transaction. Offer acceptance stays in coordination and links the same reception result. Preserve all 39 migrations.
 - Replay returns saved result current state; never revive later cancellation. Rescheduling is not a cancellation or a clinical/financial fact. Old offer and follow-up evidence links remain historical.
 
 ## Native patient mini-program (B1.5.1)
 - The user requires a native WeChat course client and later a teacher-only cloud demonstration. `clients/wechat` and `/api/mini/v1/` are the narrow assigned-patient channel; they reuse existing commands, PatientAccess, session/CSRF and workspace signatures. No alternate booking inventory or automatic phone/OpenID binding.
 - Login explicitly activates only authorized PATIENT, even for a multi-role person. Business confirmation still rechecks authorization and resources under existing locks. Session cookies/passwords stay out of client persistent storage and logs.
-- Preserve all39 migrations and actual ER relations. Source/transport/HTTP tests and real backend Page-handler runs do not establish WeChat-tool compilation, device operation, upload or cloud acceptance. Keep those readiness fields separate.
+- Preserve all 39 migrations and actual ER relations. Source/transport/HTTP tests and real backend Page-handler runs do not establish WeChat-tool compilation, device operation, upload or cloud acceptance. Keep those readiness fields separate.
 - Local loopback packages are for the developer-tool simulator. Experience packages require a registered AppID and verified HTTPS request domain with domain checks enabled. No AppSecret in the client; cloud hosting and platform inputs are still pending.
 
 ## Native waitlist and service centre (B1.5.3)

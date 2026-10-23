@@ -1,0 +1,23 @@
+# Commercial V2 inspected baseline
+
+Date: 2026-10-22. Inspected local source: `c750e7ebabc6bfa90769570a8468972ae7b94b14`. This audit describes files and retained records; it does not rerun historical tests or certify the running application.
+
+| Area | Inspected source or record | Observation | V2 consequence |
+|---|---|---|---|
+| Staff entry | `templates/registration/login.html` | Course-project introduction and synthetic-data notice are hard-coded into the normal login | Product/environment design and professional identity replace academic framing in customer routes |
+| Staff workspace | `templates/base.html` | Sidebar labels the application as a course/synthetic demonstration | Environment indicator and product identity must be configurable and tied to the correct deployment/data boundary |
+| Patient entry/workspace | `templates/portal/login.html`, `templates/portal/base.html` | Distributed credentials, course wording and synthetic/no-actual-payment footer | Verified patient onboarding and accurate production capability/status presentation |
+| Developer checklist | `templates/entry/index.html`, `adc_core/entry_catalog.py`, login/shell links | Six-route personal acceptance checklist is linked from normal user pages | Move acceptance tooling into a separately authorized internal path; normal entry serves actual patient/staff tasks |
+| Clinical model | `care/models.py` | `VisitRecordVersion` has free-text `clinical_note`, allergy/header snapshots and treatment charge lines; `Invoice` points to a current record version | Design structured dental encounters/documents, plans, signatures, orders and prescription/fulfilment models without rewriting historical billing sources |
+| Financial documents | `templates/care/invoice.html` | Correctly distinguishes business settlement, revenue version and receipt/tax-invoice status; includes a hard-coded course disclaimer | Preserve financially accurate status and snapshots; make test provenance appropriate to the actual document/environment |
+| Professional authority | `workspaces/rules.py`, `AGENTS.md` | Seven current roles; directory qualifications explicitly do not prove professional authorization | Add reviewed nursing/pharmacy/records authority and professional credential/scope evidence; no automatic permission expansion |
+| Production configuration | `config/production_contract.py`, `config/settings/production.py` | Candidate stage/host/runtime-owner separation, secure cookies/HTTPS and 1 h session age exist | Retain controls; add complete release evidence, session governance, MFA/recovery and deployment lifecycle rather than treating configuration as qualification |
+| Existing business foundations | `scheduling`, `coordination`, `finance`, `care`, `workspaces`, associated AGENTS rules | Shared locked commands, explicit confirmations, scope, immutable money/history and independent review are existing design foundations | Retain and extend domain boundaries; verify new clinical/financial integration invariants |
+| Historical full regression | `docs/evidence_b153/application_ci.json` | Records1,052 rule and 1,402 PostgreSQL/HTTP/concurrency checks for application `72b613e`; stored CI success | Evidence applies to that version and workload, not unimplemented clinical V2 |
+| Prior Mac delivery | `docs/evidence_b153/delivery.json` | Records preserved original data/configuration and local delivery; WeChat runtime/device/cloud remain NOT_RUN | Retained historical baseline; new rollout, real data and real external systems need their own acceptance |
+| Latest local entry increment | `docs/evidence_b16/validation.json` | 1,060 source checks recorded; 5 authored HTTP tests unexecuted locally, CI upload blocked, Mac update not run | Commercial plan must not imply latest source was deployed or its HTTP/database changes passed |
+| Capacity baseline | `docs/evidence_b14/capacity.json` | Five-clinic/twenty-account synthetic workload, 30 min, 9,000 HTTP requests at 5 rps, retained scope | Define a new clinical/user/data/interface workload before claiming commercial capacity |
+
+The source scan covered the active care, portal, account, configuration, template and native-client areas for clinical/professional concepts and user-visible academic wording. An absent item in this audit is a gap in the reviewed implementation evidence, not proof that no historical design text mentions it.
+
+User-confirmed V2 decisions: independent deployment per dental chain; complete clinical replacement including electronic records and prescriptions. Mainland outpatient use and 5–20 branches remain planning assumptions to validate with the first customer.

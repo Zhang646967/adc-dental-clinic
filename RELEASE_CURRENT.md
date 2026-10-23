@@ -1,3 +1,18 @@
+# Commercial V2 product program 2026-10-22
+
+The user selected independent deployment per dental chain and full clinical
+replacement, including electronic records and prescriptions. The
+[master plan](docs/COMMERCIAL_V2_MASTER_PLAN.md),
+[inspected baseline](docs/COMMERCIAL_V2_BASELINE.md) and
+[acceptance backlog](docs/COMMERCIAL_V2_BACKLOG.json) now govern development.
+Customer experience, professional authority, structured dental care, signatures,
+prescribing/fulfilment, traceability, financial integration and supported
+production operation are explicit release requirements.
+
+This increment changes planning/instructions only. Application behavior,
+migrations and the running Mac are unchanged. The preceding local entry
+increment and its unexecuted/deployment limits remain recorded below.
+
 # B1.6 系统入口与本人核验 2026-10-22
 
 加入公开只读入口、同源业务导航、六条带预期和异常的跨岗位路线、岗位筛选及仅在本页保留的人工核对记录。便携入口替换旧Windows说明，复用相同目录连接本机系统。未新增迁移或业务权限。
