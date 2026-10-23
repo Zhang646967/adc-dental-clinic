@@ -5,7 +5,7 @@ from portal.reschedule_forms import PreviewForm, ConfirmForm
 
 class CandidateForm(forms.Form):
     clinic = forms.IntegerField(min_value=1)
-    service = forms.IntegerField(min_value=1, required=False)
+    service = forms.IntegerField(min_value=1)
     dentist = forms.IntegerField(min_value=1, required=False)
     day = forms.DateField()
 
@@ -13,7 +13,15 @@ class CandidateForm(forms.Form):
 class BookingPreviewForm(forms.Form):
     slot = forms.IntegerField(min_value=1)
     start = forms.DateTimeField()
-    service = forms.IntegerField(min_value=1, required=False)
+    service = forms.IntegerField(min_value=1)
+    patient_request = forms.CharField(max_length=500, required=False, strip=True)
+
+    def clean_patient_request(self):
+        from scheduling.service_content import patient_request
+        try:
+            return patient_request(self.cleaned_data['patient_request'])
+        except ValueError as exc:
+            raise forms.ValidationError(str(exc)) from exc
 
 
 class ConfirmationForm(forms.Form):
@@ -33,7 +41,7 @@ class PageForm(forms.Form):
 
 class WaitJoinForm(forms.Form):
     clinic = forms.IntegerField(min_value=1)
-    service = forms.IntegerField(min_value=1, required=False)
+    service = forms.IntegerField(min_value=1)
     dentist = forms.IntegerField(min_value=1, required=False)
     earliest = forms.DateTimeField()
     latest = forms.DateTimeField()

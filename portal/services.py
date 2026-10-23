@@ -108,7 +108,7 @@ def _read_token(token, user):
 
 @business_errors
 @transaction.atomic
-def confirm_booking(*, actor, token, patient_request=''):
+def confirm_booking(*, actor, token, patient_request='', require_published_service=False):
     require_writable(actor)
     access = patient_access(actor, lock=True)
     data = _read_token(token, actor)
@@ -132,7 +132,8 @@ def confirm_booking(*, actor, token, patient_request=''):
     else:end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
     visit = create_visit_locked(actor=actor, patient=patient, slot=slot, start=start, end=end,
                        chief_complaint=reason or "患者端预约；具体需求由接诊人员确认。",
-                       service_id=data.get("service"),resource_snapshot=data.get("resources"))
+                       service_id=data.get("service"),resource_snapshot=data.get("resources"),
+                       require_published_service=require_published_service)
     BookingReceipt.objects.create(nonce=data["nonce"], access=access, visit=visit)
     emit(actor, "PORTAL_BOOKING_CONFIRMED", visit, visit=visit, summary={"source":"patient_portal"})
     return visit

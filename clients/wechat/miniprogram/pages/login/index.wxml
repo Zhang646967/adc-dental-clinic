@@ -2,12 +2,12 @@
   <view class="brand">ADC DENTAL CARE</view><view class="title">把就诊安排好</view>
   <view class="subtitle">查询合适时段，预约与改期都在这里。</view>
   <view class="card">
-    <view class="time">课程患者登录</view>
-    <label class="label" for="username">账号</label><input id="username" class="input" value="{{username}}" maxlength="150" placeholder="请输入分配的患者账号" data-field="username" bindinput="field" aria-label="课程患者账号" />
+    <view class="time">患者登录</view>
+    <label class="label" for="username">账号</label><input id="username" class="input" value="{{username}}" maxlength="150" placeholder="请输入患者账号" data-field="username" bindinput="field" aria-label="患者账号" />
     <label class="label" for="password">密码</label><input id="password" class="input" value="{{password}}" password maxlength="128" data-field="password" bindinput="field" confirm-type="go" bindconfirm="login" aria-label="密码" />
     <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
     <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="login">登录并查看预约</button>
-    <view class="muted">课程使用合成资料。账号由教师或管理员分配，不使用手机号自动匹配患者。</view>
+    <view class="muted">首次使用或无法登录时，请联系门店前台核验账号。</view>
   </view>
-  <navigator class="link" url="/pages/help/index">试用说明与人工协助</navigator>
+  <navigator class="link" url="/pages/help/index">登录与就诊协助</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

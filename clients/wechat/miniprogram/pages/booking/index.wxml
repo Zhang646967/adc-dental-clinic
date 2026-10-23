@@ -1,14 +1,17 @@
 <view class="page"><view class="brand">{{source?'调整一次安排':'选择就诊安排'}}</view><view class="title">{{source?'预约改期':'预约就诊'}}</view>
   <view wx:if="{{source}}" class="card"><view class="pill">原预约 #{{source.id}}</view><view>{{source.clinic}} · {{source.dentist}}</view><view>{{source.startLabel}} 至 {{source.endLabel}}</view><view class="muted">成功确认前保留原约；仅可在本店调整同一服务。</view></view>
-  <label class="label">诊所</label><picker class="picker" range="{{clinics}}" range-key="name" value="{{clinicIndex}}" bindchange="pickClinic" disabled="{{!!source}}">{{clinics[clinicIndex].name || '暂无可选诊所'}}</picker>
-  <label class="label">预约服务</label><picker class="picker" range="{{services}}" range-key="name" value="{{serviceIndex}}" bindchange="pickService" disabled="{{!!source}}">{{services[serviceIndex].name || '请联系前台配置服务'}} · {{services[serviceIndex].duration || '—'}}分钟</picker>
-  <label class="label">就诊日期 北京时间</label><picker class="picker" mode="date" value="{{day}}" start="{{firstDay}}" end="{{lastDay}}" bindchange="pickDay">{{day}}</picker>
-  <label class="label">医师偏好</label><picker class="picker" range="{{doctors}}" range-key="name" value="{{doctorIndex}}" bindchange="pickDoctor">{{doctors[doctorIndex].name}}</picker>
+  <label class="label">诊所</label><picker class="picker" range="{{clinics}}" range-key="name" value="{{clinicIndex}}" bindchange="pickClinic" disabled="{{!!source || busy}}">{{clinics[clinicIndex].name || '暂无可选诊所'}}</picker>
+  <label class="label">预约服务</label><picker class="picker" range="{{services}}" range-key="name" value="{{serviceIndex}}" bindchange="pickService" disabled="{{!!source || busy}}">{{services[serviceIndex].name || '暂无已发布服务'}} · {{services[serviceIndex].duration || '—'}}分钟</picker>
+  <view wx:if="{{!source && selectedService}}" class="card"><view>{{selectedService.summary}}</view><view class="fee">{{selectedService.fee_label}}</view><view class="prose">{{selectedService.fee_note}}</view><navigator class="link" url="/pages/service/index?id={{selectedService.id}}">核对服务内容与到诊准备</navigator></view>
+  <label class="label">就诊日期 北京时间</label><picker class="picker" mode="date" value="{{day}}" start="{{firstDay}}" end="{{lastDay}}" bindchange="pickDay" disabled="{{busy}}">{{day}}</picker>
+  <label class="label">医师偏好</label><picker class="picker" range="{{doctors}}" range-key="name" value="{{doctorIndex}}" bindchange="pickDoctor" disabled="{{busy}}">{{doctors[doctorIndex].name}}</picker>
   <view wx:if="{{source}}"><label class="label" for="reason">改期原因</label><textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="改期原因" /></view>
+  <view wx:if="{{!source}}"><label class="label" for="patientRequest">本次希望解决什么问题？（选填）</label><textarea id="patientRequest" value="{{patientRequest}}" maxlength="500" bindinput="patientRequest" placeholder="可简要说明就诊需求，请勿填写证件号或无关隐私" aria-label="本次就诊需求，选填" /><view class="muted">将保存到本次预约，供接诊人员了解；具体诊疗由面诊确认。</view></view>
   <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="search">查询可用时段</button>
   <view class="muted">椅位和必要设备由系统统一核对。服务时长用于排程，实际治疗与费用由接诊后确认。</view>
   <view wx:if="{{note}}" class="notice">{{note}}</view>
   <view wx:for="{{rows}}" wx:key="id" class="card"><view class="time">{{item.startLabel}}</view><view>至 {{item.endLabel}} · {{item.dentist}}</view><button class="secondary" disabled="{{busy}}" data-index="{{index}}" bindtap="choose">选择并核对</button></view>
-  <view wx:if="{{searched && !rows.length}}" class="card empty">这天没有可用组合。可以换日期或医师，或登记候补；原有预约继续保留。<button class="secondary" bindtap="waitlist">沿用服务偏好登记候补</button></view>
+  <view wx:if="{{searched && !rows.length}}" class="card empty">这天没有可用组合。可以换日期或医师，或登记候补；原有预约继续保留。<button wx:if="{{!source}}" class="secondary" bindtap="waitlist">沿用服务偏好登记候补</button></view>
+  <navigator wx:if="{{!source}}" class="link" url="/pages/services/index">返回查看服务</navigator>
   <navigator class="link" url="/pages/help/index">联系前台协调候补或其他安排</navigator>
 </view>

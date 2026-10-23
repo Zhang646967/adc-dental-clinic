@@ -7,6 +7,7 @@ urlpatterns = [
     path('login/', api.sign_in, name='mini_login'),
     path('logout/', api.sign_out, name='mini_logout'),
     path('catalogue/', api.catalogue, name='mini_catalogue'),
+    path('services/<int:pk>/', api.service_detail, name='mini_service'),
     path('overview/', api.overview, name='mini_overview'),
     path('waitlist/', wait.listing, name='mini_waitlist'),
     path('waitlist/join/preview/', wait.join_preview, name='mini_wait_join_preview'),

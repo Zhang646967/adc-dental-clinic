@@ -1,4 +1,4 @@
-"""Native WeChat course channel. Shared business commands own every booking effect.
+"""Native WeChat patient channel. Shared commands own every booking effect.
 
 Standard Django sessions, CSRF and signed workspace contexts are retained. This
 is assigned-account login, not WeChat identity verification or phone registration.
@@ -18,13 +18,16 @@ from django.views.decorators.debug import sensitive_post_parameters
 from accounts.models import UserAccount
 from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
+from adc_core.snapshots import reporting_snapshot
 from portal.models import PatientAccess
 from portal.policies import patient_access
 from portal import mini_forms as forms, services, rescheduling
+from portal.service_catalogue import public_profiles, public_profile, require_self_service
+from portal.service_projection import service_data
 from registry.models import Clinic
 from scheduling.models import AvailabilitySlot, Visit
-from scheduling.resource_models import BookingService, ResourcePolicy
-from scheduling.resources import current_plan, service_for
+from scheduling.resource_models import ResourcePolicy
+from scheduling.resources import current_plan
 from workspaces.activation import begin_login_workspace, apply_role
 from workspaces.context import ensure_context, token_for, valid_context, attach
 
@@ -52,7 +55,7 @@ def endpoint(methods=('GET',), *, public=False):
             try:
                 if not public:
                     if not request.user.is_authenticated:
-                        return result(request, status=401, code='LOGIN_REQUIRED', message='请先登录课程患者账号。')
+                        return result(request, status=401, code='LOGIN_REQUIRED', message='请先登录患者账号。')
                     patient_access(request.user)
                 return view(request, *args, **kwargs)
             except PermissionDenied:
@@ -73,6 +76,7 @@ def validated(form):
 
 def session_data(request):
     data = dict(authenticated=False, csrf_token=get_token(request), read_only=settings.ADC_READ_ONLY,
+        environment_label=settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
         business_timezone='Asia/Shanghai', today=timezone.localdate().isoformat(),
         last_day=(timezone.localdate()+timedelta(days=14)).isoformat())
     if request.user.is_authenticated:
@@ -125,7 +129,8 @@ def visit_data(visit):
         service=(plan.snapshot.get('service', {}).get('name') or plan.service.name) if plan else '常规预约',
         service_id=plan.service_id if plan else None, predecessor=visit.replaces_visit_id, successor=successor,
         can_change=visit.status == 'SCHEDULED' and visit.scheduled_start > timezone.now(),
-        address=visit.clinic.postal_address, phone=visit.clinic.phone)
+        address=visit.clinic.postal_address, phone=visit.clinic.phone,
+        patient_request=visit.chief_complaint)
 
 
 def option_data(row):
@@ -138,15 +143,15 @@ def option_data(row):
 @endpoint()
 def catalogue(request):
     clinics = list(Clinic.objects.filter(is_active=True).values('id', 'name', 'postal_address', 'phone'))
-    enabled = ResourcePolicy.objects.filter(state='ENABLED').values('clinic_id')
-    services_qs = BookingService.objects.filter(is_active=True, department__is_active=True,
-        department__clinic_id__in=enabled, department__clinic__is_active=True).prefetch_related('dentists')
-    data = []
-    for service in services_qs.order_by('department__clinic_id', 'pk'):
-        data.append(dict(id=service.pk, name=service.name, clinic=service.department.clinic_id,
-            department=service.department.name, duration=service.duration_minutes,
-            dentists=list(service.dentists.filter(is_active=True).values('id', 'name'))))
-    return result(request, dict(clinics=clinics, services=data, resource_clinics=list(enabled)))
+    offerings = [service_data(p) for p in public_profiles()]
+    return result(request, dict(clinics=clinics, offerings=offerings,
+        services=[s for s in offerings if s['self_booking']],
+        resource_clinics=list(ResourcePolicy.objects.filter(state='ENABLED').values_list('clinic_id', flat=True))))
+
+
+@endpoint()
+def service_detail(request, pk):
+    return result(request, service_data(public_profile(pk)))
 
 
 @endpoint()
@@ -161,6 +166,7 @@ def overview(request):
 @endpoint()
 def candidates(request):
     d = validated(forms.CandidateForm(request.GET))
+    require_self_service(d['service'], clinic_id=d['clinic'])
     rows = services.public_options(request.user, d['clinic'], d['day'], d['service'], d['dentist'])
     return result(request, dict(rows=[option_data(r) for r in rows], observed_at=timezone.now().isoformat(),
         note='候选不占位；确认时重新核对。时间均为北京时间。'))
@@ -181,24 +187,45 @@ def visits(request):
 
 @endpoint()
 def detail(request, pk):
-    return result(request, visit_data(rescheduling.owned_visit(request.user, pk)))
+    visit = rescheduling.owned_visit(request.user, pk)
+    data = visit_data(visit)
+    plan = current_plan(visit)
+    # Own historical service, deliberately absent from the general catalogue.
+    if plan:
+        dentists = plan.service.dentists.filter(is_active=True)
+    else:
+        from registry.models import Dentist
+        dentists = Dentist.objects.filter(is_active=True, pk__in=AvailabilitySlot.objects.filter(
+            clinic_id=visit.clinic_id, is_active=True, ends_at__gt=timezone.now()).values('dentist_id'))
+    data['reschedule_service'] = dict(id=data['service_id'], name=data['service'], clinic=visit.clinic_id,
+        duration=plan.service.duration_minutes if plan else int((visit.scheduled_end-visit.scheduled_start).total_seconds()/60),
+        dentists=list(dentists.values('id', 'name')))
+    return result(request, data)
 
 
+@sensitive_post_parameters('patient_request')
 @endpoint(('POST',))
 def book_preview(request):
     d = validated(forms.BookingPreviewForm(request.POST))
-    slot, end, token = services.preview_booking(user=request.user, slot_id=d['slot'], start=d['start'], service_id=d['service'])
-    wrapped = proposal(request.user, BOOK, ('PATIENT',), dict(token=token))
-    label = service_for(slot.clinic_id, d['service']).name if d['service'] else '常规预约'
-    return result(request, dict(proposal_token=wrapped, clinic=slot.clinic.name, dentist=slot.dentist.name,
-        start=d['start'].isoformat(), end=end.isoformat(), service=label))
+    with reporting_snapshot():
+        profile = require_self_service(d['service'])
+        slot, end, token = services.preview_booking(user=request.user, slot_id=d['slot'], start=d['start'], service_id=d['service'])
+        if profile.service.department.clinic_id != slot.clinic_id:
+            raise RuleError('服务与所选诊所不一致，请重新选择。')
+        offering = service_data(profile)
+        wrapped = proposal(request.user, BOOK, ('PATIENT',), dict(token=token, patient_request=d['patient_request']))
+        return result(request, dict(proposal_token=wrapped, clinic=slot.clinic.name, dentist=slot.dentist.name,
+            start=d['start'].isoformat(), end=end.isoformat(), service=offering['name'],
+            fee_label=offering['fee_label'], fee_note=offering['fee_note'],
+            preparation=offering['preparation'], patient_request=d['patient_request']))
 
 
 @endpoint(('POST',))
 def book_confirm(request):
     d = validated(forms.ConfirmationForm(request.POST))
     p = read_proposal(request.user, BOOK, ('PATIENT',), d['proposal_token'])
-    visit = services.confirm_booking(actor=request.user, token=p['data']['token'])
+    visit = services.confirm_booking(actor=request.user, token=p['data']['token'],
+        patient_request=p['data'].get('patient_request', ''), require_published_service=True)
     return result(request, visit_data(visit))
 
 

@@ -10,7 +10,8 @@ from care.models import Invoice, AuditEvent
 from finance.cash_models import CashEntry
 from portal.models import PatientAccess, BookingReceipt
 from scheduling.models import Visit
-from scheduling.resource_models import ResourceBinding, ResourceClaim
+from scheduling.resource_models import ResourceBinding, ResourceClaim, ServicePresentation
+from scheduling.service_content import draft_from_guide
 from tests.test_reception_resources import ResourceFixture
 from workspaces.context import SESSION_KEY
 from workspaces.models import WorkspaceContext
@@ -19,6 +20,8 @@ from workspaces.models import WorkspaceContext
 class MiniProgramTests(ResourceFixture, TransactionTestCase):
     def setUp(self):
         self.resources()
+        self.profile = ServicePresentation.objects.create(service=self.service,
+            **dict(draft_from_guide('CHECKUP'), title='本店初诊评估', is_published=True))
         self.password = 'Synthetic-mini-course-2026'
         self.user = UserAccount.objects.create_user(username='mini_patient', password=self.password)
         self.other = UserAccount.objects.create_user(username='mini_other', password=self.password)

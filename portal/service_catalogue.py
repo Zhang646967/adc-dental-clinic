@@ -1,5 +1,6 @@
 """Read projections of explicitly published clinic services. Never reserves."""
 from django.db.models import Prefetch
+from adc_core.rules import RuleError
 from registry.models import Dentist
 from scheduling.resource_models import BookingService, ResourcePolicy, ServicePresentation
 from scheduling.service_content import presentation_values, validate_presentation
@@ -31,3 +32,25 @@ def public_profiles(*, category=None, clinic_id=None):
 def public_services():
     return BookingService.objects.filter(pk__in=[p.service_id for p in public_profiles() if p.category!='CHILDREN']).select_related(
         'department__clinic', 'patient_presentation')
+
+
+def public_profile(service_id):
+    profile = published_profiles().get(service_id=service_id)
+    if not complete(profile):
+        raise ServicePresentation.DoesNotExist
+    return profile
+
+
+def require_self_service(service_id, *, clinic_id=None):
+    """New patient requests only; retained visits/offers use their own commands."""
+    if not service_id:
+        raise RuleError('请先选择已发布的预约服务。')
+    try:
+        profile = public_profile(service_id)
+    except ServicePresentation.DoesNotExist as exc:
+        raise RuleError('该服务暂不可在线预约，请重新查看服务或联系前台。') from exc
+    if clinic_id is not None and profile.service.department.clinic_id != clinic_id:
+        raise RuleError('服务与所选诊所不一致，请重新选择。')
+    if profile.category == 'CHILDREN':
+        raise RuleError('儿童就诊需由前台核验监护人与就诊人，请联系本店前台。')
+    return profile

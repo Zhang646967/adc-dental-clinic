@@ -1,43 +1,81 @@
-# ADC 患者微信小程序
+# ADC native patient client / 患者微信小程序
 
-本地导入 → 课程账号 → 查询与确认 → 网站共用数据 → 微信体验版另验收。
+Published service → scope and fee terms → exact service and time → explicit
+confirmation → own appointment and waitlist progress.
 
-这是原生小程序，使用 WXML、WXSS 和 JavaScript，不是网页套壳。课程患者可以登录、选择诊所／服务／日期／医师、预约、查看当前及历史安排、普通及邀约改期、取消、候补登记与退出、邀约接受及拒绝。椅位及设备由服务端统一安排；改期前身与后继可互查。无合适时段时可带入服务偏好登记候补；前台在网站发布后，两端查询同一邀约。接受须明确选择新增预约或替换指定原约。
+This native WXML/WXSS/JavaScript client shares the website's patient authorization,
+resource inventory and booking commands. The C0.2 source adds service discovery,
+service detail, selected-service continuation and a signed optional visit request.
+It includes appointment/history, same-service rescheduling, cancellation, waitlist
+registration/withdrawal and explicit offer acceptance/decline. It does not create
+clinical assessments, payments or a WeChat identity/phone binding.
 
-## 教师本地试用
+## Matched backend and content
 
-1. 启动项目网站，确认 `http://127.0.0.1:18000/health/` 可访问。
-2. 从[微信官方下载页](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)安装微信开发者工具，导入本目录。项目默认 `touristappid`；按工具提示选择测试号／游客模式。工具本身的登录要求以实际版本为准。
-3. 本地设置使用“不校验合法域名、TLS版本及HTTPS证书”，只在开发者工具模拟器连接本机 HTTP 服务。本设置不作为体验版部署方式。
-4. 使用私下分配的课程患者账号和密码登录。测试先查询有已发布排班的日期；没有时段时由前台发布出诊，并由主管完成资源配置。
-5. 演示“预约→查看→改期→原新互查→取消→历史”，也可演示“候补登记→网站前台发布→邀约新增／替换→拒绝或退出”。在网站核对同一记录。取消后的时段可重新被选择，预约不会产生治疗或收费。
+Use the client with the matching C0.2 backend after its protected migration and
+runtime gates. The current port-18000 installation has not been updated by this
+source work. The earlier server's raw service catalogue does not implement the
+new published-offerings contract; pairing versions is not an accepted deployment.
 
-仓库没有附带密码。现有本机实例的账号文件保存在 `.rc/private/demo-credentials.txt`，仅在本机查看。数据库、网站及小程序均只使用课程合成资料。
+Before patients can book, a current-clinic manager must configure the actual
+service/resources, complete its patient description and explicitly publish it
+through **患者服务内容**. Templates remain drafts. No service, price or clinical
+capability is invented by the client. Active but unpublished services cannot
+start new native bookings or waitlist requests. Child services require front-desk
+verification. Retained own appointments/offers use their existing domain rules.
 
-**手机的127.0.0.1是手机自身。** 默认地址仅供开发者工具在这台电脑使用，不能直接用于手机扫码。真机及体验版要使用已验证的后端地址。
+## Local developer-tool import
 
-可生成独立导入包，保留源目录配置：
+1. Verify the identified matched backend and `/health/` in the isolated/protected
+   workflow; do not point verification at an existing real-data database.
+2. Import this directory in WeChat developer tools. The source uses `touristappid`
+   and local loopback configuration for simulator development only.
+3. Local domain-check relaxation is for the simulator, not an experience release.
+   `127.0.0.1` on a phone refers to that phone, not the Mac.
+4. Use a separately assigned synthetic patient account. No password is included
+   in the repository or package. Existing local private credentials stay local;
+   they must not become customer credentials.
+5. Check **了解服务并预约** → offering details/fees/preparation → booking/request →
+   confirmation → own appointment. Also check child services, stale descriptions,
+   failed networking, fee changes, waitlist and existing-appointment rescheduling.
+
+Prepare a separate import directory without changing source configuration:
 
 ```sh
 python scripts/prepare_wechat.py --output /tmp/adc-mini-local --api-base http://127.0.0.1:18000
 ```
 
-## 后续微信体验版
+The command prepares files only. It does not update that backend or establish
+simulator/device acceptance.
 
-需要注册小程序、取得 AppID、给开发者授权，并把教师加入体验成员。前端仅用 AppID，不需要 AppSecret；当前采用课程账号登录，不调用微信身份或手机号接口。
+## Experience release inputs
 
-云端后端需要固定 HTTPS 请求域名、有效证书及微信后台接受的服务器域名。微信官方网络文档要求域名经过 ICP 备案，因此不能直接假定免费 DuckDNS 子域名适用。优先核查学校可提供的已有备案域名。纯网页教师演示可单独准备免费子域名，微信平台接入另行完成。
+A registered AppID, authorized developer, accepted HTTPS backend/request domain,
+platform configuration and experience members are required. AppSecret must never
+be placed in the client. Account activation/recovery and real-data initialization
+remain separate commercial requirements; assigned-account login is retained.
 
 ```sh
 python scripts/prepare_wechat.py --mode experience --appid wx0123456789abcdef --api-base https://YOUR-APPROVED-HOST --output /tmp/adc-mini-experience
 ```
 
-上例 AppID 和域名必须替换为实际值。生成器强制开启域名校验，但不会代替微信后台授权、备案检查、代码上传、体验成员配置或真机验证。未注册和未取得服务器期间不宣称微信已上线。
+Replace the example AppID/domain with the actual permitted values. The generator
+keeps domain checks on for this mode, but does not upload, configure the platform
+or verify a device. Current platform setup must be checked when that release is
+actually undertaken.
 
-## 验证范围
+## Actual verification scope
 
-`node scripts/verify_wechat.cjs`检查原生源文件、事件绑定、北京时间、会话传输及已知不兼容选择器；Django真实PostgreSQL测试检查API、CSRF、权限和资源竞争。设置 `ADC_WECHAT_COMPILER_DIR` 为官方开发工具中的 `wcc-exec` 目录，可以同时运行官方WXML／WXSS语法编译。九页模板和样式已通过该官方离线编译，修复了一处通配选择器兼容问题。
+`node scripts/verify_wechat.cjs` runs source/event-binding/timezone/transport
+checks and `verify_native_services.cjs`: 23 actual Page-handler scenarios with a
+mocked API boundary. This does not execute Django, PostgreSQL or the WeChat bridge.
+The 25 C0.2 API/transaction cases are authored for the real PostgreSQL gate and
+have not run in this environment. Full current results and limitations are in
+[the C0.2 release record](../../docs/C02_NATIVE_SERVICE_RELEASE.md).
 
-客户端与真实后端联调证据另见[本阶段记录](../../docs/evidence_b15/README.md)。离线语法编译不等同于开发者工具界面预览、手机实际运行或体验版扫码验收。
-
-官方依据：[网络与域名](https://developers.weixin.qq.com/miniprogram/dev/framework/ability/network.html)、[成员与版本发布](https://developers.weixin.qq.com/miniprogram/dev/framework/quickstart/release.html)。
+There are now 11 pages. Earlier nine-page official offline compiler/HTTP evidence
+is historical and does not cover this version. Current official WXML/WXSS
+compilation, IDE/device execution, matching backend installation and experience
+acceptance remain unexecuted. If current official compiler binaries are available,
+set `ADC_WECHAT_COMPILER_DIR` for the verifier; syntax success alone is still not
+runtime acceptance.

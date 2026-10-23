@@ -6,6 +6,7 @@ from django.utils import timezone
 from accounts.policies import require_writable
 from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
+from adc_core.snapshots import reporting_snapshot
 from care.audit import emit
 from care.models import AuditEvent
 from coordination import services
@@ -15,6 +16,8 @@ from coordination.windows import validate_wait_window, WindowError
 from portal import mini_forms as forms
 from portal.mini_api import endpoint, result, validated, visit_data
 from portal.policies import patient_access
+from portal.service_catalogue import require_self_service
+from portal.service_projection import service_data
 from registry.models import Clinic, Dentist
 from scheduling.models import Visit
 from scheduling.resource_models import ResourcePlan
@@ -58,6 +61,7 @@ def listing(request):
 
 
 def join_values(actor, d):
+    require_self_service(d['service'], clinic_id=d['clinic'])
     Clinic.objects.get(pk=d['clinic'], is_active=True)
     resource_policy = policy(d['clinic'])
     if d['service'] and resource_policy is None:
@@ -80,17 +84,21 @@ def join_values(actor, d):
 @endpoint(('POST',))
 def join_preview(request):
     d = validated(forms.WaitJoinForm(request.POST))
-    service = join_values(request.user, d)
-    qs = owned(request.user)
-    if qs.filter(state__in=('WAITING', 'OFFERED')).exists():
-        raise RuleError('你已有有效候补，请先查看或退出原记录。')
-    data = dict(clinic=d['clinic'], service=d['service'], dentist=d['dentist'],
-        earliest=d['earliest'].isoformat(), latest=d['latest'].isoformat(),
-        last_entry=qs.order_by('-pk').values_list('pk', flat=True).first(),
-        duration=service.duration_minutes if service else 30)
-    return result(request, dict(clinic=Clinic.objects.get(pk=d['clinic']).name,
-        service=service.name if service else '常规预约', dentist=Dentist.objects.get(pk=d['dentist']).name if d['dentist'] else '不限医师',
-        start=data['earliest'], end=data['latest'], proposal_token=proposal(request.user, JOIN, ('PATIENT',), data)))
+    with reporting_snapshot():
+        service = join_values(request.user, d)
+        offering = service_data(require_self_service(d['service'], clinic_id=d['clinic']))
+        qs = owned(request.user)
+        if qs.filter(state__in=('WAITING', 'OFFERED')).exists():
+            raise RuleError('你已有有效候补，请先查看或退出原记录。')
+        data = dict(clinic=d['clinic'], service=d['service'], dentist=d['dentist'],
+            earliest=d['earliest'].isoformat(), latest=d['latest'].isoformat(),
+            last_entry=qs.order_by('-pk').values_list('pk', flat=True).first(),
+            duration=service.duration_minutes if service else 30,
+            publication_revision=policy(d['clinic']).revision)
+        return result(request, dict(clinic=offering['clinic_name'], service=offering['name'],
+            fee_label=offering['fee_label'], fee_note=offering['fee_note'], preparation=offering['preparation'],
+            dentist=Dentist.objects.get(pk=d['dentist']).name if d['dentist'] else '不限医师',
+            start=data['earliest'], end=data['latest'], proposal_token=proposal(request.user, JOIN, ('PATIENT',), data)))
 
 
 @transaction.atomic
@@ -107,6 +115,13 @@ def register(actor, token):
     if prior:
         return owned(actor).get(pk=prior.subject_key)
     d = p['data']
+    # Match manager publication's physical-lock protocol. Replays above remain
+    # readable after withdrawal; a new registration uses the current publication.
+    from scheduling.resources import lock_physical
+    lock_physical(d['clinic'])
+    current_policy = policy(d['clinic'])
+    if not current_policy or d.get('publication_revision') != current_policy.revision:
+        raise RuleError('服务说明或接诊配置已变化，请重新核对候补偏好。')
     if owned(actor).order_by('-pk').values_list('pk', flat=True).first() != d['last_entry']:
         raise RuleError('候补记录已经变化，请先查看办理结果，再重新登记。')
     values = dict(d, earliest=datetime.fromisoformat(d['earliest']), latest=datetime.fromisoformat(d['latest']))

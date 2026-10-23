@@ -1,0 +1,11 @@
+<view class="page">
+  <view class="service-hero"><view class="brand">ADC DENTAL CARE · 就诊服务</view><view class="title">先了解服务，再安排就诊</view><view class="hero-note">看看本次可以讨论什么、包含哪些内容，以及到诊前需要准备什么。</view></view>
+  <label class="label" for="keyword">搜索服务或就诊需求</label><input id="keyword" class="input" value="{{keyword}}" maxlength="100" bindinput="keyword" placeholder="输入服务名称或你关心的问题" aria-label="搜索服务或就诊需求" />
+  <label class="label">服务分类</label><picker class="picker" range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="pickCategory">{{categories[categoryIndex].name}}</picker>
+  <label class="label">就诊门店</label><picker class="picker" range="{{clinics}}" range-key="name" value="{{clinicIndex}}" bindchange="pickClinic">{{clinics[clinicIndex].name}}</picker>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><view wx:if="{{busy}}" class="notice">正在查看本店服务…</view>
+  <view wx:if="{{!busy && !error}}" class="section-heading"><view class="section-title">可了解的服务</view><view class="muted">{{rows.length}} 项</view></view>
+  <view wx:for="{{rows}}" wx:key="id" class="card"><view class="pill">{{item.category_label}}</view><view class="section-title">{{item.name}}</view><view>{{item.summary}}</view><view class="line muted">{{item.clinic_name}} · 预约时长 {{item.duration}} 分钟</view><view class="fee">{{item.fee_label}}</view><view wx:if="{{!item.self_booking}}" class="muted">请先联系前台核验就诊人及陪同要求</view><button class="secondary" data-id="{{item.id}}" bindtap="open">了解内容与就诊安排 →</button></view>
+  <view wx:if="{{!busy && !error && !rows.length}}" class="card"><view class="section-title">暂未找到匹配的服务</view><view>可调整分类、门店或搜索词。门店尚未发布服务时，请联系前台了解接诊安排。</view></view>
+  <button class="secondary" bindtap="load" disabled="{{busy}}">刷新服务</button><navigator class="link" url="/pages/help/index">需要帮助选择？联系前台</navigator><navigator class="link" open-type="reLaunch" url="/pages/home/index">查看我的就诊安排</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+</view>

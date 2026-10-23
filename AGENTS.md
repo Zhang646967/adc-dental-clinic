@@ -148,3 +148,22 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
 - Native registration uses the existing patient lock and immutable audit receipt for operation replay; a withdrawn result is returned as current history and never revived. No new table or migration.
 - Native offer/withdraw confirmations recheck request revisions under the coordination module's existing locks; shared rescheduling owns unique successors and receipts. Preserve retained service labels from resource snapshots.
 - Page handlers plus real HTTP/Chrome and offline compilation do not establish WeChat runtime or cloud acceptance.
+
+## Native service journey (C0.2 source candidate)
+- `docs/C02_NATIVE_SERVICE_PLAN.md` records the plan and release boundary;
+  `docs/evidence_c02/verification.json` records execution separately.
+- Native discovery/detail reuse complete explicitly published operational profiles.
+  New candidate, booking and waitlist requests require a published non-child service.
+  No raw active-service exposure or invented generic fallback in new-booking UI.
+- Native confirmation passes an internal publication guard to the shared booking
+  effect; it runs after physical locks and before Visit/claim writes. Ordinary
+  receipt replay returns current history before that gate. Do not turn the flag
+  into an HTTP option or apply marketing publication to retained offers/reschedules.
+- Waitlist confirmation follows patient then physical locks and rechecks the
+  signed publication revision/current profile; successful receipt replay precedes
+  those new-request checks. Withdrawal/republication cannot revive a stale preview.
+- Patient request text is signed in preview, never taken from raw confirmation,
+  never logged, and shown only in existing authorized visit projections. Own-visit
+  rescheduling projects its retained service separately from public discovery.
+- All 40 current migrations are unchanged. Source/page-handler checks are not
+  PostgreSQL, official compilation, device or installed-release acceptance.

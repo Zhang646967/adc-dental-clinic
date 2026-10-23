@@ -1,0 +1,15 @@
+<view class="page">
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><view wx:if="{{busy}}" class="notice">正在核对服务内容…</view>
+  <block wx:if="{{service}}">
+    <view class="service-hero"><view class="brand">{{service.category_label}}</view><view class="title">{{service.name}}</view><view class="hero-note">{{service.summary}}</view></view>
+    <view class="card"><view class="section-title">适合哪些需求</view><view class="prose">{{service.suitable_for}}</view><view class="section-title">本次就诊包含</view><view class="prose">{{service.visit_content}}</view><view class="section-title">需要另行确认的内容</view><view class="prose">{{service.limitations}}</view></view>
+    <view class="card"><view class="section-title">费用说明</view><view class="fee">{{service.fee_label}}</view><view class="prose">{{service.fee_note}}</view><view class="muted line">服务说明中的金额不代表已经收费，另行安排的项目请与接诊团队确认。</view></view>
+    <view class="card"><view class="section-title">到诊准备</view><view class="prose">{{service.preparation}}</view></view>
+    <view class="card"><view class="section-title">{{service.clinic_name}}</view><view>{{service.address}}</view><view class="line">前台电话 {{service.phone || '请通过门店已公布的联系方式咨询'}}</view><view class="muted">{{service.department}} · 预约时长 {{service.duration}} 分钟</view><view class="label">本服务可选医师</view><view wx:for="{{service.dentists}}" wx:key="id" class="line">{{item.name}}</view></view>
+    <view wx:if="{{!service.self_booking}}" class="notice">儿童就诊请先联系本店前台，核验监护人与就诊人及陪同要求。</view>
+    <view wx:if="{{readOnly}}" class="notice">当前环境仅供查看，暂不办理预约。</view>
+    <button wx:if="{{service.self_booking}}" class="primary" disabled="{{readOnly || busy}}" bindtap="book">选择本服务的就诊时间 →</button>
+    <navigator class="link" url="/pages/help/index">联系前台协助</navigator>
+  </block>
+  <button class="secondary" bindtap="load" disabled="{{busy}}">重新核对服务</button><navigator class="link" url="/pages/services/index">返回服务目录</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+</view>

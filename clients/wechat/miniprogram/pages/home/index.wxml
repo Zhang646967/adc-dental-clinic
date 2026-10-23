@@ -1,6 +1,6 @@
 <view class="page">
-  <view class="service-hero"><view class="brand">ADC DENTAL CARE · 患者服务</view><view class="title">{{patient || '欢迎'}}， 就诊安排在这里</view><view class="hero-note">预约有结果，候补有进展。时间均为北京时间。</view><button class="hero-button" bindtap="book" disabled="{{readOnly}}">预约一次就诊 →</button></view>
-  <view wx:if="{{readOnly}}" class="notice">当前演示仅供查看，暂不办理预约变更。</view>
+  <view class="service-hero"><view class="brand">ADC DENTAL CARE · 患者服务</view><view class="title">{{patient || '欢迎'}}， 就诊安排在这里</view><view class="hero-note">预约有结果，候补有进展。时间均为北京时间。</view><button class="hero-button" bindtap="book">了解服务并预约 →</button></view>
+  <view wx:if="{{readOnly}}" class="notice">当前环境仅供查看，暂不办理预约变更。</view>
   <view wx:if="{{overview.offer_count}}" class="attention"><view class="label">有 {{overview.offer_count}} 条邀约待你确认</view><view>时段为限时保留，请先查看截止时间，再决定是否接受。</view><navigator class="link" url="/pages/waitlist/index">立即查看邀约 →</navigator></view>
   <view class="quick-grid"><navigator class="quick-item" url="/pages/waitlist/index"><view class="stat">{{overview.waiting_count || 0}}</view><view>我的候补 →</view></navigator><navigator class="quick-item" url="/pages/help/index"><view class="stat">协助</view><view>联系前台 →</view></navigator></view>
   <view wx:if="{{overview.next_visit}}" class="card next-card"><view class="section-label">{{overview.next_visit.status==='CHECKED_IN'?'正在就诊':'下一次就诊'}}</view><view class="time">{{overview.next_visit.startLabel}}</view><view>{{overview.next_visit.clinic}} · {{overview.next_visit.dentist}}</view><view class="muted">{{overview.next_visit.service}} · {{overview.next_visit.status_label}}</view><button class="secondary" data-id="{{overview.next_visit.id}}" bindtap="open">查看安排与到诊提示</button></view>
@@ -16,5 +16,5 @@
   <view wx:if="{{!busy && !rows.length && !error}}" class="card empty"><view class="section-title">这里还没有预约</view><view>先查看服务与时段；没有合适时间，也可以登记候补等待前台协调。</view><navigator class="link" url="/pages/waitjoin/index">登记候补偏好 →</navigator></view>
   <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view>
   <button class="secondary" bindtap="load" disabled="{{busy}}">刷新办理结果</button>
-  <button bindtap="logout">退出账号</button><view class="page-footnote">课程试用 · 合成资料 · 无在线诊断或实际付款</view>
+  <button bindtap="logout">退出账号</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

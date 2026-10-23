@@ -22,7 +22,7 @@ def _slot_ids_for_visit(visit_id):
 # Internal public command used by authorized staff/portal coordinators.
 # PRE: active transaction, authorized actor/patient, and slot row already locked.
 # This helper is not an HTTP endpoint and does not grant access by itself.
-def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="", special_needs="", replaces=None, honor_offer_id=None, service_id=None, resource_snapshot=None):
+def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="", special_needs="", replaces=None, honor_offer_id=None, service_id=None, resource_snapshot=None, require_published_service=False):
     if not connection.in_atomic_block:
         raise RuntimeError('create_visit_locked requires a transaction and the source-slot lock')
     from scheduling.intake_rules import require_new_admission, validate_reserved_offer, IntakeError
@@ -67,6 +67,11 @@ def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="",
     else:
         bundle = choose_bundle(slot=slot, start=start, end=end, service_id=service_id,
             expected=resource_snapshot, locked=True)
+    if require_published_service:
+        # Native new-booking policy, after shared physical locks and before writes.
+        # Existing reschedules, held offers and receipt replays keep their contracts.
+        from portal.service_catalogue import require_self_service
+        require_self_service(service_id, clinic_id=slot.clinic_id)
     v = Visit.objects.create(patient=patient, dentist_id=slot.dentist_id, clinic_id=slot.clinic_id,
                              availability_slot=slot, scheduled_start=start, scheduled_end=end,
                              chief_complaint=chief_complaint, special_needs=special_needs, replaces_visit=replaces)

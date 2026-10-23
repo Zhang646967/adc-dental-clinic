@@ -3,7 +3,7 @@ const {showError} = require('../../utils/format');
 Page({
   data: {username: '', password: '', busy: false, error: ''},
   async onLoad() {
-    try { if ((await api.bootstrap()).authenticated) wx.reLaunch({url:'/pages/home/index'}); }
+    try { const session=await api.bootstrap();this.setData({environmentLabel:session.environment_label||''});if(session.authenticated)wx.reLaunch({url:'/pages/home/index'}); }
     catch (e) { showError(this, e); }
   },
   field(e) { this.setData({[e.currentTarget.dataset.field]: e.detail.value}); },
