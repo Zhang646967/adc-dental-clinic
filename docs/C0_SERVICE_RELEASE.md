@@ -1,5 +1,7 @@
 # C0 patient services: implementation and release record
 
+Historical source-slice record. Subsequent executed local acceptance and protected installation are documented in [C0.3](C03_RELEASE_ACCEPTANCE.md); the original limits below retain their original date.
+
 Patient need → understandable service → clinic/team and fee terms → available time → explicit booking.
 
 Record date: 2026-10-22, America/Los_Angeles. Source implementation continues from

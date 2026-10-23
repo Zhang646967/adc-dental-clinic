@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "samples": [
+    {
+      "unix": 1792756290.2622201,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756300.9265192,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756311.5936158,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756322.224629,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756332.850611,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756343.504732,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756354.13638,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756364.8065128,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756375.477481,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792756386.1115909,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    }
+  ],
+  "elapsed_seconds": 95.85,
+  "scope": "Brief post-update and test-cleanup observation; not a 24-hour acceptance"
+}

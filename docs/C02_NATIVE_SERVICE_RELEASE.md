@@ -1,5 +1,7 @@
 # C0.2 native service journey — source candidate
 
+Historical source-slice record. Subsequent executed local acceptance and protected installation are documented in [C0.3](C03_RELEASE_ACCEPTANCE.md); the original limits below retain their original date.
+
 Published offering → understood scope and fees → selected service → explicit
 confirmation → own appointment and front-desk follow-through.
 

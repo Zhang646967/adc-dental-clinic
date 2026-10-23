@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "scope": "encrypted C0.3 rehearsal data restored into an independent empty database using all40 current migrations (39 original unchanged); all row and schema fingerprints compared",
+  "application_commit": "3b78cc5f430f18411bf50e4314f287b2c95666a0",
+  "runtime_equivalence": "candidate.json",
+  "database": "PostgreSQL 17",
+  "method": "PG17_JSONB_SHA256_V1",
+  "tables": 70,
+  "rows": 29875,
+  "facts_sha256": "ed9246295c262bcd2f39a6190856562f9e22a13841a8fac0c18c377845f5181b",
+  "restore_seconds_after_empty_database_ready": 3.689,
+  "total_seconds": 5.468,
+  "encrypted_dump_sha256": "0c3a17f851349f1aa120ee9c44a0092494706ef7e25ee9e94cebb16bd03f394d",
+  "original_bytes_evidence_and_history_included": true,
+  "new_table_rows": {
+    "adc_service_presentation": 5,
+    "adc_portal_booking_receipt": 32,
+    "adc_visit": 10562,
+    "adc_wait_offer": 0,
+    "adc_resource_plan": 62,
+    "adc_resource_claim": 62,
+    "adc_cancellation_followup": 0,
+    "adc_wait_request": 0,
+    "adc_audit_event": 4172
+  },
+  "original_runtime_untouched": true,
+  "trigger_definitions_and_enabled_states_compared": 42
+}

@@ -23,7 +23,7 @@
       "id": "C0",
       "title": "Product and environment foundation",
       "status": "PLANNED",
-      "progress_note": "SERVICE-01 and SERVICE-02 source implemented; full C0 requirements and execution/release acceptance remain incomplete."
+      "progress_note": "SERVICE-01/02 locally accepted and installed in synthetic instance; broader C0 and commercial clinical qualification remain incomplete."
     },
     {
       "id": "C1",
@@ -94,7 +94,7 @@
       "id": "SERVICE-01",
       "batch": "C0",
       "title": "Patient service discovery, content publication and booking continuation",
-      "status": "IMPLEMENTED",
+      "status": "RELEASED",
       "dependencies": [],
       "owner_roles_to_assign": [
         "clinic service owner",
@@ -122,13 +122,15 @@
         "postgresql": "not executed",
         "browser": "not executed for this source",
         "deployment": "not deployed"
-      }
+      },
+      "release_scope": "2026-10-23 local synthetic installation only; C0.3 execution record; not cloud/WeChat runtime/commercial clinical qualification",
+      "execution_evidence": "docs/evidence_c03/README.md"
     },
     {
       "id": "SERVICE-02",
       "batch": "C0",
       "title": "Native service discovery and publication-consistent patient booking",
-      "status": "IMPLEMENTED",
+      "status": "RELEASED",
       "dependencies": [
         "SERVICE-01"
       ],
@@ -163,7 +165,9 @@
         "official_compiler": "not executed for this 11-page source",
         "native_runtime": "not executed",
         "deployment": "not deployed"
-      }
+      },
+      "release_scope": "2026-10-23 local synthetic installation only; C0.3 execution record; not cloud/WeChat runtime/commercial clinical qualification",
+      "execution_evidence": "docs/evidence_c03/README.md"
     },
     {
       "id": "ENV-01",

@@ -24,14 +24,12 @@ The requirements structure follows the uploaded requirements/design notes: obser
 
 ## Customer experience and onboarding
 
-The [C0 service-centre implementation](C0_SERVICE_RELEASE.md) now provides patient needs, clinic-published service content, fee terms and service-first booking continuation. Manager readiness and draft preview are implemented. Source checks have run; PostgreSQL, browser acceptance and installation remain pending. This is implementation progress, not a commercial release or completed clinical scope contract.
+The [C0 service-centre implementation](C0_SERVICE_RELEASE.md) now provides patient needs, clinic-published service content, fee terms and service-first booking continuation. Manager readiness and draft preview are implemented. Initial source checks were followed by C0.3 local PostgreSQL/browser/recovery acceptance and protected synthetic installation. These results do not establish commercial clinical qualification or a completed clinical scope contract.
 
 The [C0.2 native service journey](C02_NATIVE_SERVICE_RELEASE.md) brings those
 published descriptions, fee terms and selected-service booking into the native
 patient channel, closes its raw-draft exposure, and preserves own historical
-rescheduling. Its source/rule/Page-handler checks have run; actual PostgreSQL,
-official eleven-page compilation, device and installation acceptance remain
-pending. Neither C0 slice is an installed commercial release.
+rescheduling. Its initial source/rule/Page-handler checks were followed by [C0.3 local acceptance](C03_RELEASE_ACCEPTANCE.md): actual PostgreSQL, exact-image website/native-handler journeys, official eleven-page offline compilation, protected restore/upgrade and local synthetic installation. Device/experience, cloud and professional clinical qualification remain pending. Neither C0 slice is an installed commercial clinical release.
 
 The staff front door opens into that person's work: today's schedule, waiting patients, unsigned records, orders awaiting action, exceptions and responsible colleagues. The patient front door offers clinic/service selection, appointments, treatment progress, approved documents, balances and a contact path. An owner or platform evaluator is not the default persona for either interface.
 

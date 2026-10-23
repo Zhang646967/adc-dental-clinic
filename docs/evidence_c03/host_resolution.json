@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "application_commit": "3b78cc5f430f18411bf50e4314f287b2c95666a0",
+  "incident_id": "fc5129f0daaa4fdab5cb8712325321d8",
+  "cause": "Failure detail was not retained; independent fresh samples did not reproduce it. No source-code fix claimed.",
+  "failure_observed_at": {
+    "mono": 661994.442618166,
+    "utc": 1792755937.0311759
+  },
+  "recovery_verified_at": {
+    "utc": 1792756289.491584,
+    "mono": 662346.900937583
+  },
+  "independent_docker_samples": [
+    {
+      "seconds": 0.123,
+      "services": 5,
+      "events": 0,
+      "all_ready": true
+    },
+    {
+      "seconds": 0.088,
+      "services": 5,
+      "events": 0,
+      "all_ready": true
+    },
+    {
+      "seconds": 0.089,
+      "services": 5,
+      "events": 0,
+      "all_ready": true
+    }
+  ],
+  "retained_incidents": 1,
+  "closed_with_actions": [
+    "inspect_dependencies",
+    "verify_health",
+    "accept_observation_gap"
+  ],
+  "old_history_preserved": true,
+  "application_services_restarted": false,
+  "state_reset": false,
+  "current_host_state": "HEALTHY",
+  "follow_up": "Failure category/stage diagnostics and sustained observation remain pending; no root-cause source fix is claimed."
+}

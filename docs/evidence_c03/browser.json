@@ -194,5 +194,8 @@
   "browser": "156.0.8078.47",
   "scope": "Actual Chrome (including no-JS forms) and native Page handlers through HTTP adapter to isolated PostgreSQL; not WeChat runtime/device validation",
   "writes": "Synthetic isolated instance only",
-  "native_visual_runtime": false
+  "native_visual_runtime": false,
+  "application_commit": "3b78cc5f430f18411bf50e4314f287b2c95666a0",
+  "rerun_on_exact_image": true,
+  "independent_database_checks": 64
 }

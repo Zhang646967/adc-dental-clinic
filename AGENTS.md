@@ -167,3 +167,11 @@ Run: unittest checks; Django check; makemigrations --check --dry-run; migrate; m
   rescheduling projects its retained service separately from public discovery.
 - All 40 current migrations are unchanged. Source/page-handler checks are not
   PostgreSQL, official compilation, device or installed-release acceptance.
+
+## C0.3 executed local acceptance and target transition
+
+2026-10-23 follow-up: read `docs/C03_RELEASE_ACCEPTANCE.md` and `docs/evidence_c03/`. Application `3b78cc5f430f18411bf50e4314f287b2c95666a0` passed exact CI (1,095 rules/1,474 PG cases), five-clinic exact-image Chrome/native-handler acceptance, independent same-version encrypted restore, and a protected copy upgrade of the original database. Port18000 has been updated to that image. New local synthetic service descriptions were explicitly created through manager commands, with documented policy revisions and original clinical/money rows preserved. The earlier C0/C0.2 NOT_RUN and port18000-old-baseline statements describe their original dates; they are superseded for these executed scopes by C0.3 records.
+
+Current observed structure is 70 tables/171 SQL FKs/42 triggers after all40 current migration files (39 original bytes preserved). ER, DBML, field/FK catalogues and the fixed-name formal report are current; report has 59 business cases plus SF-01. Public educational guides use `/care/guides/<category>/`; never reintroduce a greedy string route before numeric `/care/<visit>/` clinical handling. The public large-text preference shares `experience.js`; no inline-CSP exception is needed.
+
+The previous inability to verify GitHub target authorization was resolved in this session by authenticated read-only identity/ADMIN verification and an approved normal fast-forward push. Do not generalize that to new destinations or public data. Local synthetic service acceptance does not complete C0/C1 or qualify clinical replacement. WeChat runtime/device/experience, actual cloud, new-version capacity, continuous operation and professional acceptance remain separate; Windows-original recovery is UNRESOLVED. Preserve the archived old observer UNKNOWN history.
