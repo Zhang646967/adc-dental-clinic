@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "date": "2026-10-23",
+  "scope": "isolated PostgreSQL 17 full gate; corrected route and request fixture; UI large-text change subsequently browser-tested",
+  "rules": {
+    "tests": 1095,
+    "seconds": 7.981
+  },
+  "postgresql": {
+    "tests": 1474,
+    "seconds": 229.047
+  },
+  "migration_apply": true,
+  "migration_drift": false,
+  "first_run": {
+    "tests": 1473,
+    "failures": 8,
+    "errors": 1,
+    "cause": "Public guide string converter intercepted numeric clinical workspace; RequestFactory missing middleware user"
+  },
+  "fix": "Move guide to /care/guides/<category>/; assert clinical route resolution; complete anonymous request fixture",
+  "repeated_gate_passed": true
+}

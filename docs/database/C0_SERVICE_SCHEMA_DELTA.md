@@ -2,9 +2,10 @@
 
 Published patient information → existing appointment service → clinic-owned scheduling.
 
-This is an **implemented migration design**, pending actual PostgreSQL execution
-and metadata capture. It is not an observed update of `schema_snapshot.json`.
-That 2026-10-21 snapshot remains the identified 69-table historical baseline.
+This additive migration was executed in the isolated PostgreSQL 17 rehearsal on
+2026-10-23. `schema_snapshot.json`, the catalogue ER, DBML and field/FK catalogues
+now reflect the observed migrated structure. The 69-table result from 2026-10-21
+remains historical evidence, preserved in its original delivery records and Git history.
 
 `scheduling/0006_servicepresentation` adds `adc_service_presentation`:
 
@@ -36,11 +37,10 @@ Changes use the existing `ResourceAction` retained proposal/confirmation workflo
 and clinic `ResourcePolicy.revision`; no separate price, invoice or clinical
 fact is created. An FK is a structural relationship, not an authorization grant.
 
-The expected additive result is 70 SQL tables, 69 ORM tables and 171 SQL foreign
-keys, with the historical 42 SQL triggers unchanged and 40 application migrations.
-These are design-derived counts, **not measurements of a migrated database**.
-Do not amend the observed snapshot or six ER images until the exact migration
-has run and the actual metadata has been captured and compared.
+The observed result is 70 SQL tables, 69 ORM tables, 632 ORM columns and 171 SQL
+foreign keys, with all historical 42 SQL triggers retained and 40 application
+migration files. The sixth-version documentation uses actual metadata; it does
+not infer runtime installation or clinical qualification from these counts.
 
 No business data migration or auto-publication runs. A reverse guard refuses to
 drop the table when descriptions exist; restore/cutover requires the normal

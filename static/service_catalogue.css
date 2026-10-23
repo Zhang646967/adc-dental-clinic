@@ -4,3 +4,12 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.care-guide-card{transition:none}.care-guide-card:hover{transform:none}}
 
 .care-preview-banner{padding:24px;background:#e6eee4;border-left:4px solid var(--care-teal);margin-top:28px}.care-preview-banner p{margin:6px 0 12px}
+.care-display-toggle{background:transparent;border:1px solid var(--care-line);border-radius:6px;color:var(--care-ink);min-height:44px;padding:8px 12px;cursor:pointer}
+.care-footer>div{flex-wrap:wrap;white-space:normal}.care-header nav{flex-wrap:wrap}
+html[data-display="comfortable"]{font-size:20px}
+html[data-display="comfortable"] body.care-site{font-size:1rem}
+html[data-display="comfortable"] .care-guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+html[data-display="comfortable"] .care-guide-card p{min-height:0}
+html[data-display="comfortable"] .care-button{min-height:56px}
+html[data-display="comfortable"] .care-header{flex-wrap:wrap}
+@media(max-width:700px){html[data-display="comfortable"] .care-guide-grid{grid-template-columns:1fr}.care-footer>div{gap:12px}}

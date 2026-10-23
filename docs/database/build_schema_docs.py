@@ -58,11 +58,12 @@ VIEWS = {
             'adc_department_hours': ['id', 'department_id', 'weekday', 'opens_at', 'closes_at'],
             'adc_treatment_room': ['id', 'department_id', 'code'],
             'adc_booking_service': ['id', 'department_id', 'duration_minutes'],
+            'adc_service_presentation': ['id', 'service_id', 'category', 'fee_mode', 'fee_amount', 'is_published'],
             'adc_service_requirement': ['id', 'service_id', 'category', 'quantity'],
             'adc_booking_service_dentists': ['id', 'bookingservice_id', 'dentist_id'],
             'adc_dentist': ['id', 'employee_no'],
         },
-        'note': '服务与医师的多对多关系通过真实连接表实现；科室开放区间与医师出诊区间分别保存，共同参与预约核验。',
+        'note': '服务与医师的多对多关系通过真实连接表实现；科室开放与医师出诊分别保存。每项预约服务至多一份患者说明，未建立、草稿或不完整说明均不公开；费用说明不生成账单。',
     },
     'er_resource_claims': {
         'title': '设备位置与资源占用',
@@ -126,14 +127,14 @@ def build():
                 for t,m in models.items() for f in m['fields'] if f['target_table']}
     actual = {(t, tuple(cols), parent, tuple(targets)) for t,cols,parent,targets in sql_fks}
     assert expected <= actual, 'ORM relation missing from actual SQL constraints'
-    assert len(expected)==169 and len(sql_fks)==170
-    assert len(actual-expected)==1, 'Review additional SQL-only relations before publishing'
+    assert actual-expected == {('adc_invoice', ('current_record_version_id', 'visit_id'),
+                               'adc_visit_record_version', ('id', 'visit_id'))}, 'Review additional SQL-only relations before publishing'
     # Preserve actual SQL semantics, including the invoice composite foreign key.
     dbml = ['// Current database ER source; selected view diagrams are projections.',
-            '// All 68 ORM tables; django_migrations is a framework migration journal.',
+            f'// All {len(models)} ORM tables; django_migrations is a framework migration journal.',
             '// Partial uniqueness, exclusions and triggers are documented separately.', '']
     catalog = ['# 当前数据库字段目录', '',
-        '结构基线日期：'+data['observed_on']+'。本目录列出68张ORM业务／框架表；另1张django_migrations为框架迁移日志。', '',
+        '结构基线日期：'+data['observed_on']+f'。本目录列出{len(models)}张ORM业务／框架表；另1张django_migrations为框架迁移日志。', '',
         '字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。', '',
         'PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯一和排斥约束另列，不用单列UK代替。', '']
     for name,m in models.items():
@@ -177,7 +178,7 @@ def build():
     (ROOT/'schema.dbml').write_text('\n'.join(dbml).rstrip()+'\n')
     (ROOT/'FIELD_CATALOG.md').write_text('\n'.join(catalog).rstrip()+'\n')
     relation_lines=['# 当前数据库外键关系', '',
-        '170条实际SQL外键，其中169条对应ORM单列关系，1条为账单同次就诊复合外键。', '',
+        f'{len(sql_fks)}条实际SQL外键，其中{len(expected)}条对应ORM单列关系，1条为账单同次就诊复合外键。', '',
         '| 子表 | 外键列 | 父表 | 被引用列 |', '|---|---|---|---|']
     relation_lines += ['| '+t+' | '+', '.join(cols)+' | '+parent+' | '+', '.join(targets)+' |' for t,cols,parent,targets in sql_fks]
     (ROOT/'RELATIONSHIPS.md').write_text('\n'.join(relation_lines)+'\n')
@@ -207,7 +208,7 @@ def build():
         parts += ['}']
         (ROOT/(name+'.dot')).write_text('\n'.join(parts)+'\n')
         result[name]=dict(title=view['title'],tables=len(view['tables']),relationships=len(edges),note=view['note'],columns=view['tables'])
-    result['validation'] = dict(passed=True,tables=69,orm_tables=68,columns_types_and_nullability_checked=checked_columns,model_database_type_differences=type_differences,orm_foreign_keys=169,sql_foreign_keys=170,
+    result['validation'] = dict(passed=True,tables=len(data['tables']),orm_tables=len(models),columns_types_and_nullability_checked=checked_columns,model_database_type_differences=type_differences,orm_foreign_keys=len(expected),sql_foreign_keys=len(sql_fks),
         sql_only_composite_foreign_keys=1, snapshot_sha256=hashlib.sha256((ROOT/'schema_snapshot.json').read_bytes()).hexdigest(),
         scope='Structure documentation only; this is not a new business or capacity acceptance result.')
     (ROOT/'view_manifest.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')

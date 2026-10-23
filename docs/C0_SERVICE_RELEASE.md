@@ -74,7 +74,7 @@ say so. No migration populates or renames existing business data.
 | Public | `/`, `/start/` | Customer service homepage |
 | Public | `/services/` | Published service directory and filters |
 | Public | `/services/<service_id>/` | Service contents, preparation, fee terms and booking continuation |
-| Public | `/care/<category>/` | Educational visit guide and actual matching offerings |
+| Public | `/care/guides/<category>/` | Educational visit guide and actual matching offerings |
 | Public | `/clinics/` | Branch address/contact information for published offerings |
 | Patient | `/portal/slots/` | Service-first, own-patient availability query |
 | Manager | `/scheduling/service-content/` | Current-clinic content and publication readiness |

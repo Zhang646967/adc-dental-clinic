@@ -1,3 +1,7 @@
+# C0.3 patient-channel acceptance 2026-10-23
+
+[Executed regression and protected delivery contract](docs/C03_RELEASE_ACCEPTANCE.md) · [Evidence](docs/evidence_c03/README.md). C0/C0.2 now have actual local PostgreSQL and browser evidence. Clinical workspace route shadowing is fixed. Exact-image/CI, restore and installation outcomes are recorded separately; the historical candidate records below keep their original execution limits.
+
 # C0 patient service implementation 2026-10-22
 
 Patient needs → published service scope and fees → clinic/team → available time → explicit booking.

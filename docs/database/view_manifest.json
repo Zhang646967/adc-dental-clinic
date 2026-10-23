@@ -137,9 +137,9 @@
   },
   "er_catalogue": {
     "title": "排班服务与医师适配",
-    "tables": 8,
-    "relationships": 7,
-    "note": "服务与医师的多对多关系通过真实连接表实现；科室开放区间与医师出诊区间分别保存，共同参与预约核验。",
+    "tables": 9,
+    "relationships": 8,
+    "note": "服务与医师的多对多关系通过真实连接表实现；科室开放与医师出诊分别保存。每项预约服务至多一份患者说明，未建立、草稿或不完整说明均不公开；费用说明不生成账单。",
     "columns": {
       "adc_clinic": [
         "id",
@@ -166,6 +166,14 @@
         "id",
         "department_id",
         "duration_minutes"
+      ],
+      "adc_service_presentation": [
+        "id",
+        "service_id",
+        "category",
+        "fee_mode",
+        "fee_amount",
+        "is_published"
       ],
       "adc_service_requirement": [
         "id",
@@ -288,9 +296,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 69,
-    "orm_tables": 68,
-    "columns_types_and_nullability_checked": 618,
+    "tables": 70,
+    "orm_tables": 69,
+    "columns_types_and_nullability_checked": 632,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -299,10 +307,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 169,
-    "sql_foreign_keys": 170,
+    "orm_foreign_keys": 170,
+    "sql_foreign_keys": 171,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "07deab191a2dde5306a3cd7c4a6279a59e65894d6734a9c42d51308d159591f2",
+    "snapshot_sha256": "af7e9cffc8b8813ece2a9b167f4faa30dd5d184124050c9b671637f71b4a5a01",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": 64,
+  "clinics": 5,
+  "financial_invoice_count": 500,
+  "posted_cash_count": 500,
+  "financial_invoice_total": "50000.00",
+  "posted_cash_total": "50000.00",
+  "new_treatment_or_money_effects": 0,
+  "published_services": 5
+}

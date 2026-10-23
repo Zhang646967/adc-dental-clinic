@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_b153",
-  "pdf_pages": 119,
-  "business_use_cases": 58,
+  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_c03",
+  "pdf_pages": 121,
+  "business_use_cases": 59,
   "shared_subfunctions": 1,
-  "complete_specifications": 59,
-  "tables": 77,
+  "complete_specifications": 60,
+  "tables": 78,
   "figures": 35,
   "mind_maps": 6,
   "contents_entries": 54,
@@ -18,37 +18,24 @@
   "all_captions_in_order": true,
   "text_outside_bounds": false,
   "all_fonts_embedded": true,
-  "font_subsets": 23,
+  "font_subsets": 24,
   "media_parts_preserved": 39,
   "original_migrations_preserved": 39,
   "frozen_reports_unchanged": true,
   "private_values_absent": 31,
-  "word_sha256": "acb43d41c9907a2f6898165428d46a02ad587d33926db793a79e4e66c13d0e5d",
-  "pdf_sha256": "03a813951b7e3868106794b67285f836ec64d94856663ba958c6c3b5ab3ce185",
+  "word_sha256": "e1aeec11952be256dd26a8badc56acdf6ffd711de7c42150d28edc4de4a0c6ac",
+  "pdf_sha256": "5886f39ea94f8eb8ed41236b7eede2b09833e2e714b32d860cdd5bc92edc6425",
   "database_er_views": 6,
   "front_desk_scheduling_role_migration": "implemented",
   "visual_review": {
-    "pages": 119,
-    "new_or_changed_bodies_reviewed": 9,
-    "previously_reviewed_body_pixel_matches": 110,
-    "reviewed_pages": [
-      8,
-      22,
-      23,
-      24,
-      44,
-      55,
-      58,
-      59,
-      100
-    ],
-    "final_contents_pages_reviewed": [
-      4,
-      5
-    ],
-    "clipping_or_label_collisions_observed": false,
-    "header_footer_page_numbers_verified": true
+    "pages": 121,
+    "unchanged_body_pixel_matches": 97,
+    "new_or_changed_bodies_reviewed": 24,
+    "all_page_bodies_reviewed_or_pixel_identical": true,
+    "header_footer_page_numbers_verified": true,
+    "clipping_or_overlap_observed": false,
+    "intentional_repeating_table_continuations": true
   },
   "structure_validation": "../database/view_manifest.json",
-  "native_program_platform_validation": "Pending IDE preview, WeChat runtime, device and experience; official offline nine-page syntax and local backend verified separately"
+  "native_program_platform_validation": "Eleven-page official offline syntax and local HTTP adapter passed; WeChat runtime/device/experience remain pending"
 }

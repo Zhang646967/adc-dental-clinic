@@ -24,7 +24,7 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[170条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[171条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [成熟系统学习与差距](MATURE_SYSTEM_STUDY.md)、[后续开发方向](COMMERCIAL_DEVELOPMENT.md)。
@@ -39,7 +39,7 @@
 
 ## 测试与验收
 
-当前[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
+当前[C0.3患者渠道验证与交付](evidence_c03/README.md)；历史[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
 
 | 验证范围 | 实际记录 |
 |---|---|

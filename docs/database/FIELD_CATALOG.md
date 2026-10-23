@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-21。本目录列出68张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-23。本目录列出69张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -1879,6 +1879,42 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_schedule_plan_clinic_id_edac77fb`：`CREATE INDEX adc_schedule_plan_clinic_id_edac77fb ON public.adc_schedule_plan USING btree (clinic_id)`。
 - `adc_schedule_plan_created_by_id_c94552ee`：`CREATE INDEX adc_schedule_plan_created_by_id_c94552ee ON public.adc_schedule_plan USING btree (created_by_id)`。
 - `adc_schedule_plan_pkey`：`CREATE UNIQUE INDEX adc_schedule_plan_pkey ON public.adc_schedule_plan USING btree (id)`。
+
+跨表及历史触发器：
+
+
+## adc_service_presentation
+
+模型：`scheduling.ServicePresentation`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| service_id | bigint | UK / FK | 否 | `adc_booking_service.id` |
+| category | character varying(24) | — | 否 | — |
+| title | character varying(100) | — | 否 | — |
+| summary | character varying(240) | — | 否 | — |
+| suitable_for | text | — | 否 | — |
+| visit_content | text | — | 否 | — |
+| limitations | text | — | 否 | — |
+| preparation | text | — | 否 | — |
+| fee_mode | character varying(12) | — | 否 | — |
+| fee_amount | numeric(12,2) | — | 是 | — |
+| fee_note | text | — | 否 | — |
+| is_published | boolean | — | 否 | — |
+| updated_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_service_presenta_service_id_356fed37_fk_adc_booki`：`FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_service_presentation_pkey`：`PRIMARY KEY (id)`。
+- `adc_service_presentation_service_id_key`：`UNIQUE (service_id)`。
+- `service_presentation_fee_valid`：`CHECK ((((fee_amount IS NULL) AND ((fee_mode)::text = 'ASSESSED'::text)) OR ((fee_amount >= (0)::numeric) AND (fee_amount IS NOT NULL) AND ((fee_mode)::text = ANY ((ARRAY['FIXED'::character varying, 'FROM'::character varying])::text[])))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_service_presentation_pkey`：`CREATE UNIQUE INDEX adc_service_presentation_pkey ON public.adc_service_presentation USING btree (id)`。
+- `adc_service_presentation_service_id_key`：`CREATE UNIQUE INDEX adc_service_presentation_service_id_key ON public.adc_service_presentation USING btree (service_id)`。
 
 跨表及历史触发器：
 

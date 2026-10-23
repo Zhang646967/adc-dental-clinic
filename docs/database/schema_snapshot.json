@@ -6831,6 +6831,197 @@
       "unique_together": []
     },
     {
+      "table": "adc_service_presentation",
+      "model": "scheduling.ServicePresentation",
+      "app": "scheduling",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "service",
+          "column": "service_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_booking_service",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "category",
+          "column": "category",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "title",
+          "column": "title",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "summary",
+          "column": "summary",
+          "type": "CharField",
+          "db_type": "varchar(240)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 240,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "suitable_for",
+          "column": "suitable_for",
+          "type": "TextField",
+          "db_type": "text",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1600,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "visit_content",
+          "column": "visit_content",
+          "type": "TextField",
+          "db_type": "text",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 2400,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "limitations",
+          "column": "limitations",
+          "type": "TextField",
+          "db_type": "text",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1600,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "preparation",
+          "column": "preparation",
+          "type": "TextField",
+          "db_type": "text",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1600,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "fee_mode",
+          "column": "fee_mode",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "fee_amount",
+          "column": "fee_amount",
+          "type": "DecimalField",
+          "db_type": "numeric(12, 2)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "fee_note",
+          "column": "fee_note",
+          "type": "TextField",
+          "db_type": "text",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1600,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "is_published",
+          "column": "is_published",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "updated_at",
+          "column": "updated_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_service_requirement",
       "model": "scheduling.ServiceRequirement",
       "app": "scheduling",
@@ -9022,6 +9213,7 @@
     "adc_resource_policy",
     "adc_role_assignment",
     "adc_schedule_plan",
+    "adc_service_presentation",
     "adc_service_requirement",
     "adc_statement_batch",
     "adc_statement_line",
@@ -11182,6 +11374,30 @@
       "definition": "PRIMARY KEY (id)"
     },
     {
+      "table": "adc_service_presentation",
+      "name": "adc_service_presenta_service_id_356fed37_fk_adc_booki",
+      "kind": "f",
+      "definition": "FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_service_presentation",
+      "name": "adc_service_presentation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_service_presentation",
+      "name": "adc_service_presentation_service_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (service_id)"
+    },
+    {
+      "table": "adc_service_presentation",
+      "name": "service_presentation_fee_valid",
+      "kind": "c",
+      "definition": "CHECK ((((fee_amount IS NULL) AND ((fee_mode)::text = 'ASSESSED'::text)) OR ((fee_amount >= (0)::numeric) AND (fee_amount IS NOT NULL) AND ((fee_mode)::text = ANY ((ARRAY['FIXED'::character varying, 'FROM'::character varying])::text[])))))"
+    },
+    {
       "table": "adc_service_requirement",
       "name": "adc_service_requirem_service_id_8a7429d0_fk_adc_booki",
       "kind": "f",
@@ -13181,6 +13397,16 @@
       "table": "adc_schedule_plan",
       "name": "adc_schedule_plan_pkey",
       "definition": "CREATE UNIQUE INDEX adc_schedule_plan_pkey ON public.adc_schedule_plan USING btree (id)"
+    },
+    {
+      "table": "adc_service_presentation",
+      "name": "adc_service_presentation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_service_presentation_pkey ON public.adc_service_presentation USING btree (id)"
+    },
+    {
+      "table": "adc_service_presentation",
+      "name": "adc_service_presentation_service_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_service_presentation_service_id_key ON public.adc_service_presentation USING btree (service_id)"
     },
     {
       "table": "adc_service_requirement",
@@ -16464,6 +16690,90 @@
       "null": true
     },
     {
+      "table": "adc_service_presentation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "category",
+      "db_type": "character varying(24)",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "title",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "summary",
+      "db_type": "character varying(240)",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "suitable_for",
+      "db_type": "text",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "visit_content",
+      "db_type": "text",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "limitations",
+      "db_type": "text",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "preparation",
+      "db_type": "text",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "fee_mode",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "fee_amount",
+      "db_type": "numeric(12,2)",
+      "null": true
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "fee_note",
+      "db_type": "text",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "is_published",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "updated_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_service_presentation",
+      "column": "service_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_service_requirement",
       "column": "id",
       "db_type": "bigint",
@@ -17592,6 +17902,10 @@
       "name": "0005_scheduling_relations_and_calendar"
     },
     {
+      "app": "scheduling",
+      "name": "0006_servicepresentation"
+    },
+    {
       "app": "sessions",
       "name": "0001_initial"
     },
@@ -17600,7 +17914,7 @@
       "name": "0001_initial"
     }
   ],
-  "application_base_commit": "01fcb1ad24f73d49bf5a2a41940b5689602018ba",
-  "observed_on": "2026-10-21",
-  "scope": "B1.4 isolated working-tree schema metadata; no business rows, credentials or field defaults"
+  "application_base_commit": "67f3bccb7f5fc1521ce46e371ec82d069c56d82b",
+  "observed_on": "2026-10-23",
+  "scope": "C0.3 isolated PostgreSQL migration metadata (C0/C0.2 candidate plus route fix); no business rows, credentials or field defaults"
 }

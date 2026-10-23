@@ -5,6 +5,7 @@
     var large = mode === "comfortable";
     document.documentElement.dataset.display = large ? "comfortable" : "standard";
     document.querySelectorAll(".mode-toggle").forEach(function (button) {
+      button.hidden = false;
       button.textContent = large ? "切回标准模式" : "大字简明模式";
       button.setAttribute("aria-pressed", String(large));
     });

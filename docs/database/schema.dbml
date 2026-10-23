@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 68 ORM tables; django_migrations is a framework migration journal.
+// All 69 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_ai_usage_bucket {
@@ -660,6 +660,23 @@ Table adc_schedule_plan {
   published_at "timestamp with time zone" [null]
 }
 
+Table adc_service_presentation {
+  id "bigint" [pk, not null]
+  service_id "bigint" [unique, not null]
+  category "character varying(24)" [not null]
+  title "character varying(100)" [not null]
+  summary "character varying(240)" [not null]
+  suitable_for "text" [not null]
+  visit_content "text" [not null]
+  limitations "text" [not null]
+  preparation "text" [not null]
+  fee_mode "character varying(12)" [not null]
+  fee_amount "numeric(12,2)" [null]
+  fee_note "text" [not null]
+  is_published "boolean" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
 Table adc_service_requirement {
   id "bigint" [pk, not null]
   service_id "bigint" [not null]
@@ -1030,6 +1047,7 @@ Ref: adc_role_assignment.clinic_id > adc_clinic.id
 Ref: adc_role_assignment.user_id > adc_user.id
 Ref: adc_schedule_plan.clinic_id > adc_clinic.id
 Ref: adc_schedule_plan.created_by_id > adc_user.id
+Ref: adc_service_presentation.service_id - adc_booking_service.id
 Ref: adc_service_requirement.service_id > adc_booking_service.id
 Ref: adc_statement_batch.account_id > adc_payment_account.id
 Ref: adc_statement_batch.created_by_id > adc_user.id

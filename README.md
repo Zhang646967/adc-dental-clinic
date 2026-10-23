@@ -8,9 +8,9 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 Clinical V2 is planned; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
-**C0患者服务更新（源码候选）：** [内容、预约与执行状态](docs/C0_SERVICE_RELEASE.md)说明需求指南、门店发布、草稿预览、多身份续接及14天查询。规则检查通过；数据库、浏览器与原实例更新待执行。
+**C0.3患者服务验证：** [网站／小程序与交付记录](docs/C03_RELEASE_ACCEPTANCE.md) · [执行证据](docs/evidence_c03/README.md)。已完成1,095项规则、1,474项数据库回归及五店187项跨端检查，修复接诊路径冲突，新增公开页面大字模式，ER与正式报告同步。准确版本CI、恢复与原实例更新按各自记录确认。
 
-**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；新`/start/`页面尚待本机更新。
+**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C0.3交付记录为准。
 
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
 
