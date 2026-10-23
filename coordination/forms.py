@@ -10,6 +10,7 @@ class JoinForm(forms.Form):
     patient_no=forms.CharField(label='患者业务编号（前台代登记）',required=False,max_length=40)
     earliest=forms.DateTimeField(label='最早可开始就诊（北京时间）',widget=forms.DateTimeInput(attrs={'type':'datetime-local'}))
     latest=forms.DateTimeField(label='最晚必须结束就诊（北京时间）',widget=forms.DateTimeInput(attrs={'type':'datetime-local'}))
+    patient_authority=forms.CharField(required=False,widget=forms.HiddenInput)
     confirmed=forms.BooleanField(label='已核对以上偏好；候补登记不是正式预约')
     def __init__(self,*args,user,**kwargs):
         super().__init__(*args,**kwargs)
@@ -24,7 +25,12 @@ class JoinForm(forms.Form):
         if getattr(getattr(user,'_adc_workspace',None),'role',None)=='FRONT_DESK':
             self.fields['clinic'].queryset=self.fields['clinic'].queryset.filter(pk__in=clinic_ids(user))
             self.fields['patient_no'].required=True
-        else:self.fields.pop('patient_no')
+        else:
+            self.fields.pop('patient_no')
+            from portal.policies import patient_access,form_authority
+            access=patient_access(user)
+            self.fields['patient_authority'].initial=form_authority(user)
+            if access.delegated:self.fields['clinic'].queryset=self.fields['clinic'].queryset.filter(pk=access.clinic_id)
         self.fields['preferred_dentist'].queryset=Dentist.objects.filter(is_active=True)
         self.fields['service'].queryset=self.BookingService.objects.filter(is_active=True,department__clinic__in=self.fields['clinic'].queryset).select_related('department__clinic')
         self.fields['service'].label_from_instance=lambda s:s.department.clinic.name+' · '+str(s)
@@ -41,4 +47,5 @@ class JoinForm(forms.Form):
         return data
 
 class ConfirmForm(forms.Form):
+    patient_authority=forms.CharField(required=False,widget=forms.HiddenInput)
     confirmed=forms.BooleanField(label='我已核对本次操作及其影响')

@@ -20,7 +20,7 @@ function page(name,options={}){
   const calls=[],navigation=[],state={globalData:{review:null}};
   const wx=Object.fromEntries(['navigateTo','reLaunch','redirectTo'].map(method=>[method,data=>navigation.push({method,...data})]));
   const currentSession={...session,...options.session};
-  const api={bootstrap:async()=>currentSession,sessionInfo:()=>currentSession,request:async(route,method='GET',data)=>{
+  const api={selectSubject:async key=>{calls.push({route:'patients/select/',method:'POST',data:{subject:key}});state.globalData.review=null;},showSubject:p=>p.setData({patientName:currentSession.patient_name||'',patientCapacity:currentSession.acting_capacity||''}),bootstrap:async()=>currentSession,sessionInfo:()=>currentSession,request:async(route,method='GET',data)=>{
     calls.push({route,method,data});
     if(options.request)return options.request(route,method,data);
     if(route==='catalogue/')return options.catalogue||catalogue;
@@ -136,6 +136,21 @@ async function verify(){
   await test('visit refresh removes private cached text if authorization fails',async()=>{
     const {p}=page('visit',{request:async()=>{throw Error('授权已失效');}});p.onLoad({id:'41'});p.setData({visit:{patient_request:'此前的患者需求'}});
     await p.onShow();assert.equal(p.data.visit,null);assert(p.data.error);
+  });
+  await test('subject selector submits exact server choice and clears prior review',async()=>{
+    const {p,calls,navigation,state}=page('patients',{request:async()=>({rows:[{key:'grant:7',name:'患者乙',capacity:'父母',clinic:'门店一',expires:'2026-11-01T01:00:00Z'}]})});
+    await p.onShow();assert.equal(p.data.rows[0].expiresLabel,'2026-11-01 09:00');
+    state.globalData.review={patient:'old'};await p.choose({currentTarget:{dataset:{key:'grant:7'}}});
+    assert.equal(calls.at(-1).data.subject,'grant:7');assert.equal(state.globalData.review,null);assert.equal(navigation.at(-1).url,'/pages/home/index');
+  });
+  await test('stale subject review cannot reach confirmation transport',async()=>{
+    const {p,state,calls}=page('confirm',{session:{subject_key:'grant:2',workspace_token:'new'}});
+    state.globalData.review={subjectKey:'self',workspaceToken:'old',kind:'booking',preview:{}};p.onLoad();
+    p.checked({detail:{value:['yes']}});await p.submit();assert.equal(calls.length,0);assert(p.data.error);
+  });
+  await test('same subject and context permit a refreshed transport signature',async()=>{
+    const {p,state}=page('confirm',{session:{subject_key:'grant:2',workspace_id:'ctx',subject_revision:3,workspace_token:'refreshed'}});
+    state.globalData.review={subjectKey:'grant:2',workspaceKey:'ctx',subjectRevision:3,workspaceToken:'prior',kind:'booking',preview:{}};p.onLoad();assert(p.data.review);assert.equal(p.data.error,'');
   });
   return {passed:true,cases:cases.length,case_names:cases,scope:'actual Page handlers with mocked API; not Django/PostgreSQL, official compilation or WeChat runtime'};
 }

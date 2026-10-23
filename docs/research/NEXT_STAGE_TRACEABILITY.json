@@ -3,8 +3,8 @@
   "plan": "../COMMERCIAL_V2_NEXT_STAGE.md",
   "study": "DENTAL_PRACTICE_STUDY_20261023.md",
   "source_register": "dental_study_sources.json",
-  "status": "PLANNED",
-  "scenarios": "NS-01 through NS-24 in the plan; all NOT_RUN for proposed new functionality",
+  "status": "PARTIALLY_IMPLEMENTED",
+  "scenarios": "NS-01 through NS-24 retain their planned full-program scope. The C1.1 appointment-delegation slice is executed separately; see implementation_slices.",
   "interpretation": "Scenarios are partial evidence slices for the existing full-program requirements; they do not replace C3-C8 professional/target-environment release gates. FIN-01 full acceptance still includes RX-02; the C2 bridge covers non-drug performed events only.",
   "requirements": [
     {
@@ -517,6 +517,15 @@
       ],
       "execution_status": "NOT_RUN",
       "requirement_title": "Clinical safety security usability and commercial capacity qualification"
+    }
+  ],
+  "implementation_slices": [
+    {
+      "release": "C1.1",
+      "scope": "current-clinic relationship verification, appointment-only grants and explicit website/native patient selection",
+      "status": "LOCAL_VERIFIED",
+      "evidence": "../evidence_c11/README.md",
+      "full_program_gates": "Clinical consent, source-aware imports, shared care and professional qualification remain incomplete."
     }
   ]
 }

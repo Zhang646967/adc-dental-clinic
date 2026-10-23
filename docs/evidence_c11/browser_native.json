@@ -1,0 +1,639 @@
+{
+  "checks": [
+    {
+      "name": "delegate-only selection required 1",
+      "passed": true
+    },
+    {
+      "name": "authorized list 1",
+      "passed": true
+    },
+    {
+      "name": "native selected patient 1",
+      "passed": true
+    },
+    {
+      "name": "web selected patient 1",
+      "passed": true
+    },
+    {
+      "name": "patient switch 1 reflow",
+      "passed": true
+    },
+    {
+      "name": "patient switch 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 1",
+      "passed": true
+    },
+    {
+      "name": "review before effect 1",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 8",
+      "passed": true
+    },
+    {
+      "name": "saved native result 9",
+      "passed": true
+    },
+    {
+      "name": "native result visible website 1",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 1",
+      "passed": true
+    },
+    {
+      "name": "review before effect 1",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 13",
+      "passed": true
+    },
+    {
+      "name": "saved native result 14",
+      "passed": true
+    },
+    {
+      "name": "website retains original chain 1",
+      "passed": true
+    },
+    {
+      "name": "appointment 1 reflow",
+      "passed": true
+    },
+    {
+      "name": "appointment 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "delegated wait preview 1",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 19",
+      "passed": true
+    },
+    {
+      "name": "saved native result 20",
+      "passed": true
+    },
+    {
+      "name": "offer issued by front desk 1",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 22",
+      "passed": true
+    },
+    {
+      "name": "saved native result 23",
+      "passed": true
+    },
+    {
+      "name": "offer creates patient appointment 1",
+      "passed": true
+    },
+    {
+      "name": "relationship 1 reflow",
+      "passed": true
+    },
+    {
+      "name": "relationship 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "revocation blocks native access 1",
+      "passed": true
+    },
+    {
+      "name": "revocation removes web appointment 1",
+      "passed": true
+    },
+    {
+      "name": "delegate-only selection required 2",
+      "passed": true
+    },
+    {
+      "name": "authorized list 2",
+      "passed": true
+    },
+    {
+      "name": "native selected patient 2",
+      "passed": true
+    },
+    {
+      "name": "web selected patient 2",
+      "passed": true
+    },
+    {
+      "name": "patient switch 2 reflow",
+      "passed": true
+    },
+    {
+      "name": "patient switch 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 2",
+      "passed": true
+    },
+    {
+      "name": "review before effect 2",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 37",
+      "passed": true
+    },
+    {
+      "name": "saved native result 38",
+      "passed": true
+    },
+    {
+      "name": "native result visible website 2",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 2",
+      "passed": true
+    },
+    {
+      "name": "review before effect 2",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 42",
+      "passed": true
+    },
+    {
+      "name": "saved native result 43",
+      "passed": true
+    },
+    {
+      "name": "website retains original chain 2",
+      "passed": true
+    },
+    {
+      "name": "appointment 2 reflow",
+      "passed": true
+    },
+    {
+      "name": "appointment 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "delegated wait preview 2",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 48",
+      "passed": true
+    },
+    {
+      "name": "saved native result 49",
+      "passed": true
+    },
+    {
+      "name": "offer issued by front desk 2",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 51",
+      "passed": true
+    },
+    {
+      "name": "saved native result 52",
+      "passed": true
+    },
+    {
+      "name": "offer creates patient appointment 2",
+      "passed": true
+    },
+    {
+      "name": "relationship 2 reflow",
+      "passed": true
+    },
+    {
+      "name": "relationship 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "revocation blocks native access 2",
+      "passed": true
+    },
+    {
+      "name": "revocation removes web appointment 2",
+      "passed": true
+    },
+    {
+      "name": "delegate-only selection required 3",
+      "passed": true
+    },
+    {
+      "name": "authorized list 3",
+      "passed": true
+    },
+    {
+      "name": "native selected patient 3",
+      "passed": true
+    },
+    {
+      "name": "web selected patient 3",
+      "passed": true
+    },
+    {
+      "name": "patient switch 3 reflow",
+      "passed": true
+    },
+    {
+      "name": "patient switch 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 3",
+      "passed": true
+    },
+    {
+      "name": "review before effect 3",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 66",
+      "passed": true
+    },
+    {
+      "name": "saved native result 67",
+      "passed": true
+    },
+    {
+      "name": "native result visible website 3",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 3",
+      "passed": true
+    },
+    {
+      "name": "review before effect 3",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 71",
+      "passed": true
+    },
+    {
+      "name": "saved native result 72",
+      "passed": true
+    },
+    {
+      "name": "website retains original chain 3",
+      "passed": true
+    },
+    {
+      "name": "appointment 3 reflow",
+      "passed": true
+    },
+    {
+      "name": "appointment 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "delegated wait preview 3",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 77",
+      "passed": true
+    },
+    {
+      "name": "saved native result 78",
+      "passed": true
+    },
+    {
+      "name": "offer issued by front desk 3",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 80",
+      "passed": true
+    },
+    {
+      "name": "saved native result 81",
+      "passed": true
+    },
+    {
+      "name": "offer creates patient appointment 3",
+      "passed": true
+    },
+    {
+      "name": "relationship 3 reflow",
+      "passed": true
+    },
+    {
+      "name": "relationship 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "revocation blocks native access 3",
+      "passed": true
+    },
+    {
+      "name": "revocation removes web appointment 3",
+      "passed": true
+    },
+    {
+      "name": "delegate-only selection required 4",
+      "passed": true
+    },
+    {
+      "name": "authorized list 4",
+      "passed": true
+    },
+    {
+      "name": "native selected patient 4",
+      "passed": true
+    },
+    {
+      "name": "web selected patient 4",
+      "passed": true
+    },
+    {
+      "name": "patient switch 4 reflow",
+      "passed": true
+    },
+    {
+      "name": "patient switch 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 4",
+      "passed": true
+    },
+    {
+      "name": "review before effect 4",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 95",
+      "passed": true
+    },
+    {
+      "name": "saved native result 96",
+      "passed": true
+    },
+    {
+      "name": "native result visible website 4",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 4",
+      "passed": true
+    },
+    {
+      "name": "review before effect 4",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 100",
+      "passed": true
+    },
+    {
+      "name": "saved native result 101",
+      "passed": true
+    },
+    {
+      "name": "website retains original chain 4",
+      "passed": true
+    },
+    {
+      "name": "appointment 4 reflow",
+      "passed": true
+    },
+    {
+      "name": "appointment 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "delegated wait preview 4",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 106",
+      "passed": true
+    },
+    {
+      "name": "saved native result 107",
+      "passed": true
+    },
+    {
+      "name": "offer issued by front desk 4",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 109",
+      "passed": true
+    },
+    {
+      "name": "saved native result 110",
+      "passed": true
+    },
+    {
+      "name": "offer creates patient appointment 4",
+      "passed": true
+    },
+    {
+      "name": "relationship 4 reflow",
+      "passed": true
+    },
+    {
+      "name": "relationship 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "revocation blocks native access 4",
+      "passed": true
+    },
+    {
+      "name": "revocation removes web appointment 4",
+      "passed": true
+    },
+    {
+      "name": "delegate-only selection required 5",
+      "passed": true
+    },
+    {
+      "name": "authorized list 5",
+      "passed": true
+    },
+    {
+      "name": "native selected patient 5",
+      "passed": true
+    },
+    {
+      "name": "web selected patient 5",
+      "passed": true
+    },
+    {
+      "name": "patient switch 5 reflow",
+      "passed": true
+    },
+    {
+      "name": "patient switch 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 5",
+      "passed": true
+    },
+    {
+      "name": "review before effect 5",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 124",
+      "passed": true
+    },
+    {
+      "name": "saved native result 125",
+      "passed": true
+    },
+    {
+      "name": "native result visible website 5",
+      "passed": true
+    },
+    {
+      "name": "available shared resources 5",
+      "passed": true
+    },
+    {
+      "name": "review before effect 5",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 129",
+      "passed": true
+    },
+    {
+      "name": "saved native result 130",
+      "passed": true
+    },
+    {
+      "name": "website retains original chain 5",
+      "passed": true
+    },
+    {
+      "name": "appointment 5 reflow",
+      "passed": true
+    },
+    {
+      "name": "appointment 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "delegated wait preview 5",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 135",
+      "passed": true
+    },
+    {
+      "name": "saved native result 136",
+      "passed": true
+    },
+    {
+      "name": "offer issued by front desk 5",
+      "passed": true
+    },
+    {
+      "name": "explicit consent 138",
+      "passed": true
+    },
+    {
+      "name": "saved native result 139",
+      "passed": true
+    },
+    {
+      "name": "offer creates patient appointment 5",
+      "passed": true
+    },
+    {
+      "name": "relationship 5 reflow",
+      "passed": true
+    },
+    {
+      "name": "relationship 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "revocation blocks native access 5",
+      "passed": true
+    },
+    {
+      "name": "revocation removes web appointment 5",
+      "passed": true
+    },
+    {
+      "name": "no browser script errors",
+      "passed": true
+    }
+  ],
+  "results": [
+    {
+      "clinic": 1,
+      "original": 10540,
+      "replacement": 10541,
+      "wait": 4,
+      "offer": 3,
+      "addition": 10542,
+      "case": 1
+    },
+    {
+      "clinic": 2,
+      "original": 10543,
+      "replacement": 10544,
+      "wait": 5,
+      "offer": 4,
+      "addition": 10545,
+      "case": 2
+    },
+    {
+      "clinic": 3,
+      "original": 10546,
+      "replacement": 10547,
+      "wait": 6,
+      "offer": 5,
+      "addition": 10548,
+      "case": 3
+    },
+    {
+      "clinic": 4,
+      "original": 10549,
+      "replacement": 10550,
+      "wait": 7,
+      "offer": 6,
+      "addition": 10551,
+      "case": 4
+    },
+    {
+      "clinic": 5,
+      "original": 10552,
+      "replacement": 10553,
+      "wait": 8,
+      "offer": 7,
+      "addition": 10554,
+      "case": 5
+    }
+  ],
+  "page_errors": 0,
+  "scope": "C1.1 real Chrome plus actual native Page handlers over HTTP to isolated PostgreSQL; no WeChat runtime",
+  "browser": "156.0.8078.47",
+  "passed": true
+}

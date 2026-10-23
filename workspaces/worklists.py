@@ -96,15 +96,16 @@ def workspace_worklist(actor):
             return result
         if role == 'PATIENT':
             from portal.policies import patient_access
-            patient_id = patient_access(actor).patient_id
-            offers = WaitOffer.objects.filter(request__patient_id=patient_id, request__state='OFFERED',
+            access = patient_access(actor)
+            patient_id = access.patient_id
+            offers = access.scope(WaitOffer.objects.all(),patient_field='request__patient_id',clinic_field='request__clinic_id').filter(request__state='OFFERED',
                     state='PENDING', expires_at__gt=now).select_related('slot__clinic', 'slot__dentist').order_by('expires_at', 'pk')
             groups.append(_group('offers', '候补邀约待你答复', offers,
                 lambda offer: {'title': f'{offer.slot.clinic.name} · {offer.slot.dentist.name}',
                     'detail': '答复截止时间（北京时间）', 'when': offer.expires_at,
                     'url': reverse('wait_offer', args=[offer.pk]), 'action': '核对时段并答复'},
                 reverse('waitlist'), '邀约尚未形成预约；请在截止前自行决定，确认页会重新核验。'))
-            stale = WaitRequest.objects.filter(patient_id=patient_id).filter(
+            stale = access.scope(WaitRequest.objects.all()).filter(
                 Q(state='WAITING', latest__lte=now) |
                 Q(state='OFFERED', offers__state='PENDING', offers__expires_at__lte=now)).distinct()
             groups.append(_group('wait_review', '候补期限需重新核对', stale.order_by('created_at', 'pk'),
@@ -113,6 +114,7 @@ def workspace_worklist(actor):
                     'url': reverse('waitlist'), 'action': '查看候补记录'}, reverse('waitlist'),
                 '本页不自动退出候补、回收邀约或创建新预约。'))
             bills = Invoice.objects.filter(visit__patient_id=patient_id).select_related('current_record_version').order_by('-first_issued_at', '-pk')
+            if access.delegated:bills=bills.none()
             groups.append(_group('invoices', '本人的结算单', bills,
                 lambda bill: {'title': bill.invoice_no, 'detail': f'当前版本开单金额 ¥{bill.current_record_version.total_amount}',
                     'when': bill.first_issued_at, 'url': reverse('portal_invoice', args=[bill.pk]), 'action': '查看结算单'},

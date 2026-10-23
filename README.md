@@ -1,5 +1,7 @@
 # ADC — Dental Clinic Management
 
+**C1.1 患者关系与预约代办。** 前台受理与核验，网站／小程序选择本人或授权患者，共用预约、改期和候补。[办理说明](docs/C11_PATIENT_RELATIONSHIPS.md) · [验证与交付](docs/evidence_c11/README.md)。
+
 **Commercial V2 direction:** an independently deployed platform for a dental
 chain, covering patient services, operations and full clinical replacement
 including electronic records and prescribing. [Product and release plan](docs/COMMERCIAL_V2_MASTER_PLAN.md)
@@ -24,7 +26,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **课程交付：原生微信小程序与教师云端演示。** [小程序工程与本地导入](clients/wechat/README.md)支持课程患者登录、预约、普通／邀约改期、候补登记、邀约处置、取消及历史，复用网站预约数据。[交付安排](docs/COURSE_TEACHER_DELIVERY.md)区分本地联调、微信体验版与云端验收：小程序账号尚未注册，服务器尚未购买，暂不宣称微信或云端已上线。
 
-**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步70表、171条外键、42项触发器，六幅ER纳入课程报告；前台继续负责日常排班。
+**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步73表、181条外键、43项触发器，七幅ER纳入课程报告；前台继续负责日常排班。
 
 ## 仓库分类
 
@@ -39,7 +41,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告包含59项业务用例及1项共享核验、78张表和35幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
+正式报告包含63项业务用例及1项共享核验、82张表和36幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

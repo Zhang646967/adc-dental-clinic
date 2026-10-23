@@ -2,13 +2,13 @@ const api=require('../../utils/api');
 const {showError}=require('../../utils/format');
 Page({
   data:{service:null,busy:false,error:'',readOnly:false,environmentLabel:''},
-  onLoad(query){this.id=query.id;},
-  async onShow(){await this.load();},
+  onLoad(query){ api.showSubject(this);this.id=query.id;},
+  async onShow(){ api.showSubject(this);await this.load();},
   async load(){
     if(this.data.busy)return;
     this.setData({busy:true,error:'',service:null});
     try{
-      const session=await api.bootstrap();
+      const session=await api.bootstrap();api.showSubject(this);
       if(!session.authenticated){this.setData({busy:false});wx.reLaunch({url:'/pages/login/index'});return;}
       if(!/^[1-9][0-9]{0,17}$/.test(String(this.id)) || !Number.isSafeInteger(Number(this.id)))throw Error('服务链接无效，请返回服务目录。');
       const service=await api.request(`services/${this.id}/`);

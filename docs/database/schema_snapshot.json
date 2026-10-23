@@ -155,6 +155,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_notice_immutable()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION 'notification event history is immutable' USING ERRCODE='23514';\n  END IF;\n  IF (NEW.source_event_id, NEW.task_id, NEW.clinic_id, NEW.task_revision, NEW.action,\n      NEW.event_state, NEW.occurred_at, NEW.recipients)\n    IS DISTINCT FROM\n     (OLD.source_event_id, OLD.task_id, OLD.clinic_id, OLD.task_revision, OLD.action,\n      OLD.event_state, OLD.occurred_at, OLD.recipients) THEN\n    RAISE EXCEPTION 'notification source and targets are immutable' USING ERRCODE='23514';\n  END IF;\n  IF OLD.state IN ('DELIVERED','NO_RECIPIENTS') THEN\n    RAISE EXCEPTION 'completed notification outcome cannot be rewritten' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_patient_relationship_event",
+      "name": "relationship_history",
+      "definition": "CREATE TRIGGER relationship_history BEFORE DELETE OR UPDATE ON public.adc_patient_relationship_event FOR EACH ROW EXECUTE FUNCTION adc_relationship_history_guard()",
+      "function": "adc_relationship_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_relationship_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Patient relationship evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_payment_account",
       "name": "payment_account_history",
       "definition": "CREATE TRIGGER payment_account_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_payment_account FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()",
@@ -4880,6 +4887,423 @@
       "unique_together": []
     },
     {
+      "table": "adc_patient_appointment_grant",
+      "model": "portal.PatientAppointmentGrant",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "relationship",
+          "column": "relationship_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_patient_relationship",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "valid_from",
+          "column": "valid_from",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_until",
+          "column": "valid_until",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "is_active",
+          "column": "is_active",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_by",
+          "column": "created_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_patient_relationship",
+      "model": "portal.PatientRelationship",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "patient",
+          "column": "patient_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_patient",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "related_name",
+          "column": "related_name",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "delegate_user",
+          "column": "delegate_user_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_by",
+          "column": "created_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "model": "portal.PatientRelationshipEvent",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "relationship",
+          "column": "relationship_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_patient_relationship",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prior_state",
+          "column": "prior_state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "resulting_state",
+          "column": "resulting_state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(160)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 160,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_payment_account",
       "model": "finance.PaymentAccount",
       "app": "finance",
@@ -5057,9 +5481,22 @@
           "db_type": "bigint",
           "pk": false,
           "unique": false,
-          "null": false,
+          "null": true,
           "max_length": null,
           "target_table": "adc_patient_access",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "appointment_grant",
+          "column": "appointment_grant_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_patient_appointment_grant",
           "target_column": "id",
           "on_delete": "PROTECT"
         },
@@ -6704,6 +7141,19 @@
         {
           "name": "is_active",
           "column": "is_active",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "can_verify_patient_relationships",
+          "column": "can_verify_patient_relationships",
           "type": "BooleanField",
           "db_type": "boolean",
           "pk": false,
@@ -8880,6 +9330,19 @@
           "on_delete": "PROTECT"
         },
         {
+          "name": "patient_grant",
+          "column": "patient_grant_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_patient_appointment_grant",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
           "name": "revision",
           "column": "revision",
           "type": "PositiveIntegerField",
@@ -9197,6 +9660,9 @@
     "adc_patient",
     "adc_patient_access",
     "adc_patient_allergy",
+    "adc_patient_appointment_grant",
+    "adc_patient_relationship",
+    "adc_patient_relationship_event",
     "adc_payment_account",
     "adc_portal_booking_receipt",
     "adc_qualification",
@@ -10762,6 +11228,114 @@
       "definition": "UNIQUE (patient_id, allergy_id)"
     },
     {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointm_created_by_id_f89c71f9_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointm_relationship_id_8e78bcef_fk_adc_patie",
+      "kind": "f",
+      "definition": "FOREIGN KEY (relationship_id) REFERENCES adc_patient_relationship(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointment_grant_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointment_grant_relationship_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (relationship_id)"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointment_grant_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "appointment_grant_interval",
+      "kind": "c",
+      "definition": "CHECK ((valid_until > valid_from))"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relation_delegate_user_id_3d5b9998_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (delegate_user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_clinic_id_d6a7f7d6_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_created_by_id_5c86f3ee_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_patient_id_4f0407f3_fk_adc_patient_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "relationship_kind_valid",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['PARENT'::character varying, 'GUARDIAN'::character varying, 'DELEGATE'::character varying, 'FAMILY'::character varying, 'CONTACT'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "relationship_state_valid",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'VERIFIED'::character varying, 'SUSPENDED'::character varying, 'REJECTED'::character varying, 'REVOKED'::character varying, 'WITHDRAWN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relation_relationship_id_d583103f_fk_adc_patie",
+      "kind": "f",
+      "definition": "FOREIGN KEY (relationship_id) REFERENCES adc_patient_relationship(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_actor_id_49fee078_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
       "table": "adc_payment_account",
       "name": "adc_payment_account_clinic_id_89887fe7_fk_adc_clinic_id",
       "kind": "f",
@@ -10811,6 +11385,12 @@
     },
     {
       "table": "adc_portal_booking_receipt",
+      "name": "adc_portal_booking_r_appointment_grant_id_9eee0a5c_fk_adc_patie",
+      "kind": "f",
+      "definition": "FOREIGN KEY (appointment_grant_id) REFERENCES adc_patient_appointment_grant(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_portal_booking_receipt",
       "name": "adc_portal_booking_receipt_nonce_key",
       "kind": "u",
       "definition": "UNIQUE (nonce)"
@@ -10832,6 +11412,12 @@
       "name": "adc_portal_booking_receipt_visit_id_key",
       "kind": "u",
       "definition": "UNIQUE (visit_id)"
+    },
+    {
+      "table": "adc_portal_booking_receipt",
+      "name": "booking_receipt_one_authority",
+      "kind": "c",
+      "definition": "CHECK ((((access_id IS NOT NULL) AND (appointment_grant_id IS NULL)) OR ((access_id IS NULL) AND (appointment_grant_id IS NOT NULL))))"
     },
     {
       "table": "adc_qualification",
@@ -11348,6 +11934,12 @@
       "name": "adc_role_assignment_user_id_49685fe0_fk_adc_user_id",
       "kind": "f",
       "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_role_assignment",
+      "name": "identity_reviewer_frontdesk",
+      "kind": "c",
+      "definition": "CHECK (((NOT can_verify_patient_relationships) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))"
     },
     {
       "table": "adc_role_assignment",
@@ -12035,6 +12627,12 @@
     },
     {
       "table": "adc_workspace_context",
+      "name": "adc_workspace_contex_patient_grant_id_d1d100c8_fk_adc_patie",
+      "kind": "f",
+      "definition": "FOREIGN KEY (patient_grant_id) REFERENCES adc_patient_appointment_grant(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_workspace_context",
       "name": "adc_workspace_context_clinic_id_0ce9581c_fk_adc_clinic_id",
       "kind": "f",
       "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
@@ -12062,6 +12660,12 @@
       "name": "workspace_clinic_role",
       "kind": "c",
       "definition": "CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying])::text[]))))"
+    },
+    {
+      "table": "adc_workspace_context",
+      "name": "workspace_patient_subject",
+      "kind": "c",
+      "definition": "CHECK (((patient_grant_id IS NULL) OR ((role)::text = 'PATIENT'::text)))"
     },
     {
       "table": "auth_group",
@@ -12989,6 +13593,71 @@
       "definition": "CREATE UNIQUE INDEX patient_allergy_unique ON public.adc_patient_allergy USING btree (patient_id, allergy_id)"
     },
     {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointment_grant_created_by_id_f89c71f9",
+      "definition": "CREATE INDEX adc_patient_appointment_grant_created_by_id_f89c71f9 ON public.adc_patient_appointment_grant USING btree (created_by_id)"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointment_grant_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_patient_appointment_grant_pkey ON public.adc_patient_appointment_grant USING btree (id)"
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "name": "adc_patient_appointment_grant_relationship_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_patient_appointment_grant_relationship_id_key ON public.adc_patient_appointment_grant USING btree (relationship_id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_clinic_id_d6a7f7d6",
+      "definition": "CREATE INDEX adc_patient_relationship_clinic_id_d6a7f7d6 ON public.adc_patient_relationship USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_created_by_id_5c86f3ee",
+      "definition": "CREATE INDEX adc_patient_relationship_created_by_id_5c86f3ee ON public.adc_patient_relationship USING btree (created_by_id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_delegate_user_id_3d5b9998",
+      "definition": "CREATE INDEX adc_patient_relationship_delegate_user_id_3d5b9998 ON public.adc_patient_relationship USING btree (delegate_user_id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_patient_id_4f0407f3",
+      "definition": "CREATE INDEX adc_patient_relationship_patient_id_4f0407f3 ON public.adc_patient_relationship USING btree (patient_id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "adc_patient_relationship_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_patient_relationship_pkey ON public.adc_patient_relationship USING btree (id)"
+    },
+    {
+      "table": "adc_patient_relationship",
+      "name": "relationship_clinic_queue",
+      "definition": "CREATE INDEX relationship_clinic_queue ON public.adc_patient_relationship USING btree (clinic_id, state, created_at)"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_actor_id_49fee078",
+      "definition": "CREATE INDEX adc_patient_relationship_event_actor_id_49fee078 ON public.adc_patient_relationship_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_patient_relationship_event_operation_id_key ON public.adc_patient_relationship_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_patient_relationship_event_pkey ON public.adc_patient_relationship_event USING btree (id)"
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "name": "adc_patient_relationship_event_relationship_id_d583103f",
+      "definition": "CREATE INDEX adc_patient_relationship_event_relationship_id_d583103f ON public.adc_patient_relationship_event USING btree (relationship_id)"
+    },
+    {
       "table": "adc_payment_account",
       "name": "adc_payment_account_clinic_id_89887fe7",
       "definition": "CREATE INDEX adc_payment_account_clinic_id_89887fe7 ON public.adc_payment_account USING btree (clinic_id)"
@@ -13017,6 +13686,11 @@
       "table": "adc_portal_booking_receipt",
       "name": "adc_portal_booking_receipt_access_id_db4e47dc",
       "definition": "CREATE INDEX adc_portal_booking_receipt_access_id_db4e47dc ON public.adc_portal_booking_receipt USING btree (access_id)"
+    },
+    {
+      "table": "adc_portal_booking_receipt",
+      "name": "adc_portal_booking_receipt_appointment_grant_id_9eee0a5c",
+      "definition": "CREATE INDEX adc_portal_booking_receipt_appointment_grant_id_9eee0a5c ON public.adc_portal_booking_receipt USING btree (appointment_grant_id)"
     },
     {
       "table": "adc_portal_booking_receipt",
@@ -13782,6 +14456,11 @@
       "table": "adc_workspace_context",
       "name": "adc_workspace_context_clinic_id_0ce9581c",
       "definition": "CREATE INDEX adc_workspace_context_clinic_id_0ce9581c ON public.adc_workspace_context USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_workspace_context",
+      "name": "adc_workspace_context_patient_grant_id_d1d100c8",
+      "definition": "CREATE INDEX adc_workspace_context_patient_grant_id_d1d100c8 ON public.adc_workspace_context USING btree (patient_grant_id)"
     },
     {
       "table": "adc_workspace_context",
@@ -15856,6 +16535,186 @@
       "null": false
     },
     {
+      "table": "adc_patient_appointment_grant",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "valid_from",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "valid_until",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "is_active",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_appointment_grant",
+      "column": "relationship_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "related_name",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "kind",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "delegate_user_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_patient_relationship",
+      "column": "patient_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "action",
+      "db_type": "character varying(24)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "prior_state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "resulting_state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "basis",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "reference",
+      "db_type": "character varying(160)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_patient_relationship_event",
+      "column": "relationship_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_payment_account",
       "column": "id",
       "db_type": "bigint",
@@ -15937,13 +16796,19 @@
       "table": "adc_portal_booking_receipt",
       "column": "access_id",
       "db_type": "bigint",
-      "null": false
+      "null": true
     },
     {
       "table": "adc_portal_booking_receipt",
       "column": "visit_id",
       "db_type": "bigint",
       "null": false
+    },
+    {
+      "table": "adc_portal_booking_receipt",
+      "column": "appointment_grant_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_qualification",
@@ -16640,6 +17505,12 @@
       "column": "clinic_id",
       "db_type": "bigint",
       "null": true
+    },
+    {
+      "table": "adc_role_assignment",
+      "column": "can_verify_patient_relationships",
+      "db_type": "boolean",
+      "null": false
     },
     {
       "table": "adc_schedule_plan",
@@ -17578,6 +18449,12 @@
       "null": false
     },
     {
+      "table": "adc_workspace_context",
+      "column": "patient_grant_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "auth_group",
       "column": "id",
       "db_type": "integer",
@@ -17696,6 +18573,10 @@
     {
       "app": "accounts",
       "name": "0001_initial"
+    },
+    {
+      "app": "accounts",
+      "name": "0002_roleassignment_can_verify_patient_relationships_and_more"
     },
     {
       "app": "assistants",
@@ -17866,6 +18747,10 @@
       "name": "0001_initial"
     },
     {
+      "app": "portal",
+      "name": "0002_patientrelationship_patientrelationshipevent_and_more"
+    },
+    {
       "app": "reception",
       "name": "0001_initial"
     },
@@ -17912,9 +18797,12 @@
     {
       "app": "workspaces",
       "name": "0001_initial"
+    },
+    {
+      "app": "workspaces",
+      "name": "0002_workspacecontext_patient_grant_and_more"
     }
   ],
-  "application_base_commit": "67f3bccb7f5fc1521ce46e371ec82d069c56d82b",
   "observed_on": "2026-10-23",
-  "scope": "C0.3 isolated PostgreSQL migration metadata (C0/C0.2 candidate plus route fix); no business rows, credentials or field defaults"
+  "scope": "C1.1 isolated PostgreSQL after all 43 application migrations; structural metadata only, no business rows or credentials"
 }

@@ -22,13 +22,17 @@ STEP=timedelta(minutes=30)
 
 @business_errors
 @transaction.atomic
-def join_waitlist(*,actor,clinic_id,earliest,latest,patient_no=None,dentist_id=None,service_id=None):
+def join_waitlist(*,actor,clinic_id,earliest,latest,patient_no=None,dentist_id=None,service_id=None,authority=None):
     require_writable(actor)
     clinic=Clinic.objects.get(pk=clinic_id,is_active=True)
     ctx=getattr(actor,'_adc_workspace',None)
     if bindings(actor).filter(role='FRONT_DESK',scope_kind='CLINIC',clinic_id=clinic_id).exists():
         lock_clinic_grant(actor,clinic_id);patient=Patient.objects.get(patient_no=patient_no,is_active=True)
-    else:patient=patient_access(actor,lock=True).patient
+    else:
+        access=patient_access(actor,lock=True);access.require_clinic(clinic_id)
+        from portal.policies import check_action_authority
+        check_action_authority(access,authority)
+        patient=access.patient
     from scheduling.resources import policy,service_for
     resource_policy=policy(clinic_id)
     service=service_for(clinic_id,service_id) if resource_policy else None
@@ -52,9 +56,9 @@ def join_waitlist(*,actor,clinic_id,earliest,latest,patient_no=None,dentist_id=N
 
 @business_errors
 @transaction.atomic
-def withdraw(*,actor,entry_id,expected_revision=None):
+def withdraw(*,actor,entry_id,expected_revision=None,authority=None):
     require_writable(actor)
-    entry=WaitRequest.objects.get(pk=entry_id);require_owner_or_front(actor,entry,lock=True)
+    entry=WaitRequest.objects.get(pk=entry_id);require_owner_or_front(actor,entry,lock=True,authority=authority)
     pending=list(WaitOffer.objects.filter(request=entry,state='PENDING'))
     slots=lock_slots([o.slot_id for o in pending])
     lock_resources(patients=[entry.patient_id],dentists=[s.dentist_id for s in slots.values()])
@@ -164,11 +168,11 @@ def publish_plan(*,actor,plan_id):
 
 @business_errors
 @transaction.atomic
-def answer_offer(*,actor,offer_id,accept,expected_revision=None):
+def answer_offer(*,actor,offer_id,accept,expected_revision=None,authority=None):
     require_writable(actor)
     if type(accept) is not bool:raise RuleError('必须明确接受或拒绝。')
     preview=WaitOffer.objects.select_related('request').get(pk=offer_id)
-    require_owner_or_front(actor,preview.request,lock=True)
+    require_owner_or_front(actor,preview.request,lock=True,authority=authority)
     from reception.services import lock_waitlist_case
     reception_case=lock_waitlist_case(preview.request_id)
     s=lock_slots([preview.slot_id])[preview.slot_id]

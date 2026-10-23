@@ -1,3 +1,9 @@
+# C1.1 患者关系与预约代办 2026-10-23
+
+前台关系受理与核验、明确职责和有效期授权、网站与小程序就诊人切换已实现。共用预约、改期、取消和候补，代约不扩大病历、账单或临床同意权限。[业务说明](docs/C11_PATIENT_RELATIONSHIPS.md) · [执行证据](docs/evidence_c11/README.md)。本地完整回归与五店衔接通过；准确CI、恢复及原实例更新按证据文件逐项登记。三份追加迁移保留原40份；真实ER为73表、181条外键、43项触发器，报告新增SU-60—63。
+
+以下历史保留原日期和范围。
+
 # C0.3 patient-channel acceptance 2026-10-23
 
 [Executed regression and protected delivery contract](docs/C03_RELEASE_ACCEPTANCE.md) · [Evidence](docs/evidence_c03/README.md). C0/C0.2 now have actual local PostgreSQL and browser evidence. Clinical workspace route shadowing is fixed. [Exact application CI](docs/evidence_c03/application_ci.json), [restore](docs/evidence_c03/encrypted_restore.json) and [protected installation](docs/evidence_c03/delivery.json) passed. The final documentation commit leaves the tested application code/image unchanged; the historical candidate records below keep their original execution limits.

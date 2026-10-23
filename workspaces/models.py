@@ -8,8 +8,10 @@ class WorkspaceContext(models.Model):
     user = models.ForeignKey('accounts.UserAccount', on_delete=models.CASCADE)
     role = models.CharField(max_length=16, default='', blank=True)
     clinic = models.ForeignKey('registry.Clinic', null=True, blank=True, on_delete=models.PROTECT)
+    patient_grant = models.ForeignKey('portal.PatientAppointmentGrant', null=True, blank=True, on_delete=models.PROTECT)
     revision = models.PositiveIntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = 'adc_workspace_context'
-        constraints = [models.CheckConstraint(condition=Q(clinic__isnull=True) | Q(role__in=['MANAGER','FRONT_DESK']), name='workspace_clinic_role')]
+        constraints = [models.CheckConstraint(condition=Q(clinic__isnull=True) | Q(role__in=['MANAGER','FRONT_DESK']), name='workspace_clinic_role'),
+            models.CheckConstraint(condition=Q(patient_grant__isnull=True) | Q(role='PATIENT'), name='workspace_patient_subject')]

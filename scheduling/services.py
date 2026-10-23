@@ -71,7 +71,7 @@ def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="",
         # Native new-booking policy, after shared physical locks and before writes.
         # Existing reschedules, held offers and receipt replays keep their contracts.
         from portal.service_catalogue import require_self_service
-        require_self_service(service_id, clinic_id=slot.clinic_id)
+        require_self_service(service_id, clinic_id=slot.clinic_id, actor=actor)
     v = Visit.objects.create(patient=patient, dentist_id=slot.dentist_id, clinic_id=slot.clinic_id,
                              availability_slot=slot, scheduled_start=start, scheduled_end=end,
                              chief_complaint=chief_complaint, special_needs=special_needs, replaces_visit=replaces)

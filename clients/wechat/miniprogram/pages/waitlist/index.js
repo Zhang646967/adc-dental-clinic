@@ -2,8 +2,8 @@ const api=require('../../utils/api');
 const {waitEntry,showError}=require('../../utils/format');
 Page({
   data:{rows:[],page:1,pages:1,busy:false,error:'',hasOpen:false,readOnly:false},
-  async onShow(){
-    try{const s=await api.bootstrap();if(!s.authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
+  async onShow(){ api.showSubject(this);
+    try{const s=await api.bootstrap();api.showSubject(this);if(!s.authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
       this.setData({readOnly:s.read_only});await this.load();
     }catch(e){showError(this,e);}
   },
@@ -19,7 +19,7 @@ Page({
     if(this.data.busy)return;this.setData({busy:true,error:''});
     const id=e.currentTarget.dataset.id;
     try{const p=await api.request(`waitlist/${id}/withdraw/preview/`,'POST');
-      getApp().globalData.review={kind:'wait_withdraw',preview:p,path:`waitlist/${id}/withdraw/confirm/`};
+      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:'wait_withdraw',preview:p,path:`waitlist/${id}/withdraw/confirm/`};
       this.setData({busy:false});wx.navigateTo({url:'/pages/confirm/index'});
     }catch(error){showError(this,error);}
   }

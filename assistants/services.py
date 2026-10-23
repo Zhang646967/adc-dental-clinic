@@ -42,12 +42,12 @@ def _answer(user,audience,intent):
             "appointments":("你的预约概览","下面是当前账号未来的有效预约。更完整的记录在“我的预约”中；这里没有自动按聊天中的相对日期筛选。","portal_appointments","查看我的预约","PORTAL-02 · 本人数据范围"),
             "cancel":("取消前再核对一次","进入“我的预约”，打开尚未开始的预约，选择取消并填写原因，再确认。已到诊或已经开始的预约请联系前台。本次对话没有取消任何记录。","portal_appointments","打开我的预约","PORTAL-03 · 取消与历史保留"),
             "bill":("账单中的金额是什么","账单逐行显示已经确认的治疗、单位数量、单价和小计。总价由系统精确计算；它是开单金额，不代表已经付款。请在对应就诊详情中打开账单。","portal_appointments","查找就诊账单","BR-09/12/13 · 账单与实收款区分"),
-            "human":("不通过聊天也能完成操作","可使用页面导航和按钮。需要更改身份资料、委托家属或处理过去的预约，请联系前台；本演示不提供真实电话转接、短信或家属代办授权。","portal_help","查看帮助","PORTAL-04 · 人工协助与范围"),
+            "human":("不通过聊天也能完成操作","可使用页面导航和按钮。需要更改身份资料、委托家属或处理过去的预约，请联系前台；电话转接与短信仍需由诊所办理；家属代约须先完成本店关系核验和预约授权。","portal_help","查看帮助","PORTAL-04 · 人工协助与范围"),
             "help":("你可以直接选一个任务","我支持预约入口、本人预约概览、取消步骤和账单说明。请只输入办理事项，不输入真实姓名、电话、证件或病情。也可以不使用AI，直接点击页面按钮。","portal_home","返回患者首页","AI-01 · 受限服务目录"),
         }
         title,answer,name,label,source=entries.get(intent,entries["help"])
         if intent=="appointments":
-            qs=Visit.objects.filter(patient_id=access.patient_id,status="SCHEDULED",scheduled_start__gte=timezone.now()).select_related("clinic","dentist").order_by("scheduled_start")[:3]
+            qs=access.scope(Visit.objects.all()).filter(status="SCHEDULED",scheduled_start__gte=timezone.now()).select_related("clinic","dentist").order_by("scheduled_start")[:3]
             facts=[f"{timezone.localtime(v.scheduled_start):%Y-%m-%d %H:%M}（北京时间） · {v.clinic.name} · {v.dentist.name}" for v in qs]
             if not facts: facts=["目前没有未来的有效预约；这不表示你没有历史记录。"]
     else:

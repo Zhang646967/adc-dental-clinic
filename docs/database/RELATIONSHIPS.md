@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-171条实际SQL外键，其中170条对应ORM单列关系，1条为账单同次就诊复合外键。
+181条实际SQL外键，其中180条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -89,9 +89,18 @@
 | adc_patient_access | user_id | adc_user | id |
 | adc_patient_allergy | allergy_id | adc_allergy | id |
 | adc_patient_allergy | patient_id | adc_patient | id |
+| adc_patient_appointment_grant | created_by_id | adc_user | id |
+| adc_patient_appointment_grant | relationship_id | adc_patient_relationship | id |
+| adc_patient_relationship | delegate_user_id | adc_user | id |
+| adc_patient_relationship | clinic_id | adc_clinic | id |
+| adc_patient_relationship | created_by_id | adc_user | id |
+| adc_patient_relationship | patient_id | adc_patient | id |
+| adc_patient_relationship_event | relationship_id | adc_patient_relationship | id |
+| adc_patient_relationship_event | actor_id | adc_user | id |
 | adc_payment_account | clinic_id | adc_clinic | id |
 | adc_payment_account | created_by_id | adc_user | id |
 | adc_portal_booking_receipt | access_id | adc_patient_access | id |
+| adc_portal_booking_receipt | appointment_grant_id | adc_patient_appointment_grant | id |
 | adc_portal_booking_receipt | visit_id | adc_visit | id |
 | adc_quarter | roster_confirmed_by_id | adc_user | id |
 | adc_reception_case | clinic_id | adc_clinic | id |
@@ -170,6 +179,7 @@
 | adc_wait_request | patient_id | adc_patient | id |
 | adc_wait_request | preferred_dentist_id | adc_dentist | id |
 | adc_wait_request | service_id | adc_booking_service | id |
+| adc_workspace_context | patient_grant_id | adc_patient_appointment_grant | id |
 | adc_workspace_context | clinic_id | adc_clinic | id |
 | adc_workspace_context | user_id | adc_user | id |
 | auth_group_permissions | permission_id | auth_permission | id |

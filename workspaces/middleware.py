@@ -14,6 +14,8 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'patient_relationships':{'FRONT_DESK'},'patient_relationship_create':{'FRONT_DESK'},
+ 'patient_relationship_detail':{'FRONT_DESK'},'patient_relationship_action':{'FRONT_DESK'},'patient_relationship_confirm':{'FRONT_DESK'},
  'service_content_home':{'MANAGER'},'service_content_preview':{'MANAGER'},
  'schedule_calendar':{'FRONT_DESK'},
  'reception_list':{'FRONT_DESK'},'reception_create':{'FRONT_DESK'},'reception_detail':{'FRONT_DESK'},
@@ -119,6 +121,15 @@ class WorkspaceMiddleware:
             if ctx.role in CLINIC_ROLES and ctx.clinic_id is None and name not in ROLE_HOME and name not in {'dashboard','guide_index','guide_task'}:
                 if unsafe:return self.error(request,'尚未选择诊所；本次操作未执行。',409)
                 return redirect('manager_home' if ctx.role=='MANAGER' else 'frontdesk_home')
+        if ctx.role=='PATIENT' and name not in ROLE_FREE | {'portal_subjects','mini_subjects','mini_subject_select'}:
+            from portal.policies import patient_access,SubjectRequired
+            try:patient_access(request.user)
+            except SubjectRequired as exc:
+                if request.path.startswith('/api/mini/'):
+                    from portal.mini_api import result
+                    return result(request,status=409,code='SUBJECT_REQUIRED',message=str(exc))
+                if unsafe:return self.error(request,str(exc),409)
+                return redirect('portal_subjects')
         if unsafe:
             token=request.headers.get('X-ADC-Workspace','') if name=='assistant_api' or (name and name.startswith('mini_')) else request.POST.get('workspace_token','')
             if not check_token(ctx,token):

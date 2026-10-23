@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 69 ORM tables; django_migrations is a framework migration journal.
+// All 72 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_ai_usage_bucket {
@@ -461,6 +461,45 @@ Table adc_patient_allergy {
   }
 }
 
+Table adc_patient_appointment_grant {
+  id "bigint" [pk, not null]
+  relationship_id "bigint" [unique, not null]
+  valid_from "timestamp with time zone" [not null]
+  valid_until "timestamp with time zone" [not null]
+  is_active "boolean" [not null]
+  revision "integer" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_patient_relationship {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  patient_id "bigint" [not null]
+  related_name "character varying(100)" [not null]
+  kind "character varying(16)" [not null]
+  delegate_user_id "bigint" [null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_patient_relationship_event {
+  id "bigint" [pk, not null]
+  relationship_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  prior_state "character varying(16)" [not null]
+  resulting_state "character varying(16)" [not null]
+  basis "character varying(32)" [not null]
+  reference "character varying(160)" [not null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
 Table adc_payment_account {
   id "bigint" [pk, not null]
   clinic_id "bigint" [not null]
@@ -480,7 +519,8 @@ Table adc_payment_account {
 Table adc_portal_booking_receipt {
   id "bigint" [pk, not null]
   nonce "uuid" [unique, not null]
-  access_id "bigint" [not null]
+  access_id "bigint" [null]
+  appointment_grant_id "bigint" [null]
   visit_id "bigint" [unique, not null]
   created_at "timestamp with time zone" [not null]
 }
@@ -647,6 +687,7 @@ Table adc_role_assignment {
   scope_kind "character varying(16)" [not null]
   clinic_id "bigint" [null]
   is_active "boolean" [not null]
+  can_verify_patient_relationships "boolean" [not null]
 }
 
 Table adc_schedule_plan {
@@ -874,6 +915,7 @@ Table adc_workspace_context {
   user_id "bigint" [not null]
   role "character varying(16)" [not null]
   clinic_id "bigint" [null]
+  patient_grant_id "bigint" [null]
   revision "integer" [not null]
   updated_at "timestamp with time zone" [not null]
 }
@@ -1002,9 +1044,18 @@ Ref: adc_patient_access.patient_id - adc_patient.id
 Ref: adc_patient_access.user_id - adc_user.id
 Ref: adc_patient_allergy.allergy_id > adc_allergy.id
 Ref: adc_patient_allergy.patient_id > adc_patient.id
+Ref: adc_patient_appointment_grant.created_by_id > adc_user.id
+Ref: adc_patient_appointment_grant.relationship_id - adc_patient_relationship.id
+Ref: adc_patient_relationship.delegate_user_id > adc_user.id
+Ref: adc_patient_relationship.clinic_id > adc_clinic.id
+Ref: adc_patient_relationship.created_by_id > adc_user.id
+Ref: adc_patient_relationship.patient_id > adc_patient.id
+Ref: adc_patient_relationship_event.relationship_id > adc_patient_relationship.id
+Ref: adc_patient_relationship_event.actor_id > adc_user.id
 Ref: adc_payment_account.clinic_id > adc_clinic.id
 Ref: adc_payment_account.created_by_id > adc_user.id
 Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
+Ref: adc_portal_booking_receipt.appointment_grant_id > adc_patient_appointment_grant.id
 Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
 Ref: adc_quarter.roster_confirmed_by_id > adc_user.id
 Ref: adc_reception_case.clinic_id > adc_clinic.id
@@ -1083,6 +1134,7 @@ Ref: adc_wait_request.created_by_id > adc_user.id
 Ref: adc_wait_request.patient_id > adc_patient.id
 Ref: adc_wait_request.preferred_dentist_id > adc_dentist.id
 Ref: adc_wait_request.service_id > adc_booking_service.id
+Ref: adc_workspace_context.patient_grant_id > adc_patient_appointment_grant.id
 Ref: adc_workspace_context.clinic_id > adc_clinic.id
 Ref: adc_workspace_context.user_id > adc_user.id
 Ref: auth_group_permissions.permission_id > auth_permission.id

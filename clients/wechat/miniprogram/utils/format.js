@@ -10,6 +10,7 @@ function waitEntry(v) {
 }
 function showError(page, error) {
   page.setData({error: error.message, busy: false});
+  if(error.code==='SUBJECT_REQUIRED'){wx.reLaunch({url:'/pages/patients/index'});return;}
   if (error.status === 401) wx.reLaunch({url:'/pages/login/index'});
 }
 module.exports = {dateTime, arrangement, waitEntry, showError};

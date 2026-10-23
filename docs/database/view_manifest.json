@@ -1,9 +1,59 @@
 {
+  "er_patient_relationship": {
+    "title": "患者关系核验与预约代办授权",
+    "tables": 7,
+    "relationships": 8,
+    "note": "关系属于患者及核验诊所，账号可在待核验阶段补充。每项关系至多一项预约授权；联系人和普通亲属关系不生成授权。决定事件仅追加，operation_id唯一。上下文可选一个授权，本人入口保持空；有效期、当前账号与本店范围由事务核验，不从外键连线推断病历、资金或临床同意权限。",
+    "columns": {
+      "adc_patient": [
+        "id",
+        "patient_no"
+      ],
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_user": [
+        "id",
+        "username"
+      ],
+      "adc_patient_relationship": [
+        "id",
+        "clinic_id",
+        "patient_id",
+        "delegate_user_id",
+        "kind",
+        "state",
+        "revision"
+      ],
+      "adc_patient_appointment_grant": [
+        "id",
+        "relationship_id",
+        "valid_from",
+        "valid_until",
+        "is_active",
+        "revision"
+      ],
+      "adc_patient_relationship_event": [
+        "id",
+        "relationship_id",
+        "actor_id",
+        "operation_id",
+        "action"
+      ],
+      "adc_workspace_context": [
+        "id",
+        "user_id",
+        "patient_grant_id",
+        "revision"
+      ]
+    }
+  },
   "er_portal_reschedule": {
     "title": "患者授权与预约改期来源",
-    "tables": 7,
-    "relationships": 9,
-    "note": "患者授权与网站确认回执复用既有表；nonce唯一，visit_id唯一。预约自引用可空且唯一，构成原约与后继。邀约和取消跟进保留各自原关联，不因后续改期改写；同店本人范围和活动状态由事务命令核验，不能从外键推定权限。",
+    "tables": 8,
+    "relationships": 10,
+    "note": "本人绑定保留；预约确认回执必须且只能引用本人绑定或预约代办授权之一，nonce唯一，visit_id唯一。预约自引用可空且唯一，构成原约与后继。邀约和取消跟进保留各自原关联，不因后续改期改写；当前患者、本店代约范围和活动状态由事务命令核验，不能从外键推定权限。",
     "columns": {
       "adc_user": [
         "id",
@@ -23,7 +73,13 @@
         "id",
         "nonce",
         "access_id",
+        "appointment_grant_id",
         "visit_id"
+      ],
+      "adc_patient_appointment_grant": [
+        "id",
+        "relationship_id",
+        "revision"
       ],
       "adc_visit": [
         "id",
@@ -296,9 +352,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 70,
-    "orm_tables": 69,
-    "columns_types_and_nullability_checked": 632,
+    "tables": 73,
+    "orm_tables": 72,
+    "columns_types_and_nullability_checked": 665,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -307,10 +363,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 170,
-    "sql_foreign_keys": 171,
+    "orm_foreign_keys": 180,
+    "sql_foreign_keys": 181,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "af7e9cffc8b8813ece2a9b167f4faa30dd5d184124050c9b671637f71b4a5a01",
+    "snapshot_sha256": "6f1f496c3a635e709d7f590e64bd1aca628dd30ede04e6a2f1eb39ad39e78b9e",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

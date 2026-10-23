@@ -11,18 +11,32 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_patient_relationship': {
+        'title': '患者关系核验与预约代办授权',
+        'tables': {
+            'adc_patient': ['id', 'patient_no'],
+            'adc_clinic': ['id', 'clinic_code'],
+            'adc_user': ['id', 'username'],
+            'adc_patient_relationship': ['id','clinic_id','patient_id','delegate_user_id','kind','state','revision'],
+            'adc_patient_appointment_grant': ['id','relationship_id','valid_from','valid_until','is_active','revision'],
+            'adc_patient_relationship_event': ['id','relationship_id','actor_id','operation_id','action'],
+            'adc_workspace_context': ['id','user_id','patient_grant_id','revision'],
+        },
+        'note': '关系属于患者及核验诊所，账号可在待核验阶段补充。每项关系至多一项预约授权；联系人和普通亲属关系不生成授权。决定事件仅追加，operation_id唯一。上下文可选一个授权，本人入口保持空；有效期、当前账号与本店范围由事务核验，不从外键连线推断病历、资金或临床同意权限。',
+    },
     'er_portal_reschedule': {
         'title': '患者授权与预约改期来源',
         'tables': {
             'adc_user': ['id', 'username'],
             'adc_patient_access': ['id', 'user_id', 'patient_id', 'is_active'],
             'adc_patient': ['id', 'patient_no'],
-            'adc_portal_booking_receipt': ['id', 'nonce', 'access_id', 'visit_id'],
+            'adc_portal_booking_receipt': ['id', 'nonce', 'access_id', 'appointment_grant_id', 'visit_id'],
+            'adc_patient_appointment_grant': ['id','relationship_id','revision'],
             'adc_visit': ['id', 'patient_id', 'replaces_visit_id', 'status'],
             'adc_wait_offer': ['id', 'visit_id', 'state'],
             'adc_cancellation_followup': ['id', 'visit_id', 'replacement_visit_id', 'state'],
         },
-        'note': '患者授权与网站确认回执复用既有表；nonce唯一，visit_id唯一。预约自引用可空且唯一，构成原约与后继。邀约和取消跟进保留各自原关联，不因后续改期改写；同店本人范围和活动状态由事务命令核验，不能从外键推定权限。',
+        'note': '本人绑定保留；预约确认回执必须且只能引用本人绑定或预约代办授权之一，nonce唯一，visit_id唯一。预约自引用可空且唯一，构成原约与后继。邀约和取消跟进保留各自原关联，不因后续改期改写；当前患者、本店代约范围和活动状态由事务命令核验，不能从外键推定权限。',
     },
     'er_schedule_coordination': {
         'title': '前台排班与调班责任',

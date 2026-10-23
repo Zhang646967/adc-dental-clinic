@@ -14,8 +14,9 @@ def apply_role(request, ctx, role):
         raise PermissionDenied('该身份已失效；请重新登录或核对授权。')
     ctx.role = role
     ctx.clinic = None
+    ctx.patient_grant = None
     ctx.revision += 1
-    ctx.save(update_fields=['role', 'clinic', 'revision', 'updated_at'])
+    ctx.save(update_fields=['role', 'clinic', 'patient_grant', 'revision', 'updated_at'])
     request.session.pop('adc_guide', None)
     attach(request, ctx)
     return ROLES[role][1]

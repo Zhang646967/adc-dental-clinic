@@ -11,6 +11,13 @@ from coordination.models import WaitRequest,WaitOffer,SchedulePlan
 from coordination.policies import entries_for,require_owner_or_front
 from coordination.forms import JoinForm,ConfirmForm
 from coordination import services
+from portal.policies import form_authority,read_form_authority
+
+def patient_stamp(request):
+    return read_form_authority(request.user,request.POST.get('patient_authority','')) if request.workspace.role=='PATIENT' else None
+
+def confirmation(request):
+    return ConfirmForm(request.POST or None,initial={'patient_authority':form_authority(request.user)} if request.workspace.role=='PATIENT' else {})
 
 def template_for(request):return 'portal/base.html' if request.workspace.role=='PATIENT' else 'base.html'
 
@@ -50,7 +57,7 @@ def join(request):
         d=form.cleaned_data
         try:services.join_waitlist(actor=request.user,clinic_id=d['clinic'].pk,
             dentist_id=d['preferred_dentist'].pk if d['preferred_dentist'] else None,
-            patient_no=d.get('patient_no'),earliest=d['earliest'],latest=d['latest'],service_id=d['service'].pk if d.get('service') else None)
+            patient_no=d.get('patient_no'),earliest=d['earliest'],latest=d['latest'],service_id=d['service'].pk if d.get('service') else None,authority=patient_stamp(request))
         except EXPECTED_ERRORS as e:add_error(form,e)
         else:messages.success(request,'候补已登记，尚未形成预约。');return redirect('waitlist')
     return render(request,'coordination/form.html',{'title':'登记候补偏好','form':form,
@@ -62,9 +69,9 @@ def join(request):
 @require_http_methods(['GET','POST'])
 def withdraw(request,pk):
     e=get_object_or_404(entries_for(request.user),pk=pk);require_owner_or_front(request.user,e)
-    form=ConfirmForm(request.POST or None)
+    form=confirmation(request)
     if request.method=='POST' and form.is_valid():
-        try:services.withdraw(actor=request.user,entry_id=e.pk)
+        try:services.withdraw(actor=request.user,entry_id=e.pk,authority=patient_stamp(request))
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:messages.success(request,'候补已退出；既有正式预约不会被取消。');return redirect('waitlist')
     return render(request,'coordination/form.html',{'title':'退出这条候补？','description':'未确认的邀约也会撤回；不会取消已有正式预约。',
@@ -76,11 +83,11 @@ def offer(request,pk):
     o=get_object_or_404(WaitOffer.objects.select_related('request','slot__clinic','slot__dentist'),pk=pk,request__in=entries_for(request.user))
     require_owner_or_front(request.user,o.request)
     origin = offer_return_slot(request.user,request.GET.get("coord_slot"),o)
-    form=ConfirmForm(request.POST or None)
+    form=confirmation(request)
     if request.method=='POST' and form.is_valid():
         action=request.POST.get('action')
         if action not in ('accept','decline'):raise PermissionDenied('未知操作')
-        try:services.answer_offer(actor=request.user,offer_id=o.pk,accept=action=='accept')
+        try:services.answer_offer(actor=request.user,offer_id=o.pk,accept=action=='accept',authority=patient_stamp(request))
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:
             messages.success(request,'已处理候补邀约；接受时产生正式预约，可在预约页面核对。')
@@ -102,7 +109,7 @@ def offer(request,pk):
 def plans(request):
     from scheduling.availability_services import require_availability_actor
     cid=require_availability_actor(request.user).clinic_id
-    form=ConfirmForm(request.POST or None)
+    form=confirmation(request)
     if request.method=='POST' and form.is_valid():
         try:p=services.create_plan(actor=request.user,clinic_id=cid)
         except EXPECTED_ERRORS as exc:add_error(form,exc)
@@ -116,7 +123,7 @@ def plan(request,pk):
     from scheduling.availability_services import require_availability_actor
     cid=require_availability_actor(request.user).clinic_id
     p=get_object_or_404(SchedulePlan,pk=pk,clinic_id=cid)
-    form=ConfirmForm(request.POST or None)
+    form=confirmation(request)
     if request.method=='POST' and form.is_valid():
         try:services.publish_plan(actor=request.user,plan_id=p.pk)
         except EXPECTED_ERRORS as exc:add_error(form,exc)

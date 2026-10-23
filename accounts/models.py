@@ -16,9 +16,11 @@ class RoleAssignment(models.Model):
     scope_kind = models.CharField(max_length=16, choices=SCOPE_CHOICES)
     clinic = models.ForeignKey("registry.Clinic", on_delete=models.PROTECT, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    can_verify_patient_relationships = models.BooleanField(default=False)
     class Meta:
         db_table = "adc_role_assignment"
         constraints = [
+            models.CheckConstraint(condition=Q(can_verify_patient_relationships=False) | Q(role='FRONT_DESK', scope_kind='CLINIC', clinic__isnull=False), name='identity_reviewer_frontdesk'),
             models.CheckConstraint(condition=(Q(role__in=["FRONT_DESK", "MANAGER"], scope_kind="CLINIC", clinic__isnull=False) | Q(role="DENTIST", scope_kind="SELF_DENTIST", clinic__isnull=True) | Q(role__in=["HQ", "FINANCE"], scope_kind="CHAIN", clinic__isnull=True) | Q(role="SYSADMIN", scope_kind="TECHNICAL", clinic__isnull=True)), name="role_scope_valid"),
             models.UniqueConstraint(fields=["user", "role", "scope_kind", "clinic"], condition=Q(clinic__isnull=False), name="role_clinic_unique"),
             models.UniqueConstraint(fields=["user", "role", "scope_kind"], condition=Q(clinic__isnull=True), name="role_noclinic_unique"),

@@ -1,4 +1,4 @@
-<view class="page"><view class="brand">ADC · 候补与邀约</view><view class="title">等一个合适的安排</view><view class="subtitle">登记偏好 → 前台协调 → 核对邀约 → 明确成约</view>
+<view class="page"><view class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><navigator url="/pages/patients/index" open-type="reLaunch">切换就诊人</navigator></view><view class="brand">ADC · 候补与邀约</view><view class="title">等一个合适的安排</view><view class="subtitle">登记偏好 → 前台协调 → 核对邀约 → 明确成约</view>
   <view class="notice">候补登记不等于预约。接受邀约前请核对用途：新增一次就诊，或替换原预约。</view>
   <navigator wx:if="{{!hasOpen && !readOnly}}" class="link" url="/pages/waitjoin/index">＋ 登记候补偏好</navigator>
   <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><view wx:if="{{busy}}" class="notice">正在核对候补进展…</view>

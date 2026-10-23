@@ -7,8 +7,8 @@ from scheduling.models import Visit
 
 def dashboard(actor):
     access = patient_access(actor)
-    visits = Visit.objects.filter(patient_id=access.patient_id)
-    waits = WaitRequest.objects.filter(patient_id=access.patient_id)
+    visits = access.scope(Visit.objects.all())
+    waits = access.scope(WaitRequest.objects.all())
     now = timezone.now()
     current = visits.filter(status='CHECKED_IN').select_related('clinic', 'dentist').order_by('scheduled_start', 'pk').first()
     upcoming = visits.filter(status='SCHEDULED', scheduled_start__gt=now).select_related('clinic', 'dentist').order_by('scheduled_start', 'pk').first()

@@ -121,6 +121,6 @@ def invoice_detail(request,pk):
 @require_GET
 def portal_invoice(request,pk):
     from portal.policies import patient_access
-    access=patient_access(request.user)
+    access=patient_access(request.user,self_only=True)
     invoice=get_object_or_404(Invoice.objects.select_related("current_record_version"),pk=pk,visit__patient_id=access.patient_id)
     return render(request,"care/invoice.html",invoice_context(invoice,request,portal=True))

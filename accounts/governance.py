@@ -27,7 +27,7 @@ from workspaces.models import WorkspaceContext
 
 SALT = 'adc.account-management.v08a1'
 MANAGED_ROLES = {'DENTIST':'SELF_DENTIST','FRONT_DESK':'CLINIC','MANAGER':'CLINIC','HQ':'CHAIN','FINANCE':'CHAIN'}
-ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend'))
+ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer'))
 
 
 def require_technical(actor):
@@ -37,7 +37,7 @@ def require_technical(actor):
 
 
 def state_digest(target):
-    grant_rows=list(RoleAssignment.objects.filter(user=target).order_by('id').values_list('id','role','scope_kind','clinic_id','is_active'))
+    grant_rows=list(RoleAssignment.objects.filter(user=target).order_by('id').values_list('id','role','scope_kind','clinic_id','is_active','can_verify_patient_relationships'))
     access=list(PatientAccess.objects.filter(user=target).values_list('id','patient_id','is_active'))
     # Only the digest is serialized in the signed token, never the password hash itself.
     raw=json.dumps([target.pk,target.is_active,target.dentist_id,target.password,grant_rows,access],ensure_ascii=True)
@@ -82,7 +82,7 @@ def check_reason(reason):
 
 
 def invalidate_contexts(target):
-    WorkspaceContext.objects.filter(user=target).update(role='',clinic=None,revision=F('revision')+1,updated_at=timezone.now())
+    WorkspaceContext.objects.filter(user=target).update(role='',clinic=None,patient_grant=None,revision=F('revision')+1,updated_at=timezone.now())
 
 
 def protected_target(actor, target):
@@ -129,7 +129,7 @@ def create_account(*, actor, username, password, operator_password, reason, dent
 @business_errors
 @transaction.atomic
 def change_account(*, actor, target_id, token, action, operator_password, reason, role=None, clinic_id=None,
-                   grant_id=None, patient_no=None, new_password=None):
+                   grant_id=None, patient_no=None, new_password=None, reviewer_enabled=False):
     target=lock_operator(actor,operator_password,target_id)
     if target is None: raise UserAccount.DoesNotExist
     protected_target(actor,target)
@@ -153,7 +153,13 @@ def change_account(*, actor, target_id, token, action, operator_password, reason
         obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target)
         if obj.role not in MANAGED_ROLES:raise PermissionDenied('不能在此撤回技术管理身份。')
         if obj.role=='DENTIST' and pending_work(target):raise RuleError('仍有未闭合业务，请先安排交接；没有撤回牙医身份。')
-        obj.is_active=False;obj.save(update_fields=['is_active']);summary['grant_id']=obj.pk
+        obj.is_active=False;obj.can_verify_patient_relationships=False
+        obj.save(update_fields=['is_active','can_verify_patient_relationships']);summary['grant_id']=obj.pk
+    elif action == 'identity_reviewer':
+        obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target,role='FRONT_DESK',scope_kind='CLINIC',is_active=True,clinic__is_active=True)
+        obj.can_verify_patient_relationships=bool(reviewer_enabled)
+        obj.save(update_fields=['can_verify_patient_relationships'])
+        summary.update(grant_id=obj.pk,identity_reviewer=obj.can_verify_patient_relationships)
     elif action == 'reset_password':
         validate_password(new_password or '',user=target)
         target.set_password(new_password);target.save(update_fields=['password'])

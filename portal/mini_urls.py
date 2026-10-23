@@ -3,6 +3,8 @@ from portal import mini_api as api
 from portal import mini_waitlist as wait
 
 urlpatterns = [
+    path('patients/',api.subjects,name='mini_subjects'),
+    path('patients/select/',api.select_subject,name='mini_subject_select'),
     path('session/', api.session, name='mini_session'),
     path('login/', api.sign_in, name='mini_login'),
     path('logout/', api.sign_out, name='mini_logout'),

@@ -28,7 +28,7 @@ ACTION = 'adc.mini.wait.action.v1'
 
 
 def owned(actor):
-    return WaitRequest.objects.filter(patient_id=patient_access(actor).patient_id).select_related('clinic', 'service', 'preferred_dentist')
+    return patient_access(actor).scope(WaitRequest.objects.all()).select_related('clinic', 'service', 'preferred_dentist')
 
 
 def offer_data(offer):
@@ -61,7 +61,7 @@ def listing(request):
 
 
 def join_values(actor, d):
-    require_self_service(d['service'], clinic_id=d['clinic'])
+    require_self_service(d['service'], clinic_id=d['clinic'],actor=actor)
     Clinic.objects.get(pk=d['clinic'], is_active=True)
     resource_policy = policy(d['clinic'])
     if d['service'] and resource_policy is None:
@@ -86,7 +86,7 @@ def join_preview(request):
     d = validated(forms.WaitJoinForm(request.POST))
     with reporting_snapshot():
         service = join_values(request.user, d)
-        offering = service_data(require_self_service(d['service'], clinic_id=d['clinic']))
+        offering = service_data(require_self_service(d['service'], clinic_id=d['clinic'],actor=request.user),actor=request.user)
         qs = owned(request.user)
         if qs.filter(state__in=('WAITING', 'OFFERED')).exists():
             raise RuleError('你已有有效候补，请先查看或退出原记录。')
@@ -129,7 +129,7 @@ def register(actor, token):
     if (service.duration_minutes if service else 30) != d['duration']:
         raise RuleError('服务时长已变化，请重新核对候补范围。')
     entry = services.join_waitlist(actor=actor, clinic_id=d['clinic'], service_id=d['service'], dentist_id=d['dentist'],
-        earliest=values['earliest'], latest=values['latest'])
+        earliest=values['earliest'], latest=values['latest'],authority=access.stamp)
     emit(actor, 'MINI_WAIT_REGISTERED', entry, summary={'operation': p['operation']})
     return entry
 
@@ -151,10 +151,11 @@ def withdraw_preview(request, pk):
 @endpoint(('POST',))
 def withdraw_confirm(request, pk):
     d = validated(forms.ConfirmationForm(request.POST))
-    p = read_proposal(request.user, ACTION, ('PATIENT',), d['proposal_token'])['data']
+    prepared=read_proposal(request.user, ACTION, ('PATIENT',), d['proposal_token'])
+    p=prepared['data']
     if p.get('entry') != pk or p['action'] != 'withdraw': raise RuleError('确认内容不属于本次操作。')
     owned(request.user).get(pk=pk)
-    entry = services.withdraw(actor=request.user, entry_id=pk, expected_revision=p['revision'])
+    entry = services.withdraw(actor=request.user, entry_id=pk, expected_revision=p['revision'],authority=prepared['binding']['patient_authority'])
     return result(request, dict(kind='waitlist', wait=wait_data(entry)))
 
 
@@ -185,9 +186,10 @@ def answer_preview(request, pk):
 @endpoint(('POST',))
 def answer_confirm(request, pk):
     d = validated(forms.ConfirmationForm(request.POST))
-    p = read_proposal(request.user, ACTION, ('PATIENT',), d['proposal_token'])['data']
+    prepared=read_proposal(request.user, ACTION, ('PATIENT',), d['proposal_token'])
+    p=prepared['data']
     if p.get('offer') != pk or p['action'] not in ('accept', 'decline'): raise RuleError('确认内容不属于本次邀约。')
     own_offer(request.user, pk)
-    offer = services.answer_offer(actor=request.user, offer_id=pk, accept=p['action'] == 'accept', expected_revision=p['revision'])
+    offer = services.answer_offer(actor=request.user, offer_id=pk, accept=p['action'] == 'accept', expected_revision=p['revision'],authority=prepared['binding']['patient_authority'])
     return result(request, dict(kind='visit' if offer.visit_id else 'waitlist', visit=visit_data(offer.visit) if offer.visit_id else None,
         wait=wait_data(owned(request.user).get(pk=offer.request_id))))

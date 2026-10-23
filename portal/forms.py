@@ -8,6 +8,7 @@ class BookingConfirmationForm(forms.Form):
     confirmed = forms.BooleanField(label="我已核对诊所、牙医和北京时间，确认提交此预约。")
 
 class CancelForm(forms.Form):
+    patient_authority=forms.CharField(required=False,widget=forms.HiddenInput)
     expected_version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
     reason = forms.CharField(label="取消原因", max_length=500, widget=forms.Textarea(attrs={"rows":3}))
     confirmed = forms.BooleanField(label="我确认取消这一次预约；不会影响其他预约。")
@@ -17,12 +18,12 @@ class SlotFilterForm(forms.Form):
     from registry.models import Dentist
     service=forms.ModelChoiceField(label='预约服务',queryset=BookingService.objects.none())
     dentist=forms.ModelChoiceField(label='医师（可选）',queryset=Dentist.objects.none(),required=False)
-    def __init__(self,*args,**kwargs):
+    def __init__(self,*args,actor=None,**kwargs):
         super().__init__(*args,**kwargs)
         from portal.service_catalogue import public_services
         from scheduling.service_content import positive_id
         from registry.models import Clinic
-        services=public_services()
+        services=public_services(actor)
         self.fields['clinic'].queryset=Clinic.objects.filter(pk__in=services.values('department__clinic_id'))
         clinic_id=positive_id(str(self.data.get('clinic',''))) if self.is_bound else None
         if clinic_id:services=services.filter(department__clinic_id=clinic_id)

@@ -11,8 +11,9 @@ const actions={
 };
 Page({
   data:{review:null,checked:false,busy:false,error:'',done:null},
-  onLoad(){
+  onLoad(){ api.showSubject(this);
     const review=getApp().globalData.review;
+    if(review && (review.subjectKey!==api.sessionInfo().subject_key || review.workspaceKey!==api.sessionInfo().workspace_id || review.subjectRevision!==api.sessionInfo().subject_revision)){getApp().globalData.review=null;this.setData({error:'就诊人已变化，请重新核对预约。'});return;}
     if(!review){this.setData({error:'核对内容已失效，请返回我的预约重新办理。'});return;}
     const display=Object.assign({},review,{preview:Object.assign({},review.preview)});
     if(display.preview.original)display.preview.original=arrangement(display.preview.original);

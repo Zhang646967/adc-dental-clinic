@@ -2,7 +2,11 @@
 from scheduling.service_content import CATEGORY_CHOICES, fee_label
 
 
-def service_data(profile):
+def service_data(profile, *, actor=None):
+    access=None
+    if actor:
+        from portal.policies import patient_access
+        access=patient_access(actor)
     service = profile.service
     clinic = service.department.clinic
     return dict(id=service.pk, name=profile.title, clinic=clinic.pk,
@@ -14,5 +18,5 @@ def service_data(profile):
         preparation=profile.preparation, fee_mode=profile.fee_mode,
         fee_amount=str(profile.fee_amount) if profile.fee_amount is not None else None,
         fee_label=fee_label(profile.fee_mode, profile.fee_amount), fee_note=profile.fee_note,
-        self_booking=profile.category != 'CHILDREN',
+        self_booking=profile.category != 'CHILDREN' or bool(access and access.delegated and access.clinic_id==clinic.pk),
         dentists=[dict(id=d.pk, name=d.name) for d in service.public_dentists])

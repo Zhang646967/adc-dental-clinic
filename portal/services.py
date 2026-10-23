@@ -14,7 +14,7 @@ from adc_core.commands import business_errors, assert_revision as _assert_curren
 from scheduling.coordination import lock_slots as _lock_slots
 from scheduling.services import create_visit_locked
 from portal.models import BookingReceipt
-from portal.policies import patient_access
+from portal.policies import patient_access, check_authority, check_action_authority
 from portal.rules import validate_public_start, BOOKING_MINUTES, HORIZON_DAYS
 
 SALT = "adc.portal.booking.v04"
@@ -22,6 +22,9 @@ SALT = "adc.portal.booking.v04"
 def public_options(user, clinic_id=None, day=None, service_id=None, dentist_id=None):
     access = patient_access(user)
     now = timezone.now()
+    if access.delegated:
+        if clinic_id:access.require_clinic(clinic_id)
+        clinic_id=access.clinic_id
     if service_id:
         from scheduling.resource_candidates import candidates
         from scheduling.resources import service_for
@@ -82,6 +85,7 @@ def preview_booking(*, user, slot_id, start, service_id=None):
     access = patient_access(user)
     slot = AvailabilitySlot.objects.select_related("clinic","dentist").get(pk=slot_id,
         is_active=True, booking_paused=False, clinic__is_active=True, dentist__is_active=True)
+    access.require_clinic(slot.clinic_id)
     from scheduling.resources import policy,choose_bundle,service_for
     from adc_core.rules import validate_slot
     bundle=None
@@ -94,7 +98,9 @@ def preview_booking(*, user, slot_id, start, service_id=None):
         bundle=choose_bundle(slot=slot,start=start,end=end,service_id=service_id)
     else:end = validate_public_start(start, slot.starts_at, slot.ends_at, timezone.now())
     data = {"uid":user.pk,"access":access.pk,"slot":slot.pk,"start":start.isoformat(),"nonce":str(uuid4()),"intake_revision":slot.intake_revision}
-    data.update(service=service_id,resources=bundle,end=end.isoformat())
+    ctx=getattr(user,'_adc_workspace',None)
+    data.update(service=service_id,resources=bundle,end=end.isoformat(),authority=access.stamp,
+        context=str(ctx.pk) if ctx else None,context_revision=ctx.revision if ctx else None)
     return slot, end, signing.dumps(data, salt=SALT, compress=True)
 
 def _read_token(token, user):
@@ -113,12 +119,17 @@ def confirm_booking(*, actor, token, patient_request='', require_published_servi
     access = patient_access(actor, lock=True)
     data = _read_token(token, actor)
     if data.get("access") != access.pk: raise RuleError("患者端授权已变化，请重新确认。")
-    receipt = BookingReceipt.objects.filter(nonce=data["nonce"], access=access).select_related("visit").first()
+    check_authority(access,data.get('authority'))
+    ctx=getattr(actor,'_adc_workspace',None)
+    if (data.get('context'),data.get('context_revision')) != ((str(ctx.pk),ctx.revision) if ctx else (None,None)):
+        raise RuleError('就诊人或工作台已切换，请重新核对预约。')
+    receipt = BookingReceipt.objects.filter(nonce=data["nonce"], **access.receipt_fields).select_related("visit").first()
     if receipt: return receipt.visit
     from scheduling.service_content import patient_request as normalize_request
     try:reason=normalize_request(patient_request)
     except ValueError as exc:raise RuleError(str(exc)) from exc
     slot = _lock_slots([data["slot"]])[data["slot"]]
+    access.require_clinic(slot.clinic_id)
     revision = data.get('intake_revision', 0)  # Legacy previews valid only before intake has ever changed.
     if type(revision) is not int or revision != slot.intake_revision:
         raise RuleError('出诊接收状态已变化，请重新选择并核对，原确认页不能继续使用。')
@@ -134,16 +145,17 @@ def confirm_booking(*, actor, token, patient_request='', require_published_servi
                        chief_complaint=reason or "患者端预约；具体需求由接诊人员确认。",
                        service_id=data.get("service"),resource_snapshot=data.get("resources"),
                        require_published_service=require_published_service)
-    BookingReceipt.objects.create(nonce=data["nonce"], access=access, visit=visit)
+    BookingReceipt.objects.create(nonce=data["nonce"], visit=visit, **access.receipt_fields)
     emit(actor, "PORTAL_BOOKING_CONFIRMED", visit, visit=visit, summary={"source":"patient_portal"})
     return visit
 
 @business_errors
 @transaction.atomic
-def cancel_booking(*, actor, visit_id, expected_version, reason):
+def cancel_booking(*, actor, visit_id, expected_version, reason, authority=None):
     require_writable(actor)
     access = patient_access(actor, lock=True)
-    preview = Visit.objects.get(pk=visit_id, patient_id=access.patient_id)
+    check_action_authority(access,authority)
+    preview = access.scope(Visit.objects.all()).get(pk=visit_id)
     _lock_slots([preview.availability_slot_id])
     from coordination.reservations import lock_resources
     from scheduling.resources import lock_physical

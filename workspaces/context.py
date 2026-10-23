@@ -23,7 +23,8 @@ def available_roles(user):
             roles.discard(clinic_role)
     if not UserAccount.objects.filter(pk=user.pk,dentist__is_active=True).exists():
         roles.discard('DENTIST')
-    if PatientAccess.objects.filter(user_id=user.pk,is_active=True,patient__is_active=True).exists():
+    from portal.policies import has_patient_access
+    if has_patient_access(user):
         roles.add('PATIENT')
     return [r for r in ROLES if r in roles]
 

@@ -4,9 +4,9 @@ const {selectedCatalogue}=require('../../utils/service-selection');
 Page({
   data:{clinics:[], services:[], doctors:[], allServices:[], clinicIndex:0, serviceIndex:0, doctorIndex:0,
     day:'', firstDay:'', lastDay:'', rows:[], error:'', busy:false, searched:false, source:null, reason:'',patientRequest:'',selectedService:null},
-  async onLoad(query) {
+  async onLoad(query) { api.showSubject(this);
     try {
-      const session = await api.bootstrap();
+      const session = await api.bootstrap();api.showSubject(this);
       if (!session.authenticated) { wx.reLaunch({url:'/pages/login/index'}); return; }
       if (session.read_only) throw new Error('当前实例仅供查看，暂不办理预约变更。');
       let source = query.visit ? arrangement(await api.request(`visits/${query.visit}/`)) : null;
@@ -58,7 +58,7 @@ Page({
       const path=source ? `visits/${source.id}/reschedule/preview/` : 'booking/preview/';
       const payload=source ? {action:'preview',slot_id:row.slot,start:row.start,expected_version:source.version,reason:this.data.reason} : {slot:row.slot,start:row.start,service:row.service||'',patient_request:this.data.patientRequest};
       const preview=await api.request(path,'POST',payload);
-      getApp().globalData.review={kind:source?'reschedule':'booking',preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
+      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
       wx.navigateTo({url:'/pages/confirm/index'}); this.setData({busy:false});
     } catch(e) { showError(this,e); }
   }

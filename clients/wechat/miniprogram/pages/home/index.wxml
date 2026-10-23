@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page"><view class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><navigator url="/pages/patients/index" open-type="reLaunch">切换就诊人</navigator></view>
   <view class="service-hero"><view class="brand">ADC DENTAL CARE · 患者服务</view><view class="title">{{patient || '欢迎'}}， 就诊安排在这里</view><view class="hero-note">预约有结果，候补有进展。时间均为北京时间。</view><button class="hero-button" bindtap="book">了解服务并预约 →</button></view>
   <view wx:if="{{readOnly}}" class="notice">当前环境仅供查看，暂不办理预约变更。</view>
   <view wx:if="{{overview.offer_count}}" class="attention"><view class="label">有 {{overview.offer_count}} 条邀约待你确认</view><view>时段为限时保留，请先查看截止时间，再决定是否接受。</view><navigator class="link" url="/pages/waitlist/index">立即查看邀约 →</navigator></view>

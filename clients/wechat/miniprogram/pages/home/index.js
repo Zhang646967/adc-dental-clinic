@@ -2,10 +2,11 @@ const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 Page({
   data:{rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null},
-  async onShow() {
+  async onShow() { api.showSubject(this);
     try {
-      const session = await api.bootstrap();
+      const session = await api.bootstrap();api.showSubject(this);
       if (!session.authenticated) { wx.reLaunch({url:'/pages/login/index'}); return; }
+      if(session.subject_required){wx.reLaunch({url:'/pages/patients/index'});return;}
       this.setData({patient:session.patient_name, readOnly:session.read_only,environmentLabel:session.environment_label||''}); await this.load();
     } catch (e) { showError(this, e); }
   },

@@ -18,7 +18,7 @@ from workspaces.context import available_roles
 from workspaces.rules import ROLES
 
 ACTION_LABELS={'grant':'授予身份','revoke':'撤回身份','reset_password':'重置密码','disable':'停用账号',
-               'security_suspend':'紧急安全封禁','enable':'启用账号','bind_patient':'绑定演示患者','disable_patient_access':'停用患者入口'}
+               'security_suspend':'紧急安全封禁','enable':'启用账号','bind_patient':'绑定演示患者','disable_patient_access':'停用患者入口','identity_reviewer':'配置患者关系核验职责'}
 
 @login_required
 @require_GET
@@ -75,7 +75,7 @@ def change(request,pk,action):
                 operator_password=d['operator_password'],reason=d['reason'],role=d.get('role'),
                 clinic_id=d['clinic'].pk if d.get('clinic') else None,
                 grant_id=d['grant'].pk if d.get('grant') else None,
-                patient_no=d.get('patient_no'),new_password=d.get('password1'))
+                patient_no=d.get('patient_no'),new_password=d.get('password1'),reviewer_enabled=d.get('reviewer_enabled',False))
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:
             if action == 'security_suspend':

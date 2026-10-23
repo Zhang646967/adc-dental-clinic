@@ -29,8 +29,12 @@ def public_profiles(*, category=None, clinic_id=None):
     return [profile for profile in rows if complete(profile)]
 
 
-def public_services():
-    return BookingService.objects.filter(pk__in=[p.service_id for p in public_profiles() if p.category!='CHILDREN']).select_related(
+def public_services(actor=None):
+    from portal.policies import patient_access
+    access=patient_access(actor) if actor else None
+    return BookingService.objects.filter(pk__in=[p.service_id for p in public_profiles()
+        if (p.category!='CHILDREN' or access and access.delegated) and
+        (not access or not access.delegated or p.service.department.clinic_id==access.clinic_id)]).select_related(
         'department__clinic', 'patient_presentation')
 
 
@@ -41,7 +45,7 @@ def public_profile(service_id):
     return profile
 
 
-def require_self_service(service_id, *, clinic_id=None):
+def require_self_service(service_id, *, clinic_id=None, actor=None):
     """New patient requests only; retained visits/offers use their own commands."""
     if not service_id:
         raise RuleError('请先选择已发布的预约服务。')
@@ -51,6 +55,9 @@ def require_self_service(service_id, *, clinic_id=None):
         raise RuleError('该服务暂不可在线预约，请重新查看服务或联系前台。') from exc
     if clinic_id is not None and profile.service.department.clinic_id != clinic_id:
         raise RuleError('服务与所选诊所不一致，请重新选择。')
-    if profile.category == 'CHILDREN':
+    from portal.policies import patient_access
+    access=patient_access(actor) if actor else None
+    if access:access.require_clinic(profile.service.department.clinic_id)
+    if profile.category == 'CHILDREN' and not (access and access.delegated):
         raise RuleError('儿童就诊需由前台核验监护人与就诊人，请联系本店前台。')
     return profile

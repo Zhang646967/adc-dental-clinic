@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-23。本目录列出69张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-23。本目录列出72张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -1293,6 +1293,116 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 
+## adc_patient_appointment_grant
+
+模型：`portal.PatientAppointmentGrant`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| relationship_id | bigint | UK / FK | 否 | `adc_patient_relationship.id` |
+| valid_from | timestamp with time zone | — | 否 | — |
+| valid_until | timestamp with time zone | — | 否 | — |
+| is_active | boolean | — | 否 | — |
+| revision | integer | — | 否 | — |
+| created_by_id | bigint | FK | 否 | `adc_user.id` |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_patient_appointm_created_by_id_f89c71f9_fk_adc_user_`：`FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_appointm_relationship_id_8e78bcef_fk_adc_patie`：`FOREIGN KEY (relationship_id) REFERENCES adc_patient_relationship(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_appointment_grant_pkey`：`PRIMARY KEY (id)`。
+- `adc_patient_appointment_grant_relationship_id_key`：`UNIQUE (relationship_id)`。
+- `adc_patient_appointment_grant_revision_check`：`CHECK ((revision >= 0))`。
+- `appointment_grant_interval`：`CHECK ((valid_until > valid_from))`。
+
+索引（含条件唯一索引）：
+
+- `adc_patient_appointment_grant_created_by_id_f89c71f9`：`CREATE INDEX adc_patient_appointment_grant_created_by_id_f89c71f9 ON public.adc_patient_appointment_grant USING btree (created_by_id)`。
+- `adc_patient_appointment_grant_pkey`：`CREATE UNIQUE INDEX adc_patient_appointment_grant_pkey ON public.adc_patient_appointment_grant USING btree (id)`。
+- `adc_patient_appointment_grant_relationship_id_key`：`CREATE UNIQUE INDEX adc_patient_appointment_grant_relationship_id_key ON public.adc_patient_appointment_grant USING btree (relationship_id)`。
+
+跨表及历史触发器：
+
+
+## adc_patient_relationship
+
+模型：`portal.PatientRelationship`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| patient_id | bigint | FK | 否 | `adc_patient.id` |
+| related_name | character varying(100) | — | 否 | — |
+| kind | character varying(16) | — | 否 | — |
+| delegate_user_id | bigint | FK | 是 | `adc_user.id` |
+| state | character varying(16) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| created_by_id | bigint | FK | 否 | `adc_user.id` |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_patient_relation_delegate_user_id_3d5b9998_fk_adc_user_`：`FOREIGN KEY (delegate_user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_relationship_clinic_id_d6a7f7d6_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_relationship_created_by_id_5c86f3ee_fk_adc_user_id`：`FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_relationship_patient_id_4f0407f3_fk_adc_patient_id`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_relationship_pkey`：`PRIMARY KEY (id)`。
+- `adc_patient_relationship_revision_check`：`CHECK ((revision >= 0))`。
+- `relationship_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['PARENT'::character varying, 'GUARDIAN'::character varying, 'DELEGATE'::character varying, 'FAMILY'::character varying, 'CONTACT'::character varying])::text[])))`。
+- `relationship_state_valid`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'VERIFIED'::character varying, 'SUSPENDED'::character varying, 'REJECTED'::character varying, 'REVOKED'::character varying, 'WITHDRAWN'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_patient_relationship_clinic_id_d6a7f7d6`：`CREATE INDEX adc_patient_relationship_clinic_id_d6a7f7d6 ON public.adc_patient_relationship USING btree (clinic_id)`。
+- `adc_patient_relationship_created_by_id_5c86f3ee`：`CREATE INDEX adc_patient_relationship_created_by_id_5c86f3ee ON public.adc_patient_relationship USING btree (created_by_id)`。
+- `adc_patient_relationship_delegate_user_id_3d5b9998`：`CREATE INDEX adc_patient_relationship_delegate_user_id_3d5b9998 ON public.adc_patient_relationship USING btree (delegate_user_id)`。
+- `adc_patient_relationship_patient_id_4f0407f3`：`CREATE INDEX adc_patient_relationship_patient_id_4f0407f3 ON public.adc_patient_relationship USING btree (patient_id)`。
+- `adc_patient_relationship_pkey`：`CREATE UNIQUE INDEX adc_patient_relationship_pkey ON public.adc_patient_relationship USING btree (id)`。
+- `relationship_clinic_queue`：`CREATE INDEX relationship_clinic_queue ON public.adc_patient_relationship USING btree (clinic_id, state, created_at)`。
+
+跨表及历史触发器：
+
+
+## adc_patient_relationship_event
+
+模型：`portal.PatientRelationshipEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| relationship_id | bigint | FK | 否 | `adc_patient_relationship.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| prior_state | character varying(16) | — | 否 | — |
+| resulting_state | character varying(16) | — | 否 | — |
+| basis | character varying(32) | — | 否 | — |
+| reference | character varying(160) | — | 否 | — |
+| note | character varying(500) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_patient_relation_relationship_id_d583103f_fk_adc_patie`：`FOREIGN KEY (relationship_id) REFERENCES adc_patient_relationship(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_relationship_event_actor_id_49fee078_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_relationship_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_patient_relationship_event_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_patient_relationship_event_actor_id_49fee078`：`CREATE INDEX adc_patient_relationship_event_actor_id_49fee078 ON public.adc_patient_relationship_event USING btree (actor_id)`。
+- `adc_patient_relationship_event_operation_id_key`：`CREATE UNIQUE INDEX adc_patient_relationship_event_operation_id_key ON public.adc_patient_relationship_event USING btree (operation_id)`。
+- `adc_patient_relationship_event_pkey`：`CREATE UNIQUE INDEX adc_patient_relationship_event_pkey ON public.adc_patient_relationship_event USING btree (id)`。
+- `adc_patient_relationship_event_relationship_id_d583103f`：`CREATE INDEX adc_patient_relationship_event_relationship_id_d583103f ON public.adc_patient_relationship_event USING btree (relationship_id)`。
+
+跨表及历史触发器：
+
+- `relationship_history`：`CREATE TRIGGER relationship_history BEFORE DELETE OR UPDATE ON public.adc_patient_relationship_event FOR EACH ROW EXECUTE FUNCTION adc_relationship_history_guard()`。
+
 ## adc_payment_account
 
 模型：`finance.PaymentAccount`。
@@ -1340,21 +1450,25 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 |---|---|---|---|---|
 | id | bigint | PK | 否 | — |
 | nonce | uuid | UK | 否 | — |
-| access_id | bigint | FK | 否 | `adc_patient_access.id` |
+| access_id | bigint | FK | 是 | `adc_patient_access.id` |
+| appointment_grant_id | bigint | FK | 是 | `adc_patient_appointment_grant.id` |
 | visit_id | bigint | UK / FK | 否 | `adc_visit.id` |
 | created_at | timestamp with time zone | — | 否 | — |
 
 数据库约束：
 
 - `adc_portal_booking_r_access_id_db4e47dc_fk_adc_patie`：`FOREIGN KEY (access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_portal_booking_r_appointment_grant_id_9eee0a5c_fk_adc_patie`：`FOREIGN KEY (appointment_grant_id) REFERENCES adc_patient_appointment_grant(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_portal_booking_receipt_nonce_key`：`UNIQUE (nonce)`。
 - `adc_portal_booking_receipt_pkey`：`PRIMARY KEY (id)`。
 - `adc_portal_booking_receipt_visit_id_284edf2a_fk_adc_visit_id`：`FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_portal_booking_receipt_visit_id_key`：`UNIQUE (visit_id)`。
+- `booking_receipt_one_authority`：`CHECK ((((access_id IS NOT NULL) AND (appointment_grant_id IS NULL)) OR ((access_id IS NULL) AND (appointment_grant_id IS NOT NULL))))`。
 
 索引（含条件唯一索引）：
 
 - `adc_portal_booking_receipt_access_id_db4e47dc`：`CREATE INDEX adc_portal_booking_receipt_access_id_db4e47dc ON public.adc_portal_booking_receipt USING btree (access_id)`。
+- `adc_portal_booking_receipt_appointment_grant_id_9eee0a5c`：`CREATE INDEX adc_portal_booking_receipt_appointment_grant_id_9eee0a5c ON public.adc_portal_booking_receipt USING btree (appointment_grant_id)`。
 - `adc_portal_booking_receipt_nonce_key`：`CREATE UNIQUE INDEX adc_portal_booking_receipt_nonce_key ON public.adc_portal_booking_receipt USING btree (nonce)`。
 - `adc_portal_booking_receipt_pkey`：`CREATE UNIQUE INDEX adc_portal_booking_receipt_pkey ON public.adc_portal_booking_receipt USING btree (id)`。
 - `adc_portal_booking_receipt_visit_id_key`：`CREATE UNIQUE INDEX adc_portal_booking_receipt_visit_id_key ON public.adc_portal_booking_receipt USING btree (visit_id)`。
@@ -1834,12 +1948,14 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | scope_kind | character varying(16) | — | 否 | — |
 | clinic_id | bigint | FK | 是 | `adc_clinic.id` |
 | is_active | boolean | — | 否 | — |
+| can_verify_patient_relationships | boolean | — | 否 | — |
 
 数据库约束：
 
 - `adc_role_assignment_clinic_id_06c108de_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_role_assignment_pkey`：`PRIMARY KEY (id)`。
 - `adc_role_assignment_user_id_49685fe0_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `identity_reviewer_frontdesk`：`CHECK (((NOT can_verify_patient_relationships) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `role_scope_valid`：`CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))`。
 
 索引（含条件唯一索引）：
@@ -2470,20 +2586,24 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | user_id | bigint | FK | 否 | `adc_user.id` |
 | role | character varying(16) | — | 否 | — |
 | clinic_id | bigint | FK | 是 | `adc_clinic.id` |
+| patient_grant_id | bigint | FK | 是 | `adc_patient_appointment_grant.id` |
 | revision | integer | — | 否 | — |
 | updated_at | timestamp with time zone | — | 否 | — |
 
 数据库约束：
 
+- `adc_workspace_contex_patient_grant_id_d1d100c8_fk_adc_patie`：`FOREIGN KEY (patient_grant_id) REFERENCES adc_patient_appointment_grant(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_workspace_context_clinic_id_0ce9581c_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_workspace_context_pkey`：`PRIMARY KEY (id)`。
 - `adc_workspace_context_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_workspace_context_user_id_88d56c99_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `workspace_clinic_role`：`CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying])::text[]))))`。
+- `workspace_patient_subject`：`CHECK (((patient_grant_id IS NULL) OR ((role)::text = 'PATIENT'::text)))`。
 
 索引（含条件唯一索引）：
 
 - `adc_workspace_context_clinic_id_0ce9581c`：`CREATE INDEX adc_workspace_context_clinic_id_0ce9581c ON public.adc_workspace_context USING btree (clinic_id)`。
+- `adc_workspace_context_patient_grant_id_d1d100c8`：`CREATE INDEX adc_workspace_context_patient_grant_id_d1d100c8 ON public.adc_workspace_context USING btree (patient_grant_id)`。
 - `adc_workspace_context_pkey`：`CREATE UNIQUE INDEX adc_workspace_context_pkey ON public.adc_workspace_context USING btree (id)`。
 - `adc_workspace_context_user_id_88d56c99`：`CREATE INDEX adc_workspace_context_user_id_88d56c99 ON public.adc_workspace_context USING btree (user_id)`。
 

@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "front_a relation permission",
+      "passed": true
+    },
+    {
+      "name": "manager_a relation permission",
+      "passed": true
+    },
+    {
+      "name": "doctor_a relation permission",
+      "passed": true
+    },
+    {
+      "name": "finance_demo relation permission",
+      "passed": true
+    },
+    {
+      "name": "hq_demo relation permission",
+      "passed": true
+    },
+    {
+      "name": "tech_demo relation permission",
+      "passed": true
+    },
+    {
+      "name": "patient_demo_a relation permission",
+      "passed": true
+    },
+    {
+      "name": "technical explicit reviewer assignment",
+      "passed": true
+    },
+    {
+      "name": "reception preview no authority",
+      "passed": true
+    },
+    {
+      "name": "review requires second explicit submit",
+      "passed": true
+    },
+    {
+      "name": "keyboard confirmation recorded",
+      "passed": true
+    },
+    {
+      "name": "390px large text reflow",
+      "passed": true
+    }
+  ],
+  "case": 6,
+  "roles": 7,
+  "scope": "Chrome UI technical grant, front desk reception/verification, keyboard and 390px large text"
+}

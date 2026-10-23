@@ -39,7 +39,9 @@ def _fresh_actor(request):
 def _still_owns(request, fact):
     ctx = _fresh_actor(request)
     if ctx.role == "PATIENT":
-        if patient_access(request.user).patient_id != fact.patient_id:
+        access=patient_access(request.user)
+        access.require_clinic(fact.clinic_id)
+        if access.patient_id != fact.patient_id:
             raise Http404("未找到可核对的记录。")
     elif ctx.clinic_id != fact.clinic_id or not bindings(request.user).filter(
             role="FRONT_DESK", scope_kind="CLINIC", clinic_id=fact.clinic_id).exists():

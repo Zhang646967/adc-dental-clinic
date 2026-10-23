@@ -15,8 +15,11 @@ def workspace_binding(actor, roles):
     if not valid_context(actor, ctx) or not WorkspaceContext.objects.filter(
             pk=ctx.pk, user_id=actor.pk, role=ctx.role, clinic_id=ctx.clinic_id, revision=ctx.revision).exists():
         raise PermissionDenied('工作身份或诊所已变化，请重新打开页面。')
-    return dict(user=actor.pk, workspace=str(ctx.pk), role=ctx.role,
-                clinic=ctx.clinic_id, revision=ctx.revision)
+    binding=dict(user=actor.pk, workspace=str(ctx.pk), role=ctx.role, clinic=ctx.clinic_id, revision=ctx.revision)
+    if ctx.role=='PATIENT':
+        from portal.policies import patient_access
+        binding['patient_authority']=patient_access(actor).stamp
+    return binding
 
 @sensitive_variables()
 def proposal(actor, contract, roles, data):

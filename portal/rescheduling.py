@@ -24,7 +24,7 @@ CONTRACT = 'adc.portal.reschedule.v1'
 
 def owned_visit(actor, visit_id):
     access = patient_access(actor)
-    return Visit.objects.select_related('patient', 'clinic', 'dentist').get(pk=visit_id, patient_id=access.patient_id)
+    return access.scope(Visit.objects.select_related('patient', 'clinic', 'dentist')).get(pk=visit_id)
 
 
 def check_source(visit):
@@ -79,6 +79,7 @@ def prepare(*, actor, visit_id, expected_version, slot_id, start, reason, offer_
         access = patient_access(actor)
         visit = owned_visit(actor, visit_id)
         check_source(visit)
+        access.require_clinic(visit.clinic_id)
         assert_revision(visit, expected_version)
         if not isinstance(reason, str) or not 1 <= len(reason.strip()) <= 500:
             raise RuleError('请填写1至500字的改期原因。')
@@ -116,7 +117,7 @@ def confirm(*, actor, visit_id, proposal_token, confirmed):
     if (d['access'], d['patient'], d['visit']) != (access.pk, access.patient_id, visit_id):
         raise RuleError('确认内容或患者授权已经变化，请重新打开本人预约。')
     # A receipt proves this exact successful request, even if its result later changes.
-    prior = BookingReceipt.objects.select_related('visit').filter(nonce=p['operation'], access=access,
+    prior = BookingReceipt.objects.select_related('visit').filter(nonce=p['operation'], **access.receipt_fields,
         visit__replaces_visit_id=visit_id, visit__patient_id=access.patient_id).first()
     if prior:
         return prior.visit, True
@@ -156,7 +157,7 @@ def confirm(*, actor, visit_id, proposal_token, confirmed):
             raise RuleError('服务或预计时长已经变化，请重新核对；本次没有改约。')
         new = reschedule_visit_locked(actor=actor, old=visit, slot=slot, expected_version=d['version'],
             start=start, end=end, reason=d['reason'], service_id=d['service'], resource_snapshot=d['resources'])
-    BookingReceipt.objects.create(nonce=p['operation'], access=access, visit=new)
+    BookingReceipt.objects.create(nonce=p['operation'], visit=new, **access.receipt_fields)
     emit(actor, 'PORTAL_RESCHEDULE_CONFIRMED', new, visit=new,
         summary={'original_id': visit.pk, 'source': 'patient_portal'})
     return new, False
@@ -165,9 +166,9 @@ def confirm(*, actor, visit_id, proposal_token, confirmed):
 def related_context(actor, visit):
     """Only own immediate links; each later history page reauthorizes independently."""
     access = patient_access(actor)
-    own = Visit.objects.filter(patient_id=access.patient_id)
+    own = access.scope(Visit.objects.all())
     from coordination.models import WaitRequest
     return dict(previous_visit=own.filter(pk=visit.replaces_visit_id).first() if visit.replaces_visit_id else None,
         next_visit=own.filter(replaces_visit_id=visit.pk).first(),
-        open_wait=WaitRequest.objects.filter(patient_id=access.patient_id, state__in=('WAITING', 'OFFERED')).exists(),
+        open_wait=access.scope(WaitRequest.objects.all()).filter(state__in=('WAITING', 'OFFERED')).exists(),
         source_plan=current_plan(visit))

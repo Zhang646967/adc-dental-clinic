@@ -39,6 +39,15 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   p=api.request('visits/');last.success({statusCode:401,data:{ok:false,message:'请先登录'}});await assert.rejects(p,/请先登录/);
   assert.deepEqual(api.sessionInfo(),{});assert.equal(appState.globalData.review,null);checks+=2;
   p=api.signOut();success({csrf_token:'new'},['sessionid=; Max-Age=0']);await p;assert.deepEqual(api.sessionInfo(),{});assert.equal(appState.globalData.review,null);checks+=2;
+  p=api.request('session/');success({csrf_token:'c',workspace_token:'w1',workspace_id:'ctx',subject_revision:1,subject_key:'self',authenticated:true});await p;
+  const late=api.request('visits/'),oldResponse=last;
+  appState.globalData.review={patient:'self'};
+  p=api.selectSubject('grant:3');success({csrf_token:'c',workspace_token:'w2',workspace_id:'ctx',subject_revision:2,subject_key:'grant:3',authenticated:true});await p;
+  oldResponse.success({statusCode:200,data:{ok:true,data:{patient:'old'}}});
+  await assert.rejects(late,e=>e.code==='SUBJECT_CHANGED');assert.equal(appState.globalData.review,null);checks+=2;
+  appState.globalData.review={patient:'current'};
+  p=api.bootstrap();success({csrf_token:'c',workspace_token:'refreshed_signature',workspace_id:'ctx',subject_revision:2,subject_key:'grant:3',authenticated:true});await p;
+  assert.equal(appState.globalData.review.patient,'current');checks++;
   let compiler={status:'not_run'};
   if(process.env.ADC_WECHAT_COMPILER_DIR){
     const os=require('node:os'),{spawnSync}=require('node:child_process');

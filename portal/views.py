@@ -14,7 +14,7 @@ from registry.models import Clinic
 from scheduling.resources import service_for
 from scheduling.models import Visit
 from portal.forms import BookingConfirmationForm, CancelForm, SlotFilterForm
-from portal.policies import patient_access
+from portal.policies import patient_access, form_authority, read_form_authority
 from portal.services import public_options, preview_booking, confirm_booking, cancel_booking
 
 class PortalLoginView(LoginView):
@@ -68,7 +68,7 @@ def home(request):
 @require_GET
 def appointments(request):
     access=patient_access(request.user)
-    qs=Visit.objects.filter(patient_id=access.patient_id).select_related("clinic","dentist")
+    qs=access.scope(Visit.objects.all()).select_related("clinic","dentist")
     queue=request.GET.get('queue','active')
     if queue not in ('active','history','all'): raise Http404
     counts={'active':qs.filter(status__in=['SCHEDULED','CHECKED_IN']).count(),'all':qs.count()}
@@ -82,7 +82,7 @@ def appointments(request):
 @require_GET
 def slots(request):
     patient_access(request.user)
-    form=SlotFilterForm(request.GET or None)
+    form=SlotFilterForm(request.GET or None,actor=request.user)
     rows=[];profile=None;searched=False;query_failed=False
     if form.is_valid():
         searched=True
@@ -102,7 +102,7 @@ def booking_preview(request):
     if request.method=="POST":
         form=BookingConfirmationForm(request.POST)
         if form.is_valid():
-            try: v=confirm_booking(actor=request.user,token=form.cleaned_data["token"],patient_request=form.cleaned_data['patient_request'])
+            try: v=confirm_booking(actor=request.user,token=form.cleaned_data["token"],patient_request=form.cleaned_data['patient_request'],require_published_service=True)
             except EXPECTED_ERRORS as exc: add_error(form,exc)
             else:
                 messages.success(request,"预约已经保存。相同确认页的重复提交不会再建一条。")
@@ -114,7 +114,8 @@ def booking_preview(request):
         selected=positive_id(request.GET.get('service',''))
         profile=next((p for p in public_profiles() if p.service_id==selected),None)
         if not profile:raise RuleError('请先选择已开放的预约服务。')
-        if profile.category=='CHILDREN':raise RuleError('儿童代办请先联系门店核验接诊安排。')
+        from portal.service_catalogue import require_self_service
+        require_self_service(selected,actor=request.user)
         start=parse_datetime(request.GET.get("start",""))
         if start is None or timezone.is_naive(start): raise RuleError("请选择有效时段。")
         slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start,service_id=int(request.GET["service"]) if request.GET.get("service") else None)
@@ -129,7 +130,7 @@ def booking_preview(request):
 @require_GET
 def visit(request,pk):
     access=patient_access(request.user)
-    v=get_object_or_404(Visit.objects.select_related("clinic","dentist"),pk=pk,patient_id=access.patient_id)
+    v=get_object_or_404(access.scope(Visit.objects.select_related("clinic","dentist")),pk=pk)
     from portal.rescheduling import related_context
     return render(request,"portal/visit.html",dict(related_context(request.user,v),visit=v,
         can_cancel=v.status=="SCHEDULED" and v.scheduled_start>timezone.now()))
@@ -138,10 +139,10 @@ def visit(request,pk):
 @require_http_methods(["GET","POST"])
 def cancel(request,pk):
     access=patient_access(request.user)
-    v=get_object_or_404(Visit.objects.select_related("clinic","dentist"),pk=pk,patient_id=access.patient_id)
-    form=CancelForm(request.POST or None,initial={"expected_version":v.lock_version})
+    v=get_object_or_404(access.scope(Visit.objects.select_related("clinic","dentist")),pk=pk)
+    form=CancelForm(request.POST or None,initial={"expected_version":v.lock_version,"patient_authority":form_authority(request.user)})
     if request.method=="POST" and form.is_valid():
-        try: cancel_booking(actor=request.user,visit_id=v.pk,expected_version=form.cleaned_data["expected_version"],reason=form.cleaned_data["reason"])
+        try: cancel_booking(actor=request.user,visit_id=v.pk,expected_version=form.cleaned_data["expected_version"],reason=form.cleaned_data["reason"],authority=read_form_authority(request.user,form.cleaned_data.get("patient_authority")))
         except EXPECTED_ERRORS as exc: add_error(form,exc)
         else:
             messages.success(request,"本次预约已取消，历史记录仍保留。")
@@ -152,5 +153,5 @@ def cancel(request,pk):
 @require_GET
 def help_page(request):
     access=patient_access(request.user)
-    own=Visit.objects.filter(patient_id=access.patient_id,pk=request.GET.get('visit')).select_related('clinic').first() if request.GET.get('visit','').isdigit() else None
+    own=access.scope(Visit.objects.all()).filter(pk=request.GET.get('visit')).select_related('clinic').first() if request.GET.get('visit','').isdigit() else None
     return render(request,"portal/help.html",{'help_visit':own})

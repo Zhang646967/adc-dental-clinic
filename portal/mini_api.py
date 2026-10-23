@@ -20,7 +20,7 @@ from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
 from adc_core.snapshots import reporting_snapshot
 from portal.models import PatientAccess
-from portal.policies import patient_access
+from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
 from portal import mini_forms as forms, services, rescheduling
 from portal.service_catalogue import public_profiles, public_profile, require_self_service
 from portal.service_projection import service_data
@@ -44,7 +44,7 @@ def result(request, data=None, *, status=200, code=None, message=None):
     return response
 
 
-def endpoint(methods=('GET',), *, public=False):
+def endpoint(methods=('GET',), *, public=False, subject_optional=False):
     def decorate(view):
         @wraps(view)
         def handle(request, *args, **kwargs):
@@ -56,8 +56,10 @@ def endpoint(methods=('GET',), *, public=False):
                 if not public:
                     if not request.user.is_authenticated:
                         return result(request, status=401, code='LOGIN_REQUIRED', message='请先登录患者账号。')
-                    patient_access(request.user)
+                    if not subject_optional:patient_access(request.user)
                 return view(request, *args, **kwargs)
+            except SubjectRequired as exc:
+                return result(request,status=409,code='SUBJECT_REQUIRED',message=str(exc))
             except PermissionDenied:
                 return result(request, status=403, code='ACCESS_DENIED', message='当前账号或患者授权已失效，请重新登录或联系前台。')
             except ObjectDoesNotExist:
@@ -83,8 +85,13 @@ def session_data(request):
         ctx = ensure_context(request)
         attach(request, ctx)
         if valid_context(request.user, ctx) and ctx.role == 'PATIENT':
-            access = patient_access(request.user)
-            data.update(authenticated=True, patient_name=access.patient.name, workspace_token=token_for(ctx))
+            data.update(authenticated=True,workspace_token=token_for(ctx),workspace_id=str(ctx.pk),subject_revision=ctx.revision,
+                subject_required=False,patient_name='',subject_key=None,acting_capacity='',delegated=False)
+            try:
+                access = patient_access(request.user)
+                data.update(patient_name=access.patient.name,subject_key=access.pk if access.delegated else 'self',
+                    delegated=access.delegated,acting_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.name) if access.delegated else '本人')
+            except SubjectRequired:data['subject_required']=True
     return data
 
 
@@ -102,7 +109,7 @@ def sign_in(request):
     user = form.get_user()
     with transaction.atomic():
         UserAccount.objects.select_for_update().get(pk=user.pk, is_active=True)
-        if not PatientAccess.objects.select_for_update().filter(user=user, is_active=True, patient__is_active=True).exists():
+        if not has_patient_access(user):
             raise PermissionDenied
         login(request, user)
         request.session.set_expiry(3600)
@@ -120,7 +127,7 @@ def sign_out(request):
     return result(request, session_data(request))
 
 
-def visit_data(visit):
+def visit_data(visit, *, actor=None):
     plan = current_plan(visit)
     successor = Visit.objects.filter(replaces_visit_id=visit.pk, patient_id=visit.patient_id).values_list('pk', flat=True).first()
     return dict(id=visit.pk, clinic_id=visit.clinic_id, clinic=visit.clinic.name,
@@ -130,7 +137,7 @@ def visit_data(visit):
         service_id=plan.service_id if plan else None, predecessor=visit.replaces_visit_id, successor=successor,
         can_change=visit.status == 'SCHEDULED' and visit.scheduled_start > timezone.now(),
         address=visit.clinic.postal_address, phone=visit.clinic.phone,
-        patient_request=visit.chief_complaint)
+        patient_request=visit.chief_complaint if actor and not patient_access(actor).delegated else '')
 
 
 def option_data(row):
@@ -142,8 +149,11 @@ def option_data(row):
 
 @endpoint()
 def catalogue(request):
-    clinics = list(Clinic.objects.filter(is_active=True).values('id', 'name', 'postal_address', 'phone'))
-    offerings = [service_data(p) for p in public_profiles()]
+    access=patient_access(request.user)
+    clinics_qs=Clinic.objects.filter(is_active=True)
+    if access.delegated:clinics_qs=clinics_qs.filter(pk=access.clinic_id)
+    clinics = list(clinics_qs.values('id', 'name', 'postal_address', 'phone'))
+    offerings = [service_data(p,actor=request.user) for p in public_profiles(clinic_id=access.clinic_id)]
     return result(request, dict(clinics=clinics, offerings=offerings,
         services=[s for s in offerings if s['self_booking']],
         resource_clinics=list(ResourcePolicy.objects.filter(state='ENABLED').values_list('clinic_id', flat=True))))
@@ -151,14 +161,16 @@ def catalogue(request):
 
 @endpoint()
 def service_detail(request, pk):
-    return result(request, service_data(public_profile(pk)))
+    profile=public_profile(pk)
+    patient_access(request.user).require_clinic(profile.service.department.clinic_id)
+    return result(request, service_data(profile,actor=request.user))
 
 
 @endpoint()
 def overview(request):
     from portal.patient_dashboard import dashboard
     d = dashboard(request.user)
-    return result(request, dict(next_visit=visit_data(d['next_visit']) if d['next_visit'] else None,
+    return result(request, dict(next_visit=visit_data(d['next_visit'],actor=request.user) if d['next_visit'] else None,
         active_count=d['active_count'], history_count=d['history_count'],
         waiting_count=d['waiting_count'], offer_count=d['offer_count']))
 
@@ -166,7 +178,7 @@ def overview(request):
 @endpoint()
 def candidates(request):
     d = validated(forms.CandidateForm(request.GET))
-    require_self_service(d['service'], clinic_id=d['clinic'])
+    require_self_service(d['service'], clinic_id=d['clinic'], actor=request.user)
     rows = services.public_options(request.user, d['clinic'], d['day'], d['service'], d['dentist'])
     return result(request, dict(rows=[option_data(r) for r in rows], observed_at=timezone.now().isoformat(),
         note='候选不占位；确认时重新核对。时间均为北京时间。'))
@@ -176,19 +188,19 @@ def candidates(request):
 def visits(request):
     access = patient_access(request.user)
     d = validated(forms.PageForm(request.GET))
-    qs = Visit.objects.filter(patient_id=access.patient_id).select_related('clinic', 'dentist')
+    qs = access.scope(Visit.objects.all()).select_related('clinic', 'dentist')
     queue = d['queue'] or 'active'
     if queue == 'active': qs = qs.filter(status__in=('SCHEDULED', 'CHECKED_IN')).order_by('scheduled_start', 'pk')
     elif queue == 'history': qs = qs.exclude(status__in=('SCHEDULED', 'CHECKED_IN')).order_by('-scheduled_start', '-pk')
     else: qs = qs.order_by('-scheduled_start', '-pk')
     page = Paginator(qs, 10).get_page(d['page'] or 1)
-    return result(request, dict(rows=[visit_data(v) for v in page], page=page.number, pages=page.paginator.num_pages))
+    return result(request, dict(rows=[visit_data(v,actor=request.user) for v in page], page=page.number, pages=page.paginator.num_pages))
 
 
 @endpoint()
 def detail(request, pk):
     visit = rescheduling.owned_visit(request.user, pk)
-    data = visit_data(visit)
+    data = visit_data(visit,actor=request.user)
     plan = current_plan(visit)
     # Own historical service, deliberately absent from the general catalogue.
     if plan:
@@ -208,11 +220,11 @@ def detail(request, pk):
 def book_preview(request):
     d = validated(forms.BookingPreviewForm(request.POST))
     with reporting_snapshot():
-        profile = require_self_service(d['service'])
+        profile = require_self_service(d['service'],actor=request.user)
         slot, end, token = services.preview_booking(user=request.user, slot_id=d['slot'], start=d['start'], service_id=d['service'])
         if profile.service.department.clinic_id != slot.clinic_id:
             raise RuleError('服务与所选诊所不一致，请重新选择。')
-        offering = service_data(profile)
+        offering = service_data(profile,actor=request.user)
         wrapped = proposal(request.user, BOOK, ('PATIENT',), dict(token=token, patient_request=d['patient_request']))
         return result(request, dict(proposal_token=wrapped, clinic=slot.clinic.name, dentist=slot.dentist.name,
             start=d['start'].isoformat(), end=end.isoformat(), service=offering['name'],
@@ -226,7 +238,7 @@ def book_confirm(request):
     p = read_proposal(request.user, BOOK, ('PATIENT',), d['proposal_token'])
     visit = services.confirm_booking(actor=request.user, token=p['data']['token'],
         patient_request=p['data'].get('patient_request', ''), require_published_service=True)
-    return result(request, visit_data(visit))
+    return result(request, visit_data(visit,actor=request.user))
 
 
 @endpoint(('POST',))
@@ -237,16 +249,17 @@ def cancel_preview(request, pk):
     from adc_core.commands import assert_revision
     assert_revision(visit, d['expected_version'])
     token = proposal(request.user, CANCEL, ('PATIENT',), dict(visit=pk, **d))
-    return result(request, dict(original=visit_data(visit), reason=d['reason'], proposal_token=token))
+    return result(request, dict(original=visit_data(visit,actor=request.user), reason=d['reason'], proposal_token=token))
 
 
 @endpoint(('POST',))
 def cancel_confirm(request, pk):
     d = validated(forms.ConfirmationForm(request.POST))
-    p = read_proposal(request.user, CANCEL, ('PATIENT',), d['proposal_token'])['data']
+    prepared = read_proposal(request.user, CANCEL, ('PATIENT',), d['proposal_token'])
+    p=prepared['data']
     if p['visit'] != pk: raise RuleError('确认内容不属于这条预约，请重新核对。')
-    visit = services.cancel_booking(actor=request.user, visit_id=pk, expected_version=p['expected_version'], reason=p['reason'])
-    return result(request, visit_data(visit))
+    visit = services.cancel_booking(actor=request.user, visit_id=pk, expected_version=p['expected_version'], reason=p['reason'],authority=prepared['binding']['patient_authority'])
+    return result(request, visit_data(visit,actor=request.user))
 
 
 @endpoint()
@@ -257,7 +270,7 @@ def reschedule_candidates(request, pk):
     observation = rescheduling.options(actor=request.user, visit_id=pk, day=d['day'],
         dentist_id=d['dentist'].pk if d['dentist'] else None)
     return result(request, dict(rows=[option_data(r) for r in observation['rows']], limited=observation['limited'],
-        note=observation['limit_reason'], original=visit_data(visit)))
+        note=observation['limit_reason'], original=visit_data(visit,actor=request.user)))
 
 
 @endpoint(('POST',))
@@ -265,7 +278,7 @@ def reschedule_preview(request, pk):
     d = validated(forms.PreviewForm(request.POST))
     prepared = rescheduling.prepare(actor=request.user, visit_id=pk, expected_version=d['expected_version'],
         slot_id=d['slot_id'], start=d['start'], reason=d['reason'], offer_id=d['offer_id'])
-    return result(request, dict(original=visit_data(prepared['original']), proposal_token=prepared['proposal_token'],
+    return result(request, dict(original=visit_data(prepared['original'],actor=request.user), proposal_token=prepared['proposal_token'],
         clinic=prepared['destination'].clinic.name, dentist=prepared['destination'].dentist.name,
         start=prepared['start'].isoformat(), end=prepared['end'].isoformat(), reason=prepared['reason'],
         duration_changed=prepared['duration_changed']))
@@ -275,4 +288,17 @@ def reschedule_preview(request, pk):
 def reschedule_confirm(request, pk):
     d = validated(forms.ConfirmationForm(request.POST))
     visit, replayed = rescheduling.confirm(actor=request.user, visit_id=pk, proposal_token=d['proposal_token'], confirmed=True)
-    return result(request, dict(visit=visit_data(visit), replayed=replayed))
+    return result(request, dict(visit=visit_data(visit,actor=request.user), replayed=replayed))
+
+
+@endpoint(subject_optional=True)
+def subjects(request):
+    return result(request,dict(rows=subject_choices(request.user)))
+
+
+@endpoint(('POST',),subject_optional=True)
+def select_subject(request):
+    from portal.relationships import select_subject as select
+    select(actor=request.user,key=request.POST.get('subject',''))
+    request.session.pop('adc_guide',None);request.session.pop('adc_booking_intent',None)
+    return result(request,session_data(request))
