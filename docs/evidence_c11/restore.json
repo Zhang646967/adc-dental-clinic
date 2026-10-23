@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "scope": "encrypted C1.1 rehearsal data restored into an independent empty database using all43 current migrations (40 original unchanged); all row and schema fingerprints compared",
+  "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "runtime_equivalence": "candidate.json",
+  "database": "PostgreSQL 17",
+  "method": "PG17_JSONB_SHA256_V1",
+  "tables": 73,
+  "rows": 30162,
+  "facts_sha256": "d8a34be1cd8dc5bf7d5c654296f84d1c1a475ffc6ca178445697866cd3e13227",
+  "restore_seconds_after_empty_database_ready": 4.737,
+  "total_seconds": 6.841,
+  "encrypted_dump_sha256": "e995aeee6c5ec30d549eef6c26f38da34e6a10fe1dde7c648b73645f561988bb",
+  "original_bytes_evidence_and_history_included": true,
+  "new_table_rows": {
+    "adc_patient_relationship": 11,
+    "adc_patient_appointment_grant": 11,
+    "adc_patient_relationship_event": 32,
+    "adc_service_presentation": 5,
+    "adc_portal_booking_receipt": 27,
+    "adc_visit": 10569,
+    "adc_wait_offer": 12,
+    "adc_resource_plan": 69,
+    "adc_resource_claim": 69,
+    "adc_cancellation_followup": 0,
+    "adc_wait_request": 13,
+    "adc_audit_event": 4282
+  },
+  "original_runtime_untouched": true,
+  "trigger_definitions_and_enabled_states_compared": 43
+}

@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "tables": 73,
+  "foreign_keys": 181,
+  "triggers": 43,
+  "checked_sections": [
+    "triggers",
+    "models",
+    "tables",
+    "constraints",
+    "indexes",
+    "columns",
+    "migrations"
+  ],
+  "business_rows_read": false,
+  "er_and_actual_schema_equal": true
+}

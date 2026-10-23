@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Website grant-only login requires explicit patient",
+      "passed": true
+    },
+    {
+      "name": "Website has two scoped patient choices",
+      "passed": true
+    },
+    {
+      "name": "Native grant-only account requires selection",
+      "passed": true
+    },
+    {
+      "name": "Website selected patient 0",
+      "passed": true
+    },
+    {
+      "name": "Website large-text 390px 0",
+      "passed": true
+    },
+    {
+      "name": "Website keyboard 0",
+      "passed": true
+    },
+    {
+      "name": "Native choices remain explicit 0",
+      "passed": true
+    },
+    {
+      "name": "Native switch clears prior review 0",
+      "passed": true
+    },
+    {
+      "name": "Native patient and scoped authority 0",
+      "passed": true
+    },
+    {
+      "name": "Native catalogue only selected clinic 0",
+      "passed": true
+    },
+    {
+      "name": "Native selected overview 0",
+      "passed": true
+    },
+    {
+      "name": "Native selected waitlist 0",
+      "passed": true
+    },
+    {
+      "name": "Website selected patient 1",
+      "passed": true
+    },
+    {
+      "name": "Website large-text 390px 1",
+      "passed": true
+    },
+    {
+      "name": "Website keyboard 1",
+      "passed": true
+    },
+    {
+      "name": "Native choices remain explicit 1",
+      "passed": true
+    },
+    {
+      "name": "Native switch clears prior review 1",
+      "passed": true
+    },
+    {
+      "name": "Native patient and scoped authority 1",
+      "passed": true
+    },
+    {
+      "name": "Native catalogue only selected clinic 1",
+      "passed": true
+    },
+    {
+      "name": "Native selected overview 1",
+      "passed": true
+    },
+    {
+      "name": "Native selected waitlist 1",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors",
+      "passed": true
+    }
+  ],
+  "business_writes": false,
+  "scope": "Actual installed C1.1, one explicitly synthetic account selecting two patients in two clinics, website Chrome and native Page/HTTP; no booking confirmation; not WeChat runtime"
+}

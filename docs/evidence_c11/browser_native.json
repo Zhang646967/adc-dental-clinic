@@ -588,48 +588,48 @@
   "results": [
     {
       "clinic": 1,
-      "original": 10540,
-      "replacement": 10541,
-      "wait": 4,
-      "offer": 3,
-      "addition": 10542,
-      "case": 1
+      "original": 10555,
+      "replacement": 10556,
+      "wait": 9,
+      "offer": 8,
+      "addition": 10557,
+      "case": 7
     },
     {
       "clinic": 2,
-      "original": 10543,
-      "replacement": 10544,
-      "wait": 5,
-      "offer": 4,
-      "addition": 10545,
-      "case": 2
+      "original": 10558,
+      "replacement": 10559,
+      "wait": 10,
+      "offer": 9,
+      "addition": 10560,
+      "case": 8
     },
     {
       "clinic": 3,
-      "original": 10546,
-      "replacement": 10547,
-      "wait": 6,
-      "offer": 5,
-      "addition": 10548,
-      "case": 3
+      "original": 10561,
+      "replacement": 10562,
+      "wait": 11,
+      "offer": 10,
+      "addition": 10563,
+      "case": 9
     },
     {
       "clinic": 4,
-      "original": 10549,
-      "replacement": 10550,
-      "wait": 7,
-      "offer": 6,
-      "addition": 10551,
-      "case": 4
+      "original": 10564,
+      "replacement": 10565,
+      "wait": 12,
+      "offer": 11,
+      "addition": 10566,
+      "case": 10
     },
     {
       "clinic": 5,
-      "original": 10552,
-      "replacement": 10553,
-      "wait": 8,
-      "offer": 7,
-      "addition": 10554,
-      "case": 5
+      "original": 10567,
+      "replacement": 10568,
+      "wait": 13,
+      "offer": 12,
+      "addition": 10569,
+      "case": 11
     }
   ],
   "page_errors": 0,

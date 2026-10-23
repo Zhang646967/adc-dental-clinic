@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "mode": "local",
+  "backend": "http://127.0.0.1:18000",
+  "pages": 12,
+  "source_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "credentials_included": false,
+  "platform_uploaded": false,
+  "platform_runtime_verified": false
+}

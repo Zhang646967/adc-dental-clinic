@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39984392881",
+  "source_to_image_to_installed_version_matched": true,
+  "rule_tests": 1095,
+  "postgresql_tests": 1502,
+  "new_relationship_tests": 28,
+  "five_clinic_real_browser_native_checks": 146,
+  "independent_business_facts_checks": 78,
+  "installed_existing_account_checks": 272,
+  "installed_native_checks": 13,
+  "installed_relationship_checks": 22,
+  "same_version_encrypted_restore": "PASS",
+  "original_copy_upgrade": "PASS",
+  "original_runtime_update": "PASS",
+  "original_data_and_configuration": "PRESERVED",
+  "actual_schema": {
+    "tables": 73,
+    "sql_foreign_keys": 181,
+    "triggers": 43,
+    "migration_files": 43,
+    "original_migrations_unchanged": 40
+  },
+  "course_report": {
+    "pages": 127,
+    "business_use_cases": 63,
+    "shared_specifications": 1,
+    "actual_er_views": 7
+  },
+  "separate_pending": {
+    "wechat_runtime": "NOT_RUN",
+    "device": "NOT_RUN",
+    "experience": "NOT_RUN",
+    "cloud": "NOT_RUN",
+    "current_version_capacity": "NOT_RUN",
+    "continuous_24_hour": "NOT_RUN",
+    "clinical_qualification": "NOT_ESTABLISHED",
+    "historical_windows_recovery": "UNRESOLVED"
+  }
+}

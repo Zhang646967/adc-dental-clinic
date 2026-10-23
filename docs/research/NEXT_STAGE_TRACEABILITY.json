@@ -523,9 +523,10 @@
     {
       "release": "C1.1",
       "scope": "current-clinic relationship verification, appointment-only grants and explicit website/native patient selection",
-      "status": "LOCAL_VERIFIED",
+      "status": "LOCAL_DELIVERED",
       "evidence": "../evidence_c11/README.md",
-      "full_program_gates": "Clinical consent, source-aware imports, shared care and professional qualification remain incomplete."
+      "full_program_gates": "Clinical consent, source-aware imports, shared care and professional qualification remain incomplete.",
+      "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2"
     }
   ]
 }

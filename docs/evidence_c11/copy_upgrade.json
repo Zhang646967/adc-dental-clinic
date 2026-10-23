@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "scope": "Encrypted original 40-migration database restored to independent empty PostgreSQL 17 using original migration image, then additive migration applied using exact candidate image",
+  "original_business_models_preserved": 67,
+  "original_private_configurations": 70,
+  "new_relationship_tables": 3,
+  "new_relationship_rows": 0,
+  "additive_permission_rows": 12,
+  "additive_content_type_rows": 3,
+  "trigger_definitions_and_enabled_states_preserved": 42,
+  "restore_and_upgrade_seconds_after_database_ready": 5.993,
+  "total_seconds": 6.836,
+  "original_instance_untouched": true,
+  "public_network_ports": false,
+  "known_restore_structure_comparison_limitation": "same-version migration path; not a certification of arbitrary equivalent DDL"
+}

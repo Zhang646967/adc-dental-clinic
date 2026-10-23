@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "headSha": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "tests": [
+    {
+      "count": 1095,
+      "seconds": 18.827
+    },
+    {
+      "count": 1502,
+      "seconds": 821.927
+    }
+  ],
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/39984392881"
+}

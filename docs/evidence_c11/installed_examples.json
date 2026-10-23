@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "synthetic": true,
+  "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "normal_account_and_relationship_commands": true,
+  "new_delegate_accounts": 1,
+  "explicit_reviewer_duties": 2,
+  "new_relationships": 2,
+  "new_appointment_grants": 2,
+  "new_append_only_events": 4,
+  "original_business_rows_preserved": true,
+  "private_configuration_preserved": true,
+  "new_visits_treatments_or_financial_effects": 0,
+  "credentials_private": true
+}

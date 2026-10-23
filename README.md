@@ -1,6 +1,6 @@
 # ADC — Dental Clinic Management
 
-**C1.1 患者关系与预约代办。** 前台受理与核验，网站／小程序选择本人或授权患者，共用预约、改期和候补。[办理说明](docs/C11_PATIENT_RELATIONSHIPS.md) · [验证与交付](docs/evidence_c11/README.md)。
+**C1.1 已交付：患者关系与预约代办。** 前台受理与核验，网站／小程序选择本人或授权患者，共用预约、改期和候补。[办理说明](docs/C11_PATIENT_RELATIONSHIPS.md) · [验证与交付](docs/evidence_c11/README.md)。
 
 **Commercial V2 direction:** an independently deployed platform for a dental
 chain, covering patient services, operations and full clinical replacement
@@ -14,7 +14,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **C0.3患者服务验证：** [网站／小程序与交付记录](docs/C03_RELEASE_ACCEPTANCE.md) · [执行证据](docs/evidence_c03/README.md)。已完成1,095项规则、1,474项数据库回归及五店187项跨端检查，修复接诊路径冲突，新增公开页面大字模式，ER与正式报告同步。准确应用提交CI、加密恢复及本机更新已通过，原业务与私有配置保留。
 
-**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C0.3交付记录为准。
+**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C1.1交付记录为准。
 
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
 

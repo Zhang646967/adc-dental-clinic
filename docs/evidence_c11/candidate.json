@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "application_commit": "edcb6eb2b89ee54375afd24ea7cff364df7b87a2",
+  "image": "sha256:f4b2383d9245791a7dbfe4de2b29a382ee05bd9ce07b47a5f2be0e2abbfe8281",
+  "five_clinic_cross_channel_checks": 146,
+  "independent_business_fact_checks": 78,
+  "source_equivalence_feature_files": 580,
+  "new_financial_or_clinical_effects": 0,
+  "scope": "Exact committed image; real Chrome and native Page handlers through actual HTTP. Not WeChat runtime or cloud acceptance."
+}
