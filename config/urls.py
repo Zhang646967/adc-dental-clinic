@@ -2,6 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from workspaces.views import WorkspaceLoginView
 from adc_core import views
+from adc_core.entry_views import system_entry
 from portal import views as portal_views
 from portal import reschedule_views as portal_reschedule_views
 from care import views as care_views
@@ -13,6 +14,7 @@ from care import correction_views
 handler500 = 'adc_core.request_trace.server_error'
 
 urlpatterns = [
+    path('start/', system_entry, name='system_entry'),
     path('api/mini/v1/', include('portal.mini_urls')),
     path("", include("reception.urls")),
     path("", include("scheduling.resource_urls")),

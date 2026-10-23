@@ -1,0 +1,38 @@
+{
+  "base_commit": "7ee448edc3fef5952c40cfc1202550324aaface0",
+  "date": "2026-10-22",
+  "source_rules": {
+    "status": "PASS",
+    "tests": 1060,
+    "new_tests": 8,
+    "seconds": 6.832
+  },
+  "javascript_syntax": "PASS",
+  "personal_result_export_semantics": "PASS",
+  "migration_files_unchanged": 39,
+  "added_migrations": 0,
+  "business_commands_changed": false,
+  "http_tests": {
+    "authored": 5,
+    "local_execution": "NOT_RUN_DEPENDENCIES_UNAVAILABLE",
+    "ci": "BLOCKED_AUTO_APPROVAL"
+  },
+  "browser": {
+    "existing_staff_login": "OPENED",
+    "new_entry": "NOT_RUN",
+    "blocked_preview_reasons": [
+      "Local listening sockets denied",
+      "Local file URLs rejected by browser policy"
+    ]
+  },
+  "mac_deployment": "NOT_RUN_DOCKER_ACCESS_DENIED",
+  "running_entry": "http://127.0.0.1:18000/",
+  "new_http_entry_after_deployment": "/start/",
+  "wechat_runtime_device_cloud": "NOT_RUN",
+  "repository_publication": {
+    "status": "BLOCKED_AUTO_APPROVAL",
+    "destination": "Zhang646967/adc-dental-clinic",
+    "reason": "Automatic review could not verify user authorization for uploading source to the specific repository and flagged potential disclosure. No retry or alternative upload was attempted.",
+    "remote_head_observed": "7ee448edc3fef5952c40cfc1202550324aaface0"
+  }
+}

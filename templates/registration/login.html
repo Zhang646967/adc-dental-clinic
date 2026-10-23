@@ -14,4 +14,5 @@
 {% for field in form %}<div class="field">{{ field.label_tag }}{% if field.name == 'password' %}<div class="password-control">{{ field }}<button class="password-toggle secondary" type="button" data-password-toggle aria-controls="{{ field.id_for_label }}" aria-pressed="false" hidden>显示密码</button></div>{% else %}{{ field }}{% endif %}{{ field.errors }}</div>{% endfor %}
 <input type="hidden" name="next" value="{{ next }}"><button class="login-submit" type="submit">登录工作台 <span aria-hidden="true">→</span></button></form>
 <a class="patient-entry" href="{% url 'portal_login' %}"><span>我是患者</span><strong>前往患者服务 <span aria-hidden="true">→</span></strong></a>
+<p class="login-safety"><a href="{% url 'system_entry' %}">系统入口与六条业务核验路线</a></p>
 <p class="login-safety">课程演示使用合成数据，请勿录入真实患者信息或办理真实付款。</p></section></main></body></html>
