@@ -8,6 +8,8 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 Clinical V2 is planned; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
+**2026-10-23 商业化调研与下一阶段：** [六类成熟牙科系统与诊所业务差距](docs/research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 患者身份与连续诊疗计划](docs/COMMERCIAL_V2_NEXT_STAGE.md)。附 34 项外部来源、16 项需求追踪、24 个待执行验收场景及两幅明确标注为规划的领域关系图。当前实际 ER 与已执行验收保持独立。
+
 **C0.3患者服务验证：** [网站／小程序与交付记录](docs/C03_RELEASE_ACCEPTANCE.md) · [执行证据](docs/evidence_c03/README.md)。已完成1,095项规则、1,474项数据库回归及五店187项跨端检查，修复接诊路径冲突，新增公开页面大字模式，ER与正式报告同步。准确应用提交CI、加密恢复及本机更新已通过，原业务与私有配置保留。
 
 **历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C0.3交付记录为准。

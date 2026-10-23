@@ -1,0 +1,341 @@
+{
+  "study_date": "2026-10-23",
+  "inspected_commit": "3d0fb0002e7aa5631f5f12763c2885f85e278dee",
+  "method": "Primary-source desk research and actual ADC code/evidence inspection. No clinic interviews, competitor execution tests or patient data access.",
+  "product_families": [
+    "Open Dental",
+    "Dentrix Ascend",
+    "Dentally",
+    "CareStack",
+    "领健 e看牙",
+    "牙医管家"
+  ],
+  "sources": [
+    {
+      "id": "OD-00",
+      "title": "Open Dental Quick Manual",
+      "url": "https://www.opendental.com/site/quickmanual.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Index and organizing modules",
+      "limitations": "Abridged manual; no performance or clinical qualification claim.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-01",
+      "title": "Open Dental appointments",
+      "url": "https://www.opendental.com/site/0_appointments.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Day/week calendar and outstanding scheduling work",
+      "limitations": "Documented behavior only; no measured benefit.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-02",
+      "title": "Open Dental family",
+      "url": "https://www.opendental.com/site/0_family.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Family, guarantor, contact and recall information",
+      "limitations": "US family/guarantor concepts do not establish guardian or clinical consent authority.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-03",
+      "title": "Open Dental treatment plan",
+      "url": "https://www.opendental.com/site/0_treatmentplan.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Versions, priorities, estimates and planned appointments",
+      "limitations": "Acceptance and estimates are distinct from actual treatment.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-04",
+      "title": "Open Dental chart",
+      "url": "https://www.opendental.com/site/0_chart.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Dental history, charting, consent, lab and related clinical work",
+      "limitations": "Feature overview; not a reviewed Chinese clinical template.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-05",
+      "title": "Open Dental account",
+      "url": "https://www.opendental.com/site/0_account.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Ledger and patient/family financial workflow",
+      "limitations": "US billing/insurance assumptions require local adaptation.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-06",
+      "title": "Open Dental patient payment",
+      "url": "https://www.opendental.com/site/0_patpayment.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Procedure allocations and family payment behavior",
+      "limitations": "No real payment provider verification performed.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-07",
+      "title": "Open Dental recall list",
+      "url": "https://www.opendental.com/site/0_recalllist.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Due patients, communication status and scheduling",
+      "limitations": "No evidence that reminders alone improve attendance.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-08",
+      "title": "Open Dental lab cases",
+      "url": "https://www.opendental.com/site/0_labcases.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Supplier, due date, dispatch/return and appointment coordination",
+      "limitations": "Workflow reference; no supplier integration tested.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-09",
+      "title": "Open Dental imaging",
+      "url": "https://www.opendental.com/site/0_images.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Patient images, import, viewing and retained originals",
+      "limitations": "No device or image interoperability acceptance.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-10",
+      "title": "Open Dental management",
+      "url": "https://www.opendental.com/site/0_manage.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Tasks, inventory, accounting and backup organization",
+      "limitations": "Index-level scope, not a feature completeness audit.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "OD-11",
+      "title": "Open Dental supply inventory",
+      "url": "https://www.opendental.com/site/0_supplyinventory.html",
+      "evidence_type": "official_manual",
+      "read_scope": "Suppliers, orders, receipt and equipment inventory",
+      "limitations": "Does not establish comprehensive lot or sterile-package traceability.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "DA-01",
+      "title": "Dentrix Ascend treatment-plan case",
+      "url": "https://learn.dentrixascend.com/courses/clinical-essentials-for-teams/lessons/treatment-planning/topic/creating-a-treatment-plan-case/",
+      "evidence_type": "official_manual",
+      "read_scope": "Cases organized into visits and statuses",
+      "limitations": "Documented product workflow only.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "DA-02",
+      "title": "Dentrix Ascend recare",
+      "url": "https://learn.dentrixascend.com/courses/scheduling-essentials-for-teams/lessons/scheduling-recare/",
+      "evidence_type": "official_manual",
+      "read_scope": "Continuing-care intervals and worklists",
+      "limitations": "Index and linked-topic scope; no customer outcome measurements.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "DA-03",
+      "title": "Dentrix Ascend signed-note addendum",
+      "url": "https://learn.dentrixascend.com/courses/clinical-essentials-for-teams/lessons/charting/topic/adding-an-addendum-to-a-signed-clinical-note-2/",
+      "evidence_type": "official_manual",
+      "read_scope": "Preserved signed content and attributed additions",
+      "limitations": "Not evidence of compliance with another jurisdiction.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "DT-01",
+      "title": "Dentally patient medical history",
+      "url": "https://help.dentally.com/en/articles/3566262-how-to-manage-a-patient-s-medical-history-information",
+      "evidence_type": "official_manual",
+      "read_scope": "Reported/signed history, professional review and retained old history",
+      "limitations": "Product-specific 24-hour edit policy is not adopted as a Chinese legal rule.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CS-01",
+      "title": "CareStack patient search scope",
+      "url": "https://carestack.zendesk.com/hc/en-us/articles/44464270867860-Patient-Search-Scope-Configuration",
+      "evidence_type": "official_manual",
+      "read_scope": "Location-scoped search and documented duplicate/portal trade-offs",
+      "limitations": "No justification for unrestricted chain-wide chart access; displayed update 2026-09-07.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CS-02",
+      "title": "CareStack recall management",
+      "url": "https://carestack.com/en-GB/dental-software/features/recall-management",
+      "evidence_type": "vendor_feature_page",
+      "read_scope": "Advertised recall intervals, communication and outcomes",
+      "limitations": "Marketing reach/efficiency claims excluded.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CS-03",
+      "title": "CareStack groups and DSOs",
+      "url": "https://carestack.com/en-AU/who-we-serve/groups-dsos",
+      "evidence_type": "vendor_feature_page",
+      "read_scope": "Advertised centralized configuration and multi-site workflows",
+      "limitations": "No measured scale, security or adoption inferred.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-01",
+      "title": "领健 e看牙 official scope",
+      "url": "https://www.lingjian.cn/kouqiang/about-eky.html",
+      "evidence_type": "vendor_feature_page",
+      "read_scope": "Advertised domestic clinical, CRM, inventory, imaging, BI and chain scope",
+      "limitations": "Customer counts and comparative claims excluded.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-02",
+      "title": "牙医管家 developer product description",
+      "url": "https://apps.apple.com/cn/app/%E7%89%99%E5%8C%BB%E7%AE%A1%E5%AE%B6/id904824378",
+      "evidence_type": "developer_product_listing",
+      "read_scope": "Developer description of appointment, follow-up, record, payment and inventory scope",
+      "limitations": "Developer claims establish advertised scope only; adoption claims excluded.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "ADA-01",
+      "title": "ADA State of the US Dental Economy Q3 2026",
+      "url": "https://www.ada.org/-/media/project/ada-organization/ada/ada-org/files/resources/research/hpi/state_us_dental_economy_q32026.pdf",
+      "evidence_type": "professional_survey",
+      "read_scope": "Operating constraints and methodology; 750 respondents, including 704 private-practice dentists",
+      "limitations": "US selected panel with documented response/composition limits; not a China prevalence estimate; no chart-derived percentage used.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-REG-01",
+      "title": "2022 clinic filing measures and publication of basic standards",
+      "url": "https://app.www.gov.cn/govdata/gov/202212/28/495617/article.html",
+      "evidence_type": "official_regulatory_text",
+      "read_scope": "Full main notice/measures; service scope, staff, equipment, infection control and regulatory reporting",
+      "limitations": "2022 basic-standards attachment inaccessible; no chair ratios or unread attachment clauses asserted.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-REG-02",
+      "title": "2025 electronic medical record access notice",
+      "url": "https://app.www.gov.cn/govdata/gov/202507/01/531972/article.html",
+      "evidence_type": "official_regulatory_text",
+      "read_scope": "Full notice on purpose/task/time-limited access, identity, traceability, export and supplier controls",
+      "limitations": "Clinic-specific implementation and local applicability require review; no certification asserted.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-REG-03",
+      "title": "2017 electronic medical record application norm",
+      "url": "https://www.beijing.gov.cn/zhengce/zhengcefagui/201905/t20190522_59868.html",
+      "evidence_type": "official_republication",
+      "read_scope": "Full norm on record identity, changes, archive and retention",
+      "limitations": "Outpatient retention rule refers to institution-kept records; scope and current local implementation need review.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-REG-04",
+      "title": "2018 prescription-review norm",
+      "url": "https://wjw.wuxi.gov.cn/doc/2023/02/13/3881781.shtml",
+      "evidence_type": "official_republication",
+      "read_scope": "Full norm including Article 3 applicability and review before pricing/charge/dispense",
+      "limitations": "Article 3 distinguishes mandatory institutional categories from other institutions referring to the norm; do not universalize that distinction.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-REG-05",
+      "title": "Personal Information Protection Law",
+      "url": "https://www.cac.gov.cn/2021-08/20/c_1631050028355286.htm",
+      "evidence_type": "official_legal_text",
+      "read_scope": "Lawful bases, sensitive health/child data, processor duties and safeguards",
+      "limitations": "Consent is not the only lawful basis; under-14 data protection is not a universal medical-consent age.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CDC-01",
+      "title": "CDC sterilization and disinfection",
+      "url": "https://www.cdc.gov/dental-infection-control/hcp/summary/sterilization-disinfection.html",
+      "evidence_type": "professional_guidance",
+      "read_scope": "Packaging/load records, process monitoring and response to failure",
+      "limitations": "International workflow reference, not a Chinese legal requirement or actual clinic audit.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "CN-STD-01",
+      "title": "WS 506-2016 publication entry",
+      "url": "https://www.nhc.gov.cn/wjw/s9496/201701/4ef349307e3b4ff98267af8e28108907.shtml",
+      "evidence_type": "official_publication_metadata",
+      "read_scope": "Official search-visible title/publication/effective-date entry only",
+      "limitations": "Direct page returned 412; full standard not read or clause-audited. Do not use as support for detailed sterilization requirements.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "FHIR-01",
+      "title": "HL7 FHIR R4 RelatedPerson",
+      "url": "https://hl7.org/fhir/R4/relatedperson.html",
+      "evidence_type": "versioned_standard_documentation",
+      "read_scope": "R4 relationship, contact and actor vocabulary",
+      "limitations": "Vocabulary reference only; not the latest-version claim, a prescribed schema or FHIR conformance.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "FHIR-02",
+      "title": "HL7 FHIR R4 Encounter",
+      "url": "https://hl7.org/fhir/R4/encounter.html",
+      "evidence_type": "versioned_standard_documentation",
+      "read_scope": "R4 actual interaction versus scheduling and encounter granularity",
+      "limitations": "No FHIR interface implemented or accepted.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "DICOM-01",
+      "title": "DICOM PS3.1 2024d introduction",
+      "url": "https://dicom.nema.org/Medical/dicom/2024d/output/html/part01.html",
+      "evidence_type": "versioned_standard_documentation",
+      "read_scope": "Introduction text surfaced through search; standards vocabulary",
+      "limitations": "No complete normative-series audit or current-version assertion; use actual partner conformance documentation for integration.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "ASVS-01",
+      "title": "OWASP ASVS official project",
+      "url": "https://asvs.owasp.org/",
+      "evidence_type": "security_reference",
+      "read_scope": "Stable 5.0.0 and versioned requirement structure",
+      "limitations": "No completed ADC ASVS assessment or certification.",
+      "accessed_on": "2026-10-23"
+    },
+    {
+      "id": "SRE-01",
+      "title": "Google SRE implementing SLOs",
+      "url": "https://sre.google/workbook/implementing-slos/",
+      "evidence_type": "engineering_reference",
+      "read_scope": "User-visible objectives and evidence-based reliability priorities",
+      "limitations": "No ADC SLA or measured target-environment availability established by the reference.",
+      "accessed_on": "2026-10-23"
+    }
+  ],
+  "provided_course_sources": [
+    {
+      "id": "NOTE-03",
+      "file": "note__3.pdf",
+      "pages": "1–5, 11",
+      "use": "Requirements versus design; testable observable behavior; invariants and failure responses. Read-only supplied reference, not redistributed."
+    },
+    {
+      "id": "NOTE-05",
+      "file": "note__5.pdf",
+      "pages": "4–10",
+      "use": "Separation, restricted visibility, simplicity and information hiding. Read-only supplied reference, not redistributed."
+    }
+  ],
+  "excluded_evidence": [
+    "Vendor market-share and outcome claims were not independently verified and are not used as prevalence or effectiveness evidence.",
+    "An unrelated-link-contaminated help-site index was not used for business claims; the developer product listing was used instead.",
+    "No unread standards attachment or search-only detailed clause is presented as an inspected legal requirement."
+  ],
+  "status": "RESEARCH_COMPLETED; proposed functionality and professional applicability acceptance remain pending"
+}

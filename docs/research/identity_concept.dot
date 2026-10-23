@@ -1,0 +1,18 @@
+digraph Identity {
+  graph [rankdir=LR, bgcolor="#ffffff", pad="0.32", nodesep="0.50", ranksep="0.95", fontname="Arial", fontsize=18, label="ADC | Identity and appointment authority\nPLANNED logical model · 2026-10-23", labelloc=t];
+  node [shape=box, style="rounded,filled", fillcolor="#f0f3f7", color="#62748b", fontname="Arial", fontsize=12, margin="0.18,0.13"];
+  edge [fontname="Arial", fontsize=10, color="#526578", arrowsize=0.7];
+  account [label="EXISTING\nUserAccount\nActing person / login"];
+  patient [label="EXISTING\nPatient\nSubject of care"];
+  self [label="EXISTING\nPatientAccess\nOne account / one patient"];
+  relation [style="rounded,dashed,filled", color="#16746e", fillcolor="#edf7f5", label="PROPOSED\nRelationship case\nPatient + related person\nNo access by itself"];
+  decision [style="rounded,dashed,filled", color="#16746e", fillcolor="#edf7f5", label="PROPOSED\nVerification history\nBasis / reviewer / validity"];
+  grant [style="rounded,dashed,filled", color="#16746e", fillcolor="#edf7f5", label="PROPOSED\nPatient action grant\nActor + subject + scope\nValidity / revision"];
+  account -> self [label="0..1 self-access"];
+  patient -> self [label="0..1 self-access"];
+  patient -> relation [label="0..* cases"];
+  relation -> decision [label="0..* decisions"];
+  account -> grant [label="0..* grants"];
+  patient -> grant [label="0..* grants"];
+  relation -> grant [label="0..* derived grants"];
+}

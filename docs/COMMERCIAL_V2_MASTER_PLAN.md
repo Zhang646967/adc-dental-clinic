@@ -4,6 +4,8 @@ Customer trust → complete clinical workflows → protected records and money �
 
 Planning baseline: 2026-10-22, local source `c750e7ebabc6bfa90769570a8468972ae7b94b14`. This is the controlling development plan for the commercial V2 program. Historical RC/course evidence retains its original date, environment and scope.
 
+**2026-10-23 research refinement:** the [six-product maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md) and [C1–C2 next-stage plan](COMMERCIAL_V2_NEXT_STAGE.md) refine the immediate sequence around verified identity, professional authority and continuous care. Internal clinical recall and lab readiness move into C2; actual supplier interfaces remain C5. C0.3 is locally accepted as a synthetic service-channel increment. The [current audit](COMMERCIAL_V2_BASELINE.md) supersedes earlier deployment gaps only for its recorded scope. Broader C0 and clinical/production qualification remain incomplete.
+
 ## Product decisions
 
 The user has explicitly selected **one dental chain per independent deployment** and **full replacement of the clinic's clinical system, including electronic medical records and prescriptions**. ADC will serve clinic owners, reception staff, dentists, nurses, pharmacy personnel and patients as a working dental practice platform. Clinical completion is a release requirement, rather than a later optional enhancement.
@@ -135,7 +137,7 @@ Batch order reflects clinical dependency, rather than a promise that a visually 
 |---|---|---|---|
 | C0 Product and environment foundation | Professional login/workspaces; product identity/configuration; separate test/production presentation; internal acceptance tools separated | Customer UI has no academic/developer scaffolding; test provenance and production bootstrap guards remain effective; existing role/scope/forms unchanged | Current baseline |
 | C1 Organization, people and authority | Branch onboarding, verified patient/guardian relationships, attributable professionals, nursing/pharmacy/records policies | No unauthorized chart/order/export; revocation and concurrent role/clinic changes verified; qualification evidence is attributable | C0 |
-| C2 Complete dental encounters | Structured record, odontogram, service-specific templates, multi-visit plans, orders, workflow and quality worklists | First clinic's complete service matrix handled; correct patient/encounter and draft/concurrency/exception flows reviewed by dental professionals | C1 |
+| C2 Complete dental encounters | Structured record, odontogram, service-specific templates, multi-visit plans, actual execution/charge bridge, clinical recall, internal lab readiness and quality worklists | First clinic's applicable C2 service matrix handled; correct patient/encounter, partial care and draft/concurrency/exception flows reviewed by dental professionals; prescribing/signing/interfaces retain their later gates | C1 |
 | C3 Clinical evidence and archive | Consent, signatures, immutable amendments, controlled copies and protected imaging/documents | Original signed versions remain verifiable; archive/copy/retention/legal-hold and attachment-recovery cases pass professional review | C2; identity/security foundations |
 | C4 Prescribing and pharmacy | Medication catalogue, prescription/order creation, professional review and fulfilment | No unreviewed medicine charge/dispense or role bypass; units, revisions, cancellations, partial fulfilment and knowledge-source behavior verified | C1–C3 |
 | C5 Nursing and material traceability | Execution, drug/material/implant lots, infection-control linkage, lab/imaging interfaces | Patient/order/use/batch chain is complete; expiry/recall/concurrency and interface failure cases pass the relevant professional review | C2–C4 |
@@ -145,7 +147,11 @@ Batch order reflects clinical dependency, rather than a promise that a visually 
 
 Each batch needs user journeys, abnormal responses, data/state/authority design, changed-service tests, actual PostgreSQL/concurrency and browser checks, independent business reconciliation and migration/recovery coverage as applicable. A test count or a checked personal walkthrough is never substituted for the batch's business exit condition. The machine-readable [backlog](COMMERCIAL_V2_BACKLOG.json) holds concrete work and evidence, initially planned rather than completed.
 
-## First implementation batch C0
+The immediate implementation is **C1.1 patient relationships and bounded appointment authority**, with the minimal C1.0 identity/receipt ADRs and outstanding environment/service contracts. C1.2 professional/shared-care authority follows, then C2 structured encounters, plans/performed facts and recall/readiness. The [24 proposed scenarios](COMMERCIAL_V2_NEXT_STAGE.md) and [requirement trace](research/NEXT_STAGE_TRACEABILITY.json) are unexecuted specifications. Internal lab and non-drug follow-up need not wait behind dispensing; a full financial/clinical release still includes its prescription, signing, material and interface prerequisites.
+
+## Original C0 work package and remaining scope
+
+This list preserves the initial product/environment scope. Service-content and channel work were accepted in C0.3; the uncompleted environment, initialization and clinic-scope contracts remain requirements rather than being marked done by a visual refresh.
 
 1. Write a product/environment contract using existing deployment-stage configuration as the starting point. Keep brand configuration separate from readiness/authority; a “production” appearance cannot enable clinical functions or load synthetic defaults.
 2. Replace customer login, staff shell and patient shell academic text with product/clinic identity, service/help/privacy information and concise action-specific errors. Retain legally meaningful document status and clinical/financial alerts. Do not erase test provenance from archived documents.
@@ -181,9 +187,11 @@ Network/security classification and assessment, reliable signature, clinical int
 
 The [Open Dental chart manual](https://www.opendental.com/manual/chart.html) is a functional benchmark for chart, prescriptions, periodontal data, consent, imaging and multi-visit work. Its market, legal assumptions and integrations are not adopted as Chinese requirements.
 
-## Planning completion and continuity
+## Historical planning completion: 2026-10-22
 
-This turn establishes the commercial product target, the inspected gap baseline, dependencies and acceptance backlog. It changes project planning/instructions, not application behavior, migrations or the running Mac. The preceding local B1.6 source remains undeployed, and its GitHub publication/CI authorization and Docker constraints retain their recorded status. No new attempt to bypass those limits is part of this plan.
+The initial planning turn established the commercial product target, the inspected gap baseline, dependencies and acceptance backlog. At that time it changed planning/instructions, not application behavior, migrations or the running Mac. The preceding local B1.6 source was then undeployed and GitHub/CI and Docker limits were recorded. Those dated statements remain historical; [C0.3](C03_RELEASE_ACCEPTANCE.md) subsequently records authorized publication, exact CI and protected local installation for its synthetic application scope.
+
+The 2026-10-23 research increment changes planning documents only. It preserves all 40 current migration files, the installed application and formal report's implemented baseline. Proposed logical relations remain separate from observed SQL; cloud, actual WeChat runtime/device/experience, sustained operation and professional clinical acceptance remain outstanding. The historical Windows-data and collector UNKNOWN boundaries are retained.
 
 Clinical workflows, qualified reviewers, first-clinic service scope, integrations, hosting and support coverage are the material scheduling dependencies. Estimate the calendar after those contracts and supplier inputs are known; a short interface sprint is not an estimate for replacing a clinical system.
 

@@ -1,0 +1,522 @@
+{
+  "date": "2026-10-23",
+  "plan": "../COMMERCIAL_V2_NEXT_STAGE.md",
+  "study": "DENTAL_PRACTICE_STUDY_20261023.md",
+  "source_register": "dental_study_sources.json",
+  "status": "PLANNED",
+  "scenarios": "NS-01 through NS-24 in the plan; all NOT_RUN for proposed new functionality",
+  "interpretation": "Scenarios are partial evidence slices for the existing full-program requirements; they do not replace C3-C8 professional/target-environment release gates. FIN-01 full acceptance still includes RX-02; the C2 bridge covers non-drug performed events only.",
+  "requirements": [
+    {
+      "requirement_id": "ID-01",
+      "status": "PLANNED",
+      "problem": "Contacts and accounts cannot represent verified patient delegation.",
+      "actors": [
+        "front desk",
+        "identity reviewer",
+        "patient/representative"
+      ],
+      "domain_owner": "identity",
+      "invariant": "Actor, subject, verified basis, action scope and current revision are distinct; existing self-access and receipts remain intact.",
+      "failure_response": "Pending/refused/expired/revoked authority has an explicit front-desk resolution path; no unauthorized effect or receipt disclosure.",
+      "acceptance_scenarios": [
+        "NS-01",
+        "NS-02",
+        "NS-03",
+        "NS-04",
+        "NS-05",
+        "NS-06",
+        "NS-07",
+        "NS-08",
+        "NS-09"
+      ],
+      "source_ids": [
+        "OD-02",
+        "FHIR-01",
+        "CN-REG-05"
+      ],
+      "dependencies": [
+        "SCOPE-01",
+        "ENV-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Verified patients guardians and source-aware import"
+    },
+    {
+      "requirement_id": "ID-02",
+      "status": "PLANNED",
+      "problem": "Restricted branch search can create duplicates while broad chart access leaks sensitive data.",
+      "actors": [
+        "identity reviewer",
+        "referring clinician",
+        "receiving clinician"
+      ],
+      "domain_owner": "identity/shared-care",
+      "invariant": "Only restricted identity resolution and explicit care authority permit cross-clinic continuity; shared phone is not identity proof.",
+      "failure_response": "Route ambiguous identity or missing referral authority to reviewed resolution without global chart exposure.",
+      "acceptance_scenarios": [
+        "NS-05",
+        "NS-10",
+        "NS-22"
+      ],
+      "source_ids": [
+        "CS-01",
+        "CN-REG-02"
+      ],
+      "dependencies": [
+        "ID-01",
+        "AUTH-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Restricted cross-clinic identity resolution and shared-care authority"
+    },
+    {
+      "requirement_id": "AUTH-01",
+      "status": "PLANNED",
+      "problem": "Directory qualifications do not establish current professional permission.",
+      "actors": [
+        "clinical director",
+        "dentist",
+        "pharmacy/nursing/records reviewer"
+      ],
+      "domain_owner": "professional authority",
+      "invariant": "Professional action requires accountable person, effective clinic/service/care scope and validity; role switching cannot self-review.",
+      "failure_response": "Expired/withdrawn scope blocks new privileged effects and preserves historical decisions.",
+      "acceptance_scenarios": [
+        "NS-10",
+        "NS-11",
+        "NS-12",
+        "NS-15"
+      ],
+      "source_ids": [
+        "CN-REG-01",
+        "CN-REG-02",
+        "CN-REG-04"
+      ],
+      "dependencies": [
+        "SCOPE-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Clinical professional scope and attributable permissions"
+    },
+    {
+      "requirement_id": "IAM-01",
+      "status": "PLANNED",
+      "problem": "Departure and account recovery can leave obsolete capabilities.",
+      "actors": [
+        "account owner",
+        "security/operations owner"
+      ],
+      "domain_owner": "accounts",
+      "invariant": "Authentication and applicable session revocation remain aligned with current authority.",
+      "failure_response": "Reject stale capability with recoverable login/role path; no reused demo credentials for customer initialization.",
+      "acceptance_scenarios": [
+        "NS-01",
+        "NS-07",
+        "NS-11",
+        "NS-12"
+      ],
+      "source_ids": [
+        "ASVS-01",
+        "CN-REG-02"
+      ],
+      "dependencies": [
+        "ENV-01",
+        "AUTH-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Customer account activation recovery and session governance"
+    },
+    {
+      "requirement_id": "CLIN-01",
+      "status": "PLANNED",
+      "problem": "Billing notes do not provide structured attributed clinical continuity.",
+      "actors": [
+        "dentist",
+        "patient",
+        "authorized clinical staff"
+      ],
+      "domain_owner": "clinical encounters",
+      "invariant": "Actual encounter and reported/reviewed facts are distinct; draft subject/version is fixed.",
+      "failure_response": "Conflicting edits preserve recoverable work; unreviewed history cannot silently replace clinical evidence.",
+      "acceptance_scenarios": [
+        "NS-13",
+        "NS-15",
+        "NS-18",
+        "NS-24"
+      ],
+      "source_ids": [
+        "OD-04",
+        "DT-01",
+        "FHIR-02",
+        "CN-REG-03"
+      ],
+      "dependencies": [
+        "ID-01",
+        "AUTH-01",
+        "SCOPE-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Structured dental encounters and quality worklists"
+    },
+    {
+      "requirement_id": "CLIN-02",
+      "status": "PLANNED",
+      "problem": "Tooth/surface findings cannot be reliably reconstructed from charge descriptions.",
+      "actors": [
+        "dentist",
+        "clinical reviewer"
+      ],
+      "domain_owner": "dental findings",
+      "invariant": "Tooth numbering/dentition, surface, provenance and version are explicit; keyboard and graphical input preserve the same fact.",
+      "failure_response": "Invalid/ambiguous findings require review, with UNKNOWN retained and no fabricated procedure.",
+      "acceptance_scenarios": [
+        "NS-14",
+        "NS-15"
+      ],
+      "source_ids": [
+        "OD-04",
+        "NOTE-03"
+      ],
+      "dependencies": [
+        "CLIN-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Odontogram periodontal data and service-specific dental findings"
+    },
+    {
+      "requirement_id": "CLIN-03",
+      "status": "PLANNED",
+      "problem": "Single-visit records lose plan alternatives and unfinished treatment.",
+      "actors": [
+        "dentist",
+        "patient/authorized representative"
+      ],
+      "domain_owner": "treatment planning",
+      "invariant": "Accepted version, actual performance, consent and money are separate; only performed events enter the unique charging bridge.",
+      "failure_response": "A revised/refused/partial plan preserves original acceptance and completed events; no silent new bill/refund.",
+      "acceptance_scenarios": [
+        "NS-16",
+        "NS-17",
+        "NS-18",
+        "NS-23",
+        "NS-24"
+      ],
+      "source_ids": [
+        "OD-03",
+        "DA-01",
+        "NOTE-05"
+      ],
+      "dependencies": [
+        "CLIN-01",
+        "CLIN-02"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Longitudinal treatment plans and safe draft saving"
+    },
+    {
+      "requirement_id": "CLIN-04",
+      "status": "PLANNED",
+      "problem": "Cancellation follow-up does not track clinically due continuing care.",
+      "actors": [
+        "dentist",
+        "front desk",
+        "patient"
+      ],
+      "domain_owner": "clinical recall",
+      "invariant": "Clinical due window is owned by clinical staff; front desk owns contact/booking; completion needs the defined actual-care fact.",
+      "failure_response": "Cancelled appointment, declined contact or unreachable patient leaves an attributed resolution rather than false completion.",
+      "acceptance_scenarios": [
+        "NS-19",
+        "NS-21",
+        "NS-22"
+      ],
+      "source_ids": [
+        "OD-07",
+        "DA-02",
+        "CS-02"
+      ],
+      "dependencies": [
+        "CLIN-01",
+        "CLIN-03"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Clinical recall and unfinished-care responsibility"
+    },
+    {
+      "requirement_id": "LAB-01",
+      "status": "PLANNED",
+      "problem": "An apparently free slot can be unusable if a required lab case is late or rejected.",
+      "actors": [
+        "dentist",
+        "front desk",
+        "lab coordinator"
+      ],
+      "domain_owner": "clinical laboratory workflow",
+      "invariant": "Dispatch/receipt/quality acceptance are distinct; required readiness is checked without silently breaking the promised appointment.",
+      "failure_response": "Delay or rework creates accountable coordination; front desk obtains explicit reschedule/cancellation decisions.",
+      "acceptance_scenarios": [
+        "NS-20",
+        "NS-21",
+        "NS-22"
+      ],
+      "source_ids": [
+        "OD-08",
+        "OD-01"
+      ],
+      "dependencies": [
+        "CLIN-01",
+        "AUTH-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Internal laboratory cases and appointment readiness"
+    },
+    {
+      "requirement_id": "FIN-01",
+      "status": "PLANNED",
+      "problem": "Plan and actual care can otherwise create independent duplicate charge sources.",
+      "actors": [
+        "dentist",
+        "finance reviewer"
+      ],
+      "domain_owner": "finance/clinical charge boundary",
+      "invariant": "Typed unique performed source feeds existing finance commands; estimates are not revenue and historical money is unchanged.",
+      "failure_response": "Duplicate/revised clinical input preserves committed money; financial correction follows existing reviewed path.",
+      "acceptance_scenarios": [
+        "NS-16",
+        "NS-17",
+        "NS-18",
+        "NS-23",
+        "NS-24"
+      ],
+      "source_ids": [
+        "OD-05",
+        "OD-06",
+        "NOTE-05"
+      ],
+      "dependencies": [
+        "CLIN-03",
+        "RX-02"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Clinical source charges and treatment-course allocations"
+    },
+    {
+      "requirement_id": "PRIV-01",
+      "status": "PLANNED",
+      "problem": "Write authorization alone does not control sensitive reads or exports.",
+      "actors": [
+        "records/privacy owner",
+        "authorized staff"
+      ],
+      "domain_owner": "access projections and audit",
+      "invariant": "Read/export follows patient/object/action/purpose scope with attributable bounded audit, excluding raw medical text from runtime logs.",
+      "failure_response": "Wrong subject/clinic or revoked authority denies disclosure and records safe evidence.",
+      "acceptance_scenarios": [
+        "NS-04",
+        "NS-07",
+        "NS-10",
+        "NS-11",
+        "NS-12",
+        "NS-22",
+        "NS-24"
+      ],
+      "source_ids": [
+        "CN-REG-02",
+        "CN-REG-05",
+        "ASVS-01"
+      ],
+      "dependencies": [
+        "SCOPE-01",
+        "AUTH-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Sensitive read export retention and processor governance"
+    },
+    {
+      "requirement_id": "REC-02",
+      "status": "PLANNED",
+      "problem": "A clinical save or financial approval does not prove clinical consent or signing.",
+      "actors": [
+        "patient/authorized representative",
+        "dentist"
+      ],
+      "domain_owner": "clinical documents",
+      "invariant": "Plan acceptance is distinct from informed consent; only implemented reviewed signing evidence may be labeled signed.",
+      "failure_response": "Missing signing/consent prerequisite remains visible; do not substitute billing or role-switch approval.",
+      "acceptance_scenarios": [
+        "NS-04",
+        "NS-16",
+        "NS-18"
+      ],
+      "source_ids": [
+        "OD-03",
+        "DA-03",
+        "CN-REG-03"
+      ],
+      "dependencies": [
+        "REC-01",
+        "ID-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Consent archive controlled copies and retention"
+    },
+    {
+      "requirement_id": "REC-01",
+      "status": "PLANNED",
+      "problem": "Corrections must preserve the earlier clinical evidence.",
+      "actors": [
+        "dentist",
+        "records owner"
+      ],
+      "domain_owner": "record archive",
+      "invariant": "Signed original and attributed amendments remain readable and separately linked from financial versions.",
+      "failure_response": "Reject destructive rewrite; retain original and explicitly route the amendment/copy process.",
+      "acceptance_scenarios": [
+        "NS-18",
+        "NS-24"
+      ],
+      "source_ids": [
+        "DA-03",
+        "CN-REG-03"
+      ],
+      "dependencies": [
+        "CLIN-03",
+        "IAM-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Clinical signatures and immutable amendment lifecycle"
+    },
+    {
+      "requirement_id": "QC-01",
+      "status": "PLANNED",
+      "problem": "Scheduling and completion metrics can misclassify rescheduling and open cohorts.",
+      "actors": [
+        "front desk",
+        "clinical lead",
+        "HQ aggregate reader"
+      ],
+      "domain_owner": "operations read projections",
+      "invariant": "Versioned denominators distinguish appointment episode, actual care, contact and cash; HQ sees only authorized aggregates.",
+      "failure_response": "Missing/unmatured data is identified, not coerced to zero or successful care.",
+      "acceptance_scenarios": [
+        "NS-19",
+        "NS-20",
+        "NS-21",
+        "NS-22",
+        "NS-23"
+      ],
+      "source_ids": [
+        "OD-01",
+        "OD-07",
+        "ADA-01",
+        "NOTE-03"
+      ],
+      "dependencies": [
+        "CLIN-03",
+        "CLIN-04",
+        "LAB-01"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Consistent clinical and operational outcome measures"
+    },
+    {
+      "requirement_id": "MIG-01",
+      "status": "PLANNED",
+      "problem": "New identities and clinical sources can detach historical records during migration.",
+      "actors": [
+        "records owner",
+        "finance owner",
+        "operations"
+      ],
+      "domain_owner": "migration/recovery",
+      "invariant": "All 40 migrations and existing facts remain unchanged; new records have provenance and independently checked source links.",
+      "failure_response": "Stop cutover on mismatch; preserve source and execute reviewed forward/recovery path without fabricated historical facts.",
+      "acceptance_scenarios": [
+        "NS-01",
+        "NS-18",
+        "NS-23",
+        "NS-24"
+      ],
+      "source_ids": [
+        "NOTE-05",
+        "CN-REG-03"
+      ],
+      "dependencies": [
+        "REC-02",
+        "RX-03",
+        "CARE-01",
+        "INT-01",
+        "PAY-01",
+        "OPS-01",
+        "ID-02",
+        "CLIN-04",
+        "LAB-01",
+        "QC-01",
+        "INT-02"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Additive clinical migration and rehearsed replacement cutover"
+    },
+    {
+      "requirement_id": "QA-01",
+      "status": "PLANNED",
+      "problem": "Existing scheduling load does not qualify a new clinical workload.",
+      "actors": [
+        "QA",
+        "clinical/finance reviewers",
+        "operations"
+      ],
+      "domain_owner": "release acceptance",
+      "invariant": "Exact-version business, concurrency, usability and target-workload evidence establishes only its declared scope.",
+      "failure_response": "Retain failed/unexecuted gates; no production or WeChat-runtime claim from mocks or old load.",
+      "acceptance_scenarios": [
+        "NS-01",
+        "NS-02",
+        "NS-03",
+        "NS-04",
+        "NS-05",
+        "NS-06",
+        "NS-07",
+        "NS-08",
+        "NS-09",
+        "NS-10",
+        "NS-11",
+        "NS-12",
+        "NS-13",
+        "NS-14",
+        "NS-15",
+        "NS-16",
+        "NS-17",
+        "NS-18",
+        "NS-19",
+        "NS-20",
+        "NS-21",
+        "NS-22",
+        "NS-23",
+        "NS-24"
+      ],
+      "source_ids": [
+        "ASVS-01",
+        "SRE-01",
+        "NOTE-03"
+      ],
+      "dependencies": [
+        "RX-03",
+        "CARE-01",
+        "INT-01",
+        "PAY-01",
+        "PRIV-01",
+        "OPS-01",
+        "ID-02",
+        "CLIN-04",
+        "LAB-01",
+        "QC-01",
+        "INT-02",
+        "OPS-02"
+      ],
+      "execution_status": "NOT_RUN",
+      "requirement_title": "Clinical safety security usability and commercial capacity qualification"
+    }
+  ]
+}

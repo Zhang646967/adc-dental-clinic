@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-23",
+  "status": "PASSED_PLANNING_ARTIFACT_CHECKS",
+  "inspected_application_source": "3d0fb0002e7aa5631f5f12763c2885f85e278dee",
+  "scope": "Research and planning documents only; no application code, configuration, migration, installed data, physical ER or formal-report content changed.",
+  "external_sources": 34,
+  "course_notes": 2,
+  "product_families": 6,
+  "traced_requirements": 16,
+  "proposed_scenarios": 24,
+  "proposed_functionality_execution": "NOT_RUN",
+  "backlog_requirements": 36,
+  "checks": {
+    "unique_requirement_source_ids": true,
+    "all_dependency_targets_resolve": true,
+    "dependency_graph_acyclic": true,
+    "existing_requirement_statuses_preserved": true,
+    "scenario_and_source_trace_complete": true,
+    "local_markdown_links_resolve": 241,
+    "logical_diagrams": "2 SVGs rendered and visually inspected; explicit EXISTING/PROPOSED labels, proposed cardinalities documented",
+    "current_migrations_byte_identical": 40,
+    "actual_database_er": "unchanged",
+    "formal_course_report": "Word/PDF byte-identical to inspected baseline"
+  },
+  "application_regression": "Not rerun locally for this planning-only change; historical results remain linked at their exact original versions. Any publication CI is independently visible on the planning commit.",
+  "clinical_or_production_acceptance": "NOT_ESTABLISHED"
+}

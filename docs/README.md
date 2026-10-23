@@ -2,6 +2,8 @@
 
 当前产品方向：[商业V2总计划](COMMERCIAL_V2_MASTER_PLAN.md) → [代码与证据基线](COMMERCIAL_V2_BASELINE.md) → [分批需求及验收](COMMERCIAL_V2_BACKLOG.json)。首发采用单连锁独立部署，完整诊疗替代纳入目标；课程报告与旧执行记录继续作为来源保留。
 
+最新规划（2026-10-23）：[Open Dental 等六类系统调研](research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 身份与连续诊疗](COMMERCIAL_V2_NEXT_STAGE.md) → [需求与验收追踪](research/NEXT_STAGE_TRACEABILITY.json)。[来源登记](research/dental_study_sources.json)区分官方手册、厂商声明、调查与法规；[规划模型](research/MODEL_NOTES.md)不替代实际数据库 ER。
+
 当前交付 → 业务与设计 → 运行与验证 → 历史来源。课程报告请从 [PDF](../课程报告/课程报告_张加良_8210241102.pdf)、[Word](../课程报告/课程报告_张加良_8210241102.docx) 或 [报告目录](../课程报告/README.md) 直接进入。
 
 ## 业务流程
@@ -27,7 +29,7 @@
 - [当前数据库ER与字段目录](database/README.md)、[171条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
-- [成熟系统学习与差距](MATURE_SYSTEM_STUDY.md)、[后续开发方向](COMMERCIAL_DEVELOPMENT.md)。
+- [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。
 - [AI 接口与边界](AI_INTERFACE.md)、[版本范围](V1_SCOPE_AND_REMAINING.md)。
 
 ## 部署与运行保障

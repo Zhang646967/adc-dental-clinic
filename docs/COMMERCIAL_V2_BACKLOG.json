@@ -1,7 +1,7 @@
 {
   "program": "ADC commercial V2",
   "date": "2026-10-22",
-  "baseline_commit": "c750e7ebabc6bfa90769570a8468972ae7b94b14",
+  "baseline_commit": "3d0fb0002e7aa5631f5f12763c2885f85e278dee",
   "master_plan": "COMMERCIAL_V2_MASTER_PLAN.md",
   "user_confirmed_decisions": {
     "deployment": "independent deployment per dental chain",
@@ -28,12 +28,14 @@
     {
       "id": "C1",
       "title": "Organization identity and authority",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "next_increment": "C1.1 with bounded C1.0 ADRs; see COMMERCIAL_V2_NEXT_STAGE.md"
     },
     {
       "id": "C2",
       "title": "Complete dental encounters",
-      "status": "PLANNED"
+      "status": "PLANNED",
+      "scope_refinement": "Add clinical recall (CLIN-04), internal lab readiness (LAB-01) and metric contracts (QC-01); external supplier interfaces remain C5."
     },
     {
       "id": "C3",
@@ -88,7 +90,7 @@
         "actual browser ordinary and exception journeys",
         "390px keyboard and non-JS checks"
       ],
-      "implementation_notes": "C0 customer entry, service pages, login and ordinary shell framing implemented; complete UI inventory and browser acceptance pending. See C0_SERVICE_RELEASE.md."
+      "implementation_notes": "C0.3 local service-channel/browser acceptance recorded. Full commercial role/task inventory and clinical-workspace usability remain planned; not completed by service-page delivery."
     },
     {
       "id": "SERVICE-01",
@@ -115,16 +117,31 @@
         "ordinary and negative customer/manager browser journeys at 390px and with keyboard/non-JS",
         "protected upgrade-copy reconciliation"
       ],
-      "execution_status": {
-        "local_rule_suite": "1090 passed",
-        "new_django_cases": "41 authored, not run",
-        "entry_http_cases": "5 updated, not run",
-        "postgresql": "not executed",
-        "browser": "not executed for this source",
-        "deployment": "not deployed"
-      },
       "release_scope": "2026-10-23 local synthetic installation only; C0.3 execution record; not cloud/WeChat runtime/commercial clinical qualification",
-      "execution_evidence": "docs/evidence_c03/README.md"
+      "execution_evidence": "docs/evidence_c03/README.md",
+      "execution_history": [
+        {
+          "source_stage": "C0",
+          "status_at_that_stage": {
+            "local_rule_suite": "1090 passed",
+            "new_django_cases": "41 authored, not run",
+            "entry_http_cases": "5 updated, not run",
+            "postgresql": "not executed",
+            "browser": "not executed for this source",
+            "deployment": "not deployed"
+          }
+        }
+      ],
+      "execution_status": {
+        "current_evidence": "docs/evidence_c03/README.md",
+        "application_commit": "3b78cc5f430f18411bf50e4314f287b2c95666a0",
+        "exact_ci": "PASSED: 1095 rule checks and 1474 PostgreSQL/HTTP/concurrency cases",
+        "local_synthetic_installation": "PASSED",
+        "independent_encrypted_restore": "PASSED",
+        "wechat_runtime_device_experience": "NOT_RUN",
+        "cloud": "NOT_RUN",
+        "commercial_clinical_qualification": "NOT_ESTABLISHED"
+      }
     },
     {
       "id": "SERVICE-02",
@@ -155,19 +172,35 @@
         "official compiler and native runtime journeys",
         "protected matching backend/client deployment"
       ],
-      "execution_status": {
-        "local_rule_suite": "1095 passed",
-        "native_source_transport_checks": "107 passed",
-        "native_mock_api_page_scenarios": "23 passed",
-        "new_django_cases": "25 authored, not run",
-        "preserved_migrations": 40,
-        "postgresql": "not executed",
-        "official_compiler": "not executed for this 11-page source",
-        "native_runtime": "not executed",
-        "deployment": "not deployed"
-      },
       "release_scope": "2026-10-23 local synthetic installation only; C0.3 execution record; not cloud/WeChat runtime/commercial clinical qualification",
-      "execution_evidence": "docs/evidence_c03/README.md"
+      "execution_evidence": "docs/evidence_c03/README.md",
+      "execution_history": [
+        {
+          "source_stage": "C0.2",
+          "status_at_that_stage": {
+            "local_rule_suite": "1095 passed",
+            "native_source_transport_checks": "107 passed",
+            "native_mock_api_page_scenarios": "23 passed",
+            "new_django_cases": "25 authored, not run",
+            "preserved_migrations": 40,
+            "postgresql": "not executed",
+            "official_compiler": "not executed for this 11-page source",
+            "native_runtime": "not executed",
+            "deployment": "not deployed"
+          }
+        }
+      ],
+      "execution_status": {
+        "current_evidence": "docs/evidence_c03/README.md",
+        "application_commit": "3b78cc5f430f18411bf50e4314f287b2c95666a0",
+        "exact_ci": "PASSED: 1095 rule checks and 1474 PostgreSQL/HTTP/concurrency cases",
+        "local_synthetic_installation": "PASSED",
+        "independent_encrypted_restore": "PASSED",
+        "wechat_runtime_device_experience": "NOT_RUN",
+        "cloud": "NOT_RUN",
+        "commercial_clinical_qualification": "NOT_ESTABLISHED",
+        "official_offline_compilation": "PASSED for retained 11-page source; not WeChat runtime acceptance"
+      }
     },
     {
       "id": "ENV-01",
@@ -540,7 +573,7 @@
     {
       "id": "CARE-01",
       "batch": "C5",
-      "title": "Nursing execution sterilization and specialty follow-up",
+      "title": "Nursing execution sterilization and specialty traceability",
       "status": "PLANNED",
       "dependencies": [
         "CLIN-03",
@@ -555,13 +588,14 @@
       "acceptance": [
         "Applicable instrument/package/sterilization evidence links to actual use and patient care.",
         "Nursing records actual execution and escalation instead of merely copying planned orders.",
-        "Contracted specialty follow-ups and incomplete external results have owners and deadlines."
+        "Specialty execution and infection-control exceptions have accountable owners; general clinical recall moves to CLIN-04/C2 and internal laboratory readiness to LAB-01/C2."
       ],
       "required_evidence": [
         "clinic workflow review",
         "traceability walkthroughs",
         "independent event-chain comparison"
-      ]
+      ],
+      "scope_refinement": "2026-10-23: split early non-drug recall/lab coordination from the later stock/sterilization workflow; preserve full professional execution gate."
     },
     {
       "id": "INT-01",
@@ -586,7 +620,8 @@
         "provider contract",
         "real authorized sandbox or target integration evidence",
         "outage replay and wrong-patient negative cases"
-      ]
+      ],
+      "scope_refinement": "LAB-01/C2 provides internal/manual case tracking. INT-01 still requires actual authorized supplier/imaging interface evidence."
     },
     {
       "id": "FIN-01",
@@ -611,7 +646,8 @@
         "financial model ADR",
         "independent amount/source oracles",
         "clinical correction and historical version regression"
-      ]
+      ],
+      "scope_refinement": "Define and verify the unique non-drug performed-event charging bridge in C2.2. Full FIN-01 release continues to require RX-02 and required deposit/allocation/provider work; no duplicate billing source."
     },
     {
       "id": "PAY-01",
@@ -685,7 +721,8 @@
         "data-flow and processing register",
         "jurisdiction applicability review",
         "cross-patient and marker-secret tests"
-      ]
+      ],
+      "scope_refinement": "Begin object/purpose-scoped reads and safe audit with C1.2. C7 remains the full retention/processor/target-environment acceptance gate."
     },
     {
       "id": "OPS-01",
@@ -722,7 +759,12 @@
         "CARE-01",
         "INT-01",
         "PAY-01",
-        "OPS-01"
+        "OPS-01",
+        "ID-02",
+        "CLIN-04",
+        "LAB-01",
+        "QC-01",
+        "INT-02"
       ],
       "owner_roles_to_assign": [
         "medical records owner",
@@ -731,7 +773,7 @@
         "developer"
       ],
       "acceptance": [
-        "Existing 39 migrations/history remain preserved and old free-text/billing data is not fabricated into missing clinical facts.",
+        "Preserve all 40 current migrations and historical facts; old free-text/billing data is not fabricated into missing clinical events or diagnoses.",
         "Real source records are mapped with provenance and reviewed ambiguities; row/version/signature/attachment/amount comparisons are independent.",
         "Write freeze, final delta, downtime procedure, named acceptance and data-preserving rollback/forward recovery are rehearsed."
       ],
@@ -752,7 +794,13 @@
         "INT-01",
         "PAY-01",
         "PRIV-01",
-        "OPS-01"
+        "OPS-01",
+        "ID-02",
+        "CLIN-04",
+        "LAB-01",
+        "QC-01",
+        "INT-02",
+        "OPS-02"
       ],
       "owner_roles_to_assign": [
         "clinical director",
@@ -823,6 +871,196 @@
         "observed outcome and incident register",
         "wider-rollout authorization"
       ]
+    },
+    {
+      "id": "ID-02",
+      "batch": "C1",
+      "title": "Restricted cross-clinic identity resolution and shared-care authority",
+      "status": "PLANNED",
+      "dependencies": [
+        "ID-01",
+        "AUTH-01"
+      ],
+      "owner_roles_to_assign": [
+        "identity/records reviewer",
+        "referring and receiving clinicians",
+        "privacy owner"
+      ],
+      "acceptance": [
+        "Resolve identity ambiguity through a limited authorized projection; shared names or contact details never auto-merge patients.",
+        "Cross-clinic chart access requires explicit current care authority, not merely chain membership or a successful search.",
+        "Retain requested/approved/refused/revoked transfer evidence and preserve original clinic records."
+      ],
+      "required_evidence": [
+        "identity-resolution and referral policy",
+        "cross-clinic negative tests",
+        "NS-05/10/22 scenarios"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "CLIN-04",
+      "batch": "C2",
+      "title": "Clinical recall and unfinished-care responsibility",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-01",
+        "CLIN-03"
+      ],
+      "owner_roles_to_assign": [
+        "dentists",
+        "front desk",
+        "clinic service owner"
+      ],
+      "acceptance": [
+        "Clinical staff define due windows; front desk owns contact and booking, with named responsibility and overdue work.",
+        "Contacted, booked, attended and clinically completed are distinct; cancellation restores appropriate unfinished work.",
+        "Declined, deferred and unreachable outcomes retain attributable decisions and do not fabricate clinical completion."
+      ],
+      "required_evidence": [
+        "recall state/owner contract",
+        "NS-19/21/22 scenarios",
+        "independent cohort and completion assertions"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "LAB-01",
+      "batch": "C2",
+      "title": "Internal laboratory cases and appointment readiness",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-01",
+        "AUTH-01"
+      ],
+      "owner_roles_to_assign": [
+        "dentists",
+        "front desk",
+        "lab coordinator"
+      ],
+      "acceptance": [
+        "Record supplier/case identity, due time and dispatch/return; patient and clinical source are consistent.",
+        "Receipt, quality acceptance and rework are distinct; missing readiness creates an owned coordination item.",
+        "Preserve the original appointment until explicit authorized coordination; synthetic/manual acknowledgements never imply actual integration."
+      ],
+      "required_evidence": [
+        "laboratory and readiness state contract",
+        "NS-20/21/22 scenarios",
+        "actual case-to-appointment reconciliation"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "SCH-01",
+      "batch": "C5",
+      "title": "Supporting-team capacity and staged resource occupancy",
+      "status": "PLANNED",
+      "dependencies": [
+        "AUTH-01",
+        "CLIN-03",
+        "LAB-01"
+      ],
+      "owner_roles_to_assign": [
+        "front desk",
+        "clinical lead",
+        "nursing lead",
+        "resource manager"
+      ],
+      "acceptance": [
+        "Front desk retains daily schedule ownership; clinical staff define required team and readiness constraints.",
+        "Any phased occupancy model preserves old full-slot plans and prevents conflicting actual use.",
+        "Changes protect existing promises and require explicit coordination, with no autonomous overbooking."
+      ],
+      "required_evidence": [
+        "observed clinic time/resource study",
+        "phased-resource ADR and concurrency cases",
+        "old-plan and exception comparison"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "QC-01",
+      "batch": "C2",
+      "title": "Consistent clinical and operational outcome measures",
+      "status": "PLANNED",
+      "dependencies": [
+        "CLIN-03",
+        "CLIN-04",
+        "LAB-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinical lead",
+        "front desk",
+        "finance",
+        "HQ aggregate reader"
+      ],
+      "acceptance": [
+        "Version appointment, care-plan, recall and lab denominators; distinguish mature cohorts, reschedules and actual completion.",
+        "Report quality/rework/overdue work alongside recorded financial facts; absent costs do not support profit claims.",
+        "HQ receives authorized aggregates and no contact or clinical text; changes remain reconcilable to source events."
+      ],
+      "required_evidence": [
+        "metric contract and source lineage",
+        "NS-19/20/21/22/23 scenarios",
+        "independently recomputed cohort totals"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "OPS-02",
+      "batch": "C7",
+      "title": "Host collector diagnosis and sustained service evidence",
+      "status": "PLANNED",
+      "dependencies": [
+        "ENV-01"
+      ],
+      "owner_roles_to_assign": [
+        "operations owner",
+        "developer"
+      ],
+      "acceptance": [
+        "Expose bounded collection-stage and error-category evidence without raw sensitive payloads.",
+        "Retain historical UNKNOWN and unreproduced failure; distinguish collection failure from healthy-host evidence.",
+        "Close incidents only with attributable handling and appropriate fresh/sustained observations; target recovery includes required objects and dependencies."
+      ],
+      "required_evidence": [
+        "bounded diagnostic negative tests",
+        "collector failure reproduction or explicitly retained uncertainty",
+        "continuous observation and recovery record"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "INT-02",
+      "batch": "C5",
+      "title": "Local regulatory reporting and institution interface applicability",
+      "status": "PLANNED",
+      "dependencies": [
+        "SCOPE-01",
+        "PRIV-01"
+      ],
+      "owner_roles_to_assign": [
+        "clinic compliance owner",
+        "local platform/provider",
+        "developer"
+      ],
+      "acceptance": [
+        "Determine the actual jurisdiction and required clinic reporting/interface contract.",
+        "Map minimum necessary fields, institution identifiers, purpose and accountable review before exchange.",
+        "Required interfaces pass actual authorized target tests; mocks or a generic standards link cannot mark them available."
+      ],
+      "required_evidence": [
+        "jurisdiction/interface applicability matrix",
+        "authorized integration and outage/replay evidence"
+      ],
+      "planning_source": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+      "execution_status": "NOT_RUN"
     }
   ],
   "scheduling_dependencies": [
@@ -833,8 +1071,32 @@
     "validated independent hosting and support coverage"
   ],
   "current_execution_constraints": [
-    "Latest local entry source has not been deployed to the Mac.",
-    "Previous Docker/preview access and GitHub publication authorization limits retain their recorded status; no new bypass or upload is authorized by this plan."
+    "C0.3 application 3b78cc5f430f18411bf50e4314f287b2c95666a0 is installed locally with retained exact CI, restore and protected-update evidence; this research changes no runtime behavior.",
+    "Actual WeChat runtime/device/experience and cloud remain NOT_RUN; new-version capacity and continuous target operation remain separately unverified.",
+    "C1-C8 new clinical/identity functionality remains PLANNED; no qualified professional acceptance or commercial clinical release is established.",
+    "The unreproduced host-collector failure and historical UNKNOWN gap remain open evidence; short healthy samples do not prove continuous service.",
+    "Historical Windows-original data recovery remains UNRESOLVED."
   ],
-  "commercial_release_requirement": "Complete first-customer contracted outpatient clinical replacement plus verified identity/privacy/money/recovery/migration/support; an operational-only preview is not the selected finished product."
+  "commercial_release_requirement": "Complete first-customer contracted outpatient clinical replacement plus verified identity/privacy/money/recovery/migration/support; an operational-only preview is not the selected finished product.",
+  "updated_on": "2026-10-23",
+  "baseline_history": [
+    {
+      "date": "2026-10-22",
+      "baseline_commit": "c750e7ebabc6bfa90769570a8468972ae7b94b14",
+      "note": "Original commercial planning baseline; dated execution constraints preserved below."
+    }
+  ],
+  "next_stage_plan": "docs/COMMERCIAL_V2_NEXT_STAGE.md",
+  "research": "docs/research/DENTAL_PRACTICE_STUDY_20261023.md",
+  "requirement_trace": "docs/research/NEXT_STAGE_TRACEABILITY.json",
+  "execution_constraint_history": [
+    {
+      "date": "2026-10-22",
+      "constraints": [
+        "Latest local entry source has not been deployed to the Mac.",
+        "Previous Docker/preview access and GitHub publication authorization limits retain their recorded status; no new bypass or upload is authorized by this plan."
+      ],
+      "superseded_scope": "C0.3 records subsequently authorized exact CI, publication and protected local synthetic installation. Historical restrictions retain their original date only."
+    }
+  ]
 }

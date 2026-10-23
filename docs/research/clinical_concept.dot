@@ -1,0 +1,25 @@
+digraph Clinical {
+  graph [rankdir=TB, bgcolor="#ffffff", pad="0.32", nodesep="0.65", ranksep="0.60", fontname="Arial", fontsize=18, label="ADC | Continuous care and charging\nPLANNED logical model · 2026-10-23", labelloc=t];
+  node [shape=box, style="rounded,dashed,filled", fillcolor="#edf7f5", color="#16746e", fontname="Arial", fontsize=12, margin="0.16,0.12"];
+  edge [fontname="Arial", fontsize=10, color="#526578", arrowsize=0.7];
+  patient [style="rounded,filled", fillcolor="#f0f3f7", color="#62748b", label="EXISTING\nPatient"];
+  visit [style="rounded,filled", fillcolor="#f0f3f7", color="#62748b", label="EXISTING\nVisit\nAppointment promise"];
+  charge [style="rounded,filled", fillcolor="#f0f3f7", color="#62748b", label="EXISTING\nTreatmentRecord\nFinancial charge line"];
+  encounter [label="PROPOSED\nEncounter\nActual interaction"];
+  plan [label="PROPOSED\nTreatment plan"];
+  version [label="PROPOSED\nPlan version\nRetained decision"];
+  step [label="PROPOSED\nPlanned step\nNever actual care itself"];
+  performed [label="PROPOSED\nPerformed procedure\nPatient / author / time"];
+  bridge [label="PROPOSED\nCharge source\nUnique performed event"];
+  {rank=same;patient;visit;}
+  {rank=same;step;encounter;}
+  patient -> encounter [label="0..* encounters"];
+  patient -> plan [label="0..* plans"];
+  plan -> version [label="1..* versions"];
+  version -> step [label="0..* steps"];
+  visit -> encounter [label="0..1 encounter\nvisit link optional", style=dashed];
+  encounter -> performed [label="0..* events"];
+  step -> performed [label="0..* events\nstep link optional"];
+  performed -> bridge [label="0..1 source"];
+  bridge -> charge [label="0..1 original line\nvia finance command"];
+}
