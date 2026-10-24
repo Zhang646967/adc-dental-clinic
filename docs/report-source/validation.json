@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_c21",
-  "pdf_pages": 144,
-  "business_use_cases": 71,
+  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_c23",
+  "pdf_pages": 164,
+  "business_use_cases": 80,
   "shared_subfunctions": 1,
-  "complete_specifications": 72,
-  "tables": 90,
-  "figures": 41,
+  "complete_specifications": 81,
+  "tables": 99,
+  "figures": 50,
   "mind_maps": 6,
-  "contents_entries": 62,
-  "legacy_substantive_fields_preserved": 260,
+  "contents_entries": 67,
+  "legacy_substantive_fields_preserved": 280,
   "SU04_channel_expansion_explicit": true,
   "all_AT_01_25_retained": true,
   "pending_cases": [],
@@ -20,28 +20,21 @@
   "all_fonts_embedded": true,
   "font_subsets": 25,
   "media_parts_preserved": 39,
-  "original_migrations_preserved": 44,
+  "original_migrations_preserved": 47,
   "frozen_reports_unchanged": true,
   "private_values_absent": 11,
-  "word_sha256": "f2c3c96c695866a11a7f8d3eb94df4063f8a2ad1a0c6ad1987fe3f1045265209",
-  "pdf_sha256": "3410c810ff91a1f5969d0615d5054da4fe2ec56cb94adcdf960e46ee92e6c0e1",
-  "database_er_views": 11,
+  "word_sha256": "5e10c7494ed074e857722c78188d57486ea9ead19963a8e836f2674183bebf79",
+  "pdf_sha256": "24cbc5d3e119fac6130ab844bf6745424f820b21c9d866f8207a6b8a166aa377",
+  "database_er_views": 17,
   "front_desk_scheduling_role_migration": "implemented",
   "visual_review": {
-    "pages": 144,
-    "exact_previously_reviewed_body_pixels": 27,
-    "changed_bodies_overview_reviewed": 117,
-    "overview_sheets": 15,
-    "critical_pages_inspected_at_full_resolution": [
-      58,
-      59,
-      63,
-      141,
-      142,
-      144
+    "pages": 164,
+    "exact_approved_body_pixel_matches": 163,
+    "new_contents_pages_inspected_at_full_resolution": [
+      5
     ],
-    "all_fonts_embedded": true,
-    "all_page_bounds_and_captions_verified": true,
-    "scope": "Current render-4 bodies: 27 exact prior matches, all117 changed bodies inspected in rendered overviews; new ER/state and clinical specs checked in detail. No old pass flag reused."
+    "new_state_and_case_pages_inspected_in_prior_render": true,
+    "all_current_page_bounds_fonts_captions_and_contents_verified": true,
+    "scope": "All final render-9 page bodies:163 exact body-pixel matches to individually or previously approved renders, one updated contents page visually inspected at full resolution. Current metadata/content/font/page-bound/caption tests are run separately; no old validation pass reused."
   }
 }

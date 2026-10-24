@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": 113,
+  "clinics": 5,
+  "page_errors": 0,
+  "seven_roles": true,
+  "independent_receipt_refund_review": true,
+  "same_request_replay": true,
+  "sensitive_projection_excluded": true,
+  "scope": "C2.2–C2.3 real Chrome and actual native Page handlers over HTTP/PostgreSQL; synthetic professional evidence only, not WeChat runtime"
+}

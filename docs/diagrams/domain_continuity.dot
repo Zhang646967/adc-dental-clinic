@@ -1,0 +1,26 @@
+digraph continuity {
+ graph [rankdir=TB,bgcolor="white",nodesep=0.4,ranksep=0.55,pad=0.2,splines=polyline];
+ node [shape=box,style="rounded,filled",fillcolor="#f2f4f6",fontname="Noto Sans CJK SC",fontsize=15,margin="0.3,0.18"];
+ edge [fontname="Noto Sans CJK SC",fontsize=12,color="#45515e",arrowsize=0.8];
+ exam [label="实际就诊与确认检查\n患者及诊所由原就诊确定"];
+ plan [label="方案及步骤版本\n稳定目标保留版本沿革"];
+ decision [label="本人具体版本决定\n认可／暂缓／不选择"];
+ actual [label="实际已提供项目\n部分／完成，原开单快照"];
+ bill [label="唯一原收费来源\n结算与资金独立审核"];
+ next [label="医师后续要求\n服务、窗口及完成标准"];
+ appointment [label="正式预约及资源\n明确关联，保留改期后继"];
+ recall [label="前台随访责任\n负责人、期限及联系历史"];
+ lab [label="加工请求与送返周期\n具体版本临床验收"];
+ exam -> plan [label="作为确认依据"];
+ plan -> decision [label="本人逐步核对"];
+ plan -> actual [label="可引用已接受步骤"];
+ decision -> actual [style=dashed,label="是计划内执行条件"];
+ actual -> bill [label="按实际及计费约定"];
+ exam -> next [label="明确后续目标"];
+ next -> appointment [label="前台明确关联"];
+ next -> recall [label="前台承接责任"];
+ actual -> recall [style=dashed,label="达到目标并关闭才可核对完成"];
+ plan -> lab [label="明确加工依赖"];
+ lab -> actual [style=dashed,label="本周期及具体版本就绪"];
+ {rank=same;decision;lab;next;}
+}

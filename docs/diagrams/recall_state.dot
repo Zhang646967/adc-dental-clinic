@@ -1,0 +1,20 @@
+digraph recall {
+ graph [rankdir=TB,bgcolor="white",nodesep=0.6,ranksep=0.65,pad=0.2];
+ node [shape=box,style="rounded,filled",fillcolor="#f2f4f6",fontname="Noto Sans CJK SC",fontsize=15,fixedsize=true,width=2.6,height=0.85];
+ edge [fontname="Noto Sans CJK SC",fontsize=14,color="#45515e",arrowsize=0.8];
+ start [shape=point,width=.08,height=.08];open [label="继续联系与安排\nOPEN"];
+ review [label="转医师核对\nREVIEW"];
+ done [label="已核对实际完成\nCOMPLETED"];
+ withdrawn [label="原指示已撤回\nWITHDRAWN"];
+ start -> open [label="1"];
+ open -> open [label="2"];
+ open -> review [label="3"];
+ review -> review [label="4"];
+ review -> open [label="5"];
+ open -> done [label="6"];
+ review -> done [label="6"];
+ open -> withdrawn [label="7"];
+ review -> withdrawn [label="7"];
+ note [shape=plaintext,style="",fixedsize=true,width=6.1,height=2.2,fontsize=12,label="1 前台明确认领责任和下次内部期限。\l2 记录联系、未回复、内部协调或责任接续，历史追加。\l3 本人暂不继续，转医师核对；不自动再次联系。\l4 内部协调并保留责任及期限。\l5 有明确依据后恢复协调。\l6 关联后续就诊已关闭，患者、诊所及服务相符，达到原完成标准。\l7 医师已撤回原指示，前台明确核对；不记成实际完成。\l联系、成约、到诊和部分治疗不等于目标完成。\l原建议窗口和预约保留，迟延照实记录。\l"];
+ done -> note [style=invis];withdrawn -> note [style=invis];
+}

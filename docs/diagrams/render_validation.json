@@ -1,0 +1,17 @@
+{
+  "domain_continuity": {
+    "width": 661,
+    "height": 556,
+    "nodes": 9
+  },
+  "recall_state": {
+    "width": 468,
+    "height": 620,
+    "nodes": 6
+  },
+  "lab_state": {
+    "width": 579,
+    "height": 743,
+    "nodes": 7
+  }
+}

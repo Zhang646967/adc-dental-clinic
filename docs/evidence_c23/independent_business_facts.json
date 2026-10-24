@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "scope": "Independent raw database calculation for the five browser care/settlement journeys; no reuse of application balance or completion selectors",
+  "clinics": 5,
+  "scenarios": [
+    {
+      "stage_bill": "0.00",
+      "actual_billed": "200.00",
+      "gross_receipt": "200.00",
+      "refund": "100.00",
+      "net_cash": "100.00",
+      "outstanding": "100.00",
+      "actual_rows": 2,
+      "original_charge_rows": 1,
+      "lab_cycle": 3
+    },
+    {
+      "stage_bill": "0.00",
+      "actual_billed": "200.00",
+      "gross_receipt": "200.00",
+      "refund": "100.00",
+      "net_cash": "100.00",
+      "outstanding": "100.00",
+      "actual_rows": 2,
+      "original_charge_rows": 1,
+      "lab_cycle": 3
+    },
+    {
+      "stage_bill": "0.00",
+      "actual_billed": "200.00",
+      "gross_receipt": "200.00",
+      "refund": "100.00",
+      "net_cash": "100.00",
+      "outstanding": "100.00",
+      "actual_rows": 2,
+      "original_charge_rows": 1,
+      "lab_cycle": 3
+    },
+    {
+      "stage_bill": "0.00",
+      "actual_billed": "200.00",
+      "gross_receipt": "200.00",
+      "refund": "100.00",
+      "net_cash": "100.00",
+      "outstanding": "100.00",
+      "actual_rows": 2,
+      "original_charge_rows": 1,
+      "lab_cycle": 3
+    },
+    {
+      "stage_bill": "0.00",
+      "actual_billed": "200.00",
+      "gross_receipt": "200.00",
+      "refund": "100.00",
+      "net_cash": "100.00",
+      "outstanding": "100.00",
+      "actual_rows": 2,
+      "original_charge_rows": 1,
+      "lab_cycle": 3
+    }
+  ],
+  "invoice_count": 510,
+  "billed_total": "51000.00",
+  "gross_receipts": "51000.00",
+  "refunds": "500.00",
+  "net_patient_cash": "50500.00",
+  "equipment_expense": "0",
+  "no_duplicate_execution_or_charge": true,
+  "partial_and_actual_completion_separate": true,
+  "independent_review": true,
+  "original_money_history_retained": true
+}

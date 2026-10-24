@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "scope": "Print projections omit only the numbered legend, retained as actual report text",
+  "views": {
+    "recall_state": {
+      "width": 433.20001220703125,
+      "height": 399.7600402832031
+    },
+    "lab_state": {
+      "width": 557.634033203125,
+      "height": 531.2000122070312
+    }
+  }
+}

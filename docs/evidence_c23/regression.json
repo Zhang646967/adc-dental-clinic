@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "exit_code": 0,
+  "seconds": 445.356,
+  "source_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "source_checks": 1104,
+  "postgresql_http_concurrency_cases": 1688,
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "scope": "Complete existing source and real PostgreSQL/HTTP/concurrency suite on exact application commit"
+}

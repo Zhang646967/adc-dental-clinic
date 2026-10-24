@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "date": "2026-10-21",
-  "scope": "B1.4 patient self-rescheduling, own retained offers, resource/cancellation continuity and six actual ER views",
+  "date": "2026-10-24",
+  "scope": "Current integrated formal report: identity, professional scope, continuous care, recall/lab, finance/equipment and actual ER",
   "user_requests": [
     {
       "id": "U1",
@@ -31,8 +31,8 @@
         "portal/views.py",
         "portal/services.py"
       ],
-      "status": "website booking, cancellation, self-rescheduling and own offer replacement implemented; mini-program pending",
-      "evidence": "evidence_b14/README.md"
+      "status": "Website and native source/HTTP workflows implemented; actual WeChat runtime/device/experience remain separate.",
+      "evidence": "evidence_c23/README.md"
     },
     {
       "id": "U3",
@@ -68,9 +68,9 @@
         "3.6",
         "appendix A/B/C"
       ],
-      "business_use_cases": 58,
+      "business_use_cases": 80,
       "shared_subfunction": 1,
-      "status": "59 complete specifications including one shared subfunction"
+      "status": "81 complete specifications including one shared subfunction"
     },
     {
       "id": "U6",
@@ -103,8 +103,8 @@
         "4.13",
         "6.2"
       ],
-      "evidence": "database/README.md",
-      "status": "six actual ER views; 69 SQL tables, 618 ORM columns plus 4 migration-journal columns, 170 foreign keys and 42 triggers; additive relation guards and direct PostgreSQL counterexamples verified"
+      "evidence": "evidence_c23/mac_schema.json",
+      "status": "17 actual ER views;101 SQL tables/100ORM/966ORM columns/282SQL FKs/74 triggers; observed installed structure equals documentation."
     },
     {
       "id": "U9",
@@ -121,7 +121,13 @@
     }
   ],
   "validation": "report-source/validation.json",
-  "domain_and_state_models": "three core views: care/billing, telephone conversion and resource occupation; separate reception and resource-coordination states",
+  "domain_and_state_models": "Care/billing, reception conversion, physical resources and continuous-care responsibilities are separate domain views; reception/resource and recall/lab states retain their own guards.",
   "historical_application_changes": true,
-  "this_update_application_changes": true
+  "this_update_application_changes": true,
+  "scope_history": [
+    {
+      "date": "2026-10-21",
+      "scope": "B1.4 patient self-rescheduling, own retained offers, resource/cancellation continuity and six actual ER views"
+    }
+  ]
 }

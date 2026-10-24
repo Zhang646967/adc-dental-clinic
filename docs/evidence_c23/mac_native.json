@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "checks": 16,
+  "business_writes": false,
+  "scope": "Actual Mac native Page handlers and API read/preview using existing assigned account; no booking confirmation; WeChat runtime not executed"
+}

@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "status": "PASS_LOCAL_SYNTHETIC_DELIVERY",
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "full_regression": "regression.json",
+  "exact_ci": "application_ci.json",
+  "business": "clinical_browser.json",
+  "independent_money": "independent_business_facts.json",
+  "capacity": "capacity.json",
+  "recovery": "release_restore.json",
+  "installed": "mac_update.json",
+  "actual_er": "mac_schema.json",
+  "formal_report": "report_validation.json",
+  "requirements": "requirement_trace.json",
+  "external_gates": {
+    "qualified_templates_and_professional_review": "NOT_SUPPLIED",
+    "full_qc_periodontal_and_wider_commercial_contracts": "SEPARATE_BACKLOG",
+    "wechat_runtime_device_experience": "NOT_RUN",
+    "cloud": "SERVER_NOT_PURCHASED",
+    "twenty_clinic_capacity": "NOT_ESTABLISHED",
+    "continuous_24h": "NOT_ESTABLISHED",
+    "independent_https_runtime_role": "NOT_RUN_LOCAL_RC_USES_LEGACY_OWNER",
+    "historical_windows_data": "UNRESOLVED"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "checks": 383,
+  "business_writes": false,
+  "scope": "C2.2–C2.3 actual Mac update; nine existing accounts, seven roles; read-only business checks, existing patient has no appointment; no injected business fixtures"
+}

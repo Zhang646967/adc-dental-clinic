@@ -1,0 +1,15 @@
+digraph laboratory {
+ graph [rankdir=TB,bgcolor="white",nodesep=0.55,ranksep=0.55,pad=0.2];
+ node [shape=box,style="rounded,filled",fillcolor="#f2f4f6",fontname="Noto Sans CJK SC",fontsize=15,fixedsize=true,width=2.5,height=.8];
+ edge [fontname="Noto Sans CJK SC",fontsize=14,color="#45515e",arrowsize=0.8];
+ request [label="待前台安排\nREQUESTED"];dispatched [label="手工登记送出\nDISPATCHED"];
+ received [label="已返回，待验收\nRECEIVED"];accepted [label="具体步骤本周期通过\nACCEPTED"];
+ rework [label="明确返工，未就绪\nREWORK"];withdrawn [label="医师明确撤回\nWITHDRAWN"];
+ request -> dispatched [label="1"];dispatched -> dispatched [label="2"];
+ dispatched -> received [label="3"];received -> accepted [label="4"];
+ received -> rework [label="5"];accepted -> rework [label="5"];
+ rework -> dispatched [label="6"];accepted -> accepted [label="7"];
+ request -> withdrawn [style=dashed,label="8"];received -> withdrawn [style=dashed,label="8"];
+ note [shape=plaintext,style="",fixedsize=true,width=6.1,height=2.2,fontsize=12,label="1 前台认领责任，记录实际送出；开始新物理周期。\l2 获悉延误，记录内部跟进；原需要日期和预约保留。\l3 前台记录本周期实际返回，不代表临床适配。\l4 医师验收当前确切步骤，记录实际时间及结论。\l5 医师明确返工，并单列前台需协调的事项。\l6 重新送出、返回，进入下一物理周期后重新验收。\l7 新版复用须重新核对具体步骤，旧验收不自动继承。\l8 各非撤回阶段均可由医师明确撤回，保留原请求。\l撤回不免除步骤依赖；就绪本身不产生治疗或收费。\l"];
+ rework -> note [style=invis];withdrawn -> note [style=invis];
+}

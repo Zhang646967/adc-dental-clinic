@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "clinics": 5,
+  "normal_frontdesk_availability": true,
+  "explicit_followup_links": 5,
+  "explicit_reschedules": 5,
+  "faults": 5,
+  "faulted_checkin_refused": 5,
+  "compatible_same_doctor_time_replacements": 5,
+  "automatic_cancellations": 0,
+  "original_links_retained": true,
+  "clinical_and_money_facts_unchanged_by_coordination": true
+}

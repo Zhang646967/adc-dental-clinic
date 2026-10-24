@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "checks": 34,
+  "business_writes": false,
+  "scope": "Actual installed C2.2–C2.3, one explicitly synthetic account selecting two patients in two clinics, website Chrome and native Page/HTTP; no booking confirmation; not WeChat runtime"
+}

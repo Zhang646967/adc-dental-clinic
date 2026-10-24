@@ -1,0 +1,88 @@
+{
+  "scope": "Executed local synthetic C2.2–C2.3 software contract, not full commercial/professional acceptance",
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "requirements": [
+    {
+      "use_case": "SU-72",
+      "invariant": "跨次方案保留确切版本、目录定义与未知费用",
+      "owner": "clinical/plans.py",
+      "regression": "tests/test_treatment_continuity.py:test_confirmed_plan_retains_original_service_definition_after_catalogue_change",
+      "executed_evidence": "clinical_browser.json",
+      "acceptance": "AT-CONTINUITY-72"
+    },
+    {
+      "use_case": "SU-73",
+      "invariant": "本人决定绑定具体步骤；旧决定、代约和互斥选项不能绕过",
+      "owner": "clinical/plans.py",
+      "regression": "tests/test_treatment_continuity_http.py:test_mini_plan_and_website_share_exact_patient_decisions",
+      "executed_evidence": "clinical_browser.json",
+      "acceptance": "AT-CONTINUITY-73"
+    },
+    {
+      "use_case": "SU-74",
+      "invariant": "实际执行与唯一原收费；阶段不收费仍为已治疗",
+      "owner": "clinical/executions.py",
+      "regression": "tests/test_treatment_continuity.py:test_on_completion_partial_then_final_charge_across_visits",
+      "executed_evidence": "independent_business_facts.json",
+      "acceptance": "AT-CONTINUITY-74"
+    },
+    {
+      "use_case": "SU-75",
+      "invariant": "前台关联正式预约、唯一改期链，故障保留原承诺",
+      "owner": "clinical/next_visits.py",
+      "regression": "tests/test_treatment_continuity.py:test_instruction_follows_real_reschedule_without_rewriting_original_link",
+      "executed_evidence": "coordination.json",
+      "acceptance": "AT-CONTINUITY-75"
+    },
+    {
+      "use_case": "SU-76",
+      "invariant": "复诊责任、期限、未接通、暂不继续及责任接续",
+      "owner": "clinical/recall.py",
+      "regression": "tests/test_recall_laboratory.py:test_patient_refusal_requires_review_and_preserves_appointment",
+      "executed_evidence": "clinical_browser.json",
+      "acceptance": "AT-CONTINUITY-76"
+    },
+    {
+      "use_case": "SU-77",
+      "invariant": "完成引用关联且已关闭的实际检查或指定步骤；部分不完成",
+      "owner": "clinical/recall.py",
+      "regression": "tests/test_recall_laboratory.py:test_partial_step_close_still_allows_next_booking_and_full_completion",
+      "executed_evidence": "independent_business_facts.json",
+      "acceptance": "AT-CONTINUITY-77"
+    },
+    {
+      "use_case": "SU-78",
+      "invariant": "加工手工送返、延误、周期及原需要日期留存",
+      "owner": "clinical/laboratory.py",
+      "regression": "tests/test_recall_laboratory.py:test_delay_preserves_original_needed_date_and_booking",
+      "executed_evidence": "clinical_browser.json",
+      "acceptance": "AT-CONTINUITY-78"
+    },
+    {
+      "use_case": "SU-79",
+      "invariant": "当前周期和具体版本临床验收；返工重验，行政交接不失效",
+      "owner": "clinical/lab_readiness.py",
+      "regression": "tests/test_recall_laboratory.py:test_logistics_owner_handover_does_not_invalidate_unchanged_clinical_readiness",
+      "executed_evidence": "clinical_browser.json",
+      "acceptance": "AT-CONTINUITY-79"
+    },
+    {
+      "use_case": "SU-80",
+      "invariant": "主管总部仅授权范围状态数量，不泄露临床和联系文字",
+      "owner": "clinical/continuity_views.py",
+      "regression": "tests/test_recall_laboratory_http.py:test_seven_roles_keep_coordination_and_management_distinct",
+      "executed_evidence": "finance_roles_browser.json",
+      "acceptance": "AT-CONTINUITY-80"
+    }
+  ],
+  "shared_gates": [
+    "regression.json",
+    "application_ci.json",
+    "capacity.json",
+    "release_restore.json",
+    "copy_upgrade.json",
+    "mac_update.json",
+    "mac_schema.json",
+    "report_validation.json"
+  ]
+}

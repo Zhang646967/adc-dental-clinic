@@ -1,0 +1,81 @@
+{
+  "project": "adc_rc1_5e6978238cbb",
+  "scope": "C2.2–C2.3 local synthetic loopback HTTP: 80% nonmutating reads (including signed preview POST),20% committed valid writes. All measured HTTP requests included; five initial preview requests are warmup; no independent cloud-host claim",
+  "started_utc": "2026-10-24T16:15:38.197200+00:00",
+  "arrival_mode": "waves",
+  "seconds": 1800,
+  "target_rps": 5,
+  "elapsed_seconds": 1800.01,
+  "wall_elapsed_seconds": 1800.008,
+  "max_offer_gap_seconds": 4.009,
+  "continuity_passed": true,
+  "actual_rps": 5.0,
+  "distinct_users": 20,
+  "clinics": 5,
+  "offered": 9000,
+  "dropped": [],
+  "max_in_flight": 20,
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.55,
+    "max_seconds": 1.3754
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.532,
+    "max_seconds": 1.3754
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.615,
+    "max_seconds": 1.3278
+  },
+  "warmup_previews": 5,
+  "effect_counts": {
+    "READ": 6302,
+    "RECALL_CONTACT": 900,
+    "PLAN_DRAFT": 900,
+    "SIGNED_PREVIEW": 898
+  },
+  "unconfirmed_previews": 3,
+  "http_passed": true,
+  "passed": true,
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "image": "sha256:c20134a131637e4c5090c4d8d8e4a1158c7580b3dddbbdb97471a77ee32f67af",
+  "independently_verified_plan_saves": 900,
+  "independently_verified_recall_contacts": 900,
+  "original_model_groups_preserved": 98,
+  "unchanged_money_treatment_and_appointment_facts": true,
+  "no_new_deadlocks": true,
+  "no_oom_or_restart": true,
+  "resource_samples": 120,
+  "original_18000_untouched": true,
+  "sampled_resources": {
+    "db": {
+      "sampled_max_memory_mib": 70.31,
+      "sampled_max_cpu_percent": 45.06
+    },
+    "web": {
+      "sampled_max_memory_mib": 145.1,
+      "sampled_max_cpu_percent": 79.71
+    },
+    "notification-worker": {
+      "sampled_max_memory_mib": 56.07,
+      "sampled_max_cpu_percent": 0.73
+    },
+    "operations": {
+      "sampled_max_memory_mib": 57.2,
+      "sampled_max_cpu_percent": 0.69
+    },
+    "gateway": {
+      "sampled_max_memory_mib": 15.67,
+      "sampled_max_cpu_percent": 1.0
+    }
+  },
+  "resource_scope": "120 periodic samples plus unchanged identities/restart counters; not a continuous high-water mark",
+  "configured_total_memory_mib": 1856,
+  "database_identity_profile": "Legacy loopback RC maintenance identity; independent HTTPS runtime-role gate not part of this capacity environment"
+}

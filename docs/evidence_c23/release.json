@@ -1,0 +1,103 @@
+{
+  "status": "PASS_LOCAL_SYNTHETIC_DELIVERY",
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "application_image": "sha256:c20134a131637e4c5090c4d8d8e4a1158c7580b3dddbbdb97471a77ee32f67af",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40104194491",
+  "source_checks": 1104,
+  "postgresql_http_concurrency_cases": 1688,
+  "exact_image_browser_checks": 610,
+  "clinics": 5,
+  "seven_roles": true,
+  "implemented_increments": [
+    "C1.1",
+    "C1.2",
+    "C2.1",
+    "C2.2",
+    "C2.3"
+  ],
+  "current_increment_scope": "C2.2–C2.3 combined local software acceptance; earlier increments retain their own dated evidence",
+  "new_owned_tables": 15,
+  "application_migrations": 49,
+  "prior_migration_files_unchanged": 47,
+  "observed_database": {
+    "tables": 101,
+    "orm_tables": 100,
+    "orm_columns": 966,
+    "sql_foreign_keys": 282,
+    "triggers": 74,
+    "er_views": 17
+  },
+  "capacity": {
+    "requests": 9000,
+    "actual_committed_writes": 1800,
+    "p95_seconds": 0.55,
+    "minutes": 30,
+    "users": 20,
+    "reads": 7200,
+    "scope": "Local synthetic multi-visit workload, not twenty-clinic/cloud capacity"
+  },
+  "encrypted_restore": {
+    "tables": 101,
+    "rows": 45583,
+    "seconds_after_empty_database_ready": 8.857,
+    "all_fifteen_new_tables_nonempty": true,
+    "trigger_definitions_and_states": 74,
+    "same_version_migration_path": true
+  },
+  "original_model_groups_preserved": 83,
+  "private_configurations_preserved": 70,
+  "original_database_container_volume_and_rc_tag_preserved": true,
+  "clinical_fixtures_injected_into_original": false,
+  "course_report": {
+    "passed": true,
+    "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_c23",
+    "pdf_pages": 164,
+    "business_use_cases": 80,
+    "shared_subfunctions": 1,
+    "complete_specifications": 81,
+    "tables": 99,
+    "figures": 50,
+    "mind_maps": 6,
+    "contents_entries": 67,
+    "legacy_substantive_fields_preserved": 280,
+    "SU04_channel_expansion_explicit": true,
+    "all_AT_01_25_retained": true,
+    "pending_cases": [],
+    "contents_match": true,
+    "arabic_pages_match": true,
+    "all_captions_in_order": true,
+    "text_outside_bounds": false,
+    "all_fonts_embedded": true,
+    "font_subsets": 25,
+    "media_parts_preserved": 39,
+    "original_migrations_preserved": 47,
+    "frozen_reports_unchanged": true,
+    "private_values_absent": 11,
+    "word_sha256": "5e10c7494ed074e857722c78188d57486ea9ead19963a8e836f2674183bebf79",
+    "pdf_sha256": "24cbc5d3e119fac6130ab844bf6745424f820b21c9d866f8207a6b8a166aa377",
+    "database_er_views": 17,
+    "front_desk_scheduling_role_migration": "implemented",
+    "visual_review": {
+      "pages": 164,
+      "exact_approved_body_pixel_matches": 163,
+      "new_contents_pages_inspected_at_full_resolution": [
+        5
+      ],
+      "new_state_and_case_pages_inspected_in_prior_render": true,
+      "all_current_page_bounds_fonts_captions_and_contents_verified": true,
+      "scope": "All final render-9 page bodies:163 exact body-pixel matches to individually or previously approved renders, one updated contents page visually inspected at full resolution. Current metadata/content/font/page-bound/caption tests are run separately; no old validation pass reused."
+    }
+  },
+  "mac_native_local_package": "mac_local_package.json",
+  "remaining_in_local_increment": [],
+  "external_gates": {
+    "qualified_templates_and_professional_review": "NOT_SUPPLIED",
+    "full_qc_periodontal_and_wider_commercial_contracts": "SEPARATE_BACKLOG",
+    "wechat_runtime_device_experience": "NOT_RUN",
+    "cloud": "SERVER_NOT_PURCHASED",
+    "twenty_clinic_capacity": "NOT_ESTABLISHED",
+    "continuous_24h": "NOT_ESTABLISHED",
+    "independent_https_runtime_role": "NOT_RUN_LOCAL_RC_USES_LEGACY_OWNER",
+    "historical_windows_data": "UNRESOLVED"
+  }
+}

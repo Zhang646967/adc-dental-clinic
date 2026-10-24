@@ -1,0 +1,7 @@
+{
+  "passed": false,
+  "classification": "LEGACY_LOOPBACK_RC_OWNER_RETAINED",
+  "independent_https_gate": "NOT_RUN",
+  "original_private_configuration_preserved": true,
+  "reason": "Original RC course configuration uses its maintenance identity; check_runtime_role is mandatory in scripts/g4_course.py independent deployment. This local source/browser/load delivery does not pass that production-role gate."
+}

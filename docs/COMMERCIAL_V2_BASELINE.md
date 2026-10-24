@@ -1,6 +1,21 @@
 # Commercial V2 inspected baseline
 
-## Current audit: 2026-10-23
+## Current implementation check: 2026-10-24
+
+C1.1–C2.1 have retained local synthetic delivery records. C2.2–C2.3 application `021a2183f52ff2170298134e610aea5d30fe28e7` has passing exact CI (1,104 source rules /1,688 PostgreSQL, HTTP and concurrency cases), five-clinic actual Chrome/native-handler journeys and independently checked treatment/money facts. Combined capacity, populated restoration and protected installation passed and are recorded separately in [the current release](evidence_c23/release.json). Check that record before interpreting source availability as deployment.
+
+| Area | Inspected current capability | Remaining boundary |
+|---|---|---|
+| Identity and authority | Verified appointment-only relationships, explicit website/native subject, clinic/service/action scope, selected referrals and sensitive-read metadata | Source-aware imports, broader professional roles, actual qualified reviewers and production onboarding |
+| Clinical continuity | Actual encounter/history/findings, immutable plan versions and catalogue definitions, self-only step decisions, typed actual execution and original charge snapshots | Qualified signatures/consent/archive, periodontal breadth, prescribing and materials |
+| Follow-up and lab | Actual-care completion rules, attributed front-desk contact, explicit appointment links, manual dispatch/return/cycle acceptance and readiness | Real supplier integration and full QC cohort metrics; status counts are not outcome rates |
+| Observed schema |49 migrations,101 tables/100 ORM tables,966 ORM columns,282 SQL FKs and74 application triggers;17 ER views | Preserve all47 prior migration bytes and nullable historical unknowns; compare actual installation separately |
+| Measured environment | Five synthetic clinics and local exact-image journeys; new clinical 30-minute workload has its own dated result | No20-clinic, independent-cloud,24-hour or real clinical maturity claim |
+| Report |80 business cases plus SF-01 and17 actual ER views delivered | Fixed-name Word/PDF render/validation and final installation evidence recorded with release |
+
+The dated audits below remain unchanged historical observations. Their earlier source, table, role and deployment limits do not describe the later implementation automatically.
+
+## Historical audit: 2026-10-23
 
 Inspected source: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. Read with the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md) and [next-stage plan](COMMERCIAL_V2_NEXT_STAGE.md). This audit reads current code and retained evidence; it does not rerun the application tests or certify professional clinical use.
 

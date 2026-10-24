@@ -1,0 +1,58 @@
+{
+  "passed": true,
+  "elapsed_seconds": 37.31,
+  "samples": [
+    {
+      "unix": 1792861615.9415748,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861619.674767,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861623.410778,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861627.1254568,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861630.841208,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861634.56511,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861638.281652,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861642.002848,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861645.7586079,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792861649.494886,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    }
+  ],
+  "scope": "Brief fresh post-install health samples, not24-hour or historical-gap reconstruction",
+  "old_unknown_history_retained": true
+}

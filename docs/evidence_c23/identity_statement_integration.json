@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "verified_appointment_only_delegations": 5,
+  "independently_confirmed_statement_matches": 10,
+  "retained_original_csv_bytes": true,
+  "normal_governance_and_business_commands": true,
+  "final_cross_channel_relationship_checks": 68,
+  "delegated_booking_unique_receipt": true,
+  "money_unchanged": true,
+  "scope": "Post-capacity synthetic existing-module integration fixtures for populated recovery; no real supplier or payment API"
+}

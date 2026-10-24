@@ -1,4 +1,4 @@
-# C2.2 treatment continuity — source and isolated acceptance
+# C2.2 treatment continuity — locally delivered
 
 Confirmed examination → retained plan version → exact patient decision → actual execution → unique charge source → independently reviewed settlement and next appointment.
 
@@ -35,10 +35,10 @@ Mind map: physician service/window → front-desk arrangement → retained appoi
 
 ## Executed and remaining gates
 
-This is an isolated C2.2 source candidate, not an installed release. C2.1 remains the installed application until the protected C2.2–C2.3 acceptance completes. The 45 previous migration files remain unchanged; two additive migrations introduce the ten owned tables and extend the final-care invariant. The 2026-10-24 isolated PostgreSQL observation has96 tables,264 SQL foreign keys,67 application triggers and95 ORM models; it is kept separately from the installed C2.1 ER snapshot.
+The combined C2.2–C2.3 software release is now locally delivered; [exact CI, business, capacity, recovery and protected installation](evidence_c23/release.json) identify its scope. The following96-table counts describe the earlier C2.2 source checkpoint; the combined observed and installed schema has101 tables/282 SQL FKs/74 triggers and49 migrations. The 45 previous migration files remain unchanged; two additive migrations introduce the ten owned tables and extend the final-care invariant. The 2026-10-24 isolated PostgreSQL observation has96 tables,264 SQL foreign keys,67 application triggers and95 ORM models; it is kept separately from the installed C2.1 ER snapshot.
 
 Executed initial C2.2 gates: 50 PostgreSQL/website/native HTTP scenarios, all 1,104 prior source rules, 158 native source/transport checks, 45 mocked Page scenarios (36 prior plus 9 new), and official offline syntax compilation of 16 WXML pages. These are distinct from a real browser journey, final exact-version CI, WeChat runtime/device/experience, populated encrypted restore, protected installation and the new 30-minute capacity workload.
 
-The final combined acceptance includes C2.3 recall/lab readiness, a five-clinic browser/native journey, the complete regression, exact implementation CI, observed ER/catalogues, populated independent restore and original-data/configuration comparison. Report and original installation are updated after those gates. Professional, real supplier, cloud, 24-hour and WeChat platform acceptance remain separate. Historical Windows data recovery remains UNRESOLVED.
+The final combined acceptance passed C2.3 recall/lab readiness, five-clinic browser/native journeys, the complete regression, exact implementation CI, new30-minute capacity, observed ER/catalogues, populated independent restore and original-data/configuration comparison. The report and original installation are updated. Professional, real supplier, cloud, 24-hour and WeChat platform acceptance remain separate. Historical Windows data recovery remains UNRESOLVED.
 
 Mind map: initial source evidence → real journey → dependent follow-up/readiness → full regression and capacity → observed ER → encrypted restore → exact CI → protected delivery.

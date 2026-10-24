@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": 68,
+  "clinics": 5,
+  "subject_switches": 5,
+  "delegated_clinical_read_denied": true,
+  "appointment_receipt_already_verified": true,
+  "page_errors": 0,
+  "scope": "Exact C2.2–C2.3 image: Chrome and real native Page handlers over HTTP; original grant/clinic boundaries retained, no new clinical or money effect; not WeChat runtime"
+}

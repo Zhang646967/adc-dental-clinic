@@ -4,7 +4,7 @@ Clinic contract → verified person and authority → structured encounter → s
 
 **下一阶段目标：让同一患者跨多次就诊得到连续、可追溯的服务，让前台知道下一步应由谁、在何时、完成什么。**
 
-Date: 2026-10-23. Research/source baseline: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. This planning increment follows the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md). C1.1 is now implemented with synthetic local evidence in [the C1.1 release record](C11_PATIENT_RELATIONSHIPS.md). C1.2 is also locally delivered in [its executed record](evidence_c12/release.json). C2.1 is locally delivered with exact CI, recovery and protected installation; C2.2–C2.3 remain **PLANNED**; professional and commercial acceptance are separate. It refines C1–C2 in the [master program](COMMERCIAL_V2_MASTER_PLAN.md); it does not replace the C3–C8 clinical and production release gates.
+Date: 2026-10-23. Research/source baseline: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. This planning increment follows the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md). C1.1 is now implemented with synthetic local evidence in [the C1.1 release record](C11_PATIENT_RELATIONSHIPS.md). C1.2 is also locally delivered in [its executed record](evidence_c12/release.json). C2.1 is locally delivered with exact CI, recovery and protected installation; C2.2–C2.3 are locally delivered with exact CI, capacity, recovery and protected installation; consult [their release record](evidence_c23/release.json); professional and commercial acceptance are separate. It refines C1–C2 in the [master program](COMMERCIAL_V2_MASTER_PLAN.md); it does not replace the C3–C8 clinical and production release gates.
 
 ## 1. Outcome, scope and priorities（目标、范围与优先级）
 
@@ -86,7 +86,7 @@ Mind map: relation evidence → verified authority → selected subject → sign
 
 The [identity proposal](research/identity_concept.svg) and [clinical proposal](research/clinical_concept.svg) are small logical views. Dashed/proposed nodes are not current tables. Cardinalities express the design proposal, not a migration already applied. Their [DOT sources](research/identity_concept.dot) and [relationship explanations](research/MODEL_NOTES.md) are retained.
 
-The original planning baseline was **70 tables, 171 SQL foreign keys, 42 application triggers and 40 migration files** in the C0.3 snapshot. The observed and installed C1.2 baseline is **80 tables, 205 SQL foreign keys, 50 application triggers and 44 migration files**; preserve all 44 current migration files. Append new migrations and produce an observed schema diff, regenerated ER/DBML/field catalogues, old-row comparison and independent restore evidence for each schema release. Never alter the observed snapshot merely to make it match a future drawing.
+The original planning baseline was **70 tables, 171 SQL foreign keys, 42 application triggers and 40 migration files** in the C0.3 snapshot. The dated C1.2 baseline was **80 tables,205 SQL foreign keys,50 application triggers and44 migration files**. The C2.2–C2.3 observed candidate now has **101 tables,282 SQL foreign keys,74 application triggers and49 migration files**, preserving all47 prior migration bytes; current installation status is recorded separately. Append new migrations and produce an observed schema diff, regenerated ER/DBML/field catalogues, old-row comparison and independent restore evidence for each schema release. Never alter the observed snapshot merely to make it match a future drawing.
 
 Minimal clinical structure to evaluate in C2:
 
@@ -146,13 +146,13 @@ Before a local schema update: encrypted backup, trusted empty-copy rehearsal, ol
 
 Independent hosting, privileged MFA, sensitive-read/export monitoring, backup freshness, full-service recovery and customer support remain commercial gates. The unreproduced collector incident needs safe stage/category diagnostics and sustained observation; retain historical UNKNOWN intervals rather than treating a fresh healthy sample as proof of continuous operation.
 
-Update the formal course report after actual implementation: business rules/use cases first, then actual ER, state models, interfaces and executed acceptance. Keep future proposals explicitly separate. This research changes planning documents; it does not mark proposed use cases implemented or rewrite the current formal report's executed baseline.
+Update the formal course report after actual implementation: business rules/use cases first, then actual ER, state models, interfaces and executed acceptance. Keep future proposals explicitly separate. Implemented local slices update the formal report only after executed gates; future professional and production proposals remain separately labeled.
 
 Mind map: source → exact tests/CI → business facts → observed schema → encrypted recovery → protected installation → attributable professional and target-environment acceptance.
 
 ## 7. Immediate work package and outstanding inputs（近期工作包）
 
-The immediate implementation package is **C2.1**: reported/reviewed history, actual encounter, tooth/surface findings, safe drafts and clinical worklist. C1.1 and C1.2 have local executed delivery records; build the new clinical facts on their same actor/subject and professional semantics. C2.2 and C2.3 then provide continuity, actual charging, recall and lab readiness.
+C1.1, C1.2 and C2.1 have local delivery records. C2.2–C2.3 complete the plan/actual-charge/recall/lab local software slices; their combined exact-image acceptance and protected delivery passed and are tracked in the current release record. The next commercial package follows C3 consent/document lifecycle; its professional contract must be designed before real clinical use. Wider C1/C2 backlog requirements remain separately tracked.
 
 No server purchase or AppID is needed to design and verify this local synthetic slice. Actual WeChat experience release and cloud operation require those inputs later. Before real clinical replacement, obtain the first clinic/service matrix, authorized professional reviewers, local integration/retention requirements and funded operating responsibilities. Record each dependency with its owner and evidence; do not invent approvals or dates.
 

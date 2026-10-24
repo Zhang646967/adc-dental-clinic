@@ -4,7 +4,7 @@
   "study": "DENTAL_PRACTICE_STUDY_20261023.md",
   "source_register": "dental_study_sources.json",
   "status": "PARTIALLY_IMPLEMENTED",
-  "scenarios": "NS-01 through NS-24 retain their planned full-program scope. The C1.1 appointment-delegation slice is executed separately; see implementation_slices.",
+  "scenarios": "NS-01 through NS-24 retain their full-program contracts. Bounded C1.1–C2.3 local software execution is recorded in implementation_slices; professional/platform/production acceptance is not inferred.",
   "interpretation": "Scenarios are partial evidence slices for the existing full-program requirements; they do not replace C3-C8 professional/target-environment release gates. FIN-01 full acceptance still includes RX-02; the C2 bridge covers non-drug performed events only.",
   "requirements": [
     {
@@ -535,6 +535,31 @@
       "evidence": "../evidence_c12/release.json",
       "full_program_gates": "Synthetic source and software behavior do not qualify clinical reviewers or complete C2–C8.",
       "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb"
+    },
+    {
+      "release": "C2.1",
+      "scope": "Reported versus reviewed history, actual encounter, tooth/surface/dentition, safe draft conflicts, versioned examinations and selected referral",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "../evidence_c21/release.json",
+      "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+      "full_program_gates": "Qualified templates, periodontal breadth and clinical replacement remain distinct."
+    },
+    {
+      "release": "C2.2",
+      "scope": "Retained plan/catalogue definitions, exact-version patient decisions, partial and complete actual care, unique non-drug original charge and explicit next-visit links",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "../evidence_c23/release.json",
+      "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+      "full_program_gates": "Discussion acceptance is not qualified informed consent. Prescribing and full FIN-01 allocation/integration remain separate."
+    },
+    {
+      "release": "C2.3",
+      "scope": "Clinician-directed completion rules, attributed recall work, manual lab logistics, exact-step/cycle acceptance and readiness, management state counts",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "../evidence_c23/release.json",
+      "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+      "full_program_gates": "Real supplier exchange, full QC cohorts, clinical qualification and platform/cloud acceptance remain outstanding."
     }
-  ]
+  ],
+  "updated_on": "2026-10-24"
 }

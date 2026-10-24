@@ -1,0 +1,12 @@
+{
+  "capacity_first_attempt": {
+    "http_requests": 9000,
+    "http_failures": 0,
+    "valid_committed_writes": 1800,
+    "p95_seconds": 0.513,
+    "accepted": false,
+    "reason": "Observer had already exited before the run after Mac sleep caused wall/monotonic clock inconsistency. Existing UNKNOWN observations were retained and explicitly archived/reset; full run repeated with fresh healthy monitoring."
+  },
+  "regression_attempts": "Integrity manifest refreshed after source changes; a reused verification tmpfs exhausted temporary space. Failures retained privately; complete exact-source regression passed on a fresh isolated database.",
+  "retries": "A browser transport interruption resumed from retained progress; successful business operations were not repeated with new identifiers."
+}

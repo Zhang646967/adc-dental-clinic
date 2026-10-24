@@ -1,4 +1,4 @@
-**C2.1 当前交付：** [实际检查与健康自述](C21_CLINICAL_CONTRACT.md) · [执行与本机交付](evidence_c21/release.json)。
+**C2.2–C2.3 当前交付：** [连续方案与实际执行](C22_CONTINUITY_CONTRACT.md) · [复诊与加工就绪](C23_RECALL_LAB_CONTRACT.md) · [准确版本、容量、恢复与本机交付](evidence_c23/release.json)。
 
 **当前 C1.2：** [专业权限与限定转诊](C12_AUTHORITY_CONTRACT.md) · [本机交付证据](evidence_c12/release.json) · [C1–C2执行进度](C1_C2_PROGRESS.md)。
 
@@ -14,6 +14,7 @@
 
 | 范围 | 文档 |
 |---|---|
+| 连续诊疗、复诊与加工 | [方案与唯一收费](C22_CONTINUITY_CONTRACT.md)、[责任与具体版本就绪](C23_RECALL_LAB_CONTRACT.md)、[验证](evidence_c23/README.md)、[跨岗位演示](CONTINUING_CARE_DEMO.md) |
 | 患者关系与预约代办 | [C1.1业务流程](C11_PATIENT_RELATIONSHIPS.md)、[权限与数据合同](C11_IDENTITY_CONTRACT.md) |
 | 微信小程序与教师试用 | [原生工程与本地导入](../clients/wechat/README.md)、[本地／微信／云端交付](COURSE_TEACHER_DELIVERY.md) |
 | 业务演示、岗位与跟进 | [演示路线](DEMO_ROUTES_RC1.md)、[业务跟进](BUSINESS_FOLLOW_UP.md) |
@@ -31,7 +32,7 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[225条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[282条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。
@@ -46,7 +47,7 @@
 
 ## 测试与验收
 
-当前[C1.1患者关系与预约代办](evidence_c11/README.md)；历史[C0.3患者渠道验证与交付](evidence_c03/README.md)；历史[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
+当前[C2.2–C2.3连续诊疗与加工](evidence_c23/README.md)；历史[C1.1患者关系与预约代办](evidence_c11/README.md)；历史[C0.3患者渠道验证与交付](evidence_c03/README.md)；历史[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
 
 | 验证范围 | 实际记录 |
 |---|---|
@@ -74,7 +75,7 @@
 | 职责 | 目录 |
 |---|---|
 | 账号、岗位、诊所与基础目录 | [accounts](../accounts/)、[workspaces](../workspaces/)、[registry](../registry/) |
-| 患者、排班、治疗与协调 | [reception](../reception/)、[patients](../patients/)、[scheduling](../scheduling/)、[care](../care/)、[coordination](../coordination/) |
+| 患者、排班、治疗与协调 | [reception](../reception/)、[patients](../patients/)、[scheduling](../scheduling/)、[care](../care/)、[clinical](../clinical/)、[coordination](../coordination/) |
 | 财务与设备 | [finance](../finance/)、[equipment](../equipment/) |
 | 通知和业务操作 | [notifications](../notifications/)、[operations](../operations/) |
 | 门户、辅助和无障碍引导 | [portal](../portal/)、[assistants](../assistants/)、[guidance](../guidance/) |

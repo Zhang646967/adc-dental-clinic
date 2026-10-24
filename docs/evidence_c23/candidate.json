@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "image": "sha256:c20134a131637e4c5090c4d8d8e4a1158c7580b3dddbbdb97471a77ee32f67af",
+  "architecture": "arm64",
+  "immutable_feature_files_compared": 717,
+  "exact_source_bundle_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "exact_implementation_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40104194491",
+  "browser_acceptance_image_identical": true,
+  "scope": "Frozen source copied before image build; exact application source/image reused for browser, load, restore and installation. Subsequent changes are documentation/report only.",
+  "runtime_project": "adc_rc1_5e6978238cbb",
+  "port": 18177
+}

@@ -29,13 +29,14 @@
       "id": "C1",
       "title": "Organization identity and authority",
       "status": "PLANNED",
-      "next_increment": "C1.1 with bounded C1.0 ADRs; see COMMERCIAL_V2_NEXT_STAGE.md"
+      "progress_note": "C1.1–C1.2 local synthetic increments delivered; full organizational/import/professional scope and production gates remain defined separately."
     },
     {
       "id": "C2",
       "title": "Complete dental encounters",
       "status": "PLANNED",
-      "scope_refinement": "Add clinical recall (CLIN-04), internal lab readiness (LAB-01) and metric contracts (QC-01); external supplier interfaces remain C5."
+      "scope_refinement": "Add clinical recall (CLIN-04), internal lab readiness (LAB-01) and metric contracts (QC-01); external supplier interfaces remain C5.",
+      "progress_note": "C2.1–C2.3 bounded local software increments delivered. Wider periodontal breadth, professional acceptance and full QC cohorts remain separate contracts."
     },
     {
       "id": "C3",
@@ -141,7 +142,8 @@
         "wechat_runtime_device_experience": "NOT_RUN",
         "cloud": "NOT_RUN",
         "commercial_clinical_qualification": "NOT_ESTABLISHED"
-      }
+      },
+      "limitations": []
     },
     {
       "id": "SERVICE-02",
@@ -1071,14 +1073,14 @@
     "validated independent hosting and support coverage"
   ],
   "current_execution_constraints": [
-    "C0.3 application 3b78cc5f430f18411bf50e4314f287b2c95666a0 is installed locally with retained exact CI, restore and protected-update evidence; this research changes no runtime behavior.",
-    "Actual WeChat runtime/device/experience and cloud remain NOT_RUN; new-version capacity and continuous target operation remain separately unverified.",
-    "C1-C8 new clinical/identity functionality remains PLANNED; no qualified professional acceptance or commercial clinical release is established.",
-    "The unreproduced host-collector failure and historical UNKNOWN gap remain open evidence; short healthy samples do not prove continuous service.",
+    "C1.1–C2.3 bounded local software increments are delivered. Latest application021a2183f52ff2170298134e610aea5d30fe28e7 has exact CI, full regression, five-clinic browser/financial journeys, new30-minute capacity, populated restoration and protected installation; see docs/evidence_c23/release.json.",
+    "Actual WeChat runtime/device/experience and cloud remain NOT_RUN. No purchased server, registered AppID or qualified professional approval has been supplied.",
+    "The implemented increments are bounded software slices. Wider source-aware imports, new professional roles, periodontal cohorts, qualified consent/archive, prescribing, materials/interfaces and full QC metrics remain outstanding in the unchanged full-program requirements.",
+    "Historical UNKNOWN intervals and their dated dispositions are retained. A new healthy sample cannot prove continuous service or reconstruct an old failure.",
     "Historical Windows-original data recovery remains UNRESOLVED."
   ],
   "commercial_release_requirement": "Complete first-customer contracted outpatient clinical replacement plus verified identity/privacy/money/recovery/migration/support; an operational-only preview is not the selected finished product.",
-  "updated_on": "2026-10-23",
+  "updated_on": "2026-10-24",
   "baseline_history": [
     {
       "date": "2026-10-22",
@@ -1097,6 +1099,46 @@
         "Previous Docker/preview access and GitHub publication authorization limits retain their recorded status; no new bypass or upload is authorized by this plan."
       ],
       "superseded_scope": "C0.3 records subsequently authorized exact CI, publication and protected local synthetic installation. Historical restrictions retain their original date only."
+    },
+    {
+      "date": "2026-10-23",
+      "constraints": [
+        "C0.3 application 3b78cc5f430f18411bf50e4314f287b2c95666a0 is installed locally with retained exact CI, restore and protected-update evidence; this research changes no runtime behavior.",
+        "Actual WeChat runtime/device/experience and cloud remain NOT_RUN; new-version capacity and continuous target operation remain separately unverified.",
+        "C1-C8 new clinical/identity functionality remains PLANNED; no qualified professional acceptance or commercial clinical release is established.",
+        "The unreproduced host-collector failure and historical UNKNOWN gap remain open evidence; short healthy samples do not prove continuous service.",
+        "Historical Windows-original data recovery remains UNRESOLVED."
+      ],
+      "superseded_scope": "C1.1–C2.3 bounded local implementation and evidence are now tracked separately; full commercial requirements keep their original contracts."
+    }
+  ],
+  "local_implementation_slices": [
+    {
+      "id": "C1.1",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "docs/evidence_c11/release.json"
+    },
+    {
+      "id": "C1.2",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "docs/evidence_c12/release.json"
+    },
+    {
+      "id": "C2.1",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "docs/evidence_c21/release.json"
+    },
+    {
+      "id": "C2.2",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "docs/evidence_c23/release.json",
+      "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7"
+    },
+    {
+      "id": "C2.3",
+      "status": "LOCAL_DELIVERED",
+      "evidence": "docs/evidence_c23/release.json",
+      "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7"
     }
   ]
 }

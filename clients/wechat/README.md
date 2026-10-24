@@ -12,7 +12,7 @@ clinical assessments, payments or a WeChat identity/phone binding.
 
 ## Matched backend and content
 
-Use the client with the matching C1.1 backend. See [release evidence](../../docs/evidence_c11/README.md) for the exact application and installed version. The client requires the subject-selection API and cannot be paired with the older C0.2 backend.
+Use the current client with the matching C2.2–C2.3 backend. [Current source/image and delivery evidence](../../docs/evidence_c23/release.json) identifies the accepted application. The subject-selection, self-history and exact-version plan APIs require a matched backend; do not pair this client with older versions.
 
 Before patients can book, a current-clinic manager must configure the actual
 service/resources, complete its patient description and explicitly publish it
@@ -62,7 +62,7 @@ actually undertaken.
 
 ## Actual verification scope
 
-`node scripts/verify_wechat.cjs` runs 114 source/transport checks and 26 actual Page-handler scenarios with mocked API responses. Separate five-clinic runs use real HTTP and PostgreSQL, plus Chrome website checks. All 12 WXML pages and the WXSS bundle passed the official offline compiler. See [C1.1 evidence](../../docs/evidence_c11/README.md).
+`node scripts/verify_wechat.cjs` runs158 source/transport checks and45 Page-handler scenarios with mocked API responses. Separate five-clinic runs use actual Page handlers over real HTTP/PostgreSQL, plus Chrome website checks. All16 WXML pages and the WXSS bundle passed the official offline compiler. [Current evidence](../../docs/evidence_c23/README.md) records these different scopes.
 
 These scopes do not establish WeChat developer-tool runtime, phone execution or experience release. AppID and independent cloud setup are still pending. Set `ADC_WECHAT_COMPILER_DIR` to available official compiler binaries for the offline syntax gate.
 
@@ -71,3 +71,9 @@ These scopes do not establish WeChat developer-tool runtime, phone execution or 
 The native client now has 12 pages, including an explicit patient selector. Assigned accounts can use their own PatientAccess or a clinic-verified, time-limited appointment grant. Subject switching clears pending reviews and stale responses; booking, rescheduling and waitlist share the website commands. Delegation does not grant chart, invoice or clinical-consent access. Official offline compilation and Page/HTTP tests remain separate from WeChat runtime/device/experience acceptance.
 
 C2.1 adds the own-patient health-history page (`pages/history/index`). It shares the website command, independent self-report versions, explicit confirmation and uncertain-response retry. Appointment delegates cannot report clinical history. There are14 native pages; official offline syntax, backend/Page-over-HTTP and actual WeChat runtime remain distinct. See [C2.1 evidence](../../docs/evidence_c21/README.md).
+
+## C2.2–C2.3 own-patient continuity
+
+There are16 native pages. `pages/plans/index` and `pages/plan/index` show released own-patient plan versions, retained service/fee definitions, exact-step decisions, actual partial/completed progress and follow-up status. An explicit preview and checkbox precede a decision. A lost response retains the same pending confirmation for retry; switching subject clears clinical/review content. Appointment delegates have no clinical plan/history/referral authority. Front-desk recall and manual lab logistics remain staff website work. Discussion decisions are not qualified signatures or treatment consent.
+
+The original local backend and separately prepared import package are updated only after protected delivery. Check the release record for installed status. Local loopback packages remain simulator-only; no actual WeChat upload or phone operation is implied.

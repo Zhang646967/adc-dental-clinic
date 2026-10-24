@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "application_commit": "021a2183f52ff2170298134e610aea5d30fe28e7",
+  "phases": [
+    {
+      "phase": "plan_patient_decisions_lab_cycles_partial",
+      "checks": 338,
+      "clinics": 5,
+      "page_errors": 0,
+      "browser": "156.0.8078.47"
+    },
+    {
+      "phase": "reschedule_fault_lab_review_actual_completion",
+      "checks": 159,
+      "clinics": 5,
+      "page_errors": 0,
+      "browser": "156.0.8078.47"
+    }
+  ],
+  "checks": 497,
+  "native_scope": "Actual unmodified Page handlers over loopback HTTP/PostgreSQL, not WeChat runtime",
+  "viewport": "390px with large text and keyboard",
+  "actions": [
+    "exact patient decisions and lost-response retry",
+    "manual physical cycles, rework and exact new-version acceptance",
+    "partial actual with zero invoice",
+    "actual closed follow-up then explicit recall completion"
+  ]
+}

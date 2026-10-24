@@ -1005,5 +1005,311 @@
       "tests/test_clinical_encounters.py",
       "tests/test_clinical_encounter_http.py"
     ]
+  },
+  {
+    "id": "SU-72",
+    "name": "建立与修订跨次治疗方案",
+    "actor": "负责医师",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "本次有确认检查及本店本服务记录范围。",
+    "inputs": "方案摘要、步骤、位置、估算、互斥组、计费时点与加工依赖。",
+    "flow": [
+      "基于当前检查建立工作草稿。",
+      "讨论目标及可选步骤，未知费用保持空缺。",
+      "预览后明确确认具体方案版本。",
+      "后续改变另建版本，保留原步骤沿革及发布时目录定义。"
+    ],
+    "alternatives": [
+      "目录或检查在预览后变化：重新核对。",
+      "双页冲突、撤权或跨店：拒绝覆盖并提供返回入口。"
+    ],
+    "result": "可按确切版本查阅的方案与工作历史。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "方案估算不产生治疗或账单；旧本人决定不自动适用新版。",
+    "acceptance": [
+      "AT-CONTINUITY-72：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-73",
+    "name": "核对具体方案步骤的本人决定",
+    "actor": "患者本人或手工记录讨论的负责医师",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "网站和小程序须为有效本人；医师须有具体服务范围。",
+    "inputs": "认可、暂缓或不选择，具体步骤版本与讨论说明。",
+    "flow": [
+      "读取本人已经发布的方案。",
+      "选择具体版本步骤及本人表态。",
+      "核对预览并明确提交。",
+      "刷新当前进度，保留所有旧决定。"
+    ],
+    "alternatives": [
+      "互斥步骤同时认可：拒绝第二个选择。",
+      "患者切换或响应丢失：清除旧主体资料，原提交可同次核实。"
+    ],
+    "result": "可追溯来源、账号及版本的本人决定。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "代约权限不含临床决定；讨论决定不等于治疗完成或合格知情同意签署。",
+    "acceptance": [
+      "AT-CONTINUITY-73：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-74",
+    "name": "登记实际执行与唯一开单来源",
+    "actor": "本次负责医师",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "实际到诊、确认检查、具体服务权限及必要准备已满足。",
+    "inputs": "实际项目、数量、位置、发生时间、阶段、计费及差异依据。",
+    "flow": [
+      "核对当前已认可步骤或明确计划外依据。",
+      "检查加工件周期及确切步骤就绪。",
+      "预览实际执行和本次开单金额，明确确认。",
+      "依实际治疗关闭接诊并发布结算，保留原收费来源与快照。"
+    ],
+    "alternatives": [
+      "旧预览、重复确认或并发执行：重新核对或返回原结果。",
+      "未发布误录：说明依据撤回，原执行及快照保留。"
+    ],
+    "result": "唯一实际执行与至多一个原始收费行；阶段不收费仍记已治疗。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "估算和本人表态不收费；已发布执行不能由本入口作废，审核账单副本不新增执行。",
+    "acceptance": [
+      "AT-CONTINUITY-74：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-75",
+    "name": "明确后续要求并关联正式预约",
+    "actor": "负责医师、当前店前台",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "医师有已确认检查及目标服务范围；前台有本店预约权限。",
+    "inputs": "服务、日期窗口、临床目标、完成标准、安排说明及已有预约。",
+    "flow": [
+      "医师明确后续目标和完成标准。",
+      "前台核对患者与统一资源时段并正式成约。",
+      "明确关联同患者同店同服务预约。",
+      "沿原改期后继显示当前结果，未完成目标继续安排。"
+    ],
+    "alternatives": [
+      "原预约取消或部分治疗关闭：保留临床目标并继续协调。",
+      "窗口或资源不符：重新协商，不自动造约。"
+    ],
+    "result": "有原检查依据和原预约关联的后续要求。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "关联预约不代表复诊完成，前台不查阅临床目标及计划估价。",
+    "acceptance": [
+      "AT-CONTINUITY-75：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-76",
+    "name": "承接复诊责任与联系跟进",
+    "actor": "当前店前台",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "医师已明确后续完成标准。",
+    "inputs": "责任期限、实际联系结果及安排需要的说明。",
+    "flow": [
+      "明确认领责任和下次内部期限。",
+      "记录联系、未接通或内部协调。",
+      "本人暂不继续时转医师核对。",
+      "原责任人失效可明确接续，经核对后明确恢复协调。"
+    ],
+    "alternatives": [
+      "非责任人、撤权或跨店：不得代替原责任人写入。",
+      "本人暂不继续：不自动再次联系，不自动取消预约。"
+    ],
+    "result": "有责任、期限和追加沟通历史的随访工作。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "内部期限不是患者承诺，也不触发真实电话或短信。",
+    "acceptance": [
+      "AT-CONTINUITY-76：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-77",
+    "name": "核对随访目标实际完成",
+    "actor": "当前责任前台",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "明确关联的后续就诊已关闭并达到医师定义的目标。",
+    "inputs": "具体实际完成依据及核对说明。",
+    "flow": [
+      "查看原要求、建议窗口及原预约后继。",
+      "选择已关闭实际检查或指定步骤完成依据。",
+      "核对患者、诊所、服务及实际时间。",
+      "明确结束责任，保留迟于建议窗口等事实。"
+    ],
+    "alternatives": [
+      "只有预约、到诊、草稿或部分治疗：不得完成。",
+      "原指示被医师撤回：按撤回事实另行结束，不能记成完成。"
+    ],
+    "result": "带实际证据的完成或明确撤回结果。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "不改原建议日期，不把联络或物理返回当成临床完成。",
+    "acceptance": [
+      "AT-CONTINUITY-77：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-78",
+    "name": "登记加工要求与手工送返",
+    "actor": "负责医师、当前店责任前台",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "当前已接受步骤明确需要加工件，医师有对应服务范围。",
+    "inputs": "加工类别、临床要求、原需要日期、加工方、交接凭据及期限。",
+    "flow": [
+      "医师从确认检查登记具体步骤加工要求。",
+      "前台认领协调责任和期限。",
+      "手工登记实际送出、返回及凭据。",
+      "延误照实登记新获悉日期，原日期及预约保留。"
+    ],
+    "alternatives": [
+      "责任人失效：明确交接并留历史。",
+      "延误或原约不合适：进入原资源改期流程，不静默取消。"
+    ],
+    "result": "可核对周期及责任的加工流转历史。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "手工登记不是供应方回执，前台不读取临床规格及验收详情。",
+    "acceptance": [
+      "AT-CONTINUITY-78：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-79",
+    "name": "临床验收、返工与加工件就绪",
+    "actor": "具有具体服务记录范围的医师",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "加工件已实际返回，目标为当前明确步骤。",
+    "inputs": "验收周期、具体版本步骤、实际验收时间、结果及返工说明。",
+    "flow": [
+      "核对物理周期及当前具体步骤。",
+      "分别记录临床验收通过或明确返工。",
+      "返工经下一次送返周期重新验收。",
+      "换版复用重新核对，全部有效请求满足后允许实际执行。"
+    ],
+    "alternatives": [
+      "只有返回、旧周期或旧版本：不能作为当前就绪。",
+      "缺少历史依赖或实际时间早于验收：重新核对。"
+    ],
+    "result": "有原检查、版本、周期及医师依据的就绪或返工结果。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "返回不等于适配，撤回请求不取消步骤依赖，验收本身不产生收费。",
+    "acceptance": [
+      "AT-CONTINUITY-79：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
+  },
+  {
+    "id": "SU-80",
+    "name": "查看复诊与加工协同汇总",
+    "actor": "当前店主管、总部",
+    "status": "已实现；以明确标注的合成资料核对软件流程。",
+    "precondition": "相应管理范围有效。",
+    "inputs": "状态、未承接及逾期筛选。",
+    "flow": [
+      "主管核对当前诊所的责任和状态数量。",
+      "总部查看授权范围汇总。",
+      "区分复诊未完成、本人暂不继续和加工待验收。",
+      "根据汇总交由对应岗位办理，不能代替临床或财务决定。"
+    ],
+    "alternatives": [
+      "其他岗位或跨店探测：拒绝越权明细。",
+      "空数据：明确为零，不补造联系或临床结果。"
+    ],
+    "result": "可解释统计范围与状态含义的管理投影。",
+    "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
+    "rules": "汇总不包含患者身份、联系文字、临床目标、加工规格和验收详情。",
+    "acceptance": [
+      "AT-CONTINUITY-80：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "clinical/executions.py",
+      "clinical/next_visits.py",
+      "clinical/recall.py",
+      "clinical/laboratory.py",
+      "tests/test_treatment_continuity.py",
+      "tests/test_recall_laboratory.py",
+      "tests/test_recall_laboratory_http.py"
+    ]
   }
 ]
