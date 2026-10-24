@@ -73,12 +73,13 @@
   },
   "host_followup": {
     "status": "SOURCE_AND_REAL_DOCKER_PASSED_CI_AND_INSTALL_PENDING",
-    "root_failure_class": "multiline/delimited exec actions were projected before lifecycle filtering",
-    "source_checks": 1103,
-    "focused_host_cases": 34,
+    "root_failure_class": "unsafe action projection included multiline/delimited exec command text",
+    "source_checks": 1104,
+    "focused_host_cases": 35,
     "old_unknown_history": "RETAINED_NOT_REWRITTEN",
     "app_and_containers": "HEALTHY",
-    "source": "host_filter_live.json"
+    "source": "host_filter_live.json",
+    "retained_history_ring_saturation": true
   },
   "remaining_work": [
     "C2.2 treatment plans, actual execution and unique charge bridge",

@@ -1,23 +1,23 @@
 {
   "passed": true,
   "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
-  "fixed_script_sha256": "0ffdfc0fe4aba4e1ff9e331fa07fd54b50bf922f27c1062fcae441b77278a34e",
+  "fixed_script_sha256": "18edf031dae523c4d7e32ffd752ebb5c89b942201991f71533a32245fd42373e",
   "actual_docker_samples": 3,
   "fresh_samples": [
     {
-      "utc": 1792838216.0664692,
-      "mono": 727596.364828416
+      "utc": 1792839243.641997,
+      "mono": 728623.941746041
     },
     {
-      "utc": 1792838217.298205,
-      "mono": 727597.596567333
+      "utc": 1792839244.8807838,
+      "mono": 728625.180535666
     },
     {
-      "utc": 1792838218.539559,
-      "mono": 727598.837922416
+      "utc": 1792839246.1136682,
+      "mono": 728626.413421208
     }
   ],
-  "multiline_delimited_execs_filtered_before_projection": true,
+  "multiline_delimited_execs_projected_to_fixed_label": true,
   "all_five_services_running": true,
   "no_unexpected_collector_incident": true,
   "original_journal_not_changed_by_this_drill": true,

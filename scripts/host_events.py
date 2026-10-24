@@ -32,7 +32,9 @@ INSPECT = ('{{.Id}}|{{index .Config.Labels "' + LABEL + 'project"}}|'
            '{{.State.Status}}|{{.State.ExitCode}}|{{.State.OOMKilled}}|'
            '{{.RestartCount}}|{{.State.StartedAt}}|'
            '{{if index .State "Health"}}{{index (index .State "Health") "Status"}}{{else}}none{{end}}|' + SOURCE)
-EVENT_FORMAT = ('{{.TimeNano}}|{{.Action}}|{{.Actor.ID}}|'
+ACTION_FORMAT = ('{{if or ' + ' '.join('(eq .Action "' + a + '")' for a in EVENTS) +
+                 '}}{{.Action}}{{else}}IGNORED{{end}}')
+EVENT_FORMAT = ('{{.TimeNano}}|' + ACTION_FORMAT + '|{{.Actor.ID}}|'
                 '{{index .Actor.Attributes "' + LABEL + 'service"}}')
 
 
@@ -91,12 +93,11 @@ def docker_sample(target, since, until):
             rows.append(dict(id=cid, service=service, image=image, phase=phase,
                 exit_code=int(exit_code), oom=oom == 'true', restarts=int(restarts),
                 started=started, health=health))
-    # Exec actions contain command text, including newlines and delimiters.
-    # Ask the daemon for lifecycle events only, before projecting any fields.
-    event_filters = [part for action in EVENTS for part in ('--filter', 'event=' + action)]
+    # Only lifecycle action names enter the projection. Keep all event rows so
+    # a full daemon history ring still marks the observation as incomplete.
     raw = run(target, 'events', '--since', str(since), '--until', str(until),
         '--filter', 'type=container', '--filter', 'label=' + LABEL + 'project=' + target['project'],
-        *event_filters, '--format', EVENT_FORMAT).splitlines()
+        '--format', EVENT_FORMAT).splitlines()
     events = []
     for line in raw:
         ns, action, cid, service = line.split('|')
