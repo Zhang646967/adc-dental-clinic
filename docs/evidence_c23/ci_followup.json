@@ -1,0 +1,11 @@
+{
+  "scope": "Final documentation delivery CI follow-up; application source/image unchanged",
+  "first_delivery_commit": "74d5a4c80c4ba9739116ba52fc6c38c51fd82c97",
+  "first_run": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40115092081",
+  "first_outcome": "CANCELLED_AT_JOB_TIME_LIMIT_20_MINUTES",
+  "completed_full_regression": false,
+  "test_assertion_failures_observed": false,
+  "previous_successful_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40104194491",
+  "change": "Increase only the existing full validation job timeout from20 to30minutes; retain every command/assertion and the same runner",
+  "rerun_policy": "Final exact delivery commit must complete all checks successfully before local documentation/report synchronization"
+}
