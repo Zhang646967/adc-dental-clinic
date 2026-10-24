@@ -4,8 +4,6 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.utils import timezone
 from django.views.decorators.debug import sensitive_variables
-from accounts.models import RoleAssignment, UserAccount
-from accounts.policies import require_writable
 from adc_core.rules import RuleError, CLOSED_STATUSES, line_amount, total_amount, validate_allergies
 from care.audit import emit
 from care.models import VisitRecordVersion, TreatmentRecord, Invoice
@@ -13,25 +11,12 @@ from patients.models import Patient, PatientAllergy
 from registry.models import Allergy, TreatmentType
 from scheduling.models import Visit
 from adc_core.commands import business_errors, assert_revision as _assert_current
-from scheduling.coordination import lock_slots as _lock_slots
 
 
 def _lock_care(actor, visit_id):
-    from workspaces.context import require_active
-    require_active(actor, ("DENTIST",))
-    require_writable(actor)
-    current_user=UserAccount.objects.get(pk=actor.pk)
-    preview=Visit.objects.only("availability_slot_id","dentist_id","clinic_id").get(pk=visit_id)
-    grant=RoleAssignment.objects.select_for_update().filter(user_id=actor.pk,is_active=True,
-        role="DENTIST",scope_kind="SELF_DENTIST").first()
-    if not grant or current_user.dentist_id!=preview.dentist_id:
-        raise PermissionDenied("只有本次负责牙医可以确认治疗事实和完成接诊。")
-    from clinical.authority import require_visit_authority
-    require_visit_authority(actor,preview,'RECORD',lock=True)
-    _lock_slots([preview.availability_slot_id])
-    v=Visit.objects.select_for_update().get(pk=visit_id)
-    if v.dentist_id != current_user.dentist_id: raise PermissionDenied
-    return v
+    from clinical.locking import lock_clinical_visit
+    from clinical.models import ClinicalEncounter
+    return lock_clinical_visit(actor,visit_id,strict=ClinicalEncounter.objects.filter(visit_id=visit_id).exists())
 
 
 def _draft(actor,visit):
@@ -55,6 +40,9 @@ def save_clinical_note(*,actor,visit_id,expected_version,clinical_note):
     if not isinstance(clinical_note,str) or len(clinical_note)>4000:
         raise RuleError("接诊草稿最多4000字。")
     v=_lock_care(actor,visit_id);_assert_current(v,expected_version)
+    from clinical.models import ClinicalEncounter
+    if ClinicalEncounter.objects.filter(visit=v).exists():
+        raise RuleError("本次已开始结构化检查，请在检查记录工作台维护检查与核对结论。")
     draft=_draft(actor,v)
     draft.clinical_note=clinical_note.strip()
     draft.save(update_fields=["clinical_note"]);_bump(v)
@@ -134,6 +122,9 @@ def complete_visit(*,actor,visit_id,expected_version,outcome,reason=""):
     _assert_current(v,expected_version)
     # Global patient lock precedes version lock, as in allergy review.
     patient=Patient.objects.select_for_update().get(pk=v.patient_id,is_active=True)
+    from clinical.completion import completion_blockers
+    clinical_blockers=completion_blockers(v)
+    if clinical_blockers:raise RuleError(clinical_blockers[0])
     draft=_draft(actor,v)
     lines=list(draft.treatment_lines.select_for_update().order_by("line_no"))
     if outcome=="TREATED":

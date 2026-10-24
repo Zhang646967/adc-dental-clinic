@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "previous_migrations_preserved": 44,
+  "current_migrations": 45,
+  "previous_tables_retained": 80,
+  "new_tables": [
+    "adc_clinical_draft",
+    "adc_clinical_encounter",
+    "adc_clinical_history_version",
+    "adc_clinical_record_event",
+    "adc_clinical_record_version",
+    "adc_tooth_finding"
+  ],
+  "previous_columns_unchanged": 749,
+  "new_columns": 60,
+  "previous_triggers_unchanged": 50,
+  "current_triggers": 56,
+  "actual_foreign_keys": 225
+}

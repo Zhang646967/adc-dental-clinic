@@ -179,7 +179,18 @@ def referral_new(request,pk):
     if request.method=='POST' and form.is_valid():
         try:p=referrals.prepare_referral(actor=request.user,action='CREATE',fields=form.fields_data())
         except EXPECTED_ERRORS as exc:add_error(form,exc)
-        else:return preview(request,'核对限定跨店转诊',p['proposal_token'],[(f.label,form.cleaned_data.get(n)) for n,f in form.fields.items()],mode='referral')
+        else:
+            from django.forms import ModelChoiceField,ChoiceField
+            from datetime import datetime
+            from django.utils import timezone
+            values=[]
+            for name,field in form.fields.items():
+                value=form.cleaned_data.get(name)
+                if value is not None and isinstance(field,ModelChoiceField):value=field.label_from_instance(value)
+                elif isinstance(field,ChoiceField):value=dict(field.choices).get(value,value)
+                elif isinstance(value,datetime):value=timezone.localtime(value).strftime('%Y-%m-%d %H:%M')+'（北京时间）'
+                values.append((field.label,value))
+            return preview(request,'核对限定跨店转诊',p['proposal_token'],values,mode='referral')
     return render(request,'clinical/form.html',{'title':'发起限定跨店转诊','form':form,
         'description':f'{visit.patient.patient_no} · {visit.clinic.name}。明确接收人、期限、披露依据和具体记录；预约授权不能代替临床同意。'})
 

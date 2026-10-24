@@ -1,4 +1,18 @@
 {
+  "er_clinical_history": {
+    "nodes": 6,
+    "edges": 7,
+    "width": 449,
+    "height": 646,
+    "minPrintedFontPt": 14.141559020044545
+  },
+  "er_clinical_encounter": {
+    "nodes": 7,
+    "edges": 10,
+    "width": 574,
+    "height": 695,
+    "minPrintedFontPt": 11.061951219512196
+  },
   "er_professional_authority": {
     "nodes": 7,
     "edges": 9,
@@ -7,11 +21,11 @@
     "minPrintedFontPt": 9.434710252600297
   },
   "er_clinical_referral": {
-    "nodes": 8,
-    "edges": 11,
-    "width": 715,
-    "height": 784,
-    "minPrintedFontPt": 8.880503496503497
+    "nodes": 7,
+    "edges": 9,
+    "width": 692,
+    "height": 809,
+    "minPrintedFontPt": 9.175664739884393
   },
   "er_patient_relationship": {
     "nodes": 7,

@@ -2,8 +2,11 @@ from django.urls import path
 from portal import mini_api as api
 from portal import mini_waitlist as wait
 from portal import mini_referrals as referral
+from portal import mini_history as history
 
 urlpatterns = [
+    path('history/',history.listing,name='mini_history'),
+    path('history/submit/',history.submit,name='mini_history_submit'),
     path('referrals/',referral.listing,name='mini_referrals'),
     path('referrals/<int:pk>/stop/preview/',referral.stop_preview,name='mini_referral_stop_preview'),
     path('referrals/<int:pk>/stop/confirm/',referral.stop_confirm,name='mini_referral_stop_confirm'),

@@ -34,7 +34,7 @@ function page(name,options={}){
     require:module=>module.endsWith('/api')?api:module.endsWith('/format')?format.exports:{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};
-  return {p:instance,calls,navigation,state};
+  return {p:instance,calls,navigation,state,session:currentSession};
 }
 
 async function verify(){
@@ -173,6 +173,43 @@ async function verify(){
     const {p,calls}=page('referrals',{session:{subject_key:'self',subject_revision:4}});
     p.setData({preview:{referral:{id:8},proposal_token:'old'},checked:true,subject:'self',revision:3});
     await p.confirm();assert.equal(calls.length,0);assert.equal(p.data.preview,null);assert.match(p.data.error,/就诊人已变化/);
+  });
+  const historyRow={id:4,revision:1,recorded_at:'2026-10-24T01:00:00Z',medical_status:'UNKNOWN',medical_history:'',medication_status:'UNKNOWN',medications:'',allergy_status:'UNKNOWN',reported_allergies:''};
+  const historySession={subject_key:'self',workspace_id:'ctx',subject_revision:1,delegated:false};
+  const historyList={rows:[historyRow],latest:historyRow,current_revision:1,operation_id:'history-operation',page:1,pages:1};
+  await test('appointment delegate cannot load or submit patient clinical history',async()=>{
+    const {p,calls}=page('history',{session:{...historySession,delegated:true}});await p.onShow();assert.equal(calls.length,0);assert(p.data.error);assert.equal(p.data.rows.length,0);
+    await p.submit();assert.equal(calls.length,0);
+  });
+  await test('patient history preserves unknown and requires explicit confirmation',async()=>{
+    const {p,calls}=page('history',{session:historySession,request:async()=>historyList});await p.onShow();
+    assert.equal(p.data.fields.allergy_status,'UNKNOWN');assert.equal(p.data.expected,1);
+    await p.submit();assert.equal(calls.filter(c=>c.method==='POST').length,0);assert(p.data.error);
+  });
+  await test('patient history submits the displayed source revision and no other patient identifier',async()=>{
+    let saved=false;const {p,calls}=page('history',{session:historySession,request:async(route,method,data)=>{
+      if(method==='POST'){saved=true;return {row:{...historyRow,id:5,revision:2,medical_status:data.medical_status,medical_history:data.medical_history},current_revision:2,operation_id:'next-operation'};}
+      return saved?{...historyList,current_revision:2,latest:{...historyRow,revision:2,medical_status:'REPORTED',medical_history:'PRIVATE_SELF'},operation_id:'next-operation'}:historyList;
+    }});await p.onShow();p.pick({currentTarget:{dataset:{field:'medical_status'}},detail:{value:'1'}});p.field({currentTarget:{dataset:{field:'medical_history'}},detail:{value:'PRIVATE_SELF'}});p.checked({detail:{value:['yes']}});await p.submit();
+    const request=calls.find(c=>c.method==='POST');assert.equal(request.data.expected_revision,1);assert.equal(request.data.operation_id,'history-operation');assert.equal(request.data.medical_history,'PRIVATE_SELF');assert(!('patient' in request.data));assert.match(p.data.done,/第 2 版/);
+  });
+  await test('uncertain history save freezes edits and retries the same intent',async()=>{
+    let attempts=0;const {p,calls}=page('history',{session:historySession,request:async(route,method,data)=>{
+      if(method==='POST'){attempts++;if(attempts===1){const e=Error('结果尚未确认');e.code='NETWORK_UNCONFIRMED';throw e;}return {row:historyRow,current_revision:1,operation_id:'next'};}
+      return historyList;
+    }});await p.onShow();p.checked({detail:{value:['yes']}});await p.submit();assert(p.data.uncertain);
+    p.field({currentTarget:{dataset:{field:'medical_history'}},detail:{value:'must not change pending intent'}});assert.equal(p.data.fields.medical_history,'');
+    await p.submit();const writes=calls.filter(c=>c.method==='POST');assert.equal(writes.length,2);assert.deepEqual(plain(writes[0].data),plain(writes[1].data));assert.equal(p.data.uncertain,false);
+  });
+  await test('history subject switch clears private draft before any write',async()=>{
+    const {p,calls,session:s}=page('history',{session:historySession,request:async()=>historyList});await p.onShow();p.field({currentTarget:{dataset:{field:'medical_history'}},detail:{value:'PRIVATE_OLD_PATIENT'}});p.checked({detail:{value:['yes']}});
+    s.subject_key='grant:9';s.subject_revision=2;s.delegated=true;await p.submit();assert.equal(calls.filter(c=>c.method==='POST').length,0);assert.equal(p.data.fields.medical_history,'');assert.equal(p.data.rows.length,0);
+  });
+  await test('foreground refresh keeps acknowledged unsaved history work',async()=>{
+    const {p}=page('history',{session:historySession,request:async()=>historyList});await p.onShow();p.field({currentTarget:{dataset:{field:'medical_history'}},detail:{value:'PRIVATE_UNSAVED'}});await p.onShow();assert.equal(p.data.fields.medical_history,'PRIVATE_UNSAVED');assert.equal(p.data.dirty,true);
+  });
+  await test('read-only history client cannot issue a reporting write',async()=>{
+    const {p,calls}=page('history',{session:{...historySession,read_only:true},request:async()=>historyList});await p.onShow();p.checked({detail:{value:['yes']}});await p.submit();assert.equal(calls.filter(c=>c.method==='POST').length,0);
   });
   return {passed:true,cases:cases.length,case_names:cases,scope:'actual Page handlers with mocked API; not Django/PostgreSQL, official compilation or WeChat runtime'};
 }

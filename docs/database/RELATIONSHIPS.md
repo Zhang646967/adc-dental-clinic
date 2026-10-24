@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-205条实际SQL外键，其中204条对应ORM单列关系，1条为账单同次就诊复合外键。
+225条实际SQL外键，其中224条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -42,9 +42,28 @@
 | adc_clinical_authority_event | actor_id | adc_user | id |
 | adc_clinical_authority_policy | activated_by_id | adc_user | id |
 | adc_clinical_authority_policy | clinic_id | adc_clinic | id |
+| adc_clinical_draft | base_record_id | adc_clinical_record_version | id |
+| adc_clinical_draft | encounter_id | adc_clinical_encounter | id |
+| adc_clinical_draft | saved_by_id | adc_user | id |
+| adc_clinical_encounter | opened_by_id | adc_user | id |
+| adc_clinical_encounter | visit_id | adc_visit | id |
+| adc_clinical_history_version | patient_id | adc_patient | id |
+| adc_clinical_history_version | previous_id | adc_clinical_history_version | id |
+| adc_clinical_history_version | reported_by_id | adc_user | id |
+| adc_clinical_history_version | scope_clinic_id | adc_clinic | id |
+| adc_clinical_history_version | source_visit_id | adc_visit | id |
+| adc_clinical_record_event | encounter_id | adc_clinical_encounter | id |
+| adc_clinical_record_event | history_id | adc_clinical_history_version | id |
+| adc_clinical_record_event | record_id | adc_clinical_record_version | id |
+| adc_clinical_record_event | actor_id | adc_user | id |
+| adc_clinical_record_version | encounter_id | adc_clinical_encounter | id |
+| adc_clinical_record_version | history_id | adc_clinical_history_version | id |
+| adc_clinical_record_version | previous_id | adc_clinical_record_version | id |
+| adc_clinical_record_version | recorded_by_id | adc_user | id |
 | adc_clinical_referral | destination_clinic_id | adc_clinic | id |
 | adc_clinical_referral | destination_service_id | adc_booking_service | id |
 | adc_clinical_referral | source_clinic_id | adc_clinic | id |
+| adc_clinical_referral | source_clinical_record_id | adc_clinical_record_version | id |
 | adc_clinical_referral | source_record_id | adc_visit_record_version | id |
 | adc_clinical_referral | created_by_id | adc_user | id |
 | adc_clinical_referral | patient_id | adc_patient | id |
@@ -173,6 +192,7 @@
 | adc_statement_batch | created_by_id | adc_user | id |
 | adc_statement_line | account_id | adc_payment_account | id |
 | adc_statement_line | batch_id | adc_statement_batch | id |
+| adc_tooth_finding | record_id | adc_clinical_record_version | id |
 | adc_treatment_record | confirmed_by_id | adc_user | id |
 | adc_treatment_record | record_version_id | adc_visit_record_version | id |
 | adc_treatment_record | treatment_type_id | adc_treatment_type | id |

@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "encounters": 6,
+  "history_versions": 11,
+  "interview_versions": 1,
+  "confirmed_record_versions": 11,
+  "findings": 30,
+  "nonempty_drafts": 1,
+  "clinical_operation_events": 70,
+  "new_invoices": 6,
+  "new_actual_treatment_lines": 5,
+  "new_treatment_sum": "1000.00",
+  "explicit_no_treatment_invoices": 1,
+  "invoice_total": "51000.00",
+  "posted_cash_total": "50000.00",
+  "repeated_effects": 0,
+  "clinical_only_facts": "clinical_independent_facts.json",
+  "synthetic": true
+}

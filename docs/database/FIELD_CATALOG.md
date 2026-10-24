@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-24。本目录列出79张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-24。本目录列出85张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -578,6 +578,214 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `clinical_activation_history`：`CREATE TRIGGER clinical_activation_history BEFORE DELETE OR UPDATE ON public.adc_clinical_authority_policy FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
+## adc_clinical_draft
+
+模型：`clinical.ClinicalDraft`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| encounter_id | bigint | UK / FK | 否 | `adc_clinical_encounter.id` |
+| saved_by_id | bigint | FK | 否 | `adc_user.id` |
+| base_record_id | bigint | FK | 是 | `adc_clinical_record_version.id` |
+| payload | jsonb | — | 否 | — |
+| saved_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_draft_base_record_id_8358bed4_fk_adc_clini`：`FOREIGN KEY (base_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_draft_encounter_id_b7a76721_fk_adc_clini`：`FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_draft_encounter_id_key`：`UNIQUE (encounter_id)`。
+- `adc_clinical_draft_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_draft_saved_by_id_4bc77d99_fk_adc_user_id`：`FOREIGN KEY (saved_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_draft_base_record_id_8358bed4`：`CREATE INDEX adc_clinical_draft_base_record_id_8358bed4 ON public.adc_clinical_draft USING btree (base_record_id)`。
+- `adc_clinical_draft_encounter_id_key`：`CREATE UNIQUE INDEX adc_clinical_draft_encounter_id_key ON public.adc_clinical_draft USING btree (encounter_id)`。
+- `adc_clinical_draft_pkey`：`CREATE UNIQUE INDEX adc_clinical_draft_pkey ON public.adc_clinical_draft USING btree (id)`。
+- `adc_clinical_draft_saved_by_id_4bc77d99`：`CREATE INDEX adc_clinical_draft_saved_by_id_4bc77d99 ON public.adc_clinical_draft USING btree (saved_by_id)`。
+
+跨表及历史触发器：
+
+- `clinical_draft_identity_retained`：`CREATE TRIGGER clinical_draft_identity_retained BEFORE UPDATE ON public.adc_clinical_draft FOR EACH ROW EXECUTE FUNCTION adc_clinical_draft_identity_guard()`。
+
+## adc_clinical_encounter
+
+模型：`clinical.ClinicalEncounter`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| visit_id | bigint | UK / FK | 否 | `adc_visit.id` |
+| opened_by_id | bigint | FK | 否 | `adc_user.id` |
+| opened_at | timestamp with time zone | — | 否 | — |
+| revision | integer | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_encounter_opened_by_id_bd5223da_fk_adc_user_id`：`FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_encounter_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_encounter_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_clinical_encounter_visit_id_35529a15_fk_adc_visit_id`：`FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_encounter_visit_id_key`：`UNIQUE (visit_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_encounter_opened_by_id_bd5223da`：`CREATE INDEX adc_clinical_encounter_opened_by_id_bd5223da ON public.adc_clinical_encounter USING btree (opened_by_id)`。
+- `adc_clinical_encounter_pkey`：`CREATE UNIQUE INDEX adc_clinical_encounter_pkey ON public.adc_clinical_encounter USING btree (id)`。
+- `adc_clinical_encounter_visit_id_key`：`CREATE UNIQUE INDEX adc_clinical_encounter_visit_id_key ON public.adc_clinical_encounter USING btree (visit_id)`。
+
+跨表及历史触发器：
+
+- `clinical_encounter_identity_retained`：`CREATE TRIGGER clinical_encounter_identity_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_encounter FOR EACH ROW EXECUTE FUNCTION adc_clinical_encounter_identity_guard()`。
+
+## adc_clinical_history_version
+
+模型：`clinical.ClinicalHistoryVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| patient_id | bigint | FK | 否 | `adc_patient.id` |
+| revision | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_clinical_history_version.id` |
+| source | character varying(16) | — | 否 | — |
+| source_visit_id | bigint | FK | 是 | `adc_visit.id` |
+| scope_clinic_id | bigint | FK | 是 | `adc_clinic.id` |
+| reported_by_id | bigint | FK | 否 | `adc_user.id` |
+| medical_status | character varying(16) | — | 否 | — |
+| medical_history | character varying(2000) | — | 否 | — |
+| medication_status | character varying(16) | — | 否 | — |
+| medications | character varying(2000) | — | 否 | — |
+| allergy_status | character varying(16) | — | 否 | — |
+| reported_allergies | character varying(2000) | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_history_patient_id_1114d72f_fk_adc_patie`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_history_previous_id_039a3420_fk_adc_clini`：`FOREIGN KEY (previous_id) REFERENCES adc_clinical_history_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_history_reported_by_id_ade589cf_fk_adc_user_`：`FOREIGN KEY (reported_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_history_scope_clinic_id_f44cf321_fk_adc_clini`：`FOREIGN KEY (scope_clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_history_source_visit_id_9f4088d6_fk_adc_visit`：`FOREIGN KEY (source_visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_history_version_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_history_version_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_clinical_history_version_revision_check`：`CHECK ((revision >= 0))`。
+- `clinical_history_not_previous_self`：`CHECK ((NOT ((previous_id = id) AND (previous_id IS NOT NULL))))`。
+- `clinical_history_previous_required`：`CHECK ((((previous_id IS NULL) AND (revision = 1)) OR ((previous_id IS NOT NULL) AND (revision > 1))))`。
+- `clinical_history_revision_positive`：`CHECK ((revision >= 1))`。
+- `clinical_history_revision_unique`：`UNIQUE NULLS NOT DISTINCT (patient_id, scope_clinic_id, revision)`。
+- `clinical_history_source_valid`：`CHECK ((((scope_clinic_id IS NULL) AND ((source)::text = 'SELF'::text) AND (source_visit_id IS NULL)) OR ((scope_clinic_id IS NOT NULL) AND ((source)::text = 'INTERVIEW'::text) AND (source_visit_id IS NOT NULL))))`。
+- `clinical_history_states_valid`：`CHECK ((((medical_status)::text = ANY ((ARRAY['UNKNOWN'::character varying, 'REPORTED'::character varying, 'NO_KNOWN'::character varying])::text[])) AND ((medication_status)::text = ANY ((ARRAY['UNKNOWN'::character varying, 'REPORTED'::character varying, 'NO_KNOWN'::character varying])::text[])) AND ((allergy_status)::text = ANY ((ARRAY['UNKNOWN'::character varying, 'REPORTED'::character varying, 'NO_KNOWN'::character varying])::text[]))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_history_version_patient_id_1114d72f`：`CREATE INDEX adc_clinical_history_version_patient_id_1114d72f ON public.adc_clinical_history_version USING btree (patient_id)`。
+- `adc_clinical_history_version_pkey`：`CREATE UNIQUE INDEX adc_clinical_history_version_pkey ON public.adc_clinical_history_version USING btree (id)`。
+- `adc_clinical_history_version_previous_id_key`：`CREATE UNIQUE INDEX adc_clinical_history_version_previous_id_key ON public.adc_clinical_history_version USING btree (previous_id)`。
+- `adc_clinical_history_version_reported_by_id_ade589cf`：`CREATE INDEX adc_clinical_history_version_reported_by_id_ade589cf ON public.adc_clinical_history_version USING btree (reported_by_id)`。
+- `adc_clinical_history_version_scope_clinic_id_f44cf321`：`CREATE INDEX adc_clinical_history_version_scope_clinic_id_f44cf321 ON public.adc_clinical_history_version USING btree (scope_clinic_id)`。
+- `adc_clinical_history_version_source_visit_id_9f4088d6`：`CREATE INDEX adc_clinical_history_version_source_visit_id_9f4088d6 ON public.adc_clinical_history_version USING btree (source_visit_id)`。
+- `clinical_history_revision_unique`：`CREATE UNIQUE INDEX clinical_history_revision_unique ON public.adc_clinical_history_version USING btree (patient_id, scope_clinic_id, revision) NULLS NOT DISTINCT`。
+
+跨表及历史触发器：
+
+- `clinical_reported_history_retained`：`CREATE TRIGGER clinical_reported_history_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_history_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_clinical_record_event
+
+模型：`clinical.ClinicalRecordEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| encounter_id | bigint | FK | 是 | `adc_clinical_encounter.id` |
+| history_id | bigint | FK | 是 | `adc_clinical_history_version.id` |
+| record_id | bigint | FK | 是 | `adc_clinical_record_version.id` |
+| note | character varying(500) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_record__encounter_id_8e793a9c_fk_adc_clini`：`FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record__history_id_5edd1fc8_fk_adc_clini`：`FOREIGN KEY (history_id) REFERENCES adc_clinical_history_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record__record_id_df7f718b_fk_adc_clini`：`FOREIGN KEY (record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record_event_actor_id_71e3e837_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_clinical_record_event_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_record_event_actor_id_71e3e837`：`CREATE INDEX adc_clinical_record_event_actor_id_71e3e837 ON public.adc_clinical_record_event USING btree (actor_id)`。
+- `adc_clinical_record_event_encounter_id_8e793a9c`：`CREATE INDEX adc_clinical_record_event_encounter_id_8e793a9c ON public.adc_clinical_record_event USING btree (encounter_id)`。
+- `adc_clinical_record_event_history_id_5edd1fc8`：`CREATE INDEX adc_clinical_record_event_history_id_5edd1fc8 ON public.adc_clinical_record_event USING btree (history_id)`。
+- `adc_clinical_record_event_operation_id_key`：`CREATE UNIQUE INDEX adc_clinical_record_event_operation_id_key ON public.adc_clinical_record_event USING btree (operation_id)`。
+- `adc_clinical_record_event_pkey`：`CREATE UNIQUE INDEX adc_clinical_record_event_pkey ON public.adc_clinical_record_event USING btree (id)`。
+- `adc_clinical_record_event_record_id_df7f718b`：`CREATE INDEX adc_clinical_record_event_record_id_df7f718b ON public.adc_clinical_record_event USING btree (record_id)`。
+
+跨表及历史触发器：
+
+- `clinical_record_event_retained`：`CREATE TRIGGER clinical_record_event_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_record_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_clinical_record_version
+
+模型：`clinical.ClinicalRecordVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| encounter_id | bigint | FK | 否 | `adc_clinical_encounter.id` |
+| revision | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_clinical_record_version.id` |
+| history_id | bigint | FK | 是 | `adc_clinical_history_version.id` |
+| recorded_by_id | bigint | FK | 否 | `adc_user.id` |
+| observed_at | timestamp with time zone | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+| chief_complaint | character varying(2000) | — | 否 | — |
+| examination | character varying(4000) | — | 否 | — |
+| history_review | character varying(16) | — | 否 | — |
+| history_assessment | character varying(2000) | — | 否 | — |
+| history_cursor | character varying(64) | — | 否 | — |
+| history_discrepancy | character varying(2000) | — | 否 | — |
+| dentition | character varying(16) | — | 否 | — |
+| amendment_reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_record__encounter_id_fbdd5948_fk_adc_clini`：`FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record__history_id_8db92521_fk_adc_clini`：`FOREIGN KEY (history_id) REFERENCES adc_clinical_history_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record__previous_id_8e7c29b5_fk_adc_clini`：`FOREIGN KEY (previous_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record__recorded_by_id_93818125_fk_adc_user_`：`FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_record_version_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_record_version_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_clinical_record_version_revision_check`：`CHECK ((revision >= 0))`。
+- `clinical_dentition_valid`：`CHECK (((dentition)::text = ANY ((ARRAY['UNASSESSED'::character varying, 'PERMANENT'::character varying, 'PRIMARY'::character varying, 'MIXED'::character varying])::text[])))`。
+- `clinical_history_review_consistent`：`CHECK ((((history_id IS NOT NULL) AND ((history_review)::text = 'REVIEWED'::text)) OR ((history_id IS NULL) AND ((history_review)::text = 'UNAVAILABLE'::text))))`。
+- `clinical_observation_not_future`：`CHECK ((observed_at <= recorded_at))`。
+- `clinical_record_amendment_reason`：`CHECK (((previous_id IS NULL) OR (NOT ((amendment_reason)::text = ''::text))))`。
+- `clinical_record_not_previous_self`：`CHECK ((NOT ((previous_id = id) AND (previous_id IS NOT NULL))))`。
+- `clinical_record_previous_required`：`CHECK ((((previous_id IS NULL) AND (revision = 1)) OR ((previous_id IS NOT NULL) AND (revision > 1))))`。
+- `clinical_record_revision_positive`：`CHECK ((revision >= 1))`。
+- `clinical_record_revision_unique`：`UNIQUE (encounter_id, revision)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_record_version_encounter_id_fbdd5948`：`CREATE INDEX adc_clinical_record_version_encounter_id_fbdd5948 ON public.adc_clinical_record_version USING btree (encounter_id)`。
+- `adc_clinical_record_version_history_id_8db92521`：`CREATE INDEX adc_clinical_record_version_history_id_8db92521 ON public.adc_clinical_record_version USING btree (history_id)`。
+- `adc_clinical_record_version_pkey`：`CREATE UNIQUE INDEX adc_clinical_record_version_pkey ON public.adc_clinical_record_version USING btree (id)`。
+- `adc_clinical_record_version_previous_id_key`：`CREATE UNIQUE INDEX adc_clinical_record_version_previous_id_key ON public.adc_clinical_record_version USING btree (previous_id)`。
+- `adc_clinical_record_version_recorded_by_id_93818125`：`CREATE INDEX adc_clinical_record_version_recorded_by_id_93818125 ON public.adc_clinical_record_version USING btree (recorded_by_id)`。
+- `clinical_record_revision_unique`：`CREATE UNIQUE INDEX clinical_record_revision_unique ON public.adc_clinical_record_version USING btree (encounter_id, revision)`。
+
+跨表及历史触发器：
+
+- `clinical_record_version_retained`：`CREATE TRIGGER clinical_record_version_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_record_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
 ## adc_clinical_referral
 
 模型：`clinical.ClinicalReferral`。
@@ -588,6 +796,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | patient_id | bigint | FK | 否 | `adc_patient.id` |
 | source_visit_id | bigint | FK | 否 | `adc_visit.id` |
 | source_record_id | bigint | FK | 是 | `adc_visit_record_version.id` |
+| source_clinical_record_id | bigint | FK | 是 | `adc_clinical_record_version.id` |
 | source_clinic_id | bigint | FK | 否 | `adc_clinic.id` |
 | destination_clinic_id | bigint | FK | 否 | `adc_clinic.id` |
 | destination_service_id | bigint | FK | 是 | `adc_booking_service.id` |
@@ -606,6 +815,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_clinical_referra_destination_clinic_i_2c2506d3_fk_adc_clini`：`FOREIGN KEY (destination_clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_clinical_referra_destination_service__3725cf8b_fk_adc_booki`：`FOREIGN KEY (destination_service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_clinical_referra_source_clinic_id_7a27a76e_fk_adc_clini`：`FOREIGN KEY (source_clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_referra_source_clinical_reco_1f226ba6_fk_adc_clini`：`FOREIGN KEY (source_clinical_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_clinical_referra_source_record_id_12f06e1f_fk_adc_visit`：`FOREIGN KEY (source_record_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_clinical_referral_created_by_id_c2b34095_fk_adc_user_id`：`FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_clinical_referral_patient_id_ba652d3f_fk_adc_patient_id`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
@@ -615,6 +825,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_clinical_referral_source_visit_id_bb429916_fk_adc_visit_id`：`FOREIGN KEY (source_visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
 - `referral_consent_valid`：`CHECK (((consent_basis)::text = ANY ((ARRAY['PATIENT'::character varying, 'LEGAL_REPRESENTATIVE'::character varying])::text[])))`。
 - `referral_distinct_clinics`：`CHECK ((NOT (source_clinic_id = destination_clinic_id)))`。
+- `referral_single_record_source`：`CHECK (((source_record_id IS NULL) OR (source_clinical_record_id IS NULL)))`。
 - `referral_state_valid`：`CHECK (((state)::text = ANY ((ARRAY['REQUESTED'::character varying, 'IDENTITY_CONFIRMED'::character varying, 'IDENTITY_DISPUTED'::character varying, 'ACCEPTED'::character varying, 'DECLINED'::character varying, 'WITHDRAWN'::character varying, 'REVOKED'::character varying])::text[])))`。
 
 索引（含条件唯一索引）：
@@ -626,6 +837,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_clinical_referral_pkey`：`CREATE UNIQUE INDEX adc_clinical_referral_pkey ON public.adc_clinical_referral USING btree (id)`。
 - `adc_clinical_referral_receiver_id_4066029e`：`CREATE INDEX adc_clinical_referral_receiver_id_4066029e ON public.adc_clinical_referral USING btree (receiver_id)`。
 - `adc_clinical_referral_source_clinic_id_7a27a76e`：`CREATE INDEX adc_clinical_referral_source_clinic_id_7a27a76e ON public.adc_clinical_referral USING btree (source_clinic_id)`。
+- `adc_clinical_referral_source_clinical_record_id_1f226ba6`：`CREATE INDEX adc_clinical_referral_source_clinical_record_id_1f226ba6 ON public.adc_clinical_referral USING btree (source_clinical_record_id)`。
 - `adc_clinical_referral_source_record_id_12f06e1f`：`CREATE INDEX adc_clinical_referral_source_record_id_12f06e1f ON public.adc_clinical_referral USING btree (source_record_id)`。
 - `adc_clinical_referral_source_visit_id_bb429916`：`CREATE INDEX adc_clinical_referral_source_visit_id_bb429916 ON public.adc_clinical_referral USING btree (source_visit_id)`。
 
@@ -2425,6 +2637,44 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `statement_line_history`：`CREATE TRIGGER statement_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_line FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
+
+## adc_tooth_finding
+
+模型：`clinical.ToothFinding`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
+| line_no | smallint | — | 否 | — |
+| tooth | smallint | — | 否 | — |
+| surface | character varying(6) | — | 否 | — |
+| kind | character varying(16) | — | 否 | — |
+| detail | character varying(1000) | — | 否 | — |
+
+数据库约束：
+
+- `adc_tooth_finding_line_no_check`：`CHECK ((line_no >= 0))`。
+- `adc_tooth_finding_pkey`：`PRIMARY KEY (id)`。
+- `adc_tooth_finding_record_id_60a2ac23_fk_adc_clini`：`FOREIGN KEY (record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_tooth_finding_tooth_check`：`CHECK ((tooth >= 0))`。
+- `clinical_finding_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['OBSERVATION'::character varying, 'MISSING'::character varying, 'EXISTING_WORK'::character varying, 'OTHER'::character varying])::text[])))`。
+- `clinical_finding_line_positive`：`CHECK ((line_no >= 1))`。
+- `clinical_finding_line_unique`：`UNIQUE (record_id, line_no)`。
+- `clinical_finding_location_unique`：`UNIQUE (record_id, tooth, surface, kind)`。
+- `clinical_finding_tooth_valid`：`CHECK ((tooth = ANY (ARRAY[11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48, 51, 52, 53, 54, 55, 61, 62, 63, 64, 65, 71, 72, 73, 74, 75, 81, 82, 83, 84, 85])))`。
+- `clinical_missing_whole_tooth`：`CHECK (((NOT ((kind)::text = 'MISSING'::text)) OR ((surface)::text = ''::text)))`。
+
+索引（含条件唯一索引）：
+
+- `adc_tooth_finding_pkey`：`CREATE UNIQUE INDEX adc_tooth_finding_pkey ON public.adc_tooth_finding USING btree (id)`。
+- `adc_tooth_finding_record_id_60a2ac23`：`CREATE INDEX adc_tooth_finding_record_id_60a2ac23 ON public.adc_tooth_finding USING btree (record_id)`。
+- `clinical_finding_line_unique`：`CREATE UNIQUE INDEX clinical_finding_line_unique ON public.adc_tooth_finding USING btree (record_id, line_no)`。
+- `clinical_finding_location_unique`：`CREATE UNIQUE INDEX clinical_finding_location_unique ON public.adc_tooth_finding USING btree (record_id, tooth, surface, kind)`。
+
+跨表及历史触发器：
+
+- `clinical_tooth_finding_retained`：`CREATE TRIGGER clinical_tooth_finding_retained BEFORE DELETE OR UPDATE ON public.adc_tooth_finding FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
 ## adc_treatment_record
 

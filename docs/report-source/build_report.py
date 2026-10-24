@@ -304,7 +304,7 @@ def build(folder,repo,output=None):
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例清单与业务完整性');p('系统共定义67项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—67。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义71项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—71。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
  p('表3-4 用例分组及业务目标',10.5,False,True)
  table(['业务范围','编号','使用者目标'],[
  ['身份与资料','SU-01—03、21—23、25—28、64—67','账号、患者资料、基础目录、专业审核与限定转诊。'],
@@ -352,11 +352,14 @@ def build(folder,repo,output=None):
    p('执行与复核采用不同账号；后续观察窗口完整结束且不早于最近执行开始日。样本不足、不可比和变化待观察分别记录，不把统计变化当作措施的因果效果。')
   if item['heading'].startswith('4.13'):
    manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
-   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination','er_portal_reschedule','er_patient_relationship','er_professional_authority','er_clinical_referral'],15):
+   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination','er_portal_reschedule','er_patient_relationship','er_professional_authority','er_clinical_referral','er_clinical_history','er_clinical_encounter'],15):
     if number>15:page()
     heading('4.13.'+str(number-14)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number)+' '+manifest[name]['title']+'数据库ER图',16,max_height=12.5 if number==15 else 18)
     p(manifest[name]['note'],10.5)
+  if item['heading'].startswith('4.17'):
+   figure(repo/'docs/diagrams/clinical_record_state.png','图4-26 检查草稿与确认版本的业务状态',16,max_height=18)
+   p('状态图描述可观察的业务阶段，不增加虚构的状态列。旧确认版本在更正草稿期间继续保留；确认及保存不等于合格电子签名或实际治疗。')
  mind(4)
  page();heading('第5章 系统实现与测试',1)
  for item in source['implementation']:
@@ -396,7 +399,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 预约完善 财务与设备用例规约',1)
- p('本附录补充SU-39—67。电话接待、多资源核对、患者自助改期及资源目录规约说明现有业务。取消分析、财务与设备的原规则继续保留；每项实现范围与验收目标分别列明。',10.5)
+ p('本附录补充SU-39—71。电话接待、多资源核对、患者自助改期及资源目录规约说明现有业务。取消分析、财务与设备的原规则继续保留；每项实现范围与验收目标分别列明。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

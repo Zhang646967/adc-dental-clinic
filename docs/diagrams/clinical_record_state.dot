@@ -1,0 +1,21 @@
+digraph clinical_record {
+ graph [rankdir=TB, bgcolor="white", pad="0.2", nodesep="0.35", ranksep="0.5", splines=polyline];
+ node [shape=box, style="rounded", fontname="Noto Sans CJK SC", fontsize=18, margin="0.15,0.12"];
+ edge [fontname="Noto Sans CJK SC", fontsize=15, color="#4d5d69", arrowsize=0.7];
+ scheduled [label="仅预约\n尚无实际检查"];
+ arrived [label="已实际到诊\n可由负责医师开始检查"];
+ empty [label="检查头已建立\n尚无确认版本"];
+ draft [label="服务器草稿\n保存不产生治疗或收费"];
+ confirmed [label="已保留确认版本 Vn\n原内容不可覆盖"];
+ amendment [label="更正草稿\n原 Vn 继续保留"];
+ next [label="新确认版本 Vn+1\n保留前版与更正依据"];
+ scheduled -> arrived [label="前台核对身份及资源／登记到诊"];
+ arrived -> empty [label="负责医师／核对专业范围与本次患者"];
+ empty -> draft [label="保存文字或牙位观察"];
+ draft -> draft [label="保存／版本重检；冲突先比较再继续"];
+ draft -> empty [label="明确放弃／记录原因"];
+ draft -> confirmed [label="预览后确认／重检自述与草稿"];
+ confirmed -> amendment [label="说明依据／建立更正草稿"];
+ amendment -> confirmed [label="明确放弃／原版本不变"];
+ amendment -> next [label="重新预览并确认／追加版本"];
+}

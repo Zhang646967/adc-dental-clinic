@@ -69,3 +69,5 @@ These scopes do not establish WeChat developer-tool runtime, phone execution or 
 ## C1.1 patient subjects
 
 The native client now has 12 pages, including an explicit patient selector. Assigned accounts can use their own PatientAccess or a clinic-verified, time-limited appointment grant. Subject switching clears pending reviews and stale responses; booking, rescheduling and waitlist share the website commands. Delegation does not grant chart, invoice or clinical-consent access. Official offline compilation and Page/HTTP tests remain separate from WeChat runtime/device/experience acceptance.
+
+C2.1 adds the own-patient health-history page (`pages/history/index`). It shares the website command, independent self-report versions, explicit confirmation and uncertain-response retry. Appointment delegates cannot report clinical history. There are14 native pages; official offline syntax, backend/Page-over-HTTP and actual WeChat runtime remain distinct. See [C2.1 evidence](../../docs/evidence_c21/README.md).

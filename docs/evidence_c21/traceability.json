@@ -1,0 +1,38 @@
+{
+  "scope": "C2.1 implemented slice; selected C1\u2013C2 scenarios are not full-program acceptance",
+  "requirements": [
+    {
+      "id": "NS-13",
+      "behavior": "self/interview source and attributed assessment",
+      "test": "ClinicalEncounterTests.test_reported_and_reviewed_history_retain_disagreement"
+    },
+    {
+      "id": "NS-14",
+      "behavior": "shared tooth/surface validator and graph/keyboard browser",
+      "test": "ClinicalEncounterTests.test_invalid_tooth_or_surface_preserves_saved_draft; clinical_browser.json graph/keyboard checks"
+    },
+    {
+      "id": "NS-15",
+      "behavior": "stale subject, parallel form and explicit continuation",
+      "test": "ClinicalEncounterHTTPTests.test_conflict_can_compare_and_resume_without_losing_entered_notes"
+    },
+    {
+      "id": "NS-18",
+      "behavior": "retained clinical amendments separate from bill history",
+      "test": "ClinicalEncounterTests"
+    },
+    {
+      "id": "NS-24",
+      "behavior": "populated encrypted restore and original copy upgrade",
+      "test": "release_restore.json / copy_upgrade.json (pending release)"
+    }
+  ],
+  "non_goals": [
+    "C2.2 plans and typed actual-charge bridge",
+    "C2.3 recall/lab readiness",
+    "qualified signing/archive",
+    "professional template approval",
+    "WeChat runtime",
+    "cloud"
+  ]
+}

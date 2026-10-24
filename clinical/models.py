@@ -90,6 +90,7 @@ class ClinicalReferral(models.Model):
     patient = models.ForeignKey('patients.Patient', on_delete=models.PROTECT)
     source_visit = models.ForeignKey('scheduling.Visit', on_delete=models.PROTECT)
     source_record = models.ForeignKey('care.VisitRecordVersion', null=True, blank=True, on_delete=models.PROTECT)
+    source_clinical_record = models.ForeignKey('clinical.ClinicalRecordVersion', null=True, blank=True, on_delete=models.PROTECT)
     source_clinic = models.ForeignKey('registry.Clinic', on_delete=models.PROTECT, related_name='+')
     destination_clinic = models.ForeignKey('registry.Clinic', on_delete=models.PROTECT, related_name='+')
     destination_service = models.ForeignKey('scheduling.BookingService', null=True, blank=True, on_delete=models.PROTECT)
@@ -109,6 +110,7 @@ class ClinicalReferral(models.Model):
             models.CheckConstraint(condition=~Q(source_clinic=F('destination_clinic')), name='referral_distinct_clinics'),
             models.CheckConstraint(condition=Q(state__in=['REQUESTED','IDENTITY_CONFIRMED','IDENTITY_DISPUTED','ACCEPTED','DECLINED','WITHDRAWN','REVOKED']), name='referral_state_valid'),
             models.CheckConstraint(condition=Q(consent_basis__in=['PATIENT','LEGAL_REPRESENTATIVE']), name='referral_consent_valid'),
+            models.CheckConstraint(condition=Q(source_record__isnull=True)|Q(source_clinical_record__isnull=True), name='referral_single_record_source'),
         ]
 
 
@@ -141,3 +143,6 @@ class SensitiveReadEvent(models.Model):
         db_table = 'adc_sensitive_read_event'
         indexes = [models.Index(fields=['actor', 'created_at'], name='sensitive_actor_time')]
         constraints = [models.CheckConstraint(condition=Q(outcome__in=['ALLOW','DENY']), name='sensitive_outcome_valid')]
+
+# C2 clinical ownership remains separate from the existing billing versions.
+from clinical.encounter_models import (ClinicalHistoryVersion,ClinicalEncounter,ClinicalDraft,ClinicalRecordVersion,ToothFinding,ClinicalRecordEvent)

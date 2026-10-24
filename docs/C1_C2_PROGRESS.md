@@ -9,7 +9,7 @@ C2.2 and C2.3; the plan has no separately defined C1.3 increment.
 |---|---|---|
 | C1.1 | Verified patient relations, appointment grants, website/native subject selection | Locally delivered; [executed evidence](evidence_c11/release.json). External platform/production gates remain separate. |
 | C1.2 | Professional evidence/validity, clinic/service scope, controlled identity/referral requests, sensitive-read audit, departure/session handling | LOCAL DELIVERED. Exact application CI, full regression, five-clinic browser/native acceptance, 80-table encrypted restore, original-copy upgrade and protected installation passed; see [evidence](evidence_c12/release.json). Professional/platform/cloud and new clinical capacity remain separate. |
-| C2.1 | Reported/reviewed history, encounter, dentition/tooth/surface findings, safe draft saving and worklist | NOT IMPLEMENTED. Professional review of terminology/templates required before real care. |
+| C2.1 | Reported/reviewed history, encounter, dentition/tooth/surface findings, safe draft saving and worklist | SOURCE + LOCAL REHEARSAL PASSED. History, encounter, dentition/findings, safe conflicts, retained versions, browser/HTTP/PG and actual ER implemented. Exact CI/recovery/installation remain pending in [evidence](evidence_c21/verification.json); qualified template review remains separate. |
 | C2.2 | Plan revisions/alternatives/decisions, partial actual execution, next-visit linkage and unique charge source | NOT IMPLEMENTED. Estimates, clinical facts, existing bill versions and cash remain separate. |
 | C2.3 | Clinical recall windows, attributed front-desk work, lab dispatch/receipt/clinical acceptance/rework and readiness | NOT IMPLEMENTED. Retain original appointments; close recall only on defined actual care. |
 
@@ -26,9 +26,7 @@ from synthetic local tests. Their owners, supplied inputs and actual acceptance
 must be recorded. Historical UNKNOWN monitoring gaps and unrecovered Windows
 data remain historical facts. These boundaries do not prevent local development.
 
-The source report, observed PostgreSQL snapshot and original installation now
-cover C1.2.
-Future C2 structures remain proposals, never substituted for observed schema.
+The report and observed86-table PostgreSQL snapshot now cover implemented C2.1. The original installation remains C1.2 until the protected C2.1 release actually executes. C2.2–C2.3 remain required; their planned tables are not substituted for observed SQL.
 
 Mind map: verified identity → professional scope/shared care → encounter/findings
 → plan/actual execution/charge → recall/lab readiness → measured delivery.

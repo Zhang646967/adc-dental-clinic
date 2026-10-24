@@ -11,6 +11,31 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_clinical_history': {
+        'title':'患者自述来源与医师核对',
+        'tables': {
+            'adc_patient':['id','patient_no'],
+            'adc_clinic':['id','clinic_code'],
+            'adc_user':['id','username'],
+            'adc_visit':['id','patient_id'],
+            'adc_clinical_history_version':['id','patient_id','scope_clinic_id','source_visit_id','reported_by_id','previous_id','revision','source'],
+            'adc_clinical_record_version':['id','history_id','history_review','history_cursor'],
+        },
+        'note':'本人提交不归属某次预约或诊所；医师面谈引用实际就诊及当前诊所。患者与来源诊所及版号组成唯一键，空诊所也参与唯一性；各来源分别追加版本。检查记录可引用一个已核对的具体版本，并保留核对结论、差异和可见来源游标。自述不覆盖已复核过敏资料；外键不授予跨店查阅权限。',
+    },
+    'er_clinical_encounter': {
+        'title':'实际检查、草稿与确认版本',
+        'tables': {
+            'adc_visit':['id','patient_id','clinic_id'],
+            'adc_user':['id','username'],
+            'adc_clinical_encounter':['id','visit_id','opened_by_id','revision'],
+            'adc_clinical_draft':['id','encounter_id','base_record_id'],
+            'adc_clinical_record_version':['id','encounter_id','previous_id','recorded_by_id','revision'],
+            'adc_tooth_finding':['id','record_id','line_no','tooth','surface','kind'],
+            'adc_clinical_record_event':['id','encounter_id','record_id','operation_id','action'],
+        },
+        'note':'每次实际到诊至多一个检查头，患者与诊所经原就诊推导，不重复维护。每个检查头至多一个可修改草稿，base_record可空；确认版本按检查头和版号唯一，前版引用可空且唯一。牙位观察属于具体确认版本，草稿观察尚在有界工作载荷中。确认版本、观察及决定事件只追加，草稿可明确放弃。检查记录本身不是治疗执行或资金事实。',
+    },
     'er_professional_authority': {
         'title':'专业资质来源与限定操作授权',
         'tables': {
@@ -29,14 +54,13 @@ VIEWS = {
         'tables': {
             'adc_patient':['id','patient_no'],
             'adc_clinic':['id','clinic_code'],
-            'adc_user':['id','username'],
             'adc_visit':['id','patient_id'],
             'adc_visit_record_version':['id','visit_id','revision_no'],
-            'adc_clinical_referral':['id','patient_id','source_visit_id','source_record_id','source_clinic_id','destination_clinic_id','receiver_id','state'],
+            'adc_clinical_record_version':['id','revision'],
+            'adc_clinical_referral':['id','patient_id','source_visit_id','source_record_id','source_clinical_record_id','source_clinic_id','destination_clinic_id','receiver_id','state'],
             'adc_clinical_referral_event':['id','referral_id','actor_id','operation_id'],
-            'adc_sensitive_read_event':['id','actor_id','object_kind','object_id','outcome'],
         },
-        'note':'转诊保留原患者、原就诊、可选已发布版本、转出／接收诊所及指定医师；身份核对、临床披露同意和医师接收分别办理。不合并档案，不把转诊作为预约或实际诊疗。查阅事件的object_kind/object_id为受控类型与对象编号，不是虚构的患者或转诊外键。其余服务、来源人和有效期在完整目录保留。',
+        'note':'转诊保留原患者、原就诊、转出／接收诊所及指定医师。来源可不选，选择时至多引用一个旧发布版本或结构化检查确认版本；必须属于同次原就诊。后续更正不改写已选择的版本。身份核对、临床披露同意和医师接收分别办理。查阅事件的object_kind/object_id为受控类型与对象编号，不是虚构外键。其余来源及有效期在完整目录保留。',
     },
     'er_patient_relationship': {
         'title': '患者关系核验与预约代办授权',

@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "source_checks": 1101,
+  "postgresql_http_concurrency_cases": 1592,
+  "all_seven_stages_passed": true,
+  "source_digest": "3cabea58cab3ad4448fb3afc3dc9a6307011ce67d7652b78c9b44b8182ef5ede",
+  "scope": "Final C2.1 working-tree regression; exact commit CI and image acceptance remain separate"
+}

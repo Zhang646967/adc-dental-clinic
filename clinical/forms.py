@@ -2,7 +2,7 @@ from django import forms
 from django.db.models import Q
 from django.utils import timezone
 from accounts.models import UserAccount
-from clinical.models import ProfessionalAuthorization, ClinicalReferral, ClinicalReviewerAppointment
+from clinical.models import ProfessionalAuthorization, ClinicalReferral, ClinicalReviewerAppointment,ClinicalRecordVersion
 from scheduling.models import Visit
 from scheduling.resource_models import BookingService
 from care.models import VisitRecordVersion
@@ -58,6 +58,7 @@ class ConfirmForm(forms.Form):
 
 
 class ReferralForm(forms.Form):
+    source_clinical_record=forms.ModelChoiceField(label='披露的结构化检查版本（与既有版本只选一种）',queryset=ClinicalRecordVersion.objects.none(),required=False)
     source_record=forms.ModelChoiceField(label='明确披露的已发布记录版本（可不披露历史记录）',queryset=VisitRecordVersion.objects.none(),required=False)
     destination_service=forms.ModelChoiceField(label='接收店服务范围（无服务旧模式可不选）',queryset=BookingService.objects.none(),required=False)
     destination_clinic=forms.ModelChoiceField(label='接收诊所',queryset=Visit.objects.none())
@@ -70,6 +71,8 @@ class ReferralForm(forms.Form):
         super().__init__(*args,**kwargs)
         from registry.models import Clinic
         self.visit=visit
+        self.fields['source_clinical_record'].queryset=ClinicalRecordVersion.objects.filter(encounter__visit=visit).order_by('-revision')
+        self.fields['source_clinical_record'].label_from_instance=lambda r:f'检查第 {r.revision} 版 · {timezone.localtime(r.recorded_at):%Y-%m-%d %H:%M}'
         self.fields['source_record'].queryset=VisitRecordVersion.objects.filter(visit=visit,state='PUBLISHED').order_by('-revision_no')
         self.fields['source_record'].label_from_instance=lambda r:f'版本 {r.revision_no} · {timezone.localtime(r.published_at):%Y-%m-%d %H:%M}'
         self.fields['destination_clinic'].queryset=Clinic.objects.filter(is_active=True).exclude(pk=visit.clinic_id)
@@ -79,7 +82,7 @@ class ReferralForm(forms.Form):
         self.fields['receiver'].label_from_instance=lambda u:f'{u.dentist.name} · {u.username}'
     def fields_data(self):
         d=dict(self.cleaned_data)
-        for key in ('source_record','destination_clinic','destination_service','receiver'):
+        for key in ('source_record','source_clinical_record','destination_clinic','destination_service','receiver'):
             value=d.pop(key); d[key+'_id']=value.pk if value else None
         d['source_visit_id']=self.visit.pk
         return d

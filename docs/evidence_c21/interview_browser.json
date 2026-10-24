@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "name": "interview returns actual encounter",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview interview",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version interview",
+      "passed": true
+    },
+    {
+      "name": "patient self history excludes clinician interview",
+      "passed": true
+    },
+    {
+      "name": "native self history excludes clinician interview",
+      "passed": true
+    },
+    {
+      "name": "no treatment close has unique invoice",
+      "passed": true
+    },
+    {
+      "name": "no script errors",
+      "passed": true
+    }
+  ],
+  "results": [],
+  "page_errors": 0,
+  "scope": "C2.1 real Chrome and actual native Page handlers over HTTP/PostgreSQL; synthetic professional evidence only, not WeChat runtime",
+  "browser": "156.0.8078.47",
+  "passed": true
+}

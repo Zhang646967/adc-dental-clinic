@@ -1,7 +1,14 @@
 from django.urls import path
 from clinical import views
+from clinical import encounter_views as encounters
 
 urlpatterns=[
+    path('clinical/worklist/',encounters.worklist,name='clinical_worklist'),
+    path('clinical/encounters/<int:pk>/',encounters.workspace,name='clinical_encounter'),
+    path('clinical/encounters/<int:pk>/history/',encounters.interview_history,name='clinical_interview_history'),
+    path('clinical/encounters/<int:pk>/confirm/',encounters.record_preview,name='clinical_record_preview'),
+    path('clinical/records/confirm/',encounters.record_confirm,name='clinical_record_confirm'),
+    path('portal/history/',encounters.patient_history,name='portal_history'),
     path('clinical/authority/',views.authority_home,name='clinical_authority_home'),
     path('clinical/authority/new/',views.authority_new,name='clinical_authority_new'),
     path('clinical/authority/activate/',views.authority_activate,name='clinical_authority_activate'),

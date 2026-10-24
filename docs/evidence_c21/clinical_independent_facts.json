@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "clinics": 5,
+  "source_rows_preserved": {
+    "adc_patient": {
+      "rows": 10004,
+      "rows_md5": "03254be801e5e87ce33c2e6cdae2ff4f"
+    },
+    "adc_visit": {
+      "rows": 10505,
+      "rows_md5": "7ba274b9688cb919a267bbdb5a23c325"
+    },
+    "adc_visit_record_version": {
+      "rows": 505,
+      "rows_md5": "fc3570b1b43c266c83a6c048f3f59344"
+    },
+    "adc_treatment_record": {
+      "rows": 500,
+      "rows_md5": "8cce4edc02dbbdfd6f707660acc295aa"
+    },
+    "adc_invoice": {
+      "rows": 500,
+      "rows_md5": "b8a7bf72a81291e79c6569872e8e664e"
+    },
+    "adc_cash_entry": {
+      "rows": 500,
+      "rows_md5": "2e9220a5b52a368e87f35f7fb5c7802c"
+    },
+    "adc_cash_evidence": {
+      "rows": 500,
+      "rows_md5": "3b43987f97baf7bdf831d2c85db0180e"
+    },
+    "adc_resource_plan": {
+      "rows": 5,
+      "rows_md5": "c8e2f0b1cf778cfccc1105cf4bae3d66"
+    },
+    "adc_resource_claim": {
+      "rows": 5,
+      "rows_md5": "7380caac918e27146d8b08bacd350a9d"
+    },
+    "adc_portal_booking_receipt": {
+      "rows": 0,
+      "rows_md5": null
+    }
+  },
+  "invoice_total": "50000.00",
+  "posted_cash_total": "50000.00",
+  "confirmed_versions": 10,
+  "findings": 30,
+  "same_graph_keyboard_fact": true,
+  "no_clinical_generated_business_or_money": true
+}

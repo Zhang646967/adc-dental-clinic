@@ -52,7 +52,7 @@ function request(path, method = 'GET', data = {}) {
           reject(error);
         }
       },
-      fail() { reject(new Error('连接中断，结果尚未确认。若刚刚提交，请先查看“我的预约”或“我的候补”，再核对是否需要重试。')); }
+      fail() { const error=new Error('连接中断，结果尚未确认。若刚刚提交，请先查看对应业务清单，再核对是否需要重试。');error.code='NETWORK_UNCONFIRMED';reject(error); }
     });
   });
 }

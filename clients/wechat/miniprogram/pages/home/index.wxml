@@ -17,5 +17,6 @@
   <view wx:if="{{!busy && !rows.length && !error}}" class="card empty"><view class="section-title">这里还没有预约</view><view>先查看服务与时段；没有合适时间，也可以登记候补等待前台协调。</view><navigator class="link" url="/pages/waitjoin/index">登记候补偏好 →</navigator></view>
   <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view>
   <button class="secondary" bindtap="load" disabled="{{busy}}">刷新办理结果</button>
+  <navigator class="card" wx:if="{{!patientDelegated}}" url="/pages/history/index"><view class="section-title">我的健康自述</view><view>补充本人健康、用药与自述过敏情况，由医师在接诊时核对。</view></navigator>
   <button bindtap="logout">退出账号</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

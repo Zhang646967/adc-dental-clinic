@@ -11,11 +11,11 @@ from care.audit import emit
 from care.models import VisitRecordVersion
 from clinical.authority import require_visit_authority, professional_scope
 from clinical.authority_services import lock_people, text, date_time
-from clinical.models import ClinicalReferral, ClinicalReferralEvent
+from clinical.models import ClinicalReferral, ClinicalReferralEvent, ClinicalRecordVersion
 from patients.models import Patient
 from scheduling.models import Visit
 
-CONTRACT = 'adc.clinical-referral.c12.v1'
+CONTRACT = 'adc.clinical-referral.c21.v2'
 ROLES = ('DENTIST', 'FRONT_DESK', 'MANAGER', 'PATIENT')
 
 
@@ -80,12 +80,19 @@ def validate_new(actor, fields, *, lock=False):
     if fields['consent_basis'] not in ('PATIENT', 'LEGAL_REPRESENTATIVE'):
         raise RuleError('须记录患者本人或另行核验的法定代理披露同意；代约授权不能代替此项。')
     source_record_id = fields.get('source_record_id')
+    source_clinical_record_id=fields.get('source_clinical_record_id')
+    if source_record_id is not None and source_clinical_record_id is not None:
+        raise RuleError('请选择一种明确的历史版本来源；不能把两种记录合并为一次未区分的披露。')
+    if source_clinical_record_id is not None and not ClinicalRecordVersion.objects.filter(
+            pk=source_clinical_record_id,encounter__visit_id=visit.pk).exists():
+        raise RuleError('只能选择本次就诊已确认的结构化检查版本；草稿和其他患者记录不在此披露范围。')
     if source_record_id is not None and not VisitRecordVersion.objects.filter(pk=source_record_id,
         visit=visit, state='PUBLISHED').exists():
         raise RuleError('只能明确选择原就诊已发布的记录版本，不能披露草稿或其他患者的记录。')
     if not Patient.objects.filter(pk=visit.patient_id, is_active=True).exists():
         raise RuleError('患者资料已停用，请先核对身份。')
     return dict(patient_id=visit.patient_id, source_visit_id=visit.pk, source_record_id=source_record_id,
+        source_clinical_record_id=source_clinical_record_id,
         source_clinic_id=visit.clinic_id, destination_clinic_id=fields['destination_clinic_id'],
         destination_service_id=fields.get('destination_service_id'), receiver_id=fields['receiver_id'],
         consent_basis=fields['consent_basis'], consent_reference=text(fields['consent_reference'], '披露同意依据编号'),
@@ -161,7 +168,7 @@ def confirm_referral(*, actor, proposal_token, confirmed):
         note = data['note']
     ClinicalReferralEvent.objects.create(actor=actor, referral=row, operation_id=payload['operation'], action=action,
         prior_state=before, resulting_state=row.state, note=note,
-        snapshot={'revision':row.revision,'source_record_id':row.source_record_id,'valid_until':row.valid_until.isoformat()})
+        snapshot={'revision':row.revision,'source_record_id':row.source_record_id,'source_clinical_record_id':row.source_clinical_record_id,'valid_until':row.valid_until.isoformat()})
     emit(actor, 'CLINICAL_REFERRAL_CHANGED', row, summary={'action':action,'state':row.state})
     return row, False
 
@@ -176,10 +183,26 @@ def require_referral_read(actor, row):
 def released_record(actor, row):
     """Private, minimal projection. No invoice amounts, billing header or chain query."""
     require_referral_read(actor,row)
-    result = {'purpose':row.purpose, 'record':None}
+    result = {'purpose':row.purpose, 'record':None,'clinical_record':None}
     if row.source_record_id:
         record = VisitRecordVersion.objects.get(pk=row.source_record_id, visit_id=row.source_visit_id, state='PUBLISHED')
         result['record'] = {'revision':record.revision_no, 'published_at':record.published_at,
             'clinical_note':record.clinical_note, 'allergy_review':record.allergy_review_snapshot,
             'treatments':list(record.treatment_lines.values('name_snapshot','unit_snapshot','quantity'))}
+    if row.source_clinical_record_id:
+        from clinical.tooth_rules import KINDS,DENTITIONS
+        from clinical.encounter_models import HISTORY_STATES
+        record=ClinicalRecordVersion.objects.select_related('history').get(pk=row.source_clinical_record_id,encounter__visit_id=row.source_visit_id)
+        history=None
+        if record.history_id:
+            h=record.history
+            if h.patient_id!=row.patient_id:raise PermissionDenied('引用的患者自述对象需要重新核对。')
+            history=dict(source=h.get_source_display(),revision=h.revision,recorded_at=h.recorded_at,
+                medical_status=dict(HISTORY_STATES)[h.medical_status],medical_history=h.medical_history,
+                medication_status=dict(HISTORY_STATES)[h.medication_status],medications=h.medications,
+                allergy_status=dict(HISTORY_STATES)[h.allergy_status],reported_allergies=h.reported_allergies)
+        result['clinical_record']=dict(revision=record.revision,recorded_at=record.recorded_at,observed_at=record.observed_at,
+            chief_complaint=record.chief_complaint,examination=record.examination,history_assessment=record.history_assessment,
+            history_discrepancy=record.history_discrepancy,history=history,dentition=DENTITIONS[record.dentition],
+            findings=[dict(tooth=f.tooth,surface=f.surface,kind=KINDS[f.kind],detail=f.detail) for f in record.findings.all()])
     return result

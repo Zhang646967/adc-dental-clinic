@@ -1,0 +1,629 @@
+{
+  "checks": [
+    {
+      "name": "own self-report source 1",
+      "passed": true
+    },
+    {
+      "name": "website report saved 1",
+      "passed": true
+    },
+    {
+      "name": "native shares website self report 1",
+      "passed": true
+    },
+    {
+      "name": "lost response retains exact retry 1",
+      "passed": true
+    },
+    {
+      "name": "native retry creates one report 1",
+      "passed": true
+    },
+    {
+      "name": "native latest visible website 1",
+      "passed": true
+    },
+    {
+      "name": "self history 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "self history 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "doctor assigned worklist 1",
+      "passed": true
+    },
+    {
+      "name": "one actual encounter opened 1",
+      "passed": true
+    },
+    {
+      "name": "chart shares keyboard selection 1",
+      "passed": true
+    },
+    {
+      "name": "invalid anterior surface rejected 1",
+      "passed": true
+    },
+    {
+      "name": "invalid observation input retained 1",
+      "passed": true
+    },
+    {
+      "name": "second tab conflict 1",
+      "passed": true
+    },
+    {
+      "name": "stale unsaved text retained 1",
+      "passed": true
+    },
+    {
+      "name": "comparison exposes current saved draft 1",
+      "passed": true
+    },
+    {
+      "name": "review continuation retains unsaved text 1",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 1",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 1",
+      "passed": true
+    },
+    {
+      "name": "confirmed clinical record retains unknown 1",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 1 amended",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 1 amended",
+      "passed": true
+    },
+    {
+      "name": "historical exact version retained 1",
+      "passed": true
+    },
+    {
+      "name": "historical chart 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "historical chart 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "front desk cannot see chart 1",
+      "passed": true
+    },
+    {
+      "name": "other clinic chart rejected 1",
+      "passed": true
+    },
+    {
+      "name": "own self-report source 2",
+      "passed": true
+    },
+    {
+      "name": "website report saved 2",
+      "passed": true
+    },
+    {
+      "name": "native shares website self report 2",
+      "passed": true
+    },
+    {
+      "name": "lost response retains exact retry 2",
+      "passed": true
+    },
+    {
+      "name": "native retry creates one report 2",
+      "passed": true
+    },
+    {
+      "name": "native latest visible website 2",
+      "passed": true
+    },
+    {
+      "name": "self history 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "self history 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "doctor assigned worklist 2",
+      "passed": true
+    },
+    {
+      "name": "one actual encounter opened 2",
+      "passed": true
+    },
+    {
+      "name": "chart shares keyboard selection 2",
+      "passed": true
+    },
+    {
+      "name": "invalid anterior surface rejected 2",
+      "passed": true
+    },
+    {
+      "name": "invalid observation input retained 2",
+      "passed": true
+    },
+    {
+      "name": "second tab conflict 2",
+      "passed": true
+    },
+    {
+      "name": "stale unsaved text retained 2",
+      "passed": true
+    },
+    {
+      "name": "comparison exposes current saved draft 2",
+      "passed": true
+    },
+    {
+      "name": "review continuation retains unsaved text 2",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 2",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 2",
+      "passed": true
+    },
+    {
+      "name": "confirmed clinical record retains unknown 2",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 2 amended",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 2 amended",
+      "passed": true
+    },
+    {
+      "name": "historical exact version retained 2",
+      "passed": true
+    },
+    {
+      "name": "historical chart 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "historical chart 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "front desk cannot see chart 2",
+      "passed": true
+    },
+    {
+      "name": "other clinic chart rejected 2",
+      "passed": true
+    },
+    {
+      "name": "own self-report source 3",
+      "passed": true
+    },
+    {
+      "name": "website report saved 3",
+      "passed": true
+    },
+    {
+      "name": "native shares website self report 3",
+      "passed": true
+    },
+    {
+      "name": "lost response retains exact retry 3",
+      "passed": true
+    },
+    {
+      "name": "native retry creates one report 3",
+      "passed": true
+    },
+    {
+      "name": "native latest visible website 3",
+      "passed": true
+    },
+    {
+      "name": "self history 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "self history 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "doctor assigned worklist 3",
+      "passed": true
+    },
+    {
+      "name": "one actual encounter opened 3",
+      "passed": true
+    },
+    {
+      "name": "chart shares keyboard selection 3",
+      "passed": true
+    },
+    {
+      "name": "invalid anterior surface rejected 3",
+      "passed": true
+    },
+    {
+      "name": "invalid observation input retained 3",
+      "passed": true
+    },
+    {
+      "name": "second tab conflict 3",
+      "passed": true
+    },
+    {
+      "name": "stale unsaved text retained 3",
+      "passed": true
+    },
+    {
+      "name": "comparison exposes current saved draft 3",
+      "passed": true
+    },
+    {
+      "name": "review continuation retains unsaved text 3",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 3",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 3",
+      "passed": true
+    },
+    {
+      "name": "confirmed clinical record retains unknown 3",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 3 amended",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 3 amended",
+      "passed": true
+    },
+    {
+      "name": "historical exact version retained 3",
+      "passed": true
+    },
+    {
+      "name": "historical chart 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "historical chart 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "front desk cannot see chart 3",
+      "passed": true
+    },
+    {
+      "name": "other clinic chart rejected 3",
+      "passed": true
+    },
+    {
+      "name": "own self-report source 4",
+      "passed": true
+    },
+    {
+      "name": "website report saved 4",
+      "passed": true
+    },
+    {
+      "name": "native shares website self report 4",
+      "passed": true
+    },
+    {
+      "name": "lost response retains exact retry 4",
+      "passed": true
+    },
+    {
+      "name": "native retry creates one report 4",
+      "passed": true
+    },
+    {
+      "name": "native latest visible website 4",
+      "passed": true
+    },
+    {
+      "name": "self history 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "self history 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "doctor assigned worklist 4",
+      "passed": true
+    },
+    {
+      "name": "one actual encounter opened 4",
+      "passed": true
+    },
+    {
+      "name": "chart shares keyboard selection 4",
+      "passed": true
+    },
+    {
+      "name": "invalid anterior surface rejected 4",
+      "passed": true
+    },
+    {
+      "name": "invalid observation input retained 4",
+      "passed": true
+    },
+    {
+      "name": "second tab conflict 4",
+      "passed": true
+    },
+    {
+      "name": "stale unsaved text retained 4",
+      "passed": true
+    },
+    {
+      "name": "comparison exposes current saved draft 4",
+      "passed": true
+    },
+    {
+      "name": "review continuation retains unsaved text 4",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 4",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 4",
+      "passed": true
+    },
+    {
+      "name": "confirmed clinical record retains unknown 4",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 4 amended",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 4 amended",
+      "passed": true
+    },
+    {
+      "name": "historical exact version retained 4",
+      "passed": true
+    },
+    {
+      "name": "historical chart 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "historical chart 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "front desk cannot see chart 4",
+      "passed": true
+    },
+    {
+      "name": "other clinic chart rejected 4",
+      "passed": true
+    },
+    {
+      "name": "own self-report source 5",
+      "passed": true
+    },
+    {
+      "name": "website report saved 5",
+      "passed": true
+    },
+    {
+      "name": "native shares website self report 5",
+      "passed": true
+    },
+    {
+      "name": "lost response retains exact retry 5",
+      "passed": true
+    },
+    {
+      "name": "native retry creates one report 5",
+      "passed": true
+    },
+    {
+      "name": "native latest visible website 5",
+      "passed": true
+    },
+    {
+      "name": "self history 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "self history 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "doctor assigned worklist 5",
+      "passed": true
+    },
+    {
+      "name": "one actual encounter opened 5",
+      "passed": true
+    },
+    {
+      "name": "chart shares keyboard selection 5",
+      "passed": true
+    },
+    {
+      "name": "invalid anterior surface rejected 5",
+      "passed": true
+    },
+    {
+      "name": "invalid observation input retained 5",
+      "passed": true
+    },
+    {
+      "name": "second tab conflict 5",
+      "passed": true
+    },
+    {
+      "name": "stale unsaved text retained 5",
+      "passed": true
+    },
+    {
+      "name": "comparison exposes current saved draft 5",
+      "passed": true
+    },
+    {
+      "name": "review continuation retains unsaved text 5",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "clinical draft 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 5",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 5",
+      "passed": true
+    },
+    {
+      "name": "confirmed clinical record retains unknown 5",
+      "passed": true
+    },
+    {
+      "name": "signed server-held preview 5 amended",
+      "passed": true
+    },
+    {
+      "name": "confirmed readonly version 5 amended",
+      "passed": true
+    },
+    {
+      "name": "historical exact version retained 5",
+      "passed": true
+    },
+    {
+      "name": "historical chart 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "historical chart 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "front desk cannot see chart 5",
+      "passed": true
+    },
+    {
+      "name": "other clinic chart rejected 5",
+      "passed": true
+    },
+    {
+      "name": "no browser script errors",
+      "passed": true
+    }
+  ],
+  "results": [
+    {
+      "clinic": 1,
+      "visit": 2101,
+      "history_versions": 2,
+      "confirmed_versions": 2,
+      "findings_per_version": 3
+    },
+    {
+      "clinic": 2,
+      "visit": 4202,
+      "history_versions": 2,
+      "confirmed_versions": 2,
+      "findings_per_version": 3
+    },
+    {
+      "clinic": 3,
+      "visit": 6303,
+      "history_versions": 2,
+      "confirmed_versions": 2,
+      "findings_per_version": 3
+    },
+    {
+      "clinic": 4,
+      "visit": 8404,
+      "history_versions": 2,
+      "confirmed_versions": 2,
+      "findings_per_version": 3
+    },
+    {
+      "clinic": 5,
+      "visit": 10505,
+      "history_versions": 2,
+      "confirmed_versions": 2,
+      "findings_per_version": 3
+    }
+  ],
+  "page_errors": 0,
+  "scope": "C2.1 real Chrome and actual native Page handlers over HTTP/PostgreSQL; synthetic professional evidence only, not WeChat runtime",
+  "browser": "156.0.8078.47",
+  "passed": true
+}

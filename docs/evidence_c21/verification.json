@@ -1,0 +1,70 @@
+{
+  "status": "LOCAL_REHEARSAL_PASSED_RELEASE_PENDING",
+  "synthetic": true,
+  "source_checks": 1101,
+  "postgresql_before_final_four_http_cases": {
+    "passed": true,
+    "cases": 1588
+  },
+  "focused_final_clinical_cases": {
+    "passed": true,
+    "cases": 90
+  },
+  "native": {
+    "source_checks": 138,
+    "mock_page_cases": 36,
+    "official_offline_pages": 14,
+    "wechat_runtime": "NOT_RUN"
+  },
+  "browser": {
+    "clinical_checks": 146,
+    "structured_referral_checks": 126,
+    "care_checks": 51,
+    "interview_checks": 7,
+    "clinics": 5,
+    "width_px": 390,
+    "keyboard": true,
+    "page_errors": 0
+  },
+  "actual_schema": {
+    "tables": 86,
+    "orm_columns": 805,
+    "sql_foreign_keys": 225,
+    "application_triggers": 56,
+    "migrations": 45,
+    "prior_migrations_unchanged": 44
+  },
+  "course_report": {
+    "pages": 144,
+    "business_use_cases": 71,
+    "shared_subfunctions": 1,
+    "specifications": 72,
+    "er_views": 11,
+    "tables": 90,
+    "figures": 41
+  },
+  "remaining": [
+    "exact_commit_ci",
+    "exact_image_acceptance",
+    "populated_encrypted_restore",
+    "original_copy_upgrade",
+    "protected_installation",
+    "C2.2",
+    "C2.3",
+    "new_multivisit_capacity"
+  ],
+  "external": {
+    "professional_template_review": "NOT_SUPPLIED",
+    "wechat_runtime": "NOT_RUN",
+    "cloud": "SERVER_NOT_PURCHASED",
+    "historical_windows_recovery": "UNRESOLVED"
+  },
+  "final_full_regression": {
+    "passed": true,
+    "source_checks": 1101,
+    "postgresql_http_concurrency_cases": 1592,
+    "all_seven_stages_passed": true,
+    "source_digest": "3cabea58cab3ad4448fb3afc3dc9a6307011ce67d7652b78c9b44b8182ef5ede",
+    "scope": "Final C2.1 working-tree regression; exact commit CI and image acceptance remain separate"
+  }
+}

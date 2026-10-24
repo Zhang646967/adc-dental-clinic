@@ -8,6 +8,11 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'clinical_worklist':('VISIT_LIST','CARE'),'clinical_encounter':('CARE','CARE'),
+    'clinical_interview_history':('CARE','HISTORY'),'clinical_record_preview':('CARE','CARE'),
+    'clinical_record_confirm':('CARE','CARE'),
+    'portal_history':('HISTORY','SELF_HISTORY'),'mini_history':('HISTORY','SELF_HISTORY'),
+    'mini_history_submit':('HISTORY','SELF_HISTORY'),
     'patients': ('PATIENT_LIST', 'CARE'), 'patient_detail': ('PATIENT', 'CARE'),
     'patient_lookup': ('IDENTITY_LOOKUP', 'IDENTITY'), 'patient_contact_edit': ('PATIENT', 'COORDINATION'),
     'patient_contact_confirm': ('PATIENT', 'COORDINATION'),
@@ -47,10 +52,13 @@ class SensitiveReadMiddleware:
             except Resolver404:return response
         name = getattr(match, 'url_name', None)
         route = ROUTES.get(name)
-        if route and request.user.is_authenticated:
+        # A successful write redirect contains no sensitive read response.
+        # Denied attempts and read redirects remain attributable evidence.
+        redirected_write=request.method not in ('GET','HEAD') and 300<=response.status_code<400
+        if route and request.user.is_authenticated and not redirected_write:
             ctx = getattr(request.user, '_adc_workspace', None)
             SensitiveReadEvent.objects.create(actor=request.user, role=ctx.role if ctx else '',
                 object_kind=route[0], object_id=match.kwargs.get('pk'), purpose=route[1],
-                outcome='ALLOW' if 200 <= response.status_code < 300 else 'DENY',
+                outcome='ALLOW' if getattr(response,'adc_sensitive_read_authorized',False) or 200 <= response.status_code < 300 else 'DENY',
                 trace_id=getattr(request, 'adc_request_id', ''))
         return response

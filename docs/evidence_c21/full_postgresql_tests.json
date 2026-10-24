@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "seconds": 370.829,
+  "exit_code": 0,
+  "tail": [
+    "----------------------------------------------------------------------",
+    "Ran 1588 tests in 361.798s",
+    "",
+    "OK",
+    "Destroying test database for alias 'default'..."
+  ]
+}

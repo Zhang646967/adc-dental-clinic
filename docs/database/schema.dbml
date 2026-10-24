@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 79 ORM tables; django_migrations is a framework migration journal.
+// All 85 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_ai_usage_bucket {
@@ -201,11 +201,82 @@ Table adc_clinical_authority_policy {
   reference "character varying(160)" [not null]
 }
 
+Table adc_clinical_draft {
+  id "bigint" [pk, not null]
+  encounter_id "bigint" [unique, not null]
+  saved_by_id "bigint" [not null]
+  base_record_id "bigint" [null]
+  payload "jsonb" [not null]
+  saved_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_encounter {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [unique, not null]
+  opened_by_id "bigint" [not null]
+  opened_at "timestamp with time zone" [not null]
+  revision "integer" [not null]
+}
+
+Table adc_clinical_history_version {
+  id "bigint" [pk, not null]
+  patient_id "bigint" [not null]
+  revision "integer" [not null]
+  previous_id "bigint" [unique, null]
+  source "character varying(16)" [not null]
+  source_visit_id "bigint" [null]
+  scope_clinic_id "bigint" [null]
+  reported_by_id "bigint" [not null]
+  medical_status "character varying(16)" [not null]
+  medical_history "character varying(2000)" [not null]
+  medication_status "character varying(16)" [not null]
+  medications "character varying(2000)" [not null]
+  allergy_status "character varying(16)" [not null]
+  reported_allergies "character varying(2000)" [not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_record_event {
+  id "bigint" [pk, not null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  encounter_id "bigint" [null]
+  history_id "bigint" [null]
+  record_id "bigint" [null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_record_version {
+  id "bigint" [pk, not null]
+  encounter_id "bigint" [not null]
+  revision "integer" [not null]
+  previous_id "bigint" [unique, null]
+  history_id "bigint" [null]
+  recorded_by_id "bigint" [not null]
+  observed_at "timestamp with time zone" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  chief_complaint "character varying(2000)" [not null]
+  examination "character varying(4000)" [not null]
+  history_review "character varying(16)" [not null]
+  history_assessment "character varying(2000)" [not null]
+  history_cursor "character varying(64)" [not null]
+  history_discrepancy "character varying(2000)" [not null]
+  dentition "character varying(16)" [not null]
+  amendment_reason "character varying(500)" [not null]
+  indexes {
+    (encounter_id, revision) [unique, name: 'clinical_record_revision_unique']
+  }
+}
+
 Table adc_clinical_referral {
   id "bigint" [pk, not null]
   patient_id "bigint" [not null]
   source_visit_id "bigint" [not null]
   source_record_id "bigint" [null]
+  source_clinical_record_id "bigint" [null]
   source_clinic_id "bigint" [not null]
   destination_clinic_id "bigint" [not null]
   destination_service_id "bigint" [null]
@@ -863,6 +934,20 @@ Table adc_statement_line {
   }
 }
 
+Table adc_tooth_finding {
+  id "bigint" [pk, not null]
+  record_id "bigint" [not null]
+  line_no "smallint" [not null]
+  tooth "smallint" [not null]
+  surface "character varying(6)" [not null]
+  kind "character varying(16)" [not null]
+  detail "character varying(1000)" [not null]
+  indexes {
+    (record_id, line_no) [unique, name: 'clinical_finding_line_unique']
+    (record_id, tooth, surface, kind) [unique, name: 'clinical_finding_location_unique']
+  }
+}
+
 Table adc_treatment_record {
   id "bigint" [pk, not null]
   record_version_id "bigint" [not null]
@@ -1101,9 +1186,28 @@ Ref: adc_clinical_authority_event.reviewer_id > adc_clinical_reviewer.id
 Ref: adc_clinical_authority_event.actor_id > adc_user.id
 Ref: adc_clinical_authority_policy.activated_by_id > adc_user.id
 Ref: adc_clinical_authority_policy.clinic_id - adc_clinic.id
+Ref: adc_clinical_draft.base_record_id > adc_clinical_record_version.id
+Ref: adc_clinical_draft.encounter_id - adc_clinical_encounter.id
+Ref: adc_clinical_draft.saved_by_id > adc_user.id
+Ref: adc_clinical_encounter.opened_by_id > adc_user.id
+Ref: adc_clinical_encounter.visit_id - adc_visit.id
+Ref: adc_clinical_history_version.patient_id > adc_patient.id
+Ref: adc_clinical_history_version.previous_id - adc_clinical_history_version.id
+Ref: adc_clinical_history_version.reported_by_id > adc_user.id
+Ref: adc_clinical_history_version.scope_clinic_id > adc_clinic.id
+Ref: adc_clinical_history_version.source_visit_id > adc_visit.id
+Ref: adc_clinical_record_event.encounter_id > adc_clinical_encounter.id
+Ref: adc_clinical_record_event.history_id > adc_clinical_history_version.id
+Ref: adc_clinical_record_event.record_id > adc_clinical_record_version.id
+Ref: adc_clinical_record_event.actor_id > adc_user.id
+Ref: adc_clinical_record_version.encounter_id > adc_clinical_encounter.id
+Ref: adc_clinical_record_version.history_id > adc_clinical_history_version.id
+Ref: adc_clinical_record_version.previous_id - adc_clinical_record_version.id
+Ref: adc_clinical_record_version.recorded_by_id > adc_user.id
 Ref: adc_clinical_referral.destination_clinic_id > adc_clinic.id
 Ref: adc_clinical_referral.destination_service_id > adc_booking_service.id
 Ref: adc_clinical_referral.source_clinic_id > adc_clinic.id
+Ref: adc_clinical_referral.source_clinical_record_id > adc_clinical_record_version.id
 Ref: adc_clinical_referral.source_record_id > adc_visit_record_version.id
 Ref: adc_clinical_referral.created_by_id > adc_user.id
 Ref: adc_clinical_referral.patient_id > adc_patient.id
@@ -1232,6 +1336,7 @@ Ref: adc_statement_batch.account_id > adc_payment_account.id
 Ref: adc_statement_batch.created_by_id > adc_user.id
 Ref: adc_statement_line.account_id > adc_payment_account.id
 Ref: adc_statement_line.batch_id > adc_statement_batch.id
+Ref: adc_tooth_finding.record_id > adc_clinical_record_version.id
 Ref: adc_treatment_record.confirmed_by_id > adc_user.id
 Ref: adc_treatment_record.record_version_id > adc_visit_record_version.id
 Ref: adc_treatment_record.treatment_type_id > adc_treatment_type.id

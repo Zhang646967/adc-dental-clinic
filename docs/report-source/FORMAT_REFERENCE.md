@@ -11,3 +11,5 @@ Use report_source.json and business_use_cases.json as editable content. Rebuild 
 Only canonical outputs are 课程报告/课程报告_张加良_8210241102.docx and .pdf. Keep fixed filenames and teacher links. Baseline/evidence JSON may retain technical provenance privately from report prose. Report-only synchronization changes no app code, schema, accounts or live services.
 
 Current C1.2 continuation preserves the formal reference and all original rules. It adds professional/shared-care authority, SU-64—67, two SQL-derived ERs and explicit professional-acceptance limits. Actual source has80 tables/205 SQL FKs/50 triggers after44 migrations, preserving43 prior files. Current final page/count/digest verification is required before publication.
+
+C2.1追加本人及面谈自述、实际检查、牙位牙面和版本更正，SU-68—71及两幅真实ER与状态图。实测86表、225条外键、56项触发器和45份迁移，原44份不变。最终页数、完整规约、目录与输出摘要以本次重新执行的validation.json为准。不得继承旧通过标记。

@@ -1,3 +1,5 @@
+**C2.1 当前验证：** [实际检查与健康自述](C21_CLINICAL_CONTRACT.md) · [执行及发布状态](evidence_c21/verification.json)。
+
 **当前 C1.2：** [专业权限与限定转诊](C12_AUTHORITY_CONTRACT.md) · [本机交付证据](evidence_c12/release.json) · [C1–C2执行进度](C1_C2_PROGRESS.md)。
 
 # 项目文档分类导航
@@ -29,7 +31,7 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[181条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[225条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。
