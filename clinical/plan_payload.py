@@ -41,6 +41,9 @@ def step_fields(raw):
     basis=raw.get('charge_basis','PER_EXECUTION')
     if basis not in ('PER_EXECUTION','ON_COMPLETION'):raise RuleError('请选择本步骤的明确计费时点。')
     row['charge_basis']=basis
+    requirement=raw.get('requires_lab')
+    if requirement is not None and type(requirement) is not bool:raise RuleError('请明确加工件依赖，尚未核对时保留待明确。')
+    row['requires_lab']=requirement
     tooth=raw.get('tooth');surface=raw.get('surface','')
     if tooth in (None,''):
         if surface:raise RuleError('填写牙面时请同时明确牙位。')

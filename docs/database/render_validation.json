@@ -75,5 +75,47 @@
     "width": 628,
     "height": 873,
     "minPrintedFontPt": 10.110764331210191
+  },
+  "er_treatment_plan": {
+    "nodes": 7,
+    "edges": 11,
+    "width": 526,
+    "height": 621,
+    "minPrintedFontPt": 12.071406844106464
+  },
+  "er_plan_decisions": {
+    "nodes": 5,
+    "edges": 4,
+    "width": 496,
+    "height": 458,
+    "minPrintedFontPt": 12.801532258064517
+  },
+  "er_performed_billing": {
+    "nodes": 5,
+    "edges": 4,
+    "width": 668,
+    "height": 508,
+    "minPrintedFontPt": 9.505329341317365
+  },
+  "er_next_visit": {
+    "nodes": 6,
+    "edges": 6,
+    "width": 669,
+    "height": 458,
+    "minPrintedFontPt": 9.491121076233185
+  },
+  "er_clinical_recall": {
+    "nodes": 6,
+    "edges": 6,
+    "width": 767,
+    "height": 508,
+    "minPrintedFontPt": 8.278435462842243
+  },
+  "er_laboratory": {
+    "nodes": 6,
+    "edges": 8,
+    "width": 430,
+    "height": 809,
+    "minPrintedFontPt": 14.766418604651165
   }
 }

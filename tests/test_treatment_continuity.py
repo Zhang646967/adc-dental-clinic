@@ -45,7 +45,7 @@ class PlanFixture(AuthorityFixture):
         plan,_=plans.start_plan(actor=self.doc,visit_id=self.v.pk,operation_id=uuid.uuid4())
         self.command(plan,'NOTES',summary='PRIVATE_PLAN_SUMMARY',discussion_note='讨论可选方案，仍待患者本人决定。')
         values=dict(treatment_type=self.item.pk,service=self.service.pk,description='PRIVATE_PLAN_STEP',goal='PRIVATE_PLAN_GOAL',
-            tooth=16,surface='MO',estimated_quantity='1',estimated_unit_price='100.00',estimate_note='',alternative_group='',charge_basis='PER_EXECUTION')
+            tooth=16,surface='MO',estimated_quantity='1',estimated_unit_price='100.00',estimate_note='',alternative_group='',charge_basis='PER_EXECUTION',requires_lab=False)
         values.update(overrides);self.command(plan,'ADD_STEP',**values)
         return plan
     def publish_plan(self,plan):
@@ -73,7 +73,7 @@ class PlanFixture(AuthorityFixture):
         visit.refresh_from_db();self.clinical(visit);return visit
     def instruction(self,**extra):
         values=dict(service=self.service.pk,step_version=None,earliest_on=timezone.localdate(),latest_on=self.t.date()+timedelta(days=10),
-            clinical_purpose='PRIVATE_NEXT_PURPOSE',booking_note='请安排本店同服务后续时段')
+            clinical_purpose='PRIVATE_NEXT_PURPOSE',booking_note='请安排本店同服务后续时段',completion_rule='EXAM_CONFIRMED')
         values.update(extra)
         p=next_visits.prepare_instruction(actor=self.doc,visit_id=self.v.pk,fields=values)
         return next_visits.confirm_instruction(actor=self.doc,proposal_token=p['proposal_token'],confirmed=True)[0]
@@ -300,3 +300,14 @@ class TreatmentContinuityTests(PlanFixture,TransactionTestCase):
         new=reschedule(actor=self.front,visit_id=later.pk,expected_version=0,new_slot_id=self.slot1.pk,start=self.t+timedelta(hours=2),end=self.t+timedelta(hours=2,minutes=30),reason='本人明确改期，保留原临床指示',service_id=self.service.pk)
         projected=next_visits.instruction_booking_projection(row);self.assertEqual(projected['promises'][0]['current'].pk,new.pk)
         link.refresh_from_db();self.assertEqual(link.visit_id,later.pk);self.assertFalse(projected['needs_booking'])
+    def test_confirmed_plan_retains_original_service_definition_after_catalogue_change(self):
+        plan=self.new_plan();step=self.publish_plan(plan).steps.get();original_name=self.service.name
+        self.service.name='新的当前目录名称';self.service.duration_minutes=45;self.service.save(update_fields=['name','duration_minutes'])
+        from clinical.plan_selectors import self_plan_details
+        details=self_plan_details(self.patient_user,plan.pk);shown=details['steps'][0]
+        self.assertEqual(shown.saved_service_name,original_name);self.assertEqual(shown.planned_duration,30);self.assertEqual(step.definition_snapshot['service']['name'],original_name)
+    def test_service_definition_change_invalidates_plan_preview_without_creating_version(self):
+        plan=self.new_plan();p=plans.prepare_plan(actor=self.doc,visit_id=self.v.pk,plan_id=plan.pk)
+        self.service.name='预览后更改的服务名称';self.service.save(update_fields=['name'])
+        with self.assertRaises(RuleError):plans.confirm_plan(actor=self.doc,proposal_token=p['proposal_token'],confirmed=True)
+        self.assertFalse(PlanVersion.objects.exists());self.assertTrue(PlanDraft.objects.filter(plan=plan).exists())

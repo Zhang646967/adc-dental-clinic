@@ -1,6 +1,6 @@
 # ADC — Dental Clinic Management
 
-C2.2 source checkpoint: [treatment continuity contract](docs/C22_CONTINUITY_CONTRACT.md). Isolated acceptance is recorded separately; installed application/report remain C2.1 until the protected C2.2–C2.3 delivery passes.
+C2.2–C2.3 source checkpoint: [treatment continuity](docs/C22_CONTINUITY_CONTRACT.md) and [recall/lab readiness](docs/C23_RECALL_LAB_CONTRACT.md). Isolated acceptance is recorded separately; installed application/report remain C2.1 until the protected C2.2–C2.3 delivery passes.
 **C2.1 已在本机验收交付：健康自述与结构化检查记录。** 患者本人健康自述、实际检查、牙位牙面、草稿冲突继续、确认版本与更正，衔接受控转诊和原接诊结算。[业务合同](docs/C21_CLINICAL_CONTRACT.md) · [分项证据与剩余门槛](docs/evidence_c21/README.md)。
 
 **C1.2 已在本机验收交付：专业操作范围与限定跨店转诊。** 主管整理资质、受委任医师独立审核；接收店核对身份、指定医生接收，患者本人可在网站／小程序终止披露。[业务合同](docs/C12_AUTHORITY_CONTRACT.md) · [执行证据](docs/evidence_c12/README.md)。

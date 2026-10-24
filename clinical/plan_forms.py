@@ -18,9 +18,10 @@ def services_for(actor,visit):
     return BookingService.objects.filter(department__clinic_id=visit.clinic_id,department__is_active=True,is_active=True,pk__in=scopes.values('service_id')).select_related('department')
 
 
-def current_steps(visit):
+def current_steps(visit,actor):
+    from clinical.plan_locks import readable_services
     return PlanStepVersion.objects.filter(version__plan__origin_encounter__visit__patient_id=visit.patient_id,
-        version__plan__origin_encounter__visit__clinic_id=visit.clinic_id,version__next_version__isnull=True).select_related('treatment_type','version__plan','service','step')
+        version__plan__origin_encounter__visit__clinic_id=visit.clinic_id,version__next_version__isnull=True,service_id__in=readable_services(actor,visit.clinic_id)).select_related('treatment_type','version__plan','service','step')
 
 
 class PlanStartForm(forms.Form):
@@ -49,6 +50,7 @@ class StepForm(RevisionForm):
     estimate_note=forms.CharField(label='费用估算说明',max_length=500,required=False,widget=forms.Textarea(attrs={'rows':2}))
     alternative_group=forms.CharField(label='互斥选项组（无则留空）',max_length=32,required=False,help_text='同一组中的步骤代表可替代方案，不会相加为承诺总价。')
     charge_basis=forms.ChoiceField(label='实际计费时点',choices=[('PER_EXECUTION','按每次实际已提供项目计费'),('ON_COMPLETION','本步骤分次完成时计费')])
+    requires_lab=forms.ChoiceField(label='本步骤的加工件依赖',choices=[('NO','已明确本步骤无需加工件'),('YES','需要加工件并由医师验收'),('UNKNOWN','尚待明确，暂不执行本步骤')],initial='NO')
     def __init__(self,*args,actor,visit,**kwargs):
         super().__init__(*args,**kwargs);self.fields['treatment_type'].queryset=TreatmentType.objects.filter(is_active=True)
         self.fields['service'].queryset=services_for(actor,visit)
@@ -56,6 +58,7 @@ class StepForm(RevisionForm):
         data=dict(self.cleaned_data);data['treatment_type']=data['treatment_type'].pk;data['service']=data['service'].pk
         data['surface']=''.join(data.pop('surfaces'))
         for k in ('estimated_quantity','estimated_unit_price'):data[k]=str(data[k]) if data[k] is not None else None
+        data['requires_lab']={'NO':False,'YES':True,'UNKNOWN':None}[data['requires_lab']]
         return data
 
 
@@ -96,8 +99,8 @@ class ExecutionForm(forms.Form):
     observed_at=forms.DateTimeField(label='实际执行时间（北京时间，留空按当前时间）',required=False,
         widget=forms.DateTimeInput(attrs={'type':'datetime-local','step':'1'},format='%Y-%m-%dT%H:%M:%S'))
     reason=forms.CharField(label='计划外、阶段不计费或估算差异的依据',max_length=1000,required=False,widget=forms.Textarea(attrs={'rows':3}))
-    def __init__(self,*args,visit,**kwargs):
-        super().__init__(*args,**kwargs);self.fields['step_version'].queryset=current_steps(visit)
+    def __init__(self,*args,visit,actor,**kwargs):
+        super().__init__(*args,**kwargs);self.fields['step_version'].queryset=current_steps(visit,actor)
         self.fields['step_version'].label_from_instance=lambda s:f'计划{s.version.plan_id} · V{s.version.revision} 第{s.sequence}步 · {s.treatment_type.name}'
         self.fields['treatment_type'].queryset=TreatmentType.objects.filter(is_active=True)
     def fields_data(self):
@@ -116,8 +119,9 @@ class InstructionForm(forms.Form):
     latest_on=forms.DateField(label='建议最晚日期',widget=forms.DateInput(attrs={'type':'date'}))
     clinical_purpose=forms.CharField(label='临床后续目标',max_length=1000,widget=forms.Textarea(attrs={'rows':3}),help_text='仅进入医师和患者本人范围，不提供给前台。')
     booking_note=forms.CharField(label='前台安排说明',max_length=500,required=False,widget=forms.Textarea(attrs={'rows':2}),help_text='只填写前台安排需要的内容；临床细节请写在上方。')
+    completion_rule=forms.ChoiceField(label='此后续目标何时算实际完成',choices=[('EXAM_CONFIRMED','后续实际接诊已关闭，并有确认检查记录'),('STEP_COMPLETED','指定这个版本步骤实际完成，并关闭接诊')])
     def __init__(self,*args,actor,visit,**kwargs):
-        super().__init__(*args,**kwargs);self.fields['step_version'].queryset=current_steps(visit)
+        super().__init__(*args,**kwargs);self.fields['step_version'].queryset=current_steps(visit,actor)
         self.fields['service'].queryset=services_for(actor,visit)
         self.fields['step_version'].label_from_instance=lambda s:f'计划{s.version.plan_id} · V{s.version.revision} 第{s.sequence}步'
     def fields_data(self):

@@ -85,6 +85,27 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
+      "table": "adc_clinical_recall",
+      "name": "clinical_recall_completion_consistency",
+      "definition": "CREATE CONSTRAINT TRIGGER clinical_recall_completion_consistency AFTER INSERT OR UPDATE ON public.adc_clinical_recall DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_recall_completion()",
+      "function": "adc_check_recall_completion",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_recall_completion()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE r adc_clinical_recall%ROWTYPE; i adc_next_visit_instruction%ROWTYPE; s adc_visit%ROWTYPE; valid boolean;\nBEGIN\n SELECT * INTO r FROM adc_clinical_recall WHERE id=NEW.id;\n IF r.state<>'COMPLETED' THEN RETURN NULL; END IF;\n SELECT * INTO i FROM adc_next_visit_instruction WHERE id=r.instruction_id;\n SELECT v.* INTO s FROM adc_visit v JOIN adc_clinical_encounter e ON e.visit_id=v.id JOIN adc_clinical_record_version c ON c.encounter_id=e.id WHERE c.id=i.source_record_id;\n IF i.completion_rule='EXAM_CONFIRMED' THEN\n  SELECT EXISTS (SELECT 1 FROM adc_clinical_record_version c JOIN adc_clinical_encounter e ON e.id=c.encounter_id\n   JOIN adc_visit v ON v.id=e.visit_id JOIN adc_resource_plan p ON p.visit_id=v.id AND p.is_current\n   WHERE c.id=r.completion_record_id AND v.id<>s.id AND v.patient_id=s.patient_id AND v.clinic_id=s.clinic_id\n    AND p.service_id=i.service_id AND v.status IN ('COMPLETED','CLOSED_NO_TREATMENT')\n    AND c.observed_at>=i.recorded_at AND r.completed_at>=c.recorded_at AND r.completed_at>=v.completed_at) INTO valid;\n ELSIF i.completion_rule='STEP_COMPLETED' THEN\n  SELECT EXISTS (SELECT 1 FROM adc_performed_procedure a JOIN adc_clinical_encounter e ON e.id=a.encounter_id\n   JOIN adc_clinical_record_version c ON c.id=a.source_record_id AND c.encounter_id=e.id\n   JOIN adc_visit v ON v.id=e.visit_id JOIN adc_resource_plan p ON p.visit_id=v.id AND p.is_current\n   WHERE a.id=r.completion_performed_id AND a.step_version_id=i.step_version_id AND a.state='ACTIVE' AND a.progress='COMPLETE'\n    AND v.id<>s.id AND v.patient_id=s.patient_id AND v.clinic_id=s.clinic_id AND p.service_id=i.service_id\n    AND v.status='COMPLETED' AND a.observed_at>=i.recorded_at AND r.completed_at>=a.recorded_at AND r.completed_at>=v.completed_at) INTO valid;\n ELSE valid:=false;\n END IF;\n IF NOT valid THEN RAISE EXCEPTION 'Recall completion requires matching actual closed care evidence' USING ERRCODE='23514'; END IF;\n RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "clinical_recall_identity_retained",
+      "definition": "CREATE TRIGGER clinical_recall_identity_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_recall FOR EACH ROW EXECUTE FUNCTION adc_recall_identity_guard()",
+      "function": "adc_recall_identity_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_recall_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR OLD.state IN ('COMPLETED','WITHDRAWN') OR NEW.revision<>OLD.revision+1 OR\n  (to_jsonb(OLD)-'owner_id'-'followup_due_at'-'state'-'revision'-'completed_at'-'completion_record_id'-'completion_performed_id') IS DISTINCT FROM\n  (to_jsonb(NEW)-'owner_id'-'followup_due_at'-'state'-'revision'-'completed_at'-'completion_record_id'-'completion_performed_id') THEN\n  RAISE EXCEPTION 'Recall source and completed history are retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "clinical_recall_event_retained",
+      "definition": "CREATE TRIGGER clinical_recall_event_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_recall_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_clinical_record_event",
       "name": "clinical_record_event_retained",
       "definition": "CREATE TRIGGER clinical_record_event_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_record_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
@@ -197,6 +218,34 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_validate_correction_publication()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE r adc_visit_record_version%ROWTYPE; c adc_correction_request%ROWTYPE;\nBEGIN\n  SELECT * INTO r FROM adc_visit_record_version WHERE id=NEW.current_record_version_id;\n  IF r.previous_version_id IS NULL THEN\n    IF r.revision_no<>1 OR r.correction_request_id IS NOT NULL THEN\n      RAISE EXCEPTION 'first publication must be revision one' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    SELECT * INTO c FROM adc_correction_request WHERE id=r.correction_request_id;\n    IF NOT FOUND OR c.status<>'APPLIED' OR c.visit_id<>NEW.visit_id OR c.base_record_version_id<>r.previous_version_id\n       OR c.reviewer_id IS NULL OR c.reviewer_id=c.requester_id OR r.reviewed_by_id IS NULL OR r.reviewed_by_id<>c.reviewer_id THEN\n      RAISE EXCEPTION 'correction requires a matching independent approval' USING ERRCODE='23514';\n    END IF;\n    IF NOT EXISTS(SELECT 1 FROM adc_visit_record_version p WHERE p.id=r.previous_version_id AND p.visit_id=r.visit_id AND p.revision_no<r.revision_no AND p.state='PUBLISHED') THEN\n      RAISE EXCEPTION 'invalid predecessor revision' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  IF TG_OP='UPDATE' AND NEW.current_record_version_id<>OLD.current_record_version_id THEN\n    IF r.previous_version_id IS DISTINCT FROM OLD.current_record_version_id THEN\n      RAISE EXCEPTION 'current invoice must advance from its current revision' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NULL;\nEND $function$\n"
     },
     {
+      "table": "adc_lab_case",
+      "name": "lab_acceptance_consistency",
+      "definition": "CREATE CONSTRAINT TRIGGER lab_acceptance_consistency AFTER INSERT OR UPDATE ON public.adc_lab_case DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_lab_acceptance()",
+      "function": "adc_check_lab_acceptance",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_lab_acceptance()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE c adc_lab_case%ROWTYPE; valid boolean;\nBEGIN\n SELECT * INTO c FROM adc_lab_case WHERE id=NEW.id;\n IF c.state<>'ACCEPTED' THEN RETURN NULL; END IF;\n SELECT EXISTS (SELECT 1 FROM adc_lab_review r JOIN adc_plan_step_version t ON t.id=r.target_step_version_id\n  JOIN adc_plan_step_version o ON o.id=c.step_version_id WHERE r.case_id=c.id AND r.cycle=c.cycle AND r.decision='ACCEPTED'\n   AND t.step_id=o.step_id AND t.treatment_type_id=o.treatment_type_id AND t.service_id=o.service_id\n   AND t.tooth IS NOT DISTINCT FROM o.tooth AND t.surface=o.surface\n   AND r.id=(SELECT max(x.id) FROM adc_lab_review x WHERE x.case_id=c.id AND x.cycle=c.cycle)) INTO valid;\n IF NOT valid THEN RAISE EXCEPTION 'Lab acceptance requires an explicit current-cycle clinical review' USING ERRCODE='23514'; END IF;\n RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "lab_case_identity_retained",
+      "definition": "CREATE TRIGGER lab_case_identity_retained BEFORE DELETE OR UPDATE ON public.adc_lab_case FOR EACH ROW EXECUTE FUNCTION adc_lab_case_identity_guard()",
+      "function": "adc_lab_case_identity_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_lab_case_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR OLD.state='WITHDRAWN' OR NEW.revision<>OLD.revision+1 OR\n  (to_jsonb(OLD)-'state'-'revision'-'cycle'-'coordinator_id'-'followup_due_at') IS DISTINCT FROM\n  (to_jsonb(NEW)-'state'-'revision'-'cycle'-'coordinator_id'-'followup_due_at') OR\n  NEW.cycle<OLD.cycle OR NEW.cycle>OLD.cycle+1 OR\n  (NEW.cycle=OLD.cycle+1 AND (NEW.state<>'DISPATCHED' OR OLD.state NOT IN ('REQUESTED','REWORK'))) THEN\n  RAISE EXCEPTION 'Lab identity, original specification and physical-cycle history are retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "lab_event_retained",
+      "definition": "CREATE TRIGGER lab_event_retained BEFORE DELETE OR UPDATE ON public.adc_lab_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "lab_review_retained",
+      "definition": "CREATE TRIGGER lab_review_retained BEFORE DELETE OR UPDATE ON public.adc_lab_review FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_maintenance_action",
       "name": "maintenance_action_history",
       "definition": "CREATE TRIGGER maintenance_action_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_maintenance_action FOR EACH ROW EXECUTE FUNCTION adc_maintenance_action_guard()",
@@ -218,6 +267,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_maintenance_order_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE a adc_equipment_asset%ROWTYPE; source adc_equipment_event%ROWTYPE;\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'maintenance history cannot be deleted' USING ERRCODE='23514'; END IF;\n SELECT * INTO a FROM adc_equipment_asset WHERE id=NEW.asset_id FOR UPDATE;\n SELECT * INTO source FROM adc_equipment_event WHERE id=NEW.maintenance_event_id;\n IF source.asset_id IS DISTINCT FROM a.id OR source.kind IS DISTINCT FROM 'MAINTENANCE' OR btrim(NEW.issue)='' THEN\n  RAISE EXCEPTION 'maintenance requires its own stop-use source' USING ERRCODE='23514';\n END IF;\n IF TG_OP='INSERT' THEN\n  IF NEW.state<>'ASSIGNED' OR NEW.lock_version<>0 OR a.state<>'MAINTENANCE' OR a.lock_version<>source.sequence\n     OR NEW.due_on<(now() AT TIME ZONE 'Asia/Shanghai')::date THEN\n   RAISE EXCEPTION 'maintenance must start assigned against current stop-use source' USING ERRCODE='23514';\n  END IF;\n ELSE\n  IF OLD.state IN ('CLOSED','CANCELLED') OR NEW.lock_version<>OLD.lock_version+1\n     OR (NEW.asset_id,NEW.maintenance_event_id,NEW.issue,NEW.created_by_id,NEW.created_at)\n        IS DISTINCT FROM (OLD.asset_id,OLD.maintenance_event_id,OLD.issue,OLD.created_by_id,OLD.created_at)\n     OR NOT ((OLD.state='ASSIGNED' AND NEW.state IN ('ASSIGNED','IN_PROGRESS','CANCELLED'))\n       OR (OLD.state='IN_PROGRESS' AND NEW.state IN ('ASSIGNED','READY','CANCELLED'))\n       OR (OLD.state='READY' AND NEW.state IN ('IN_PROGRESS','CLOSED'))) THEN\n   RAISE EXCEPTION 'invalid maintenance transition or immutable origin' USING ERRCODE='23514';\n  END IF;\n  IF (NEW.assigned_to_id,NEW.due_on) IS DISTINCT FROM (OLD.assigned_to_id,OLD.due_on) AND\n     (NEW.state<>'ASSIGNED' OR NEW.due_on<(now() AT TIME ZONE 'Asia/Shanghai')::date) THEN\n   RAISE EXCEPTION 'assignment requires explicit new current deadline' USING ERRCODE='23514';\n  END IF;\n  IF NEW.state='CLOSED' AND ((NEW.performed_on,NEW.cost,NEW.next_service_due,NEW.completion_note,NEW.schedule_checked,NEW.submitted_by_id,NEW.submitted_at)\n       IS DISTINCT FROM (OLD.performed_on,OLD.cost,OLD.next_service_due,OLD.completion_note,OLD.schedule_checked,OLD.submitted_by_id,OLD.submitted_at)\n       OR btrim(NEW.review_reason)='' OR NEW.reviewed_at<NEW.submitted_at) THEN\n   RAISE EXCEPTION 'acceptance must retain submitted repair evidence' USING ERRCODE='23514';\n  END IF;\n END IF;\n IF NEW.state IN ('READY','CLOSED') AND\n    (NEW.performed_on<source.performed_on OR NEW.performed_on>(now() AT TIME ZONE 'Asia/Shanghai')::date\n     OR NEW.next_service_due<=NEW.performed_on OR btrim(NEW.completion_note)='' OR NEW.submitted_at<NEW.created_at) THEN\n  RAISE EXCEPTION 'invalid repair facts' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_next_visit_instruction",
+      "name": "next_visit_instruction_retained",
+      "definition": "CREATE TRIGGER next_visit_instruction_retained BEFORE DELETE OR UPDATE ON public.adc_next_visit_instruction FOR EACH ROW EXECUTE FUNCTION adc_next_visit_instruction_guard()",
+      "function": "adc_next_visit_instruction_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_next_visit_instruction_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR\n    (to_jsonb(OLD)-'state'-'revision') IS DISTINCT FROM (to_jsonb(NEW)-'state'-'revision') OR\n    OLD.state<>'OPEN' OR NEW.state NOT IN ('OPEN','WITHDRAWN') OR NEW.revision<>OLD.revision+1 THEN\n  RAISE EXCEPTION 'Clinical next-visit instruction is retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_notification_outbox",
       "name": "notice_identity_guard",
       "definition": "CREATE TRIGGER notice_identity_guard BEFORE DELETE OR UPDATE ON public.adc_notification_outbox FOR EACH ROW EXECUTE FUNCTION adc_notice_immutable()",
@@ -237,6 +293,62 @@
       "definition": "CREATE TRIGGER payment_account_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_payment_account FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()",
       "function": "adc_financial_evidence_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_financial_evidence_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE e adc_cash_entry%ROWTYPE; a adc_payment_account%ROWTYPE;\n        p adc_cash_evidence%ROWTYPE; b adc_statement_batch%ROWTYPE;\n        l adc_statement_line%ROWTYPE; latest_id bigint;\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'financial evidence history cannot be deleted' USING ERRCODE='23514'; END IF;\n IF TG_TABLE_NAME='adc_payment_account' THEN\n   IF NEW.code !~ '^[A-Z0-9][A-Z0-9_-]{1,39}$' THEN RAISE EXCEPTION 'invalid payment account code' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     IF NOT NEW.is_active OR NEW.lock_version<>0 OR NEW.last_operation_id<>NEW.operation_id THEN\n       RAISE EXCEPTION 'account starts active at version zero' USING ERRCODE='23514'; END IF;\n   ELSIF (to_jsonb(NEW)-ARRAY['is_active','lock_version','last_operation_id']) IS DISTINCT FROM\n         (to_jsonb(OLD)-ARRAY['is_active','lock_version','last_operation_id']) OR\n         NEW.is_active=OLD.is_active OR NEW.lock_version<>OLD.lock_version+1 OR NEW.last_operation_id=OLD.last_operation_id THEN\n     RAISE EXCEPTION 'account identity is immutable and state changes are versioned' USING ERRCODE='23514';\n   END IF;\n ELSIF TG_TABLE_NAME='adc_cash_evidence' THEN\n   SELECT * INTO e FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n   SELECT * INTO a FROM adc_payment_account WHERE id=NEW.account_id;\n   IF a.clinic_id IS DISTINCT FROM e.clinic_id OR btrim(NEW.reference)='' OR NEW.reference<>btrim(NEW.reference) OR btrim(NEW.reason)='' THEN\n     RAISE EXCEPTION 'evidence needs its own clinic account and reference' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     SELECT * INTO p FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id ORDER BY version DESC LIMIT 1;\n     IF NEW.state<>'PENDING' OR (p.id IS NULL AND (NEW.version<>1 OR NEW.previous_id IS NOT NULL)) OR\n        (p.id IS NOT NULL AND (NEW.previous_id IS DISTINCT FROM p.id OR NEW.version<>p.version+1 OR p.state='PENDING')) OR\n        (NEW.initial AND (NEW.version<>1 OR e.state<>'PENDING' OR NEW.prepared_by_id<>e.prepared_by_id)) OR\n        (NOT NEW.initial AND e.state<>'POSTED') THEN\n       RAISE EXCEPTION 'evidence version lineage is invalid' USING ERRCODE='23514'; END IF;\n   ELSE\n     IF OLD.state<>'PENDING' OR NEW.state NOT IN ('APPROVED','REJECTED') OR\n       (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) IS DISTINCT FROM\n       (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) OR NEW.reviewed_at<NEW.prepared_at OR\n       (NEW.initial AND ((NEW.state='APPROVED' AND e.state<>'POSTED') OR (NEW.state='REJECTED' AND e.state<>'REJECTED'))) OR\n       (NOT NEW.initial AND e.state<>'POSTED') THEN\n       RAISE EXCEPTION 'evidence facts and terminal decisions are immutable' USING ERRCODE='23514'; END IF;\n   END IF;\n ELSIF TG_TABLE_NAME='adc_statement_batch' THEN\n   IF octet_length(NEW.source_bytes) NOT BETWEEN 1 AND 2097152 OR NEW.parser_version<>'csv-v1' OR\n      jsonb_typeof(NEW.normalized_rows)<>'array' OR jsonb_array_length(NEW.normalized_rows) NOT BETWEEN 1 AND 1000 OR\n      NEW.digest<>encode(sha256(NEW.source_bytes),'hex') THEN\n     RAISE EXCEPTION 'invalid bounded statement evidence' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     IF NEW.state<>'DRAFT' THEN RAISE EXCEPTION 'statement starts as a private draft' USING ERRCODE='23514'; END IF;\n   ELSIF OLD.state<>'DRAFT' OR NEW.state<>'IMPORTED' OR NEW.new_count+NEW.skipped_count<>jsonb_array_length(NEW.normalized_rows) OR\n      NEW.imported_at<NEW.created_at OR\n      (to_jsonb(NEW)-ARRAY['state','operation_id','imported_at','new_count','skipped_count']) IS DISTINCT FROM\n      (to_jsonb(OLD)-ARRAY['state','operation_id','imported_at','new_count','skipped_count']) THEN\n     RAISE EXCEPTION 'statement source and accepted batches are immutable' USING ERRCODE='23514';\n   END IF;\n ELSIF TG_TABLE_NAME='adc_statement_line' THEN\n   IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'accepted statement rows are immutable' USING ERRCODE='23514'; END IF;\n   SELECT * INTO b FROM adc_statement_batch WHERE id=NEW.batch_id;\n   IF b.account_id IS DISTINCT FROM NEW.account_id OR b.state<>'DRAFT' OR\n      NOT (b.normalized_rows @> jsonb_build_array(jsonb_build_object('transaction_id',NEW.transaction_id,\n        'booked_on',to_char(NEW.booked_on,'YYYY-MM-DD'),'direction',NEW.direction,'amount',NEW.amount::text,\n        'currency',NEW.currency,'reference',NEW.reference))) THEN\n     RAISE EXCEPTION 'statement line does not belong to its retained import' USING ERRCODE='23514'; END IF;\n ELSIF TG_TABLE_NAME='adc_reconciliation_match' THEN\n   SELECT * INTO e FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n   SELECT * INTO p FROM adc_cash_evidence WHERE id=NEW.evidence_id;\n   SELECT * INTO l FROM adc_statement_line WHERE id=NEW.line_id;\n   SELECT * INTO a FROM adc_payment_account WHERE id=l.account_id;\n   SELECT id INTO latest_id FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id AND state='APPROVED' ORDER BY version DESC LIMIT 1;\n   IF TG_OP='INSERT' THEN\n     IF NEW.state<>'PENDING' THEN RAISE EXCEPTION 'matching starts pending independent review' USING ERRCODE='23514'; END IF;\n   ELSE\n     IF (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','invalidated_by_id','invalidated_at']) IS DISTINCT FROM\n        (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','invalidated_by_id','invalidated_at']) THEN\n       RAISE EXCEPTION 'matching source identity is immutable' USING ERRCODE='23514'; END IF;\n     IF NEW.state='STALE' THEN\n       IF OLD.state NOT IN ('PENDING','CONFIRMED') OR latest_id IS NULL OR latest_id=NEW.evidence_id OR\n          (NEW.reviewed_by_id,NEW.reviewed_at,NEW.review_reason) IS DISTINCT FROM (OLD.reviewed_by_id,OLD.reviewed_at,OLD.review_reason) OR\n          NEW.invalidated_at<NEW.prepared_at THEN\n         RAISE EXCEPTION 'only new approved evidence invalidates an active match' USING ERRCODE='23514'; END IF;\n     ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('CONFIRMED','REJECTED') OR NEW.reviewed_at<NEW.prepared_at THEN\n       RAISE EXCEPTION 'matching decisions are retained' USING ERRCODE='23514';\n     END IF;\n   END IF;\n   IF NEW.state IN ('PENDING','CONFIRMED') AND\n      (e.state<>'POSTED' OR p.state<>'APPROVED' OR p.cash_entry_id<>e.id OR p.id IS DISTINCT FROM latest_id OR\n       p.account_id<>l.account_id OR e.clinic_id<>a.clinic_id OR e.amount<>l.amount OR l.currency<>'CNY' OR p.reference<>l.reference OR\n       l.direction<>CASE WHEN e.kind IN ('RECEIPT','EXPENSE_REVERSAL') THEN 'IN' ELSE 'OUT' END OR\n       NOT EXISTS(SELECT 1 FROM adc_statement_batch WHERE id=l.batch_id AND state='IMPORTED')) THEN\n     RAISE EXCEPTION 'matching requires exact current approved evidence and posted cash' USING ERRCODE='23514'; END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_procedure_retained",
+      "definition": "CREATE TRIGGER performed_procedure_retained BEFORE DELETE OR UPDATE ON public.adc_performed_procedure FOR EACH ROW EXECUTE FUNCTION adc_performed_procedure_guard()",
+      "function": "adc_performed_procedure_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_performed_procedure_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR NOT EXISTS (SELECT 1 FROM adc_clinical_encounter e JOIN adc_visit v ON v.id=e.visit_id WHERE e.id=OLD.encounter_id AND v.status='CHECKED_IN') OR\n    (to_jsonb(OLD)-'state'-'revision'-'charge_line_id') IS DISTINCT FROM (to_jsonb(NEW)-'state'-'revision'-'charge_line_id') OR\n    OLD.state<>'ACTIVE' OR NEW.state<>'VOIDED' OR NEW.revision<>OLD.revision+1 OR NEW.charge_line_id IS NOT NULL THEN\n  RAISE EXCEPTION 'Actual procedure source and charge history are retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_visit_final_consistency",
+      "definition": "CREATE CONSTRAINT TRIGGER performed_visit_final_consistency AFTER INSERT OR UPDATE ON public.adc_performed_procedure DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_performed_final()",
+      "function": "adc_check_performed_final",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_performed_final()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE visit_id bigint;\nBEGIN\n SELECT e.visit_id INTO visit_id FROM adc_clinical_encounter e WHERE e.id=NEW.encounter_id;\n PERFORM adc_validate_visit(visit_id);\n RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "plan_appointment_retained",
+      "definition": "CREATE TRIGGER plan_appointment_retained BEFORE DELETE OR UPDATE ON public.adc_plan_appointment FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "plan_decision_retained",
+      "definition": "CREATE TRIGGER plan_decision_retained BEFORE DELETE OR UPDATE ON public.adc_plan_decision FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "plan_draft_identity_retained",
+      "definition": "CREATE TRIGGER plan_draft_identity_retained BEFORE UPDATE ON public.adc_plan_draft FOR EACH ROW EXECUTE FUNCTION adc_plan_draft_identity_guard()",
+      "function": "adc_plan_draft_identity_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_plan_draft_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF (to_jsonb(OLD)-'payload'-'saved_by_id'-'saved_at'-'source_record_id') IS DISTINCT FROM (to_jsonb(NEW)-'payload'-'saved_by_id'-'saved_at'-'source_record_id') THEN\n  RAISE EXCEPTION 'Plan draft identity and confirmed base are retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "plan_event_retained",
+      "definition": "CREATE TRIGGER plan_event_retained BEFORE DELETE OR UPDATE ON public.adc_plan_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_version_retained",
+      "definition": "CREATE TRIGGER plan_step_version_retained BEFORE DELETE OR UPDATE ON public.adc_plan_step_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "plan_version_retained",
+      "definition": "CREATE TRIGGER plan_version_retained BEFORE DELETE OR UPDATE ON public.adc_plan_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
       "table": "adc_professional_authorization",
@@ -351,6 +463,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
+      "table": "adc_treatment_plan",
+      "name": "treatment_plan_identity_retained",
+      "definition": "CREATE TRIGGER treatment_plan_identity_retained BEFORE DELETE OR UPDATE ON public.adc_treatment_plan FOR EACH ROW EXECUTE FUNCTION adc_treatment_plan_identity_guard()",
+      "function": "adc_treatment_plan_identity_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_treatment_plan_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR (to_jsonb(OLD)-'revision') IS DISTINCT FROM (to_jsonb(NEW)-'revision') THEN\n  RAISE EXCEPTION 'Treatment plan identity is retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_treatment_record",
       "name": "adc_treatment_record_final_consistency",
       "definition": "CREATE CONSTRAINT TRIGGER adc_treatment_record_final_consistency AFTER INSERT OR DELETE OR UPDATE ON public.adc_treatment_record DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_visit_final()",
@@ -363,6 +482,13 @@
       "definition": "CREATE TRIGGER published_line_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_treatment_record FOR EACH ROW EXECUTE FUNCTION adc_protect_published_line()",
       "function": "adc_protect_published_line",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_published_line()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE old_id bigint; new_id bigint; s text;\nBEGIN\n  IF TG_OP<>'INSERT' THEN old_id=OLD.record_version_id; END IF;\n  IF TG_OP<>'DELETE' THEN new_id=NEW.record_version_id; END IF;\n  -- Lock parents in ascending order. Completion must use the same parent lock protocol.\n  FOR s IN SELECT state FROM adc_visit_record_version WHERE id IN (old_id,new_id) ORDER BY id FOR UPDATE LOOP\n    IF s='PUBLISHED' THEN\n      RAISE EXCEPTION 'cannot change lines of a published version' USING ERRCODE='23514';\n    END IF;\n  END LOOP;\n  IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "treatment_step_retained",
+      "definition": "CREATE TRIGGER treatment_step_retained BEFORE DELETE OR UPDATE ON public.adc_treatment_step FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
       "table": "adc_visit",
@@ -2764,6 +2890,271 @@
           "unique": false,
           "null": false,
           "max_length": 2000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_clinical_recall",
+      "model": "clinical.RecallEpisode",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "instruction",
+          "column": "instruction_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_next_visit_instruction",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "owner",
+          "column": "owner_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "followup_due_at",
+          "column": "followup_due_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "opened_by",
+          "column": "opened_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "opened_at",
+          "column": "opened_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "completed_at",
+          "column": "completed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "completion_record",
+          "column": "completion_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "completion_performed",
+          "column": "completion_performed_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_performed_procedure",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "model": "clinical.RecallEvent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "episode",
+          "column": "episode_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_recall",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -5482,6 +5873,514 @@
       "unique_together": []
     },
     {
+      "table": "adc_lab_case",
+      "model": "clinical.LabCase",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "case_no",
+          "column": "case_no",
+          "type": "CharField",
+          "db_type": "varchar(40)",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 40,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step_version",
+          "column": "step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "requester",
+          "column": "requester_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "requested_at",
+          "column": "requested_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "work_kind",
+          "column": "work_kind",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "specification",
+          "column": "specification",
+          "type": "CharField",
+          "db_type": "varchar(3000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 3000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "vendor_name",
+          "column": "vendor_name",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "logistics_note",
+          "column": "logistics_note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "needed_on",
+          "column": "needed_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "cycle",
+          "column": "cycle",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "coordinator",
+          "column": "coordinator_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "followup_due_at",
+          "column": "followup_due_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_lab_event",
+      "model": "clinical.LabEvent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "case",
+          "column": "case_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_lab_case",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review",
+          "column": "review_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_lab_review",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_lab_review",
+      "model": "clinical.LabReview",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "case",
+          "column": "case_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_lab_case",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "target_step_version",
+          "column": "target_step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewer",
+          "column": "reviewer_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "cycle",
+          "column": "cycle",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "decision",
+          "column": "decision",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "findings",
+          "column": "findings",
+          "type": "CharField",
+          "db_type": "varchar(3000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 3000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "coordination_note",
+          "column": "coordination_note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "assessed_at",
+          "column": "assessed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_maintenance_action",
       "model": "equipment.MaintenanceAction",
       "app": "equipment",
@@ -5885,6 +6784,184 @@
           "target_table": "adc_equipment_event",
           "target_column": "id",
           "on_delete": "PROTECT"
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "model": "clinical.NextVisitInstruction",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step_version",
+          "column": "step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "service",
+          "column": "service_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_booking_service",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "earliest_on",
+          "column": "earliest_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "latest_on",
+          "column": "latest_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinical_purpose",
+          "column": "clinical_purpose",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "booking_note",
+          "column": "booking_note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "completion_rule",
+          "column": "completion_rule",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_by",
+          "column": "recorded_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
         }
       ],
       "unique_together": []
@@ -6994,6 +8071,1135 @@
           "unique": false,
           "null": false,
           "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_performed_procedure",
+      "model": "clinical.PerformedProcedure",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "encounter",
+          "column": "encounter_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_encounter",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step_version",
+          "column": "step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "treatment_type",
+          "column": "treatment_type_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_type",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "quantity",
+          "column": "quantity",
+          "type": "DecimalField",
+          "db_type": "numeric(12, 3)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "tooth",
+          "column": "tooth",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "surface",
+          "column": "surface",
+          "type": "CharField",
+          "db_type": "varchar(6)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 6,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "progress",
+          "column": "progress",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "charge_mode",
+          "column": "charge_mode",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "charge_line",
+          "column": "charge_line_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_treatment_record",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "charge_snapshot",
+          "column": "charge_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_by",
+          "column": "recorded_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "observed_at",
+          "column": "observed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_plan_appointment",
+      "model": "clinical.PlanAppointment",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "instruction",
+          "column": "instruction_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_next_visit_instruction",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "visit",
+          "column": "visit_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "linked_by",
+          "column": "linked_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "linked_at",
+          "column": "linked_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_plan_decision",
+      "model": "clinical.PlanDecision",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "step_version",
+          "column": "step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "decision",
+          "column": "decision",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source",
+          "column": "source",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "self_access",
+          "column": "self_access_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_patient_access",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_visit",
+          "column": "source_visit_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_plan_draft",
+      "model": "clinical.PlanDraft",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "plan",
+          "column": "plan_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_plan",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "base_version",
+          "column": "base_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_plan_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "saved_by",
+          "column": "saved_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "payload",
+          "column": "payload",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "saved_at",
+          "column": "saved_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_plan_event",
+      "model": "clinical.PlanEvent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "plan",
+          "column": "plan_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_treatment_plan",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "encounter",
+          "column": "encounter_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinical_encounter",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "decision",
+          "column": "decision_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_plan_decision",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "performed",
+          "column": "performed_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_performed_procedure",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "instruction",
+          "column": "instruction_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_next_visit_instruction",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_plan_step_version",
+      "model": "clinical.PlanStepVersion",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "version",
+          "column": "version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_plan_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step",
+          "column": "step_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_step",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "treatment_type",
+          "column": "treatment_type_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_type",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "service",
+          "column": "service_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_booking_service",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "description",
+          "column": "description",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "goal",
+          "column": "goal",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "tooth",
+          "column": "tooth",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "surface",
+          "column": "surface",
+          "type": "CharField",
+          "db_type": "varchar(6)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 6,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "estimated_quantity",
+          "column": "estimated_quantity",
+          "type": "DecimalField",
+          "db_type": "numeric(12, 3)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "estimated_unit_price",
+          "column": "estimated_unit_price",
+          "type": "DecimalField",
+          "db_type": "numeric(12, 2)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "estimate_note",
+          "column": "estimate_note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "alternative_group",
+          "column": "alternative_group",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "charge_basis",
+          "column": "charge_basis",
+          "type": "CharField",
+          "db_type": "varchar(20)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 20,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "requires_lab",
+          "column": "requires_lab",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "definition_snapshot",
+          "column": "definition_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_plan_version",
+      "model": "clinical.PlanVersion",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "plan",
+          "column": "plan_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_plan",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "previous",
+          "column": "previous_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_plan_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "recorded_by",
+          "column": "recorded_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "summary",
+          "column": "summary",
+          "type": "CharField",
+          "db_type": "varchar(3000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 3000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "discussion_note",
+          "column": "discussion_note",
+          "type": "CharField",
+          "db_type": "varchar(2000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 2000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "amendment_reason",
+          "column": "amendment_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -9865,6 +12071,80 @@
       "unique_together": []
     },
     {
+      "table": "adc_treatment_plan",
+      "model": "clinical.TreatmentPlan",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "origin_encounter",
+          "column": "origin_encounter_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_encounter",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "opened_by",
+          "column": "opened_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "opened_at",
+          "column": "opened_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_treatment_record",
       "model": "care.TreatmentRecord",
       "app": "care",
@@ -10092,6 +12372,80 @@
           "column": "is_active",
           "type": "BooleanField",
           "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_treatment_step",
+      "model": "clinical.TreatmentStep",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "plan",
+          "column": "plan_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_plan",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step_key",
+          "column": "step_key",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_by",
+          "column": "created_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
           "pk": false,
           "unique": false,
           "null": false,
@@ -11674,6 +14028,8 @@
     "adc_clinical_draft",
     "adc_clinical_encounter",
     "adc_clinical_history_version",
+    "adc_clinical_recall",
+    "adc_clinical_recall_event",
     "adc_clinical_record_event",
     "adc_clinical_record_version",
     "adc_clinical_referral",
@@ -11692,8 +14048,12 @@
     "adc_equipment_event",
     "adc_inbox_message",
     "adc_invoice",
+    "adc_lab_case",
+    "adc_lab_event",
+    "adc_lab_review",
     "adc_maintenance_action",
     "adc_maintenance_order",
+    "adc_next_visit_instruction",
     "adc_notification_outbox",
     "adc_patient",
     "adc_patient_access",
@@ -11702,6 +14062,13 @@
     "adc_patient_relationship",
     "adc_patient_relationship_event",
     "adc_payment_account",
+    "adc_performed_procedure",
+    "adc_plan_appointment",
+    "adc_plan_decision",
+    "adc_plan_draft",
+    "adc_plan_event",
+    "adc_plan_step_version",
+    "adc_plan_version",
     "adc_portal_booking_receipt",
     "adc_professional_authorization",
     "adc_qualification",
@@ -11724,8 +14091,10 @@
     "adc_statement_batch",
     "adc_statement_line",
     "adc_tooth_finding",
+    "adc_treatment_plan",
     "adc_treatment_record",
     "adc_treatment_room",
+    "adc_treatment_step",
     "adc_treatment_type",
     "adc_user",
     "adc_user_groups",
@@ -12505,6 +14874,96 @@
       "name": "clinical_history_states_valid",
       "kind": "c",
       "definition": "CHECK ((((medical_status)::text = ANY ((ARRAY['UNKNOWN'::character varying, 'REPORTED'::character varying, 'NO_KNOWN'::character varying])::text[])) AND ((medication_status)::text = ANY ((ARRAY['UNKNOWN'::character varying, 'REPORTED'::character varying, 'NO_KNOWN'::character varying])::text[])) AND ((allergy_status)::text = ANY ((ARRAY['UNKNOWN'::character varying, 'REPORTED'::character varying, 'NO_KNOWN'::character varying])::text[]))))"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_completion_performed_c5a9e5ae_fk_adc_perfo",
+      "kind": "f",
+      "definition": "FOREIGN KEY (completion_performed_id) REFERENCES adc_performed_procedure(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_completion_record_id_7d1e3687_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (completion_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_instruction_id_cee3d747_fk_adc_next_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (instruction_id) REFERENCES adc_next_visit_instruction(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_instruction_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (instruction_id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_opened_by_id_6510feda_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_owner_id_c198b0c5_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (owner_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "clinical_recall_completion_consistency",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "clinical_recall_completion_evidence",
+      "kind": "c",
+      "definition": "CHECK ((((completed_at IS NOT NULL) AND ((state)::text = 'COMPLETED'::text) AND (((completion_performed_id IS NULL) AND (completion_record_id IS NOT NULL)) OR ((completion_performed_id IS NOT NULL) AND (completion_record_id IS NULL)))) OR ((NOT ((state)::text = 'COMPLETED'::text)) AND (completed_at IS NULL) AND (completion_performed_id IS NULL) AND (completion_record_id IS NULL))))"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "clinical_recall_state_valid",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['OPEN'::character varying, 'REVIEW'::character varying, 'COMPLETED'::character varying, 'WITHDRAWN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall__episode_id_d3bae0da_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (episode_id) REFERENCES adc_clinical_recall(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_actor_id_dc0840fc_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
     },
     {
       "table": "adc_clinical_record_event",
@@ -13449,6 +15908,168 @@
       "definition": "FOREIGN KEY (current_record_version_id, visit_id) REFERENCES adc_visit_record_version(id, visit_id) DEFERRABLE INITIALLY DEFERRED"
     },
     {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_case_no_key",
+      "kind": "u",
+      "definition": "UNIQUE (case_no)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_coordinator_id_54061790_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (coordinator_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_cycle_check",
+      "kind": "c",
+      "definition": "CHECK ((cycle >= 0))"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_requester_id_537fc367_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (requester_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_source_record_id_7585139a_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_step_version_id_cde7f995_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "lab_acceptance_consistency",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "lab_case_kind_valid",
+      "kind": "c",
+      "definition": "CHECK (((work_kind)::text = ANY ((ARRAY['RESTORATION'::character varying, 'PROSTHESIS'::character varying, 'APPLIANCE'::character varying, 'OTHER'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "lab_case_state_valid",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['REQUESTED'::character varying, 'DISPATCHED'::character varying, 'RECEIVED'::character varying, 'ACCEPTED'::character varying, 'REWORK'::character varying, 'WITHDRAWN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "lab_coordination_owner_due",
+      "kind": "c",
+      "definition": "CHECK ((((coordinator_id IS NULL) AND (followup_due_at IS NULL) AND ((state)::text = ANY ((ARRAY['REQUESTED'::character varying, 'WITHDRAWN'::character varying])::text[]))) OR ((coordinator_id IS NOT NULL) AND (followup_due_at IS NOT NULL))))"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_actor_id_2f0d75af_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_case_id_61c987e1_fk_adc_lab_case_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (case_id) REFERENCES adc_lab_case(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_review_id_de4c1e40_fk_adc_lab_review_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (review_id) REFERENCES adc_lab_review(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_case_id_d23321dd_fk_adc_lab_case_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (case_id) REFERENCES adc_lab_case(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_cycle_check",
+      "kind": "c",
+      "definition": "CHECK ((cycle >= 0))"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_reviewer_id_2652286d_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewer_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_source_record_id_66617fd9_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_target_step_version__ee0f4abb_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (target_step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "lab_review_decision_valid",
+      "kind": "c",
+      "definition": "CHECK (((decision)::text = ANY ((ARRAY['ACCEPTED'::character varying, 'REWORK'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "lab_review_not_future",
+      "kind": "c",
+      "definition": "CHECK ((assessed_at <= recorded_at))"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "lab_review_real_dispatch_cycle",
+      "kind": "c",
+      "definition": "CHECK ((cycle >= 1))"
+    },
+    {
       "table": "adc_maintenance_action",
       "name": "adc_maintenance_acti_order_id_01035220_fk_adc_maint",
       "kind": "f",
@@ -13579,6 +16200,60 @@
       "name": "maintenance_state_valid",
       "kind": "c",
       "definition": "CHECK (((state)::text = ANY ((ARRAY['ASSIGNED'::character varying, 'IN_PROGRESS'::character varying, 'READY'::character varying, 'CLOSED'::character varying, 'CANCELLED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instr_recorded_by_id_f5ae630d_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instr_service_id_f822e30b_fk_adc_booki",
+      "kind": "f",
+      "definition": "FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instr_source_record_id_37f395e4_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instr_step_version_id_ceae4ff4_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "next_visit_completion_rule_valid",
+      "kind": "c",
+      "definition": "CHECK ((((completion_rule)::text = ANY ((ARRAY['UNSPECIFIED'::character varying, 'EXAM_CONFIRMED'::character varying])::text[])) OR (((completion_rule)::text = 'STEP_COMPLETED'::text) AND (step_version_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "next_visit_state_valid",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['OPEN'::character varying, 'WITHDRAWN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "next_visit_window_valid",
+      "kind": "c",
+      "definition": "CHECK ((earliest_on <= latest_on))"
     },
     {
       "table": "adc_notification_outbox",
@@ -13903,6 +16578,432 @@
       "name": "payment_account_method_valid",
       "kind": "c",
       "definition": "CHECK (((method)::text = ANY ((ARRAY['CASH'::character varying, 'CARD'::character varying, 'BANK_TRANSFER'::character varying, 'E_WALLET'::character varying, 'OTHER'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_proced_charge_line_id_5b1f15b5_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (charge_line_id) REFERENCES adc_treatment_record(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_proced_encounter_id_2ff61633_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_proced_source_record_id_799b593f_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_proced_step_version_id_8eb9ab3d_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_proced_treatment_type_id_8b8e35ad_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (treatment_type_id) REFERENCES adc_treatment_type(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_charge_line_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (charge_line_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_recorded_by_id_d24e64ff_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_tooth_check",
+      "kind": "c",
+      "definition": "CHECK ((tooth >= 0))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_charge_link_valid",
+      "kind": "c",
+      "definition": "CHECK ((((charge_line_id IS NULL) AND ((charge_mode)::text = 'NO_CHARGE'::text)) OR ((charge_line_id IS NOT NULL) AND ((charge_mode)::text = 'CHARGE'::text)) OR ((charge_line_id IS NULL) AND ((charge_mode)::text = 'CHARGE'::text) AND ((state)::text = 'VOIDED'::text))))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_location_valid",
+      "kind": "c",
+      "definition": "CHECK (((((surface)::text = ''::text) AND (tooth IS NULL)) OR (tooth = ANY (ARRAY[11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48, 51, 52, 53, 54, 55, 61, 62, 63, 64, 65, 71, 72, 73, 74, 75, 81, 82, 83, 84, 85]))))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_not_future",
+      "kind": "c",
+      "definition": "CHECK ((observed_at <= recorded_at))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_progress_valid",
+      "kind": "c",
+      "definition": "CHECK (((progress)::text = ANY ((ARRAY['PARTIAL'::character varying, 'COMPLETE'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_quantity_positive",
+      "kind": "c",
+      "definition": "CHECK ((quantity > (0)::numeric))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_state_valid",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['ACTIVE'::character varying, 'VOIDED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "performed_visit_final_consistency",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_instruction_id_f8bbb3a8_fk_adc_next_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (instruction_id) REFERENCES adc_next_visit_instruction(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_linked_by_id_6a09b239_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (linked_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_visit_id_22de5a49_fk_adc_visit_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "next_visit_link_unique",
+      "kind": "u",
+      "definition": "UNIQUE (instruction_id, visit_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_actor_id_204e3b5c_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_self_access_id_2d009bc5_fk_adc_patie",
+      "kind": "f",
+      "definition": "FOREIGN KEY (self_access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_source_visit_id_954ca73b_fk_adc_visit_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_step_version_id_7f9a72aa_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "plan_decision_source_valid",
+      "kind": "c",
+      "definition": "CHECK ((((self_access_id IS NOT NULL) AND ((source)::text = 'SELF'::text) AND (source_visit_id IS NULL)) OR ((self_access_id IS NULL) AND ((source)::text = 'MANUAL'::text) AND (source_visit_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "plan_decision_valid",
+      "kind": "c",
+      "definition": "CHECK (((decision)::text = ANY ((ARRAY['ACCEPTED'::character varying, 'DEFERRED'::character varying, 'DECLINED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_base_version_id_942ffe0f_fk_adc_plan_version_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (base_version_id) REFERENCES adc_plan_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_plan_id_03e2e688_fk_adc_treatment_plan_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (plan_id) REFERENCES adc_treatment_plan(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_plan_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (plan_id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_saved_by_id_81d86335_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (saved_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_source_record_id_a67e5756_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_actor_id_01033de7_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_decision_id_b2a40bc5_fk_adc_plan_decision_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (decision_id) REFERENCES adc_plan_decision(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_encounter_id_55fbda70_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_instruction_id_d5f8b47f_fk_adc_next_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (instruction_id) REFERENCES adc_next_visit_instruction(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_performed_id_99df4350_fk_adc_perfo",
+      "kind": "f",
+      "definition": "FOREIGN KEY (performed_id) REFERENCES adc_performed_procedure(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_plan_id_632c2b2a_fk_adc_treatment_plan_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (plan_id) REFERENCES adc_treatment_plan(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_versio_service_id_0102ceca_fk_adc_booki",
+      "kind": "f",
+      "definition": "FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_versio_treatment_type_id_5ec2a311_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (treatment_type_id) REFERENCES adc_treatment_type(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_versio_version_id_7581623c_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES adc_plan_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_step_id_caf3bbdd_fk_adc_treatment_step_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_id) REFERENCES adc_treatment_step(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_tooth_check",
+      "kind": "c",
+      "definition": "CHECK ((tooth >= 0))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_charge_basis_valid",
+      "kind": "c",
+      "definition": "CHECK (((charge_basis)::text = ANY ((ARRAY['PER_EXECUTION'::character varying, 'ON_COMPLETION'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_estimate_price_nonnegative",
+      "kind": "c",
+      "definition": "CHECK (((estimated_unit_price IS NULL) OR (estimated_unit_price >= (0)::numeric)))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_estimate_quantity_positive",
+      "kind": "c",
+      "definition": "CHECK ((estimated_quantity > (0)::numeric))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_location_valid",
+      "kind": "c",
+      "definition": "CHECK (((((surface)::text = ''::text) AND (tooth IS NULL)) OR (tooth = ANY (ARRAY[11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 43, 44, 45, 46, 47, 48, 51, 52, 53, 54, 55, 61, 62, 63, 64, 65, 71, 72, 73, 74, 75, 81, 82, 83, 84, 85]))))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_sequence_bounded",
+      "kind": "c",
+      "definition": "CHECK (((sequence >= 1) AND (sequence <= 30)))"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_sequence_unique",
+      "kind": "u",
+      "definition": "UNIQUE (version_id, sequence)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_version_unique",
+      "kind": "u",
+      "definition": "UNIQUE (version_id, step_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_plan_id_1636067f_fk_adc_treatment_plan_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (plan_id) REFERENCES adc_treatment_plan(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_previous_id_7b4b0628_fk_adc_plan_version_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (previous_id) REFERENCES adc_plan_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_previous_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (previous_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_recorded_by_id_2852c0ab_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_source_record_id_011ba9c8_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "plan_version_amendment_reason",
+      "kind": "c",
+      "definition": "CHECK (((previous_id IS NULL) OR (NOT ((amendment_reason)::text = ''::text))))"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "plan_version_not_self",
+      "kind": "c",
+      "definition": "CHECK ((NOT ((previous_id = id) AND (previous_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "plan_version_previous_required",
+      "kind": "c",
+      "definition": "CHECK ((((previous_id IS NULL) AND (revision = 1)) OR ((previous_id IS NOT NULL) AND (revision > 1))))"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "plan_version_revision_unique",
+      "kind": "u",
+      "definition": "UNIQUE (plan_id, revision)"
     },
     {
       "table": "adc_portal_booking_receipt",
@@ -14775,6 +17876,30 @@
       "definition": "CHECK (((NOT ((kind)::text = 'MISSING'::text)) OR ((surface)::text = ''::text)))"
     },
     {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_opened_by_id_39853e91_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_origin_encounter_id_56f37766_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (origin_encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
       "table": "adc_treatment_record",
       "name": "adc_treatment_record_confirmed_by_id_c4e5c557_fk_adc_user_id",
       "kind": "f",
@@ -14857,6 +17982,30 @@
       "name": "room_department_code",
       "kind": "u",
       "definition": "UNIQUE (department_id, code)"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_created_by_id_16f50de1_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_plan_id_c0599e3f_fk_adc_treatment_plan_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (plan_id) REFERENCES adc_treatment_plan(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_step_key_key",
+      "kind": "u",
+      "definition": "UNIQUE (step_key)"
     },
     {
       "table": "adc_treatment_type",
@@ -15864,6 +19013,56 @@
       "definition": "CREATE UNIQUE INDEX clinical_history_revision_unique ON public.adc_clinical_history_version USING btree (patient_id, scope_clinic_id, revision) NULLS NOT DISTINCT"
     },
     {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_completion_performed_id_c5a9e5ae",
+      "definition": "CREATE INDEX adc_clinical_recall_completion_performed_id_c5a9e5ae ON public.adc_clinical_recall USING btree (completion_performed_id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_completion_record_id_7d1e3687",
+      "definition": "CREATE INDEX adc_clinical_recall_completion_record_id_7d1e3687 ON public.adc_clinical_recall USING btree (completion_record_id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_instruction_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_clinical_recall_instruction_id_key ON public.adc_clinical_recall USING btree (instruction_id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_opened_by_id_6510feda",
+      "definition": "CREATE INDEX adc_clinical_recall_opened_by_id_6510feda ON public.adc_clinical_recall USING btree (opened_by_id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_owner_id_c198b0c5",
+      "definition": "CREATE INDEX adc_clinical_recall_owner_id_c198b0c5 ON public.adc_clinical_recall USING btree (owner_id)"
+    },
+    {
+      "table": "adc_clinical_recall",
+      "name": "adc_clinical_recall_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_clinical_recall_pkey ON public.adc_clinical_recall USING btree (id)"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_actor_id_dc0840fc",
+      "definition": "CREATE INDEX adc_clinical_recall_event_actor_id_dc0840fc ON public.adc_clinical_recall_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_episode_id_d3bae0da",
+      "definition": "CREATE INDEX adc_clinical_recall_event_episode_id_d3bae0da ON public.adc_clinical_recall_event USING btree (episode_id)"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_clinical_recall_event_operation_id_key ON public.adc_clinical_recall_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "name": "adc_clinical_recall_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_clinical_recall_event_pkey ON public.adc_clinical_recall_event USING btree (id)"
+    },
+    {
       "table": "adc_clinical_record_event",
       "name": "adc_clinical_record_event_actor_id_71e3e837",
       "definition": "CREATE INDEX adc_clinical_record_event_actor_id_71e3e837 ON public.adc_clinical_record_event USING btree (actor_id)"
@@ -16374,6 +19573,96 @@
       "definition": "CREATE UNIQUE INDEX adc_invoice_visit_id_key ON public.adc_invoice USING btree (visit_id)"
     },
     {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_case_no_6d7866b7_like",
+      "definition": "CREATE INDEX adc_lab_case_case_no_6d7866b7_like ON public.adc_lab_case USING btree (case_no varchar_pattern_ops)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_case_no_key",
+      "definition": "CREATE UNIQUE INDEX adc_lab_case_case_no_key ON public.adc_lab_case USING btree (case_no)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_coordinator_id_54061790",
+      "definition": "CREATE INDEX adc_lab_case_coordinator_id_54061790 ON public.adc_lab_case USING btree (coordinator_id)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_lab_case_pkey ON public.adc_lab_case USING btree (id)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_requester_id_537fc367",
+      "definition": "CREATE INDEX adc_lab_case_requester_id_537fc367 ON public.adc_lab_case USING btree (requester_id)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_source_record_id_7585139a",
+      "definition": "CREATE INDEX adc_lab_case_source_record_id_7585139a ON public.adc_lab_case USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_lab_case",
+      "name": "adc_lab_case_step_version_id_cde7f995",
+      "definition": "CREATE INDEX adc_lab_case_step_version_id_cde7f995 ON public.adc_lab_case USING btree (step_version_id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_actor_id_2f0d75af",
+      "definition": "CREATE INDEX adc_lab_event_actor_id_2f0d75af ON public.adc_lab_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_case_id_61c987e1",
+      "definition": "CREATE INDEX adc_lab_event_case_id_61c987e1 ON public.adc_lab_event USING btree (case_id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_lab_event_operation_id_key ON public.adc_lab_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_lab_event_pkey ON public.adc_lab_event USING btree (id)"
+    },
+    {
+      "table": "adc_lab_event",
+      "name": "adc_lab_event_review_id_de4c1e40",
+      "definition": "CREATE INDEX adc_lab_event_review_id_de4c1e40 ON public.adc_lab_event USING btree (review_id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_case_id_d23321dd",
+      "definition": "CREATE INDEX adc_lab_review_case_id_d23321dd ON public.adc_lab_review USING btree (case_id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_lab_review_operation_id_key ON public.adc_lab_review USING btree (operation_id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_lab_review_pkey ON public.adc_lab_review USING btree (id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_reviewer_id_2652286d",
+      "definition": "CREATE INDEX adc_lab_review_reviewer_id_2652286d ON public.adc_lab_review USING btree (reviewer_id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_source_record_id_66617fd9",
+      "definition": "CREATE INDEX adc_lab_review_source_record_id_66617fd9 ON public.adc_lab_review USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_lab_review",
+      "name": "adc_lab_review_target_step_version_id_ee0f4abb",
+      "definition": "CREATE INDEX adc_lab_review_target_step_version_id_ee0f4abb ON public.adc_lab_review USING btree (target_step_version_id)"
+    },
+    {
       "table": "adc_maintenance_action",
       "name": "adc_maintenance_action_actor_id_641ebba0",
       "definition": "CREATE INDEX adc_maintenance_action_actor_id_641ebba0 ON public.adc_maintenance_action USING btree (actor_id)"
@@ -16447,6 +19736,31 @@
       "table": "adc_maintenance_order",
       "name": "maintenance_queue_idx",
       "definition": "CREATE INDEX maintenance_queue_idx ON public.adc_maintenance_order USING btree (state, due_on)"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_next_visit_instruction_pkey ON public.adc_next_visit_instruction USING btree (id)"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_recorded_by_id_f5ae630d",
+      "definition": "CREATE INDEX adc_next_visit_instruction_recorded_by_id_f5ae630d ON public.adc_next_visit_instruction USING btree (recorded_by_id)"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_service_id_f822e30b",
+      "definition": "CREATE INDEX adc_next_visit_instruction_service_id_f822e30b ON public.adc_next_visit_instruction USING btree (service_id)"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_source_record_id_37f395e4",
+      "definition": "CREATE INDEX adc_next_visit_instruction_source_record_id_37f395e4 ON public.adc_next_visit_instruction USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "name": "adc_next_visit_instruction_step_version_id_ceae4ff4",
+      "definition": "CREATE INDEX adc_next_visit_instruction_step_version_id_ceae4ff4 ON public.adc_next_visit_instruction USING btree (step_version_id)"
     },
     {
       "table": "adc_notification_outbox",
@@ -16622,6 +19936,241 @@
       "table": "adc_payment_account",
       "name": "payment_account_code_unique",
       "definition": "CREATE UNIQUE INDEX payment_account_code_unique ON public.adc_payment_account USING btree (clinic_id, code)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_charge_line_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_performed_procedure_charge_line_id_key ON public.adc_performed_procedure USING btree (charge_line_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_encounter_id_2ff61633",
+      "definition": "CREATE INDEX adc_performed_procedure_encounter_id_2ff61633 ON public.adc_performed_procedure USING btree (encounter_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_performed_procedure_operation_id_key ON public.adc_performed_procedure USING btree (operation_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_performed_procedure_pkey ON public.adc_performed_procedure USING btree (id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_recorded_by_id_d24e64ff",
+      "definition": "CREATE INDEX adc_performed_procedure_recorded_by_id_d24e64ff ON public.adc_performed_procedure USING btree (recorded_by_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_source_record_id_799b593f",
+      "definition": "CREATE INDEX adc_performed_procedure_source_record_id_799b593f ON public.adc_performed_procedure USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_step_version_id_8eb9ab3d",
+      "definition": "CREATE INDEX adc_performed_procedure_step_version_id_8eb9ab3d ON public.adc_performed_procedure USING btree (step_version_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_treatment_type_id_8b8e35ad",
+      "definition": "CREATE INDEX adc_performed_procedure_treatment_type_id_8b8e35ad ON public.adc_performed_procedure USING btree (treatment_type_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "one_active_performed_step_per_visit",
+      "definition": "CREATE UNIQUE INDEX one_active_performed_step_per_visit ON public.adc_performed_procedure USING btree (encounter_id, step_version_id) WHERE (((state)::text = 'ACTIVE'::text) AND (step_version_id IS NOT NULL))"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_instruction_id_f8bbb3a8",
+      "definition": "CREATE INDEX adc_plan_appointment_instruction_id_f8bbb3a8 ON public.adc_plan_appointment USING btree (instruction_id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_linked_by_id_6a09b239",
+      "definition": "CREATE INDEX adc_plan_appointment_linked_by_id_6a09b239 ON public.adc_plan_appointment USING btree (linked_by_id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_plan_appointment_operation_id_key ON public.adc_plan_appointment USING btree (operation_id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_plan_appointment_pkey ON public.adc_plan_appointment USING btree (id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_visit_id_22de5a49",
+      "definition": "CREATE INDEX adc_plan_appointment_visit_id_22de5a49 ON public.adc_plan_appointment USING btree (visit_id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "next_visit_link_unique",
+      "definition": "CREATE UNIQUE INDEX next_visit_link_unique ON public.adc_plan_appointment USING btree (instruction_id, visit_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_actor_id_204e3b5c",
+      "definition": "CREATE INDEX adc_plan_decision_actor_id_204e3b5c ON public.adc_plan_decision USING btree (actor_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_plan_decision_operation_id_key ON public.adc_plan_decision USING btree (operation_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_plan_decision_pkey ON public.adc_plan_decision USING btree (id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_self_access_id_2d009bc5",
+      "definition": "CREATE INDEX adc_plan_decision_self_access_id_2d009bc5 ON public.adc_plan_decision USING btree (self_access_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_source_visit_id_954ca73b",
+      "definition": "CREATE INDEX adc_plan_decision_source_visit_id_954ca73b ON public.adc_plan_decision USING btree (source_visit_id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_step_version_id_7f9a72aa",
+      "definition": "CREATE INDEX adc_plan_decision_step_version_id_7f9a72aa ON public.adc_plan_decision USING btree (step_version_id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_base_version_id_942ffe0f",
+      "definition": "CREATE INDEX adc_plan_draft_base_version_id_942ffe0f ON public.adc_plan_draft USING btree (base_version_id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_plan_draft_pkey ON public.adc_plan_draft USING btree (id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_plan_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_plan_draft_plan_id_key ON public.adc_plan_draft USING btree (plan_id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_saved_by_id_81d86335",
+      "definition": "CREATE INDEX adc_plan_draft_saved_by_id_81d86335 ON public.adc_plan_draft USING btree (saved_by_id)"
+    },
+    {
+      "table": "adc_plan_draft",
+      "name": "adc_plan_draft_source_record_id_a67e5756",
+      "definition": "CREATE INDEX adc_plan_draft_source_record_id_a67e5756 ON public.adc_plan_draft USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_actor_id_01033de7",
+      "definition": "CREATE INDEX adc_plan_event_actor_id_01033de7 ON public.adc_plan_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_decision_id_b2a40bc5",
+      "definition": "CREATE INDEX adc_plan_event_decision_id_b2a40bc5 ON public.adc_plan_event USING btree (decision_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_encounter_id_55fbda70",
+      "definition": "CREATE INDEX adc_plan_event_encounter_id_55fbda70 ON public.adc_plan_event USING btree (encounter_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_instruction_id_d5f8b47f",
+      "definition": "CREATE INDEX adc_plan_event_instruction_id_d5f8b47f ON public.adc_plan_event USING btree (instruction_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_plan_event_operation_id_key ON public.adc_plan_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_performed_id_99df4350",
+      "definition": "CREATE INDEX adc_plan_event_performed_id_99df4350 ON public.adc_plan_event USING btree (performed_id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_plan_event_pkey ON public.adc_plan_event USING btree (id)"
+    },
+    {
+      "table": "adc_plan_event",
+      "name": "adc_plan_event_plan_id_632c2b2a",
+      "definition": "CREATE INDEX adc_plan_event_plan_id_632c2b2a ON public.adc_plan_event USING btree (plan_id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_plan_step_version_pkey ON public.adc_plan_step_version USING btree (id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_service_id_0102ceca",
+      "definition": "CREATE INDEX adc_plan_step_version_service_id_0102ceca ON public.adc_plan_step_version USING btree (service_id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_step_id_caf3bbdd",
+      "definition": "CREATE INDEX adc_plan_step_version_step_id_caf3bbdd ON public.adc_plan_step_version USING btree (step_id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_treatment_type_id_5ec2a311",
+      "definition": "CREATE INDEX adc_plan_step_version_treatment_type_id_5ec2a311 ON public.adc_plan_step_version USING btree (treatment_type_id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "adc_plan_step_version_version_id_7581623c",
+      "definition": "CREATE INDEX adc_plan_step_version_version_id_7581623c ON public.adc_plan_step_version USING btree (version_id)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_sequence_unique",
+      "definition": "CREATE UNIQUE INDEX plan_step_sequence_unique ON public.adc_plan_step_version USING btree (version_id, sequence)"
+    },
+    {
+      "table": "adc_plan_step_version",
+      "name": "plan_step_version_unique",
+      "definition": "CREATE UNIQUE INDEX plan_step_version_unique ON public.adc_plan_step_version USING btree (version_id, step_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_plan_version_pkey ON public.adc_plan_version USING btree (id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_plan_id_1636067f",
+      "definition": "CREATE INDEX adc_plan_version_plan_id_1636067f ON public.adc_plan_version USING btree (plan_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_previous_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_plan_version_previous_id_key ON public.adc_plan_version USING btree (previous_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_recorded_by_id_2852c0ab",
+      "definition": "CREATE INDEX adc_plan_version_recorded_by_id_2852c0ab ON public.adc_plan_version USING btree (recorded_by_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "adc_plan_version_source_record_id_011ba9c8",
+      "definition": "CREATE INDEX adc_plan_version_source_record_id_011ba9c8 ON public.adc_plan_version USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_plan_version",
+      "name": "plan_version_revision_unique",
+      "definition": "CREATE UNIQUE INDEX plan_version_revision_unique ON public.adc_plan_version USING btree (plan_id, revision)"
     },
     {
       "table": "adc_portal_booking_receipt",
@@ -17149,6 +20698,21 @@
       "definition": "CREATE UNIQUE INDEX clinical_finding_location_unique ON public.adc_tooth_finding USING btree (record_id, tooth, surface, kind)"
     },
     {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_opened_by_id_39853e91",
+      "definition": "CREATE INDEX adc_treatment_plan_opened_by_id_39853e91 ON public.adc_treatment_plan USING btree (opened_by_id)"
+    },
+    {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_origin_encounter_id_56f37766",
+      "definition": "CREATE INDEX adc_treatment_plan_origin_encounter_id_56f37766 ON public.adc_treatment_plan USING btree (origin_encounter_id)"
+    },
+    {
+      "table": "adc_treatment_plan",
+      "name": "adc_treatment_plan_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_plan_pkey ON public.adc_treatment_plan USING btree (id)"
+    },
+    {
       "table": "adc_treatment_record",
       "name": "adc_treatment_record_confirmed_by_id_c4e5c557",
       "definition": "CREATE INDEX adc_treatment_record_confirmed_by_id_c4e5c557 ON public.adc_treatment_record USING btree (confirmed_by_id)"
@@ -17187,6 +20751,26 @@
       "table": "adc_treatment_room",
       "name": "room_department_code",
       "definition": "CREATE UNIQUE INDEX room_department_code ON public.adc_treatment_room USING btree (department_id, code)"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_created_by_id_16f50de1",
+      "definition": "CREATE INDEX adc_treatment_step_created_by_id_16f50de1 ON public.adc_treatment_step USING btree (created_by_id)"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_step_pkey ON public.adc_treatment_step USING btree (id)"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_plan_id_c0599e3f",
+      "definition": "CREATE INDEX adc_treatment_step_plan_id_c0599e3f ON public.adc_treatment_step USING btree (plan_id)"
+    },
+    {
+      "table": "adc_treatment_step",
+      "name": "adc_treatment_step_step_key_key",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_step_step_key_key ON public.adc_treatment_step USING btree (step_key)"
     },
     {
       "table": "adc_treatment_type",
@@ -18587,6 +22171,120 @@
       "null": true
     },
     {
+      "table": "adc_clinical_recall",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "followup_due_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "opened_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "completed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "completion_performed_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "completion_record_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "instruction_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "opened_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall",
+      "column": "owner_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "action",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_recall_event",
+      "column": "episode_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_clinical_record_event",
       "column": "id",
       "db_type": "bigint",
@@ -19757,6 +23455,228 @@
       "null": false
     },
     {
+      "table": "adc_lab_case",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "case_no",
+      "db_type": "character varying(40)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "requested_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "work_kind",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "specification",
+      "db_type": "character varying(3000)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "vendor_name",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "logistics_note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "needed_on",
+      "db_type": "date",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "cycle",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "followup_due_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "coordinator_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "requester_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_case",
+      "column": "step_version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "action",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "case_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_event",
+      "column": "review_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "cycle",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "decision",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "findings",
+      "db_type": "character varying(3000)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "coordination_note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "assessed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "case_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "reviewer_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_lab_review",
+      "column": "target_step_version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_maintenance_action",
       "column": "id",
       "db_type": "bigint",
@@ -19935,6 +23855,84 @@
       "column": "submitted_by_id",
       "db_type": "bigint",
       "null": true
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "earliest_on",
+      "db_type": "date",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "latest_on",
+      "db_type": "date",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "clinical_purpose",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "booking_note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "recorded_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "service_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "step_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_next_visit_instruction",
+      "column": "completion_rule",
+      "db_type": "character varying(24)",
+      "null": false
     },
     {
       "table": "adc_notification_outbox",
@@ -20413,6 +24411,498 @@
     {
       "table": "adc_payment_account",
       "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "quantity",
+      "db_type": "numeric(12,3)",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "tooth",
+      "db_type": "smallint",
+      "null": true
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "surface",
+      "db_type": "character varying(6)",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "progress",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "charge_mode",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "reason",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "charge_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "observed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "charge_line_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "encounter_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "recorded_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "treatment_type_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_performed_procedure",
+      "column": "step_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "linked_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "instruction_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "linked_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "visit_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "decision",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "source",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "note",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "self_access_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "source_visit_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "step_version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "payload",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "saved_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "saved_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "base_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_draft",
+      "column": "plan_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "action",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "note",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "decision_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "encounter_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "instruction_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "performed_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_event",
+      "column": "plan_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "sequence",
+      "db_type": "smallint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "description",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "goal",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "tooth",
+      "db_type": "smallint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "surface",
+      "db_type": "character varying(6)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "estimated_quantity",
+      "db_type": "numeric(12,3)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "estimated_unit_price",
+      "db_type": "numeric(12,2)",
+      "null": true
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "estimate_note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "alternative_group",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "charge_basis",
+      "db_type": "character varying(20)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "service_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "treatment_type_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "step_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "requires_lab",
+      "db_type": "boolean",
+      "null": true
+    },
+    {
+      "table": "adc_plan_step_version",
+      "column": "definition_snapshot",
+      "db_type": "jsonb",
+      "null": true
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "summary",
+      "db_type": "character varying(3000)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "discussion_note",
+      "db_type": "character varying(2000)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "amendment_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "previous_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "recorded_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_plan_version",
+      "column": "plan_id",
       "db_type": "bigint",
       "null": false
     },
@@ -21647,6 +26137,36 @@
       "null": false
     },
     {
+      "table": "adc_treatment_plan",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_plan",
+      "column": "opened_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_plan",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_plan",
+      "column": "opened_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_plan",
+      "column": "origin_encounter_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_treatment_record",
       "column": "id",
       "db_type": "bigint",
@@ -21745,6 +26265,36 @@
     {
       "table": "adc_treatment_room",
       "column": "department_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_step",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_step",
+      "column": "step_key",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_step",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_step",
+      "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_step",
+      "column": "plan_id",
       "db_type": "bigint",
       "null": false
     },
@@ -22497,6 +27047,22 @@
       "name": "0002_structured_encounter_and_history"
     },
     {
+      "app": "clinical",
+      "name": "0003_treatment_continuity"
+    },
+    {
+      "app": "clinical",
+      "name": "0004_staged_actual_care_guard"
+    },
+    {
+      "app": "clinical",
+      "name": "0005_recall_lab_readiness"
+    },
+    {
+      "app": "clinical",
+      "name": "0006_retained_plan_definition"
+    },
+    {
       "app": "contenttypes",
       "name": "0001_initial"
     },
@@ -22658,5 +27224,5 @@
     }
   ],
   "observed_on": "2026-10-24",
-  "scope": "C2.1 isolated PostgreSQL after all 45 application migrations; structural metadata only, no business rows or credentials"
+  "scope": "C2.3 isolated working candidate PostgreSQL after all 49 application migrations; structural metadata only, no business rows or credentials"
 }

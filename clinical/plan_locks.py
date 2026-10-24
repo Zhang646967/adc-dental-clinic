@@ -13,6 +13,31 @@ from workspaces.context import require_active
 from accounts.policies import require_writable
 
 
+def plan_services(plan,*,version=None,include_draft=True):
+    from clinical.plan_models import PlanVersion,PlanDraft
+    version=version or PlanVersion.objects.filter(plan=plan).order_by('-revision').first()
+    services=set(version.steps.values_list('service_id',flat=True)) if version else set()
+    if include_draft:
+        draft=PlanDraft.objects.filter(plan=plan).first()
+        if draft:services.update(row['service'] for row in draft.payload['steps'])
+    return services
+
+
+def readable_services(actor,clinic_id=None):
+    from django.conf import settings
+    from clinical.models import ProfessionalAuthorization
+    now=timezone.now()
+    scopes=ProfessionalAuthorization.objects.filter(user=actor,clinic__is_active=True,state='APPROVED',can_read=True,valid_from__lte=now,valid_until__gt=now)
+    if clinic_id is not None:scopes=scopes.filter(clinic_id=clinic_id)
+    if not settings.ADC_CLINICAL_SYNTHETIC:scopes=scopes.exclude(source_kind='SYNTHETIC')
+    return set(scopes.values_list('service_id',flat=True))
+
+
+def require_plan_scope(actor,visit,plan,action,*,version=None,include_draft=True,lock=False):
+    for service_id in sorted(plan_services(plan,version=version,include_draft=include_draft)):
+        professional_scope(actor.pk,visit.clinic_id,service_id,action,lock=lock)
+
+
 def lock_plan_visit(actor,visit_id,plan_id=None,*,actual=False,ready=False):
     visit=lock_clinical_visit(actor,visit_id)
     patient=Patient.objects.select_for_update().get(pk=visit.patient_id,is_active=True)

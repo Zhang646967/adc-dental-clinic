@@ -30,7 +30,11 @@ def instruction_fields(raw):
     earliest,latest=day('earliest_on'),day('latest_on')
     if earliest>latest:raise RuleError('建议最晚日期不能早于最早日期。')
     step=raw.get('step_version')
+    completion=raw.get('completion_rule')
+    if completion not in ('EXAM_CONFIRMED','STEP_COMPLETED') or (completion=='STEP_COMPLETED' and step in (None,'')):
+        raise RuleError('请选择医师明确的复诊完成目标；指定步骤完成需同时选择具体步骤。')
     return dict(service=identity(raw.get('service'),'后续服务'),step_version=identity(step,'计划步骤') if step not in (None,'') else None,
+        completion_rule=completion,
         earliest_on=earliest.isoformat(),latest_on=latest.isoformat(),
         clinical_purpose=text(raw.get('clinical_purpose',''),1000,'后续诊疗目标',True),
         booking_note=text(raw.get('booking_note',''),500,'前台安排说明'))
@@ -63,6 +67,8 @@ def prepare_withdrawal(*,actor,visit_id,instruction_id,reason):
     if not d['can_record']:raise PermissionDenied('没有当前患者的后续指示记录范围。')
     row=NextVisitInstruction.objects.get(pk=instruction_id,source_record__encounter__visit__patient_id=d['visit'].patient_id,
         source_record__encounter__visit__clinic_id=d['visit'].clinic_id)
+    from clinical.authority import professional_scope
+    professional_scope(actor.pk,d['visit'].clinic_id,row.service_id,'RECORD')
     data=dict(action='WITHDRAW',visit=visit_id,instruction=row.pk,revision=row.revision,reason=text(reason,1000,'撤回指示依据',True))
     return dict(proposal_token=proposal(actor,CONTRACT,('DENTIST',),data),instruction=row,reason=data['reason'])
 
@@ -92,6 +98,8 @@ def confirm_instruction(*,actor,proposal_token,confirmed):
     else:
         row=NextVisitInstruction.objects.select_for_update().get(pk=data['instruction'],source_record__encounter__visit__patient=patient,
             source_record__encounter__visit__clinic_id=visit.clinic_id)
+        from clinical.authority import professional_scope
+        professional_scope(actor.pk,visit.clinic_id,row.service_id,'RECORD',lock=True)
         if row.revision!=data['revision'] or row.state!='OPEN':raise RuleError('后续指示已有变化，请核对保留的当前结果。')
         row.state='WITHDRAWN';row.revision+=1;row.save(update_fields=['state','revision']);note=data['reason']
     PlanEvent.objects.create(actor=actor,operation_id=op,action=action,encounter=head,instruction=row,note=note,
@@ -124,10 +132,18 @@ def instruction_booking_projection(row):
     visit=row.source_record.encounter.visit
     links=list(row.appointment_links.select_related('visit').order_by('-pk'))
     promises=[dict(original=link.visit,current=current_promise(link.visit)) for link in links]
+    fulfilled=has_completed_goal(row)
     return dict(id=row.pk,patient=visit.patient,service=row.service,earliest_on=row.earliest_on,latest_on=row.latest_on,
         booking_note=row.booking_note,state=row.state,revision=row.revision,promises=promises,
-        needs_booking=row.state=='OPEN' and not any(p['current'].status in ('SCHEDULED','CHECKED_IN','COMPLETED','CLOSED_NO_TREATMENT') for p in promises),
+        completion_available=fulfilled,
+        needs_booking=row.state=='OPEN' and not fulfilled and not any(p['current'].status in ('SCHEDULED','CHECKED_IN') or (row.completion_rule=='UNSPECIFIED' and p['current'].status in ('COMPLETED','CLOSED_NO_TREATMENT')) for p in promises),
         overdue=row.state=='OPEN' and row.latest_on<timezone.localdate())
+
+
+def has_completed_goal(instruction):
+    if instruction.completion_rule=='UNSPECIFIED':return False
+    from clinical.recall import completion_candidates
+    return bool(completion_candidates(instruction))
 
 
 def check_promise(row,visit):
@@ -139,7 +155,8 @@ def check_promise(row,visit):
     if not row.earliest_on<=day<=row.latest_on:raise RuleError('预约日期不在医师建议窗口；请先请医师明确调整指示，保留原承诺。')
     for link in row.appointment_links.select_related('visit'):
         live=current_promise(link.visit)
-        if live.pk!=visit.pk and live.status in ('SCHEDULED','CHECKED_IN','COMPLETED','CLOSED_NO_TREATMENT'):
+        protected=live.status in ('SCHEDULED','CHECKED_IN') or (live.status in ('COMPLETED','CLOSED_NO_TREATMENT') and (row.completion_rule=='UNSPECIFIED' or has_completed_goal(row)))
+        if live.pk!=visit.pk and protected:
             raise RuleError('已有本指示的有效预约或到诊事实，请先核对原安排，不能重复挂接。')
 
 

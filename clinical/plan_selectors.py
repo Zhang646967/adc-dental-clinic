@@ -9,6 +9,7 @@ from clinical.plan_models import TreatmentPlan,PlanDraft,PlanVersion,PlanStepVer
 from clinical.plan_payload import estimate_totals
 from clinical.plans import current_version,version_payload
 from clinical.next_visits import instruction_booking_projection
+from clinical.plan_locks import plan_services,readable_services,require_plan_scope
 from portal.policies import patient_access
 from workspaces.context import require_active
 
@@ -25,10 +26,18 @@ def plan_steps(version):
     stable_ids=[r.step_id for r in rows]
     prior=list(PerformedProcedure.objects.filter(step_version__step_id__in=stable_ids).select_related('encounter__visit','step_version').order_by('pk'))
     for row in rows:
+        definition=row.definition_snapshot
+        row.definition_retained=definition is not None
+        row.saved_catalogue_name=definition['treatment']['name'] if definition else row.treatment_type.name
+        row.saved_unit=definition['treatment']['unit'] if definition else row.treatment_type.unit_definition
+        row.saved_service_name=definition['service']['name'] if definition else row.service.name
+        row.planned_duration=definition['service']['duration'] if definition else None
         decisions=list(row.decisions.all());row.current_decision=max(decisions,key=lambda d:d.pk) if decisions else None
         row.decision_history=sorted(decisions,key=lambda d:d.pk,reverse=True)
         row.actual_history=[p for p in prior if p.step_version.step_id==row.step_id]
         row.is_completed=any(p.state=='ACTIVE' and p.progress=='COMPLETE' for p in row.actual_history)
+        from clinical.lab_readiness import step_readiness
+        row.readiness=step_readiness(row)
         row.estimate_amount=(row.estimated_quantity*row.estimated_unit_price).quantize(Decimal('.01')) if row.estimated_unit_price is not None else None
     return rows
 
@@ -53,7 +62,8 @@ def self_plan_details(actor,plan_id,*,revision=None):
 
 def clinician_plans(actor,visit_id):
     d=encounter_details(actor,visit_id);visit=d['visit']
-    return d,_plan_rows(visit)
+    allowed=readable_services(actor,visit.clinic_id)
+    return d,[p for p in _plan_rows(visit) if plan_services(p)<=allowed]
 
 
 def _plan_rows(visit):
@@ -64,6 +74,7 @@ def clinician_plan_details(actor,visit_id,plan_id,*,revision=None):
     with reporting_snapshot():
         d=_encounter_details(actor,visit_id);plan=get_object_or_404(_plan_rows(d['visit']),pk=plan_id)
         version=selected_version(plan,revision);draft=PlanDraft.objects.filter(plan=plan).first() if revision is None else None
+        require_plan_scope(actor,d['visit'],plan,'READ',version=version,include_draft=revision is None)
         payload=draft.payload if draft else version_payload(version) if version else None
         return dict(d,plan=plan,version=version,draft=draft,plan_payload=payload,steps=plan_steps(version),versions=list(plan.versions.order_by('-revision')),
             plan_revision=plan.revision,is_current=revision is None,estimate=estimate_totals(payload['steps']) if payload else None)
@@ -73,5 +84,5 @@ def actual_details(actor,visit_id):
     d=encounter_details(actor,visit_id);visit=d['visit']
     d['actual_rows']=list(PerformedProcedure.objects.filter(encounter__visit=visit).select_related('treatment_type','step_version__version','charge_line__record_version').order_by('-pk'))
     d['instruction_rows']=list(NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=visit.patient_id,
-        source_record__encounter__visit__clinic_id=visit.clinic_id).select_related('service','step_version').order_by('-pk'))
+        source_record__encounter__visit__clinic_id=visit.clinic_id,service_id__in=readable_services(actor,visit.clinic_id)).select_related('service','step_version').order_by('-pk'))
     return d

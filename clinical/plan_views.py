@@ -24,11 +24,9 @@ from clinical.plan_forms import (PlanStartForm,PlanNotesForm,StepForm,PlanReason
 
 def show_preview(request,title,preview,back,*,base_template='base.html',visit=None):
     if preview.get('payload'):
-        from registry.models import TreatmentType
-        from scheduling.models import BookingService
-        types=dict(TreatmentType.objects.filter(pk__in=[r['treatment_type'] for r in preview['payload']['steps']]).values_list('pk','name'))
-        services=dict(BookingService.objects.filter(pk__in=[r['service'] for r in preview['payload']['steps']]).values_list('pk','name'))
-        preview['display_steps']=[dict(r,catalogue_name=types[r['treatment_type']],service_name=services[r['service']]) for r in preview['payload']['steps']]
+        definitions=preview['definitions']
+        preview['display_steps']=[dict(r,catalogue_name=definitions[r['step_key']]['treatment']['name'],service_name=definitions[r['step_key']]['service']['name'],
+            duration=definitions[r['step_key']]['service']['duration']) for r in preview['payload']['steps']]
     form=ConfirmPlanActionForm(initial={'proposal_token':preview['proposal_token']})
     return clinical_render(request,'clinical/plan_confirm.html',dict(title=title,preview=preview,form=form,back=back,base_template=base_template,visit=visit))
 
@@ -93,9 +91,10 @@ def plan_detail(request,pk,plan_id):
             number=int(edit)
             if d['draft'] is None or not 1<=number<=len(payload['steps']):raise ValueError
             edit_row=dict(payload['steps'][number-1],sequence=number,surfaces=list(payload['steps'][number-1]['surface']))
+            edit_row['requires_lab']='YES' if edit_row.get('requires_lab') is True else 'NO' if edit_row.get('requires_lab') is False else 'UNKNOWN'
         except (TypeError,ValueError):raise Http404('草稿步骤已变化，请返回当前计划。')
     forms=dict(notes_form=PlanNotesForm(bound('NOTES'),initial=initial(**{k:payload[k] for k in ('summary','discussion_note','amendment_reason')}),auto_id='plan_note_%s'),
-        step_form=StepForm(bound('ADD_STEP','UPDATE_STEP'),actor=request.user,visit=visit,initial=initial(**(edit_row or dict(estimated_quantity='1',charge_basis='PER_EXECUTION'))),auto_id='plan_step_%s'),
+        step_form=StepForm(bound('ADD_STEP','UPDATE_STEP'),actor=request.user,visit=visit,initial=initial(**(edit_row or dict(estimated_quantity='1',charge_basis='PER_EXECUTION',requires_lab='NO'))),auto_id='plan_step_%s'),
         amend_form=PlanReasonForm(bound('BEGIN_AMEND'),initial=initial(),auto_id='plan_amend_%s'),
         discard_form=PlanReasonForm(bound('DISCARD'),initial=initial(),auto_id='plan_discard_%s'),
         refresh_form=PlanRefreshForm(bound('REFRESH_SOURCE'),initial=initial(),auto_id='plan_refresh_%s'))
@@ -143,6 +142,9 @@ def decision_page(request,*,step_id,visit_id=None,plan_id=None):
     if manual:
         d=encounter_details(request.user,visit_id);visit=d['visit']
         step=get_object_or_404(PlanStepVersion.objects.select_related('version__plan'),pk=step_id,version__plan__origin_encounter__visit__patient_id=visit.patient_id,version__plan__origin_encounter__visit__clinic_id=visit.clinic_id)
+        from clinical.authority import professional_scope
+        professional_scope(request.user.pk,visit.clinic_id,step.service_id,'READ')
+        professional_scope(request.user.pk,visit.clinic_id,step.service_id,'RECORD')
         back=reverse('clinical_plan_detail',kwargs=dict(pk=visit_id,plan_id=step.version.plan_id));binding=patient_form_binding(request.user,visit)
     else:
         d=self_plan_details(request.user,plan_id);visit=None
@@ -190,9 +192,9 @@ def actual(request,pk):
     initial=dict(patient_binding=patient_form_binding(request.user,visit),quantity='1',progress='COMPLETE',charge_mode='CHARGE')
     if request.GET.get('step'):
         from clinical.plan_forms import current_steps
-        step=get_object_or_404(current_steps(visit),pk=request.GET['step'])
+        step=get_object_or_404(current_steps(visit,request.user),pk=request.GET['step'])
         initial.update(step_version=step.pk,treatment_type=step.treatment_type_id,tooth=step.tooth,surfaces=list(step.surface),quantity=str(step.estimated_quantity))
-    form=ExecutionForm(request.POST or None,visit=visit,initial=initial);status=200
+    form=ExecutionForm(request.POST or None,visit=visit,actor=request.user,initial=initial);status=200
     if request.method=='POST':
         check_patient_form(request.user,visit,request.POST.get('patient_binding',''))
         if form.is_valid():

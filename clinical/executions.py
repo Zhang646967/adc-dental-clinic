@@ -100,9 +100,11 @@ def prepare_execution(*,actor,visit_id,fields):
     observed=datetime.fromisoformat(row['observed_at'])
     if observed<visit.attended_at:raise RuleError('执行发生时间不能早于本次实际到诊。')
     plan=step.version.plan if step else None
+    from clinical.lab_readiness import execution_readiness
+    readiness=execution_readiness(visit,row,step)
     data=dict(visit=visit.pk,visit_revision=visit.lock_version,source_record=d['current_record'].pk,plan=plan.pk if plan else None,
-        plan_revision=plan.revision if plan else None,values=row,quote=q)
-    return dict(proposal_token=proposal(actor,ACTUAL_CONTRACT,('DENTIST',),data),values=row,quote=q,step=step)
+        plan_revision=plan.revision if plan else None,values=row,quote=q,readiness=readiness)
+    return dict(proposal_token=proposal(actor,ACTUAL_CONTRACT,('DENTIST',),data),values=row,quote=q,step=step,readiness=readiness)
 
 
 @business_errors
@@ -118,6 +120,9 @@ def confirm_execution(*,actor,proposal_token,confirmed):
     actual_ready(visit)
     if visit.lock_version!=data['visit_revision'] or record.pk!=data['source_record'] or (plan and plan.revision!=data['plan_revision']):raise RuleError('本次接诊、检查或方案决定已变化，请重新核对实际执行。')
     row=execution_fields(data['values']);step=checked_step(visit,row,plan);q=quote(visit,row,step,lock=True)
+    from clinical.lab_readiness import execution_readiness
+    readiness=execution_readiness(visit,row,step)
+    if readiness!=data.get('readiness'):raise RuleError('加工件准备或验收依据已有变化，请重新核对实际执行。')
     if q!=data['quote']:raise RuleError('目录价格或估算差异已变化，请重新预览本次实际开单。')
     observed=datetime.fromisoformat(row['observed_at'])
     if observed<visit.attended_at:raise RuleError('执行发生时间不能早于实际到诊。')
@@ -126,7 +131,7 @@ def confirm_execution(*,actor,proposal_token,confirmed):
         from care.services import add_treatment
         line=add_treatment(actor=actor,visit_id=visit.pk,expected_version=visit.lock_version,treatment_id=row['treatment_type'],quantity=Decimal(row['quantity']),price_reason=row['reason'],_structured_source=True)
         assert line.line_amount==Decimal(q['line_amount'])
-    snapshot=dict(q,original_line=line.pk if line else None)
+    snapshot=dict(q,original_line=line.pk if line else None,readiness=readiness)
     actual=PerformedProcedure.objects.create(encounter=head,source_record=record,step_version=step,treatment_type_id=row['treatment_type'],quantity=row['quantity'],tooth=row['tooth'],surface=row['surface'],
         progress=row['progress'],charge_mode=row['charge_mode'],reason=row['reason'],charge_line=line,charge_snapshot=snapshot,recorded_by=actor,observed_at=observed,operation_id=op)
     if line is None:

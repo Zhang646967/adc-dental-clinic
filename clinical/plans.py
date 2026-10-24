@@ -9,7 +9,7 @@ from adc_core.commands import business_errors
 from adc_core.proposals import proposal,read_proposal
 from adc_core.rules import RuleError
 from clinical.encounters import operation,draft_digest
-from clinical.plan_locks import lock_plan_visit,lock_self_plan,require_plan_service
+from clinical.plan_locks import lock_plan_visit,lock_self_plan,require_plan_service,require_plan_scope
 from clinical.plan_models import TreatmentPlan,PlanDraft,PlanVersion,TreatmentStep,PlanStepVersion,PlanDecision,PerformedProcedure,PlanEvent
 from clinical.plan_payload import normalize_plan,step_fields
 from scheduling.resource_models import BookingService
@@ -47,7 +47,7 @@ def version_payload(version):
         rows.append(dict(step_key=str(row.step.step_key),treatment_type=row.treatment_type_id,service=row.service_id,
             description=row.description,goal=row.goal,tooth=row.tooth,surface=row.surface,
             estimated_quantity=str(row.estimated_quantity),estimated_unit_price=str(row.estimated_unit_price) if row.estimated_unit_price is not None else None,
-            estimate_note=row.estimate_note,alternative_group=row.alternative_group,charge_basis=row.charge_basis))
+            estimate_note=row.estimate_note,alternative_group=row.alternative_group,charge_basis=row.charge_basis,requires_lab=row.requires_lab))
     return dict(summary=version.summary,discussion_note=version.discussion_note,amendment_reason='',steps=rows)
 
 
@@ -72,6 +72,7 @@ def start_plan(*,actor,visit_id,operation_id):
 def change_plan(*,actor,visit_id,plan_id,expected_revision,operation_id,action,fields=None):
     if action not in ('NOTES','ADD_STEP','UPDATE_STEP','REMOVE_STEP','BEGIN_AMEND','DISCARD','REFRESH_SOURCE'):raise RuleError('未知治疗计划操作。')
     visit,patient,head,record,plan=lock_plan_visit(actor,visit_id,plan_id)
+    require_plan_scope(actor,visit,plan,'RECORD',lock=True)
     op=operation(operation_id);fields=fields or {};intent=draft_digest({'action':action,'fields':fields})
     previous=event_replay(actor,op,'PLAN_'+action,plan=plan)
     if previous:
@@ -127,16 +128,33 @@ def validate_steps(actor,visit,plan,rows,*,lock=False):
                 raise RuleError('已有实际执行的步骤不能改变项目、服务或位置；新目标请另建步骤，原执行仍保留。')
 
 
+def definition_bundle(rows,*,lock=False):
+    from registry.models import TreatmentType
+    types=TreatmentType.objects.filter(pk__in={r['treatment_type'] for r in rows}).order_by('pk')
+    services=BookingService.objects.filter(pk__in={r['service'] for r in rows}).select_related('department').order_by('pk')
+    if lock:types=types.select_for_update();services=services.select_for_update(of=('self',))
+    types={r.pk:r for r in types};services={r.pk:r for r in services};result={}
+    for row in rows:
+        t=types.get(row['treatment_type']);s=services.get(row['service'])
+        if t is None or s is None or not t.is_active or not s.is_active or not s.department.is_active:
+            raise RuleError('方案目录或科室已变化，请核对当前可用定义。')
+        result[row['step_key']]=dict(treatment=dict(id=t.pk,code=t.code,name=t.name,unit=t.unit_definition),
+            service=dict(id=s.pk,code=s.code,name=s.name,duration=s.duration_minutes,department_id=s.department_id,department_name=s.department.name))
+    return result
+
+
 def prepare_plan(*,actor,visit_id,plan_id):
     from clinical.encounter_selectors import encounter_details
     details=encounter_details(actor,visit_id);plan=TreatmentPlan.objects.select_related('origin_encounter__visit').get(pk=plan_id)
     source=plan.origin_encounter.visit;visit=details['visit']
     if source.patient_id!=visit.patient_id or source.clinic_id!=visit.clinic_id:raise PermissionDenied('当前患者或诊所不匹配。')
     if not details['can_record']:raise PermissionDenied('当前没有记录本次计划的专业范围。')
+    require_plan_scope(actor,visit,plan,'RECORD')
     draft=PlanDraft.objects.get(plan=plan);payload=normalize_plan(draft.payload,complete=True)
     validate_steps(actor,visit,plan,payload['steps'])
-    data=dict(visit=visit.pk,plan=plan.pk,revision=plan.revision,source_record=draft.source_record_id,base_version=draft.base_version_id,digest=draft_digest(payload))
-    return dict(proposal_token=proposal(actor,PLAN_CONTRACT,('DENTIST',),data),payload=payload)
+    definitions=definition_bundle(payload['steps'])
+    data=dict(visit=visit.pk,plan=plan.pk,revision=plan.revision,source_record=draft.source_record_id,base_version=draft.base_version_id,digest=draft_digest(payload),definition_digest=draft_digest(definitions))
+    return dict(proposal_token=proposal(actor,PLAN_CONTRACT,('DENTIST',),data),payload=payload,definitions=definitions)
 
 
 @business_errors
@@ -146,6 +164,7 @@ def confirm_plan(*,actor,proposal_token,confirmed):
     if confirmed is not True:raise RuleError('请核对本次方案版本及估算说明后明确确认。')
     p=read_proposal(actor,PLAN_CONTRACT,('DENTIST',),proposal_token);data=p['data']
     visit,patient,head,record,plan=lock_plan_visit(actor,data['visit'],data['plan'])
+    require_plan_scope(actor,visit,plan,'RECORD',lock=True)
     read_proposal(actor,PLAN_CONTRACT,('DENTIST',),proposal_token);op=operation(p['operation'])
     previous=event_replay(actor,op,'PLAN_CONFIRMED',plan=plan)
     if previous:return PlanVersion.objects.get(pk=previous.snapshot['version']),True
@@ -160,11 +179,13 @@ def confirm_plan(*,actor,proposal_token,confirmed):
     if draft.source_record_id!=record.pk or draft.source_record_id!=data['source_record']:raise RuleError('检查记录已有新版本，请先刷新方案依据再确认。')
     if latest and not 4<=len(payload['amendment_reason'])<=500:raise RuleError('新方案版本必须保留明确依据。')
     validate_steps(actor,visit,plan,payload['steps'],lock=True)
+    definitions=definition_bundle(payload['steps'],lock=True)
+    if draft_digest(definitions)!=data.get('definition_digest'):raise RuleError('服务名称、时长或目录定义已变化，请重新预览后再确认。')
     version=PlanVersion.objects.create(plan=plan,revision=latest.revision+1 if latest else 1,previous=latest,source_record=record,recorded_by=actor,summary=payload['summary'],discussion_note=payload['discussion_note'],amendment_reason=payload['amendment_reason'] if latest else '')
     for index,row in enumerate(payload['steps'],1):
         row=dict(row);key=row.pop('step_key');stable=TreatmentStep.objects.filter(step_key=key).first()
         if stable is None:stable=TreatmentStep.objects.create(plan=plan,step_key=key,created_by=actor)
-        PlanStepVersion.objects.create(version=version,step=stable,sequence=index,treatment_type_id=row.pop('treatment_type'),service_id=row.pop('service'),**row)
+        PlanStepVersion.objects.create(version=version,step=stable,sequence=index,treatment_type_id=row.pop('treatment_type'),service_id=row.pop('service'),definition_snapshot=definitions[key],**row)
     draft.delete();bump(plan)
     append_event(actor,op,'PLAN_CONFIRMED',plan=plan,encounter=head,snapshot={'version':version.pk,'revision':version.revision,'steps':len(payload['steps']),'digest':data['digest']})
     return version,False
@@ -194,6 +215,9 @@ def prepare_decision(*,actor,step_id,fields,visit_id=None):
         if not details['can_record']:raise PermissionDenied('当前没有记录此患者表态的范围。')
         step=PlanStepVersion.objects.select_related('version__plan__origin_encounter__visit').get(pk=step_id,version__plan__origin_encounter__visit__patient_id=v.patient_id,version__plan__origin_encounter__visit__clinic_id=v.clinic_id)
         plan=step.version.plan
+        from clinical.authority import professional_scope
+        professional_scope(actor.pk,v.clinic_id,step.service_id,'READ')
+        professional_scope(actor.pk,v.clinic_id,step.service_id,'RECORD')
         if not values['reference']:raise RuleError('请注明患者本人表态的依据或沟通记录编号。')
         source='MANUAL'
     if current_version(plan).pk!=step.version_id:raise RuleError('患者讨论的方案已有新版本，请核对当前步骤。')
@@ -215,6 +239,9 @@ def confirm_decision(*,actor,proposal_token,confirmed):
     previous=event_replay(actor,op,'PLAN_DECIDED',plan=plan)
     if previous:return previous.decision,True
     step=PlanStepVersion.objects.select_related('version','step').get(pk=data['step'],version__plan=plan)
+    if data['source']=='MANUAL':
+        from clinical.authority import professional_scope
+        professional_scope(actor.pk,visit.clinic_id,step.service_id,'RECORD',lock=True)
     if plan.revision!=data['revision'] or current_version(plan).pk!=data['version'] or step.version_id!=data['version']:
         raise RuleError('方案或已有决定已变化，请重新核对当前版本。')
     values=decision_fields(data['values'])

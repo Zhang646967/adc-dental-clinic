@@ -8,6 +8,11 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'clinical_recalls':('RECALL_LIST','COORDINATION'),'clinical_recall_claim':('NEXT_VISIT','COORDINATION'),
+    'clinical_recall_detail':('RECALL','COORDINATION'),'clinical_recall_action':('RECALL','COORDINATION'),
+    'clinical_labs':('LAB_LIST','COORDINATION'),'clinical_lab_detail':('LAB','COORDINATION'),'clinical_lab_action':('LAB','COORDINATION'),
+    'clinical_doctor_labs':('CARE','CARE'),'clinical_doctor_lab_action':('LAB','CARE','case_id'),
+    'clinical_doctor_lab_queue':('LAB_LIST','CARE'),
     'clinical_plans':('PLAN_LIST','CARE'),'clinical_plan_detail':('PLAN','CARE'),
     'clinical_plan_preview':('PLAN','CARE'),'clinical_plan_decision':('PLAN','CARE'),
     'clinical_actual':('ACTUAL','CARE'),'clinical_actual_void':('ACTUAL','CARE'),
@@ -68,7 +73,7 @@ class SensitiveReadMiddleware:
         if route and request.user.is_authenticated and not redirected_write:
             ctx = getattr(request.user, '_adc_workspace', None)
             SensitiveReadEvent.objects.create(actor=request.user, role=ctx.role if ctx else '',
-                object_kind=route[0], object_id=match.kwargs.get('pk'), purpose=route[1],
+                object_kind=route[0], object_id=match.kwargs.get(route[2] if len(route)>2 else 'pk'), purpose=route[1],
                 outcome='ALLOW' if getattr(response,'adc_sensitive_read_authorized',False) or 200 <= response.status_code < 300 else 'DENY',
                 trace_id=getattr(request, 'adc_request_id', ''))
         return response

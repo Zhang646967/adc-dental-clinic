@@ -73,6 +73,12 @@ def home(request):
     if ctx.role=='PATIENT':return redirect('portal_home')
     if ctx.role in CLINIC_ROLES and ctx.clinic_id is None:return select_clinic(request)
     data={'worklist':workspace_worklist(request.user)}
+    if ctx.role=='FRONT_DESK':
+        from clinical.continuity_selectors import coordination_counts
+        data['continuity']=coordination_counts(request.user)
+    if ctx.role=='DENTIST':
+        from clinical.continuity_selectors import doctor_lab_queue
+        data['lab_review_count']=doctor_lab_queue(request.user).filter(state='RECEIVED').count()
     return render(request,{'DENTIST':'workspaces/doctor.html','FRONT_DESK':'workspaces/frontdesk.html',
         'MANAGER':'workspaces/manager.html','HQ':'workspaces/hq.html','FINANCE':'workspaces/finance.html',
         'SYSADMIN':'workspaces/technical.html'}[ctx.role],data)

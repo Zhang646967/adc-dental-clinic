@@ -2,8 +2,20 @@ from django.urls import path
 from clinical import views
 from clinical import encounter_views as encounters
 from clinical import plan_views as plans
+from clinical import continuity_views as continuity
 
 urlpatterns=[
+    path('clinical/recalls/',continuity.recalls,name='clinical_recalls'),
+    path('clinical/recalls/instructions/<int:pk>/claim/',continuity.recall_claim,name='clinical_recall_claim'),
+    path('clinical/recalls/<int:pk>/',continuity.recall_detail,name='clinical_recall_detail'),
+    path('clinical/recalls/<int:pk>/<str:action>/',continuity.recall_action,name='clinical_recall_action'),
+    path('clinical/laboratory/',continuity.labs,name='clinical_labs'),
+    path('clinical/laboratory/review/',continuity.doctor_queue,name='clinical_doctor_lab_queue'),
+    path('clinical/laboratory/<int:pk>/',continuity.lab_detail,name='clinical_lab_detail'),
+    path('clinical/laboratory/<int:pk>/<str:action>/',continuity.lab_action,name='clinical_lab_action'),
+    path('clinical/encounters/<int:pk>/laboratory/',continuity.doctor_labs,name='clinical_doctor_labs'),
+    path('clinical/encounters/<int:pk>/laboratory/<int:case_id>/<str:action>/',continuity.doctor_lab_action,name='clinical_doctor_lab_action'),
+    path('clinical/coordination-summary/',continuity.summary,name='clinical_coordination_summary'),
     path('clinical/encounters/<int:pk>/plans/',plans.plan_list,name='clinical_plans'),
     path('clinical/encounters/<int:pk>/plans/<int:plan_id>/',plans.plan_detail,name='clinical_plan_detail'),
     path('clinical/encounters/<int:pk>/plans/<int:plan_id>/confirm/',plans.plan_preview,name='clinical_plan_preview'),

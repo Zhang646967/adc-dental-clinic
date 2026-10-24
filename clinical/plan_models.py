@@ -63,6 +63,8 @@ class PlanStepVersion(models.Model):
     estimate_note=models.CharField(max_length=500,blank=True)
     alternative_group=models.CharField(max_length=32,blank=True)
     charge_basis=models.CharField(max_length=20,choices=[('PER_EXECUTION','按实际已提供项目计费'),('ON_COMPLETION','分次步骤完成时计费')],default='PER_EXECUTION')
+    requires_lab=models.BooleanField(null=True,blank=True,default=None)
+    definition_snapshot=models.JSONField(null=True,blank=True,default=None)
     class Meta:
         db_table='adc_plan_step_version'
         ordering=['sequence']
@@ -130,6 +132,7 @@ class NextVisitInstruction(models.Model):
     latest_on=models.DateField()
     clinical_purpose=models.CharField(max_length=1000)
     booking_note=models.CharField(max_length=500,blank=True)
+    completion_rule=models.CharField(max_length=24,choices=[('UNSPECIFIED','原记录尚未明确完成目标'),('EXAM_CONFIRMED','后续实际接诊关闭且检查已确认'),('STEP_COMPLETED','指定版本步骤实际完成并关闭接诊')],default='UNSPECIFIED')
     state=models.CharField(max_length=16,choices=[('OPEN','待安排后续'),('WITHDRAWN','已明确撤回指示')],default='OPEN')
     revision=models.PositiveIntegerField(default=0)
     recorded_by=models.ForeignKey('accounts.UserAccount',on_delete=models.PROTECT)
@@ -137,6 +140,7 @@ class NextVisitInstruction(models.Model):
     class Meta:
         db_table='adc_next_visit_instruction'
         constraints=[models.CheckConstraint(condition=Q(earliest_on__lte=F('latest_on')),name='next_visit_window_valid'),
+            models.CheckConstraint(condition=Q(completion_rule__in=['UNSPECIFIED','EXAM_CONFIRMED'])|Q(completion_rule='STEP_COMPLETED',step_version__isnull=False),name='next_visit_completion_rule_valid'),
             models.CheckConstraint(condition=Q(state__in=['OPEN','WITHDRAWN']),name='next_visit_state_valid')]
 
 

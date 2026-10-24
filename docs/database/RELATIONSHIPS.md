@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-225条实际SQL外键，其中224条对应ORM单列关系，1条为账单同次就诊复合外键。
+282条实际SQL外键，其中281条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -52,6 +52,13 @@
 | adc_clinical_history_version | reported_by_id | adc_user | id |
 | adc_clinical_history_version | scope_clinic_id | adc_clinic | id |
 | adc_clinical_history_version | source_visit_id | adc_visit | id |
+| adc_clinical_recall | completion_performed_id | adc_performed_procedure | id |
+| adc_clinical_recall | completion_record_id | adc_clinical_record_version | id |
+| adc_clinical_recall | instruction_id | adc_next_visit_instruction | id |
+| adc_clinical_recall | opened_by_id | adc_user | id |
+| adc_clinical_recall | owner_id | adc_user | id |
+| adc_clinical_recall_event | episode_id | adc_clinical_recall | id |
+| adc_clinical_recall_event | actor_id | adc_user | id |
 | adc_clinical_record_event | encounter_id | adc_clinical_encounter | id |
 | adc_clinical_record_event | history_id | adc_clinical_history_version | id |
 | adc_clinical_record_event | record_id | adc_clinical_record_version | id |
@@ -110,6 +117,17 @@
 | adc_invoice | current_record_version_id | adc_visit_record_version | id |
 | adc_invoice | visit_id | adc_visit | id |
 | adc_invoice | current_record_version_id, visit_id | adc_visit_record_version | id, visit_id |
+| adc_lab_case | coordinator_id | adc_user | id |
+| adc_lab_case | requester_id | adc_user | id |
+| adc_lab_case | source_record_id | adc_clinical_record_version | id |
+| adc_lab_case | step_version_id | adc_plan_step_version | id |
+| adc_lab_event | actor_id | adc_user | id |
+| adc_lab_event | case_id | adc_lab_case | id |
+| adc_lab_event | review_id | adc_lab_review | id |
+| adc_lab_review | case_id | adc_lab_case | id |
+| adc_lab_review | reviewer_id | adc_user | id |
+| adc_lab_review | source_record_id | adc_clinical_record_version | id |
+| adc_lab_review | target_step_version_id | adc_plan_step_version | id |
 | adc_maintenance_action | order_id | adc_maintenance_order | id |
 | adc_maintenance_action | actor_id | adc_user | id |
 | adc_maintenance_order | asset_id | adc_equipment_asset | id |
@@ -119,6 +137,10 @@
 | adc_maintenance_order | created_by_id | adc_user | id |
 | adc_maintenance_order | reviewed_by_id | adc_user | id |
 | adc_maintenance_order | submitted_by_id | adc_user | id |
+| adc_next_visit_instruction | recorded_by_id | adc_user | id |
+| adc_next_visit_instruction | service_id | adc_booking_service | id |
+| adc_next_visit_instruction | source_record_id | adc_clinical_record_version | id |
+| adc_next_visit_instruction | step_version_id | adc_plan_step_version | id |
 | adc_notification_outbox | source_event_id | adc_audit_event | id |
 | adc_notification_outbox | task_id | adc_coordination_task | id |
 | adc_notification_outbox | clinic_id | adc_clinic | id |
@@ -137,6 +159,37 @@
 | adc_patient_relationship_event | actor_id | adc_user | id |
 | adc_payment_account | clinic_id | adc_clinic | id |
 | adc_payment_account | created_by_id | adc_user | id |
+| adc_performed_procedure | charge_line_id | adc_treatment_record | id |
+| adc_performed_procedure | encounter_id | adc_clinical_encounter | id |
+| adc_performed_procedure | source_record_id | adc_clinical_record_version | id |
+| adc_performed_procedure | step_version_id | adc_plan_step_version | id |
+| adc_performed_procedure | treatment_type_id | adc_treatment_type | id |
+| adc_performed_procedure | recorded_by_id | adc_user | id |
+| adc_plan_appointment | instruction_id | adc_next_visit_instruction | id |
+| adc_plan_appointment | linked_by_id | adc_user | id |
+| adc_plan_appointment | visit_id | adc_visit | id |
+| adc_plan_decision | actor_id | adc_user | id |
+| adc_plan_decision | self_access_id | adc_patient_access | id |
+| adc_plan_decision | source_visit_id | adc_visit | id |
+| adc_plan_decision | step_version_id | adc_plan_step_version | id |
+| adc_plan_draft | base_version_id | adc_plan_version | id |
+| adc_plan_draft | plan_id | adc_treatment_plan | id |
+| adc_plan_draft | saved_by_id | adc_user | id |
+| adc_plan_draft | source_record_id | adc_clinical_record_version | id |
+| adc_plan_event | actor_id | adc_user | id |
+| adc_plan_event | decision_id | adc_plan_decision | id |
+| adc_plan_event | encounter_id | adc_clinical_encounter | id |
+| adc_plan_event | instruction_id | adc_next_visit_instruction | id |
+| adc_plan_event | performed_id | adc_performed_procedure | id |
+| adc_plan_event | plan_id | adc_treatment_plan | id |
+| adc_plan_step_version | service_id | adc_booking_service | id |
+| adc_plan_step_version | treatment_type_id | adc_treatment_type | id |
+| adc_plan_step_version | version_id | adc_plan_version | id |
+| adc_plan_step_version | step_id | adc_treatment_step | id |
+| adc_plan_version | plan_id | adc_treatment_plan | id |
+| adc_plan_version | previous_id | adc_plan_version | id |
+| adc_plan_version | recorded_by_id | adc_user | id |
+| adc_plan_version | source_record_id | adc_clinical_record_version | id |
 | adc_portal_booking_receipt | access_id | adc_patient_access | id |
 | adc_portal_booking_receipt | appointment_grant_id | adc_patient_appointment_grant | id |
 | adc_portal_booking_receipt | visit_id | adc_visit | id |
@@ -193,10 +246,14 @@
 | adc_statement_line | account_id | adc_payment_account | id |
 | adc_statement_line | batch_id | adc_statement_batch | id |
 | adc_tooth_finding | record_id | adc_clinical_record_version | id |
+| adc_treatment_plan | opened_by_id | adc_user | id |
+| adc_treatment_plan | origin_encounter_id | adc_clinical_encounter | id |
 | adc_treatment_record | confirmed_by_id | adc_user | id |
 | adc_treatment_record | record_version_id | adc_visit_record_version | id |
 | adc_treatment_record | treatment_type_id | adc_treatment_type | id |
 | adc_treatment_room | department_id | adc_department | id |
+| adc_treatment_step | created_by_id | adc_user | id |
+| adc_treatment_step | plan_id | adc_treatment_plan | id |
 | adc_user | dentist_id | adc_dentist | id |
 | adc_user_groups | group_id | auth_group | id |
 | adc_user_groups | useraccount_id | adc_user | id |

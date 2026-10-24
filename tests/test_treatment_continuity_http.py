@@ -30,7 +30,7 @@ class TreatmentContinuityHTTPTests(PlanFixture,TransactionTestCase):
         data=self.values(r.context['notes_form']);data.update(action='NOTES',summary='PRIVATE_HTTP_PLAN',discussion_note='已与本人讨论，先保留版本',amendment_reason='')
         self.assertEqual(c.post(url,data).status_code,302)
         r=c.get(url);data=self.values(r.context['step_form']);data.update(action='ADD_STEP',treatment_type=self.item.pk,service=self.service.pk,
-            description='PRIVATE_HTTP_STEP',goal='PRIVATE_HTTP_GOAL',tooth=16,surfaces=['M','O'],estimated_quantity='1',estimated_unit_price='',estimate_note='费用仍待评估',alternative_group='',charge_basis='PER_EXECUTION')
+            description='PRIVATE_HTTP_STEP',goal='PRIVATE_HTTP_GOAL',tooth=16,surfaces=['M','O'],estimated_quantity='1',estimated_unit_price='',estimate_note='费用仍待评估',alternative_group='',charge_basis='PER_EXECUTION',requires_lab='NO')
         r=c.post(url,data);self.assertEqual(r.status_code,302,r.content)
         target=reverse('clinical_plan_preview',args=[self.v.pk,plan.pk]);r=c.get(target);self.assertEqual(r.status_code,200,r.content)
         self.assertContains(r,'PRIVATE_HTTP_STEP');self.assertContains(r,'费用待评估');self.assertFalse(PlanVersion.objects.exists())

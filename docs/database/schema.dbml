@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 85 ORM tables; django_migrations is a framework migration journal.
+// All 100 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_ai_usage_bucket {
@@ -233,6 +233,31 @@ Table adc_clinical_history_version {
   medications "character varying(2000)" [not null]
   allergy_status "character varying(16)" [not null]
   reported_allergies "character varying(2000)" [not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_recall {
+  id "bigint" [pk, not null]
+  instruction_id "bigint" [unique, not null]
+  owner_id "bigint" [not null]
+  followup_due_at "timestamp with time zone" [not null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  opened_by_id "bigint" [not null]
+  opened_at "timestamp with time zone" [not null]
+  completed_at "timestamp with time zone" [null]
+  completion_record_id "bigint" [null]
+  completion_performed_id "bigint" [null]
+}
+
+Table adc_clinical_recall_event {
+  id "bigint" [pk, not null]
+  episode_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  action "character varying(32)" [not null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  operation_id "uuid" [unique, not null]
   recorded_at "timestamp with time zone" [not null]
 }
 
@@ -509,6 +534,52 @@ Table adc_invoice {
   first_issued_at "timestamp with time zone" [not null]
 }
 
+Table adc_lab_case {
+  id "bigint" [pk, not null]
+  case_no "character varying(40)" [unique, not null]
+  source_record_id "bigint" [not null]
+  step_version_id "bigint" [not null]
+  requester_id "bigint" [not null]
+  requested_at "timestamp with time zone" [not null]
+  work_kind "character varying(16)" [not null]
+  specification "character varying(3000)" [not null]
+  vendor_name "character varying(120)" [not null]
+  logistics_note "character varying(500)" [not null]
+  needed_on "date" [not null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  cycle "integer" [not null]
+  coordinator_id "bigint" [null]
+  followup_due_at "timestamp with time zone" [null]
+}
+
+Table adc_lab_event {
+  id "bigint" [pk, not null]
+  case_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  action "character varying(32)" [not null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  review_id "bigint" [null]
+  operation_id "uuid" [unique, not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_lab_review {
+  id "bigint" [pk, not null]
+  case_id "bigint" [not null]
+  target_step_version_id "bigint" [not null]
+  source_record_id "bigint" [not null]
+  reviewer_id "bigint" [not null]
+  cycle "integer" [not null]
+  decision "character varying(16)" [not null]
+  findings "character varying(3000)" [not null]
+  coordination_note "character varying(500)" [not null]
+  operation_id "uuid" [unique, not null]
+  assessed_at "timestamp with time zone" [not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
 Table adc_maintenance_action {
   id "bigint" [pk, not null]
   order_id "bigint" [not null]
@@ -546,6 +617,22 @@ Table adc_maintenance_order {
   reviewed_at "timestamp with time zone" [null]
   review_reason "character varying(500)" [not null]
   service_event_id "bigint" [unique, null]
+}
+
+Table adc_next_visit_instruction {
+  id "bigint" [pk, not null]
+  source_record_id "bigint" [not null]
+  step_version_id "bigint" [null]
+  service_id "bigint" [not null]
+  earliest_on "date" [not null]
+  latest_on "date" [not null]
+  clinical_purpose "character varying(1000)" [not null]
+  booking_note "character varying(500)" [not null]
+  completion_rule "character varying(24)" [not null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  recorded_by_id "bigint" [not null]
+  recorded_at "timestamp with time zone" [not null]
 }
 
 Table adc_notification_outbox {
@@ -655,6 +742,119 @@ Table adc_payment_account {
   created_at "timestamp with time zone" [not null]
   indexes {
     (clinic_id, code) [unique, name: 'payment_account_code_unique']
+  }
+}
+
+Table adc_performed_procedure {
+  id "bigint" [pk, not null]
+  encounter_id "bigint" [not null]
+  source_record_id "bigint" [not null]
+  step_version_id "bigint" [null]
+  treatment_type_id "bigint" [not null]
+  quantity "numeric(12,3)" [not null]
+  tooth "smallint" [null]
+  surface "character varying(6)" [not null]
+  progress "character varying(16)" [not null]
+  charge_mode "character varying(16)" [not null]
+  reason "character varying(1000)" [not null]
+  charge_line_id "bigint" [unique, null]
+  charge_snapshot "jsonb" [not null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  recorded_by_id "bigint" [not null]
+  observed_at "timestamp with time zone" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  operation_id "uuid" [unique, not null]
+}
+
+Table adc_plan_appointment {
+  id "bigint" [pk, not null]
+  instruction_id "bigint" [not null]
+  visit_id "bigint" [not null]
+  linked_by_id "bigint" [not null]
+  linked_at "timestamp with time zone" [not null]
+  operation_id "uuid" [unique, not null]
+  indexes {
+    (instruction_id, visit_id) [unique, name: 'next_visit_link_unique']
+  }
+}
+
+Table adc_plan_decision {
+  id "bigint" [pk, not null]
+  step_version_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  decision "character varying(16)" [not null]
+  source "character varying(16)" [not null]
+  self_access_id "bigint" [null]
+  source_visit_id "bigint" [null]
+  reference "character varying(500)" [not null]
+  note "character varying(1000)" [not null]
+  operation_id "uuid" [unique, not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_plan_draft {
+  id "bigint" [pk, not null]
+  plan_id "bigint" [unique, not null]
+  source_record_id "bigint" [not null]
+  base_version_id "bigint" [null]
+  saved_by_id "bigint" [not null]
+  payload "jsonb" [not null]
+  saved_at "timestamp with time zone" [not null]
+}
+
+Table adc_plan_event {
+  id "bigint" [pk, not null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(32)" [not null]
+  plan_id "bigint" [null]
+  encounter_id "bigint" [null]
+  decision_id "bigint" [null]
+  performed_id "bigint" [null]
+  instruction_id "bigint" [null]
+  note "character varying(1000)" [not null]
+  snapshot "jsonb" [not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_plan_step_version {
+  id "bigint" [pk, not null]
+  version_id "bigint" [not null]
+  step_id "bigint" [not null]
+  sequence "smallint" [not null]
+  treatment_type_id "bigint" [not null]
+  service_id "bigint" [not null]
+  description "character varying(1000)" [not null]
+  goal "character varying(1000)" [not null]
+  tooth "smallint" [null]
+  surface "character varying(6)" [not null]
+  estimated_quantity "numeric(12,3)" [not null]
+  estimated_unit_price "numeric(12,2)" [null]
+  estimate_note "character varying(500)" [not null]
+  alternative_group "character varying(32)" [not null]
+  charge_basis "character varying(20)" [not null]
+  requires_lab "boolean" [null]
+  definition_snapshot "jsonb" [null]
+  indexes {
+    (version_id, sequence) [unique, name: 'plan_step_sequence_unique']
+    (version_id, step_id) [unique, name: 'plan_step_version_unique']
+  }
+}
+
+Table adc_plan_version {
+  id "bigint" [pk, not null]
+  plan_id "bigint" [not null]
+  revision "integer" [not null]
+  previous_id "bigint" [unique, null]
+  source_record_id "bigint" [not null]
+  recorded_by_id "bigint" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  summary "character varying(3000)" [not null]
+  discussion_note "character varying(2000)" [not null]
+  amendment_reason "character varying(500)" [not null]
+  indexes {
+    (plan_id, revision) [unique, name: 'plan_version_revision_unique']
   }
 }
 
@@ -948,6 +1148,14 @@ Table adc_tooth_finding {
   }
 }
 
+Table adc_treatment_plan {
+  id "bigint" [pk, not null]
+  origin_encounter_id "bigint" [not null]
+  opened_by_id "bigint" [not null]
+  opened_at "timestamp with time zone" [not null]
+  revision "integer" [not null]
+}
+
 Table adc_treatment_record {
   id "bigint" [pk, not null]
   record_version_id "bigint" [not null]
@@ -975,6 +1183,14 @@ Table adc_treatment_room {
   indexes {
     (department_id, code) [unique, name: 'room_department_code']
   }
+}
+
+Table adc_treatment_step {
+  id "bigint" [pk, not null]
+  plan_id "bigint" [not null]
+  step_key "uuid" [unique, not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
 }
 
 Table adc_treatment_type {
@@ -1196,6 +1412,13 @@ Ref: adc_clinical_history_version.previous_id - adc_clinical_history_version.id
 Ref: adc_clinical_history_version.reported_by_id > adc_user.id
 Ref: adc_clinical_history_version.scope_clinic_id > adc_clinic.id
 Ref: adc_clinical_history_version.source_visit_id > adc_visit.id
+Ref: adc_clinical_recall.completion_performed_id > adc_performed_procedure.id
+Ref: adc_clinical_recall.completion_record_id > adc_clinical_record_version.id
+Ref: adc_clinical_recall.instruction_id - adc_next_visit_instruction.id
+Ref: adc_clinical_recall.opened_by_id > adc_user.id
+Ref: adc_clinical_recall.owner_id > adc_user.id
+Ref: adc_clinical_recall_event.episode_id > adc_clinical_recall.id
+Ref: adc_clinical_recall_event.actor_id > adc_user.id
 Ref: adc_clinical_record_event.encounter_id > adc_clinical_encounter.id
 Ref: adc_clinical_record_event.history_id > adc_clinical_history_version.id
 Ref: adc_clinical_record_event.record_id > adc_clinical_record_version.id
@@ -1254,6 +1477,17 @@ Ref: adc_inbox_message.recipient_id > adc_user.id
 Ref: adc_invoice.current_record_version_id - adc_visit_record_version.id
 Ref: adc_invoice.visit_id - adc_visit.id
 Ref: adc_invoice.(current_record_version_id, visit_id) - adc_visit_record_version.(id, visit_id)
+Ref: adc_lab_case.coordinator_id > adc_user.id
+Ref: adc_lab_case.requester_id > adc_user.id
+Ref: adc_lab_case.source_record_id > adc_clinical_record_version.id
+Ref: adc_lab_case.step_version_id > adc_plan_step_version.id
+Ref: adc_lab_event.actor_id > adc_user.id
+Ref: adc_lab_event.case_id > adc_lab_case.id
+Ref: adc_lab_event.review_id > adc_lab_review.id
+Ref: adc_lab_review.case_id > adc_lab_case.id
+Ref: adc_lab_review.reviewer_id > adc_user.id
+Ref: adc_lab_review.source_record_id > adc_clinical_record_version.id
+Ref: adc_lab_review.target_step_version_id > adc_plan_step_version.id
 Ref: adc_maintenance_action.order_id > adc_maintenance_order.id
 Ref: adc_maintenance_action.actor_id > adc_user.id
 Ref: adc_maintenance_order.asset_id > adc_equipment_asset.id
@@ -1263,6 +1497,10 @@ Ref: adc_maintenance_order.assigned_to_id > adc_user.id
 Ref: adc_maintenance_order.created_by_id > adc_user.id
 Ref: adc_maintenance_order.reviewed_by_id > adc_user.id
 Ref: adc_maintenance_order.submitted_by_id > adc_user.id
+Ref: adc_next_visit_instruction.recorded_by_id > adc_user.id
+Ref: adc_next_visit_instruction.service_id > adc_booking_service.id
+Ref: adc_next_visit_instruction.source_record_id > adc_clinical_record_version.id
+Ref: adc_next_visit_instruction.step_version_id > adc_plan_step_version.id
 Ref: adc_notification_outbox.source_event_id - adc_audit_event.id
 Ref: adc_notification_outbox.task_id > adc_coordination_task.id
 Ref: adc_notification_outbox.clinic_id > adc_clinic.id
@@ -1281,6 +1519,37 @@ Ref: adc_patient_relationship_event.relationship_id > adc_patient_relationship.i
 Ref: adc_patient_relationship_event.actor_id > adc_user.id
 Ref: adc_payment_account.clinic_id > adc_clinic.id
 Ref: adc_payment_account.created_by_id > adc_user.id
+Ref: adc_performed_procedure.charge_line_id - adc_treatment_record.id
+Ref: adc_performed_procedure.encounter_id > adc_clinical_encounter.id
+Ref: adc_performed_procedure.source_record_id > adc_clinical_record_version.id
+Ref: adc_performed_procedure.step_version_id > adc_plan_step_version.id
+Ref: adc_performed_procedure.treatment_type_id > adc_treatment_type.id
+Ref: adc_performed_procedure.recorded_by_id > adc_user.id
+Ref: adc_plan_appointment.instruction_id > adc_next_visit_instruction.id
+Ref: adc_plan_appointment.linked_by_id > adc_user.id
+Ref: adc_plan_appointment.visit_id > adc_visit.id
+Ref: adc_plan_decision.actor_id > adc_user.id
+Ref: adc_plan_decision.self_access_id > adc_patient_access.id
+Ref: adc_plan_decision.source_visit_id > adc_visit.id
+Ref: adc_plan_decision.step_version_id > adc_plan_step_version.id
+Ref: adc_plan_draft.base_version_id > adc_plan_version.id
+Ref: adc_plan_draft.plan_id - adc_treatment_plan.id
+Ref: adc_plan_draft.saved_by_id > adc_user.id
+Ref: adc_plan_draft.source_record_id > adc_clinical_record_version.id
+Ref: adc_plan_event.actor_id > adc_user.id
+Ref: adc_plan_event.decision_id > adc_plan_decision.id
+Ref: adc_plan_event.encounter_id > adc_clinical_encounter.id
+Ref: adc_plan_event.instruction_id > adc_next_visit_instruction.id
+Ref: adc_plan_event.performed_id > adc_performed_procedure.id
+Ref: adc_plan_event.plan_id > adc_treatment_plan.id
+Ref: adc_plan_step_version.service_id > adc_booking_service.id
+Ref: adc_plan_step_version.treatment_type_id > adc_treatment_type.id
+Ref: adc_plan_step_version.version_id > adc_plan_version.id
+Ref: adc_plan_step_version.step_id > adc_treatment_step.id
+Ref: adc_plan_version.plan_id > adc_treatment_plan.id
+Ref: adc_plan_version.previous_id - adc_plan_version.id
+Ref: adc_plan_version.recorded_by_id > adc_user.id
+Ref: adc_plan_version.source_record_id > adc_clinical_record_version.id
 Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
 Ref: adc_portal_booking_receipt.appointment_grant_id > adc_patient_appointment_grant.id
 Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
@@ -1337,10 +1606,14 @@ Ref: adc_statement_batch.created_by_id > adc_user.id
 Ref: adc_statement_line.account_id > adc_payment_account.id
 Ref: adc_statement_line.batch_id > adc_statement_batch.id
 Ref: adc_tooth_finding.record_id > adc_clinical_record_version.id
+Ref: adc_treatment_plan.opened_by_id > adc_user.id
+Ref: adc_treatment_plan.origin_encounter_id > adc_clinical_encounter.id
 Ref: adc_treatment_record.confirmed_by_id > adc_user.id
 Ref: adc_treatment_record.record_version_id > adc_visit_record_version.id
 Ref: adc_treatment_record.treatment_type_id > adc_treatment_type.id
 Ref: adc_treatment_room.department_id > adc_department.id
+Ref: adc_treatment_step.created_by_id > adc_user.id
+Ref: adc_treatment_step.plan_id > adc_treatment_plan.id
 Ref: adc_user.dentist_id - adc_dentist.id
 Ref: adc_user_groups.group_id > auth_group.id
 Ref: adc_user_groups.useraccount_id > adc_user.id
