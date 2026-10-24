@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "followup_commit": "8e67f756bab128968fa52e013a4cfc7b60e71e1e",
+  "followup_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40087853852",
+  "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "business_feature_files_unchanged": 623,
+  "application_images_and_containers_unchanged": true,
+  "database_and_configuration_unchanged": true,
+  "host_script_sha256": "18edf031dae523c4d7e32ffd752ebb5c89b942201991f71533a32245fd42373e",
+  "prior_unknown_incident_and_events_retained": true,
+  "prior_history_encrypted_and_decryption_verified": true,
+  "prior_failure_root_cause": "reproduced exec-projection failure class; old historical intervals not reconstructed",
+  "new_independent_samples": [
+    {
+      "mono": 729931.401683208,
+      "utc": 1792840551.1001658
+    },
+    {
+      "mono": 729961.544324166,
+      "utc": 1792840581.242765
+    }
+  ],
+  "current_host_state": "HEALTHY",
+  "report_bytes_match": true,
+  "unknown_disposition": [
+    "inspect_dependencies",
+    "repair_collector",
+    "accept_observation_gap",
+    "verify_health"
+  ],
+  "scope": "Exact-CI lifecycle filter and documentation; two fresh samples and explicit retained incident closure, not24-hour operation"
+}

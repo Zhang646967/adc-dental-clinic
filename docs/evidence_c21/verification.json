@@ -1,5 +1,5 @@
 {
-  "status": "CLINICAL_LOCAL_PASSED_HOST_FILTER_FOLLOWUP_PENDING",
+  "status": "PASS_LOCAL_SYNTHETIC_DELIVERY",
   "synthetic": true,
   "source_checks": 1101,
   "postgresql_before_final_four_http_cases": {
@@ -44,7 +44,6 @@
     "figures": 41
   },
   "remaining": [
-    "host_filter_exact_ci_and_install",
     "C2.2",
     "C2.3",
     "new_multivisit_capacity"
@@ -69,5 +68,7 @@
   "populated_encrypted_restore": "PASS",
   "original_copy_upgrade": "PASS",
   "protected_mac_installation": "PASS",
-  "host_observation": "UNKNOWN_HISTORY_RETAINED_FILTER_FIX_PENDING_INSTALL"
+  "host_observation": "HEALTHY_AFTER_TESTED_REPAIR_AND_EXPLICIT_RETAINED_DISPOSITION",
+  "host_followup_commit": "8e67f756bab128968fa52e013a4cfc7b60e71e1e",
+  "host_followup_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40087853852"
 }

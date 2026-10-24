@@ -1,5 +1,5 @@
 {
-  "status": "CLINICAL_LOCAL_PASSED_HOST_FILTER_FOLLOWUP_PENDING",
+  "status": "PASS_LOCAL_SYNTHETIC_DELIVERY",
   "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
   "application_image": "sha256:89aa06b9c46e899ad5bcd857fcc0e758b9990bd0d03e2122fcc980ccfd21b7dd",
   "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40085301196",
@@ -72,14 +72,39 @@
     }
   },
   "host_followup": {
-    "status": "SOURCE_AND_REAL_DOCKER_PASSED_CI_AND_INSTALL_PENDING",
-    "root_failure_class": "unsafe action projection included multiline/delimited exec command text",
-    "source_checks": 1104,
-    "focused_host_cases": 35,
-    "old_unknown_history": "RETAINED_NOT_REWRITTEN",
-    "app_and_containers": "HEALTHY",
-    "source": "host_filter_live.json",
-    "retained_history_ring_saturation": true
+    "passed": true,
+    "followup_commit": "8e67f756bab128968fa52e013a4cfc7b60e71e1e",
+    "followup_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40087853852",
+    "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+    "business_feature_files_unchanged": 623,
+    "application_images_and_containers_unchanged": true,
+    "database_and_configuration_unchanged": true,
+    "host_script_sha256": "18edf031dae523c4d7e32ffd752ebb5c89b942201991f71533a32245fd42373e",
+    "prior_unknown_incident_and_events_retained": true,
+    "prior_history_encrypted_and_decryption_verified": true,
+    "prior_failure_root_cause": "reproduced exec-projection failure class; old historical intervals not reconstructed",
+    "new_independent_samples": [
+      {
+        "mono": 729931.401683208,
+        "utc": 1792840551.1001658
+      },
+      {
+        "mono": 729961.544324166,
+        "utc": 1792840581.242765
+      }
+    ],
+    "current_host_state": "HEALTHY",
+    "report_bytes_match": true,
+    "unknown_disposition": [
+      "inspect_dependencies",
+      "repair_collector",
+      "accept_observation_gap",
+      "verify_health"
+    ],
+    "scope": "Exact-CI lifecycle filter and documentation; two fresh samples and explicit retained incident closure, not24-hour operation",
+    "focused_cases": 35,
+    "ci_source_checks": 1104,
+    "ci_postgresql_cases": 1592
   },
   "remaining_work": [
     "C2.2 treatment plans, actual execution and unique charge bridge",
@@ -93,5 +118,63 @@
     "twenty_clinic_capacity": "NOT_ESTABLISHED",
     "continuous_24h": "NOT_ESTABLISHED",
     "historical_windows_data": "UNRESOLVED"
-  }
+  },
+  "brief_observation": {
+    "passed": true,
+    "samples": [
+      {
+        "unix": 1792840815.6657002,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840826.3565152,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840837.013997,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840847.685144,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840858.3225942,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840869.074881,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840879.8244228,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840890.479506,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840901.194153,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      },
+      {
+        "unix": 1792840911.937014,
+        "conditions": "HEALTHY",
+        "host": "HEALTHY"
+      }
+    ],
+    "elapsed_seconds": 96.27,
+    "scope": "Brief post-update and test-cleanup observation; not a 24-hour acceptance"
+  },
+  "final_original_preservation": "mac_final_preservation.json"
 }

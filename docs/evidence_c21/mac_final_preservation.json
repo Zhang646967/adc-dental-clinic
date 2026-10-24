@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "original_model_groups_preserved": 77,
+  "original_row_fingerprints_preserved": true,
+  "private_configuration_files_preserved": 70,
+  "new_clinical_tables": 6,
+  "new_clinical_rows_injected": 0,
+  "rc_tag_preserved": true,
+  "scope": "Post-browser and host-only update comparison; volatile login sessions/context and last_login excluded as declared"
+}

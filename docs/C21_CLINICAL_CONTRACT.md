@@ -1,6 +1,6 @@
 # C2.1 clinical encounter contract and ADR
 
-Status: C2.1 source implementation and isolated synthetic acceptance executed; exact CI, populated encrypted recovery and protected installation remain separate until their release evidence is recorded. C1.2 protected delivery is the unchanged installed baseline during rehearsal.
+Status: C2.1 locally delivered as synthetic software. Exact application CI, same-image business acceptance, populated encrypted recovery, original-copy upgrade and protected installation passed. The host-only safe-projection repair passed separate exact CI/install; retained UNKNOWN history is not erased. Detailed source/image and professional/platform limits are in the release record.
 This is synthetic software verification, not a professionally approved clinical template.
 
 Patient-reported history → attributed professional review → actual encounter →

@@ -9,7 +9,7 @@ C2.2 and C2.3; the plan has no separately defined C1.3 increment.
 |---|---|---|
 | C1.1 | Verified patient relations, appointment grants, website/native subject selection | Locally delivered; [executed evidence](evidence_c11/release.json). External platform/production gates remain separate. |
 | C1.2 | Professional evidence/validity, clinic/service scope, controlled identity/referral requests, sensitive-read audit, departure/session handling | LOCAL DELIVERED. Exact application CI, full regression, five-clinic browser/native acceptance, 80-table encrypted restore, original-copy upgrade and protected installation passed; see [evidence](evidence_c12/release.json). Professional/platform/cloud and new clinical capacity remain separate. |
-| C2.1 | Reported/reviewed history, encounter, dentition/tooth/surface findings, safe draft saving and worklist | CLINICAL LOCAL ACCEPTANCE PASSED. Exact CI, same-image328 browser checks, populated86-table recovery, original-copy upgrade and protected installation passed. A host parser repair awaits separate exact CI/install in [evidence](evidence_c21/release.json); professional qualification remains separate. |
+| C2.1 | Reported/reviewed history, encounter, dentition/tooth/surface findings, safe draft saving and worklist | LOCAL DELIVERED. Exact application CI, same-image328 browser checks, populated86-table recovery, original-copy upgrade, protected installation and host-only repair CI/install passed; [evidence](evidence_c21/release.json). Qualified templates/clinical use remain separate. |
 | C2.2 | Plan revisions/alternatives/decisions, partial actual execution, next-visit linkage and unique charge source | NOT IMPLEMENTED. Estimates, clinical facts, existing bill versions and cash remain separate. |
 | C2.3 | Clinical recall windows, attributed front-desk work, lab dispatch/receipt/clinical acceptance/rework and readiness | NOT IMPLEMENTED. Retain original appointments; close recall only on defined actual care. |
 
@@ -26,7 +26,7 @@ from synthetic local tests. Their owners, supplied inputs and actual acceptance
 must be recorded. Historical UNKNOWN monitoring gaps and unrecovered Windows
 data remain historical facts. These boundaries do not prevent local development.
 
-The report and observed86-table PostgreSQL snapshot now cover implemented C2.1. The original installation now uses the accepted C2.1 image. A host-only collection repair is being verified; original UNKNOWN history is retained. C2.2–C2.3 remain required; their planned tables are not substituted for observed SQL.
+The report and observed86-table PostgreSQL snapshot now cover implemented C2.1. The original installation now uses the accepted C2.1 image. The host-only safe projection repair is also installed; original UNKNOWN history and its explicit disposition are retained. C2.2–C2.3 remain required; their planned tables are not substituted for observed SQL.
 
 Mind map: verified identity → professional scope/shared care → encounter/findings
 → plan/actual execution/charge → recall/lab readiness → measured delivery.

@@ -4,7 +4,7 @@ Clinic contract → verified person and authority → structured encounter → s
 
 **下一阶段目标：让同一患者跨多次就诊得到连续、可追溯的服务，让前台知道下一步应由谁、在何时、完成什么。**
 
-Date: 2026-10-23. Research/source baseline: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. This planning increment follows the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md). C1.1 is now implemented with synthetic local evidence in [the C1.1 release record](C11_PATIENT_RELATIONSHIPS.md). C1.2 is also locally delivered in [its executed record](evidence_c12/release.json). C2.1 is implemented with isolated acceptance and pending protected release; C2.2–C2.3 remain **PLANNED**; professional and commercial acceptance are separate. It refines C1–C2 in the [master program](COMMERCIAL_V2_MASTER_PLAN.md); it does not replace the C3–C8 clinical and production release gates.
+Date: 2026-10-23. Research/source baseline: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. This planning increment follows the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md). C1.1 is now implemented with synthetic local evidence in [the C1.1 release record](C11_PATIENT_RELATIONSHIPS.md). C1.2 is also locally delivered in [its executed record](evidence_c12/release.json). C2.1 is locally delivered with exact CI, recovery and protected installation; C2.2–C2.3 remain **PLANNED**; professional and commercial acceptance are separate. It refines C1–C2 in the [master program](COMMERCIAL_V2_MASTER_PLAN.md); it does not replace the C3–C8 clinical and production release gates.
 
 ## 1. Outcome, scope and priorities（目标、范围与优先级）
 
