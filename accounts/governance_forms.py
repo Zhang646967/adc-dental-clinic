@@ -43,13 +43,19 @@ class AccountActionForm(AuthorityForm):
             self.fields['reviewer_enabled']=forms.BooleanField(label='授予患者关系核验职责（取消勾选则撤回）',required=False)
         elif action=='bind_patient':
             self.fields['patient_no']=forms.CharField(label='已核对的演示患者业务编号',max_length=40,help_text='由获授权技术人员核对后绑定；这不构成真实患者身份认证。')
+        elif action=='clinical_reviewer':
+            self.fields['clinic']=forms.ModelChoiceField(label='机构委任诊所',queryset=Clinic.objects.filter(is_active=True))
+            self.fields['reviewer_enabled']=forms.BooleanField(label='授予专业审核职责（取消勾选则撤回）',required=False)
+            self.fields['reviewer_reference']=forms.CharField(label='机构委任依据编号',min_length=4,max_length=160,help_text='仅登记机构已决定的职责，不证明执业资质，不授予病历查阅权限。')
+            self.fields['reviewer_from']=forms.DateTimeField(label='职责生效时间（北京时间）',widget=forms.DateTimeInput(attrs={'type':'datetime-local'}))
+            self.fields['reviewer_until']=forms.DateTimeField(label='职责失效时间（北京时间）',widget=forms.DateTimeInput(attrs={'type':'datetime-local'}))
         elif action=='reset_password':
             for key,label in [('password1','设置新密码'),('password2','再次输入新密码')]:
                 self.fields[key]=forms.CharField(label=label,strip=False,widget=forms.PasswordInput(attrs={'autocomplete':'new-password'}))
         if action=='security_suspend':
             self.fields['security_confirmed']=forms.BooleanField(
                 label='确认立即停止此账号访问并使原密码失效；预约和历史保留，恢复须先重置密码再启用')
-        self.order_fields(['security_confirmed','target_token','role','clinic','grant','patient_no','password1','password2','reason','operator_password','confirmed'])
+        self.order_fields(['security_confirmed','target_token','role','clinic','grant','reviewer_enabled','reviewer_reference','reviewer_from','reviewer_until','patient_no','password1','password2','reason','operator_password','confirmed'])
     def clean(self):
         data=super().clean()
         if self.action=='reset_password' and data.get('password1')!=data.get('password2'):self.add_error('password2','两次密码不一致。')

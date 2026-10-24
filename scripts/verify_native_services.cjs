@@ -152,6 +152,28 @@ async function verify(){
     const {p,state}=page('confirm',{session:{subject_key:'grant:2',workspace_id:'ctx',subject_revision:3,workspace_token:'refreshed'}});
     state.globalData.review={subjectKey:'grant:2',workspaceKey:'ctx',subjectRevision:3,workspaceToken:'prior',kind:'booking',preview:{}};p.onLoad();assert(p.data.review);assert.equal(p.data.error,'');
   });
+  await test('appointment delegate cannot load clinical referral controls',async()=>{
+    const {p,calls}=page('referrals',{session:{delegated:true}});await p.onShow();
+    assert.equal(calls.length,0);assert.match(p.data.error,/代约范围不包含/);
+  });
+  await test('referral termination previews before sending only its signed decision',async()=>{
+    let stopped=false;const row={id:8,source:'甲',destination:'乙',valid_until:'2026-11-01T01:00:00Z',status_label:'已接收'};
+    const {p,calls}=page('referrals',{session:{subject_key:'self',subject_revision:3},request:async route=>{
+      if(route==='referrals/')return {rows:[{...row,status_label:stopped?'已撤销':'已接收'}],page:1,pages:1};
+      if(route.endsWith('/preview/'))return {referral:row,proposal_token:'signed-referral'};
+      stopped=true;return {referral:{...row,status_label:'已撤销'}};
+    }});
+    await p.onShow();await p.stop({currentTarget:{dataset:{id:8}}});assert.equal(stopped,false);
+    p.checked({detail:{value:['yes']}});await p.confirm();
+    const submission=calls.find(c=>c.route.endsWith('/confirm/'));
+    assert.deepEqual(plain(submission.data),{proposal_token:'signed-referral',confirmed:'on'});
+    assert.equal(p.data.preview,null);assert.equal(p.data.done,'已撤销');
+  });
+  await test('referral preview cannot cross patient subject revision',async()=>{
+    const {p,calls}=page('referrals',{session:{subject_key:'self',subject_revision:4}});
+    p.setData({preview:{referral:{id:8},proposal_token:'old'},checked:true,subject:'self',revision:3});
+    await p.confirm();assert.equal(calls.length,0);assert.equal(p.data.preview,null);assert.match(p.data.error,/就诊人已变化/);
+  });
   return {passed:true,cases:cases.length,case_names:cases,scope:'actual Page handlers with mocked API; not Django/PostgreSQL, official compilation or WeChat runtime'};
 }
 module.exports={verify};

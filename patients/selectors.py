@@ -13,7 +13,8 @@ def visible_patients(user):
     dentist_id = bindings(user).filter(role="DENTIST", scope_kind="SELF_DENTIST",
         user__dentist__isnull=False).values_list("user__dentist_id", flat=True).first()
     if dentist_id is not None:
-        scope |= Q(pk__in=Visit.objects.filter(dentist_id=dentist_id).values('patient_id'))
+        from clinical.authority import readable_assigned_visits
+        scope |= Q(pk__in=readable_assigned_visits(user,dentist_id).values('patient_id'))
     # Association existence preserves shared-patient access without multiplying
     # each patient by their complete visit history before DISTINCT/pagination.
     return Patient.objects.filter(scope)

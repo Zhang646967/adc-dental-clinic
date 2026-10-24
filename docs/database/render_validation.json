@@ -1,4 +1,18 @@
 {
+  "er_professional_authority": {
+    "nodes": 7,
+    "edges": 9,
+    "width": 673,
+    "height": 483,
+    "minPrintedFontPt": 9.434710252600297
+  },
+  "er_clinical_referral": {
+    "nodes": 8,
+    "edges": 11,
+    "width": 715,
+    "height": 784,
+    "minPrintedFontPt": 8.880503496503497
+  },
   "er_patient_relationship": {
     "nodes": 7,
     "edges": 8,

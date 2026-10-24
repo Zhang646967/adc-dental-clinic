@@ -14,6 +14,14 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'clinical_authority_home':{'MANAGER','DENTIST'},'clinical_authority_detail':{'MANAGER','DENTIST'},
+ 'clinical_authority_new':{'MANAGER'},'clinical_authority_action':{'DENTIST'},
+ 'clinical_authority_activate':{'DENTIST'},'clinical_authority_confirm':{'MANAGER','DENTIST'},
+ 'clinical_referrals':{'DENTIST','FRONT_DESK','MANAGER','PATIENT'},
+ 'clinical_referral_detail':{'DENTIST','FRONT_DESK','MANAGER','PATIENT'},
+ 'clinical_referral_action':{'DENTIST','FRONT_DESK','MANAGER','PATIENT'},
+ 'clinical_referral_confirm':{'DENTIST','FRONT_DESK','MANAGER','PATIENT'},
+ 'clinical_referral_new':{'DENTIST'},'clinical_referral_record':{'DENTIST'},
  'patient_relationships':{'FRONT_DESK'},'patient_relationship_create':{'FRONT_DESK'},
  'patient_relationship_detail':{'FRONT_DESK'},'patient_relationship_action':{'FRONT_DESK'},'patient_relationship_confirm':{'FRONT_DESK'},
  'service_content_home':{'MANAGER'},'service_content_preview':{'MANAGER'},

@@ -85,6 +85,10 @@ def review_correction(*,actor,request_id,decision,reason):
     # Authorization of the preparer must still exist at application time.
     if not preparer.is_active or not grant or preparer.dentist_id!=v.dentist_id or req.dentist_confirmed_by_id!=preparer.pk:
         raise RuleError('原申请人的负责牙医授权已经失效，请拒绝该申请。')
+    from clinical.authority import professional_controls
+    if professional_controls(v.clinic_id):
+        from clinical.authority import professional_scope,visit_service_id
+        professional_scope(preparer.pk,v.clinic_id,visit_service_id(v),'RECORD',lock=True)
     base=invoice.current_record_version
     original=list(base.treatment_lines.order_by('line_no'));new=list(draft.treatment_lines.order_by('line_no'))
     if len(original)!=len(new) or not new:raise RuleError('更正不能增加或删除实际治疗项目。')

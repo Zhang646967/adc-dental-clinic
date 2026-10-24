@@ -21,11 +21,13 @@ def _lock_care(actor, visit_id):
     require_active(actor, ("DENTIST",))
     require_writable(actor)
     current_user=UserAccount.objects.get(pk=actor.pk)
-    preview=Visit.objects.only("availability_slot_id","dentist_id").get(pk=visit_id)
+    preview=Visit.objects.only("availability_slot_id","dentist_id","clinic_id").get(pk=visit_id)
     grant=RoleAssignment.objects.select_for_update().filter(user_id=actor.pk,is_active=True,
         role="DENTIST",scope_kind="SELF_DENTIST").first()
     if not grant or current_user.dentist_id!=preview.dentist_id:
         raise PermissionDenied("只有本次负责牙医可以确认治疗事实和完成接诊。")
+    from clinical.authority import require_visit_authority
+    require_visit_authority(actor,preview,'RECORD',lock=True)
     _lock_slots([preview.availability_slot_id])
     v=Visit.objects.select_for_update().get(pk=visit_id)
     if v.dentist_id != current_user.dentist_id: raise PermissionDenied

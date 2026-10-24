@@ -67,7 +67,7 @@ async function signOut() {
 }
 function sessionInfo() { return session; }
 function showSubject(page){
-  page.setData({patientName:session.patient_name||'',patientCapacity:session.acting_capacity||''});
+  page.setData({patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated});
 }
 async function selectSubject(subject){
   const next=await request('patients/select/','POST',{subject});

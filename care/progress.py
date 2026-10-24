@@ -11,6 +11,8 @@ def care_progress(actor, visit_id):
         visit = Visit.objects.select_related('patient','dentist','clinic').get(pk=visit_id)
         if not bindings(actor).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=visit.dentist_id).exists():
             raise PermissionDenied('仅负责牙医可以查看接诊记录。')
+        from clinical.authority import require_visit_authority
+        require_visit_authority(actor,visit,'READ')
         draft = visit.record_versions.filter(state='DRAFT',correction_request__isnull=True).first()
         lines = list(draft.treatment_lines.order_by('line_no')) if draft else []
         snap = draft.allergy_review_snapshot if draft else {}
@@ -30,7 +32,8 @@ def care_progress(actor, visit_id):
         published = invoice.current_record_version if invoice else None
         display_record=draft or published
         display_lines=lines if draft else list(published.treatment_lines.order_by('line_no')) if published else []
-        return dict(visit=visit, record=display_record, lines=display_lines, invoice=invoice, published=published,
+        from clinical.authority import may_refer
+        return dict(visit=visit, record=display_record, lines=display_lines, invoice=invoice, published=published, can_refer=may_refer(actor,visit),
             editable=editable, allergy_current=allergy_current, treated_blockers=treated_blockers,
             no_treatment_allowed=not blockers and not lines,
             clinical_note=draft.clinical_note if draft else published.clinical_note if published else '')

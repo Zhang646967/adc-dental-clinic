@@ -1,0 +1,69 @@
+{
+  "status": "SOURCE_AND_PRELIMINARY_REHEARSAL_PASSED_RELEASE_PENDING",
+  "scope": "Synthetic local C1.2; current working tree, not yet an exact-commit installed release",
+  "rule_tests": 1095,
+  "postgresql_tests": 1546,
+  "new_authority_referral_audit_tests": 44,
+  "final_focused_test": "PASS",
+  "five_clinic_browser_native_checks": 126,
+  "browser_page_errors": 0,
+  "business_facts": {
+    "passed": true,
+    "core_tables_unchanged": 10,
+    "invoice_total": "50000.00",
+    "posted_cash_total": "50000.00",
+    "source_and_finance_unchanged": true,
+    "professional_scopes": 27,
+    "activated_clinics": 5,
+    "retained_referral_history": 9,
+    "sensitive_reads": 243
+  },
+  "native_source_transport_checks": 123,
+  "native_Page_handler_cases": 29,
+  "official_offline_wxml_pages": 13,
+  "official_offline_wxss_files": 1,
+  "observed_database": {
+    "tables": 80,
+    "orm_tables": 79,
+    "columns": 745,
+    "sql_foreign_keys": 205,
+    "orm_foreign_keys": 204,
+    "triggers": 50,
+    "migration_files": 44,
+    "prior_files_unchanged": 43,
+    "er_views": 9
+  },
+  "course_report": {
+    "pages": 134,
+    "business_use_cases": 67,
+    "shared_subfunctions": 1,
+    "tables": 86,
+    "figures": 38,
+    "er_views": 9,
+    "word_sha256": "5e26b2bb817627662c489545d3504eac70d00df966ff41c055492135366b8a1d",
+    "pdf_sha256": "a8fcdabf5501a53bc5334ee51854acbb6826ebc181ffad46e4e9af0e0c3403c1",
+    "visual_QA": "PASS",
+    "all_134_page_bodies_checked": true,
+    "contents_and_text_bounds_checked": true
+  },
+  "pending": [
+    "exact_commit_CI",
+    "same_image_rehearsal",
+    "encrypted_restore",
+    "original_copy_upgrade",
+    "protected_local_update",
+    "C2.1",
+    "C2.2",
+    "C2.3"
+  ],
+  "separate_pending": {
+    "wechat_runtime": "NOT_RUN",
+    "device": "NOT_RUN",
+    "experience": "NOT_RUN",
+    "cloud": "NOT_RUN",
+    "current_clinical_capacity": "NOT_RUN",
+    "continuous_24_hour": "NOT_RUN",
+    "professional_qualification": "NOT_ESTABLISHED",
+    "historical_windows_recovery": "UNRESOLVED"
+  }
+}

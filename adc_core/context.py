@@ -14,6 +14,11 @@ NAV={
  'SYSADMIN':[('technical_home','技术首页'),('directory_home','基础资料目录'),('account_manage_list','账号与授权')],
 }
 
+for _role in ('DENTIST','MANAGER'):
+    NAV[_role].insert(0,('clinical_authority_home','专业操作范围'))
+for _role in ('DENTIST','FRONT_DESK','MANAGER','PATIENT'):
+    NAV[_role].append(('clinical_referrals','跨店转诊'))
+
 def navigation(request):
     user=request.user;ctx=getattr(request,'workspace',None)
     role=ctx.role if ctx else '';clinic=ctx.clinic if ctx and ctx.clinic_id else None
@@ -43,6 +48,7 @@ def navigation(request):
                 patient_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.name) if access.delegated else '本人',
                 workspace_scope='预约代办' if access.delegated else '本人资料')
             if access.delegated:
+                data['workspace_nav']=[item for item in data['workspace_nav'] if item['url']!=reverse('clinical_referrals')]
                 for item in data['workspace_nav']:
                     if item['label']=='我的预约与账单':item['label']='当前患者预约'
         except PermissionDenied:pass

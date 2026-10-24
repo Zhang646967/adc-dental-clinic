@@ -1,4 +1,5 @@
 {% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="business-flow">
+{% if can_refer %}<p><a class="button outline" href="{% url 'clinical_referral_new' visit.pk %}">发起限定跨店转诊</a> <a href="{% url 'clinical_referrals' %}">查看转诊办理进展</a></p>{% endif %}
 <a href="{% url 'visit_detail' visit.pk %}">← 返回预约记录</a><div class="eyebrow">负责牙医工作区</div><h1>{{ visit.patient.name }} · 接诊记录</h1><p>{{ visit.clinic.name }} / {{ visit.dentist.name }} · <span class="badge">{{ visit.get_status_display }}</span></p>
 {% if visit.status == 'CHECKED_IN' %}<nav class="care-jumps" aria-label="本次接诊步骤"><a href="#care-allergy">1 过敏复核</a><a href="#care-note">2 接诊草稿</a><a href="#care-treatment-entry">3 实际治疗</a><a href="#care-treatments">4 完成核对</a></nav>{% endif %}
 {% include 'care/progress.html' %}

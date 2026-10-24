@@ -1,0 +1,4 @@
+{% extends base_template|default:'base.html' %}{% load workspace_tags %}{% block content %}<div class="clinical-flow">
+<h1>{{ title }}</h1><section class="panel"><dl class="detail-grid">{% for label,value in values %}<dt>{{ label }}</dt><dd>{{ value|default_if_none:'未选择' }}</dd>{% endfor %}</dl></section>
+<section class="panel form-panel"><form method="post" action="{% if mode == 'referral' %}{% url 'clinical_referral_confirm' %}{% else %}{% url 'clinical_authority_confirm' %}{% endif %}">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit">确认保存</button></form><p>返回修改后须重新预览。已有结果会保留，重复确认不会重复办理。</p></section>
+</div>{% endblock %}

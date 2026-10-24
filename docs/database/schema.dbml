@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 72 ORM tables; django_migrations is a framework migration journal.
+// All 79 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_ai_usage_bucket {
@@ -176,6 +176,77 @@ Table adc_clinic {
   email "character varying(254)" [not null]
   area_sqm "numeric(10,2)" [not null]
   is_active "boolean" [not null]
+}
+
+Table adc_clinical_authority_event {
+  id "bigint" [pk, not null]
+  actor_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  authorization_id "bigint" [null]
+  reviewer_id "bigint" [null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  prior_state "character varying(16)" [not null]
+  resulting_state "character varying(16)" [not null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_authority_policy {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [unique, not null]
+  activated_by_id "bigint" [not null]
+  activated_at "timestamp with time zone" [not null]
+  reference "character varying(160)" [not null]
+}
+
+Table adc_clinical_referral {
+  id "bigint" [pk, not null]
+  patient_id "bigint" [not null]
+  source_visit_id "bigint" [not null]
+  source_record_id "bigint" [null]
+  source_clinic_id "bigint" [not null]
+  destination_clinic_id "bigint" [not null]
+  destination_service_id "bigint" [null]
+  receiver_id "bigint" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  consent_basis "character varying(24)" [not null]
+  consent_reference "character varying(160)" [not null]
+  purpose "character varying(500)" [not null]
+  valid_until "timestamp with time zone" [not null]
+  state "character varying(24)" [not null]
+  revision "integer" [not null]
+}
+
+Table adc_clinical_referral_event {
+  id "bigint" [pk, not null]
+  referral_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  prior_state "character varying(24)" [not null]
+  resulting_state "character varying(24)" [not null]
+  note "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_reviewer {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  reference "character varying(160)" [not null]
+  valid_from "timestamp with time zone" [not null]
+  valid_until "timestamp with time zone" [not null]
+  is_active "boolean" [not null]
+  revision "integer" [not null]
+  appointed_by_id "bigint" [not null]
+  appointed_at "timestamp with time zone" [not null]
+  indexes {
+    (user_id, clinic_id) [unique, name: 'clinical_reviewer_clinic_unique']
+  }
 }
 
 Table adc_coordination_task {
@@ -525,6 +596,27 @@ Table adc_portal_booking_receipt {
   created_at "timestamp with time zone" [not null]
 }
 
+Table adc_professional_authorization {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  service_id "bigint" [null]
+  source_kind "character varying(16)" [not null]
+  source_reference "character varying(160)" [not null]
+  issuer "character varying(160)" [not null]
+  credential_from "timestamp with time zone" [not null]
+  credential_until "timestamp with time zone" [not null]
+  valid_from "timestamp with time zone" [not null]
+  valid_until "timestamp with time zone" [not null]
+  can_read "boolean" [not null]
+  can_record "boolean" [not null]
+  can_refer "boolean" [not null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
 Table adc_qualification {
   id "bigint" [pk, not null]
   code "character varying(24)" [unique, not null]
@@ -699,6 +791,18 @@ Table adc_schedule_plan {
   metadata "jsonb" [not null]
   state "character varying(12)" [not null]
   published_at "timestamp with time zone" [null]
+}
+
+Table adc_sensitive_read_event {
+  id "bigint" [pk, not null]
+  actor_id "bigint" [not null]
+  role "character varying(16)" [not null]
+  object_kind "character varying(24)" [not null]
+  object_id "bigint" [null]
+  purpose "character varying(24)" [not null]
+  outcome "character varying(8)" [not null]
+  trace_id "character varying(32)" [not null]
+  created_at "timestamp with time zone" [not null]
 }
 
 Table adc_service_presentation {
@@ -991,6 +1095,25 @@ Ref: adc_cash_evidence.cash_entry_id > adc_cash_entry.id
 Ref: adc_cash_evidence.prepared_by_id > adc_user.id
 Ref: adc_cash_evidence.previous_id - adc_cash_evidence.id
 Ref: adc_cash_evidence.reviewed_by_id > adc_user.id
+Ref: adc_clinical_authority_event.authorization_id > adc_professional_authorization.id
+Ref: adc_clinical_authority_event.clinic_id > adc_clinic.id
+Ref: adc_clinical_authority_event.reviewer_id > adc_clinical_reviewer.id
+Ref: adc_clinical_authority_event.actor_id > adc_user.id
+Ref: adc_clinical_authority_policy.activated_by_id > adc_user.id
+Ref: adc_clinical_authority_policy.clinic_id - adc_clinic.id
+Ref: adc_clinical_referral.destination_clinic_id > adc_clinic.id
+Ref: adc_clinical_referral.destination_service_id > adc_booking_service.id
+Ref: adc_clinical_referral.source_clinic_id > adc_clinic.id
+Ref: adc_clinical_referral.source_record_id > adc_visit_record_version.id
+Ref: adc_clinical_referral.created_by_id > adc_user.id
+Ref: adc_clinical_referral.patient_id > adc_patient.id
+Ref: adc_clinical_referral.receiver_id > adc_user.id
+Ref: adc_clinical_referral.source_visit_id > adc_visit.id
+Ref: adc_clinical_referral_event.referral_id > adc_clinical_referral.id
+Ref: adc_clinical_referral_event.actor_id > adc_user.id
+Ref: adc_clinical_reviewer.appointed_by_id > adc_user.id
+Ref: adc_clinical_reviewer.clinic_id > adc_clinic.id
+Ref: adc_clinical_reviewer.user_id > adc_user.id
 Ref: adc_coordination_task.slot_id > adc_availability_slot.id
 Ref: adc_coordination_task.assignee_id > adc_user.id
 Ref: adc_coordination_task.closed_by_id > adc_user.id
@@ -1057,6 +1180,10 @@ Ref: adc_payment_account.created_by_id > adc_user.id
 Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
 Ref: adc_portal_booking_receipt.appointment_grant_id > adc_patient_appointment_grant.id
 Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
+Ref: adc_professional_authorization.clinic_id > adc_clinic.id
+Ref: adc_professional_authorization.created_by_id > adc_user.id
+Ref: adc_professional_authorization.service_id > adc_booking_service.id
+Ref: adc_professional_authorization.user_id > adc_user.id
 Ref: adc_quarter.roster_confirmed_by_id > adc_user.id
 Ref: adc_reception_case.clinic_id > adc_clinic.id
 Ref: adc_reception_case.created_by_id > adc_user.id
@@ -1098,6 +1225,7 @@ Ref: adc_role_assignment.clinic_id > adc_clinic.id
 Ref: adc_role_assignment.user_id > adc_user.id
 Ref: adc_schedule_plan.clinic_id > adc_clinic.id
 Ref: adc_schedule_plan.created_by_id > adc_user.id
+Ref: adc_sensitive_read_event.actor_id > adc_user.id
 Ref: adc_service_presentation.service_id - adc_booking_service.id
 Ref: adc_service_requirement.service_id > adc_booking_service.id
 Ref: adc_statement_batch.account_id > adc_payment_account.id

@@ -11,6 +11,33 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_professional_authority': {
+        'title':'专业资质来源与限定操作授权',
+        'tables': {
+            'adc_clinic':['id','clinic_code'],
+            'adc_user':['id','username'],
+            'adc_booking_service':['id'],
+            'adc_clinical_reviewer':['id','user_id','clinic_id','valid_until','is_active'],
+            'adc_professional_authorization':['id','user_id','clinic_id','service_id','state','valid_until'],
+            'adc_clinical_authority_event':['id','authorization_id','reviewer_id','operation_id'],
+            'adc_clinical_authority_policy':['id','clinic_id','activated_by_id'],
+        },
+        'note':'审核职责按账号与诊所唯一；机构委任不等于病历访问。专业申请分别引用账号、诊所和可空服务；空服务仅指无服务旧记录，不是全服务通配。决定历史及诊所启用事实不可改写。图中仅展开关键外键，来源证据、有效期及查阅／记录／转诊动作见完整目录与命令核验。',
+    },
+    'er_clinical_referral': {
+        'title':'限定跨店转诊与敏感查阅留痕',
+        'tables': {
+            'adc_patient':['id','patient_no'],
+            'adc_clinic':['id','clinic_code'],
+            'adc_user':['id','username'],
+            'adc_visit':['id','patient_id'],
+            'adc_visit_record_version':['id','visit_id','revision_no'],
+            'adc_clinical_referral':['id','patient_id','source_visit_id','source_record_id','source_clinic_id','destination_clinic_id','receiver_id','state'],
+            'adc_clinical_referral_event':['id','referral_id','actor_id','operation_id'],
+            'adc_sensitive_read_event':['id','actor_id','object_kind','object_id','outcome'],
+        },
+        'note':'转诊保留原患者、原就诊、可选已发布版本、转出／接收诊所及指定医师；身份核对、临床披露同意和医师接收分别办理。不合并档案，不把转诊作为预约或实际诊疗。查阅事件的object_kind/object_id为受控类型与对象编号，不是虚构的患者或转诊外键。其余服务、来源人和有效期在完整目录保留。',
+    },
     'er_patient_relationship': {
         'title': '患者关系核验与预约代办授权',
         'tables': {

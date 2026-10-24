@@ -1,0 +1,5 @@
+{% extends base_template|default:'base.html' %}{% load workspace_tags %}{% block content %}<div class="clinical-flow">
+<p><a href="{% url 'clinical_authority_home' %}">专业范围</a> · <a href="{% url 'clinical_referrals' %}">跨店转诊</a></p>
+<h1>{{ title }}</h1><p>{{ description }}</p>
+<section class="panel form-panel"><form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit">预览并核对</button></form></section>
+</div>{% endblock %}

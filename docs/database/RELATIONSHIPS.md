@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-181条实际SQL外键，其中180条对应ORM单列关系，1条为账单同次就诊复合外键。
+205条实际SQL外键，其中204条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -36,6 +36,25 @@
 | adc_cash_evidence | prepared_by_id | adc_user | id |
 | adc_cash_evidence | previous_id | adc_cash_evidence | id |
 | adc_cash_evidence | reviewed_by_id | adc_user | id |
+| adc_clinical_authority_event | authorization_id | adc_professional_authorization | id |
+| adc_clinical_authority_event | clinic_id | adc_clinic | id |
+| adc_clinical_authority_event | reviewer_id | adc_clinical_reviewer | id |
+| adc_clinical_authority_event | actor_id | adc_user | id |
+| adc_clinical_authority_policy | activated_by_id | adc_user | id |
+| adc_clinical_authority_policy | clinic_id | adc_clinic | id |
+| adc_clinical_referral | destination_clinic_id | adc_clinic | id |
+| adc_clinical_referral | destination_service_id | adc_booking_service | id |
+| adc_clinical_referral | source_clinic_id | adc_clinic | id |
+| adc_clinical_referral | source_record_id | adc_visit_record_version | id |
+| adc_clinical_referral | created_by_id | adc_user | id |
+| adc_clinical_referral | patient_id | adc_patient | id |
+| adc_clinical_referral | receiver_id | adc_user | id |
+| adc_clinical_referral | source_visit_id | adc_visit | id |
+| adc_clinical_referral_event | referral_id | adc_clinical_referral | id |
+| adc_clinical_referral_event | actor_id | adc_user | id |
+| adc_clinical_reviewer | appointed_by_id | adc_user | id |
+| adc_clinical_reviewer | clinic_id | adc_clinic | id |
+| adc_clinical_reviewer | user_id | adc_user | id |
 | adc_coordination_task | slot_id | adc_availability_slot | id |
 | adc_coordination_task | assignee_id | adc_user | id |
 | adc_coordination_task | closed_by_id | adc_user | id |
@@ -102,6 +121,10 @@
 | adc_portal_booking_receipt | access_id | adc_patient_access | id |
 | adc_portal_booking_receipt | appointment_grant_id | adc_patient_appointment_grant | id |
 | adc_portal_booking_receipt | visit_id | adc_visit | id |
+| adc_professional_authorization | clinic_id | adc_clinic | id |
+| adc_professional_authorization | created_by_id | adc_user | id |
+| adc_professional_authorization | service_id | adc_booking_service | id |
+| adc_professional_authorization | user_id | adc_user | id |
 | adc_quarter | roster_confirmed_by_id | adc_user | id |
 | adc_reception_case | clinic_id | adc_clinic | id |
 | adc_reception_case | created_by_id | adc_user | id |
@@ -143,6 +166,7 @@
 | adc_role_assignment | user_id | adc_user | id |
 | adc_schedule_plan | clinic_id | adc_clinic | id |
 | adc_schedule_plan | created_by_id | adc_user | id |
+| adc_sensitive_read_event | actor_id | adc_user | id |
 | adc_service_presentation | service_id | adc_booking_service | id |
 | adc_service_requirement | service_id | adc_booking_service | id |
 | adc_statement_batch | account_id | adc_payment_account | id |

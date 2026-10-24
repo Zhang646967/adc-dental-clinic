@@ -74,6 +74,8 @@ def patient_lookup(request):
 @require_GET
 def patient_detail(request, pk):
     p = get_object_or_404(visible_patients(request.user), pk=pk)
+    from clinical.authority import require_patient_read
+    require_patient_read(request.user, p)
     return render(request, "patient_detail.html", {"patient": p, "allergies": p.allergy_links.filter(is_active=True).select_related("allergy")})
 
 @login_required
@@ -161,6 +163,9 @@ def visit_detail(request, pk):
     v = get_object_or_404(visible_visits(request.user).select_related("clinic", "dentist", "patient"), pk=pk)
     if not can_read_visit_details(request.user, v):
         raise PermissionDenied("此页面包含受限业务详情。")
+    if bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST').exists():
+        from clinical.authority import require_visit_authority
+        require_visit_authority(request.user,v,'READ')
     origin = visit_return_slot(request.user, request.GET.get("coord_slot"), v)
     can_act = bindings(request.user).filter(role="FRONT_DESK", scope_kind="CLINIC", clinic_id=v.clinic_id).exists()
     form = ActionForm(request.POST or None, initial={"expected_version": v.lock_version})

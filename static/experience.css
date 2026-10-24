@@ -13,3 +13,5 @@ input:not([type=checkbox]):not([type=hidden]),select,textarea{width:100%;min-hei
 
 /* Support references remain readable in narrow and large-text error screens. */
 .request-reference code { overflow-wrap: anywhere; word-break: break-all; }
+
+.clinical-flow{min-width:0;overflow-wrap:anywhere}.clinical-flow form>div{min-width:0}

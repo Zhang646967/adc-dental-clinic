@@ -13,13 +13,14 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 INSTALLED_APPS = [
     "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions",
     "django.contrib.messages", "django.contrib.staticfiles", "django.contrib.postgres",
-    "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment", "operations", "reception",
+    "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment", "operations", "reception", "clinical",
 ]
 MIDDLEWARE = [
     "adc_core.request_trace.RequestTraceMiddleware",
     "django.middleware.security.SecurityMiddleware", "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware", "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware", "django.contrib.messages.middleware.MessageMiddleware",
+    "clinical.read_audit.SensitiveReadMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware", "adc_core.security.PrivateResponseMiddleware", "workspaces.middleware.WorkspaceMiddleware", "adc_core.middleware.ReadOnlyDemoMiddleware",
 ]
 ROOT_URLCONF = "config.urls"
@@ -57,6 +58,7 @@ X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
 ADC_READ_ONLY = os.environ.get("ADC_READ_ONLY", "0") == "1"
+ADC_CLINICAL_SYNTHETIC = os.environ.get("ADC_RC_SYNTHETIC", "0") == "1"
 ADC_VERSION = "1.0.0-rc.1"
 # A production label requires the production settings and explicit deployment
 # stage. Synthetic or local/staging environments retain a compact visible label.

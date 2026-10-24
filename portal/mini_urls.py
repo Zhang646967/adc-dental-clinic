@@ -1,8 +1,12 @@
 from django.urls import path
 from portal import mini_api as api
 from portal import mini_waitlist as wait
+from portal import mini_referrals as referral
 
 urlpatterns = [
+    path('referrals/',referral.listing,name='mini_referrals'),
+    path('referrals/<int:pk>/stop/preview/',referral.stop_preview,name='mini_referral_stop_preview'),
+    path('referrals/<int:pk>/stop/confirm/',referral.stop_confirm,name='mini_referral_stop_confirm'),
     path('patients/',api.subjects,name='mini_subjects'),
     path('patients/select/',api.select_subject,name='mini_subject_select'),
     path('session/', api.session, name='mini_session'),
