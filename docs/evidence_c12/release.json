@@ -75,11 +75,19 @@
     ]
   },
   "diagnostic_followup": {
-    "status": "LOCAL_UNIT_VERIFIED_CI_AND_INSTALL_PENDING",
-    "host_rule_tests": 32,
+    "status": "PASS",
+    "commit": "1fa2e2d058bc3581bd3518b7ff086fb9744e8000",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40074986096",
+    "full_source_rules": 1101,
+    "postgresql_tests": 1546,
+    "specialist_host_rules": 32,
     "new_rules": 6,
-    "capability": "Fixed collection stage and category only; no subprocess text, credentials or automatic closure",
-    "historical_root_cause_not_inferred": true
+    "real_docker_read_only_failure_drill": "PASS",
+    "original_host_installation": "PASS",
+    "application_images_unchanged": true,
+    "prior_unknown_history_retained": true,
+    "prior_failure_root_cause": "UNDETERMINED",
+    "raw_subprocess_output_not_retained": true
   },
   "separate_pending": {
     "wechat_runtime": "NOT_RUN",

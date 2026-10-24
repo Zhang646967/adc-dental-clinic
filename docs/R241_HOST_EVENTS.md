@@ -101,4 +101,3 @@ checks and two fresh healthy samples. Its root cause remains undetermined.
 The diagnostic improvement does not retrospectively explain that event or
 establish continuous operation. See [executed evidence](evidence_c12/release.json)
 for the application release and separate diagnostic installation status.
-

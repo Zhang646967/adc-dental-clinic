@@ -13,8 +13,10 @@ and 44 migration files; nine focused ER views match that snapshot.
 [Verification summary](verification.json) records executed source tests and
 five-clinic rehearsal. [The executed release record](release.json) confirms exact application CI,
 same-image acceptance, encrypted recovery and protected installation. The
-additional host diagnostic has passed 32 local rules; its separate exact CI and
-host installation are still pending. Earlier attempts and original observer UNKNOWN history
+additional host diagnostic passed 32 specialist rules, all 1,101 source rules
+and exact CI; its installed script retained the original journal and gained two
+fresh healthy samples. A separate real Docker query-failure drill verified the
+stage/category evidence and manual recovery without changing services or data. Earlier attempts and original observer UNKNOWN history
 remain private retained evidence. Private credentials, notes and backups are not
 published.
 

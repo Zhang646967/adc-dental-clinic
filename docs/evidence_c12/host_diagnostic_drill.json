@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "source_commit": "1fa2e2d058bc3581bd3518b7ff086fb9744e8000",
+  "scope": "Actual local Docker read-only invalid-format failure in a separate private rehearsal journal; no service, original journal or database mutation",
+  "failure_stage": "inspect",
+  "failure_category": "EXIT_FAILURE",
+  "closure_before_recovery_rejected": true,
+  "two_fresh_success_samples": true,
+  "manual_disposition_and_closure": true,
+  "unknown_incident_and_diagnostic_retained": true,
+  "raw_output_or_credentials_retained": false
+}

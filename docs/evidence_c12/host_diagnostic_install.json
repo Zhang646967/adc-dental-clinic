@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "followup_commit": "1fa2e2d058bc3581bd3518b7ff086fb9744e8000",
+  "followup_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40074986096",
+  "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb",
+  "business_feature_files_unchanged": 603,
+  "application_images_and_containers_unchanged": true,
+  "database_and_configuration_unchanged": true,
+  "host_script_sha256": "59e6e02b30b813c10c84ec5ec327898d5cd4b91f9e4c698e72224e07bae282ac",
+  "prior_unknown_incident_and_events_retained": true,
+  "prior_history_encrypted_and_decryption_verified": true,
+  "prior_failure_root_cause": "UNDETERMINED",
+  "new_independent_samples": [
+    {
+      "mono": 718050.461362041,
+      "utc": 1792828670.175911
+    },
+    {
+      "mono": 718080.548098458,
+      "utc": 1792828700.2626061
+    }
+  ],
+  "current_host_state": "HEALTHY",
+  "report_bytes_match": true,
+  "scope": "Exact-CI host diagnostic and documentation; two fresh host samples, not 24-hour operation"
+}

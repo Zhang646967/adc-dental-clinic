@@ -49,8 +49,7 @@
   "pending": [
     "C2.1",
     "C2.2",
-    "C2.3",
-    "host_diagnostic_followup_CI_and_install"
+    "C2.3"
   ],
   "separate_pending": {
     "wechat_runtime": "NOT_RUN",
