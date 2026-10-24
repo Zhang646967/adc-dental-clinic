@@ -83,3 +83,22 @@ python3 scripts/host_events.py --directory /private/path/host-events close INCID
 本轮不增加数据库迁移、业务角色、公开监测页面或外部通知。R2.4.2 的真实业务依赖演练、
 R2.4.3 的等效容量复测、R2.4.4 的连续 24 小时与安全评估，以及云端验收仍分别执行。
 [本轮执行证据](evidence_r241/README.md)。
+## 2026-10-24 safe collection diagnostics
+
+New collection failures retain a fixed stage (`context`, `ps`, `inspect`,
+`events` or `projection`) and category (`TIMEOUT`, `EXIT_FAILURE`,
+`COMMAND_UNAVAILABLE`, `OUTPUT_BOUND` or `INVALID_PROJECTION`). No command
+arguments, stdout, stderr, environment values or clinical data enter the journal.
+`last_collection_failure` is historical and carries its own timestamp; it is not
+a current failure flag. A recovered sample leaves the original UNKNOWN incident
+open until attributed disposition and two fresh healthy samples permit closure.
+Changed failure categories remain visible; repeated identical polling failures
+do not flood the retained event ring. Older journals without this field remain
+readable, and missing old diagnostics must not be reconstructed as a known cause.
+
+The C1.2 post-update gap was retained and disposed after independent dependency
+checks and two fresh healthy samples. Its root cause remains undetermined.
+The diagnostic improvement does not retrospectively explain that event or
+establish continuous operation. See [executed evidence](evidence_c12/release.json)
+for the application release and separate diagnostic installation status.
+

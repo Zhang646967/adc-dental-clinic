@@ -1,5 +1,5 @@
 {
-  "status": "SOURCE_AND_PRELIMINARY_REHEARSAL_PASSED_RELEASE_PENDING",
+  "status": "SOURCE_AND_PRELIMINARY_REHEARSAL_PASSED",
   "scope": "Synthetic local C1.2; current working tree, not yet an exact-commit installed release",
   "rule_tests": 1095,
   "postgresql_tests": 1546,
@@ -47,14 +47,10 @@
     "contents_and_text_bounds_checked": true
   },
   "pending": [
-    "exact_commit_CI",
-    "same_image_rehearsal",
-    "encrypted_restore",
-    "original_copy_upgrade",
-    "protected_local_update",
     "C2.1",
     "C2.2",
-    "C2.3"
+    "C2.3",
+    "host_diagnostic_followup_CI_and_install"
   ],
   "separate_pending": {
     "wechat_runtime": "NOT_RUN",
@@ -65,5 +61,6 @@
     "continuous_24_hour": "NOT_RUN",
     "professional_qualification": "NOT_ESTABLISHED",
     "historical_windows_recovery": "UNRESOLVED"
-  }
+  },
+  "release_record": "release.json"
 }

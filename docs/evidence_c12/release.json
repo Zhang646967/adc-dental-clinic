@@ -1,0 +1,99 @@
+{
+  "passed": true,
+  "status": "LOCAL_SYNTHETIC_DELIVERED",
+  "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40072510596",
+  "source_to_image_to_installed_version_matched": true,
+  "rule_tests": 1095,
+  "postgresql_tests": 1546,
+  "new_authority_tests": 44,
+  "five_clinic_real_browser_native_checks": 126,
+  "unchanged_core_business_tables": 10,
+  "installed_existing_account_checks": 300,
+  "installed_native_checks": 14,
+  "installed_relationship_checks": 24,
+  "same_version_encrypted_restore": "PASS",
+  "original_copy_upgrade": "PASS",
+  "original_runtime_update": "PASS",
+  "original_business_models_preserved": 70,
+  "original_private_configurations_preserved": 70,
+  "original_database_container_and_volume_preserved": true,
+  "original_rc_tag_preserved": true,
+  "original_rows_and_configurations": "PRESERVED",
+  "local_synthetic_additions": {
+    "passed": true,
+    "synthetic": true,
+    "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb",
+    "normal_governance_and_authority_commands": true,
+    "activated_clinics": 2,
+    "independent_reviewer_appointments": 2,
+    "professional_scopes": 10,
+    "original_business_rows_preserved": true,
+    "private_configuration_preserved": true,
+    "new_patients_visits_treatments_referrals_or_financial_effects": 0,
+    "credentials_private": true
+  },
+  "actual_schema": {
+    "passed": true,
+    "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb",
+    "tables": 80,
+    "foreign_keys": 205,
+    "triggers": 50,
+    "checked_sections": [
+      "triggers",
+      "models",
+      "tables",
+      "constraints",
+      "indexes",
+      "columns",
+      "migrations"
+    ],
+    "business_rows_read": false,
+    "er_and_actual_schema_equal": true
+  },
+  "course_report": {
+    "pages": 134,
+    "business_use_cases": 67,
+    "shared_specifications": 1,
+    "tables": 86,
+    "figures": 38,
+    "actual_er_views": 9,
+    "word_sha256": "5e26b2bb817627662c489545d3504eac70d00df966ff41c055492135366b8a1d",
+    "pdf_sha256": "a8fcdabf5501a53bc5334ee51854acbb6826ebc181ffad46e4e9af0e0c3403c1",
+    "repository_and_installed_bytes_equal": true
+  },
+  "observation": {
+    "current_host_state": "HEALTHY",
+    "application_conditions": "HEALTHY",
+    "brief_samples": 10,
+    "historical_unknown_retained": true,
+    "prior_failure_root_cause": "UNDETERMINED",
+    "disposition": [
+      "inspect_dependencies",
+      "accept_observation_gap",
+      "verify_health"
+    ]
+  },
+  "diagnostic_followup": {
+    "status": "LOCAL_UNIT_VERIFIED_CI_AND_INSTALL_PENDING",
+    "host_rule_tests": 32,
+    "new_rules": 6,
+    "capability": "Fixed collection stage and category only; no subprocess text, credentials or automatic closure",
+    "historical_root_cause_not_inferred": true
+  },
+  "separate_pending": {
+    "wechat_runtime": "NOT_RUN",
+    "device": "NOT_RUN",
+    "experience": "NOT_RUN",
+    "cloud": "NOT_RUN",
+    "current_clinical_capacity": "NOT_RUN",
+    "continuous_24_hour": "NOT_RUN",
+    "clinical_qualification": "NOT_ESTABLISHED",
+    "historical_windows_recovery": "UNRESOLVED"
+  },
+  "next_increments": {
+    "C21": "NOT_IMPLEMENTED",
+    "C22": "NOT_IMPLEMENTED",
+    "C23": "NOT_IMPLEMENTED"
+  }
+}

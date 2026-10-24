@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from adc_core.operations_store import PrivateStore
-from scripts.host_events import Journal, SERVICES, backup_event, docker_sample
+from scripts.host_events import Journal, SERVICES, backup_event, docker_sample, CollectionFailure, run
 from scripts.g4_course import Course
 
 TARGET = dict(v=1, project='adc_host_test', source='a'*40, context='test-local', docker='docker')
@@ -90,6 +90,53 @@ class HostEventsTests(unittest.TestCase):
         result=self.journal.collect(sample=broken, now=now(30))
         self.assertEqual(result['state'], 'UNKNOWN')
         self.assertEqual(result['sampled'], now(0))
+
+    def test_timeout_identifies_stage_without_subprocess_text(self):
+        with patch('scripts.host_events.subprocess.run', side_effect=subprocess.TimeoutExpired(
+                'PRIVATE-COMMAND', 15, output='PRIVATE-OUTPUT', stderr='PRIVATE-ERROR')):
+            with self.assertRaises(CollectionFailure) as error: run(TARGET, 'events', '--format', 'PRIVATE-FORMAT')
+        self.assertEqual((error.exception.stage,error.exception.category),('events','TIMEOUT'))
+        self.assertNotIn('PRIVATE',str(error.exception))
+
+    def test_failed_command_identifies_stage_without_stderr(self):
+        with patch('scripts.host_events.subprocess.run', side_effect=subprocess.CalledProcessError(
+                1,'PRIVATE-COMMAND',stderr='PRIVATE-ERROR')):
+            with self.assertRaises(CollectionFailure) as error: run(TARGET,'inspect','PRIVATE-ID')
+        self.assertEqual((error.exception.stage,error.exception.category),('inspect','EXIT_FAILURE'))
+        self.assertNotIn('PRIVATE',str(error.exception))
+
+    def test_missing_executable_has_fixed_diagnostic(self):
+        with patch('scripts.host_events.subprocess.run', side_effect=FileNotFoundError('PRIVATE-PATH')):
+            with self.assertRaises(CollectionFailure) as error: run(TARGET,'context','inspect')
+        self.assertEqual((error.exception.stage,error.exception.category),('context','COMMAND_UNAVAILABLE'))
+
+    def test_output_bound_is_recorded_without_retaining_output(self):
+        with patch('scripts.host_events.subprocess.run', return_value=subprocess.CompletedProcess([],0,'x'*(256*1024+1))):
+            with self.assertRaises(CollectionFailure) as error: run(TARGET,'ps')
+        self.assertEqual((error.exception.stage,error.exception.category),('ps','OUTPUT_BOUND'))
+
+    def test_diagnostic_changes_retained_and_unchanged_failure_deduplicated(self):
+        self.collect(0)
+        def timeout(*_): raise CollectionFailure('events','TIMEOUT')
+        self.journal.collect(sample=timeout,now=now(30))
+        self.journal.collect(sample=timeout,now=now(60))
+        self.assertEqual(len(self.journal.load()['events']),1)
+        def failed(*_): raise CollectionFailure('inspect','EXIT_FAILURE')
+        result=self.journal.collect(sample=failed,now=now(70))
+        self.assertEqual(len(self.journal.load()['events']),2)
+        self.assertEqual(result['last_collection_failure'],dict(stage='inspect',category='EXIT_FAILURE',at=now(70)))
+        self.assertEqual(result['sampled'],now(0))
+        self.assertEqual(result['state'],'UNKNOWN')
+
+    def test_recovery_keeps_prior_diagnostic_and_unknown_history(self):
+        self.collect(0)
+        def failed(*_): raise CollectionFailure('ps','TIMEOUT')
+        self.journal.collect(sample=failed,now=now(30))
+        self.collect(60);result=self.collect(90)
+        self.assertEqual(result['conditions']['collector']['state'],'HEALTHY')
+        self.assertEqual(result['state'],'UNKNOWN')
+        self.assertEqual(result['last_collection_failure']['at'],now(30))
+        self.assertEqual(result['active_incidents'][0]['code'],'COLLECTOR_UNAVAILABLE')
 
     def test_watch_staleness_is_identified_without_docker(self):
         self.collect(0)

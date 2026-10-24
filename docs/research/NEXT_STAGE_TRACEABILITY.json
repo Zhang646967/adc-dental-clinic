@@ -531,9 +531,10 @@
     {
       "release": "C1.2",
       "scope": "Independent clinic/service/action professional decisions, controlled referral identity and disclosure, sensitive-read and departure enforcement",
-      "status": "SOURCE_AND_PRELIMINARY_REHEARSAL_PASSED_RELEASE_PENDING",
-      "evidence": "../evidence_c12/README.md",
-      "full_program_gates": "Synthetic source and software behavior do not qualify clinical reviewers or complete C2–C8."
+      "status": "LOCAL_DELIVERED",
+      "evidence": "../evidence_c12/release.json",
+      "full_program_gates": "Synthetic source and software behavior do not qualify clinical reviewers or complete C2–C8.",
+      "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb"
     }
   ]
 }

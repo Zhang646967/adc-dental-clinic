@@ -4,7 +4,7 @@ Clinic contract → verified person and authority → structured encounter → s
 
 **下一阶段目标：让同一患者跨多次就诊得到连续、可追溯的服务，让前台知道下一步应由谁、在何时、完成什么。**
 
-Date: 2026-10-23. Research/source baseline: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. This planning increment follows the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md). C1.1 is now implemented with synthetic local evidence in [the C1.1 release record](C11_PATIENT_RELATIONSHIPS.md). The other increments below remain **PLANNED**; professional and commercial acceptance are separate. It refines C1–C2 in the [master program](COMMERCIAL_V2_MASTER_PLAN.md); it does not replace the C3–C8 clinical and production release gates.
+Date: 2026-10-23. Research/source baseline: `3d0fb0002e7aa5631f5f12763c2885f85e278dee`. This planning increment follows the [maturity study](research/DENTAL_PRACTICE_STUDY_20261023.md). C1.1 is now implemented with synthetic local evidence in [the C1.1 release record](C11_PATIENT_RELATIONSHIPS.md). C1.2 is also locally delivered in [its executed record](evidence_c12/release.json). C2.1–C2.3 remain **PLANNED**; professional and commercial acceptance are separate. It refines C1–C2 in the [master program](COMMERCIAL_V2_MASTER_PLAN.md); it does not replace the C3–C8 clinical and production release gates.
 
 ## 1. Outcome, scope and priorities（目标、范围与优先级）
 
@@ -86,7 +86,7 @@ Mind map: relation evidence → verified authority → selected subject → sign
 
 The [identity proposal](research/identity_concept.svg) and [clinical proposal](research/clinical_concept.svg) are small logical views. Dashed/proposed nodes are not current tables. Cardinalities express the design proposal, not a migration already applied. Their [DOT sources](research/identity_concept.dot) and [relationship explanations](research/MODEL_NOTES.md) are retained.
 
-Current physical baseline: **70 tables, 171 SQL foreign keys, 42 application triggers and 40 migration files**, according to the C0.3 observed snapshot. Preserve all 40 existing migration files. Append new migrations and produce an observed schema diff, regenerated ER/DBML/field catalogues, old-row comparison and independent restore evidence for each schema release. Never alter the observed snapshot merely to make it match a future drawing.
+The original planning baseline was **70 tables, 171 SQL foreign keys, 42 application triggers and 40 migration files** in the C0.3 snapshot. The observed and installed C1.2 baseline is **80 tables, 205 SQL foreign keys, 50 application triggers and 44 migration files**; preserve all 44 current migration files. Append new migrations and produce an observed schema diff, regenerated ER/DBML/field catalogues, old-row comparison and independent restore evidence for each schema release. Never alter the observed snapshot merely to make it match a future drawing.
 
 Minimal clinical structure to evaluate in C2:
 
@@ -103,7 +103,7 @@ Mind map: identity/authority → encounter findings → accepted plan → actual
 
 ## 5. Proposed business acceptance（待执行场景）
 
-All scenarios below are **NOT_RUN** for the proposed features. The [trace file](research/NEXT_STAGE_TRACEABILITY.json) links them to business problems and existing/new backlog requirements. Apply to at least five synthetic clinics where clinic isolation is relevant.
+The original full-program scenarios below retain their proposed scope. The C1.1 and C1.2 software slices have separate executed evidence; later clinical, professional and platform gates remain **NOT_RUN**. The [trace file](research/NEXT_STAGE_TRACEABILITY.json) links them to business problems and existing/new backlog requirements. Apply to at least five synthetic clinics where clinic isolation is relevant.
 
 | ID | Scenario | Required observable result |
 |---|---|---|
@@ -152,7 +152,7 @@ Mind map: source → exact tests/CI → business facts → observed schema → e
 
 ## 7. Immediate work package and outstanding inputs（近期工作包）
 
-The immediate implementation package is **C1.1**, including its minimal C1.0 ADRs, relationship case, bounded appointment authority, patient subject selection and NS-01–09 plus the relevant NS-24 recovery checks. Complete it before expanding the clinical record. C1.2 and C2 then build on the same actor/subject semantics.
+The immediate implementation package is **C2.1**: reported/reviewed history, actual encounter, tooth/surface findings, safe drafts and clinical worklist. C1.1 and C1.2 have local executed delivery records; build the new clinical facts on their same actor/subject and professional semantics. C2.2 and C2.3 then provide continuity, actual charging, recall and lab readiness.
 
 No server purchase or AppID is needed to design and verify this local synthetic slice. Actual WeChat experience release and cloud operation require those inputs later. Before real clinical replacement, obtain the first clinic/service matrix, authorized professional reviewers, local integration/retention requirements and funded operating responsibilities. Record each dependency with its owner and evidence; do not invent approvals or dates.
 

@@ -1,3 +1,5 @@
+**当前 C1.2：** [专业权限与限定转诊](C12_AUTHORITY_CONTRACT.md) · [本机交付证据](evidence_c12/release.json) · [C1–C2执行进度](C1_C2_PROGRESS.md)。
+
 # 项目文档分类导航
 
 当前产品方向：[商业V2总计划](COMMERCIAL_V2_MASTER_PLAN.md) → [代码与证据基线](COMMERCIAL_V2_BASELINE.md) → [分批需求及验收](COMMERCIAL_V2_BACKLOG.json)。首发采用单连锁独立部署，完整诊疗替代纳入目标；课程报告与旧执行记录继续作为来源保留。

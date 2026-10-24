@@ -1,7 +1,8 @@
 # C1.2 authority contract and ADR
 
-Status: implementation in progress. This document defines the rules; it is not
-proof of clinical qualification, completed shared care or installed acceptance.
+Status: implemented and synthetically delivered locally; see
+[executed acceptance](evidence_c12/release.json). This contract and the local
+software evidence do not establish real professional qualification.
 
 ## ADR-C1-PROFESSIONAL
 

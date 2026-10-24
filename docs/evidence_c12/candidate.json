@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "application_commit": "3ff5383161b5e856f8b8178bb07e1c97e2a07fbb",
+  "image": "sha256:b6dabc1b74d7e2d1b8d8fd69a0dae1e7c14247342f36373959a412d18776fc3d",
+  "five_clinic_cross_channel_checks": 126,
+  "source_equivalence_feature_files": 603,
+  "unchanged_business_tables": 10,
+  "original_invoice_total": "50000.00",
+  "original_posted_cash_total": "50000.00",
+  "new_financial_or_clinical_effects": 0,
+  "scope": "Exact committed image; real Chrome 390px/keyboard and native Page handlers through actual HTTP. Not WeChat runtime or cloud acceptance."
+}

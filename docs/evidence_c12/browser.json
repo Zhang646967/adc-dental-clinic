@@ -1,0 +1,549 @@
+{
+  "checks": [
+    {
+      "name": "source clinician can prepare 1",
+      "passed": true
+    },
+    {
+      "name": "referral form 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "referral form 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 3",
+      "passed": true
+    },
+    {
+      "name": "saved referral pending identity 1",
+      "passed": true
+    },
+    {
+      "name": "front identity without clinical payload 1",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 6",
+      "passed": true
+    },
+    {
+      "name": "identity dispute retained 1",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 8",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "receiver before acceptance no clinical purpose 1",
+      "passed": true
+    },
+    {
+      "name": "unaccepted read rejected 1",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 13",
+      "passed": true
+    },
+    {
+      "name": "selected version released 1",
+      "passed": true
+    },
+    {
+      "name": "no billing header or money 1",
+      "passed": true
+    },
+    {
+      "name": "released record 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "released record 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "patient website status 1",
+      "passed": true
+    },
+    {
+      "name": "native same accepted referral 1",
+      "passed": true
+    },
+    {
+      "name": "native preview before effect 1",
+      "passed": true
+    },
+    {
+      "name": "native requires explicit checkbox 1",
+      "passed": true
+    },
+    {
+      "name": "native current revoked result 1",
+      "passed": true
+    },
+    {
+      "name": "native termination visible website 1",
+      "passed": true
+    },
+    {
+      "name": "terminated receiver read denied 1",
+      "passed": true
+    },
+    {
+      "name": "source clinician can prepare 2",
+      "passed": true
+    },
+    {
+      "name": "referral form 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "referral form 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 28",
+      "passed": true
+    },
+    {
+      "name": "saved referral pending identity 2",
+      "passed": true
+    },
+    {
+      "name": "front identity without clinical payload 2",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 31",
+      "passed": true
+    },
+    {
+      "name": "identity dispute retained 2",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 33",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "receiver before acceptance no clinical purpose 2",
+      "passed": true
+    },
+    {
+      "name": "unaccepted read rejected 2",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 38",
+      "passed": true
+    },
+    {
+      "name": "selected version released 2",
+      "passed": true
+    },
+    {
+      "name": "no billing header or money 2",
+      "passed": true
+    },
+    {
+      "name": "released record 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "released record 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "patient website status 2",
+      "passed": true
+    },
+    {
+      "name": "native same accepted referral 2",
+      "passed": true
+    },
+    {
+      "name": "native preview before effect 2",
+      "passed": true
+    },
+    {
+      "name": "native requires explicit checkbox 2",
+      "passed": true
+    },
+    {
+      "name": "native current revoked result 2",
+      "passed": true
+    },
+    {
+      "name": "native termination visible website 2",
+      "passed": true
+    },
+    {
+      "name": "terminated receiver read denied 2",
+      "passed": true
+    },
+    {
+      "name": "source clinician can prepare 3",
+      "passed": true
+    },
+    {
+      "name": "referral form 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "referral form 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 53",
+      "passed": true
+    },
+    {
+      "name": "saved referral pending identity 3",
+      "passed": true
+    },
+    {
+      "name": "front identity without clinical payload 3",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 56",
+      "passed": true
+    },
+    {
+      "name": "identity dispute retained 3",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 58",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "receiver before acceptance no clinical purpose 3",
+      "passed": true
+    },
+    {
+      "name": "unaccepted read rejected 3",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 63",
+      "passed": true
+    },
+    {
+      "name": "selected version released 3",
+      "passed": true
+    },
+    {
+      "name": "no billing header or money 3",
+      "passed": true
+    },
+    {
+      "name": "released record 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "released record 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "patient website status 3",
+      "passed": true
+    },
+    {
+      "name": "native same accepted referral 3",
+      "passed": true
+    },
+    {
+      "name": "native preview before effect 3",
+      "passed": true
+    },
+    {
+      "name": "native requires explicit checkbox 3",
+      "passed": true
+    },
+    {
+      "name": "native current revoked result 3",
+      "passed": true
+    },
+    {
+      "name": "native termination visible website 3",
+      "passed": true
+    },
+    {
+      "name": "terminated receiver read denied 3",
+      "passed": true
+    },
+    {
+      "name": "source clinician can prepare 4",
+      "passed": true
+    },
+    {
+      "name": "referral form 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "referral form 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 78",
+      "passed": true
+    },
+    {
+      "name": "saved referral pending identity 4",
+      "passed": true
+    },
+    {
+      "name": "front identity without clinical payload 4",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 81",
+      "passed": true
+    },
+    {
+      "name": "identity dispute retained 4",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 83",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "receiver before acceptance no clinical purpose 4",
+      "passed": true
+    },
+    {
+      "name": "unaccepted read rejected 4",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 88",
+      "passed": true
+    },
+    {
+      "name": "selected version released 4",
+      "passed": true
+    },
+    {
+      "name": "no billing header or money 4",
+      "passed": true
+    },
+    {
+      "name": "released record 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "released record 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "patient website status 4",
+      "passed": true
+    },
+    {
+      "name": "native same accepted referral 4",
+      "passed": true
+    },
+    {
+      "name": "native preview before effect 4",
+      "passed": true
+    },
+    {
+      "name": "native requires explicit checkbox 4",
+      "passed": true
+    },
+    {
+      "name": "native current revoked result 4",
+      "passed": true
+    },
+    {
+      "name": "native termination visible website 4",
+      "passed": true
+    },
+    {
+      "name": "terminated receiver read denied 4",
+      "passed": true
+    },
+    {
+      "name": "source clinician can prepare 5",
+      "passed": true
+    },
+    {
+      "name": "referral form 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "referral form 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 103",
+      "passed": true
+    },
+    {
+      "name": "saved referral pending identity 5",
+      "passed": true
+    },
+    {
+      "name": "front identity without clinical payload 5",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 106",
+      "passed": true
+    },
+    {
+      "name": "identity dispute retained 5",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 108",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "identity confirmation 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "receiver before acceptance no clinical purpose 5",
+      "passed": true
+    },
+    {
+      "name": "unaccepted read rejected 5",
+      "passed": true
+    },
+    {
+      "name": "explicit signed preview 113",
+      "passed": true
+    },
+    {
+      "name": "selected version released 5",
+      "passed": true
+    },
+    {
+      "name": "no billing header or money 5",
+      "passed": true
+    },
+    {
+      "name": "released record 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "released record 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "patient website status 5",
+      "passed": true
+    },
+    {
+      "name": "native same accepted referral 5",
+      "passed": true
+    },
+    {
+      "name": "native preview before effect 5",
+      "passed": true
+    },
+    {
+      "name": "native requires explicit checkbox 5",
+      "passed": true
+    },
+    {
+      "name": "native current revoked result 5",
+      "passed": true
+    },
+    {
+      "name": "native termination visible website 5",
+      "passed": true
+    },
+    {
+      "name": "terminated receiver read denied 5",
+      "passed": true
+    },
+    {
+      "name": "no browser script errors",
+      "passed": true
+    }
+  ],
+  "results": [
+    {
+      "source_clinic": 1,
+      "destination_clinic": 2,
+      "referral": 10,
+      "source_visit": 2101,
+      "source_record": 101
+    },
+    {
+      "source_clinic": 2,
+      "destination_clinic": 3,
+      "referral": 11,
+      "source_visit": 4202,
+      "source_record": 202
+    },
+    {
+      "source_clinic": 3,
+      "destination_clinic": 4,
+      "referral": 12,
+      "source_visit": 6303,
+      "source_record": 303
+    },
+    {
+      "source_clinic": 4,
+      "destination_clinic": 5,
+      "referral": 13,
+      "source_visit": 8404,
+      "source_record": 404
+    },
+    {
+      "source_clinic": 5,
+      "destination_clinic": 1,
+      "referral": 14,
+      "source_visit": 10505,
+      "source_record": 505
+    }
+  ],
+  "page_errors": 0,
+  "scope": "C1.2 real Chrome and actual native Page handlers over HTTP/PostgreSQL; synthetic professional evidence only, not WeChat runtime",
+  "browser": "156.0.8078.47",
+  "passed": true
+}

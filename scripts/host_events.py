@@ -47,13 +47,28 @@ def elapsed(old, now):
     return max(wall, mono)
 
 
+class CollectionFailure(ValueError):
+    """Fixed diagnostic codes only; never retain subprocess text or arguments."""
+    def __init__(self, stage, category):
+        self.stage, self.category = stage, category
+        super().__init__('Host collection unavailable')
+
+
 def run(target, *args):
     env = {k: v for k, v in os.environ.items() if not k.startswith(('DOCKER_', 'COMPOSE_'))}
-    completed = subprocess.run([target['docker'], '--context', target['context'], *args],
-        env=env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
-        check=True, timeout=15)
+    stage = args[0] if args and args[0] in ('context', 'ps', 'inspect', 'events') else 'projection'
+    try:
+        completed = subprocess.run([target['docker'], '--context', target['context'], *args],
+            env=env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+            check=True, timeout=15)
+    except subprocess.TimeoutExpired:
+        raise CollectionFailure(stage, 'TIMEOUT') from None
+    except subprocess.CalledProcessError:
+        raise CollectionFailure(stage, 'EXIT_FAILURE') from None
+    except OSError:
+        raise CollectionFailure(stage, 'COMMAND_UNAVAILABLE') from None
     if len(completed.stdout) > 256 * 1024:
-        raise ValueError('Host projection exceeds its bound.')
+        raise CollectionFailure(stage, 'OUTPUT_BOUND')
     return completed.stdout.strip()
 
 
@@ -152,11 +167,15 @@ class Journal:
                 try:
                     containers, events, saturated = sample(self.target, since, until)
                     gap = gap or saturated
-                except (OSError, ValueError, subprocess.SubprocessError):
+                except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                    diagnostic = (dict(stage=exc.stage, category=exc.category) if isinstance(exc, CollectionFailure)
+                        else dict(stage='projection', category='INVALID_PROJECTION'))
+                    state['last_collection_failure'] = dict(diagnostic, at=now)
                     self.condition(state, 'collector', 'UNKNOWN', 'COLLECTOR_UNAVAILABLE', now)
                     previous = state['events'][-1:]  # Avoid appending unchanged polling failures.
-                    if not previous or previous[0]['code'] != 'COLLECTOR_UNAVAILABLE':
-                        self.event(state, 'COLLECTOR_UNAVAILABLE', 'collector', now)
+                    if not previous or previous[0]['code'] != 'COLLECTOR_UNAVAILABLE' or any(
+                            previous[0].get(k) != v for k, v in diagnostic.items()):
+                        self.event(state, 'COLLECTOR_UNAVAILABLE', 'collector', now, **diagnostic)
                     self.store.write('host.json', state)
                     return self.status(state=state, now=now)
                 if gap:
@@ -211,6 +230,7 @@ class Journal:
                        key=SEVERITY.__getitem__, default='UNKNOWN')
         return dict(v=1, state=severity, code=SEVERITY[severity], project=self.target['project'],
             source=self.target['source'], sampled=state['sampled'], conditions=conditions,
+            last_collection_failure=state.get('last_collection_failure'),
             active_incidents=active, retained_incidents=len(state['incidents']),
             retained_events=len(state['events']), pruned_events=state['pruned_events'])
 
