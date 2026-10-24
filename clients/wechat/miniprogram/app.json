@@ -13,7 +13,9 @@
     "pages/waitjoin/index",
     "pages/offer/index",
     "pages/referrals/index",
-    "pages/history/index"
+    "pages/history/index",
+    "pages/plans/index",
+    "pages/plan/index"
   ],
   "window": {
     "navigationBarTitleText": "ADC 口腔预约",

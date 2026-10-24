@@ -18,6 +18,8 @@ for _role in ('DENTIST','MANAGER'):
     NAV[_role].insert(0,('clinical_authority_home','专业操作范围'))
 NAV['DENTIST'].insert(0,('clinical_worklist','检查记录工作台'))
 NAV['PATIENT'].append(('portal_history','我的健康自述'))
+NAV['PATIENT'].append(('portal_plans','我的治疗计划'))
+NAV['FRONT_DESK'].insert(5,('clinical_next_list','后续就诊安排'))
 for _role in ('DENTIST','FRONT_DESK','MANAGER','PATIENT'):
     NAV[_role].append(('clinical_referrals','跨店转诊'))
 
@@ -50,7 +52,7 @@ def navigation(request):
                 patient_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.name) if access.delegated else '本人',
                 workspace_scope='预约代办' if access.delegated else '本人资料')
             if access.delegated:
-                data['workspace_nav']=[item for item in data['workspace_nav'] if item['url'] not in (reverse('clinical_referrals'),reverse('portal_history'))]
+                data['workspace_nav']=[item for item in data['workspace_nav'] if item['url'] not in (reverse('clinical_referrals'),reverse('portal_history'),reverse('portal_plans'))]
                 for item in data['workspace_nav']:
                     if item['label']=='我的预约与账单':item['label']='当前患者预约'
         except PermissionDenied:pass

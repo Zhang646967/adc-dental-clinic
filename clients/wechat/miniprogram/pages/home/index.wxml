@@ -18,5 +18,5 @@
   <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view>
   <button class="secondary" bindtap="load" disabled="{{busy}}">刷新办理结果</button>
   <navigator class="card" wx:if="{{!patientDelegated}}" url="/pages/history/index"><view class="section-title">我的健康自述</view><view>补充本人健康、用药与自述过敏情况，由医师在接诊时核对。</view></navigator>
-  <button bindtap="logout">退出账号</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+  <navigator wx:if="{{!patientDelegated}}" class="card" url="/pages/plans/index"><view class="section-title">我的治疗计划 →</view><view>核对方案版本、本人决定与实际执行进展。</view></navigator><button bindtap="logout">退出账号</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

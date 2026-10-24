@@ -8,6 +8,16 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'clinical_plans':('PLAN_LIST','CARE'),'clinical_plan_detail':('PLAN','CARE'),
+    'clinical_plan_preview':('PLAN','CARE'),'clinical_plan_decision':('PLAN','CARE'),
+    'clinical_actual':('ACTUAL','CARE'),'clinical_actual_void':('ACTUAL','CARE'),
+    'clinical_next_visit':('NEXT_VISIT','CARE'),'clinical_next_withdraw':('NEXT_VISIT','CARE'),
+    'clinical_next_list':('NEXT_VISIT_LIST','COORDINATION'),'clinical_next_link':('NEXT_VISIT','COORDINATION'),
+    'portal_plans':('PLAN_LIST','SELF_PLAN'),'portal_plan':('PLAN','SELF_PLAN'),
+    'portal_plan_decision':('PLAN','SELF_PLAN'),
+    'mini_plans':('PLAN_LIST','SELF_PLAN'),'mini_plan':('PLAN','SELF_PLAN'),
+    'mini_plan_decision_preview':('PLAN','SELF_PLAN'),
+    'mini_plan_decision_confirm':('PLAN','SELF_PLAN'),
     'clinical_worklist':('VISIT_LIST','CARE'),'clinical_encounter':('CARE','CARE'),
     'clinical_interview_history':('CARE','HISTORY'),'clinical_record_preview':('CARE','CARE'),
     'clinical_record_confirm':('CARE','CARE'),

@@ -146,3 +146,6 @@ class SensitiveReadEvent(models.Model):
 
 # C2 clinical ownership remains separate from the existing billing versions.
 from clinical.encounter_models import (ClinicalHistoryVersion,ClinicalEncounter,ClinicalDraft,ClinicalRecordVersion,ToothFinding,ClinicalRecordEvent)
+
+# C2.2 owned treatment-continuity facts.
+from clinical.plan_models import (TreatmentPlan,PlanDraft,PlanVersion,TreatmentStep,PlanStepVersion,PlanDecision,PerformedProcedure,NextVisitInstruction,PlanAppointment,PlanEvent)

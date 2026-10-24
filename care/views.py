@@ -69,7 +69,7 @@ def complete(request,pk):
     _own_visit(request.user,pk)
     progress=care_progress(request.user,pk);v=progress['visit']
     form=CompletionForm(request.POST or None,initial={"expected_version":v.lock_version,
-        "outcome":"TREATED" if progress['lines'] else "NO_TREATMENT"})
+        "outcome":"TREATED" if progress['lines'] or progress['actual']['provided'] else "NO_TREATMENT"})
     if request.method=="POST" and form.is_valid():
         data=dict(form.cleaned_data);data.pop("confirmed")
         try: invoice=complete_visit(actor=request.user,visit_id=v.pk,**data)
@@ -95,16 +95,19 @@ def _invoice_context(invoice,request,*,portal=False):
             if n<1:raise ValueError
         except (TypeError,ValueError):raise Http404('无效版本。')
         record=get_object_or_404(VisitRecordVersion,visit_id=invoice.visit_id,revision_no=n,state='PUBLISHED')
-    # Deliberately do NOT include clinical_note or allergy snapshot in the invoice context.
+    from clinical.actual_summary import actual_care_summary
+    # Financial projection includes the retained stage label, not clinical narrative.
+    actual=actual_care_summary(invoice.visit_id)
     return {"base_template":"portal/base.html" if portal else "base.html",
         "invoice_no":invoice.invoice_no,"revision":record.revision_no,"header":record.billing_header_snapshot,
         "issued_at":invoice.first_issued_at,"total":record.total_amount,"outcome":record.outcome,
         "lines":list(record.treatment_lines.values("name_snapshot","unit_snapshot","quantity","unit_price","line_amount")),
+        "no_charge_stages":actual['no_charge_stages'],
         "patient_portal":portal,"visit_id":invoice.visit_id,
         "is_current":record.pk==invoice.current_record_version_id,
         "published_at":record.published_at,
         "revisions":tuple(VisitRecordVersion.objects.filter(visit_id=invoice.visit_id,state='PUBLISHED').order_by('-revision_no').values('revision_no','published_at')),
-        "may_correct":not portal and invoice.visit.status=='COMPLETED' and bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists(),
+        "may_correct":not portal and invoice.visit.status=='COMPLETED' and record.treatment_lines.exists() and bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists(),
         "invoice_id":invoice.pk,
         "cash_balance":invoice_balance(invoice),
         "can_request_cash":not portal and bindings(request.user).filter(role='FRONT_DESK',scope_kind='CLINIC',clinic_id=invoice.visit.clinic_id).exists()}

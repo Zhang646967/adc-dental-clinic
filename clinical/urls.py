@@ -1,8 +1,22 @@
 from django.urls import path
 from clinical import views
 from clinical import encounter_views as encounters
+from clinical import plan_views as plans
 
 urlpatterns=[
+    path('clinical/encounters/<int:pk>/plans/',plans.plan_list,name='clinical_plans'),
+    path('clinical/encounters/<int:pk>/plans/<int:plan_id>/',plans.plan_detail,name='clinical_plan_detail'),
+    path('clinical/encounters/<int:pk>/plans/<int:plan_id>/confirm/',plans.plan_preview,name='clinical_plan_preview'),
+    path('clinical/encounters/<int:pk>/steps/<int:step_id>/decision/',plans.manual_decision,name='clinical_plan_decision'),
+    path('clinical/encounters/<int:pk>/actual/',plans.actual,name='clinical_actual'),
+    path('clinical/encounters/<int:pk>/actual/<int:performed_id>/void/',plans.void_actual,name='clinical_actual_void'),
+    path('clinical/encounters/<int:pk>/next/',plans.instruction,name='clinical_next_visit'),
+    path('clinical/encounters/<int:pk>/next/<int:instruction_id>/withdraw/',plans.withdraw_instruction,name='clinical_next_withdraw'),
+    path('clinical/next-visits/',plans.next_list,name='clinical_next_list'),
+    path('clinical/next-visits/<int:pk>/link/',plans.link_appointment,name='clinical_next_link'),
+    path('portal/plans/',plans.self_list,name='portal_plans'),
+    path('portal/plans/<int:pk>/',plans.self_detail,name='portal_plan'),
+    path('portal/plans/<int:pk>/steps/<int:step_id>/decision/',plans.self_decision,name='portal_plan_decision'),
     path('clinical/worklist/',encounters.worklist,name='clinical_worklist'),
     path('clinical/encounters/<int:pk>/',encounters.workspace,name='clinical_encounter'),
     path('clinical/encounters/<int:pk>/history/',encounters.interview_history,name='clinical_interview_history'),

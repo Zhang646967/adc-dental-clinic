@@ -78,8 +78,11 @@ def review_allergies(*,actor,visit_id,expected_version,patient_version,status,al
 
 @business_errors
 @transaction.atomic
-def add_treatment(*,actor,visit_id,expected_version,treatment_id,quantity,price_reason=""):
+def add_treatment(*,actor,visit_id,expected_version,treatment_id,quantity,price_reason="",_structured_source=False):
     v=_lock_care(actor,visit_id);_assert_current(v,expected_version)
+    from clinical.models import ClinicalEncounter
+    if ClinicalEncounter.objects.filter(visit=v).exists() and not _structured_source:
+        raise RuleError("本次已有结构化检查，请从实际执行入口确认项目，保留唯一的诊疗收费来源。")
     draft=_draft(actor,v)
     treatment=TreatmentType.objects.select_for_update().get(pk=treatment_id,is_active=True)
     if draft.treatment_lines.count()>=40: raise RuleError("单次演示接诊最多40行治疗明细。")
@@ -103,10 +106,26 @@ def remove_treatment(*,actor,visit_id,expected_version,line_id,reason):
     v=_lock_care(actor,visit_id);_assert_current(v,expected_version)
     draft=_draft(actor,v)
     line=TreatmentRecord.objects.get(pk=line_id,record_version=draft)
+    from clinical.plan_models import PerformedProcedure
+    if PerformedProcedure.objects.filter(charge_line=line).exists():
+        raise RuleError("此行来自已确认实际执行，请先在实际执行入口核对并更正，原执行历史继续保留。")
     emit(actor,"DRAFT_LINE_REMOVED",line,visit=v,reason=reason.strip(),summary={"line_no":line.line_no})
     line.delete()
     draft.total_amount=total_amount(draft.treatment_lines.values_list("line_amount",flat=True))
     draft.save(update_fields=["total_amount"]);_bump(v)
+    return draft
+
+
+@business_errors
+@transaction.atomic
+def record_no_charge_effect(*,actor,visit_id,expected_version,performed_id):
+    """A staged actual fact, never a fee waiver or a zero-value cash entry."""
+    v=_lock_care(actor,visit_id);_assert_current(v,expected_version)
+    from clinical.plan_models import PerformedProcedure
+    actual=PerformedProcedure.objects.get(pk=performed_id,encounter__visit=v,charge_mode='NO_CHARGE',recorded_by=actor)
+    if v.status!='CHECKED_IN':raise RuleError("只能在尚未关闭的实际接诊中核对阶段执行。")
+    draft=_draft(actor,v);_bump(v)
+    emit(actor,'STAGED_ACTUAL_RECORDED',actual,visit=v,summary={'performed':actual.pk,'state':actual.state})
     return draft
 
 
@@ -127,13 +146,15 @@ def complete_visit(*,actor,visit_id,expected_version,outcome,reason=""):
     if clinical_blockers:raise RuleError(clinical_blockers[0])
     draft=_draft(actor,v)
     lines=list(draft.treatment_lines.select_for_update().order_by("line_no"))
+    from clinical.actual_summary import actual_care_summary
+    actual=actual_care_summary(v.pk)
     if outcome=="TREATED":
-        if not lines: raise RuleError("有治疗完成必须包含实际治疗；没有治疗请选择无治疗关闭。")
+        if not lines and not actual['stage_no_charge']: raise RuleError("有治疗完成必须包含实际治疗；没有治疗请选择无治疗关闭。")
         snap=draft.allergy_review_snapshot
         if snap.get("status") not in ("KNOWN","NO_KNOWN") or snap.get("information_version")!=patient.allergy_info_version or not snap.get("reviewed_at"):
             raise RuleError("过敏信息未知、未复核或已经更新，请重新复核。")
     else:
-        if lines: raise RuleError("已有实际治疗，不能作为无治疗关闭。")
+        if lines or actual['provided']: raise RuleError("已有实际治疗，不能作为无治疗关闭。")
         if not isinstance(reason,str) or not 1<=len(reason.strip())<=500: raise RuleError("无治疗关闭必须填写原因（1至500字）。")
     for item in lines:
         if item.confirmed_by_id!=actor.pk or item.confirmed_at is None:

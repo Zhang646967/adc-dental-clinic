@@ -213,5 +213,5 @@ async function verify(){
   });
   return {passed:true,cases:cases.length,case_names:cases,scope:'actual Page handlers with mocked API; not Django/PostgreSQL, official compilation or WeChat runtime'};
 }
-module.exports={verify};
+module.exports={verify,page};
 if(require.main===module)verify().then(result=>console.log(JSON.stringify(result))).catch(error=>{console.error(error.stack);process.exitCode=1;});

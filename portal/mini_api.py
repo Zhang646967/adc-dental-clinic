@@ -11,7 +11,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse,Http404
 from django.middleware.csrf import get_token
 from django.utils import timezone
 from django.views.decorators.debug import sensitive_post_parameters
@@ -62,7 +62,7 @@ def endpoint(methods=('GET',), *, public=False, subject_optional=False):
                 return result(request,status=409,code='SUBJECT_REQUIRED',message=str(exc))
             except PermissionDenied:
                 return result(request, status=403, code='ACCESS_DENIED', message='当前账号或患者授权已失效，请重新登录或联系前台。')
-            except ObjectDoesNotExist:
+            except (ObjectDoesNotExist,Http404):
                 return result(request, status=404, code='NOT_FOUND', message='记录不存在或不属于当前患者，请返回清单核对。')
             except RuleError as exc:
                 return result(request, status=409, code='BUSINESS_CONFLICT', message=str(exc))

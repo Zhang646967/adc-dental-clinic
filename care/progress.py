@@ -24,6 +24,8 @@ def care_progress(actor, visit_id):
         allergy_current = (snap.get('status') in ['KNOWN','NO_KNOWN'] and
             snap.get('information_version') == visit.patient.allergy_info_version and bool(snap.get('reviewed_at')))
         from clinical.completion import completion_blockers
+        from clinical.actual_summary import actual_care_summary,bind_performed_sources
+        actual=actual_care_summary(visit.pk)
         can_record=True
         try:require_visit_authority(actor,visit,'RECORD',always=structured)
         except PermissionDenied:can_record=False
@@ -35,7 +37,7 @@ def care_progress(actor, visit_id):
         if not visit.attended_at or visit.attended_at > timezone.now(): blockers.append('实际到诊时间需先核对。')
         clinical_blockers=completion_blockers(visit)
         treated_blockers = list(blockers)+clinical_blockers
-        if not lines: treated_blockers.append('尚无实际治疗明细；未治疗时请选择无治疗关闭并填写原因。')
+        if not lines and not actual['stage_no_charge']: treated_blockers.append('尚无实际治疗明细；未治疗时请选择无治疗关闭并填写原因。')
         if not allergy_current: treated_blockers.append('过敏信息仍未知、尚未复核或资料版本已变化。')
         if any(line.confirmed_by_id != actor.pk or not line.confirmed_at for line in lines):
             treated_blockers.append('部分治疗尚未由本次负责牙医确认。')
@@ -43,9 +45,10 @@ def care_progress(actor, visit_id):
         published = invoice.current_record_version if invoice else None
         display_record=draft or published
         display_lines=lines if draft else list(published.treatment_lines.order_by('line_no')) if published else []
+        bind_performed_sources(display_lines)
         from clinical.authority import may_refer
         clinical_record=ClinicalRecordVersion.objects.filter(encounter__visit=visit).order_by('-revision').first() if structured else None
         return dict(visit=visit, clinical_started=structured,clinical_available=clinical_available,clinical_record=clinical_record,record=display_record, lines=display_lines, invoice=invoice, published=published, can_refer=may_refer(actor,visit),
             editable=editable, allergy_current=allergy_current, treated_blockers=treated_blockers,
-            no_treatment_allowed=not blockers and not clinical_blockers and not lines,
+            actual=actual,no_treatment_allowed=not blockers and not clinical_blockers and not lines and not actual['provided'],
             clinical_note=draft.clinical_note if draft else published.clinical_note if published else '')

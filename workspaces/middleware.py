@@ -14,6 +14,11 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'clinical_plans':{'DENTIST'},'clinical_plan_detail':{'DENTIST'},'clinical_plan_preview':{'DENTIST'},
+ 'clinical_plan_decision':{'DENTIST'},'clinical_actual':{'DENTIST'},'clinical_actual_void':{'DENTIST'},
+ 'clinical_next_visit':{'DENTIST'},'clinical_next_withdraw':{'DENTIST'},
+ 'clinical_next_list':{'FRONT_DESK'},'clinical_next_link':{'FRONT_DESK'},
+ 'portal_plans':{'PATIENT'},'portal_plan':{'PATIENT'},'portal_plan_decision':{'PATIENT'},
  'clinical_worklist':{'DENTIST'},'clinical_encounter':{'DENTIST'},'clinical_interview_history':{'DENTIST'},
  'clinical_record_preview':{'DENTIST'},'clinical_record_confirm':{'DENTIST'},
  'clinical_authority_home':{'MANAGER','DENTIST'},'clinical_authority_detail':{'MANAGER','DENTIST'},

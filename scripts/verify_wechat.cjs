@@ -61,5 +61,6 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
     }finally{fs.rmSync(output,{recursive:true,force:true});}
   }
   const services=await require('./verify_native_services.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const plans=await require('./verify_native_plans.cjs').verify();
+  console.log(JSON.stringify({passed:true,checks,services,plans,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

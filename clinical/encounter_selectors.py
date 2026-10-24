@@ -24,31 +24,36 @@ def clinical_worklist(actor):
 
 def encounter_details(actor,visit_id,*,revision=None):
     with reporting_snapshot():
-        require_active(actor,('DENTIST',))
-        visit=get_object_or_404(Visit.objects.select_related('patient','clinic','dentist'),pk=visit_id,dentist_id=actor.dentist_id)
-        require_visit_authority(actor,visit,'READ',always=True)
-        can_record=True
-        try:require_visit_authority(actor,visit,'RECORD',always=True)
-        except PermissionDenied:can_record=False
-        head=ClinicalEncounter.objects.filter(visit=visit).first()
-        draft=ClinicalDraft.objects.filter(encounter=head).first() if head else None
-        current=current_record(head) if head else None
-        displayed=current
-        if revision is not None:
-            try:
-                number=int(revision)
-                if number<1:raise ValueError
-                displayed=ClinicalRecordVersion.objects.filter(encounter=head,revision=number).first() if head else None
-                if displayed is None:raise ValueError
-            except (TypeError,ValueError):raise Http404('未找到本次检查的指定版本。')
-        working_draft=draft if revision is None else None
-        payload=normalize_draft(working_draft.payload) if working_draft else record_payload(displayed) if displayed else normalize_draft({})
-        can_edit=can_record and visit.patient.is_active and head is not None and (draft is not None or (current is None and visit.status=='CHECKED_IN')) and revision is None
-        return dict(visit=visit,encounter=head,draft=working_draft,clinical_record=displayed,current_record=current,payload=payload,
-            can_record=can_record,can_edit=can_edit,can_start=can_record and visit.patient.is_active and head is None and visit.status=='CHECKED_IN',
-            can_amend=can_record and visit.patient.is_active and current is not None and draft is None and revision is None,
-            history_rows=list(visible_history(visit.patient_id,visit.clinic_id).select_related('scope_clinic')[:50]),
-            selected_history=visible_history(visit.patient_id,visit.clinic_id).filter(pk=payload['history_id']).first() if payload.get('history_id') else None,
-            versions=list(ClinicalRecordVersion.objects.filter(encounter=head).order_by('-revision')) if head else [],
-            newer_history=bool(current and current.history_cursor!=history_cursor(visit.patient_id,visit.clinic_id)),
-            findings=payload['findings'] if draft and revision is None else list(displayed.findings.values('tooth','surface','kind','detail')) if displayed else [])
+        return _encounter_details(actor,visit_id,revision=revision)
+
+
+def _encounter_details(actor,visit_id,*,revision=None):
+    """Internal composition inside the caller's existing reporting snapshot."""
+    require_active(actor,('DENTIST',))
+    visit=get_object_or_404(Visit.objects.select_related('patient','clinic','dentist'),pk=visit_id,dentist_id=actor.dentist_id)
+    require_visit_authority(actor,visit,'READ',always=True)
+    can_record=True
+    try:require_visit_authority(actor,visit,'RECORD',always=True)
+    except PermissionDenied:can_record=False
+    head=ClinicalEncounter.objects.filter(visit=visit).first()
+    draft=ClinicalDraft.objects.filter(encounter=head).first() if head else None
+    current=current_record(head) if head else None
+    displayed=current
+    if revision is not None:
+        try:
+            number=int(revision)
+            if number<1:raise ValueError
+            displayed=ClinicalRecordVersion.objects.filter(encounter=head,revision=number).first() if head else None
+            if displayed is None:raise ValueError
+        except (TypeError,ValueError):raise Http404('未找到本次检查的指定版本。')
+    working_draft=draft if revision is None else None
+    payload=normalize_draft(working_draft.payload) if working_draft else record_payload(displayed) if displayed else normalize_draft({})
+    can_edit=can_record and visit.patient.is_active and head is not None and (draft is not None or (current is None and visit.status=='CHECKED_IN')) and revision is None
+    return dict(visit=visit,encounter=head,draft=working_draft,clinical_record=displayed,current_record=current,payload=payload,
+        can_record=can_record,can_edit=can_edit,can_start=can_record and visit.patient.is_active and head is None and visit.status=='CHECKED_IN',
+        can_amend=can_record and visit.patient.is_active and current is not None and draft is None and revision is None,
+        history_rows=list(visible_history(visit.patient_id,visit.clinic_id).select_related('scope_clinic')[:50]),
+        selected_history=visible_history(visit.patient_id,visit.clinic_id).filter(pk=payload['history_id']).first() if payload.get('history_id') else None,
+        versions=list(ClinicalRecordVersion.objects.filter(encounter=head).order_by('-revision')) if head else [],
+        newer_history=bool(current and current.history_cursor!=history_cursor(visit.patient_id,visit.clinic_id)),
+        findings=payload['findings'] if draft and revision is None else list(displayed.findings.values('tooth','surface','kind','detail')) if displayed else [])

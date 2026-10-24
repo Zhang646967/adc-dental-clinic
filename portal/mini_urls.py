@@ -3,8 +3,13 @@ from portal import mini_api as api
 from portal import mini_waitlist as wait
 from portal import mini_referrals as referral
 from portal import mini_history as history
+from portal import mini_plans as plans
 
 urlpatterns = [
+    path('plans/',plans.listing,name='mini_plans'),
+    path('plans/<int:pk>/',plans.detail,name='mini_plan'),
+    path('plans/<int:pk>/steps/<int:step_id>/decision/preview/',plans.decision_preview,name='mini_plan_decision_preview'),
+    path('plans/<int:pk>/steps/<int:step_id>/decision/confirm/',plans.decision_confirm,name='mini_plan_decision_confirm'),
     path('history/',history.listing,name='mini_history'),
     path('history/submit/',history.submit,name='mini_history_submit'),
     path('referrals/',referral.listing,name='mini_referrals'),
