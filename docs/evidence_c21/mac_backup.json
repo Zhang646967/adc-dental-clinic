@@ -1,0 +1,10 @@
+{
+  "source_project": "adc_rc1_c65a09cf5683",
+  "finance_equipment_schema_in_archive": true,
+  "source_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "backup": "after-update-20261024T103032Z.dump.age",
+  "sha256": "7969bbfccdf149e627c7bb88bdb27944df733b6b9c541d98811ed3513b5b47ef",
+  "age_decryption_and_pg_dump_inventory": "PASS",
+  "restore_into_original_database": false,
+  "passed": true
+}

@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "image": "sha256:89aa06b9c46e899ad5bcd857fcc0e758b9990bd0d03e2122fcc980ccfd21b7dd",
+  "application_feature_files": 623,
+  "exact_image_browser_checks": {
+    "clinical": 151,
+    "referral": 126,
+    "care": 51
+  },
+  "browser_checks": 328,
+  "clinics": 5,
+  "native_handler_transport": "real HTTP/PostgreSQL, not WeChat runtime",
+  "viewport_px": 390,
+  "keyboard": true,
+  "page_errors": 0,
+  "clinical_input_only_effects": "exact-clinical-independent.json",
+  "business_facts": {
+    "passed": true,
+    "encounters": 11,
+    "history_versions": 21,
+    "interview_versions": 1,
+    "confirmed_versions": 21,
+    "nonempty_drafts": 1,
+    "findings": 60,
+    "clinical_operation_events": 135,
+    "new_actual_treatment_lines": 10,
+    "new_invoices": 11,
+    "explicit_no_treatment_invoices": 1,
+    "invoice_total": "52000.00",
+    "posted_cash_total": "50000.00",
+    "selected_historical_referrals": 10,
+    "unexpected_duplicate_effects": 0
+  },
+  "prior_interview_acceptance": "interview-browser.json; identical application file hashes; preliminary build provenance retained",
+  "exact_ci": "tracked separately",
+  "commercial_clinical_qualification": false
+}

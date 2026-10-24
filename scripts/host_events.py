@@ -91,9 +91,12 @@ def docker_sample(target, since, until):
             rows.append(dict(id=cid, service=service, image=image, phase=phase,
                 exit_code=int(exit_code), oom=oom == 'true', restarts=int(restarts),
                 started=started, health=health))
+    # Exec actions contain command text, including newlines and delimiters.
+    # Ask the daemon for lifecycle events only, before projecting any fields.
+    event_filters = [part for action in EVENTS for part in ('--filter', 'event=' + action)]
     raw = run(target, 'events', '--since', str(since), '--until', str(until),
         '--filter', 'type=container', '--filter', 'label=' + LABEL + 'project=' + target['project'],
-        '--format', EVENT_FORMAT).splitlines()
+        *event_filters, '--format', EVENT_FORMAT).splitlines()
     events = []
     for line in raw:
         ns, action, cid, service = line.split('|')

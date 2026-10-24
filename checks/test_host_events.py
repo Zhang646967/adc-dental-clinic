@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from adc_core.operations_store import PrivateStore
-from scripts.host_events import Journal, SERVICES, backup_event, docker_sample, CollectionFailure, run
+from scripts.host_events import Journal, SERVICES, EVENTS, backup_event, docker_sample, CollectionFailure, run
 from scripts.g4_course import Course
 
 TARGET = dict(v=1, project='adc_host_test', source='a'*40, context='test-local', docker='docker')
@@ -114,6 +114,35 @@ class HostEventsTests(unittest.TestCase):
         with patch('scripts.host_events.subprocess.run', return_value=subprocess.CompletedProcess([],0,'x'*(256*1024+1))):
             with self.assertRaises(CollectionFailure) as error: run(TARGET,'ps')
         self.assertEqual((error.exception.stage,error.exception.category),('ps','OUTPUT_BOUND'))
+
+    def test_lifecycle_filter_excludes_multiline_exec_before_projection(self):
+        calls=[]
+        def daemon(target,*args):
+            calls.append(args)
+            if args[0]=='context':return 'unix:///synthetic/docker.sock'
+            if args[0]=='ps':return ''
+            filters={args[i+1] for i,key in enumerate(args[:-1]) if key=='--filter'}
+            # The real daemon returns exec command text unless action filters
+            # are supplied; this is not a lifecycle event or a health sample.
+            return '' if {'event='+a for a in EVENTS}<=filters else '1|exec_create: PRIVATE|COMMAND\nPRIVATE-LINE|'+('a'*64)+'|web'
+        with patch('scripts.host_events.run',side_effect=daemon):
+            containers,events,saturated=docker_sample(TARGET,1,2)
+        self.assertEqual((containers,events,saturated),([],[],False))
+        args=calls[-1]
+        filters=[args[i+1] for i,key in enumerate(args[:-1]) if key=='--filter']
+        self.assertEqual({v for v in filters if v.startswith('event=')},{'event='+a for a in EVENTS})
+        self.assertIn('label=com.docker.compose.project='+TARGET['project'],filters)
+
+    def test_filtered_oom_and_stop_events_are_still_projected(self):
+        output='1|oom|'+('a'*64)+'|web\n2|stop|'+('b'*64)+'|notification-worker'
+        def daemon(target,*args):
+            if args[0]=='context':return 'unix:///synthetic/docker.sock'
+            if args[0]=='ps':return ''
+            return output
+        with patch('scripts.host_events.run',side_effect=daemon):
+            _,events,saturated=docker_sample(TARGET,1,2)
+        self.assertFalse(saturated)
+        self.assertEqual([e['code'] for e in events],['CONTAINER_OOM','CONTAINER_STOPPED'])
 
     def test_diagnostic_changes_retained_and_unchanged_failure_deduplicated(self):
         self.collect(0)

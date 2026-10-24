@@ -1,4 +1,4 @@
-**C2.1 当前验证：** [实际检查与健康自述](C21_CLINICAL_CONTRACT.md) · [执行及发布状态](evidence_c21/verification.json)。
+**C2.1 本机临床验收及采集修复：** [实际检查与健康自述](C21_CLINICAL_CONTRACT.md) · [执行及发布状态](evidence_c21/verification.json)。
 
 **当前 C1.2：** [专业权限与限定转诊](C12_AUTHORITY_CONTRACT.md) · [本机交付证据](evidence_c12/release.json) · [C1–C2执行进度](C1_C2_PROGRESS.md)。
 

@@ -1,6 +1,6 @@
 # ADC — Dental Clinic Management
 
-**C2.1 已完成源码与独立业务验证，准确版本发布验证进行中。** 患者本人健康自述、实际检查、牙位牙面、草稿冲突继续、确认版本与更正，衔接受控转诊和原接诊结算。[业务合同](docs/C21_CLINICAL_CONTRACT.md) · [分项证据与剩余门槛](docs/evidence_c21/README.md)。
+**C2.1 临床功能已在本机验收，主机采集修复正在验证。** 患者本人健康自述、实际检查、牙位牙面、草稿冲突继续、确认版本与更正，衔接受控转诊和原接诊结算。[业务合同](docs/C21_CLINICAL_CONTRACT.md) · [分项证据与剩余门槛](docs/evidence_c21/README.md)。
 
 **C1.2 已在本机验收交付：专业操作范围与限定跨店转诊。** 主管整理资质、受委任医师独立审核；接收店核对身份、指定医生接收，患者本人可在网站／小程序终止披露。[业务合同](docs/C12_AUTHORITY_CONTRACT.md) · [执行证据](docs/evidence_c12/README.md)。
 

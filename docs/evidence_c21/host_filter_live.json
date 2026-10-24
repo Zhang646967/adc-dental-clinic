@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "fixed_script_sha256": "0ffdfc0fe4aba4e1ff9e331fa07fd54b50bf922f27c1062fcae441b77278a34e",
+  "actual_docker_samples": 3,
+  "fresh_samples": [
+    {
+      "utc": 1792838216.0664692,
+      "mono": 727596.364828416
+    },
+    {
+      "utc": 1792838217.298205,
+      "mono": 727597.596567333
+    },
+    {
+      "utc": 1792838218.539559,
+      "mono": 727598.837922416
+    }
+  ],
+  "multiline_delimited_execs_filtered_before_projection": true,
+  "all_five_services_running": true,
+  "no_unexpected_collector_incident": true,
+  "original_journal_not_changed_by_this_drill": true,
+  "no_business_write": true,
+  "scope": "Real local Docker with isolated private host journal; original UNKNOWN history remains retained"
+}

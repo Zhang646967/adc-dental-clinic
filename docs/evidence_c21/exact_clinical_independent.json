@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "table_fingerprints_compared": 10,
+  "invoice_total": "51000.00",
+  "posted_cash_total": "50000.00",
+  "no_business_or_money_effects": true,
+  "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3"
+}

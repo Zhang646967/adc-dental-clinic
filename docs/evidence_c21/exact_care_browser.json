@@ -1,0 +1,239 @@
+{
+  "checks": [
+    {
+      "name": "structured clinical link 1",
+      "passed": true
+    },
+    {
+      "name": "separate explicit allergy review 1",
+      "passed": true
+    },
+    {
+      "name": "actual provided treatment recorded 1",
+      "passed": true
+    },
+    {
+      "name": "duplicate treatment request rejected 1",
+      "passed": true
+    },
+    {
+      "name": "close reads actual confirmed clinical version 1",
+      "passed": true
+    },
+    {
+      "name": "close never claims missing legacy note 1",
+      "passed": true
+    },
+    {
+      "name": "one invoice destination 1",
+      "passed": true
+    },
+    {
+      "name": "completion retry returns saved invoice 1",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 1 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 1 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "structured clinical link 2",
+      "passed": true
+    },
+    {
+      "name": "separate explicit allergy review 2",
+      "passed": true
+    },
+    {
+      "name": "actual provided treatment recorded 2",
+      "passed": true
+    },
+    {
+      "name": "duplicate treatment request rejected 2",
+      "passed": true
+    },
+    {
+      "name": "close reads actual confirmed clinical version 2",
+      "passed": true
+    },
+    {
+      "name": "close never claims missing legacy note 2",
+      "passed": true
+    },
+    {
+      "name": "one invoice destination 2",
+      "passed": true
+    },
+    {
+      "name": "completion retry returns saved invoice 2",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 2 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 2 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "structured clinical link 3",
+      "passed": true
+    },
+    {
+      "name": "separate explicit allergy review 3",
+      "passed": true
+    },
+    {
+      "name": "actual provided treatment recorded 3",
+      "passed": true
+    },
+    {
+      "name": "duplicate treatment request rejected 3",
+      "passed": true
+    },
+    {
+      "name": "close reads actual confirmed clinical version 3",
+      "passed": true
+    },
+    {
+      "name": "close never claims missing legacy note 3",
+      "passed": true
+    },
+    {
+      "name": "one invoice destination 3",
+      "passed": true
+    },
+    {
+      "name": "completion retry returns saved invoice 3",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 3 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 3 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "structured clinical link 4",
+      "passed": true
+    },
+    {
+      "name": "separate explicit allergy review 4",
+      "passed": true
+    },
+    {
+      "name": "actual provided treatment recorded 4",
+      "passed": true
+    },
+    {
+      "name": "duplicate treatment request rejected 4",
+      "passed": true
+    },
+    {
+      "name": "close reads actual confirmed clinical version 4",
+      "passed": true
+    },
+    {
+      "name": "close never claims missing legacy note 4",
+      "passed": true
+    },
+    {
+      "name": "one invoice destination 4",
+      "passed": true
+    },
+    {
+      "name": "completion retry returns saved invoice 4",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 4 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 4 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "structured clinical link 5",
+      "passed": true
+    },
+    {
+      "name": "separate explicit allergy review 5",
+      "passed": true
+    },
+    {
+      "name": "actual provided treatment recorded 5",
+      "passed": true
+    },
+    {
+      "name": "duplicate treatment request rejected 5",
+      "passed": true
+    },
+    {
+      "name": "close reads actual confirmed clinical version 5",
+      "passed": true
+    },
+    {
+      "name": "close never claims missing legacy note 5",
+      "passed": true
+    },
+    {
+      "name": "one invoice destination 5",
+      "passed": true
+    },
+    {
+      "name": "completion retry returns saved invoice 5",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 5 reflow {\"ok\":true,\"scroll\":390,\"inner\":390}",
+      "passed": true
+    },
+    {
+      "name": "settlement after chart 5 keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "no browser errors",
+      "passed": true
+    }
+  ],
+  "results": [
+    {
+      "clinic": 1,
+      "visit": 10507,
+      "invoice_path": "/invoices/507/"
+    },
+    {
+      "clinic": 2,
+      "visit": 10508,
+      "invoice_path": "/invoices/508/"
+    },
+    {
+      "clinic": 3,
+      "visit": 10509,
+      "invoice_path": "/invoices/509/"
+    },
+    {
+      "clinic": 4,
+      "visit": 10510,
+      "invoice_path": "/invoices/510/"
+    },
+    {
+      "clinic": 5,
+      "visit": 10511,
+      "invoice_path": "/invoices/511/"
+    }
+  ],
+  "page_errors": 0,
+  "scope": "C2.1 real Chrome and actual native Page handlers over HTTP/PostgreSQL; synthetic professional evidence only, not WeChat runtime",
+  "browser": "156.0.8078.47",
+  "passed": true
+}

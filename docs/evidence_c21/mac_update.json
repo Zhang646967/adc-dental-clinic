@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40085301196",
+  "architecture": "arm64",
+  "image": "sha256:89aa06b9c46e899ad5bcd857fcc0e758b9990bd0d03e2122fcc980ccfd21b7dd",
+  "deployment_uses_exact_business_tested_image": true,
+  "database_container_preserved": true,
+  "original_volume": "adc_rc1_c65a09cf5683_rc_data",
+  "private_configurations_preserved": 70,
+  "business_fingerprints_preserved": 77,
+  "migration_additions": {
+    "original_models": 77,
+    "new_empty_business_tables": 6,
+    "additive_permission_rows": 24,
+    "additive_content_type_rows": 6
+  },
+  "rc_tag_preserved": true,
+  "planned_restarts": [
+    "web",
+    "notification-worker",
+    "operations",
+    "gateway"
+  ],
+  "new_observation_identity": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "old_observations_encrypted": {
+    "file": "previous-observations.tar.age",
+    "sha256": "ce47662e06e1158a4e2d2b6743557231acdc23799f51f1526da4566c3c6ba498",
+    "decryption_verified": true
+  },
+  "old_host_journal_encrypted": {
+    "file": "previous-host-events.tar.age",
+    "sha256": "9c86e0beffde5803cb6c7b4a43f455a40166f2b832c01f82a7b5e17aaf6e1fd6",
+    "decryption_verified": true
+  },
+  "old_observer_preexisting_exit_recorded": false,
+  "old_observation_status": "REPLACED_AT_PLANNED_UPGRADE",
+  "six_application_conditions": "HEALTHY",
+  "host_state": "HEALTHY",
+  "new_launchd_job": false,
+  "nginx_configuration_loaded_and_valid": true,
+  "new_ui_and_static_served": true,
+  "original_business_test_data_injected": false
+}

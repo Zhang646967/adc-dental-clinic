@@ -1,17 +1,19 @@
-# C2.1 structured clinical workspace evidence
+# C2.1 structured clinical workspace acceptance
 
-Own report → clinic interview → actual encounter → tooth/surface finding → retained version → explicit care and billing.
+Patient-reported facts → actual encounter → retained findings/version → selected referral → explicit actual treatment and billing.
 
-Source implementation, additive migration and isolated synthetic acceptance have executed. Exact commit CI, same-image acceptance, encrypted nonempty recovery and original installation remain pending until the release record reports their actual result. C1.2 remains the installed baseline during rehearsal.
+The exact application commit `e688b4a933d4a65a01ba7be8c6968e6145f2f0a3` passed [CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40085301196):1,101 source rules and1,592 PostgreSQL/HTTP/concurrency cases. The same image passed328 five-clinic browser/native Page-over-HTTP checks, populated encrypted86-table restoration and an original-copy additive upgrade. It is installed at port18000 with77 original business model groups,70 private configuration files, the database container/volume and RC tag preserved. No clinical test fixtures were injected into the original.
 
-- [Verification and remaining gates](verification.json)
-- [Five-clinic clinical browser/native Page-over-HTTP](clinical_browser.json), [selected structured referral](referral_browser.json), [actual treatment and unique invoice](care_browser.json), [interview/privacy/no-treatment path](interview_browser.json)
-- [Independent pre-money business facts](clinical_independent_facts.json) and [actual additive schema diff](schema_diff.json)
-- [Full PostgreSQL run before final four HTTP cases](full_postgresql_tests.json), [final focused 90 cases](clinical_workflow_tests.json)
-- [Clinical contract](../C21_CLINICAL_CONTRACT.md), [actual ER](../database/README.md), [formal report](../../课程报告/README.md)
+The short post-install host observation identified a collection parser defect: ordinary Docker exec actions can contain multi-line command text and delimiters. The old parser projected all actions before selection. A harmless live reproduction confirmed this class; daemon-side lifecycle filtering passed34 focused cases and three real samples. The host-only fix still awaits exact CI and installation. The retained UNKNOWN incident is not overwritten or automatically closed; old historical causes remain undetermined.
 
-Browser assertions distinguish application behavior from test-script corrections. Earlier private failed assertions remain retained: collapsed history text needed form-value inspection; existing care forms return an error page for a rejected stale write. No retained clinical row was deleted to make a rerun pass.
+- [Overall release and boundaries](release.json), [verification](verification.json), [exact application CI](application_ci.json)
+- [Exact image](candidate.json), [clinical browser](exact_clinical_browser.json), [selected structured referral](exact_referral_browser.json), [actual-care/unique invoice](exact_care_browser.json)
+- [Independent clinical-only financial facts](exact_clinical_independent.json), [full regression](regression_final.json)
+- [Encrypted nonempty recovery](release_restore.json), [original-copy upgrade](copy_upgrade.json)
+- [Installed actual ER](mac_schema.json), [seven-role browser](mac_browser.json), [native self](mac_native.json), [two delegated subjects](mac_relationships.json), [protected update](mac_update.json)
+- [Host failure reproduction](host_projection_reproduction.json), [fixed live collection](host_filter_live.json)
+- [Formal report validation](report_validation.json), [current database ER](../database/README.md), [business contract](../C21_CLINICAL_CONTRACT.md)
 
-Only synthetic source and aggregate evidence is public. Credentials, encrypted backups and private row-level fingerprints stay outside Git. Software tests do not qualify clinical terminology, actual WeChat/device/experience, cloud or sustained operation. The multi-visit workload is due after C2.2–C2.3; historical capacity and UNKNOWN monitoring gaps remain separate.
+Official offline syntax passed14 native pages; actual WeChat/device/experience remains NOT_RUN. Credentials, keys, encrypted archives and per-row private fingerprints are not public. The original restore uses the tested same-version migration route; it does not certify arbitrary equivalent DDL. New multi-visit capacity follows C2.2–C2.3. Clinical qualification, cloud,24-hour operation and Windows-original recovery retain their separate status.
 
-Mind map: source and observed schema → browser and adverse cases → independent money/history facts → exact version and encrypted recovery → protected installation.
+Mind map: exact source → clinical/business evidence → observed ER → encrypted recovery → protected installation → retained incident and repair → plans and readiness next.

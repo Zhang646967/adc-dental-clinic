@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "application_commit": "e688b4a933d4a65a01ba7be8c6968e6145f2f0a3",
+  "legacy_projection_failure_reproduced": true,
+  "failure_class": "unfiltered multiline/delimited exec event parsed as lifecycle event",
+  "business_or_container_state_changed": false,
+  "scope": "reproduces this failure class; does not establish old historical UNKNOWN root causes",
+  "window": {
+    "since": 1792838122,
+    "until": 1792838124
+  }
+}
