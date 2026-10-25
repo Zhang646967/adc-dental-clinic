@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 108 ORM tables; django_migrations is a framework migration journal.
+// All 114 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -589,6 +589,120 @@ Table adc_inbox_message {
   read_at "timestamp with time zone" [null]
   indexes {
     (event_id, grant_id) [unique, name: 'inbox_event_grant_unique']
+  }
+}
+
+Table adc_insurance_arrangement {
+  id "bigint" [pk, not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  clinic_id "bigint" [not null]
+  catalogue_id "bigint" [not null]
+  starts_on "date" [not null]
+  ends_on "date" [not null]
+  reference "character varying(80)" [not null]
+}
+
+Table adc_insurance_catalogue {
+  id "bigint" [pk, not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  region "character varying(8)" [not null]
+  version_code "character varying(40)" [not null]
+  notice "character varying(120)" [not null]
+  effective_on "date" [not null]
+  source_url "character varying(500)" [not null]
+  attachment_url "character varying(500)" [not null]
+  source_format "character varying(24)" [not null]
+  parser_version "character varying(32)" [not null]
+  source_digest "character varying(64)" [not null]
+  review_attempt "integer" [not null]
+  previous_id "bigint" [unique, null]
+  normalized_digest "character varying(64)" [not null]
+  original_bytes "bytea" [not null]
+  normalized_rows "jsonb" [not null]
+  source_summary "jsonb" [not null]
+  indexes {
+    (source_digest, review_attempt) [unique, name: 'insurance_policy_source_review']
+    (region, version_code, review_attempt) [unique, name: 'insurance_policy_version_review']
+  }
+}
+
+Table adc_insurance_eligibility {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  patient_id "bigint" [not null]
+  version "integer" [not null]
+  previous_id "bigint" [unique, null]
+  insured_region "character varying(8)" [not null]
+  scheme "character varying(12)" [not null]
+  state "character varying(16)" [not null]
+  starts_on "date" [not null]
+  ends_on "date" [not null]
+  reference "character varying(80)" [not null]
+  basis "character varying(500)" [not null]
+  source "character varying(24)" [not null]
+  recorded_by_id "bigint" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  indexes {
+    (clinic_id, patient_id, version) [unique, name: 'insurance_eligibility_version']
+  }
+}
+
+Table adc_insurance_event {
+  id "bigint" [pk, not null]
+  catalogue_id "bigint" [null]
+  arrangement_id "bigint" [null]
+  mapping_id "bigint" [null]
+  eligibility_id "bigint" [null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  reason "character varying(500)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_insurance_fee_mapping {
+  id "bigint" [pk, not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  clinic_id "bigint" [not null]
+  treatment_type_id "bigint" [not null]
+  policy_item_id "bigint" [not null]
+  fee_snapshot "jsonb" [not null]
+  policy_units_per_fee "numeric(12,4)" [not null]
+  compatibility_basis "character varying(500)" [not null]
+}
+
+Table adc_insurance_policy_item {
+  id "bigint" [pk, not null]
+  catalogue_id "bigint" [not null]
+  code "character varying(15)" [not null]
+  name "character varying(160)" [not null]
+  unit "character varying(120)" [null]
+  payment_class "character varying(16)" [not null]
+  pre_self_pay_percent "numeric(5,2)" [null]
+  review_state "character varying(24)" [not null]
+  source_rows "jsonb" [not null]
+  raw_cells "jsonb" [not null]
+  indexes {
+    (catalogue_id, code) [unique, name: 'insurance_policy_code']
   }
 }
 
@@ -1587,6 +1701,28 @@ Ref: adc_inbox_message.clinic_id > adc_clinic.id
 Ref: adc_inbox_message.event_id > adc_notification_outbox.id
 Ref: adc_inbox_message.grant_id > adc_role_assignment.id
 Ref: adc_inbox_message.recipient_id > adc_user.id
+Ref: adc_insurance_arrangement.catalogue_id > adc_insurance_catalogue.id
+Ref: adc_insurance_arrangement.prepared_by_id > adc_user.id
+Ref: adc_insurance_arrangement.reviewed_by_id > adc_user.id
+Ref: adc_insurance_arrangement.clinic_id > adc_clinic.id
+Ref: adc_insurance_catalogue.previous_id - adc_insurance_catalogue.id
+Ref: adc_insurance_catalogue.prepared_by_id > adc_user.id
+Ref: adc_insurance_catalogue.reviewed_by_id > adc_user.id
+Ref: adc_insurance_eligibility.previous_id - adc_insurance_eligibility.id
+Ref: adc_insurance_eligibility.recorded_by_id > adc_user.id
+Ref: adc_insurance_eligibility.clinic_id > adc_clinic.id
+Ref: adc_insurance_eligibility.patient_id > adc_patient.id
+Ref: adc_insurance_event.actor_id > adc_user.id
+Ref: adc_insurance_event.arrangement_id > adc_insurance_arrangement.id
+Ref: adc_insurance_event.catalogue_id > adc_insurance_catalogue.id
+Ref: adc_insurance_event.eligibility_id > adc_insurance_eligibility.id
+Ref: adc_insurance_event.mapping_id > adc_insurance_fee_mapping.id
+Ref: adc_insurance_fee_mapping.policy_item_id > adc_insurance_policy_item.id
+Ref: adc_insurance_fee_mapping.prepared_by_id > adc_user.id
+Ref: adc_insurance_fee_mapping.reviewed_by_id > adc_user.id
+Ref: adc_insurance_fee_mapping.treatment_type_id > adc_treatment_type.id
+Ref: adc_insurance_fee_mapping.clinic_id > adc_clinic.id
+Ref: adc_insurance_policy_item.catalogue_id > adc_insurance_catalogue.id
 Ref: adc_invoice.current_record_version_id - adc_visit_record_version.id
 Ref: adc_invoice.visit_id - adc_visit.id
 Ref: adc_invoice.(current_record_version_id, visit_id) - adc_visit_record_version.(id, visit_id)

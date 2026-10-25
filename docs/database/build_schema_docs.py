@@ -11,6 +11,29 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_insurance_policy': {
+        'title':'医保目录版本、门店安排与收费适配',
+        'tables': {
+            'adc_clinic':['id','clinic_code'],
+            'adc_treatment_type':['id','code','unit_definition'],
+            'adc_insurance_catalogue':['id','region','version_code','previous_id','review_attempt','effective_on','source_digest','state'],
+            'adc_insurance_policy_item':['id','catalogue_id','code','unit','payment_class','pre_self_pay_percent'],
+            'adc_insurance_arrangement':['id','clinic_id','catalogue_id','starts_on','ends_on','state'],
+            'adc_insurance_fee_mapping':['id','clinic_id','treatment_type_id','policy_item_id','policy_units_per_fee','state'],
+        },
+        'note':'目录保留原文件及规范记录，编码在目录内唯一；空白单位及规则保持未知。政策版本与审阅次数分开，同一来源至多一个待核对或已启用记录；未通过或停用后可明确提交下一次审阅，前次引用可空且唯一，原决定不改写。门店已确认安排按本店日期排斥重叠；收费映射按本店与收费项目限制一个启用结果。不同账号独立复核，重新核对不恢复旧安排或映射。图中省略操作人及其余事件分支，全部关系见完整目录；本图不表示真实定点资格或资金结算。',
+    },
+    'er_insurance_eligibility': {
+        'title':'本店模拟待遇版本与办理历史',
+        'tables': {
+            'adc_clinic':['id','clinic_code'],
+            'adc_patient':['id','patient_no'],
+            'adc_user':['id','username'],
+            'adc_insurance_eligibility':['id','clinic_id','patient_id','recorded_by_id','previous_id','version','insured_region','source'],
+            'adc_insurance_event':['id','eligibility_id','actor_id','operation_id','action'],
+        },
+        'note':'待遇事实按患者、诊所和版号唯一；前版引用可空且一对一，后续版本必须继续同一患者与诊所。记录及事件只追加，最新一版未核实或失效时不回退使用旧版。source固定LOCAL_SIMULATION，参保地不由定位或手机号推断；待遇资料不扩大本人或代约权限。办理事件在目录、安排、映射、待遇四个可空来源中恰选一个，本视图仅展开待遇分支，其余关系见完整外键目录。',
+    },
     'er_patient_account': {
         'title':'患者渠道账号、凭证与联络来源',
         'tables': {

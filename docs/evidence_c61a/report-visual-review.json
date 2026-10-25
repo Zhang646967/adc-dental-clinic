@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "pages": 183,
+  "approved_prior_report_body_pixel_matches": 157,
+  "final_changed_pages": [
+    "page-2.png",
+    "page-3.png",
+    "page-4.png",
+    "page-5.png",
+    "page-22.png",
+    "page-23.png",
+    "page-33.png",
+    "page-34.png",
+    "page-51.png",
+    "page-72.png",
+    "page-73.png",
+    "page-77.png",
+    "page-78.png",
+    "page-79.png",
+    "page-80.png",
+    "page-81.png",
+    "page-82.png",
+    "page-84.png",
+    "page-92.png",
+    "page-93.png",
+    "page-96.png",
+    "page-131.png",
+    "page-180.png",
+    "page-181.png",
+    "page-182.png",
+    "page-183.png"
+  ],
+  "changed_pages_inspected_at_full_resolution": 26,
+  "unchanged_from_full_resolution_reviewed_render_6": [
+    2,
+    3,
+    4
+  ],
+  "final_revision_other_changed_pages_inspected": 23,
+  "font_bounds_contents_and_numbering": "report-validation.json",
+  "private_intermediate_renders_retained": true
+}

@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-24。本目录列出108张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-25。本目录列出114张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -1661,6 +1661,293 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `inbox_ownership_guard`：`CREATE TRIGGER inbox_ownership_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_inbox_message FOR EACH ROW EXECUTE FUNCTION adc_inbox_ownership()`。
+
+## adc_insurance_arrangement
+
+模型：`insurance.ClinicArrangement`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| catalogue_id | bigint | FK | 否 | `adc_insurance_catalogue.id` |
+| starts_on | date | — | 否 | — |
+| ends_on | date | — | 否 | — |
+| reference | character varying(80) | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_arrang_catalogue_id_3d891229_fk_adc_insur`：`FOREIGN KEY (catalogue_id) REFERENCES adc_insurance_catalogue(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_arrang_prepared_by_id_04b404b5_fk_adc_user_`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_arrang_reviewed_by_id_d26ff951_fk_adc_user_`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_arrangement_clinic_id_54003dcc_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_arrangement_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_arrangement_revision_check`：`CHECK ((revision >= 0))`。
+- `clinicarrangement_independent`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `clinicarrangement_review_metadata`：`CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND (revision = 0) AND ((state)::text = 'DRAFT'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND (revision >= 1) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying, 'DISABLED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))`。
+- `clinicarrangement_state`：`CHECK (((state)::text = ANY ((ARRAY['DRAFT'::character varying, 'CONFIRMED'::character varying, 'REJECTED'::character varying, 'DISABLED'::character varying])::text[])))`。
+- `insurance_arrangement_dates`：`CHECK ((ends_on >= starts_on))`。
+- `insurance_arrangement_no_overlap`：`EXCLUDE USING gist (clinic_id WITH =, daterange(starts_on, ends_on, '[]'::text) WITH &&) WHERE (((state)::text = 'CONFIRMED'::text))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_arrangement_catalogue_id_3d891229`：`CREATE INDEX adc_insurance_arrangement_catalogue_id_3d891229 ON public.adc_insurance_arrangement USING btree (catalogue_id)`。
+- `adc_insurance_arrangement_clinic_id_54003dcc`：`CREATE INDEX adc_insurance_arrangement_clinic_id_54003dcc ON public.adc_insurance_arrangement USING btree (clinic_id)`。
+- `adc_insurance_arrangement_pkey`：`CREATE UNIQUE INDEX adc_insurance_arrangement_pkey ON public.adc_insurance_arrangement USING btree (id)`。
+- `adc_insurance_arrangement_prepared_by_id_04b404b5`：`CREATE INDEX adc_insurance_arrangement_prepared_by_id_04b404b5 ON public.adc_insurance_arrangement USING btree (prepared_by_id)`。
+- `adc_insurance_arrangement_reviewed_by_id_d26ff951`：`CREATE INDEX adc_insurance_arrangement_reviewed_by_id_d26ff951 ON public.adc_insurance_arrangement USING btree (reviewed_by_id)`。
+- `insurance_arrangement_no_overlap`：`CREATE INDEX insurance_arrangement_no_overlap ON public.adc_insurance_arrangement USING gist (clinic_id, daterange(starts_on, ends_on, '[]'::text)) WHERE ((state)::text = 'CONFIRMED'::text)`。
+
+跨表及历史触发器：
+
+- `insurance_arrangement_history`：`CREATE TRIGGER insurance_arrangement_history BEFORE DELETE OR UPDATE ON public.adc_insurance_arrangement FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_preparation()`。
+
+## adc_insurance_catalogue
+
+模型：`insurance.PolicyCatalogue`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+| region | character varying(8) | — | 否 | — |
+| version_code | character varying(40) | — | 否 | — |
+| notice | character varying(120) | — | 否 | — |
+| effective_on | date | — | 否 | — |
+| source_url | character varying(500) | — | 否 | — |
+| attachment_url | character varying(500) | — | 否 | — |
+| source_format | character varying(24) | — | 否 | — |
+| parser_version | character varying(32) | — | 否 | — |
+| source_digest | character varying(64) | — | 否 | — |
+| review_attempt | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_insurance_catalogue.id` |
+| normalized_digest | character varying(64) | — | 否 | — |
+| original_bytes | bytea | — | 否 | — |
+| normalized_rows | jsonb | — | 否 | — |
+| source_summary | jsonb | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_catalo_previous_id_0000a899_fk_adc_insur`：`FOREIGN KEY (previous_id) REFERENCES adc_insurance_catalogue(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_catalogue_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_catalogue_prepared_by_id_01e734c9_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_catalogue_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_insurance_catalogue_review_attempt_check`：`CHECK ((review_attempt >= 0))`。
+- `adc_insurance_catalogue_reviewed_by_id_9f128752_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_catalogue_revision_check`：`CHECK ((revision >= 0))`。
+- `insurance_policy_review_chain`：`CHECK ((((previous_id IS NULL) AND (review_attempt = 1)) OR ((previous_id IS NOT NULL) AND (review_attempt >= 2))))`。
+- `insurance_policy_source_review`：`UNIQUE (source_digest, review_attempt)`。
+- `insurance_policy_version_review`：`UNIQUE (region, version_code, review_attempt)`。
+- `policycatalogue_independent`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `policycatalogue_review_metadata`：`CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND (revision = 0) AND ((state)::text = 'DRAFT'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND (revision >= 1) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying, 'DISABLED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))`。
+- `policycatalogue_state`：`CHECK (((state)::text = ANY ((ARRAY['DRAFT'::character varying, 'CONFIRMED'::character varying, 'REJECTED'::character varying, 'DISABLED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_catalogue_pkey`：`CREATE UNIQUE INDEX adc_insurance_catalogue_pkey ON public.adc_insurance_catalogue USING btree (id)`。
+- `adc_insurance_catalogue_prepared_by_id_01e734c9`：`CREATE INDEX adc_insurance_catalogue_prepared_by_id_01e734c9 ON public.adc_insurance_catalogue USING btree (prepared_by_id)`。
+- `adc_insurance_catalogue_previous_id_key`：`CREATE UNIQUE INDEX adc_insurance_catalogue_previous_id_key ON public.adc_insurance_catalogue USING btree (previous_id)`。
+- `adc_insurance_catalogue_reviewed_by_id_9f128752`：`CREATE INDEX adc_insurance_catalogue_reviewed_by_id_9f128752 ON public.adc_insurance_catalogue USING btree (reviewed_by_id)`。
+- `adc_insurance_catalogue_source_digest_a012024c`：`CREATE INDEX adc_insurance_catalogue_source_digest_a012024c ON public.adc_insurance_catalogue USING btree (source_digest)`。
+- `adc_insurance_catalogue_source_digest_a012024c_like`：`CREATE INDEX adc_insurance_catalogue_source_digest_a012024c_like ON public.adc_insurance_catalogue USING btree (source_digest varchar_pattern_ops)`。
+- `insurance_policy_one_live`：`CREATE UNIQUE INDEX insurance_policy_one_live ON public.adc_insurance_catalogue USING btree (source_digest) WHERE ((state)::text = ANY ((ARRAY['DRAFT'::character varying, 'CONFIRMED'::character varying])::text[]))`。
+- `insurance_policy_one_origin`：`CREATE UNIQUE INDEX insurance_policy_one_origin ON public.adc_insurance_catalogue USING btree (source_digest) WHERE (previous_id IS NULL)`。
+- `insurance_policy_source_review`：`CREATE UNIQUE INDEX insurance_policy_source_review ON public.adc_insurance_catalogue USING btree (source_digest, review_attempt)`。
+- `insurance_policy_version_review`：`CREATE UNIQUE INDEX insurance_policy_version_review ON public.adc_insurance_catalogue USING btree (region, version_code, review_attempt)`。
+
+跨表及历史触发器：
+
+- `insurance_catalogue_history`：`CREATE TRIGGER insurance_catalogue_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_catalogue FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_preparation()`。
+
+## adc_insurance_eligibility
+
+模型：`insurance.EligibilityFact`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| patient_id | bigint | FK | 否 | `adc_patient.id` |
+| version | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_insurance_eligibility.id` |
+| insured_region | character varying(8) | — | 否 | — |
+| scheme | character varying(12) | — | 否 | — |
+| state | character varying(16) | — | 否 | — |
+| starts_on | date | — | 否 | — |
+| ends_on | date | — | 否 | — |
+| reference | character varying(80) | — | 否 | — |
+| basis | character varying(500) | — | 否 | — |
+| source | character varying(24) | — | 否 | — |
+| recorded_by_id | bigint | FK | 否 | `adc_user.id` |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_eligib_previous_id_077b38e9_fk_adc_insur`：`FOREIGN KEY (previous_id) REFERENCES adc_insurance_eligibility(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_eligib_recorded_by_id_89589a3e_fk_adc_user_`：`FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_eligibility_clinic_id_7d3459e1_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_eligibility_patient_id_648783e8_fk_adc_patient_id`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_eligibility_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_eligibility_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_insurance_eligibility_version_check`：`CHECK ((version >= 0))`。
+- `insurance_eligibility_chain`：`CHECK ((((previous_id IS NULL) AND (version = 1)) OR ((previous_id IS NOT NULL) AND (version >= 2))))`。
+- `insurance_eligibility_facts`：`CHECK (((ends_on >= starts_on) AND ((source)::text = 'LOCAL_SIMULATION'::text) AND (version >= 1)))`。
+- `insurance_eligibility_values`：`CHECK ((((scheme)::text = ANY ((ARRAY['EMPLOYEE'::character varying, 'RESIDENT'::character varying, 'UNKNOWN'::character varying])::text[])) AND ((state)::text = ANY ((ARRAY['VERIFIED'::character varying, 'NOT_ELIGIBLE'::character varying, 'UNKNOWN'::character varying])::text[]))))`。
+- `insurance_eligibility_version`：`UNIQUE (clinic_id, patient_id, version)`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_eligibility_clinic_id_7d3459e1`：`CREATE INDEX adc_insurance_eligibility_clinic_id_7d3459e1 ON public.adc_insurance_eligibility USING btree (clinic_id)`。
+- `adc_insurance_eligibility_patient_id_648783e8`：`CREATE INDEX adc_insurance_eligibility_patient_id_648783e8 ON public.adc_insurance_eligibility USING btree (patient_id)`。
+- `adc_insurance_eligibility_pkey`：`CREATE UNIQUE INDEX adc_insurance_eligibility_pkey ON public.adc_insurance_eligibility USING btree (id)`。
+- `adc_insurance_eligibility_previous_id_key`：`CREATE UNIQUE INDEX adc_insurance_eligibility_previous_id_key ON public.adc_insurance_eligibility USING btree (previous_id)`。
+- `adc_insurance_eligibility_recorded_by_id_89589a3e`：`CREATE INDEX adc_insurance_eligibility_recorded_by_id_89589a3e ON public.adc_insurance_eligibility USING btree (recorded_by_id)`。
+- `insurance_eligibility_latest`：`CREATE INDEX insurance_eligibility_latest ON public.adc_insurance_eligibility USING btree (clinic_id, patient_id, version DESC)`。
+- `insurance_eligibility_version`：`CREATE UNIQUE INDEX insurance_eligibility_version ON public.adc_insurance_eligibility USING btree (clinic_id, patient_id, version)`。
+
+跨表及历史触发器：
+
+- `insurance_eligibility_history`：`CREATE TRIGGER insurance_eligibility_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_eligibility FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_eligibility()`。
+
+## adc_insurance_event
+
+模型：`insurance.InsuranceEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| catalogue_id | bigint | FK | 是 | `adc_insurance_catalogue.id` |
+| arrangement_id | bigint | FK | 是 | `adc_insurance_arrangement.id` |
+| mapping_id | bigint | FK | 是 | `adc_insurance_fee_mapping.id` |
+| eligibility_id | bigint | FK | 是 | `adc_insurance_eligibility.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_event_actor_id_a22e023a_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_event_arrangement_id_e7bcd385_fk_adc_insur`：`FOREIGN KEY (arrangement_id) REFERENCES adc_insurance_arrangement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_event_catalogue_id_262e3476_fk_adc_insur`：`FOREIGN KEY (catalogue_id) REFERENCES adc_insurance_catalogue(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_event_eligibility_id_18111a9f_fk_adc_insur`：`FOREIGN KEY (eligibility_id) REFERENCES adc_insurance_eligibility(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_event_mapping_id_2ab7ae76_fk_adc_insur`：`FOREIGN KEY (mapping_id) REFERENCES adc_insurance_fee_mapping(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_insurance_event_pkey`：`PRIMARY KEY (id)`。
+- `insurance_event_one_subject`：`CHECK ((((arrangement_id IS NULL) AND (catalogue_id IS NOT NULL) AND (eligibility_id IS NULL) AND (mapping_id IS NULL)) OR ((arrangement_id IS NOT NULL) AND (catalogue_id IS NULL) AND (eligibility_id IS NULL) AND (mapping_id IS NULL)) OR ((arrangement_id IS NULL) AND (catalogue_id IS NULL) AND (eligibility_id IS NULL) AND (mapping_id IS NOT NULL)) OR ((arrangement_id IS NULL) AND (catalogue_id IS NULL) AND (eligibility_id IS NOT NULL) AND (mapping_id IS NULL))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_event_actor_id_a22e023a`：`CREATE INDEX adc_insurance_event_actor_id_a22e023a ON public.adc_insurance_event USING btree (actor_id)`。
+- `adc_insurance_event_arrangement_id_e7bcd385`：`CREATE INDEX adc_insurance_event_arrangement_id_e7bcd385 ON public.adc_insurance_event USING btree (arrangement_id)`。
+- `adc_insurance_event_catalogue_id_262e3476`：`CREATE INDEX adc_insurance_event_catalogue_id_262e3476 ON public.adc_insurance_event USING btree (catalogue_id)`。
+- `adc_insurance_event_eligibility_id_18111a9f`：`CREATE INDEX adc_insurance_event_eligibility_id_18111a9f ON public.adc_insurance_event USING btree (eligibility_id)`。
+- `adc_insurance_event_mapping_id_2ab7ae76`：`CREATE INDEX adc_insurance_event_mapping_id_2ab7ae76 ON public.adc_insurance_event USING btree (mapping_id)`。
+- `adc_insurance_event_operation_id_key`：`CREATE UNIQUE INDEX adc_insurance_event_operation_id_key ON public.adc_insurance_event USING btree (operation_id)`。
+- `adc_insurance_event_pkey`：`CREATE UNIQUE INDEX adc_insurance_event_pkey ON public.adc_insurance_event USING btree (id)`。
+
+跨表及历史触发器：
+
+- `insurance_event_history`：`CREATE TRIGGER insurance_event_history BEFORE DELETE OR UPDATE ON public.adc_insurance_event FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_insurance_fee_mapping
+
+模型：`insurance.FeeMapping`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| treatment_type_id | bigint | FK | 否 | `adc_treatment_type.id` |
+| policy_item_id | bigint | FK | 否 | `adc_insurance_policy_item.id` |
+| fee_snapshot | jsonb | — | 否 | — |
+| policy_units_per_fee | numeric(12,4) | — | 否 | — |
+| compatibility_basis | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_fee_ma_policy_item_id_f717116f_fk_adc_insur`：`FOREIGN KEY (policy_item_id) REFERENCES adc_insurance_policy_item(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_fee_ma_prepared_by_id_e768435f_fk_adc_user_`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_fee_ma_reviewed_by_id_d8550e1f_fk_adc_user_`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_fee_ma_treatment_type_id_ed0f2b5e_fk_adc_treat`：`FOREIGN KEY (treatment_type_id) REFERENCES adc_treatment_type(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_fee_mapping_clinic_id_1f4a93d9_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_fee_mapping_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_fee_mapping_revision_check`：`CHECK ((revision >= 0))`。
+- `feemapping_independent`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `feemapping_review_metadata`：`CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND (revision = 0) AND ((state)::text = 'DRAFT'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND (revision >= 1) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying, 'DISABLED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))`。
+- `feemapping_state`：`CHECK (((state)::text = ANY ((ARRAY['DRAFT'::character varying, 'CONFIRMED'::character varying, 'REJECTED'::character varying, 'DISABLED'::character varying])::text[])))`。
+- `insurance_mapping_quantity`：`CHECK ((policy_units_per_fee > (0)::numeric))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_fee_mapping_clinic_id_1f4a93d9`：`CREATE INDEX adc_insurance_fee_mapping_clinic_id_1f4a93d9 ON public.adc_insurance_fee_mapping USING btree (clinic_id)`。
+- `adc_insurance_fee_mapping_pkey`：`CREATE UNIQUE INDEX adc_insurance_fee_mapping_pkey ON public.adc_insurance_fee_mapping USING btree (id)`。
+- `adc_insurance_fee_mapping_policy_item_id_f717116f`：`CREATE INDEX adc_insurance_fee_mapping_policy_item_id_f717116f ON public.adc_insurance_fee_mapping USING btree (policy_item_id)`。
+- `adc_insurance_fee_mapping_prepared_by_id_e768435f`：`CREATE INDEX adc_insurance_fee_mapping_prepared_by_id_e768435f ON public.adc_insurance_fee_mapping USING btree (prepared_by_id)`。
+- `adc_insurance_fee_mapping_reviewed_by_id_d8550e1f`：`CREATE INDEX adc_insurance_fee_mapping_reviewed_by_id_d8550e1f ON public.adc_insurance_fee_mapping USING btree (reviewed_by_id)`。
+- `adc_insurance_fee_mapping_treatment_type_id_ed0f2b5e`：`CREATE INDEX adc_insurance_fee_mapping_treatment_type_id_ed0f2b5e ON public.adc_insurance_fee_mapping USING btree (treatment_type_id)`。
+- `insurance_one_fee_mapping`：`CREATE UNIQUE INDEX insurance_one_fee_mapping ON public.adc_insurance_fee_mapping USING btree (clinic_id, treatment_type_id) WHERE ((state)::text = 'CONFIRMED'::text)`。
+
+跨表及历史触发器：
+
+- `insurance_mapping_history`：`CREATE TRIGGER insurance_mapping_history BEFORE DELETE OR UPDATE ON public.adc_insurance_fee_mapping FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_preparation()`。
+
+## adc_insurance_policy_item
+
+模型：`insurance.PolicyItem`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| catalogue_id | bigint | FK | 否 | `adc_insurance_catalogue.id` |
+| code | character varying(15) | — | 否 | — |
+| name | character varying(160) | — | 否 | — |
+| unit | character varying(120) | — | 是 | — |
+| payment_class | character varying(16) | — | 否 | — |
+| pre_self_pay_percent | numeric(5,2) | — | 是 | — |
+| review_state | character varying(24) | — | 否 | — |
+| source_rows | jsonb | — | 否 | — |
+| raw_cells | jsonb | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_policy_catalogue_id_83d74ea7_fk_adc_insur`：`FOREIGN KEY (catalogue_id) REFERENCES adc_insurance_catalogue(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_policy_item_pkey`：`PRIMARY KEY (id)`。
+- `insurance_policy_class`：`CHECK (((payment_class)::text = ANY ((ARRAY['A'::character varying, 'B'::character varying, 'NOT_PAYABLE'::character varying, 'UNKNOWN'::character varying])::text[])))`。
+- `insurance_policy_code`：`UNIQUE (catalogue_id, code)`。
+- `insurance_policy_share`：`CHECK (((pre_self_pay_percent IS NULL) OR ((pre_self_pay_percent >= (0)::numeric) AND (pre_self_pay_percent <= (100)::numeric))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_policy_item_catalogue_id_83d74ea7`：`CREATE INDEX adc_insurance_policy_item_catalogue_id_83d74ea7 ON public.adc_insurance_policy_item USING btree (catalogue_id)`。
+- `adc_insurance_policy_item_pkey`：`CREATE UNIQUE INDEX adc_insurance_policy_item_pkey ON public.adc_insurance_policy_item USING btree (id)`。
+- `insurance_policy_code`：`CREATE UNIQUE INDEX insurance_policy_code ON public.adc_insurance_policy_item USING btree (catalogue_id, code)`。
+
+跨表及历史触发器：
+
+- `insurance_policy_item_history`：`CREATE TRIGGER insurance_policy_item_history BEFORE DELETE OR UPDATE ON public.adc_insurance_policy_item FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
 
 ## adc_invoice
 

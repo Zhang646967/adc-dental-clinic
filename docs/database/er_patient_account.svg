@@ -5,7 +5,7 @@
  -->
 <!-- Title: schema Pages: 1 -->
 <svg role="img" aria-labelledby="er_patient_account-title er_patient_account-desc" width="693pt" height="557pt"
- viewBox="0.00 0.00 693.00 557.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="er_patient_account-title">患者渠道账号、凭证与联络来源</title><desc id="er_patient_account-desc">外部身份按provider、app_id及subject联合唯一，当前账号引用可空；解绑不删除ADC账号及事件。一次性凭证按用途引用外部身份或账号，数据库只存摘要。账号联络按user一对一，不与Patient建立手机号匹配外键。首次绑定事件建立患者渠道账号，未获本人或代约授权时上下文岗位仍为空，不能成为员工或临床权限。本批凭证及手机号来源仅为LOCAL替身，不能写成微信实名或居民身份证。</desc>
+ viewBox="0.00 0.00 693.00 557.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="er_patient_account-title">患者渠道账号、凭证与联络来源</title><desc id="er_patient_account-desc">外部身份按provider、app_id及subject联合唯一，当前账号引用可空；解绑不删除ADC账号及事件。一次性凭证按用途引用外部身份或账号，数据库只存摘要。账号联络按user一对一，不与Patient建立手机号匹配外键。首次绑定事件建立患者渠道账号，未获本人或代约授权时上下文岗位仍为空，不能成为员工或临床权限。本地凭证及手机号来源为LOCAL替身，不能写成微信实名或居民身份证。</desc>
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 542.8)">
 <title>schema</title>
 <polygon fill="white" stroke="none" points="-14.4,14.4 -14.4,-542.8 678.25,-542.8 678.25,14.4 -14.4,14.4"/>

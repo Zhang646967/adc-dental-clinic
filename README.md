@@ -1,3 +1,11 @@
+**系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
+
+📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
+
+教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
+
+**C6.1A 源码候选：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立复核和历史版本可核对；1,106项源码规则及1,826项PostgreSQL／HTTP／并发回归通过。准确提交CI、同镜像浏览器、恢复与本机更新仍在进行，当前在用仍为C1-WX。[业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [执行边界](docs/evidence_c61a/README.md)。
+
 **C1-WX 已在本机交付：患者账号、联络来源、本人建档与独立前台核验。** 网站／小程序沿用原预约、改期、候补与患者切换，暂停可复核恢复原关联。[执行证据](docs/evidence_c1wx/README.md) · [本地试用](docs/C1WX_LOCAL_GUIDE.md)。真实微信及医保联网另行验收。
 
 **C0.4 已在本机交付：访客找店、由近到远与患者／员工登录分流。** 八省会二十家合成门店可浏览，长沙四店可约；主管维护公开资料，患者按需登录后继续原服务。网站与小程序共用预约和患者授权。[交付证据](docs/evidence_c04/README.md) · [本地使用](docs/C04_LOCAL_GUIDE.md)。
@@ -18,7 +26,7 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 The wider clinical V2 program continues; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
-**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX本地流程已交付；真实微信和C6医保阶段继续实施。
+**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX本地流程已交付；真实微信和C6医保资金阶段继续实施。
 
 **2026-10-23 商业化调研与下一阶段：** [六类成熟牙科系统与诊所业务差距](docs/research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 患者身份与连续诊疗计划](docs/COMMERCIAL_V2_NEXT_STAGE.md)。附 34 项外部来源、16 项需求追踪、24 个待执行验收场景及两幅明确标注为规划的领域关系图。当前实际 ER 与已执行验收保持独立。
 
@@ -26,17 +34,11 @@ production patient care. Historical engineering and academic materials follow.
 
 **历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C1.2交付记录为准。
 
-**系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
-
-📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
-
-教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
-
 **新增患者服务中心与小程序候补衔接。** [页面与业务说明](docs/B153_PATIENT_SERVICE_CENTRE.md) · [执行证据](docs/evidence_b153/README.md)。
 
 **课程交付：原生微信小程序与教师云端演示。** [小程序工程与本地导入](clients/wechat/README.md)支持课程患者登录、预约、普通／邀约改期、候补登记、邀约处置、取消及历史，复用网站预约数据。[交付安排](docs/COURSE_TEACHER_DELIVERY.md)区分本地联调、微信体验版与云端验收：小程序账号尚未注册，服务器尚未购买，暂不宣称微信或云端已上线。
 
-**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步109表、296条外键、77项触发器，二十幅ER纳入课程报告；前台继续负责日常排班。
+**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步115表、318条外键、83项触发器，二十二幅ER纳入课程报告；前台继续负责日常排班。
 
 ## 仓库分类
 
@@ -51,7 +53,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告共175页，包含86项业务用例及1项共享核验、105张表和53幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
+正式报告共183页，包含90项业务用例及1项共享核验、109张表和55幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

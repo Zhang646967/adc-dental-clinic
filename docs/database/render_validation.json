@@ -1,4 +1,18 @@
 {
+  "er_insurance_policy": {
+    "nodes": 6,
+    "edges": 7,
+    "width": 654,
+    "height": 681,
+    "minPrintedFontPt": 9.708807339449542
+  },
+  "er_insurance_eligibility": {
+    "nodes": 5,
+    "edges": 6,
+    "width": 406,
+    "height": 557,
+    "minPrintedFontPt": 15.639310344827587
+  },
   "er_patient_account": {
     "nodes": 6,
     "edges": 7,

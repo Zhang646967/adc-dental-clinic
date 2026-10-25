@@ -17,6 +17,7 @@ from care import correction_views
 handler500 = 'adc_core.request_trace.server_error'
 
 urlpatterns = [
+    path('', include('insurance.urls')),
     path('',include('portal.account_urls')),
     path('', include('clinical.urls')),
     path('', include('portal.relationship_urls')),

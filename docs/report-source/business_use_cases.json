@@ -1501,5 +1501,137 @@
       "tests/test_patient_account_identity.py",
       "tests/test_patient_account_http.py"
     ]
+  },
+  {
+    "id": "SU-87",
+    "name": "导入口腔支付目录并独立发布",
+    "actor": "两名不同财务账号",
+    "status": "已实现；课程合成资料基础，真实联网另行验收。",
+    "precondition": "当前全链财务工作区，存在已核对来源的服务端目录包。",
+    "inputs": "目录版本选择、明确确认和独立核对依据。",
+    "flow": [
+      "预览地区、通知、生效日、原始摘要和缺失统计。",
+      "明确导入原始字节、规范记录及对应项目，保留待核对状态。",
+      "另一财务账号查阅原件和项目，预览决定后确认启用或未通过。",
+      "需要停用时记录依据，保留原版本和所有决定。",
+      "未通过或停用后明确重新提交核对，关联前次审阅，不修改原政策版本和原决定。"
+    ],
+    "alternatives": [
+      "相同来源已存在：打开原目录，不重复导入。",
+      "原始文件或规范包摘要变化：整批不保存。",
+      "自己复核、授权失效或旧预览：不启用。",
+      "原表分类、比例或单位为空：原样保留，不补造规则。"
+    ],
+    "result": "有原件和项目来源的地区目录及独立决定。",
+    "minimum_guarantee": "不改变诊疗、原收费、患者资格或资金；失败不留下部分目录。",
+    "rules": "普通导入同来源唯一；再次核对明确关联最新已结束审阅；目录内编码唯一、不同账号独立复核，原件与决定保留。",
+    "acceptance": [
+      "AT-INS-POLICY：原件字节、202编码、重复、缺失、权限、重试、并发和停用。"
+    ],
+    "source": [
+      "insurance/models.py",
+      "insurance/services.py",
+      "insurance/views.py",
+      "tests/test_insurance_preparation.py",
+      "tests/test_insurance_preparation_http.py"
+    ]
+  },
+  {
+    "id": "SU-88",
+    "name": "准备本店模拟医保安排",
+    "actor": "本店主管、独立财务",
+    "status": "已实现；课程合成资料基础，真实联网另行验收。",
+    "precondition": "已核对启用的目录，主管进入授权诊所。",
+    "inputs": "目录、有效起止日期、合成依据和财务决定。",
+    "flow": [
+      "主管核对本店及目录地区、生效日期。",
+      "预览并确认准备课程模拟安排，等待财务核对。",
+      "不同财务账号核对有效期与当前重叠安排，再明确决定。",
+      "需要停止新用途时明确停用，历史安排继续可查。"
+    ],
+    "alternatives": [
+      "早于政策生效、截止早于开始：重新填写。",
+      "日期重叠：核对旧安排并明确处理，不自动覆盖。",
+      "目录停用、提交人撤权或跨店：不确认新安排。"
+    ],
+    "result": "本店有明确有效期、来源及独立依据的课程安排。",
+    "minimum_guarantee": "不声明真实定点资格，不生成患者、收费或结算；旧安排不被覆盖。",
+    "rules": "已确认安排同店日期不重叠；目录生效与安排有效分别核验。",
+    "acceptance": [
+      "AT-INS-CLINIC：日期、地区、并发重叠、跨店、撤权及停用后原历史。"
+    ],
+    "source": [
+      "insurance/models.py",
+      "insurance/services.py",
+      "insurance/views.py",
+      "tests/test_insurance_preparation.py",
+      "tests/test_insurance_preparation_http.py"
+    ]
+  },
+  {
+    "id": "SU-89",
+    "name": "核对收费项目与医保目录适配",
+    "actor": "本店主管、独立财务",
+    "status": "已实现；课程合成资料基础，真实联网另行验收。",
+    "precondition": "原收费目录在用，地区政策目录已核对启用。",
+    "inputs": "原项目、明确目录项目、单位数量换算及适配依据。",
+    "flow": [
+      "逐项核对原收费项目和目录项目的含义与单位。",
+      "记录每个原收费单位对应的目录数量，预览后提交。",
+      "财务独立核对来源、单位、数量、当前收费定义及已启用映射。",
+      "原收费定义变化或映射失效时明确停用并另行核对，保留旧版。"
+    ],
+    "alternatives": [
+      "单位或支付规则缺失：继续待核对，不能启用。",
+      "同店该收费项目已有映射：先核对并停用旧映射。",
+      "预览后收费单位或目录状态变化：重新核对。",
+      "目录不支付：明确自费分类，不生成基金承担。"
+    ],
+    "result": "本店收费项目到明确政策项目的已核对适配或未通过记录。",
+    "minimum_guarantee": "不模糊合并名称，不改价格、实际治疗数量和旧账单。",
+    "rules": "换算为正数、最多四位小数；本店同一收费项目至多一个启用映射；独立确认。",
+    "acceptance": [
+      "AT-INS-MAP：源表缺项、单位变化、正数量、重复、版本与独立复核。"
+    ],
+    "source": [
+      "insurance/models.py",
+      "insurance/services.py",
+      "insurance/views.py",
+      "tests/test_insurance_preparation.py",
+      "tests/test_insurance_preparation_http.py"
+    ]
+  },
+  {
+    "id": "SU-90",
+    "name": "登记并接续患者模拟待遇核对",
+    "actor": "本店前台",
+    "status": "已实现；课程合成资料基础，真实联网另行验收。",
+    "precondition": "当前店可见且在用的患者档案，不以手机号或位置匹配患者。",
+    "inputs": "合成参保地、类型、核对结果、有效期、SIM依据及说明。",
+    "flow": [
+      "从原患者档案核对本店就诊人。",
+      "分别登记参保地、类型、有效期和本次模拟结果。",
+      "预览后明确确认，追加版本并保留原核对。",
+      "后续结果变化时比较当前版本再追加，核对门店安排、地区与日期是否适用。"
+    ],
+    "alternatives": [
+      "参保地或类型未知：保留待核实，不能认证待遇。",
+      "跨店、撤权、旧预览或版本竞争：不覆盖原结果。",
+      "同次重复确认：返回同一版本。",
+      "地区不符、过期或门店无安排：保留资料与明确待办，不承诺报销。"
+    ],
+    "result": "属于明确患者和本店的追加待遇版本及适用性提示。",
+    "minimum_guarantee": "不另建患者，不授予本人或代约权限，不产生治疗、账单和资金。",
+    "rules": "最新未知不回退旧已核实结果；前版必须为同一患者同一店；合成来源明确。",
+    "acceptance": [
+      "AT-INS-ELIGIBILITY：参保地与定位分离、未知、有效期、跨店、版本链、并发和重试。"
+    ],
+    "source": [
+      "insurance/models.py",
+      "insurance/services.py",
+      "insurance/views.py",
+      "tests/test_insurance_preparation.py",
+      "tests/test_insurance_preparation_http.py"
+    ]
   }
 ]

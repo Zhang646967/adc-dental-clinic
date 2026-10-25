@@ -5,7 +5,7 @@
  -->
 <!-- Title: schema Pages: 1 -->
 <svg role="img" aria-labelledby="er_patient_enrollment-title er_patient_enrollment-desc" width="396pt" height="532pt"
- viewBox="0.00 0.00 396.00 532.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="er_patient_enrollment-title">本人建档申请、前台决定与唯一档案关联</title><desc id="er_patient_enrollment-desc">申请归属登录账号及办理诊所；同一账号至多一项待核验或待补充申请。患者引用在批准时才有值，待核验不创建正式档案或预约。前台以本店核验职责、当前申请版号及明确原档案核对，创建新患者或复用旧患者、建立PatientAccess与决定事件同事务提交。本人关联继续保持账号、患者分别一对一；手机号不合并患者。决定与原申请快照追加保留，撤回或解绑不删除原事实。</desc>
+ viewBox="0.00 0.00 396.00 532.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="er_patient_enrollment-title">本人建档申请、前台决定与唯一档案关联</title><desc id="er_patient_enrollment-desc">申请归属登录账号及办理诊所；同一账号至多一项待核验或待补充申请。患者引用在批准时才有值，待核验不创建正式档案或预约。前台以本店核验职责、当前申请版号及明确原档案核对，新档建档及关联同事务提交；旧档不改资料，暂停复核启用原PatientAccess，决定事件一并追加。本人关联继续保持账号、患者分别一对一；手机号不合并患者。决定与原申请快照追加保留，撤回或解绑不删除原事实。</desc>
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 518)">
 <title>schema</title>
 <polygon fill="white" stroke="none" points="-14.4,14.4 -14.4,-518 381.61,-518 381.61,14.4 -14.4,14.4"/>

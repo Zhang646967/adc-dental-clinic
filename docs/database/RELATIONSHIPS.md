@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-296条实际SQL外键，其中295条对应ORM单列关系，1条为账单同次就诊复合外键。
+318条实际SQL外键，其中317条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -121,6 +121,28 @@
 | adc_inbox_message | event_id | adc_notification_outbox | id |
 | adc_inbox_message | grant_id | adc_role_assignment | id |
 | adc_inbox_message | recipient_id | adc_user | id |
+| adc_insurance_arrangement | catalogue_id | adc_insurance_catalogue | id |
+| adc_insurance_arrangement | prepared_by_id | adc_user | id |
+| adc_insurance_arrangement | reviewed_by_id | adc_user | id |
+| adc_insurance_arrangement | clinic_id | adc_clinic | id |
+| adc_insurance_catalogue | previous_id | adc_insurance_catalogue | id |
+| adc_insurance_catalogue | prepared_by_id | adc_user | id |
+| adc_insurance_catalogue | reviewed_by_id | adc_user | id |
+| adc_insurance_eligibility | previous_id | adc_insurance_eligibility | id |
+| adc_insurance_eligibility | recorded_by_id | adc_user | id |
+| adc_insurance_eligibility | clinic_id | adc_clinic | id |
+| adc_insurance_eligibility | patient_id | adc_patient | id |
+| adc_insurance_event | actor_id | adc_user | id |
+| adc_insurance_event | arrangement_id | adc_insurance_arrangement | id |
+| adc_insurance_event | catalogue_id | adc_insurance_catalogue | id |
+| adc_insurance_event | eligibility_id | adc_insurance_eligibility | id |
+| adc_insurance_event | mapping_id | adc_insurance_fee_mapping | id |
+| adc_insurance_fee_mapping | policy_item_id | adc_insurance_policy_item | id |
+| adc_insurance_fee_mapping | prepared_by_id | adc_user | id |
+| adc_insurance_fee_mapping | reviewed_by_id | adc_user | id |
+| adc_insurance_fee_mapping | treatment_type_id | adc_treatment_type | id |
+| adc_insurance_fee_mapping | clinic_id | adc_clinic | id |
+| adc_insurance_policy_item | catalogue_id | adc_insurance_catalogue | id |
 | adc_invoice | current_record_version_id | adc_visit_record_version | id |
 | adc_invoice | visit_id | adc_visit | id |
 | adc_invoice | current_record_version_id, visit_id | adc_visit_record_version | id, visit_id |

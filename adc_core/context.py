@@ -25,6 +25,8 @@ NAV['MANAGER'].append(('branch_directory_maintain','门店公开资料'))
 NAV['FRONT_DESK'].insert(6,('clinical_recalls','复诊随访与责任'))
 NAV['FRONT_DESK'].insert(7,('clinical_labs','加工件送返协调'))
 for _role in ('MANAGER','HQ'):NAV[_role].append(('clinical_coordination_summary','复诊与准备汇总'))
+for _role in ('FRONT_DESK', 'MANAGER', 'FINANCE', 'HQ'):
+    NAV[_role].append(('insurance_home', '医保资料与模拟待遇'))
 for _role in ('DENTIST','FRONT_DESK','MANAGER','PATIENT'):
     NAV[_role].append(('clinical_referrals','跨店转诊'))
 

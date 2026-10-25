@@ -17,6 +17,11 @@ PUBLIC.update({'patient_local_login','patient_account','patient_account_activate
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'insurance_home':{'FRONT_DESK','MANAGER','FINANCE','HQ'},
+ 'insurance_catalogue':{'FRONT_DESK','MANAGER','FINANCE'},'insurance_source':{'FRONT_DESK','MANAGER','FINANCE'},
+ 'insurance_import':{'FINANCE'},'insurance_resubmit':{'FINANCE'},'insurance_arrangement_new':{'MANAGER'},'insurance_mapping_new':{'MANAGER'},
+ 'insurance_eligibility':{'FRONT_DESK'},'insurance_detail':{'MANAGER','FINANCE'},
+ 'insurance_review':{'FINANCE'},'insurance_disable':{'MANAGER','FINANCE'},
  'patient_enrollment_list':{'FRONT_DESK'},'patient_enrollment_detail':{'FRONT_DESK'},'patient_enrollment_review_confirm':{'FRONT_DESK'},
  'branch_directory_maintain':{'MANAGER'},
  'clinical_recalls':{'FRONT_DESK'},'clinical_recall_claim':{'FRONT_DESK'},'clinical_recall_detail':{'FRONT_DESK'},'clinical_recall_action':{'FRONT_DESK'},

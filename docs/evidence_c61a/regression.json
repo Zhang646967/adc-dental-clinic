@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "tests": 1826,
+  "suite_seconds": 615.575,
+  "duration_seconds": 628.776,
+  "oom_killed": false,
+  "memory_events": "low 0\nhigh 0\nmax 10751\noom 0\noom_kill 0\noom_group_kill 0\nsock_throttled 0\n",
+  "scope": "Frozen uncommitted input-11 source; exact implementation CI/browser/recovery/installation recorded separately",
+  "source_rules": 1106,
+  "new_targeted_cases": 61,
+  "not_claimed": [
+    "real WeChat",
+    "real medical-insurance network",
+    "fund settlement",
+    "new capacity run",
+    "24-hour operation"
+  ]
+}
