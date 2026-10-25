@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Optional full commit SHA for exact-version release validation
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -12,9 +17,20 @@ permissions:
 jobs:
   postgresql:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.source_commit || github.sha }}
+      - name: Record validated source
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_commit }}
+        run: |
+          ADC_TESTED_SOURCE="$(git rev-parse HEAD)"
+          echo "ADC_TESTED_SOURCE=$ADC_TESTED_SOURCE"
+          if [ -n "$EXPECTED_SOURCE" ]; then
+            test "$ADC_TESTED_SOURCE" = "$EXPECTED_SOURCE"
+          fi
       - name: Verify native mini-program source and transport
         run: node scripts/verify_wechat.cjs
       - name: Verify isolated Django and PostgreSQL behavior
