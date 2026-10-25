@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "elapsed_seconds": 18.404,
+  "samples": [
+    {
+      "unix": 1792898011.623669,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792898015.294719,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792898018.975754,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792898022.671662,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792898026.3484259,
+      "conditions": "HEALTHY",
+      "host": "HEALTHY"
+    }
+  ],
+  "scope": "Brief fresh post-install health samples only; not24-hour or historical-gap reconstruction",
+  "old_unknown_history_retained": true,
+  "preexisting_worker_failure_cause": "UNDETERMINED"
+}

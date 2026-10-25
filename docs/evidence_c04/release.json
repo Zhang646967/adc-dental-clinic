@@ -1,0 +1,91 @@
+{
+  "status": "PASS_LOCAL_SYNTHETIC_DELIVERY",
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40153814579",
+  "image": "sha256:33dbe02fbfdd71b0697fc960bc1af60cff74e4a7512513e270713e4e39268cbd",
+  "preparation_tool_commit": "ba611d48ac0986e8563e0aafae105d185a4fd762",
+  "preparation_tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40157251378",
+  "runtime_image_unchanged_by_tool_followup": true,
+  "regression": {
+    "application_source_rules": 1104,
+    "application_postgresql_http_concurrency_cases": 1714,
+    "preparation_followup_postgresql_cases": 1715,
+    "targeted_existing_profile_cases": 27
+  },
+  "business_acceptance": {
+    "isolated_browser_and_native_checks": 77,
+    "original_installation_read_and_preview_checks": 42,
+    "cities": 8,
+    "synthetic_directory_branches": 20,
+    "bookable_changsha_branches": 4,
+    "isolated_unique_appointments": 4,
+    "clinical_and_money_facts_created_by_discovery": 0
+  },
+  "database": {
+    "application_migrations": 52,
+    "previous_migration_files_preserved": 49,
+    "sql_tables": 103,
+    "orm_tables": 102,
+    "orm_columns": 993,
+    "sql_foreign_keys": 285,
+    "application_triggers": 75,
+    "actual_original_structure_matches_er": true
+  },
+  "recovery": {
+    "tables": 103,
+    "rows": 1752,
+    "trigger_definitions_and_states": 75,
+    "seconds_after_empty_environment_ready": 7.794,
+    "original_copy_upgrade_seconds": 9.569,
+    "method": "same-version migration path; arbitrary equivalent-DDL comparison limitation retained"
+  },
+  "protected_original": {
+    "model_groups": 98,
+    "private_configuration_files": 70,
+    "original_database_container_and_volume_preserved": true,
+    "rc_tag_preserved": true,
+    "original_business_rows_preserved_outside_explicit_profile_metadata": true,
+    "explicit_course_profile_and_policy_updates": "mac-network.json",
+    "encrypted_before_and_after_database_and_configuration": true
+  },
+  "course_report": {
+    "pdf_pages": 169,
+    "business_cases": 82,
+    "shared_function": "SF-01",
+    "document_tables": 101,
+    "figures": 51,
+    "actual_er_views": 18,
+    "fixed_filenames_preserved": true
+  },
+  "local_native": {
+    "pages": 17,
+    "official_offline_wxml_and_wxss": true,
+    "actual_backend_page_handlers": true,
+    "registered_appid": false,
+    "wechat_runtime": false
+  },
+  "not_proven": [
+    "real WeChat authentication/phone interfaces",
+    "WeChat developer-tool runtime/device/experience upload",
+    "real map/dial services",
+    "real insurance interfaces",
+    "cloud operation",
+    "20-clinic business capacity",
+    "24-hour observation",
+    "professional clinical qualification"
+  ],
+  "preserved_boundaries": {
+    "historical_unknown_gaps_retained": true,
+    "preexisting_original_worker_failure_cause": "UNDETERMINED",
+    "old_worker_exit_code": 1,
+    "old_worker_oom_killed": false,
+    "new_worker_fresh_health": true,
+    "windows_original_data_recovery": "UNRESOLVED",
+    "original_local_runtime_role": "LEGACY_LOOPBACK_RC_OWNER_RETAINED"
+  },
+  "next_required": [
+    "C1-WX local identity and phone workflow",
+    "C6.1 Hunan directory and synthetic insurance settlement",
+    "C6.2 real institution integration when inputs exist"
+  ]
+}

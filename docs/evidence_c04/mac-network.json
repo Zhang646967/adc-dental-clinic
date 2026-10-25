@@ -1,0 +1,154 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "preparation_tool_commit": "ba611d48ac0986e8563e0aafae105d185a4fd762",
+  "preparation_tool_sha256": "abfdb54dbede7c3b5c364bcb58096dbd60fc56a583ba5b4062726ed88b8d2764",
+  "synthetic": true,
+  "published_branches": 20,
+  "cities": 8,
+  "booking_branches": 4,
+  "directory_only_branches": 16,
+  "original_clinic_identity_preserved": true,
+  "new_clinics": 18,
+  "new_registered_dentists": 2,
+  "new_assigned_doctor_accounts": 2,
+  "new_account_initial_passwords_reissued": 2,
+  "original_records_preserved_outside_explicit_catalogue_update": true,
+  "original_private_configuration_files_preserved": 70,
+  "explicit_catalogue_changes": [
+    {
+      "model": "scheduling.ResourcePolicy",
+      "id": "1",
+      "fields": [
+        "revision"
+      ]
+    },
+    {
+      "model": "scheduling.ResourcePolicy",
+      "id": "2",
+      "fields": [
+        "revision"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "1",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "5",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "2",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "6",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "3",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "7",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "4",
+      "fields": [
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "8",
+      "fields": [
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    }
+  ],
+  "clinical_and_money_facts_unchanged": true,
+  "preparation_uses_normal_owned_commands": true
+}

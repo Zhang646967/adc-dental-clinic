@@ -1,0 +1,148 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "original_model_groups": 98,
+  "private_configurations": 70,
+  "original_rows_preserved_outside_explicit_metadata_update": true,
+  "explicit_catalogue_changes": [
+    {
+      "model": "scheduling.ResourcePolicy",
+      "id": "1",
+      "fields": [
+        "revision"
+      ]
+    },
+    {
+      "model": "scheduling.ResourcePolicy",
+      "id": "2",
+      "fields": [
+        "revision"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "1",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "5",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "2",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "6",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "3",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "7",
+      "fields": [
+        "category",
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "4",
+      "fields": [
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "id": "8",
+      "fields": [
+        "fee_note",
+        "limitations",
+        "preparation",
+        "suitable_for",
+        "summary",
+        "title",
+        "updated_at",
+        "visit_content"
+      ]
+    }
+  ],
+  "clinical_and_money_facts_unchanged": true,
+  "feature_files_equal_to_tested_image": 737,
+  "database_container_and_volume_preserved": true,
+  "original_rc_tag_preserved": true,
+  "owner_runtime_separation_verified": false,
+  "local_database_role": "LEGACY_LOOPBACK_RC_OWNER_RETAINED",
+  "independent_https_role_gate": "NOT_RUN"
+}

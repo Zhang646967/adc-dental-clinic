@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "scope": "encrypted C0.4 twenty-branch populated rehearsal data restored into an independent empty database using all52 current migrations (all49 previous bytes unchanged); all row and schema fingerprints compared",
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "runtime_equivalence": "candidate.json",
+  "database": "PostgreSQL 17",
+  "method": "PG17_JSONB_SHA256_V1",
+  "tables": 103,
+  "rows": 1752,
+  "facts_sha256": "15efdf35f375c39f3de7518dd210ddfae1c1506164c03545000c5a92d4557168",
+  "restore_seconds_after_empty_database_ready": 7.794,
+  "total_seconds": 9.632,
+  "encrypted_dump_sha256": "e79407210bfee55e04da7121d19d711ab008b0c810a63959ce95e20f1b4fa279",
+  "original_bytes_evidence_and_history_included": true,
+  "new_table_rows": {
+    "adc_clinic_directory": 20,
+    "adc_clinic_directory_revision": 21,
+    "adc_portal_booking_receipt": 4,
+    "adc_resource_plan": 4,
+    "adc_resource_claim": 4
+  },
+  "original_runtime_untouched": true,
+  "trigger_definitions_and_enabled_states_compared": 75
+}

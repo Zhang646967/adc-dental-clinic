@@ -1,0 +1,177 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "checks": [
+    {
+      "name": "Installed guest home",
+      "passed": true
+    },
+    {
+      "name": "Installed eight-capital twenty-branch directory",
+      "passed": true
+    },
+    {
+      "name": "Installed public cards have no old demonstration names",
+      "passed": true
+    },
+    {
+      "name": "Four Changsha branches",
+      "passed": true
+    },
+    {
+      "name": "Actual Mac 390px large text",
+      "passed": true
+    },
+    {
+      "name": "front_a actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "front_a current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "front_a public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "manager_a actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "manager_a current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "manager_a public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "doctor_a actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "doctor_a current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "doctor_a public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "finance_demo actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "finance_demo current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "finance_demo public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "hq_demo actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "hq_demo current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "hq_demo public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "tech_demo actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "tech_demo current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "tech_demo public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "patient_demo_a actual channel and workspace",
+      "passed": true
+    },
+    {
+      "name": "patient_demo_a current workspace reflow",
+      "passed": true
+    },
+    {
+      "name": "patient_demo_a public-profile authority",
+      "passed": true
+    },
+    {
+      "name": "Installed native guest page reads twenty profiles",
+      "passed": true
+    },
+    {
+      "name": "Installed native guest is unauthenticated",
+      "passed": true
+    },
+    {
+      "name": "Native guest invokes patient login",
+      "passed": true
+    },
+    {
+      "name": "Installed login preserves exact service choice",
+      "passed": true
+    },
+    {
+      "name": "Only four configured branches are bookable",
+      "passed": true
+    },
+    {
+      "name": "Installed resource candidates clinic 1",
+      "passed": true
+    },
+    {
+      "name": "Installed signed preview branch 1",
+      "passed": true
+    },
+    {
+      "name": "Installed resource candidates clinic 4",
+      "passed": true
+    },
+    {
+      "name": "Installed signed preview branch 4",
+      "passed": true
+    },
+    {
+      "name": "Installed resource candidates clinic 2",
+      "passed": true
+    },
+    {
+      "name": "Installed signed preview branch 2",
+      "passed": true
+    },
+    {
+      "name": "Installed resource candidates clinic 3",
+      "passed": true
+    },
+    {
+      "name": "Installed signed preview branch 3",
+      "passed": true
+    },
+    {
+      "name": "Existing own waitlist remains readable",
+      "passed": true
+    },
+    {
+      "name": "Installed sign out clears transient state",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "business_confirmations": false,
+  "scope": "Actual original Mac; seven roles, public discovery and four clinic native signed previews only; no appointment, clinical or financial fixture injection; not WeChat runtime"
+}

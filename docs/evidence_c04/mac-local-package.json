@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "pages": 17,
+  "code_files_equal_to_installed_source": 41,
+  "mode": "local",
+  "backend": "http://127.0.0.1:18000",
+  "appid": "touristappid",
+  "registered_appid": false,
+  "platform_runtime_verified": false,
+  "credentials_included": false,
+  "private_directory": ".course-private/c04-20261024/wechat-local"
+}

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "checks": [
+    {
+      "name": "Public profile preview shows proposed phone",
+      "passed": true
+    },
+    {
+      "name": "Preview has no public effect",
+      "passed": true
+    },
+    {
+      "name": "Manager preview supports narrow large text",
+      "passed": true
+    },
+    {
+      "name": "Normal UI records version two",
+      "passed": true
+    },
+    {
+      "name": "Explicit confirmation publishes proposed phone",
+      "passed": true
+    }
+  ]
+}

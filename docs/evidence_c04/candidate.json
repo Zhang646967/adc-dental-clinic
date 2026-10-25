@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "image": "sha256:33dbe02fbfdd71b0697fc960bc1af60cff74e4a7512513e270713e4e39268cbd",
+  "architecture": "arm64",
+  "immutable_feature_files_compared": 737,
+  "exact_source_bundle_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "exact_implementation_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40153814579",
+  "browser_acceptance_image_identical": true,
+  "runtime_project": "adc_rc1_42b33e7291d1",
+  "port": 18178,
+  "scope": "Exact identified image, source hashes, 77 real browser/native checks, populated encrypted recovery and original-copy upgrade; subsequent changes are documentation/report only",
+  "not_proven": [
+    "WeChat runtime",
+    "cloud hosting",
+    "20-clinic capacity",
+    "24-hour operation",
+    "professional qualification"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "tool_commit": "ba611d48ac0986e8563e0aafae105d185a4fd762",
+  "source_changes": [
+    "scripts/course_branch_network.py",
+    "tests/test_course_branch_network.py"
+  ],
+  "runtime_image_unchanged": true,
+  "normal_owned_configuration_commands": true,
+  "existing_profile_identifiers_preserved": true,
+  "targeted_postgresql_cases": 27,
+  "targeted_seconds": 34.77,
+  "full_ci_postgresql_cases": 1715,
+  "full_ci_source_rules": 1104,
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40157251378",
+  "preceding_failure_retained": true,
+  "initial_password_reissue_limited_to_two_new_synthetic_accounts": true
+}

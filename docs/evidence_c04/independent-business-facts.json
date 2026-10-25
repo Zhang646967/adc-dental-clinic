@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "independent database counts after web and native explicit bookings and replay",
+  "published_branches": 20,
+  "cities": 8,
+  "booking_clinics": 4,
+  "unique_visits": 4,
+  "booking_receipts": 4,
+  "active_chair_claims": 4,
+  "treatment_rows": 0,
+  "invoices": 0,
+  "cash_rows": 0,
+  "public_profile_versions": 21,
+  "source": "SQL-backed ORM facts, independent of page success messages"
+}

@@ -1,0 +1,15 @@
+{
+  "scope": "pre-existing original worker outage, before C0.4 application changes",
+  "exit_code": 1,
+  "oom_killed": false,
+  "running_at_backup": false,
+  "finished_utc": "2026-10-25T01:10:37.078587418Z",
+  "root_cause": "UNDETERMINED",
+  "original_logs_retained_privately": true,
+  "last_logged_events": [
+    "command.notice",
+    "command.failed"
+  ],
+  "logger_included_exception_category": false,
+  "upgrade_observation_archive_read_path": "running operations container, confirmed shared monitor/worker volumes"
+}

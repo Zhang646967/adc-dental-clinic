@@ -1,0 +1,297 @@
+{
+  "passed": true,
+  "application_commit": "f9df57dc98c812c658c107d94202574ca3a5e48c",
+  "checks": [
+    {
+      "name": "Public home returns real HTML",
+      "passed": true
+    },
+    {
+      "name": "Home has four preview cards",
+      "passed": true
+    },
+    {
+      "name": "Guest startup does not request location",
+      "passed": true
+    },
+    {
+      "name": "Directory remains anonymous",
+      "passed": true
+    },
+    {
+      "name": "Eight capitals and twenty branch profiles",
+      "passed": true
+    },
+    {
+      "name": "Published cards use the chain branch names",
+      "passed": true
+    },
+    {
+      "name": "390px large-text directory reflow",
+      "passed": true
+    },
+    {
+      "name": "Denied location still displays all branches",
+      "passed": true
+    },
+    {
+      "name": "Manual Changsha selection shows four branches",
+      "passed": true
+    },
+    {
+      "name": "Keyboard area search works",
+      "passed": true
+    },
+    {
+      "name": "Synthetic contact stops before external dial",
+      "passed": true
+    },
+    {
+      "name": "Weekly hours remain readable",
+      "passed": true
+    },
+    {
+      "name": "Expanded hours reflow",
+      "passed": true
+    },
+    {
+      "name": "Nearest clinic appears first after actual browser permission",
+      "passed": true
+    },
+    {
+      "name": "Measured distance is visible",
+      "passed": true
+    },
+    {
+      "name": "Web service detail 0",
+      "passed": true
+    },
+    {
+      "name": "Web detail uses published branch 0",
+      "passed": true
+    },
+    {
+      "name": "Chosen service survives guest login",
+      "passed": true
+    },
+    {
+      "name": "Exact web service remains selected 0",
+      "passed": true
+    },
+    {
+      "name": "Resource-backed web candidate 0",
+      "passed": true
+    },
+    {
+      "name": "Confirmation repeats the published branch 0",
+      "passed": true
+    },
+    {
+      "name": "Web confirmation narrow large text 0",
+      "passed": true
+    },
+    {
+      "name": "Website created one linked appointment 0",
+      "passed": true
+    },
+    {
+      "name": "Website same confirmation replays original 0",
+      "passed": true
+    },
+    {
+      "name": "Web service detail 1",
+      "passed": true
+    },
+    {
+      "name": "Web detail uses published branch 1",
+      "passed": true
+    },
+    {
+      "name": "Exact web service remains selected 1",
+      "passed": true
+    },
+    {
+      "name": "Resource-backed web candidate 1",
+      "passed": true
+    },
+    {
+      "name": "Confirmation repeats the published branch 1",
+      "passed": true
+    },
+    {
+      "name": "Web confirmation narrow large text 1",
+      "passed": true
+    },
+    {
+      "name": "Website created one linked appointment 1",
+      "passed": true
+    },
+    {
+      "name": "Website same confirmation replays original 1",
+      "passed": true
+    },
+    {
+      "name": "front_a independent employee channel",
+      "passed": true
+    },
+    {
+      "name": "front_a directory permission",
+      "passed": true
+    },
+    {
+      "name": "manager_a independent employee channel",
+      "passed": true
+    },
+    {
+      "name": "manager_a directory permission",
+      "passed": true
+    },
+    {
+      "name": "Manager public profile form 390px",
+      "passed": true
+    },
+    {
+      "name": "doctor_a independent employee channel",
+      "passed": true
+    },
+    {
+      "name": "doctor_a directory permission",
+      "passed": true
+    },
+    {
+      "name": "finance_demo independent employee channel",
+      "passed": true
+    },
+    {
+      "name": "finance_demo directory permission",
+      "passed": true
+    },
+    {
+      "name": "hq_demo independent employee channel",
+      "passed": true
+    },
+    {
+      "name": "hq_demo directory permission",
+      "passed": true
+    },
+    {
+      "name": "tech_demo independent employee channel",
+      "passed": true
+    },
+    {
+      "name": "tech_demo directory permission",
+      "passed": true
+    },
+    {
+      "name": "Patient account cannot authenticate through staff entry",
+      "passed": true
+    },
+    {
+      "name": "Wrong-channel attempt has no patient session",
+      "passed": true
+    },
+    {
+      "name": "Actual native guest page reads twenty branches",
+      "passed": true
+    },
+    {
+      "name": "Native discovery has no automatic GPS",
+      "passed": true
+    },
+    {
+      "name": "Native discovery has no authenticated session",
+      "passed": true
+    },
+    {
+      "name": "Native denied GPS retains manual browse",
+      "passed": true
+    },
+    {
+      "name": "Native manual city returns four branches",
+      "passed": true
+    },
+    {
+      "name": "Native synthetic contact is intercepted",
+      "passed": true
+    },
+    {
+      "name": "Native detail exact branch 2",
+      "passed": true
+    },
+    {
+      "name": "Native guest choice requests patient login",
+      "passed": true
+    },
+    {
+      "name": "Native login resumes exact selected service",
+      "passed": true
+    },
+    {
+      "name": "Native booking selected intended service 2",
+      "passed": true
+    },
+    {
+      "name": "Native resource candidates available 2",
+      "passed": true
+    },
+    {
+      "name": "Native signed preview shows published contact 2",
+      "passed": true
+    },
+    {
+      "name": "Native explicit confirmation creates appointment 2",
+      "passed": true
+    },
+    {
+      "name": "Native duplicate confirms same original effect 2",
+      "passed": true
+    },
+    {
+      "name": "Native detail exact branch 3",
+      "passed": true
+    },
+    {
+      "name": "Native booking selected intended service 3",
+      "passed": true
+    },
+    {
+      "name": "Native resource candidates available 3",
+      "passed": true
+    },
+    {
+      "name": "Native signed preview shows published contact 3",
+      "passed": true
+    },
+    {
+      "name": "Native explicit confirmation creates appointment 3",
+      "passed": true
+    },
+    {
+      "name": "Native duplicate confirms same original effect 3",
+      "passed": true
+    },
+    {
+      "name": "Four unique appointments across four branches",
+      "passed": true
+    },
+    {
+      "name": "Location is absent from native API parameters",
+      "passed": true
+    },
+    {
+      "name": "Waitlist remains connected to the same patient",
+      "passed": true
+    },
+    {
+      "name": "Logout clears identity and booking hint",
+      "passed": true
+    },
+    {
+      "name": "No browser script exception",
+      "passed": true
+    }
+  ],
+  "browser": "156.0.8078.47",
+  "page_errors": 0,
+  "scope": "Real Chrome and actual native Page handlers against identified local HTTP/PostgreSQL; synthetic/manual and browser-provided geolocation; not WeChat runtime or external navigation"
+}
