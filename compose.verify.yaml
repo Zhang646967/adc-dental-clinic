@@ -2,6 +2,9 @@
 services:
   verify-db:
     image: postgres:17
+    # Constraint tests retain the error, without echoing full uploaded binaries
+    # and JSON parameters into the CI stream.
+    command: ["postgres", "-c", "log_min_error_statement=panic", "-c", "log_error_verbosity=terse"]
     environment:
       POSTGRES_DB: adc_verify
       POSTGRES_USER: adc_verify_owner
