@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "encrypted_database_and_configuration": true,
+  "decryption_archive_inventory_checked": true,
+  "new_schema_and_private_issuer_included": true,
+  "sha256": "88def6600f4714cd4cb01cf5986097eec50325e545fad976945b34506a052a6e",
+  "private_backup": true
+}

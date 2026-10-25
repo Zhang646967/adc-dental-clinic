@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "failed_source_commit": "8eb3473aae19ebca9522e8bce96617503b11b238",
+  "failed_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40165664012",
+  "failure": "Manifest referenced a local historical verification file excluded by the image; execution stopped before business tests",
+  "correction_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "correction": "Remove only the erroneous image-manifest entry; retain the local historical file",
+  "accepted_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40165900875",
+  "source_rules": 1104,
+  "postgresql_cases": 1765,
+  "postgresql_seconds": 1279.755,
+  "verification_and_cleanup_exit_codes": [
+    0,
+    0
+  ],
+  "historical_failure_retained": true
+}

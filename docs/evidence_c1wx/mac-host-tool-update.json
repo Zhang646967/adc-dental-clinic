@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "host_tool_commit": "9e77fd0e293166f586d514dec8e92b0b5879885b",
+  "host_tool_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40169469295",
+  "accepted_application_image_unchanged": true,
+  "runtime_containers_unchanged": 5,
+  "source_feature_files_equal_to_application_image": 768,
+  "host_tool_file_separately_verified": 1,
+  "private_configurations_unchanged": 70,
+  "same_journal_retained_without_reset": true,
+  "old_closed_events_and_incidents_byte_equivalent": true,
+  "original_journal_encrypted_and_verified": true,
+  "new_maintenance_probe_false_incidents": 0,
+  "fresh_independent_samples": 2,
+  "historical_UNKNOWN_preserved": true,
+  "new_launchd_job": false,
+  "host_tool_sha256": "25e12509dd01cca043b487a879b53af9d04e752d39ac9aac5d18a1d5a7358701"
+}

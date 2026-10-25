@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "image": "sha256:66b72584cb0ede0b199c665aad3be3ada1a860444d1ab5854d46ebe727ba26f2",
+  "roles": [
+    {
+      "passed": true,
+      "current_clinic_scope": true,
+      "status": 404
+    }
+  ],
+  "checks": 1,
+  "scope": "Actual Chrome credential login and session-bound GET projections; no permission mutation"
+}

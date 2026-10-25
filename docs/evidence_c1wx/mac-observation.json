@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "elapsed_seconds": 18.632,
+  "samples": [
+    {
+      "unix": 1792910419.236685,
+      "application": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792910422.987187,
+      "application": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792910426.689813,
+      "application": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792910430.401092,
+      "application": "HEALTHY",
+      "host": "HEALTHY"
+    },
+    {
+      "unix": 1792910434.119292,
+      "application": "HEALTHY",
+      "host": "HEALTHY"
+    }
+  ],
+  "scope": "Brief fresh samples only; not24-hour stability or reconstruction of older gaps",
+  "historical_unknown_history_retained": true,
+  "historical_worker_failure_cause": "UNDETERMINED"
+}

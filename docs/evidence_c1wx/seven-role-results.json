@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "image": "sha256:66b72584cb0ede0b199c665aad3be3ada1a860444d1ab5854d46ebe727ba26f2",
+  "roles": [
+    {
+      "role": "FRONT_DESK",
+      "review_queue": 200,
+      "patient_account": 403,
+      "passed": true
+    },
+    {
+      "role": "DENTIST",
+      "review_queue": 403,
+      "patient_account": 403,
+      "passed": true
+    },
+    {
+      "role": "MANAGER",
+      "review_queue": 403,
+      "patient_account": 403,
+      "passed": true
+    },
+    {
+      "role": "HQ",
+      "review_queue": 403,
+      "patient_account": 403,
+      "passed": true
+    },
+    {
+      "role": "FINANCE",
+      "review_queue": 403,
+      "patient_account": 403,
+      "passed": true
+    },
+    {
+      "role": "SYSADMIN",
+      "review_queue": 403,
+      "patient_account": 403,
+      "passed": true
+    },
+    {
+      "role": "PATIENT",
+      "review_queue": 403,
+      "patient_account": 200,
+      "passed": true
+    }
+  ],
+  "checks": 14,
+  "scope": "Actual Chrome credential login and session-bound GET projections; no permission mutation"
+}

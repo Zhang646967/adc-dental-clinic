@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "scope": "encrypted C1-WX patient-account and twenty-branch populated rehearsal data restored into an independent empty database using all54 current migrations (all52 previous bytes unchanged); all row and schema fingerprints compared",
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "runtime_equivalence": "candidate.json",
+  "database": "PostgreSQL 17",
+  "method": "PG17_JSONB_SHA256_V1",
+  "tables": 109,
+  "rows": 1932,
+  "facts_sha256": "d4429ca178be8c16841bb6bb59e2117a5a110886dcc81472d7853689b0bed533",
+  "restore_seconds_after_empty_database_ready": 8.323,
+  "total_seconds": 10.15,
+  "encrypted_dump_sha256": "1f3d6ff08538c1c946640a5db98164f9ddb639b98384f00adbb92f55a7d7c571",
+  "original_bytes_evidence_and_history_included": true,
+  "new_table_rows": {
+    "adc_external_identity": 7,
+    "adc_local_identity_code": 11,
+    "adc_account_phone": 3,
+    "adc_account_identity_event": 16,
+    "adc_patient_enrollment": 6,
+    "adc_patient_enrollment_event": 12,
+    "adc_portal_booking_receipt": 6,
+    "adc_resource_plan": 6,
+    "adc_resource_claim": 10
+  },
+  "original_runtime_untouched": true,
+  "trigger_definitions_and_enabled_states_compared": 77
+}

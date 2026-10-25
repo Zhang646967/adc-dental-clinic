@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "host_tool_commit": "9e77fd0e293166f586d514dec8e92b0b5879885b",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40169469295",
+  "source_rules": 1106,
+  "targeted_host_tests": 37,
+  "postgresql_cases": 1765,
+  "business_application_image_unchanged": true,
+  "projection_change": "Retain daemon-history rows for saturation detection; only oneoff=False lifecycle rows become runtime incidents",
+  "real_Docker_reproduction": "host-tool-real-docker.json",
+  "original_installation": "mac-host-tool-update.json"
+}

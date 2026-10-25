@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "scope": "Real local Docker one-off web maintenance against the installed synthetic instance; command does not import Django or change business data",
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "five_runtime_container_ids_unchanged": true,
+  "old_projection_false_lifecycle_events": 3,
+  "fixed_projection_maintenance_events": 0,
+  "legitimate_runtime_health_still_present": 5,
+  "daemon_history_bound_preserved": true,
+  "business_database_changes": 0,
+  "source_changes": [
+    "scripts/host_events.py",
+    "checks/test_host_events.py"
+  ],
+  "runtime_image_unchanged": true
+}

@@ -1,0 +1,121 @@
+{
+  "status": "PASS_LOCAL_SYNTHETIC_DELIVERY",
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40165900875",
+  "image": "sha256:66b72584cb0ede0b199c665aad3be3ada1a860444d1ab5854d46ebe727ba26f2",
+  "image_architecture": "arm64",
+  "source_feature_files_verified": 769,
+  "regression": {
+    "source_rules": 1104,
+    "postgresql_http_concurrency_cases": 1765,
+    "ci_postgresql_seconds": 1279.755,
+    "local_full_suite_seconds": 561.837,
+    "new_identity_and_http_cases": 50,
+    "followup_affected_cases": 181,
+    "native_structure_transport_checks": 207,
+    "official_offline_pages": 19
+  },
+  "business_acceptance": {
+    "same_image_browser_checks": 18,
+    "same_image_real_backend_page_handler_checks": 34,
+    "seven_role_http_checks": 14,
+    "current_clinic_scope_checks": 1,
+    "total_same_image_checks": 67,
+    "installed_read_and_session_checks": 18,
+    "local_issuer_full_host_command": true,
+    "independent_new_financial_or_treatment_facts": 0
+  },
+  "database": {
+    "application_migrations": 54,
+    "previous_migration_files_preserved": 52,
+    "sql_tables": 109,
+    "orm_tables": 108,
+    "orm_columns": 1042,
+    "sql_foreign_keys": 296,
+    "application_triggers": 77,
+    "actual_installed_structure_equals_ER": true
+  },
+  "recovery": {
+    "tables": 109,
+    "rows": 1932,
+    "trigger_definitions_and_enabled_states": 77,
+    "restore_seconds_after_empty_environment_ready": 8.323,
+    "original_copy_upgrade_seconds": 10.268,
+    "all_six_new_tables_populated_in_restore": true,
+    "method": "same-version migrations then data restore; arbitrary equivalent-DDL comparison limitation retained"
+  },
+  "protected_original": {
+    "model_groups": 100,
+    "private_configuration_files": 70,
+    "original_database_container_and_volume_preserved": true,
+    "rc_tag_preserved": true,
+    "original_account_password_patient_clinical_and_money_rows_preserved": true,
+    "explicit_existing_frontdesk_duty_flags_enabled": 3,
+    "all_other_original_role_fields_hash_verified": true,
+    "new_controlled_governance_audits": 3,
+    "new_authorized_list_read_audits": 3,
+    "new_unbound_simulator_identity": 1,
+    "new_unused_private_login_code": 1,
+    "no_patient_or_appointment_test_fixture_created": true,
+    "encrypted_before_and_after_database_and_configuration": true
+  },
+  "course_report": {
+    "pdf_pages": 175,
+    "business_cases": 86,
+    "shared_function": "SF-01",
+    "document_tables": 105,
+    "figures": 53,
+    "actual_ER_views": 20,
+    "retained_substantive_use_case_fields": 355,
+    "fixed_filenames_preserved": true
+  },
+  "local_native": {
+    "pages": 19,
+    "official_offline_wxml_wxss": true,
+    "actual_backend_page_handlers": true,
+    "registered_appid": false,
+    "wechat_runtime": false
+  },
+  "operational_followup": {
+    "private_rehearsal_old_source_observation_retained": true,
+    "cause": "Planned private rehearsal update omitted explicit observation reset",
+    "observer_restart_fresh_six_conditions": true,
+    "original_upgrade_performed_explicit_reset": true,
+    "old_UNKNOWN_history_retained": true,
+    "historical_original_worker_cause": "UNDETERMINED",
+    "fresh_samples_not_24_hour_acceptance": true
+  },
+  "not_proven": [
+    "real WeChat login and phone interfaces",
+    "resident ID verification",
+    "WeChat developer-tool runtime/device/experience upload",
+    "real map/dial services",
+    "real insurance eligibility or settlement",
+    "cloud operation",
+    "20-clinic business capacity",
+    "24-hour stability",
+    "professional clinical qualification"
+  ],
+  "preserved_boundaries": {
+    "windows_original_data_recovery": "UNRESOLVED",
+    "original_runtime_role": "LEGACY_LOOPBACK_RC_OWNER_RETAINED",
+    "independent_HTTPS_role_gate": "NOT_RUN"
+  },
+  "next_required": [
+    "C6.1 versioned Hunan catalogue and local synthetic insurance financial workflows",
+    "real WeChat integration when registered application and qualifications exist",
+    "C6.2 real institution integration when inputs exist"
+  ],
+  "host_tool_followup": {
+    "commit": "9e77fd0e293166f586d514dec8e92b0b5879885b",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40169469295",
+    "source_rules": 1106,
+    "postgresql_cases": 1765,
+    "targeted_tests": 37,
+    "accepted_business_image_unchanged": true,
+    "installed_core_files_equal_to_accepted_image": 768,
+    "separate_host_tool_files": 1,
+    "maintenance_false_incidents_after_fix": 0,
+    "original_warning_history_retained": true
+  }
+}

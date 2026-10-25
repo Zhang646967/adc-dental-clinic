@@ -1,4 +1,14 @@
-# Current delivery: C0.4
+# Current delivery: C1-WX
+
+本地账号 → 联络来源 → 本人申请 → 独立前台核验 → 明确进入 → 原预约、改期与候补。
+
+应用d0a05fe准确CI通过1,104项规则及1,765项PostgreSQL／HTTP／并发；同镜像67项跨端与权限、109表1,932行加密恢复、原库副本升级、本机保护更新及175页报告通过。原100组业务、70份配置、账号密码和数据库卷保留，三处前台核验职责正常维护。见[完整证据](docs/evidence_c1wx/README.md)、[本地使用](docs/C1WX_LOCAL_GUIDE.md)。
+
+C6.1本地医保继续实施。真实微信、医保机构、云端、专业、二十店容量及24小时分别验收；历史UNKNOWN与Windows资料恢复状态保留。
+
+## Historical delivery
+
+# Historical delivery: C0.4
 
 公开找店 → 按需登录 → 授权患者 → 原统一预约 → 数据保护与恢复。
 

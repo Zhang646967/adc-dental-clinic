@@ -1,0 +1,82 @@
+{
+  "passed": true,
+  "scope": "Uncommitted frozen UI preflight; runserver, not exact-image release",
+  "checks": [
+    {
+      "name": "First login shows own pending account without patient authority",
+      "passed": true
+    },
+    {
+      "name": "390px large pending account",
+      "passed": true
+    },
+    {
+      "name": "Explicit local phone provenance",
+      "passed": true
+    },
+    {
+      "name": "Human-readable application preview",
+      "passed": true
+    },
+    {
+      "name": "390px large application preview",
+      "passed": true
+    },
+    {
+      "name": "New application stays pending",
+      "passed": true
+    },
+    {
+      "name": "Staff explicit review preview for 合成发布新患者",
+      "passed": true
+    },
+    {
+      "name": "Staff retained approval for 合成发布新患者",
+      "passed": true
+    },
+    {
+      "name": "390px staff completed verification",
+      "passed": true
+    },
+    {
+      "name": "Approval does not activate patient from GET",
+      "passed": true
+    },
+    {
+      "name": "Service hint survives pending review and explicit activation",
+      "passed": true
+    },
+    {
+      "name": "Reviewed new patient receives real shared resource options",
+      "passed": true
+    },
+    {
+      "name": "Newly verified self account creates one normal appointment",
+      "passed": true
+    },
+    {
+      "name": "Existing self-reschedule rules expose compatible alternatives",
+      "passed": true
+    },
+    {
+      "name": "Self-rescheduling creates a different unique successor",
+      "passed": true
+    },
+    {
+      "name": "Own password setup keeps authenticated account visible",
+      "passed": true
+    },
+    {
+      "name": "390px large recovered account",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "image": "sha256:66b72584cb0ede0b199c665aad3be3ada1a860444d1ab5854d46ebe727ba26f2",
+  "exact_image": true
+}

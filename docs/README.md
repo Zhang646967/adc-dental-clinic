@@ -1,3 +1,5 @@
+**C1-WX 当前本地交付：** [账号及本人申请](C1WX_ACCOUNT_CONTRACT.md) · [准确CI、跨端、恢复与更新](evidence_c1wx/README.md) · [私有本地试用](C1WX_LOCAL_GUIDE.md)。
+
 **C0.4 当前本地交付：** [找店与登录合同](C04_PATIENT_DISCOVERY_CONTRACT.md) · [准确CI、跨端、恢复及更新](evidence_c04/README.md) · [本地使用](C04_LOCAL_GUIDE.md)。
 
 **C2.2–C2.3 当前交付：** [连续方案与实际执行](C22_CONTINUITY_CONTRACT.md) · [复诊与加工就绪](C23_RECALL_LAB_CONTRACT.md) · [准确版本、容量、恢复与本机交付](evidence_c23/release.json)。
@@ -8,7 +10,7 @@
 
 当前产品方向：[商业V2总计划](COMMERCIAL_V2_MASTER_PLAN.md) → [代码与证据基线](COMMERCIAL_V2_BASELINE.md) → [分批需求及验收](COMMERCIAL_V2_BACKLOG.json)。首发采用单连锁独立部署，完整诊疗替代纳入目标；课程报告与旧执行记录继续作为来源保留。
 
-最新规划（2026-10-24）：[中国患者入口、连锁布局与医保研究](research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4找店、C1-WX身份与C6医保实施安排](PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。含八省会二十店合成设计、14项需求验收与[官方来源登记](research/china_patient_access_sources.json)，C0.4已本地交付，C1-WX和C6.1继续实施。
+最新规划（2026-10-24）：[中国患者入口、连锁布局与医保研究](research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4找店、C1-WX身份与C6医保实施安排](PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md) → [C6.1本地合同](C61_LOCAL_INSURANCE_CONTRACT.md)。含八省会二十店合成设计、14项需求验收与[官方来源登记](research/china_patient_access_sources.json)，C0.4已本地交付，C1-WX本地流程已交付，真实微信及C6.1继续实施。
 
 前阶段研究（2026-10-23）：[Open Dental 等六类系统调研](research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 身份与连续诊疗](COMMERCIAL_V2_NEXT_STAGE.md) → [需求与验收追踪](research/NEXT_STAGE_TRACEABILITY.json)。[来源登记](research/dental_study_sources.json)区分官方手册、厂商声明、调查与法规；[规划模型](research/MODEL_NOTES.md)不替代实际数据库 ER。
 
@@ -36,7 +38,7 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[285条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[296条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。
@@ -51,7 +53,7 @@
 
 ## 测试与验收
 
-当前[C2.2–C2.3连续诊疗与加工](evidence_c23/README.md)；历史[C1.1患者关系与预约代办](evidence_c11/README.md)；历史[C0.3患者渠道验证与交付](evidence_c03/README.md)；历史[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
+当前[C1-WX账号与本人核验](evidence_c1wx/README.md)；历史[C2.2–C2.3连续诊疗与加工](evidence_c23/README.md)；历史[C1.1患者关系与预约代办](evidence_c11/README.md)；历史[C0.3患者渠道验证与交付](evidence_c03/README.md)；历史[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
 
 | 验证范围 | 实际记录 |
 |---|---|

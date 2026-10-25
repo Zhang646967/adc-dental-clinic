@@ -1,0 +1,145 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Local login completed exact-native-retry-self-new",
+      "passed": true
+    },
+    {
+      "name": "Native first login retains pending authority",
+      "passed": true
+    },
+    {
+      "name": "Pending identity retains exact service hint",
+      "passed": true
+    },
+    {
+      "name": "Real backend local phone provenance",
+      "passed": true
+    },
+    {
+      "name": "Pending identity cannot read appointments",
+      "passed": true
+    },
+    {
+      "name": "Own enrollment page loads",
+      "passed": true
+    },
+    {
+      "name": "Enrollment server preview",
+      "passed": true
+    },
+    {
+      "name": "Lost response leaves original operation frozen",
+      "passed": true
+    },
+    {
+      "name": "Uncertain submission does not accept new data",
+      "passed": true
+    },
+    {
+      "name": "Enrollment confirms to account",
+      "passed": true
+    },
+    {
+      "name": "Staff reviewed 合成原生新患者复验",
+      "passed": true
+    },
+    {
+      "name": "Approval is visible before activation",
+      "passed": true
+    },
+    {
+      "name": "Native activation resumes exact service",
+      "passed": true
+    },
+    {
+      "name": "Shared 45-minute resource candidates",
+      "passed": true
+    },
+    {
+      "name": "Shared business confirmation 确认就诊安排",
+      "passed": true
+    },
+    {
+      "name": "Original authorized rescheduling candidates",
+      "passed": true
+    },
+    {
+      "name": "Shared business confirmation 确认预约改期",
+      "passed": true
+    },
+    {
+      "name": "Native reschedule yields one successor",
+      "passed": true
+    },
+    {
+      "name": "Reviewed account enters original waitlist preview",
+      "passed": true
+    },
+    {
+      "name": "Shared business confirmation 核对候补偏好",
+      "passed": true
+    },
+    {
+      "name": "Waitlist confirmation keeps separate request",
+      "passed": true
+    },
+    {
+      "name": "Native logout clears all transient choices",
+      "passed": true
+    },
+    {
+      "name": "Local login completed exact-native-retry-existing-self",
+      "passed": true
+    },
+    {
+      "name": "Existing patient request does not create a patient",
+      "passed": true
+    },
+    {
+      "name": "Staff reviewed 演示患者2",
+      "passed": true
+    },
+    {
+      "name": "Legacy self activates after explicit staff review",
+      "passed": true
+    },
+    {
+      "name": "Normal pause removes subject authority but retains own account",
+      "passed": true
+    },
+    {
+      "name": "Restore forces original-file path",
+      "passed": true
+    },
+    {
+      "name": "Restore request submitted without a new patient",
+      "passed": true
+    },
+    {
+      "name": "Staff reviewed 演示患者2",
+      "passed": true
+    },
+    {
+      "name": "Reviewed restoration reuses original access",
+      "passed": true
+    },
+    {
+      "name": "Restore cannot revive pre-pause booking preview",
+      "passed": true
+    },
+    {
+      "name": "Local login completed exact-native-retry-existing-adc",
+      "passed": true
+    },
+    {
+      "name": "Explicit original ADC credentials bind without staff role",
+      "passed": true
+    }
+  ],
+  "scope": "Actual Page handlers over real Django/HTTP and Chrome staff review; consent dialog and lost response simulated, not WeChat runtime",
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "image": "sha256:66b72584cb0ede0b199c665aad3be3ada1a860444d1ab5854d46ebe727ba26f2",
+  "exact_image": true
+}

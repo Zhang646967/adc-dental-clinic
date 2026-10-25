@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "classification": "LEGACY_LOOPBACK_RC_OWNER_RETAINED",
+  "independent_https_gate": "NOT_RUN",
+  "private_configuration_preserved": true
+}

@@ -1,3 +1,5 @@
+**C1-WX本地账号流程已交付：** 当前19页包含账号、手机来源及本人申请；与网站共用独立前台核验及原预约权限。[本地导入与私有凭证](../../docs/C1WX_LOCAL_GUIDE.md) · [执行边界](../../docs/evidence_c1wx/README.md)。官方离线编译和实际处理器联调通过；无注册AppID，尚未验收微信运行时或体验版。
+
 # ADC native patient client / 患者微信小程序
 
 Published service → scope and fee terms → exact service and time → explicit

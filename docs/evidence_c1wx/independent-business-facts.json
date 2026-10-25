@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "visits": 6,
+  "rescheduled_sources": 3,
+  "scheduled_successors": 3,
+  "booking_receipts": 6,
+  "wait_requests": 2,
+  "patients": 7,
+  "self_associations": 7,
+  "approved_requests": 6,
+  "request_events": 12,
+  "new_table_rows": {
+    "adc_external_identity": 7,
+    "adc_local_identity_code": 11,
+    "adc_account_phone": 3,
+    "adc_account_identity_event": 16,
+    "adc_patient_enrollment": 6,
+    "adc_patient_enrollment_event": 12
+  },
+  "treatments": 0,
+  "invoices": 0,
+  "cash_entries": 0,
+  "distinct_synthetic_attempts_retained": true,
+  "scope": "Database facts after all exact-image browser/native journeys, including successful prefixes of the fixture-file failure; no fixture rows deleted",
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c"
+}

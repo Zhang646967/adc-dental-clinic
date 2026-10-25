@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "synthetic_clinics": 4,
+  "newly_enabled": 3,
+  "normal_governance_command": true,
+  "roles_clinics_and_passwords_preserved": true,
+  "patient_or_money_records_created": 0
+}

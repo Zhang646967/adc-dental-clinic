@@ -1,0 +1,80 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "checks": [
+    {
+      "name": "Guest route /",
+      "passed": true
+    },
+    {
+      "name": "Narrow page /",
+      "passed": true
+    },
+    {
+      "name": "Guest route /clinics/",
+      "passed": true
+    },
+    {
+      "name": "Narrow page /clinics/",
+      "passed": true
+    },
+    {
+      "name": "Guest route /portal/local-login/",
+      "passed": true
+    },
+    {
+      "name": "Narrow page /portal/local-login/",
+      "passed": true
+    },
+    {
+      "name": "Keyboard entry is focusable",
+      "passed": true
+    },
+    {
+      "name": "Local flow explicitly marked",
+      "passed": true
+    },
+    {
+      "name": "Assigned account route patient_demo_a",
+      "passed": true
+    },
+    {
+      "name": "Narrow assigned route patient_demo_a",
+      "passed": true
+    },
+    {
+      "name": "Channel separation patient_demo_a",
+      "passed": true
+    },
+    {
+      "name": "Installed native session uses original subject",
+      "passed": true
+    },
+    {
+      "name": "Installed own account API",
+      "passed": true
+    },
+    {
+      "name": "Assigned account route front_a",
+      "passed": true
+    },
+    {
+      "name": "Narrow assigned route front_a",
+      "passed": true
+    },
+    {
+      "name": "Channel separation front_a",
+      "passed": true
+    },
+    {
+      "name": "Empty real queue remains a list",
+      "passed": true
+    },
+    {
+      "name": "No page JavaScript errors",
+      "passed": true
+    }
+  ],
+  "page_errors": [],
+  "scope": "Installed original instance read-only browser/session checks; no enrollment, patient, appointment, treatment or financial fixture created"
+}

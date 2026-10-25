@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_c23",
-  "pdf_pages": 164,
-  "business_use_cases": 80,
+  "scope": "current database ER and formal report content/layout; business evidence recorded separately in evidence_c1wx",
+  "pdf_pages": 175,
+  "business_use_cases": 86,
   "shared_subfunctions": 1,
-  "complete_specifications": 81,
-  "tables": 99,
-  "figures": 50,
+  "complete_specifications": 87,
+  "tables": 105,
+  "figures": 53,
   "mind_maps": 6,
-  "contents_entries": 67,
-  "legacy_substantive_fields_preserved": 280,
+  "contents_entries": 73,
+  "legacy_substantive_fields_preserved": 355,
   "SU04_channel_expansion_explicit": true,
   "all_AT_01_25_retained": true,
   "pending_cases": [],
@@ -20,21 +20,27 @@
   "all_fonts_embedded": true,
   "font_subsets": 25,
   "media_parts_preserved": 39,
-  "original_migrations_preserved": 47,
+  "original_migrations_preserved": 52,
   "frozen_reports_unchanged": true,
   "private_values_absent": 11,
-  "word_sha256": "5e10c7494ed074e857722c78188d57486ea9ead19963a8e836f2674183bebf79",
-  "pdf_sha256": "24cbc5d3e119fac6130ab844bf6745424f820b21c9d866f8207a6b8a166aa377",
-  "database_er_views": 17,
+  "word_sha256": "942e121296feff46fb150ec0a502c32204a11bd309bae766ccdf22ca64b18d87",
+  "pdf_sha256": "028c453a6c252c0237e118a465ed067a98d773dc196e904ff261a43595bad021",
+  "database_er_views": 20,
   "front_desk_scheduling_role_migration": "implemented",
   "visual_review": {
-    "pages": 164,
-    "exact_approved_body_pixel_matches": 163,
-    "new_contents_pages_inspected_at_full_resolution": [
-      5
+    "passed": true,
+    "pages": 175,
+    "approved_original_bodies": 151,
+    "first_revision_changed_pages_inspected_at_full_resolution": 25,
+    "final_revision_bodies_equal_reviewed": 170,
+    "final_changed_pages_inspected_at_full_resolution": [
+      "page-4.png",
+      "page-5.png",
+      "page-33.png",
+      "page-69.png",
+      "page-70.png"
     ],
-    "new_state_and_case_pages_inspected_in_prior_render": true,
-    "all_current_page_bounds_fonts_captions_and_contents_verified": true,
-    "scope": "All final render-9 page bodies:163 exact body-pixel matches to individually or previously approved renders, one updated contents page visually inspected at full resolution. Current metadata/content/font/page-bound/caption tests are run separately; no old validation pass reused."
+    "font_and_bounds_check": "report-validation.json",
+    "private_intermediate_renders_retained": true
   }
 }

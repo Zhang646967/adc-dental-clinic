@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "private_file_mode": "0600",
+  "credential_not_printed": true,
+  "full_installed_host_helper": true,
+  "new_unbound_identity": 1,
+  "new_unused_login_credential": 1,
+  "no_new_patient_or_account": true
+}

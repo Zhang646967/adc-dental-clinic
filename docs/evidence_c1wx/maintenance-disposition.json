@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "classification": "ONE_OFF_MAINTENANCE_FALSE_INCIDENT",
+  "evidence": "host-tool-real-docker.json",
+  "runtime_containers_unchanged": 5,
+  "old_warning_encrypted_and_verified": true,
+  "acknowledged_with_action": "verify_health",
+  "closed_incidents": 1,
+  "old_events_and_closed_history_retained": true,
+  "remaining_active_incidents": 0,
+  "fresh_collector_and_service_samples": true,
+  "not_a_reconstruction_of_old_unknowns": true
+}

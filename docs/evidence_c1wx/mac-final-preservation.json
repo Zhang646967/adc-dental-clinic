@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "original_model_groups": 100,
+  "private_configurations": 70,
+  "original_rows_preserved_except_explicit_identity_duties": true,
+  "explicit_duty_flag_updates": 3,
+  "each_other_role_assignment_field_hash_checked": true,
+  "new_authorized_read_audit_rows": 3,
+  "read_audit_actor_scope_verified": true,
+  "synthetic_identity_issuer_only": true,
+  "new_model_rows": {
+    "accounts.ExternalIdentity": 1,
+    "accounts.LocalIdentityCode": 1,
+    "accounts.AccountPhone": 0,
+    "accounts.AccountIdentityEvent": 0,
+    "portal.PatientEnrollment": 0,
+    "portal.PatientEnrollmentEvent": 0
+  },
+  "clinical_and_money_facts_unchanged": true,
+  "accounts_and_passwords_unchanged": true,
+  "feature_files_equal_to_tested_image": 769,
+  "database_container_and_volume_preserved": true,
+  "original_rc_tag_preserved": true,
+  "independent_https_role_gate": "NOT_RUN",
+  "scope": "After application cutover, before separately versioned host-tool follow-up; latest768+1 source comparison is mac-host-tool-update.json."
+}

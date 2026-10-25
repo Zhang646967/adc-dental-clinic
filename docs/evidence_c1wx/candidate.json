@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "image": "sha256:66b72584cb0ede0b199c665aad3be3ada1a860444d1ab5854d46ebe727ba26f2",
+  "architecture": "arm64",
+  "immutable_feature_files_compared": 769,
+  "exact_implementation_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40165900875",
+  "exact_source_bundle_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "same_image_browser_checks": 18,
+  "same_image_native_real_backend_checks": 34,
+  "seven_role_http_checks": 14,
+  "current_clinic_rejection_checks": 1,
+  "total_same_image_checks": 67,
+  "encrypted_restore_tables": 109,
+  "original_copy_upgrade": true,
+  "runtime_project": "adc_rc1_729bb6b7742b",
+  "port": 18180,
+  "scope": "Identified exact image, current schema, browser and actual Page-handler workflows, independent facts, populated encrypted recovery and original-copy upgrade; no original installation updated by this record",
+  "not_proven": [
+    "WeChat runtime/device/experience release",
+    "real WeChat/phone verification",
+    "real insurance",
+    "cloud hosting",
+    "20-clinic capacity",
+    "24-hour operation",
+    "professional qualification"
+  ]
+}

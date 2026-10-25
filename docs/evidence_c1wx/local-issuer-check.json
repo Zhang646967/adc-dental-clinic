@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "credential_not_printed": true,
+  "private_file_mode": "0600",
+  "scope": "Exact-image maintenance command with the rehearsal compose override; standard installed host helper separately checked after update",
+  "one_off_writer": "root only for private output bind mount; web/worker runtime remains app uid10001"
+}

@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "cause": "SOURCE_IDENTITY_CHANGED_WITHOUT_PLANNED_OBSERVATION_RESET_IN_PRIVATE_REHEARSAL",
+  "previous_source": "8eb3473aae19ebca9522e8bce96617503b11b238",
+  "stopped_observer_exit_code": 1,
+  "oom_killed": false,
+  "old_observations_encrypted_and_decryption_checked": true,
+  "old_monitor_sha256": "a9a4a276079c6bd73ad449493e7b6679444551e3013d718734d66d56da614a22",
+  "corrective_action": "Stopped collector evidence retained; explicit operations_reset archives old observations and begins UNKNOWN; restart same image",
+  "fresh_six_conditions": "HEALTHY",
+  "fresh_observation_seconds": 38.969,
+  "application_code_changes": 0,
+  "original_runtime_untouched": true,
+  "not_proven": "24-hour stability or recovery of earlier UNKNOWN gaps"
+}

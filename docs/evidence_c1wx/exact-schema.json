@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "application_commit": "d0a05fed8d2fcf1e17c80dfd4488fc5587fb941c",
+  "sql_tables": 109,
+  "orm_tables": 108,
+  "orm_fields": 1042,
+  "sql_foreign_keys": 296,
+  "triggers": 77,
+  "application_migrations": 54,
+  "read_only_schema": true,
+  "actual_structure_equals_documented_ER": true
+}
