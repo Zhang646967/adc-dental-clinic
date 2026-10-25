@@ -17,6 +17,20 @@ class PhoneCodeForm(forms.Form):
     confirmed=forms.BooleanField(label='我同意绑定此合成联络号码（仅本地模拟）。')
 
 
+class SmsAuthForm(forms.Form):
+    phone=forms.CharField(label='手机号码',max_length=16,widget=forms.TextInput(attrs={'inputmode':'tel','autocomplete':'tel','placeholder':'请输入手机号'}))
+    code=forms.CharField(label='短信验证码',required=False,min_length=6,max_length=6,widget=forms.TextInput(attrs={'inputmode':'numeric','autocomplete':'one-time-code'}))
+    challenge=forms.UUIDField(required=False,widget=forms.HiddenInput)
+    confirmed=forms.BooleanField(label='我同意接收验证码，并使用此号码办理本人登录账号。')
+
+
+class WechatCodeForm(forms.Form):
+    code=forms.CharField(max_length=512)
+    confirmed=forms.BooleanField()
+    username=forms.CharField(required=False,max_length=150)
+    password=forms.CharField(required=False,strip=False,widget=forms.PasswordInput)
+
+
 class UnlinkForm(forms.Form):
     identity=forms.IntegerField(min_value=1,widget=forms.HiddenInput)
     revision=forms.IntegerField(min_value=0,widget=forms.HiddenInput)

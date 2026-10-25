@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-25。本目录列出128张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-25。本目录列出129张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -53,7 +53,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 数据库约束：
 
-- `account_phone_local_source_only`：`CHECK (((source)::text = 'LOCAL_SIMULATION'::text))`。
+- `account_phone_known_source`：`CHECK (((source)::text = ANY ((ARRAY['LOCAL_SIMULATION'::character varying, 'WECHAT_PHONE'::character varying, 'SMS_VERIFIED'::character varying, 'DEMO_SMS'::character varying])::text[])))`。
 - `adc_account_phone_pkey`：`PRIMARY KEY (id)`。
 - `adc_account_phone_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_account_phone_user_id_fc9bca8d_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
@@ -1611,13 +1611,14 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_external_identity_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_external_identity_user_id_2f1dc76e_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `external_identity_application_subject`：`UNIQUE (provider, app_id, subject)`。
-- `identity_local_provider_only`：`CHECK (((provider)::text = 'LOCAL'::text))`。
+- `identity_supported_provider`：`CHECK (((provider)::text = ANY ((ARRAY['LOCAL'::character varying, 'WECHAT_MINI'::character varying, 'WECHAT_WEB'::character varying, 'WECHAT_MP'::character varying, 'SMS'::character varying])::text[])))`。
 
 索引（含条件唯一索引）：
 
 - `adc_external_identity_pkey`：`CREATE UNIQUE INDEX adc_external_identity_pkey ON public.adc_external_identity USING btree (id)`。
 - `adc_external_identity_user_id_2f1dc76e`：`CREATE INDEX adc_external_identity_user_id_2f1dc76e ON public.adc_external_identity USING btree (user_id)`。
 - `external_identity_application_subject`：`CREATE UNIQUE INDEX external_identity_application_subject ON public.adc_external_identity USING btree (provider, app_id, subject)`。
+- `one_sms_login_per_account`：`CREATE UNIQUE INDEX one_sms_login_per_account ON public.adc_external_identity USING btree (user_id) WHERE (((provider)::text = 'SMS'::text) AND (user_id IS NOT NULL))`。
 
 跨表及历史触发器：
 
@@ -4223,6 +4224,45 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_service_requirement_pkey`：`CREATE UNIQUE INDEX adc_service_requirement_pkey ON public.adc_service_requirement USING btree (id)`。
 - `adc_service_requirement_service_id_8a7429d0`：`CREATE INDEX adc_service_requirement_service_id_8a7429d0 ON public.adc_service_requirement USING btree (service_id)`。
 - `service_category_unique`：`CREATE UNIQUE INDEX service_category_unique ON public.adc_service_requirement USING btree (service_id, category)`。
+
+跨表及历史触发器：
+
+
+## adc_sms_challenge
+
+模型：`accounts.SmsChallenge`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | uuid | PK | 否 | — |
+| phone | character varying(16) | — | 否 | — |
+| purpose | character varying(8) | — | 否 | — |
+| user_id | bigint | FK | 是 | `adc_user.id` |
+| provider | character varying(16) | — | 否 | — |
+| session_digest | character varying(64) | — | 否 | — |
+| ip_digest | character varying(64) | — | 否 | — |
+| code_digest | character varying(64) | — | 否 | — |
+| state | character varying(8) | — | 否 | — |
+| attempts | smallint | — | 否 | — |
+| expires_at | timestamp with time zone | — | 否 | — |
+| consumed_at | timestamp with time zone | — | 是 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_sms_challenge_attempts_check`：`CHECK ((attempts >= 0))`。
+- `adc_sms_challenge_pkey`：`PRIMARY KEY (id)`。
+- `adc_sms_challenge_user_id_3c51cd3c_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `sms_attempt_limit`：`CHECK ((attempts <= 5))`。
+- `sms_known_provider`：`CHECK (((provider)::text = ANY ((ARRAY['tencent'::character varying, 'demo'::character varying])::text[])))`。
+- `sms_purpose_owner`：`CHECK (((((purpose)::text = 'LOGIN'::text) AND (user_id IS NULL)) OR (((purpose)::text = 'BIND'::text) AND (user_id IS NOT NULL))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_sms_challenge_pkey`：`CREATE UNIQUE INDEX adc_sms_challenge_pkey ON public.adc_sms_challenge USING btree (id)`。
+- `adc_sms_challenge_user_id_3c51cd3c`：`CREATE INDEX adc_sms_challenge_user_id_3c51cd3c ON public.adc_sms_challenge USING btree (user_id)`。
+- `sms_ip_created`：`CREATE INDEX sms_ip_created ON public.adc_sms_challenge USING btree (ip_digest, created_at)`。
+- `sms_phone_created`：`CREATE INDEX sms_phone_created ON public.adc_sms_challenge USING btree (phone, created_at)`。
 
 跨表及历史触发器：
 

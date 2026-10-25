@@ -23,15 +23,21 @@ def account_context(request,*,unsafe=False):
 
 
 def account_data(request):
+    from accounts.auth_providers import capabilities
+    from django.conf import settings
     ctx=account_context(request)
     phone=AccountPhone.objects.filter(user=request.user).first()
+    phone_sources={'LOCAL_SIMULATION':'本地模拟核验','DEMO_SMS':'课程测试验证码','SMS_VERIFIED':'短信验证码已核验','WECHAT_PHONE':'微信手机号授权'}
+    identities=list(ExternalIdentity.objects.filter(user=request.user).order_by('pk').values('id','provider','revision'))
+    labels={'LOCAL':'本地模拟身份','SMS':'手机号登录','WECHAT_MINI':'微信小程序','WECHAT_WEB':'微信扫码登录','WECHAT_MP':'微信内登录'}
+    for item in identities:item['provider_label']=labels[item['provider']]
     from portal.models import PatientAccess
     own=PatientAccess.objects.filter(user=request.user).values('is_active','patient__is_active').first()
-    return dict(account_authenticated=True,account_token=token_for(ctx),account_name=request.user.username,workspace_id=str(ctx.pk),subject_revision=ctx.revision,
+    return dict(account_authenticated=True,auth_capabilities=capabilities(),local_identity_enabled=settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local',account_token=token_for(ctx),account_name=request.user.username,workspace_id=str(ctx.pk),subject_revision=ctx.revision,
         enrollment_required=not has_patient_access(request.user),password_ready=request.user.has_usable_password(),
         can_request_enrollment=own is None or (not own['is_active'] and own['patient__is_active']),self_binding_needs_review=own is not None and not (own['is_active'] and own['patient__is_active']),
-        phone=dict(number=phone.phone,source=phone.source,verified_at=phone.verified_at.isoformat(),revision=phone.revision) if phone else None,
-        identities=list(ExternalIdentity.objects.filter(user=request.user).order_by('pk').values('id','provider','revision')))
+        phone=dict(number=phone.phone,source=phone.source,source_label=phone_sources[phone.source],verified_at=phone.verified_at.isoformat(),revision=phone.revision) if phone else None,
+        identities=identities)
 
 
 def remember_pending_service(request,service):

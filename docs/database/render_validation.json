@@ -42,11 +42,11 @@
     "minPrintedFontPt": 15.639310344827587
   },
   "er_patient_account": {
-    "nodes": 6,
-    "edges": 7,
-    "width": 693,
-    "height": 557,
-    "minPrintedFontPt": 9.162424242424242
+    "nodes": 7,
+    "edges": 8,
+    "width": 867,
+    "height": 582,
+    "minPrintedFontPt": 7.323598615916955
   },
   "er_patient_enrollment": {
     "nodes": 6,

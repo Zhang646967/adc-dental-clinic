@@ -4,6 +4,8 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
+**教师异地试用已开通：** [HTTPS试用系统](https://pressed-exact-network-automobile.trycloudflare.com)使用从空库生成的合成资料及独立岗位账号。[微信／手机注册与试用说明](docs/WECHAT_SMS_TEACHER_TEST.md)记录新增登录源码、真实平台配置及逐项执行状态；岗位密码由项目所有者私下提供。
+
 **C6.1B/C 已在本机交付：原账单模拟结算、基金到账分配、差异跟进和撤销。** 准确CI、1,935项PostgreSQL回归、359项浏览器检查、五店二十账号三十分钟容量及129表加密恢复通过，原数据和70份配置保留。[完整证据](docs/evidence_c61bc/README.md)。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
 
 **C6.1A 已在本机交付：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立审阅链、明确单位和待遇历史可核对；准确CI、1,106项规则／1,826项PG回归、67项同镜像浏览器及权限、115表加密恢复和原系统保护更新通过。183页报告与22幅实际ER同步。[本地办理](docs/C61A_LOCAL_GUIDE.md) · [业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [交付证据](docs/evidence_c61a/README.md)。本节为资料准备阶段历史；当前资金闭环见C6.1B/C交付。

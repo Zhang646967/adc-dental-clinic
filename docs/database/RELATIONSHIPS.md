@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-352条实际SQL外键，其中351条对应ORM单列关系，1条为账单同次就诊复合外键。
+353条实际SQL外键，其中352条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -308,6 +308,7 @@
 | adc_sensitive_read_event | actor_id | adc_user | id |
 | adc_service_presentation | service_id | adc_booking_service | id |
 | adc_service_requirement | service_id | adc_booking_service | id |
+| adc_sms_challenge | user_id | adc_user | id |
 | adc_statement_batch | account_id | adc_payment_account | id |
 | adc_statement_batch | created_by_id | adc_user | id |
 | adc_statement_line | account_id | adc_payment_account | id |

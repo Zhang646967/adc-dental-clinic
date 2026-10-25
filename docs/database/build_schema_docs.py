@@ -87,11 +87,12 @@ VIEWS = {
             'adc_user':['id','username'],
             'adc_external_identity':['id','provider','app_id','subject','user_id','revision'],
             'adc_local_identity_code':['id','purpose','identity_id','user_id','digest','expires_at','consumed_at'],
+            'adc_sms_challenge':['id','purpose','user_id','state','attempts','expires_at','consumed_at'],
             'adc_account_phone':['id','user_id','source','revision'],
             'adc_account_identity_event':['id','user_id','identity_id','operation_id','action'],
             'adc_workspace_context':['id','user_id','login_channel','role','revision'],
         },
-        'note':'外部身份按provider、app_id及subject联合唯一，当前账号引用可空；解绑不删除ADC账号及事件。一次性凭证按用途引用外部身份或账号，数据库只存摘要。账号联络按user一对一，不与Patient建立手机号匹配外键。首次绑定事件建立患者渠道账号，未获本人或代约授权时上下文岗位仍为空，不能成为员工或临床权限。本地凭证及手机号来源为LOCAL替身，不能写成微信实名或居民身份证。',
+        'note':'外部身份按provider、app_id及subject联合唯一，当前账号引用可空；每个账号至多一个有效SMS登录身份，此条件不限制其余微信或本地绑定。解绑保留账号与事件。短信挑战仅BIND用途必须引用当前账号，LOGIN用途引用为空；会话摘要不是关系外键。验证码只存HMAC摘要，受期限、次数与一次性核验约束。账号联络按user一对一，不按手机号连接Patient。微信身份由服务端交换，LOCAL与DEMO来源仍明确标注；登录与手机号核验不授予员工、临床或患者档案权限。',
     },
     'er_patient_enrollment': {
         'title':'本人建档申请、前台决定与唯一档案关联',

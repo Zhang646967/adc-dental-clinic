@@ -50,17 +50,19 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     output = Path(output)
     if output.name != '.g4' or output.exists() or output.is_symlink():
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
-    if mode not in ('direct_tls', 'mac_tunnel'):
+    if mode not in ('direct_tls', 'mac_tunnel', 'teacher_tunnel'):
         raise ValueError('Unknown deployment mode.')
     if access_mode not in ('read-only', 'course-writable'):
         raise ValueError('Unknown access mode.')
     writable = access_mode == 'course-writable'
-    if writable and mode != 'direct_tls':
+    if writable and mode not in ('direct_tls', 'teacher_tunnel'):
         raise ValueError('Course writes require a separate direct HTTPS deployment.')
+    if mode == 'teacher_tunnel' and not writable:
+        raise ValueError('Teacher trial requires explicit course-writable access.')
     if architecture not in ('amd64', 'arm64') or (writable and architecture == 'arm64' and
             (bind_ip != '127.0.0.1' or http_port == 80 or https_port == 443)):
         raise ValueError('Cloud course images require amd64; arm64 is limited to isolated loopback rehearsals.')
-    if mode == 'mac_tunnel' and (bind_ip != '127.0.0.1' or http_port == 18000 or
+    if mode in ('mac_tunnel','teacher_tunnel') and (bind_ip != '127.0.0.1' or http_port == 18000 or
                                 not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*\.trycloudflare\.com', host)):
         raise ValueError('Mac tunnel requires its assigned hostname and a separate IPv4 loopback origin.')
     if not re.fullmatch('[0-9a-f]{40}', source_commit):
@@ -93,6 +95,8 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     if writable:
         runtime['ADC_COURSE_PROJECT'] = project
         runtime['ADC_COURSE_SYNTHETIC'] = '1'
+    if mode == 'teacher_tunnel':
+        runtime.update(ADC_RC_SYNTHETIC='1',ADC_TEACHER_TEST_MODE='1',ADC_SMS_PROVIDER='demo')
     owner_password = secrets.token_urlsafe(48)
     admin_password = secrets.token_urlsafe(48)
     maintenance = runtime | {
@@ -121,7 +125,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'G4_BIND_IP': bind_ip, 'G4_HTTP_PORT': http_port, 'G4_HTTPS_PORT': https_port,
     })
     templates = ROOT / 'deployment/g4'
-    compose_template = 'compose.mac-tunnel.template.yaml' if mode == 'mac_tunnel' else 'compose.template.yaml'
+    compose_template = 'compose.mac-tunnel.template.yaml' if mode in ('mac_tunnel','teacher_tunnel') else 'compose.template.yaml'
     for source, target in [(compose_template, 'compose.yaml'), ('init-db.sh', 'init-db.sh')]:
         (output / target).write_bytes((templates / source).read_bytes())
     if writable:
@@ -134,7 +138,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         compose = compose.replace('restart: "on-failure:5"', 'restart: unless-stopped')
         (output / 'compose.yaml').write_text(compose)
     os.chmod(output / 'init-db.sh', 0o555)
-    nginx_template = 'nginx.mac-tunnel.template.conf' if mode == 'mac_tunnel' else 'nginx.template.conf'
+    nginx_template = 'nginx.mac-tunnel.template.conf' if mode in ('mac_tunnel','teacher_tunnel') else 'nginx.template.conf'
     nginx = (templates / nginx_template).read_text().replace('__ADC_HOST__', checked.host)
     (output / 'nginx.conf').write_text(nginx)
     plan = {
@@ -144,7 +148,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'requested_source_commit': source_commit, 'read_only': not writable,
         'access_mode': access_mode,
         'architecture': architecture if writable else None,
-        'bind_ip': bind_ip, 'ports': [http_port] if mode == 'mac_tunnel' else [http_port, https_port],
+        'bind_ip': bind_ip, 'ports': [http_port] if mode in ('mac_tunnel','teacher_tunnel') else [http_port, https_port],
         'images': {'app': app_image, 'db': db_image, 'nginx': nginx_image},
         'public_acceptance_executed': False,
         'pending': ['Actual server/SSH and firewall', 'DNS and trusted TLS',
@@ -153,12 +157,15 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'file_sha256': {name: hashlib.sha256((output / name).read_bytes()).hexdigest()
                         for name in ('compose.yaml', 'init-db.sh', 'nginx.conf')},
     }
-    if mode == 'mac_tunnel':
+    if mode in ('mac_tunnel','teacher_tunnel'):
         plan['pending'] = ['Live free tunnel and public certificate verification',
                            'Public browser permissions/read-only/CSRF checks',
                            'Private backup/independent restore and service restart checks']
         plan['transport'] = 'Cloudflare edge HTTPS; authenticated outbound tunnel; IPv4 loopback HTTP origin'
         plan['availability'] = 'Temporary: Mac, Docker and tunnel must stay running; hostname changes on tunnel restart'
+        if mode == 'teacher_tunnel':
+            plan['pending'][1] = 'Public browser permissions, valid writes, account registration and CSRF checks'
+            plan['data_scope'] = 'Independent synthetic teacher trial database; never the original RC database'
     write_private(output / 'plan.json', json.dumps(plan, indent=2) + '\n')
     return plan
 
@@ -186,11 +193,13 @@ def inspect_bundle(output, rendered=None):
     if (access_mode not in ('read-only', 'course-writable') or
             plan['read_only'] != (not writable) or inputs.read_only != (not writable) or
             runtime['DJANGO_SETTINGS_MODULE'] != 'config.settings.production' or
-            (writable and (plan.get('mode') != 'direct_tls' or
+            (writable and (plan.get('mode') not in ('direct_tls','teacher_tunnel') or
                            runtime.get('ADC_DEPLOYMENT_STAGE') != 'production' or
                            runtime.get('ADC_COURSE_PROJECT') != plan['project'] or
                            runtime.get('ADC_COURSE_SYNTHETIC') != '1'))):
         raise ValueError('Reviewed access mode, deployment mode and runtime must agree.')
+    if plan.get('mode') == 'teacher_tunnel' and (not writable or runtime.get('ADC_RC_SYNTHETIC')!='1' or runtime.get('ADC_TEACHER_TEST_MODE')!='1'):
+        raise ValueError('Teacher writes are limited to the separate synthetic trial.')
     if runtime['AI_MODE'] != 'disabled' or runtime.get('ADC_MIGRATION_PASSWORD') or runtime.get('ADC_G4_MAINTENANCE'):
         raise ValueError('Runtime must not receive maintenance credentials/flags or external AI.')
     if (maintenance.get('DJANGO_SETTINGS_MODULE') != 'config.settings.g4_maintenance' or
@@ -226,12 +235,12 @@ def inspect_bundle(output, rendered=None):
         if writable and any(service.get('platform') != 'linux/' + plan['architecture'] for service in services.values()):
             raise ValueError('All course services must use the reviewed image architecture.')
         ports = services['gateway'].get('ports', [])
-        targets = {80} if plan.get('mode') == 'mac_tunnel' else {80, 443}
+        targets = {80} if plan.get('mode') in ('mac_tunnel','teacher_tunnel') else {80, 443}
         if len(ports) != len(targets) or {int(p['target']) for p in ports} != targets:
             raise ValueError('Gateway ports do not match the reviewed deployment mode.')
         if any(p.get('host_ip') != plan['bind_ip'] for p in ports):
             raise ValueError('Gateway binding does not match the reviewed plan.')
-        if plan.get('mode') == 'mac_tunnel' and (plan['bind_ip'] != '127.0.0.1' or
+        if plan.get('mode') in ('mac_tunnel','teacher_tunnel') and (plan['bind_ip'] != '127.0.0.1' or
                 any(int(p.get('published', 0)) != plan['ports'][0] for p in ports)):
             raise ValueError('Mac tunnel origin must use the reviewed IPv4 loopback port.')
     return {'status': 'PREPARED_NOT_DEPLOYED', 'configuration_checks': 'PASS',
@@ -251,7 +260,7 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--bind-ip', default='127.0.0.1')
     prepare_parser.add_argument('--http-port', type=int, default=80)
     prepare_parser.add_argument('--https-port', type=int, default=443)
-    prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel'), default='direct_tls')
+    prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel', 'teacher_tunnel'), default='direct_tls')
     prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable'), default='read-only')
     prepare_parser.add_argument('--architecture', choices=('amd64', 'arm64'), default='amd64')
     inspect_parser = sub.add_parser('inspect')

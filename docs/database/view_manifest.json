@@ -255,9 +255,9 @@
   },
   "er_patient_account": {
     "title": "患者渠道账号、凭证与联络来源",
-    "tables": 6,
-    "relationships": 7,
-    "note": "外部身份按provider、app_id及subject联合唯一，当前账号引用可空；解绑不删除ADC账号及事件。一次性凭证按用途引用外部身份或账号，数据库只存摘要。账号联络按user一对一，不与Patient建立手机号匹配外键。首次绑定事件建立患者渠道账号，未获本人或代约授权时上下文岗位仍为空，不能成为员工或临床权限。本地凭证及手机号来源为LOCAL替身，不能写成微信实名或居民身份证。",
+    "tables": 7,
+    "relationships": 8,
+    "note": "外部身份按provider、app_id及subject联合唯一，当前账号引用可空；每个账号至多一个有效SMS登录身份，此条件不限制其余微信或本地绑定。解绑保留账号与事件。短信挑战仅BIND用途必须引用当前账号，LOGIN用途引用为空；会话摘要不是关系外键。验证码只存HMAC摘要，受期限、次数与一次性核验约束。账号联络按user一对一，不按手机号连接Patient。微信身份由服务端交换，LOCAL与DEMO来源仍明确标注；登录与手机号核验不授予员工、临床或患者档案权限。",
     "columns": {
       "adc_user": [
         "id",
@@ -277,6 +277,15 @@
         "identity_id",
         "user_id",
         "digest",
+        "expires_at",
+        "consumed_at"
+      ],
+      "adc_sms_challenge": [
+        "id",
+        "purpose",
+        "user_id",
+        "state",
+        "attempts",
         "expires_at",
         "consumed_at"
       ],
@@ -1140,9 +1149,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 129,
-    "orm_tables": 128,
-    "columns_types_and_nullability_checked": 1266,
+    "tables": 130,
+    "orm_tables": 129,
+    "columns_types_and_nullability_checked": 1279,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -1151,10 +1160,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 351,
-    "sql_foreign_keys": 352,
+    "orm_foreign_keys": 352,
+    "sql_foreign_keys": 353,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "8ebc88cdf8f8f8570639df100d3073400a988cbe59bab018544bb7b8fd83a0d0",
+    "snapshot_sha256": "55d967785e1ce723a3c70fd462523e4a89c805527f48c177d9f71cff7e4be9bc",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

@@ -64,7 +64,8 @@ def _consume(code,purpose):
 
 def _record(user,action,*,identity=None,snapshot=None,operation=None):
     event=AccountIdentityEvent.objects.create(user=user,identity=identity,operation_id=operation or uuid4(),action=action,snapshot=snapshot or {})
-    emit(user,'PATIENT_ACCOUNT_IDENTITY',event,summary={'action':action,'provider':'LOCAL','synthetic':True})
+    provider=identity.provider if identity else (snapshot or {}).get('provider','LOCAL')
+    emit(user,'PATIENT_ACCOUNT_IDENTITY',event,summary={'action':action,'provider':provider,'synthetic':settings.ADC_CLINICAL_SYNTHETIC})
     return event
 
 
@@ -129,7 +130,7 @@ def verify_phone(*,actor,code,confirmed):
 @transaction.atomic
 @sensitive_variables()
 def unlink_identity(*,actor,identity_id,expected_revision,password,confirmed):
-    require_local()
+    if settings.ADC_READ_ONLY:raise PermissionDenied('只读实例不能变更登录绑定。')
     if confirmed is not True:raise RuleError('请明确确认解除本次快捷登录绑定。')
     identity=ExternalIdentity.objects.select_for_update().get(pk=identity_id,user_id=actor.pk)
     user=UserAccount.objects.select_for_update().get(pk=actor.pk)
@@ -137,7 +138,7 @@ def unlink_identity(*,actor,identity_id,expected_revision,password,confirmed):
     if not user.has_usable_password() or not user.check_password(password):raise RuleError('请先通过账号恢复设置可用密码，再核对密码解绑。')
     if identity.revision!=expected_revision:raise RuleError('绑定已变化，请刷新；没有覆盖原结果。')
     identity.user=None;identity.revision+=1;identity.save(update_fields=['user','revision'])
-    _record(user,'UNBIND',identity=identity,snapshot={'revision':identity.revision,'source':'LOCAL_SIMULATION'})
+    _record(user,'UNBIND',identity=identity,snapshot={'revision':identity.revision,'source':identity.provider})
     return identity
 
 

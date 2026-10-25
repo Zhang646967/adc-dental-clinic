@@ -6,8 +6,16 @@ from portal import mini_history as history
 from portal import mini_plans as plans
 from portal import mini_discovery as discovery
 from portal import mini_account as account
+from portal import auth_views as auth
 
 urlpatterns = [
+    path('auth/wechat/',auth.mini_wechat_login,name='mini_wechat_login'),
+    path('account/wechat/bind/',auth.mini_wechat_login,{'binding':True},name='mini_wechat_bind'),
+    path('auth/sms/send/',auth.mini_sms_send,name='mini_sms_send'),
+    path('auth/sms/confirm/',auth.mini_sms_confirm,name='mini_sms_confirm'),
+    path('account/phone/wechat/',auth.mini_phone,name='mini_wechat_phone'),
+    path('account/phone/sms/send/',auth.mini_sms_send,{'binding':True},name='mini_sms_bind_send'),
+    path('account/phone/sms/confirm/',auth.mini_sms_confirm,{'binding':True},name='mini_sms_bind_confirm'),
     path('account/local-login/',account.local_login,name='mini_account_local_login'),
     path('account/',account.profile,name='mini_account_profile'),
     path('account/phone/',account.phone,name='mini_account_phone'),

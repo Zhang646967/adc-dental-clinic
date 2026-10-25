@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 128 ORM tables; django_migrations is a framework migration journal.
+// All 129 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -1507,6 +1507,22 @@ Table adc_service_requirement {
   }
 }
 
+Table adc_sms_challenge {
+  id "uuid" [pk, not null]
+  phone "character varying(16)" [not null]
+  purpose "character varying(8)" [not null]
+  user_id "bigint" [null]
+  provider "character varying(16)" [not null]
+  session_digest "character varying(64)" [not null]
+  ip_digest "character varying(64)" [not null]
+  code_digest "character varying(64)" [not null]
+  state "character varying(8)" [not null]
+  attempts "smallint" [not null]
+  expires_at "timestamp with time zone" [not null]
+  consumed_at "timestamp with time zone" [null]
+  created_at "timestamp with time zone" [not null]
+}
+
 Table adc_statement_batch {
   id "bigint" [pk, not null]
   account_id "bigint" [not null]
@@ -2084,6 +2100,7 @@ Ref: adc_schedule_plan.created_by_id > adc_user.id
 Ref: adc_sensitive_read_event.actor_id > adc_user.id
 Ref: adc_service_presentation.service_id - adc_booking_service.id
 Ref: adc_service_requirement.service_id > adc_booking_service.id
+Ref: adc_sms_challenge.user_id > adc_user.id
 Ref: adc_statement_batch.account_id > adc_payment_account.id
 Ref: adc_statement_batch.created_by_id > adc_user.id
 Ref: adc_statement_line.account_id > adc_payment_account.id

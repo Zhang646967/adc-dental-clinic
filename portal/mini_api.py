@@ -77,7 +77,9 @@ def validated(form):
 
 
 def session_data(request):
+    from accounts.auth_providers import capabilities
     data = dict(authenticated=False, csrf_token=get_token(request), read_only=settings.ADC_READ_ONLY,
+        auth_capabilities=capabilities(),
         account_authenticated=False,identity_provider='local' if settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local' else 'disabled',
         environment_label=settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
         business_timezone='Asia/Shanghai', today=timezone.localdate().isoformat(),

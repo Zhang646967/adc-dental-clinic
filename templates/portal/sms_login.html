@@ -1,0 +1,15 @@
+{% extends 'portal/account_base.html' %}
+{% block title %}{% if binding %}绑定手机号码{% else %}手机号登录与注册{% endif %} · ADC 口腔{% endblock %}
+{% block content %}
+<p class="eyebrow">ADC DENTAL CARE · 患者服务</p>
+<h1>{% if binding %}绑定你的手机号码。{% else %}用手机号码，<br>继续安排就诊。{% endif %}</h1>
+<p class="lede">{% if binding %}核验后可用此号码登录同一账号。患者档案与家人的代约授权分别核对。{% else %}未注册的号码验证后会创建患者账号，再完成本人档案核验。{% endif %}</p>
+<section class="account-card">
+{% if auth.sms_demo %}<div class="notice"><strong>课程测试验证码</strong><p>仅接收0开头的十一位合成号码，例如00000000110。验证码显示在本页，不发送真实短信。</p></div>{% endif %}
+{% if sent %}<div class="notice" role="status">{% if sent.demo %}<strong>测试验证码：<span data-test-code>{{ sent.test_code }}</span></strong><p>这是合成号码测试，未发送短信。</p>{% else %}<strong>验证码已提交发送</strong><p>请留意手机短信。未收到时，可在60秒后重新获取。</p>{% endif %}<p>五分钟内有效，请勿转发给他人。</p></div>{% endif %}
+{% if auth.sms_enabled %}<form method="post" id="sms-auth-form">{% csrf_token %}{% if binding %}<input type="hidden" name="account_token" value="{{ account_token }}">{% endif %}
+{% include 'portal/account_fields.html' with form=form %}
+<div class="actions"><button class="button secondary" type="submit" name="action" value="send" formnovalidate>发送验证码</button><button class="button" type="submit" name="action" value="confirm">{% if binding %}核验并绑定手机号{% else %}验证并登录／注册{% endif %}</button></div></form>
+{% else %}<div class="notice"><h2>短信登录正在开通</h2><p>目前可使用患者账号密码登录，或联系门店办理账号。</p></div>{% endif %}
+<p><a href="{% if binding %}{% url 'patient_account' %}{% else %}{% url 'portal_login' %}{% endif %}">返回{% if binding %}我的账号{% else %}患者登录{% endif %} →</a></p></section>
+{% endblock %}

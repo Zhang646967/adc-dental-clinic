@@ -1,6 +1,9 @@
 <view class="page">
   <view class="brand">ADC DENTAL CARE</view><view class="title">把就诊安排好</view>
   <view class="subtitle">查询合适时段，预约与改期都在这里。</view>
+  <view class="card"><view class="section-title">快捷登录</view><checkbox-group bindchange="authConsent"><label><checkbox value="agree" checked="{{authConfirmed}}" /> 我同意使用微信身份或验证码办理本人账号。</label></checkbox-group><button wx:if="{{auth.wechat_mini}}" class="primary" bindtap="wechatLogin" disabled="{{busy||!authConfirmed}}" loading="{{busy}}">微信一键登录</button><view wx:else class="muted">微信登录正在开通，可先使用账号{{auth.sms_enabled?'或验证码':''}}登录。</view>
+    <block wx:if="{{auth.sms_enabled}}"><view wx:if="{{auth.sms_demo}}" class="notice">课程测试：使用0开头的十一位合成号码，验证码在本页显示，不发送真实短信。</view><label class="label" for="sms-phone">手机号码</label><input id="sms-phone" class="input" type="number" maxlength="11" value="{{phone}}" data-field="phone" bindinput="field" aria-label="手机号码" /><button bindtap="sendSms" disabled="{{busy||!authConfirmed}}">发送验证码</button><view wx:if="{{smsNotice}}" class="notice">{{smsNotice}}</view><label class="label" for="sms-code">六位验证码</label><input id="sms-code" class="input" type="number" maxlength="6" value="{{smsCode}}" data-field="smsCode" bindinput="field" aria-label="六位验证码" /><button class="primary" bindtap="smsLogin" disabled="{{busy||!authConfirmed||!smsChallenge}}">验证并登录／注册</button><view class="muted">首次验证创建患者账号，就诊档案仍由门店前台核验。</view></block>
+  </view>
   <view class="card">
     <view class="time">患者登录</view>
     <label class="label" for="username">账号</label><input id="username" class="input" value="{{username}}" maxlength="150" placeholder="请输入患者账号" data-field="username" bindinput="field" aria-label="患者账号" />

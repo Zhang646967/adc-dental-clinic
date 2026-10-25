@@ -14,6 +14,8 @@ ROLE_FREE={'select_role','activate_role','own_password_change'}
 PUBLIC.update({'patient_local_login','patient_account','patient_account_activate','patient_enrollment_new','patient_enrollment_edit',
     'patient_enrollment_submit_confirm','patient_enrollment_withdraw','mini_account_local_login','mini_account_profile','mini_account_phone',
     'mini_account_unlink','mini_account_password','mini_account_activate','mini_enrollment_preview','mini_enrollment_confirm','mini_enrollment_withdraw'})
+PUBLIC.update({'patient_sms_login','patient_sms_bind','patient_wechat_start','patient_wechat_callback',
+    'mini_wechat_login','mini_wechat_bind','mini_sms_send','mini_sms_confirm','mini_wechat_phone','mini_sms_bind_send','mini_sms_bind_confirm'})
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={

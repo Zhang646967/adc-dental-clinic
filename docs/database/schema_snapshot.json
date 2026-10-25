@@ -15896,6 +15896,184 @@
       "unique_together": []
     },
     {
+      "table": "adc_sms_challenge",
+      "model": "accounts.SmsChallenge",
+      "app": "accounts",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "phone",
+          "column": "phone",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "purpose",
+          "column": "purpose",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "user",
+          "column": "user_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "provider",
+          "column": "provider",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "session_digest",
+          "column": "session_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "ip_digest",
+          "column": "ip_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "code_digest",
+          "column": "code_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "attempts",
+          "column": "attempts",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "expires_at",
+          "column": "expires_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "consumed_at",
+          "column": "consumed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_statement_batch",
       "model": "finance.StatementBatch",
       "app": "finance",
@@ -18470,6 +18648,7 @@
     "adc_sensitive_read_event",
     "adc_service_presentation",
     "adc_service_requirement",
+    "adc_sms_challenge",
     "adc_statement_batch",
     "adc_statement_line",
     "adc_statement_use",
@@ -18522,9 +18701,9 @@
     },
     {
       "table": "adc_account_phone",
-      "name": "account_phone_local_source_only",
+      "name": "account_phone_known_source",
       "kind": "c",
-      "definition": "CHECK (((source)::text = 'LOCAL_SIMULATION'::text))"
+      "definition": "CHECK (((source)::text = ANY ((ARRAY['LOCAL_SIMULATION'::character varying, 'WECHAT_PHONE'::character varying, 'SMS_VERIFIED'::character varying, 'DEMO_SMS'::character varying])::text[])))"
     },
     {
       "table": "adc_account_phone",
@@ -20340,9 +20519,9 @@
     },
     {
       "table": "adc_external_identity",
-      "name": "identity_local_provider_only",
+      "name": "identity_supported_provider",
       "kind": "c",
-      "definition": "CHECK (((provider)::text = 'LOCAL'::text))"
+      "definition": "CHECK (((provider)::text = ANY ((ARRAY['LOCAL'::character varying, 'WECHAT_MINI'::character varying, 'WECHAT_WEB'::character varying, 'WECHAT_MP'::character varying, 'SMS'::character varying])::text[])))"
     },
     {
       "table": "adc_fund_allocation",
@@ -23327,6 +23506,42 @@
       "definition": "UNIQUE (service_id, category)"
     },
     {
+      "table": "adc_sms_challenge",
+      "name": "adc_sms_challenge_attempts_check",
+      "kind": "c",
+      "definition": "CHECK ((attempts >= 0))"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "adc_sms_challenge_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "adc_sms_challenge_user_id_3c51cd3c_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "sms_attempt_limit",
+      "kind": "c",
+      "definition": "CHECK ((attempts <= 5))"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "sms_known_provider",
+      "kind": "c",
+      "definition": "CHECK (((provider)::text = ANY ((ARRAY['tencent'::character varying, 'demo'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "sms_purpose_owner",
+      "kind": "c",
+      "definition": "CHECK (((((purpose)::text = 'LOGIN'::text) AND (user_id IS NULL)) OR (((purpose)::text = 'BIND'::text) AND (user_id IS NOT NULL))))"
+    },
+    {
       "table": "adc_statement_batch",
       "name": "adc_statement_batch_account_id_1534d446_fk_adc_payme",
       "kind": "f",
@@ -25242,6 +25457,11 @@
       "definition": "CREATE UNIQUE INDEX external_identity_application_subject ON public.adc_external_identity USING btree (provider, app_id, subject)"
     },
     {
+      "table": "adc_external_identity",
+      "name": "one_sms_login_per_account",
+      "definition": "CREATE UNIQUE INDEX one_sms_login_per_account ON public.adc_external_identity USING btree (user_id) WHERE (((provider)::text = 'SMS'::text) AND (user_id IS NOT NULL))"
+    },
+    {
       "table": "adc_fund_allocation",
       "name": "adc_fund_allocation_operation_id_key",
       "definition": "CREATE UNIQUE INDEX adc_fund_allocation_operation_id_key ON public.adc_fund_allocation USING btree (operation_id)"
@@ -26975,6 +27195,26 @@
       "table": "adc_service_requirement",
       "name": "service_category_unique",
       "definition": "CREATE UNIQUE INDEX service_category_unique ON public.adc_service_requirement USING btree (service_id, category)"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "adc_sms_challenge_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_sms_challenge_pkey ON public.adc_sms_challenge USING btree (id)"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "adc_sms_challenge_user_id_3c51cd3c",
+      "definition": "CREATE INDEX adc_sms_challenge_user_id_3c51cd3c ON public.adc_sms_challenge USING btree (user_id)"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "sms_ip_created",
+      "definition": "CREATE INDEX sms_ip_created ON public.adc_sms_challenge USING btree (ip_digest, created_at)"
+    },
+    {
+      "table": "adc_sms_challenge",
+      "name": "sms_phone_created",
+      "definition": "CREATE INDEX sms_phone_created ON public.adc_sms_challenge USING btree (phone, created_at)"
     },
     {
       "table": "adc_statement_batch",
@@ -34078,6 +34318,84 @@
       "null": false
     },
     {
+      "table": "adc_sms_challenge",
+      "column": "id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "phone",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "purpose",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "provider",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "session_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "ip_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "code_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "state",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "attempts",
+      "db_type": "smallint",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "expires_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "consumed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_sms_challenge",
+      "column": "user_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_statement_batch",
       "column": "id",
       "db_type": "bigint",
@@ -35148,6 +35466,10 @@
       "name": "0003_externalidentity_accountidentityevent_and_more"
     },
     {
+      "app": "accounts",
+      "name": "0004_patient_live_auth"
+    },
+    {
       "app": "assistants",
       "name": "0001_initial"
     },
@@ -35437,5 +35759,5 @@
     }
   ],
   "observed_on": "2026-10-25",
-  "source": "Isolated PostgreSQL; frozen C6.1B/C checkpoint-3; not installed"
+  "observed_scope": "Independent empty PostgreSQL17 database with61 application migrations; authentication source candidate mounted read-only; no business rows exported."
 }

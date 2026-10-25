@@ -128,7 +128,9 @@ def checked_bundle(bundle):
         raise ValueError('This helper is limited to the selected Mac course host.')
     inspect_bundle(bundle)
     plan = json.loads((bundle / 'plan.json').read_text())
-    if plan.get('mode') != 'mac_tunnel' or not plan['read_only'] or plan['bind_ip'] != '127.0.0.1':
+    if (plan.get('mode') not in ('mac_tunnel','teacher_tunnel') or
+            (plan.get('mode')=='mac_tunnel' and not plan['read_only']) or
+            plan['bind_ip'] != '127.0.0.1'):
         raise ValueError('A separate read-only Mac tunnel bundle is required.')
     return plan
 
@@ -207,8 +209,9 @@ def start(bundle, binary, protocol='http2'):
         private_render = bundle / 'private/rendered.json'
         atomic_text(private_render, rendered.stdout)
         inspect_bundle(bundle, private_render)
+        targets=['web','gateway']+(['notification-worker','operations'] if not plan['read_only'] else [])
         subprocess.run(command + ['up', '-d', '--wait', '--wait-timeout', '90',
-                                   '--force-recreate', 'web', 'gateway'], check=True, timeout=120)
+                                   '--force-recreate', *targets], check=True, timeout=120)
         check_origin(hostname, plan['ports'][0])
         wait_for_registration(process, log_file)
         if process.poll() is not None:
@@ -217,10 +220,10 @@ def start(bundle, binary, protocol='http2'):
         metadata = {'pid': process.pid, 'process_stamp': process_stamp(process.pid),
                     'url': 'https://' + hostname, 'project': plan['project'],
                     'configured_protocol': protocol, 'registered_protocol': tunnel_protocol(log_file),
-                    'read_only': True, 'public_acceptance_executed': False}
+                    'read_only': plan['read_only'], 'public_acceptance_executed': False}
         atomic_text(metadata_file, json.dumps(metadata, indent=2) + '\n')
         return {'status': 'TEMPORARY_DEMO_RUNNING', 'url': metadata['url'],
-                'read_only': True, 'public_acceptance_executed': False}
+                'read_only': plan['read_only'], 'public_acceptance_executed': False}
     except BaseException:
         if process.poll() is None:
             process.terminate()

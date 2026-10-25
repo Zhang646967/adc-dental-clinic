@@ -1,0 +1,25 @@
+# Copy selected settings to a private server environment; never commit secrets.
+# A registered/approved website app, service-account web app and mini-program
+# use their own application credentials. Configure only the channels you own.
+ADC_WECHAT_MINI_APP_ID=
+ADC_WECHAT_MINI_APP_SECRET=
+ADC_WECHAT_PHONE_ENABLED=0
+ADC_WECHAT_WEB_APP_ID=
+ADC_WECHAT_WEB_APP_SECRET=
+ADC_WECHAT_MP_APP_ID=
+ADC_WECHAT_MP_APP_SECRET=
+
+# Tencent SMS: approved signature and a two-variable template: code, minutes.
+ADC_SMS_PROVIDER=disabled
+ADC_SMS_SECRET_ID=
+ADC_SMS_SECRET_KEY=
+ADC_SMS_APP_ID=
+ADC_SMS_SIGN_NAME=
+ADC_SMS_TEMPLATE_ID=
+ADC_SMS_REGION=ap-guangzhou
+ADC_SMS_GLOBAL_DAILY_LIMIT=200
+
+# Synthetic teacher trial ONLY: requires both flags plus ADC_SMS_PROVIDER=demo.
+# It accepts only 0-prefixed synthetic numbers and does not send a real SMS.
+ADC_RC_SYNTHETIC=0
+ADC_TEACHER_TEST_MODE=0

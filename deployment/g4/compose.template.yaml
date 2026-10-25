@@ -47,6 +47,7 @@ services:
     restart: "no"
   web:
     <<: *app
+    networks: [private, edge]
     volumes: ["monitor_observation:/app/operations/monitor:ro"]
     depends_on: {db: {condition: service_healthy}}
     command: [sh, -c, "python manage.py check_runtime_role && python manage.py migrate --check && exec gunicorn config.wsgi:application --config deployment/gunicorn.conf.py"]

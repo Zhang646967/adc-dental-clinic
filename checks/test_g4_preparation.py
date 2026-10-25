@@ -52,6 +52,25 @@ class G4PreparationTests(unittest.TestCase):
                 mode='mac_tunnel', access_mode='course-writable')))
         self.assertFalse(self.folder.exists())
 
+    def test_teacher_trial_has_explicit_synthetic_writes_and_separate_loopback(self):
+        plan=prepare(self.folder,**(self.inputs|dict(host='teacher-course.trycloudflare.com',mode='teacher_tunnel',
+            access_mode='course-writable',architecture='arm64',http_port=18191,https_port=18491)))
+        runtime=read_env(self.folder/'private/runtime.env')
+        self.assertEqual(runtime['ADC_RC_SYNTHETIC'],'1');self.assertEqual(runtime['ADC_TEACHER_TEST_MODE'],'1')
+        self.assertEqual(runtime['ADC_SMS_PROVIDER'],'demo');self.assertFalse(inspect_bundle(self.folder)['read_only'])
+        self.assertEqual(plan['ports'],[18191]);self.assertIn('operations:',(self.folder/'compose.yaml').read_text())
+
+    def test_teacher_trial_cannot_publish_original_local_port(self):
+        with self.assertRaises(ValueError):prepare(self.folder,**(self.inputs|dict(host='teacher-course.trycloudflare.com',mode='teacher_tunnel',
+            access_mode='course-writable',architecture='arm64',http_port=18000,https_port=18491)))
+        self.assertFalse(self.folder.exists())
+
+    def test_teacher_trial_cannot_silently_remove_synthetic_label(self):
+        prepare(self.folder,**(self.inputs|dict(host='teacher-course.trycloudflare.com',mode='teacher_tunnel',
+            access_mode='course-writable',architecture='arm64',http_port=18191,https_port=18491)))
+        path=self.folder/'private/runtime.env';path.write_text(path.read_text().replace('ADC_RC_SYNTHETIC=1','ADC_RC_SYNTHETIC=0'))
+        with self.assertRaises(ValueError):inspect_bundle(self.folder)
+
     def test_access_mode_and_runtime_disagreement_is_refused(self):
         prepare(self.folder, **self.inputs, access_mode='course-writable')
         path = self.folder / 'private/runtime.env'

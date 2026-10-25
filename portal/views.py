@@ -32,7 +32,8 @@ class PortalLoginView(LoginView):
 
     def get_context_data(self,**kwargs):
         from django.conf import settings
-        return dict(super().get_context_data(**kwargs),booking_service=self.chosen_service(),local_identity_enabled=settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local')
+        from accounts.auth_providers import capabilities
+        return dict(super().get_context_data(**kwargs),booking_service=self.chosen_service(),auth=capabilities(),local_identity_enabled=settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local',wechat_in_browser='micromessenger' in self.request.headers.get('User-Agent','').lower())
 
     def get(self,request,*args,**kwargs):
         # A signed-in patient can continue without another password prompt.
