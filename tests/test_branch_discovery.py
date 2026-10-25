@@ -144,6 +144,8 @@ class BranchDiscoveryTests(ResourceFixture,TransactionTestCase):
 
     def test_new_booking_forms_and_native_preview_use_the_published_contact(self):
         self.publish()
+        public=Client().get(reverse('public_services'))
+        self.assertContains(public,'ADC口腔·长沙梅溪湖门店');self.assertNotContains(public,self.a.name)
         r=self.client.get(reverse('portal_slots'),{'service':self.service.pk})
         self.assertContains(r,'ADC口腔·长沙梅溪湖门店');self.assertNotContains(r,self.a.name)
         r=self.client.get(reverse('portal_confirm'),dict(slot=self.slot1.pk,start=self.t.isoformat(),service=self.service.pk))
