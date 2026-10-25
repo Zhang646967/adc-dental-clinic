@@ -48,6 +48,10 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   appState.globalData.review={patient:'current'};
   p=api.bootstrap();success({csrf_token:'c',workspace_token:'refreshed_signature',workspace_id:'ctx',subject_revision:2,subject_key:'grant:3',authenticated:true});await p;
   assert.equal(appState.globalData.review.patient,'current');checks++;
+  p=api.bootstrap();success({csrf_token:'c',workspace_id:'pending-a',subject_revision:0,account_name:'pending-a',account_authenticated:true,authenticated:false,account_token:'account-a'});await p;
+  const oldAccount=api.request('account/'),oldAccountResponse=last;
+  p=api.request('account/local-login/','POST',{code:'one-use'});assert.equal(last.header['X-ADC-Account'],'account-a');success({csrf_token:'new-c',workspace_id:'pending-b',subject_revision:0,account_name:'pending-b',account_authenticated:true,authenticated:false,account_token:'account-b'});await p;
+  oldAccountResponse.success({statusCode:200,data:{ok:true,data:{phone:'PRIVATE_OLD_ACCOUNT'}}});await assert.rejects(oldAccount,e=>e.code==='SUBJECT_CHANGED');checks+=2;
   let compiler={status:'not_run'};
   if(process.env.ADC_WECHAT_COMPILER_DIR){
     const os=require('node:os'),{spawnSync}=require('node:child_process');
@@ -63,5 +67,6 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const services=await require('./verify_native_services.cjs').verify();
   const plans=await require('./verify_native_plans.cjs').verify();
   const discovery=await require('./verify_native_discovery.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const accounts=await require('./verify_native_accounts.cjs').verify();
+  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,accounts,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

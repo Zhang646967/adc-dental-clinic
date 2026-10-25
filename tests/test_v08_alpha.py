@@ -41,8 +41,12 @@ class LoginShortcutTests(V07Fixture,TransactionTestCase):
         self.assertNotIn('_auth_user_id',self.c.session);self.assertNotIn(SESSION_KEY,self.c.session)
     def test_disabled_patient_access_not_activated(self):
         self.access.is_active=False;self.access.save();r=self.real_login(self.pa)
-        self.assertContains(r,'该账号尚未开通患者服务')
-        self.assertNotIn('_auth_user_id',self.c.session);self.assertNotIn(SESSION_KEY,self.c.session)
+        self.assertRedirects(r,reverse('patient_account'))
+        self.assertEqual(self.ctx().role,'')
+        self.assertContains(self.c.get(reverse('patient_account')),'原本人关联需要复核')
+        self.assertNotContains(self.c.get(reverse('select_role')),'value="PATIENT"')
+        self.assertNotEqual(self.c.get(reverse('portal_home')).status_code,200)
+        self.assertFalse(PatientAccess.objects.get(pk=self.access.pk).is_active)
     def test_only_inactive_clinic_role_not_activated(self):
         self.a.is_active=False;self.a.save();r=self.real_login(self.manager)
         self.assertContains(r,'该账号没有员工岗位')

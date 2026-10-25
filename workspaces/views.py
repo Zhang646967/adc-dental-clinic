@@ -22,8 +22,9 @@ class WorkspaceLoginView(LoginView):
         return reverse('select_role')
 
     def form_valid(self, form):
+        from portal.account_access import can_account_login
         from portal.policies import has_patient_access
-        permitted=has_patient_access(form.get_user()) if self.login_channel=='PATIENT' else any(
+        permitted=can_account_login(form.get_user()) if self.login_channel=='PATIENT' else any(
             r!='PATIENT' for r in available_roles(form.get_user()))
         if not permitted:
             form.add_error(None,'该账号尚未开通患者服务，请联系门店前台。' if self.login_channel=='PATIENT' else
@@ -32,7 +33,9 @@ class WorkspaceLoginView(LoginView):
         # Django performs authentication/session rotation, then our scoped activation.
         super().form_valid(form)
         from workspaces.activation import begin_login_workspace
-        return redirect(begin_login_workspace(self.request,channel=self.login_channel))
+        route=begin_login_workspace(self.request,channel=self.login_channel)
+        if self.login_channel=='PATIENT' and not has_patient_access(self.request.user):route='patient_account'
+        return redirect(route)
 
 @login_required
 @require_GET
@@ -84,6 +87,11 @@ def home(request):
     if ctx.role=='FRONT_DESK':
         from clinical.continuity_selectors import coordination_counts
         data['continuity']=coordination_counts(request.user)
+        from accounts.policies import bindings
+        data['can_verify_identity']=bindings(request.user).filter(can_verify_patient_relationships=True).exists()
+        if data['can_verify_identity']:
+            from portal.enrollment_models import PatientEnrollment
+            data['enrollment_pending_count']=PatientEnrollment.objects.filter(clinic_id=ctx.clinic_id,state='PENDING').count()
     if ctx.role=='DENTIST':
         from clinical.continuity_selectors import doctor_lab_queue
         data['lab_review_count']=doctor_lab_queue(request.user).filter(state='RECEIVED').count()

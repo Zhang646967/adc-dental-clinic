@@ -31,7 +31,8 @@ class PortalLoginView(LoginView):
         return next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
 
     def get_context_data(self,**kwargs):
-        return dict(super().get_context_data(**kwargs),booking_service=self.chosen_service())
+        from django.conf import settings
+        return dict(super().get_context_data(**kwargs),booking_service=self.chosen_service(),local_identity_enabled=settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local')
 
     def get(self,request,*args,**kwargs):
         # A signed-in patient can continue without another password prompt.
@@ -48,6 +49,10 @@ class PortalLoginView(LoginView):
     def form_valid(self,form):
         response=super().form_valid(form)
         if response.status_code!=302:return response
+        if response.url==reverse('patient_account'):
+            from portal.account_access import remember_pending_service
+            remember_pending_service(self.request,self.chosen_service().service_id if self.chosen_service() else None)
+            return response
         # The ordinary authenticated activation completes first. This typed
         # service hint cannot choose a role, clinic scope or arbitrary URL.
         from portal.booking_intent import remember_service,destination_after_activation

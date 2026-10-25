@@ -1,9 +1,12 @@
 # 当前数据库外键关系
 
-285条实际SQL外键，其中284条对应ORM单列关系，1条为账单同次就诊复合外键。
+296条实际SQL外键，其中295条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
+| adc_account_identity_event | user_id | adc_user | id |
+| adc_account_identity_event | identity_id | adc_external_identity | id |
+| adc_account_phone | user_id | adc_user | id |
 | adc_appointment_action_event | followup_id | adc_cancellation_followup | id |
 | adc_appointment_action_event | improvement_id | adc_appointment_improvement | id |
 | adc_appointment_action_event | actor_id | adc_user | id |
@@ -113,6 +116,7 @@
 | adc_equipment_cost_amendment | reviewed_by_id | adc_user | id |
 | adc_equipment_event | asset_id | adc_equipment_asset | id |
 | adc_equipment_event | recorded_by_id | adc_user | id |
+| adc_external_identity | user_id | adc_user | id |
 | adc_inbox_message | clinic_id | adc_clinic | id |
 | adc_inbox_message | event_id | adc_notification_outbox | id |
 | adc_inbox_message | grant_id | adc_role_assignment | id |
@@ -131,6 +135,8 @@
 | adc_lab_review | reviewer_id | adc_user | id |
 | adc_lab_review | source_record_id | adc_clinical_record_version | id |
 | adc_lab_review | target_step_version_id | adc_plan_step_version | id |
+| adc_local_identity_code | identity_id | adc_external_identity | id |
+| adc_local_identity_code | user_id | adc_user | id |
 | adc_maintenance_action | order_id | adc_maintenance_order | id |
 | adc_maintenance_action | actor_id | adc_user | id |
 | adc_maintenance_order | asset_id | adc_equipment_asset | id |
@@ -154,6 +160,11 @@
 | adc_patient_allergy | patient_id | adc_patient | id |
 | adc_patient_appointment_grant | created_by_id | adc_user | id |
 | adc_patient_appointment_grant | relationship_id | adc_patient_relationship | id |
+| adc_patient_enrollment | clinic_id | adc_clinic | id |
+| adc_patient_enrollment | patient_id | adc_patient | id |
+| adc_patient_enrollment | user_id | adc_user | id |
+| adc_patient_enrollment_event | enrollment_id | adc_patient_enrollment | id |
+| adc_patient_enrollment_event | actor_id | adc_user | id |
 | adc_patient_relationship | delegate_user_id | adc_user | id |
 | adc_patient_relationship | clinic_id | adc_clinic | id |
 | adc_patient_relationship | created_by_id | adc_user | id |

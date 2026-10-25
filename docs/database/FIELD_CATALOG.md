@@ -1,10 +1,71 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-24。本目录列出102张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-24。本目录列出108张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
 PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯一和排斥约束另列，不用单列UK代替。
+
+## adc_account_identity_event
+
+模型：`accounts.AccountIdentityEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| user_id | bigint | FK | 否 | `adc_user.id` |
+| identity_id | bigint | FK | 是 | `adc_external_identity.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_account_identity_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_account_identity_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_account_identity_event_user_id_9158966b_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_account_identity_identity_id_16cf1641_fk_adc_exter`：`FOREIGN KEY (identity_id) REFERENCES adc_external_identity(id) DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_account_identity_event_identity_id_16cf1641`：`CREATE INDEX adc_account_identity_event_identity_id_16cf1641 ON public.adc_account_identity_event USING btree (identity_id)`。
+- `adc_account_identity_event_operation_id_key`：`CREATE UNIQUE INDEX adc_account_identity_event_operation_id_key ON public.adc_account_identity_event USING btree (operation_id)`。
+- `adc_account_identity_event_pkey`：`CREATE UNIQUE INDEX adc_account_identity_event_pkey ON public.adc_account_identity_event USING btree (id)`。
+- `adc_account_identity_event_user_id_9158966b`：`CREATE INDEX adc_account_identity_event_user_id_9158966b ON public.adc_account_identity_event USING btree (user_id)`。
+
+跨表及历史触发器：
+
+- `account_identity_history`：`CREATE TRIGGER account_identity_history BEFORE DELETE OR UPDATE ON public.adc_account_identity_event FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_account_phone
+
+模型：`accounts.AccountPhone`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| user_id | bigint | UK / FK | 否 | `adc_user.id` |
+| phone | character varying(32) | — | 否 | — |
+| source | character varying(24) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| verified_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `account_phone_local_source_only`：`CHECK (((source)::text = 'LOCAL_SIMULATION'::text))`。
+- `adc_account_phone_pkey`：`PRIMARY KEY (id)`。
+- `adc_account_phone_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_account_phone_user_id_fc9bca8d_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_account_phone_user_id_key`：`UNIQUE (user_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_account_phone_pkey`：`CREATE UNIQUE INDEX adc_account_phone_pkey ON public.adc_account_phone USING btree (id)`。
+- `adc_account_phone_user_id_key`：`CREATE UNIQUE INDEX adc_account_phone_user_id_key ON public.adc_account_phone USING btree (user_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_ai_usage_bucket
 
@@ -1530,6 +1591,37 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `equipment_event_history`：`CREATE TRIGGER equipment_event_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_equipment_event FOR EACH ROW EXECUTE FUNCTION adc_equipment_event_guard()`。
 
+## adc_external_identity
+
+模型：`accounts.ExternalIdentity`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| provider | character varying(16) | — | 否 | — |
+| app_id | character varying(80) | — | 否 | — |
+| subject | character varying(160) | — | 否 | — |
+| user_id | bigint | FK | 是 | `adc_user.id` |
+| revision | integer | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_external_identity_pkey`：`PRIMARY KEY (id)`。
+- `adc_external_identity_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_external_identity_user_id_2f1dc76e_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `external_identity_application_subject`：`UNIQUE (provider, app_id, subject)`。
+- `identity_local_provider_only`：`CHECK (((provider)::text = 'LOCAL'::text))`。
+
+索引（含条件唯一索引）：
+
+- `adc_external_identity_pkey`：`CREATE UNIQUE INDEX adc_external_identity_pkey ON public.adc_external_identity USING btree (id)`。
+- `adc_external_identity_user_id_2f1dc76e`：`CREATE INDEX adc_external_identity_user_id_2f1dc76e ON public.adc_external_identity USING btree (user_id)`。
+- `external_identity_application_subject`：`CREATE UNIQUE INDEX external_identity_application_subject ON public.adc_external_identity USING btree (provider, app_id, subject)`。
+
+跨表及历史触发器：
+
+
 ## adc_inbox_message
 
 模型：`notifications.InboxMessage`。
@@ -1740,6 +1832,41 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `lab_review_retained`：`CREATE TRIGGER lab_review_retained BEFORE DELETE OR UPDATE ON public.adc_lab_review FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_local_identity_code
+
+模型：`accounts.LocalIdentityCode`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| purpose | character varying(8) | — | 否 | — |
+| digest | character varying(64) | UK | 否 | — |
+| identity_id | bigint | FK | 是 | `adc_external_identity.id` |
+| user_id | bigint | FK | 是 | `adc_user.id` |
+| phone | character varying(32) | — | 否 | — |
+| expires_at | timestamp with time zone | — | 否 | — |
+| consumed_at | timestamp with time zone | — | 是 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_local_identity_c_identity_id_aeeca682_fk_adc_exter`：`FOREIGN KEY (identity_id) REFERENCES adc_external_identity(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_local_identity_code_digest_key`：`UNIQUE (digest)`。
+- `adc_local_identity_code_pkey`：`PRIMARY KEY (id)`。
+- `adc_local_identity_code_user_id_e82994c4_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `local_identity_code_purpose`：`CHECK ((((identity_id IS NOT NULL) AND ((phone)::text = ''::text) AND ((purpose)::text = 'LOGIN'::text) AND (user_id IS NULL)) OR ((identity_id IS NULL) AND ((purpose)::text = 'PHONE'::text) AND (user_id IS NOT NULL) AND (NOT ((phone)::text = ''::text)))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_local_identity_code_digest_c6ee09e4_like`：`CREATE INDEX adc_local_identity_code_digest_c6ee09e4_like ON public.adc_local_identity_code USING btree (digest varchar_pattern_ops)`。
+- `adc_local_identity_code_digest_key`：`CREATE UNIQUE INDEX adc_local_identity_code_digest_key ON public.adc_local_identity_code USING btree (digest)`。
+- `adc_local_identity_code_identity_id_aeeca682`：`CREATE INDEX adc_local_identity_code_identity_id_aeeca682 ON public.adc_local_identity_code USING btree (identity_id)`。
+- `adc_local_identity_code_pkey`：`CREATE UNIQUE INDEX adc_local_identity_code_pkey ON public.adc_local_identity_code USING btree (id)`。
+- `adc_local_identity_code_user_id_e82994c4`：`CREATE INDEX adc_local_identity_code_user_id_e82994c4 ON public.adc_local_identity_code USING btree (user_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_maintenance_action
 
@@ -2070,6 +2197,81 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+
+## adc_patient_enrollment
+
+模型：`portal.PatientEnrollment`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| user_id | bigint | FK | 否 | `adc_user.id` |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| kind | character varying(8) | — | 否 | — |
+| state | character varying(16) | — | 否 | — |
+| details | jsonb | — | 否 | — |
+| patient_message | character varying(500) | — | 否 | — |
+| patient_id | bigint | FK | 是 | `adc_patient.id` |
+| revision | integer | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+| updated_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_patient_enrollment_clinic_id_507e8090_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_enrollment_patient_id_d65f565a_fk_adc_patient_id`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_enrollment_pkey`：`PRIMARY KEY (id)`。
+- `adc_patient_enrollment_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_patient_enrollment_user_id_994fcc37_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `enrollment_approved_patient`：`CHECK ((((patient_id IS NOT NULL) AND ((state)::text = 'APPROVED'::text)) OR ((NOT ((state)::text = 'APPROVED'::text)) AND (patient_id IS NULL))))`。
+- `enrollment_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['NEW'::character varying, 'EXISTING'::character varying])::text[])))`。
+- `enrollment_state_valid`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'NEED_INFO'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying, 'WITHDRAWN'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_patient_enrollment_clinic_id_507e8090`：`CREATE INDEX adc_patient_enrollment_clinic_id_507e8090 ON public.adc_patient_enrollment USING btree (clinic_id)`。
+- `adc_patient_enrollment_patient_id_d65f565a`：`CREATE INDEX adc_patient_enrollment_patient_id_d65f565a ON public.adc_patient_enrollment USING btree (patient_id)`。
+- `adc_patient_enrollment_pkey`：`CREATE UNIQUE INDEX adc_patient_enrollment_pkey ON public.adc_patient_enrollment USING btree (id)`。
+- `adc_patient_enrollment_user_id_994fcc37`：`CREATE INDEX adc_patient_enrollment_user_id_994fcc37 ON public.adc_patient_enrollment USING btree (user_id)`。
+- `enrollment_clinic_queue`：`CREATE INDEX enrollment_clinic_queue ON public.adc_patient_enrollment USING btree (clinic_id, state, created_at)`。
+- `one_open_patient_enrollment`：`CREATE UNIQUE INDEX one_open_patient_enrollment ON public.adc_patient_enrollment USING btree (user_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'NEED_INFO'::character varying])::text[]))`。
+
+跨表及历史触发器：
+
+
+## adc_patient_enrollment_event
+
+模型：`portal.PatientEnrollmentEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| enrollment_id | bigint | FK | 否 | `adc_patient_enrollment.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| basis | character varying(32) | — | 否 | — |
+| reference | character varying(160) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_patient_enrollme_enrollment_id_b07bf119_fk_adc_patie`：`FOREIGN KEY (enrollment_id) REFERENCES adc_patient_enrollment(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_enrollment_event_actor_id_2a471e5b_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_patient_enrollment_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_patient_enrollment_event_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_patient_enrollment_event_actor_id_2a471e5b`：`CREATE INDEX adc_patient_enrollment_event_actor_id_2a471e5b ON public.adc_patient_enrollment_event USING btree (actor_id)`。
+- `adc_patient_enrollment_event_enrollment_id_b07bf119`：`CREATE INDEX adc_patient_enrollment_event_enrollment_id_b07bf119 ON public.adc_patient_enrollment_event USING btree (enrollment_id)`。
+- `adc_patient_enrollment_event_operation_id_key`：`CREATE UNIQUE INDEX adc_patient_enrollment_event_operation_id_key ON public.adc_patient_enrollment_event USING btree (operation_id)`。
+- `adc_patient_enrollment_event_pkey`：`CREATE UNIQUE INDEX adc_patient_enrollment_event_pkey ON public.adc_patient_enrollment_event USING btree (id)`。
+
+跨表及历史触发器：
+
+- `patient_enrollment_history`：`CREATE TRIGGER patient_enrollment_history BEFORE DELETE OR UPDATE ON public.adc_patient_enrollment_event FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
 
 ## adc_patient_relationship
 

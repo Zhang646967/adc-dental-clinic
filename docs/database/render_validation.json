@@ -1,4 +1,18 @@
 {
+  "er_patient_account": {
+    "nodes": 6,
+    "edges": 7,
+    "width": 693,
+    "height": 557,
+    "minPrintedFontPt": 9.162424242424242
+  },
+  "er_patient_enrollment": {
+    "nodes": 6,
+    "edges": 7,
+    "width": 396,
+    "height": 532,
+    "minPrintedFontPt": 16.034242424242425
+  },
   "er_clinic_directory": {
     "nodes": 4,
     "edges": 3,

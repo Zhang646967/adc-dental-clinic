@@ -59,6 +59,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
 ADC_READ_ONLY = os.environ.get("ADC_READ_ONLY", "0") == "1"
 ADC_CLINICAL_SYNTHETIC = os.environ.get("ADC_RC_SYNTHETIC", "0") == "1"
+ADC_PATIENT_IDENTITY_PROVIDER = os.environ.get('ADC_PATIENT_IDENTITY_PROVIDER', 'local' if ADC_CLINICAL_SYNTHETIC else 'disabled')
 ADC_VERSION = "1.0.0-rc.1"
 # A production label requires the production settings and explicit deployment
 # stage. Synthetic or local/staging environments retain a compact visible label.

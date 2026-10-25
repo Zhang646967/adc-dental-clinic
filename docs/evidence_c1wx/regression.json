@@ -1,0 +1,32 @@
+{
+  "status": "PASS_FROZEN_UNCOMMITTED_SOURCE",
+  "source_rules": 1104,
+  "postgresql_http_concurrency_cases": 1765,
+  "full_suite_seconds": 561.837,
+  "postgresql": "17",
+  "source_commit": "uncommitted checkpoint; exact implementation CI to follow",
+  "native_source_checks": 207,
+  "native_offline_compiler": {
+    "status": "passed",
+    "wxml_pages": 19,
+    "wxss_files": 1,
+    "scope": "Official offline syntax only; not an IDE preview or WeChat runtime"
+  },
+  "native_actual_handlers": 34,
+  "website_actual_browser_checks": 18,
+  "new_targeted_cases": 50,
+  "followup_affected_cases": 181,
+  "preceding_failure": {
+    "case": "LoginShortcutTests.test_disabled_patient_access_not_activated",
+    "reason": "Old complete-login rejection changed to account-only authentication; patient activation and business access remain denied until independent original-binding restoration"
+  },
+  "preflight_limit": "real Django HTTP and Chrome / actual Page JS with a Node transport bridge; not a WeChat runtime or exact release image",
+  "not_claimed": [
+    "real WeChat authentication",
+    "real phone verification",
+    "WeChat runtime",
+    "public cloud",
+    "new capacity run",
+    "24-hour operation"
+  ]
+}

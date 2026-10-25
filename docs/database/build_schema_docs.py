@@ -11,6 +11,30 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_patient_account': {
+        'title':'患者渠道账号、凭证与联络来源',
+        'tables': {
+            'adc_user':['id','username'],
+            'adc_external_identity':['id','provider','app_id','subject','user_id','revision'],
+            'adc_local_identity_code':['id','purpose','identity_id','user_id','digest','expires_at','consumed_at'],
+            'adc_account_phone':['id','user_id','source','revision'],
+            'adc_account_identity_event':['id','user_id','identity_id','operation_id','action'],
+            'adc_workspace_context':['id','user_id','login_channel','role','revision'],
+        },
+        'note':'外部身份按provider、app_id及subject联合唯一，当前账号引用可空；解绑不删除ADC账号及事件。一次性凭证按用途引用外部身份或账号，数据库只存摘要。账号联络按user一对一，不与Patient建立手机号匹配外键。首次绑定事件建立患者渠道账号，未获本人或代约授权时上下文岗位仍为空，不能成为员工或临床权限。本地凭证及手机号来源为LOCAL替身，不能写成微信实名或居民身份证。',
+    },
+    'er_patient_enrollment': {
+        'title':'本人建档申请、前台决定与唯一档案关联',
+        'tables': {
+            'adc_user':['id','username'],
+            'adc_clinic':['id','clinic_code'],
+            'adc_patient':['id','patient_no'],
+            'adc_patient_access':['id','user_id','patient_id','is_active'],
+            'adc_patient_enrollment':['id','user_id','clinic_id','patient_id','kind','state','revision'],
+            'adc_patient_enrollment_event':['id','enrollment_id','actor_id','operation_id','action'],
+        },
+        'note':'申请归属登录账号及办理诊所；同一账号至多一项待核验或待补充申请。患者引用在批准时才有值，待核验不创建正式档案或预约。前台以本店核验职责、当前申请版号及明确原档案核对，新档建档及关联同事务提交；旧档不改资料，暂停复核启用原PatientAccess，决定事件一并追加。本人关联继续保持账号、患者分别一对一；手机号不合并患者。决定与原申请快照追加保留，撤回或解绑不删除原事实。',
+    },
     'er_clinic_directory': {
         'title':'门店公开资料与发布历史',
         'tables': {

@@ -1,6 +1,7 @@
 """Explicit login binding; a patient number is NOT a credential."""
 from django.db import models
 from django.db.models import Q, F
+from portal.enrollment_models import PatientEnrollment, PatientEnrollmentEvent
 
 class PatientAccess(models.Model):
     user = models.OneToOneField("accounts.UserAccount", on_delete=models.PROTECT, related_name="patient_access")

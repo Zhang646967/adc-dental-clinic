@@ -9,5 +9,6 @@
     <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="login">登录并继续</button>
     <view class="muted">首次使用或无法登录时，请联系门店前台核验账号。</view>
   </view>
+  <view wx:if="{{identityProvider==='local'}}" class="card"><view class="section-title">本地授权体验</view><view class="muted">尚未接通微信授权；使用私下签发的合成凭证。首次体验不填上方账号；绑定原账号时填写原账号密码。</view><label class="label" for="local-code">新本地授权码</label><input id="local-code" class="input" password maxlength="160" value="{{localCode}}" data-field="localCode" bindinput="field" /><checkbox-group bindchange="consent"><label><checkbox value="agree" checked="{{localConfirmed}}" /> 我同意使用本地模拟身份继续。</label></checkbox-group><button bindtap="localLogin" disabled="{{busy||!localConfirmed}}" loading="{{busy}}">核对凭证并继续</button></view>
   <navigator class="link" url="/pages/discovery/index" open-type="reLaunch">先看附近门店与营业安排</navigator><navigator class="link" url="/pages/help/index">登录与就诊协助</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

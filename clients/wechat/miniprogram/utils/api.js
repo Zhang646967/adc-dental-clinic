@@ -26,6 +26,7 @@ function request(path, method = 'GET', data = {}) {
     if (method !== 'GET') {
       header['X-CSRFToken'] = session.csrf_token || '';
       header['X-ADC-Workspace'] = session.workspace_token || '';
+      header['X-ADC-Account'] = session.account_token || '';
     }
     wx.request({url: `${config.apiBase}/api/mini/v1/${path}`, method, data, header,
       success(response) {
@@ -36,7 +37,7 @@ function request(path, method = 'GET', data = {}) {
         const body = response.data || {};
         if (response.statusCode >= 200 && response.statusCode < 300 && body.ok === true) {
           if (body.data && body.data.csrf_token) {
-            if(session.workspace_id!==body.data.workspace_id || session.subject_revision!==body.data.subject_revision || session.authenticated!==body.data.authenticated){epoch+=1;getApp().globalData.review=null;}
+            if(session.workspace_id!==body.data.workspace_id || session.subject_revision!==body.data.subject_revision || session.authenticated!==body.data.authenticated || session.account_name!==body.data.account_name || session.account_authenticated!==body.data.account_authenticated){epoch+=1;getApp().globalData.review=null;}
             session = body.data;
             if (!session.authenticated) getApp().globalData.review = null;
           }
@@ -62,6 +63,10 @@ async function signIn(username, password) {
   await bootstrap();
   return request('login/', 'POST', {username, password});
 }
+async function localSignIn(code,username,password,confirmed){
+  await bootstrap();
+  return request('account/local-login/','POST',{code,username,password,confirmed:confirmed?'on':''});
+}
 async function signOut() {
   await request('logout/', 'POST'); reset(); getApp().globalData.review = null;getApp().globalData.bookingIntent=null;
 }
@@ -73,4 +78,4 @@ async function selectSubject(subject){
   const next=await request('patients/select/','POST',{subject});
   getApp().globalData.review=null;return next;
 }
-module.exports = {request, bootstrap, signIn, signOut, sessionInfo, reset, showSubject, selectSubject};
+module.exports = {request, bootstrap, signIn, localSignIn, signOut, sessionInfo, reset, showSubject, selectSubject};

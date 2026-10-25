@@ -13,6 +13,8 @@ READ_ONLY_POST_CONTRACTS = MappingProxyType({
     "logout": "close_session",
     "mini_login": "authenticate_patient_session",
     "mini_logout": "close_patient_session",
+    "patient_account_activate": "select_reviewed_patient_context",
+    "mini_account_activate": "select_reviewed_patient_context",
     "activate_role": "select_authorized_context",
     "activate_clinic": "select_authorized_context",
     "assistant_api": "bounded_assistance_no_business_command",

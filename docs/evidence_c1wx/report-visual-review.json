@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "pages": 175,
+  "approved_original_bodies": 151,
+  "first_revision_changed_pages_inspected_at_full_resolution": 25,
+  "final_revision_bodies_equal_reviewed": 170,
+  "final_changed_pages_inspected_at_full_resolution": [
+    "page-4.png",
+    "page-5.png",
+    "page-33.png",
+    "page-69.png",
+    "page-70.png"
+  ],
+  "font_and_bounds_check": "report-validation.json",
+  "private_intermediate_renders_retained": true
+}

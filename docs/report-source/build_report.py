@@ -304,10 +304,10 @@ def build(folder,repo,output=None):
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例清单与业务完整性');p('系统共定义82项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—82。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义86项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—86。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
  p('表3-4 用例分组及业务目标',10.5,False,True)
  table(['业务范围','编号','使用者目标'],[
- ['身份与资料','SU-01—03、21—23、25—28、64—67','账号、患者资料、基础目录、专业审核与限定转诊。'],
+ ['身份与资料','SU-01—03、21—23、25—28、64—67、83—86','账号、患者资料、基础目录、专业审核与限定转诊。'],
  ['预约与接诊','SU-04—10、19、29—33\nSU-39—40、54、57—63','预约、变更、到诊、治疗、结算与资源核对。'],
  ['候补与协作','SU-13—17、24、31、34—38','候补、邀约、任务办理、独立复核及消息。'],
  ['经营与引导','SU-11—12、18、20、41、55—56、81—82','成本利润、取消分析和操作协助。'],
@@ -346,11 +346,11 @@ def build(folder,repo,output=None):
  for item in source['design']:
   if item['heading'].startswith('4.19'):
    page();heading(item['heading']);p(item['paragraphs'][0])
-   figure(repo/'docs/diagrams/recall_state_print.png','图4-35 复诊责任状态与实际完成依据',16,max_height=12)
+   figure(repo/'docs/diagrams/recall_state_print.png','图4-37 复诊责任状态与实际完成依据',16,max_height=12)
    p('\n'.join(source['state_legends']['recall']),10.5,False,False).paragraph_format.line_spacing=Pt(16)
    p(item['paragraphs'][2])
    page();p(item['paragraphs'][1])
-   figure(repo/'docs/diagrams/lab_state_print.png','图4-36 加工送返周期与临床验收状态',16,max_height=14)
+   figure(repo/'docs/diagrams/lab_state_print.png','图4-38 加工送返周期与临床验收状态',16,max_height=14)
    p('\n'.join(source['state_legends']['lab']),10.5,False,False).paragraph_format.line_spacing=Pt(16)
    continue
   add(item)
@@ -361,16 +361,16 @@ def build(folder,repo,output=None):
    p('执行与复核采用不同账号；后续观察窗口完整结束且不早于最近执行开始日。样本不足、不可比和变化待观察分别记录，不把统计变化当作措施的因果效果。')
   if item['heading'].startswith('4.13'):
    manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
-   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination','er_portal_reschedule','er_patient_relationship','er_professional_authority','er_clinical_referral','er_clinical_history','er_clinical_encounter','er_treatment_plan','er_plan_decisions','er_performed_billing','er_next_visit','er_clinical_recall','er_laboratory','er_clinic_directory'],15):
+   for number,name in enumerate(['er_booking','er_catalogue','er_resource_claims','er_finance','er_schedule_coordination','er_portal_reschedule','er_patient_relationship','er_professional_authority','er_clinical_referral','er_clinical_history','er_clinical_encounter','er_treatment_plan','er_plan_decisions','er_performed_billing','er_next_visit','er_clinical_recall','er_laboratory','er_clinic_directory','er_patient_account','er_patient_enrollment'],15):
     if number>15:page()
     heading('4.13.'+str(number-14)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number)+' '+manifest[name]['title']+'数据库ER图',16,max_height=12.5 if number==15 else 18)
     p(manifest[name]['note'],10.5)
   if item['heading'].startswith('4.17'):
-   figure(repo/'docs/diagrams/clinical_record_state.png','图4-33 检查草稿与确认版本的业务状态',16,max_height=18)
+   figure(repo/'docs/diagrams/clinical_record_state.png','图4-35 检查草稿与确认版本的业务状态',16,max_height=18)
    p('状态图描述可观察的业务阶段，不增加虚构的状态列。旧确认版本在更正草稿期间继续保留；确认及保存不等于合格电子签名或实际治疗。')
   if item['heading'].startswith('4.18'):
-   figure(repo/'docs/diagrams/domain_continuity.png','图4-34 连续诊疗与后续责任的领域关系',16,max_height=18)
+   figure(repo/'docs/diagrams/domain_continuity.png','图4-36 连续诊疗与后续责任的领域关系',16,max_height=18)
  mind(4)
  page();heading('第5章 系统实现与测试',1)
  for item in source['implementation']:
@@ -410,7 +410,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 扩展业务用例规约',1)
- p('本附录补充SU-39—82，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作及连续诊疗。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
+ p('本附录补充SU-39—86，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作及连续诊疗。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

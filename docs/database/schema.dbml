@@ -1,6 +1,25 @@
 // Current database ER source; selected view diagrams are projections.
-// All 102 ORM tables; django_migrations is a framework migration journal.
+// All 108 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
+
+Table adc_account_identity_event {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  identity_id "bigint" [null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_account_phone {
+  id "bigint" [pk, not null]
+  user_id "bigint" [unique, not null]
+  phone "character varying(32)" [not null]
+  source "character varying(24)" [not null]
+  revision "integer" [not null]
+  verified_at "timestamp with time zone" [not null]
+}
 
 Table adc_ai_usage_bucket {
   id "bigint" [pk, not null]
@@ -546,6 +565,19 @@ Table adc_equipment_event {
   }
 }
 
+Table adc_external_identity {
+  id "bigint" [pk, not null]
+  provider "character varying(16)" [not null]
+  app_id "character varying(80)" [not null]
+  subject "character varying(160)" [not null]
+  user_id "bigint" [null]
+  revision "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (provider, app_id, subject) [unique, name: 'external_identity_application_subject']
+  }
+}
+
 Table adc_inbox_message {
   id "bigint" [pk, not null]
   event_id "bigint" [not null]
@@ -612,6 +644,18 @@ Table adc_lab_review {
   operation_id "uuid" [unique, not null]
   assessed_at "timestamp with time zone" [not null]
   recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_local_identity_code {
+  id "bigint" [pk, not null]
+  purpose "character varying(8)" [not null]
+  digest "character varying(64)" [unique, not null]
+  identity_id "bigint" [null]
+  user_id "bigint" [null]
+  phone "character varying(32)" [not null]
+  expires_at "timestamp with time zone" [not null]
+  consumed_at "timestamp with time zone" [null]
+  created_at "timestamp with time zone" [not null]
 }
 
 Table adc_maintenance_action {
@@ -732,6 +776,32 @@ Table adc_patient_appointment_grant {
   is_active "boolean" [not null]
   revision "integer" [not null]
   created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_patient_enrollment {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  kind "character varying(8)" [not null]
+  state "character varying(16)" [not null]
+  details "jsonb" [not null]
+  patient_message "character varying(500)" [not null]
+  patient_id "bigint" [null]
+  revision "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table adc_patient_enrollment_event {
+  id "bigint" [pk, not null]
+  enrollment_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  basis "character varying(32)" [not null]
+  reference "character varying(160)" [not null]
+  snapshot "jsonb" [not null]
   created_at "timestamp with time zone" [not null]
 }
 
@@ -1400,6 +1470,9 @@ Table django_session {
   expire_date "timestamp with time zone" [not null]
 }
 
+Ref: adc_account_identity_event.user_id > adc_user.id
+Ref: adc_account_identity_event.identity_id > adc_external_identity.id
+Ref: adc_account_phone.user_id - adc_user.id
 Ref: adc_appointment_action_event.followup_id > adc_cancellation_followup.id
 Ref: adc_appointment_action_event.improvement_id > adc_appointment_improvement.id
 Ref: adc_appointment_action_event.actor_id > adc_user.id
@@ -1509,6 +1582,7 @@ Ref: adc_equipment_cost_amendment.prepared_by_id > adc_user.id
 Ref: adc_equipment_cost_amendment.reviewed_by_id > adc_user.id
 Ref: adc_equipment_event.asset_id > adc_equipment_asset.id
 Ref: adc_equipment_event.recorded_by_id > adc_user.id
+Ref: adc_external_identity.user_id > adc_user.id
 Ref: adc_inbox_message.clinic_id > adc_clinic.id
 Ref: adc_inbox_message.event_id > adc_notification_outbox.id
 Ref: adc_inbox_message.grant_id > adc_role_assignment.id
@@ -1527,6 +1601,8 @@ Ref: adc_lab_review.case_id > adc_lab_case.id
 Ref: adc_lab_review.reviewer_id > adc_user.id
 Ref: adc_lab_review.source_record_id > adc_clinical_record_version.id
 Ref: adc_lab_review.target_step_version_id > adc_plan_step_version.id
+Ref: adc_local_identity_code.identity_id > adc_external_identity.id
+Ref: adc_local_identity_code.user_id > adc_user.id
 Ref: adc_maintenance_action.order_id > adc_maintenance_order.id
 Ref: adc_maintenance_action.actor_id > adc_user.id
 Ref: adc_maintenance_order.asset_id > adc_equipment_asset.id
@@ -1550,6 +1626,11 @@ Ref: adc_patient_allergy.allergy_id > adc_allergy.id
 Ref: adc_patient_allergy.patient_id > adc_patient.id
 Ref: adc_patient_appointment_grant.created_by_id > adc_user.id
 Ref: adc_patient_appointment_grant.relationship_id - adc_patient_relationship.id
+Ref: adc_patient_enrollment.clinic_id > adc_clinic.id
+Ref: adc_patient_enrollment.patient_id > adc_patient.id
+Ref: adc_patient_enrollment.user_id > adc_user.id
+Ref: adc_patient_enrollment_event.enrollment_id > adc_patient_enrollment.id
+Ref: adc_patient_enrollment_event.actor_id > adc_user.id
 Ref: adc_patient_relationship.delegate_user_id > adc_user.id
 Ref: adc_patient_relationship.clinic_id > adc_clinic.id
 Ref: adc_patient_relationship.created_by_id > adc_user.id

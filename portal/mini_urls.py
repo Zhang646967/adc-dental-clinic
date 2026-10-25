@@ -5,8 +5,18 @@ from portal import mini_referrals as referral
 from portal import mini_history as history
 from portal import mini_plans as plans
 from portal import mini_discovery as discovery
+from portal import mini_account as account
 
 urlpatterns = [
+    path('account/local-login/',account.local_login,name='mini_account_local_login'),
+    path('account/',account.profile,name='mini_account_profile'),
+    path('account/phone/',account.phone,name='mini_account_phone'),
+    path('account/unlink/',account.unlink,name='mini_account_unlink'),
+    path('account/password/',account.password_setup,name='mini_account_password'),
+    path('account/activate/',account.activate,name='mini_account_activate'),
+    path('account/enrollment/preview/',account.submit_preview,name='mini_enrollment_preview'),
+    path('account/enrollment/confirm/',account.submit_confirm,name='mini_enrollment_confirm'),
+    path('account/enrollment/<int:pk>/withdraw/',account.withdraw,name='mini_enrollment_withdraw'),
     path('discovery/',discovery.listing,name='mini_public_discovery'),
     path('discovery/services/<int:pk>/',discovery.service,name='mini_public_service'),
     path('plans/',plans.listing,name='mini_plans'),

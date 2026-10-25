@@ -18,6 +18,14 @@ def has_patient_access(user):
     return user.is_authenticated and user.is_active and (PatientAccess.objects.filter(user_id=user.pk,
         is_active=True, patient__is_active=True).exists() or active_grants(user).exists())
 
+
+def has_patient_account(user):
+    """Account authentication survives suspended subject rights; no PATIENT grant."""
+    from accounts.external_models import AccountIdentityEvent
+    return bool(user.is_authenticated and user.is_active and (
+        PatientAccess.objects.filter(user_id=user.pk).exists() or active_grants(user).exists() or
+        AccountIdentityEvent.objects.filter(user_id=user.pk,action='BIND').exists()))
+
 @dataclass(frozen=True)
 class PatientAuthority:
     patient: object

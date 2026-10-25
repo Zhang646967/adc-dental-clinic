@@ -11,9 +11,13 @@ from workspaces.rules import CLINIC_ROLES
 PUBLIC={'system_entry','public_home','public_services','public_service_detail','public_service_guide','public_clinics',
         'login','portal_login','logout','health','mini_session','mini_login','mini_logout','mini_public_discovery','mini_public_service'}
 ROLE_FREE={'select_role','activate_role','own_password_change'}
+PUBLIC.update({'patient_local_login','patient_account','patient_account_activate','patient_enrollment_new','patient_enrollment_edit',
+    'patient_enrollment_submit_confirm','patient_enrollment_withdraw','mini_account_local_login','mini_account_profile','mini_account_phone',
+    'mini_account_unlink','mini_account_password','mini_account_activate','mini_enrollment_preview','mini_enrollment_confirm','mini_enrollment_withdraw'})
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'patient_enrollment_list':{'FRONT_DESK'},'patient_enrollment_detail':{'FRONT_DESK'},'patient_enrollment_review_confirm':{'FRONT_DESK'},
  'branch_directory_maintain':{'MANAGER'},
  'clinical_recalls':{'FRONT_DESK'},'clinical_recall_claim':{'FRONT_DESK'},'clinical_recall_detail':{'FRONT_DESK'},'clinical_recall_action':{'FRONT_DESK'},
  'clinical_labs':{'FRONT_DESK'},'clinical_lab_detail':{'FRONT_DESK'},'clinical_lab_action':{'FRONT_DESK'},

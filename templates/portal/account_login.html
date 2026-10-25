@@ -1,0 +1,2 @@
+{% extends 'portal/account_base.html' %}{% block title %}本地授权体验 · ADC 口腔{% endblock %}{% block content %}
+<p class="eyebrow">LOCAL IDENTITY · 本地替身</p><h1>先登录账号，<br>再核对就诊人。</h1><p class="lede">本地授权用于演练账号流程。微信平台授权尚未接通。</p><section class="account-card"><form method="post">{% csrf_token %}{% include 'portal/account_fields.html' %}<button type="submit" class="button">确认登录或绑定</button></form><p>已有账号时，填写原账号和密码后绑定；不会按手机号合并患者。</p><a href="{% url 'portal_login' %}">返回账号密码登录 →</a></section>{% endblock %}

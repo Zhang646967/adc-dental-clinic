@@ -78,12 +78,17 @@ def validated(form):
 
 def session_data(request):
     data = dict(authenticated=False, csrf_token=get_token(request), read_only=settings.ADC_READ_ONLY,
+        account_authenticated=False,identity_provider='local' if settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local' else 'disabled',
         environment_label=settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
         business_timezone='Asia/Shanghai', today=timezone.localdate().isoformat(),
         last_day=(timezone.localdate()+timedelta(days=14)).isoformat())
     if request.user.is_authenticated:
         ctx = ensure_context(request)
         attach(request, ctx)
+        if ctx.login_channel=='PATIENT':
+            from portal.account_access import account_data
+            try:data.update(account_data(request))
+            except PermissionDenied:pass
         if valid_context(request.user, ctx) and ctx.role == 'PATIENT':
             data.update(authenticated=True,workspace_token=token_for(ctx),workspace_id=str(ctx.pk),subject_revision=ctx.revision,
                 subject_required=False,patient_name='',subject_key=None,acting_capacity='',delegated=False)
@@ -109,14 +114,15 @@ def sign_in(request):
     user = form.get_user()
     with transaction.atomic():
         UserAccount.objects.select_for_update().get(pk=user.pk, is_active=True)
-        if not has_patient_access(user):
+        from portal.account_access import can_account_login
+        if not can_account_login(user):
             raise PermissionDenied
         login(request, user)
         request.session.set_expiry(3600)
         begin_login_workspace(request,channel='PATIENT')
         # This endpoint explicitly selects only the authorized patient role,
         # including for a person who also has an employee role.
-        if request.workspace.role != 'PATIENT':
+        if has_patient_access(user) and request.workspace.role != 'PATIENT':
             apply_role(request, request.workspace, 'PATIENT')
     return result(request, session_data(request))
 
