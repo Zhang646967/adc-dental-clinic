@@ -3,7 +3,21 @@ name: ADC validation
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '课程报告/**'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'RELEASE_CURRENT.md'
+      - 'UPDATE_MANIFEST.json'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '课程报告/**'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'RELEASE_CURRENT.md'
+      - 'UPDATE_MANIFEST.json'
   workflow_dispatch:
     inputs:
       source_commit:
