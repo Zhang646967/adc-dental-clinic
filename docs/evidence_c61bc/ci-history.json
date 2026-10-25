@@ -1,0 +1,41 @@
+{
+  "attempts": [
+    {
+      "commit": "65a5b149d7a05e450df5e8c5ee565f0aa3f10cd6",
+      "run": 40189740075,
+      "result": "FAILED",
+      "reason": "Outdated file-integrity manifest; failed before business regression"
+    },
+    {
+      "commit": "eff3c52a466fefc75bd852f92f07cb0bc00b4b22",
+      "run": 40190320083,
+      "result": "FAILED",
+      "reason": "Manifest included Docker-excluded historical evidence; scope corrected before business regression"
+    },
+    {
+      "commit": "e471bb451ccf95b7f0267fa341ae38b8a3e4b853",
+      "run": 40191121161,
+      "result": "TIMED_OUT",
+      "reason": "Expected SQL-constraint failures logged full uploaded binary and JSON parameters; CI output stalled at a large policy INSERT and reached30minutes"
+    },
+    {
+      "commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+      "run": 40193324784,
+      "result": "TIMED_OUT",
+      "reason": "After SQL log fix,1901of1935 database cases completed without test failure; original30-minute CI limit ended an actively progressing suite"
+    },
+    {
+      "commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+      "workflow_commit": "c9e2151336bb7a12eb5cc64e8937fa98d939f2d0",
+      "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40196305305",
+      "result": "PASSED",
+      "repair": "45-minute controller explicitly checks out the exact application commit and records it in CI; full1117source/1935database suite retained; isolated DB suppresses complete binary SQL statements"
+    }
+  ],
+  "earlier_local_browser_driver_issues": [
+    "An expected cancellation label differed from actual completed wording; assertion corrected and complete five-clinic flow repeated",
+    "A full-page screenshot timed out; viewport captures plus full-page reflow and workflow assertions used",
+    "First final-image login check ran immediately after restart and did not find the form; no business writes started; retained attempt and repeated after HTTP and observation readiness checks"
+  ],
+  "historical_records_retained": true
+}

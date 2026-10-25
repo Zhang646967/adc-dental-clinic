@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "image": "sha256:6a0640d58070b0000a44be514c780165b3bc51f138eda8af787202515de24267",
+  "original_model_groups_preserved": 112,
+  "original_model_rows_and_passwords_preserved": true,
+  "all_original_private_configurations_preserved": 70,
+  "additional_rows_separately_listed": {
+    "auth.Permission": 56,
+    "contenttypes.ContentType": 14,
+    "clinical.SensitiveReadEvent": 12
+  },
+  "new_financial_table_rows": {
+    "insurance.SettlementReview": 0,
+    "insurance.SettlementEvent": 0,
+    "insurance.ReversalOutcome": 0,
+    "insurance.CancellationRequest": 0,
+    "insurance.CancellationReview": 0,
+    "finance.FundIssue": 0,
+    "insurance.SimulationOutcome": 0,
+    "finance.FundAllocationLine": 0,
+    "finance.FundIssueEvent": 0,
+    "finance.FundAllocation": 0,
+    "insurance.SettlementLine": 0,
+    "finance.StatementUse": 0,
+    "finance.FundTransfer": 0,
+    "insurance.SettlementRequest": 0
+  },
+  "additional_read_audits": {
+    "rows": 12,
+    "authorized_read_responses": 9,
+    "denied_read_responses": 3,
+    "actor_role_route_purpose_outcome_and_browser_time_verified": true,
+    "contain_patient_or_clinical_text": false
+  },
+  "existing_independent_finance_accounts_preserved": true,
+  "new_patient_treatment_invoice_or_cash_rows": 0,
+  "immutable_feature_files_compared": 826,
+  "database_container_and_volume_preserved": true,
+  "rc_tag_preserved": true,
+  "formal_report_bytes_equal": true,
+  "post_update_database_encryption_and_archive_verified": true,
+  "post_update_encrypted_configuration_and_retained_private_guide_verified": 72,
+  "after_database_backup_sha256": "b8fd22114fb0efd404e49ecf784bec37c760bac3f3503e543b0b8dad5daf96f7",
+  "after_configuration_backup_sha256": "2ca35ea865a1c4ed2a222487360e2aa1e6921c9de29770e0955d6fc6a4ed7dd3",
+  "six_application_conditions": "HEALTHY",
+  "host_state": "HEALTHY",
+  "fresh_independent_host_samples": [
+    1792935943.791446,
+    1792935973.900154
+  ],
+  "enabled_triggers": 103,
+  "runtime_database_role": "LEGACY_LOOPBACK_RC_OWNER_RETAINED",
+  "historical_UNKNOWN_and_UNDETERMINED_retained": true,
+  "scope": "Protected local C6.1B/C synthetic settlement and fund closure; short fresh samples are not24-hour acceptance; real WeChat, institution interfaces and cloud remain unverified"
+}

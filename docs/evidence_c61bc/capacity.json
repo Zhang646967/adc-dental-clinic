@@ -1,0 +1,95 @@
+{
+  "project": "adc_rc1_68fbc52245c3",
+  "scope": "C6.1B/C five-clinic local HTTP:80% nonmutating reads/previews,20% real state changes; includes signed clinical drafts/recall plus15 independent bank import and allocation cycles. Import previews persist evidence and count as writes. Per-service limits are not a cloud-host qualification",
+  "started_utc": "2026-10-25T12:47:41.650491+00:00",
+  "arrival_mode": "waves",
+  "seconds": 1800,
+  "target_rps": 5,
+  "elapsed_seconds": 1800.006,
+  "wall_elapsed_seconds": 1800.003,
+  "max_offer_gap_seconds": 4.005,
+  "continuity_passed": true,
+  "actual_rps": 5.0,
+  "distinct_users": 20,
+  "clinics": 5,
+  "offered": 9000,
+  "dropped": [],
+  "max_in_flight": 20,
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.529,
+    "max_seconds": 1.1233
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.492,
+    "max_seconds": 1.094
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.566,
+    "max_seconds": 1.1233
+  },
+  "financial_cycles": 15,
+  "warmup_previews": 5,
+  "effect_counts": {
+    "READ": 6152,
+    "FINANCIAL_READ": 150,
+    "RECALL_CONTACT": 900,
+    "PLAN_DRAFT": 810,
+    "SIGNED_PREVIEW": 898,
+    "IMPORT_PREVIEW": 15,
+    "IMPORT_ACCEPT": 15,
+    "FUND_REQUEST": 15,
+    "FUND_REVIEW": 15,
+    "ALLOCATION_REQUEST": 15,
+    "ALLOCATION_REVIEW": 15
+  },
+  "unconfirmed_previews": 3,
+  "http_passed": true,
+  "passed": true,
+  "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "image": "sha256:6a0640d58070b0000a44be514c780165b3bc51f138eda8af787202515de24267",
+  "original_model_groups_preserved": 126,
+  "unchanged_original_money_treatment_appointment_facts": true,
+  "no_new_deadlocks": true,
+  "no_oom_or_restart": true,
+  "resource_samples": 121,
+  "financial_oracle": {
+    "transactions": 15,
+    "independently_reviewed_transfers": 15,
+    "independently_reviewed_allocations": 15,
+    "allocated_cny": "15.00",
+    "unique_source_use": true
+  },
+  "original_18000_untouched": true,
+  "sampled_resources": {
+    "db": {
+      "sampled_max_memory_mib": 75.83,
+      "sampled_max_cpu_percent": 31.44
+    },
+    "web": {
+      "sampled_max_memory_mib": 146.2,
+      "sampled_max_cpu_percent": 82.33
+    },
+    "notification-worker": {
+      "sampled_max_memory_mib": 59.51,
+      "sampled_max_cpu_percent": 1.75
+    },
+    "operations": {
+      "sampled_max_memory_mib": 59.95,
+      "sampled_max_cpu_percent": 1.72
+    },
+    "gateway": {
+      "sampled_max_memory_mib": 15.82,
+      "sampled_max_cpu_percent": 0.89
+    }
+  },
+  "resource_scope": "Periodic samples plus unchanged identities/restart counters; not a continuous high-water mark or a separate cloud machine",
+  "configured_total_memory_mib": 1856,
+  "database_identity_profile": "Legacy loopback RC maintenance identity; independent HTTPS runtime-role gate remains separate",
+  "workload_driver_sha256": "0b5e1377a7405fd8b8ee78b82efb4dbdac081deb25545554407d756fbd61f455"
+}

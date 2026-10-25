@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "image": "sha256:6a0640d58070b0000a44be514c780165b3bc51f138eda8af787202515de24267",
+  "scope": "Original installed system, real Chrome login and GET,390px large text and keyboard. No financial, patient, clinical or configuration writes.",
+  "checks": 18
+}

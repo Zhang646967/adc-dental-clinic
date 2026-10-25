@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "image": "sha256:6a0640d58070b0000a44be514c780165b3bc51f138eda8af787202515de24267",
+  "architecture": "arm64",
+  "immutable_feature_files_compared": 826,
+  "validation_workflow_commit": "c9e2151336bb7a12eb5cc64e8937fa98d939f2d0",
+  "recorded_before_installation": true,
+  "exact_implementation_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40196305305",
+  "exact_source_bundle_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "same_image_Chrome_checks": 359,
+  "clinics": 5,
+  "roles": 7,
+  "independent_financial_oracle": true,
+  "encrypted_restore_tables": 129,
+  "encrypted_restore_evidence": "release-restore.json",
+  "original_copy_upgrade": true,
+  "capacity_seconds": 1800,
+  "capacity_requests": 9000,
+  "capacity_actual_writes": 1800,
+  "runtime_project": "adc_rc1_68fbc52245c3",
+  "port": 18186,
+  "original_instance_not_yet_updated": true,
+  "scope": "Exact identified image and source, full local synthetic settlement/fund closure, actual ER, independent facts, bounded capacity and encrypted recovery",
+  "not_proven": [
+    "real WeChat or phone/ID verification",
+    "real insurance institution",
+    "cloud",
+    "20-clinic business capacity",
+    "24-hour operation",
+    "professional qualification"
+  ]
+}

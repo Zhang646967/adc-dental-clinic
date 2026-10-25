@@ -1,0 +1,15 @@
+{
+  "conclusion": "success",
+  "headSha": "c9e2151336bb7a12eb5cc64e8937fa98d939f2d0",
+  "status": "completed",
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40196305305",
+  "event": "workflow_dispatch",
+  "workflowName": "ADC validation",
+  "tested_source_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "workflow_commit": "c9e2151336bb7a12eb5cc64e8937fa98d939f2d0",
+  "exact_checkout_recorded_in_log": true,
+  "source_rules": 1117,
+  "postgresql_cases": 1935,
+  "log_sha256": "102eecd24d2d50594001cb223b0a8991ff05c60d42b6c611aa834d15efa0180e",
+  "scope": "45-minute workflow explicitly checks out the immutable application commit; only CI workflow/manifest differ from its controller commit; complete original regression is retained"
+}

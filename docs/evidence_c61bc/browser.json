@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
+  "image": "sha256:6a0640d58070b0000a44be514c780165b3bc51f138eda8af787202515de24267",
+  "page_errors": 0,
+  "clinics": 5,
+  "roles": 7,
+  "scope": "Exact-image Chrome, complete synthetic financial workflows,390px large-text and keyboard; real insurance/WeChat not exercised",
+  "checks": 359,
+  "business_workflows": [
+    "five-clinic receipt/refund, independent settlement, unknown original query, batch bank import/allocation, owned discrepancy, partial/full return and cancellation",
+    "all seven roles and current-clinic rejection",
+    "390px large text and keyboard navigation"
+  ],
+  "original_business_records_only_in_isolated_rehearsal": true
+}

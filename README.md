@@ -4,9 +4,9 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**C6.1B/C 源码已实现：原账单模拟结算、基金到账分配、差异跟进和撤销。** 1,935项完整PostgreSQL回归通过；同镜像业务、容量、恢复及原系统更新继续按[专项证据](docs/evidence_c61bc/README.md)执行，尚不标记最终交付。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
+**C6.1B/C 已在本机交付：原账单模拟结算、基金到账分配、差异跟进和撤销。** 准确CI、1,935项PostgreSQL回归、359项浏览器检查、五店二十账号三十分钟容量及129表加密恢复通过，原数据和70份配置保留。[完整证据](docs/evidence_c61bc/README.md)。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
 
-**C6.1A 已在本机交付：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立审阅链、明确单位和待遇历史可核对；准确CI、1,106项规则／1,826项PG回归、67项同镜像浏览器及权限、115表加密恢复和原系统保护更新通过。183页报告与22幅实际ER同步。[本地办理](docs/C61A_LOCAL_GUIDE.md) · [业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [交付证据](docs/evidence_c61a/README.md)。后续结算与基金清算已进入C6.1B/C最终验收。
+**C6.1A 已在本机交付：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立审阅链、明确单位和待遇历史可核对；准确CI、1,106项规则／1,826项PG回归、67项同镜像浏览器及权限、115表加密恢复和原系统保护更新通过。183页报告与22幅实际ER同步。[本地办理](docs/C61A_LOCAL_GUIDE.md) · [业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [交付证据](docs/evidence_c61a/README.md)。本节为资料准备阶段历史；当前资金闭环见C6.1B/C交付。
 
 **C1-WX 已在本机交付：患者账号、联络来源、本人建档与独立前台核验。** 网站／小程序沿用原预约、改期、候补与患者切换，暂停可复核恢复原关联。[执行证据](docs/evidence_c1wx/README.md) · [本地试用](docs/C1WX_LOCAL_GUIDE.md)。真实微信及医保联网另行验收。
 
@@ -28,19 +28,19 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 The wider clinical V2 program continues; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
-**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX及C6.1A本地流程已交付；C6.1B/C本地资金流程已实现并继续最终验收，真实联网另行验收。
+**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX及C6.1A本地流程已交付；C6.1B/C本地资金流程已交付，真实联网另行验收。
 
 **2026-10-23 商业化调研与下一阶段：** [六类成熟牙科系统与诊所业务差距](docs/research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 患者身份与连续诊疗计划](docs/COMMERCIAL_V2_NEXT_STAGE.md)。附 34 项外部来源、16 项需求追踪、24 个待执行验收场景及两幅明确标注为规划的领域关系图。当前实际 ER 与已执行验收保持独立。
 
 **C0.3患者服务验证：** [网站／小程序与交付记录](docs/C03_RELEASE_ACCEPTANCE.md) · [执行证据](docs/evidence_c03/README.md)。已完成1,095项规则、1,474项数据库回归及五店187项跨端检查，修复接诊路径冲突，新增公开页面大字模式，ER与正式报告同步。准确应用提交CI、加密恢复及本机更新已通过，原业务与私有配置保留。
 
-**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C6.1A交付记录为准。
+**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C6.1B/C交付记录为准。
 
 **新增患者服务中心与小程序候补衔接。** [页面与业务说明](docs/B153_PATIENT_SERVICE_CENTRE.md) · [执行证据](docs/evidence_b153/README.md)。
 
 **课程交付：原生微信小程序与教师云端演示。** [小程序工程与本地导入](clients/wechat/README.md)支持课程患者登录、预约、普通／邀约改期、候补登记、邀约处置、取消及历史，复用网站预约数据。[交付安排](docs/COURSE_TEACHER_DELIVERY.md)区分本地联调、微信体验版与云端验收：小程序账号尚未注册，服务器尚未购买，暂不宣称微信或云端已上线。
 
-**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步115表、318条外键、83项触发器，二十二幅ER纳入课程报告；前台继续负责日常排班。
+**B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步129表、352条外键、103项触发器，二十六幅ER纳入课程报告；前台继续负责日常排班。
 
 ## 仓库分类
 
@@ -55,7 +55,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告共183页，包含90项业务用例及1项共享核验、109张表和55幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
+正式报告共193页，包含96项业务用例及1项共享核验、115张表和59幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

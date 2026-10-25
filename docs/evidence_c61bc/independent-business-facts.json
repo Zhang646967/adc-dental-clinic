@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "clinics": 5,
+  "invoices": 10,
+  "financial_totals_cny": {
+    "billed": "1000.00",
+    "patient_cash": "200.00",
+    "personal_account": "100",
+    "fund_responsibility": "250",
+    "remaining": "450",
+    "bank_net": "250"
+  },
+  "raw_cash_ledger_independently_summed": true,
+  "retained_versions_and_one_original_result": true,
+  "unknown_settlement_and_reversal_history_retained": true,
+  "raw_imported_csv_retained": true,
+  "no_new_treatment_or_invoice": true,
+  "independent_reviews": true,
+  "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff"
+}
