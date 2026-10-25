@@ -11,6 +11,7 @@ from scheduling.models import Visit
 from scheduling.resource_models import ResourcePolicy,ServicePresentation
 from workspaces.models import WorkspaceContext
 from scripts.course_branch_network import prepare_network
+from accounts.models import RoleAssignment
 
 
 class CourseNetworkTests(FixtureMixin,TransactionTestCase):
@@ -46,3 +47,26 @@ class CourseNetworkTests(FixtureMixin,TransactionTestCase):
         with self.assertRaises(RuleError):self.run_preparation()
         self.assertEqual(Clinic.objects.count(),2)
         self.assertFalse(ClinicDirectory.objects.exists())
+
+    @patch.dict('os.environ',{'ADC_RC_SYNTHETIC':'1'})
+    def test_prepared_original_clinics_retain_their_existing_service_profile_rows(self):
+        from scripts.course_resources import prepare_clinic
+        from scheduling.resource_models import BookingService
+        original_ids=[]
+        for clinic,dentist in [(self.a,self.d1),(self.b,self.d2)]:
+            RoleAssignment.objects.get_or_create(user=self.manager,role='MANAGER',scope_kind='CLINIC',clinic=clinic)
+            self.manager._adc_workspace=WorkspaceContext.objects.create(user=self.manager,role='MANAGER',clinic=clinic,login_channel='STAFF')
+            prepare_clinic(actor=self.manager,clinic_id=clinic.pk,dentist_ids=[dentist.pk])
+            for service in BookingService.objects.filter(department__clinic=clinic):
+                profile=ServicePresentation.objects.create(service=service,title='原已发布服务',summary='已有资料',
+                    suitable_for='已有适用说明',visit_content='已有包含内容',limitations='已有范围',preparation='已有准备',
+                    fee_note='费用经实际评估',is_published=True)
+                original_ids.append((profile.pk,service.pk))
+        self.run_preparation()
+        self.assertEqual(ServicePresentation.objects.filter(is_published=True).count(),16)
+        for pk,service in original_ids:
+            current=ServicePresentation.objects.get(pk=pk)
+            self.assertEqual(current.service_id,service);self.assertTrue(current.is_published)
+            self.assertNotEqual(current.title,'原已发布服务')
+        self.assertEqual(ClinicDirectory.objects.count(),20)
+        self.assertFalse(Visit.objects.exists());self.assertFalse(Invoice.objects.exists())

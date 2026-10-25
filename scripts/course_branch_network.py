@@ -49,7 +49,7 @@ def prepare_network(*,technical_actor,operator_password,manager,frontdesk,
     from registry.directory_services import prepare_registration,confirm_directory_change
     from registry.branch_services import prepare_directory,confirm_directory
     from scheduling.resource_config import prepare_config,confirm_config
-    from scheduling.resource_models import ResourcePolicy,BookingService
+    from scheduling.resource_models import ResourcePolicy,BookingService,ServicePresentation
     from scheduling.models import AvailabilitySlot
     from scheduling.slot_creation import prepare_slot_creation,confirm_slot_creation
     from scripts.course_resources import prepare_clinic
@@ -89,7 +89,8 @@ def prepare_network(*,technical_actor,operator_password,manager,frontdesk,
             clinic=Clinic.objects.get(pk=action.object_id)
         grant(manager,'MANAGER',clinic.pk);workspace(manager,'MANAGER',clinic.pk)
         def config(kind,fields=None):
-            p=prepare_config(actor=manager,kind=kind,fields=fields)
+            target=ServicePresentation.objects.filter(service_id=fields['service']).values_list('pk',flat=True).first() if kind=='service_profile' else None
+            p=prepare_config(actor=manager,kind=kind,fields=fields,target=target)
             action,_=confirm_config(actor=manager,proposal_token=p['proposal_token'],confirmed=True)
             return action.result.get('id')
         if index<4:
