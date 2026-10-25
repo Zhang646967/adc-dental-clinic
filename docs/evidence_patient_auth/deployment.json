@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "application_commit": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+  "application_image": "sha256:66026a4c3eee2a9ae9cf5df36af3d4a0b3645cf3003d63a06c0fb93f990d36b4",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40203599436",
+  "project": "adc_g4_de62b0730edd",
+  "old_model_groups_preserved": 126,
+  "old_rows_and_passwords_preserved": true,
+  "new_sms_table_empty_before_acceptance": true,
+  "permission_rows_added": 4,
+  "content_type_rows_added": 1,
+  "database_and_volume_preserved": true,
+  "original_local_system_modified": false,
+  "encrypted_preupdate_backup_verified": true,
+  "backup_sha256": "0a70613c31ca2402af53bc7343f8cca36b6a6e105cac2e278bf8f7e44c104b8a",
+  "six_conditions": "HEALTHY",
+  "prior_observations_archived": true,
+  "public_browser_acceptance_pending": true,
+  "startup_status_refinement": "Treat operations_status exit3 as a recorded startup UNKNOWN sample, then wait for fresh healthy conditions; initial stopped installer retained."
+}

@@ -1,10 +1,10 @@
 {
-  "target": "Patient WeChat/SMS authentication and independent teacher HTTPS trial candidate",
+  "target": "Verified synthetic teacher HTTPS trial and patient authentication adapters",
   "parent": "0.9.0-alpha.10",
   "supported_source": "Original v0.7 cumulative SOURCE COPY, or complete alpha.10 source. Never apply over the running instance. Data upgrade is a separate trusted-copy validation.",
   "scope": "Declared application/config/tests/docs present in the Docker build. Runtime evidence directories and logs excluded here; full archive CHECKSUMS.sha256 covers them. Hashes detect difference, not publisher authenticity.",
-  "schema_change": "Preserve60 previous migration files; accounts0004 adds SMS challenges and extends explicit identity/phone sources;61migrations,130SQLtables,353foreign keys,103triggers.",
-  "user_release_validation": "1120source rules,67focused PostgreSQL identity cases and218native source checks plus22account handler cases pass. Exact application CI and updated public browser acceptance are required before the new authentication image is installed. Teacher URL currently serves the previous accepted application on newly generated synthetic data.",
+  "schema_change": "Preserve60 prior migration bytes;61current application migrations,130SQLtables,353FKs,103enabled triggers.",
+  "user_release_validation": "Exact application CI1120source/1970PostgreSQL cases,67focused identity cases,33real public Chrome checks,218native source checks plus22account handlers and19offline-compiled pages pass.130-table1957-row encrypted independent restore passes. Real WeChat/SMS and independent cloud remain pending.",
   "removed_from_original_v07": [],
   "files": {
     ".dockerignore": "45494731fef1b0ed53133c336f718bb0bc5984552b66ab41f96cbc674dc5a121",
@@ -16,15 +16,15 @@
     ".gitignore": "ed7bd768e062178375b08bb8e79bfaf7b7093b06ebfb068f7c796992fca2551e",
     "ADC_MIGRATION_MAC.sh": "9c1392289cc2a5696a92d9f31549ce328787e7997b0fdfad1cf16b9c44d34675",
     "ADC_MIGRATION_WINDOWS.cmd": "58c64b71505dc4bb683db74e779dd687d51e2d6004e3bb50c88a4449b4cd1df6",
-    "AGENTS.md": "934c7fe96725ed64fd1d6021af83e6efc57dc90554c3c9465d49905543159518",
+    "AGENTS.md": "f7933a012e132aa70f4698e1fd6577e5d8962fd24e27008c46c90874c6464009",
     "AI_ENV.example": "3670d94246ca1685104cfce74e12da32fea6b935b2fc976a098cefb85e44dcb6",
     "Dockerfile": "9ceb745273173907830fa75406001ca061bbb87aaecaaba0a5739d4eec5bef5f",
     "Dockerfile.production": "cd7cca900452474a53e36278f34fe1c1a1cbda1de5e6380b35bca00cc2d39822",
     "PATIENT_AUTH_ENV.example": "e8be6993564fadfa74ae86eb691b30d7383f83104f1642e262558d31d66d8e40",
     "RC_MACOS.sh": "3c2a66737dc9f5f7e57476264382375b3433edcce02ab0f8b6ae6b217e5186f2",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "f715f0d795581c71596413638141800e9c91aa773057eb50913b6c72228af294",
-    "RELEASE_CURRENT.md": "ce5e1b88c4fee49e1e2be38e26709e149cc4579e208f76377baefdb92fe34e6e",
+    "README.md": "ee9fcbf8d0929d98e35b6df23b870c82b79d57acd64429f1059e3d38905b69d9",
+    "RELEASE_CURRENT.md": "bf972c688bbb5123cc179a027f209d6d404ac6241c6fc89b3e6b250b343fbda4",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
@@ -392,7 +392,7 @@
     "docs/RC_AB_DELIVERY.md": "8d7169507b3e7e882c21356bde2e476dfc223fe3e55cadae847471438610c612",
     "docs/RC_ACCEPTANCE_RECORD.json": "029ad143ae857de4f72bf636642008df4a781d9b757b114cce9739503425f381",
     "docs/RC_WINDOWS_ACCEPTANCE.md": "df8cf997949f92aa8b3b70b4062ef89c38e46f2d8d509ebdd4991fd0f60dc59d",
-    "docs/README.md": "31adff2c9f6c9cbadc0fd2139c2e7fbfe7892442af51a9bd78a29ac64eeb8608",
+    "docs/README.md": "31f6d40d4792727629c63a615af6e8e7e487323c9e168ab822476fc9122c59d1",
     "docs/RELEASE_V09_ALPHA1.md": "afd80562658f9ea144aefb127d5872e10d19f9732dc428154576a4e0aa95ac8a",
     "docs/RELEASE_v0.7.md": "6d6eccdf061d58d7eedc10037113e3a48c75343252c24cb94521c491b0dabce2",
     "docs/RELEASE_v0.9a10.md": "b2867c805a07d2d5379016ba61f3ff7a54b730e6104751b5ce3bc7a9d6a1e2ee",
@@ -420,7 +420,7 @@
     "docs/UX2_NATIVE_WORKFLOWS.md": "659a7b06980e5e45ce85cc81a5b6049c5ff20adf7ba5621368c6621dcb004ea3",
     "docs/V1_SCOPE_AND_REMAINING.md": "240864f7578eb2938f7f6936cd0b19fa4ee216b0d7251d9b5674e7a18efb3f23",
     "docs/VERIFY_AND_UPGRADE_09A3.md": "10ce0deb36b6bc00eb82b82c56b3d0f4165d33e2751fb83d6b5da7fcb63b0742",
-    "docs/WECHAT_SMS_TEACHER_TEST.md": "a51fe0a839ed28fe7ad9e5fbe969873f4f8fad15e21d448eb29acb07c66df87d",
+    "docs/WECHAT_SMS_TEACHER_TEST.md": "67500eb4352308966e5310c41ffbe2106fc6f26a2de68f367de35690e3f26eda",
     "docs/WORKER_PROCESS_ACCEPTANCE.md": "3f52ed32c7c04e8aeddb9eba66e2fb32f522ad4f4baf811ffc93c12408212150",
     "docs/archive_v0.3/AGENTS.md": "f6fef724870d7620ba41b0d186f6c9bef3c781513b8fa70cb114c1f7ed5a1f51",
     "docs/archive_v0.3/FIELD_CATALOG.md": "781dcc5802f730632b53e43dd7f44acbfae8bcb0ece3ce4b2072777be602b078",
@@ -1087,6 +1087,16 @@
     "docs/evidence_multiclinic/acceptance.json": "6fe619245cef2ab020cf245547fe973bd94048ce8363b113e697fcc0c07dac4b",
     "docs/evidence_multiclinic/multiclinic-daily.png": "f61378ba0a75f79d12c69c2a1bae724fdd637915d2646db48fe693bb12269408",
     "docs/evidence_multiclinic/multiclinic-patients.png": "0a8b73276359e2f737678d383301e21fdc7db2eedc06245b8e5b255e5af7d7e4",
+    "docs/evidence_patient_auth/README.md": "0adb8ed029f5a3d6a0153aabe613a888a2519a715dffb444e57ed685ef60db54",
+    "docs/evidence_patient_auth/application-ci.json": "5311493d0c6e6a5b6a9d65ade5108cdb5c894fe5b5832be7b2378426ae2b7466",
+    "docs/evidence_patient_auth/browser.json": "9b7c0e5e832d7acb6bfd94b9b97bd549fe25c21cbe085cff73c95112393188dc",
+    "docs/evidence_patient_auth/business-facts.json": "bb732ce1e20291c6ed2f0e951c47d7e6de2cf22f77549c8d0331f2d7170c6582",
+    "docs/evidence_patient_auth/deployment.json": "8c63672fe057590b370134737dc5308e504147bb98d814757aa07bd22a73f4e0",
+    "docs/evidence_patient_auth/history.json": "76a107c83d3846ee14e8c8bb6f2ecd3c8734e228173978ce47e0d69dd5ef7ae6",
+    "docs/evidence_patient_auth/native.json": "9813f8dd98e0672ff9a9274d9b80214d53720232230f67aec885232b8ea73163",
+    "docs/evidence_patient_auth/recovery.json": "bf05f411e4845875024a5499362b1e5dcaf94dea13150453c335e8dfd51bc928",
+    "docs/evidence_patient_auth/release.json": "91138ae8a20587a052f3ce69ce9f50074680e9d8302b097367e365de09d3492b",
+    "docs/evidence_patient_auth/synthetic-data.json": "315d147c164ca3756d8cd21a48645eaabec2708ca52d354c43d4115e7e21b27c",
     "docs/evidence_r21/README.md": "719ad05de952b4bdb25778f47b322b7a7894f33b736b127d34e573e0516f40e7",
     "docs/evidence_r21/acceptance.json": "3a417137af78a0441c10bb9429b7fb19c0de6757b38c2b51c9ecea787d01e780",
     "docs/evidence_r21/delivery.json": "04eec75e5623be4b11b535c7f5022c4835d17b1415098f9f93e896e6634f2546",
@@ -2539,7 +2549,7 @@
     "课程报告/课程报告_张加良_8210241102.pdf": "770e0f329f3ddc0756c10b1726c23b0bebb48b55a706db0cfabc5ee5ee96f03f"
   },
   "host_migration": "macOS migration authorized 2026-10-12; original Windows host reset; source baseline preserved by tag v1.0.0-rc.1. No previous database backup was supplied.",
-  "documentation_update": "Actual account/OTP ER,field dictionary and teacher/authentication guide updated. Formal193-page C6.1 report retains its prior dated scope.",
+  "documentation_update": "Updated authentication ER,field catalogue,private teacher guide and public acceptance records. Formal193-page C6.1 report retains its dated baseline.",
   "historical_metadata_b14": {
     "schema_change": "B1.4 reuses the existing unique visit successor and portal confirmation receipts. All 39 migration files remain unchanged.",
     "user_release_validation": "Patient self-rescheduling, retained offer acceptance and cancellation follow-up; current execution evidence under docs/evidence_b14."
@@ -2566,9 +2576,10 @@
     "documentation_update": "183-page formal report,90business use cases plus SF-01,109tables,55figures,22actualERs;375 prior substantive fields and39 original images retained. Stable filenames."
   },
   "documentation_only_followup": {
-    "application_commit": "bc9d02837eba0c5f4b987b893d9f6af1ad577aff",
-    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40196305305",
-    "runtime_image": "sha256:6a0640d58070b0000a44be514c780165b3bc51f138eda8af787202515de24267",
-    "scope": "Delivery evidence and report navigation; application image and business feature files remain unchanged. CI controller uses an explicit source SHA; documentation integrity is a separate job."
+    "application_commit": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40203599436",
+    "runtime_image": "sha256:66026a4c3eee2a9ae9cf5df36af3d4a0b3645cf3003d63a06c0fb93f990d36b4",
+    "teacher_url": "https://courier-block-salon-festival.trycloudflare.com",
+    "scope": "Documentation only after exact application acceptance. Runtime code/image remain the accepted commit; new public release is an independent generated synthetic teacher instance."
   }
 }

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "one_appointment_and_one_receipt_after_repeat": true,
+  "frontdesk_approved_same_account": true,
+  "patient_employee_grants": 0,
+  "old_phone_login_released": true,
+  "new_phone_has_single_owner": true,
+  "native_first_login_has_no_chart": true,
+  "treatment_invoice_and_cash_rows": 0,
+  "real_wechat_identities_created": 0,
+  "real_sms_sent": false,
+  "wrong_attempt_retained": true
+}

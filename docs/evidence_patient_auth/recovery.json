@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "application_commit": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+  "tables": 130,
+  "rows": 1957,
+  "all_table_rows_including_sessions_and_contexts_equal": true,
+  "enabled_trigger_definitions_and_states_equal": 103,
+  "independent_empty_database": true,
+  "restore_seconds_after_empty_database_ready": 12.338,
+  "same_version_migration_then_data_restore": true,
+  "accounts_permissions_phone_binding_enrollment_booking_and_otp_history_equal": true,
+  "source_during_dump_unchanged": true,
+  "configuration_and_private_account_files": 13,
+  "encrypted_configuration_decryption_verified": true,
+  "database_backup_sha256": "4cb4bd0a39e5d2e646454dcf56535b569b46b2a87c7311a8ec33e10160e2a864",
+  "config_backup_sha256": "b280328c9a06e256696e52002bcdbedc7ed8a7f971c8665f892686ad651752ec",
+  "structural_equivalence_scope": "Same-version migration path; arbitrary equivalent-DDL automatic comparison limitation retained.",
+  "scope": "Independent synthetic teacher trial recovery, not actual cloud or production operating acceptance"
+}

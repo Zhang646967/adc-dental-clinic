@@ -1,0 +1,142 @@
+{
+  "passed": true,
+  "url": "https://courier-block-salon-festival.trycloudflare.com",
+  "application_commit": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+  "image": "sha256:66026a4c3eee2a9ae9cf5df36af3d4a0b3645cf3003d63a06c0fb93f990d36b4",
+  "scope": "Real public TLS and browser workflows over independent generated synthetic data. SMS demo only; no real WeChat/SMS/provider call or mainland availability claim.",
+  "checks": 33,
+  "executed_checks": [
+    {
+      "name": "Updated patient login over valid public TLS",
+      "passed": true
+    },
+    {
+      "name": "SMS registration entry visible",
+      "passed": true
+    },
+    {
+      "name": "Unconfigured real WeChat never pretends to log in",
+      "passed": true
+    },
+    {
+      "name": "Public OTP sending requires CSRF",
+      "passed": true
+    },
+    {
+      "name": "Synthetic delivery clearly labelled 00000000531",
+      "passed": true
+    },
+    {
+      "name": "Incorrect OTP leaves account unregistered",
+      "passed": true
+    },
+    {
+      "name": "Public synthetic registration reaches own account",
+      "passed": true
+    },
+    {
+      "name": "Registration grants no patient chart",
+      "passed": true
+    },
+    {
+      "name": "Public session has Secure and HttpOnly",
+      "passed": true
+    },
+    {
+      "name": "Synthetic delivery clearly labelled 00000000532",
+      "passed": true
+    },
+    {
+      "name": "Changing own login phone retains account",
+      "passed": true
+    },
+    {
+      "name": "New phone has explicit synthetic provenance",
+      "passed": true
+    },
+    {
+      "name": "Old phone login identity is released",
+      "passed": true
+    },
+    {
+      "name": "Patient sees complete enrollment preview",
+      "passed": true
+    },
+    {
+      "name": "Enrollment waits for independent front desk",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login front_a",
+      "passed": true
+    },
+    {
+      "name": "Front desk independently approves new chart",
+      "passed": true
+    },
+    {
+      "name": "Patient explicitly activates original patient channel",
+      "passed": true
+    },
+    {
+      "name": "Newly verified patient sees shared resource candidates",
+      "passed": true
+    },
+    {
+      "name": "Confirmed appointment reaches its retained result",
+      "passed": true
+    },
+    {
+      "name": "Repeated appointment confirmation returns same result",
+      "passed": true
+    },
+    {
+      "name": "Patient cannot enter staff fund allocation",
+      "passed": true
+    },
+    {
+      "name": "Own account reflows at390px large text",
+      "passed": true
+    },
+    {
+      "name": "Keyboard focus remains usable",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login doctor_a",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login manager_a",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login hq_demo",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login finance_demo",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login teacher_finance_review",
+      "passed": true
+    },
+    {
+      "name": "Assigned role login tech_demo",
+      "passed": true
+    },
+    {
+      "name": "Native API returns labelled synthetic challenge",
+      "passed": true
+    },
+    {
+      "name": "Native registration shares account rules",
+      "passed": true
+    },
+    {
+      "name": "Unconfigured real WeChat refuses without an identity effect",
+      "passed": true
+    }
+  ]
+}

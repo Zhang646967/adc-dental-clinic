@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "generated_patients": 4,
+  "generated_dentists": 4,
+  "synthetic_branches": 20,
+  "bookable_branches": 4,
+  "all_patient_names_exact_synthetic_constants": true,
+  "all_contact_phones_synthetic": true,
+  "all_emails_blank_or_example_invalid": true,
+  "clinical_treatment_invoice_and_cash_records": 0,
+  "original_database_read": false,
+  "original_dump_or_files_imported": false
+}

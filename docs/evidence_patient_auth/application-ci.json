@@ -1,0 +1,20 @@
+{
+  "conclusion": "success",
+  "headSha": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+  "status": "completed",
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40203599436",
+  "source_rules": 1120,
+  "postgresql_cases": 1970,
+  "logged_source_commit": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+  "log_proof": {
+    "application_commit": "fb4fe431d49aa8c6b808770218c2fe1491314f40",
+    "workflow_run": 40203599436,
+    "job_id": 121199744731,
+    "source_rules": 1120,
+    "postgresql_cases": 1970,
+    "all_gates_passed": true,
+    "log_characters": 1896235,
+    "verified_source": "GitHub plugin decoded job log",
+    "raw_log_retained_by_github": true
+  }
+}

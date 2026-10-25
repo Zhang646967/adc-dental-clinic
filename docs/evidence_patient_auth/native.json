@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "source_checks": 218,
+  "account_handler_cases": 22,
+  "official_offline_compiler": {
+    "status": "passed",
+    "wxml_pages": 19,
+    "wxss_files": 1,
+    "scope": "Official offline syntax only; not an IDE preview or WeChat runtime"
+  },
+  "scope": "Source/transport and actual Page handlers with mocked APIs; not WeChat runtime, device or real authorization"
+}
