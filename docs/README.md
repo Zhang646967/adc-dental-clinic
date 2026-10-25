@@ -6,7 +6,9 @@
 
 当前产品方向：[商业V2总计划](COMMERCIAL_V2_MASTER_PLAN.md) → [代码与证据基线](COMMERCIAL_V2_BASELINE.md) → [分批需求及验收](COMMERCIAL_V2_BACKLOG.json)。首发采用单连锁独立部署，完整诊疗替代纳入目标；课程报告与旧执行记录继续作为来源保留。
 
-最新规划（2026-10-23）：[Open Dental 等六类系统调研](research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 身份与连续诊疗](COMMERCIAL_V2_NEXT_STAGE.md) → [需求与验收追踪](research/NEXT_STAGE_TRACEABILITY.json)。[来源登记](research/dental_study_sources.json)区分官方手册、厂商声明、调查与法规；[规划模型](research/MODEL_NOTES.md)不替代实际数据库 ER。
+最新规划（2026-10-24）：[中国患者入口、连锁布局与医保研究](research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4找店、C1-WX身份与C6医保实施安排](PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。含八省会二十店合成设计、14项需求验收与[官方来源登记](research/china_patient_access_sources.json)，状态为PLANNED。
+
+前阶段研究（2026-10-23）：[Open Dental 等六类系统调研](research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 身份与连续诊疗](COMMERCIAL_V2_NEXT_STAGE.md) → [需求与验收追踪](research/NEXT_STAGE_TRACEABILITY.json)。[来源登记](research/dental_study_sources.json)区分官方手册、厂商声明、调查与法规；[规划模型](research/MODEL_NOTES.md)不替代实际数据库 ER。
 
 当前交付 → 业务与设计 → 运行与验证 → 历史来源。课程报告请从 [PDF](../课程报告/课程报告_张加良_8210241102.pdf)、[Word](../课程报告/课程报告_张加良_8210241102.docx) 或 [报告目录](../课程报告/README.md) 直接进入。
 

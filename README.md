@@ -14,6 +14,8 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 The wider clinical V2 program continues; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
+**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，拟采用含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。此项为规划，当前交付仍以C2.3证据为准。
+
 **2026-10-23 商业化调研与下一阶段：** [六类成熟牙科系统与诊所业务差距](docs/research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 患者身份与连续诊疗计划](docs/COMMERCIAL_V2_NEXT_STAGE.md)。附 34 项外部来源、16 项需求追踪、24 个待执行验收场景及两幅明确标注为规划的领域关系图。当前实际 ER 与已执行验收保持独立。
 
 **C0.3患者服务验证：** [网站／小程序与交付记录](docs/C03_RELEASE_ACCEPTANCE.md) · [执行证据](docs/evidence_c03/README.md)。已完成1,095项规则、1,474项数据库回归及五店187项跨端检查，修复接诊路径冲突，新增公开页面大字模式，ER与正式报告同步。准确应用提交CI、加密恢复及本机更新已通过，原业务与私有配置保留。

@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-24",
+  "scope": "planning_documents_only",
+  "baseline_commit": "dba73a354ff66d596668e632b308db5afbf1d2cb",
+  "status": "PLANNED",
+  "checks": {
+    "registered_primary_sources": 14,
+    "study_external_links_match_registry": "PASS",
+    "local_document_links": "PASS",
+    "planned_capitals": 8,
+    "planned_synthetic_clinics": 20,
+    "unique_requirement_scenarios": 14,
+    "actual_ER_and_formal_report": "unchanged_from_baseline",
+    "whitespace": "PASS"
+  },
+  "application_migrations_or_business_writes": "none",
+  "new_functional_acceptance": "NOT_RUN",
+  "file_sha256": {
+    "README.md": "672ffd39c185f4293963b9a8036bd55ab6e169a0c671cae783547a980e5c4bbb",
+    "docs/README.md": "6fd9622a8306706194b2a983a435d91784bebc395f26ba790ae5d0a6ff4c514d",
+    "docs/COMMERCIAL_V2_MASTER_PLAN.md": "18e85ebbd6b885821bb030d0bb8f0890ecedefcb2007c2be317a2a2c23bdec20",
+    "docs/COMMERCIAL_V2_NEXT_STAGE.md": "db62f359554584b6f6cc2ea73fc872351880432eedb9fa9397c6e9fec523000d",
+    "docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md": "6c6cdaa05b8417eeca04f21d882a2a9b0813a58b7c92e92b8a417ed0d6b6403e",
+    "docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md": "8ebeed1f33502b3f9896fb8bf15afc737f8780a6e5d9390a675cd681f7e4b5fc",
+    "docs/research/china_patient_access_sources.json": "3f6b80747992536cd1b68a91c93b64de97c9de024216d12bbe2b8c516a6d6e09"
+  }
+}

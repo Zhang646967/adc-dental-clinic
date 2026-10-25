@@ -1,0 +1,125 @@
+{
+  "title": "中国口腔连锁患者入口与医保业务研究来源",
+  "accessed_on": "2026-10-24",
+  "source_baseline": "dba73a354ff66d596668e632b308db5afbf1d2cb",
+  "scope": "公开资料和源码核对；方案为 PLANNED，不是选址、平台授权或医保接口验收",
+  "sources": [
+    {
+      "id": "CN-PRIVACY",
+      "title": "中华人民共和国个人信息保护法",
+      "url": "https://www.stats.gov.cn/gk/tjfg/xgfxfg/202503/t20250310_1958923.html",
+      "kind": "official_legal_text",
+      "read_scope": "第6、16、28至31条；数据必要性、服务与敏感信息规则",
+      "limitation": "2021年法律的官方转载；具体处理活动仍需按实际场景确定"
+    },
+    {
+      "id": "WX-LOGIN",
+      "title": "腾讯 OneID 微信小程序登录 API 模式",
+      "url": "https://cloud.tencent.com.cn/document/product/1441/68677",
+      "kind": "official_provider_documentation",
+      "read_scope": "临时凭证、OpenID/UnionID 与独立 phone_code 参数",
+      "limitation": "OneID 接入说明，不要求 ADC 采用 OneID，也不证明取得身份证号"
+    },
+    {
+      "id": "WX-PHONE",
+      "title": "腾讯云微搭登录用户客服模版",
+      "url": "https://cloud.tencent.com/document/product/1301/90227",
+      "kind": "official_provider_documentation",
+      "read_scope": "非个人认证主体准备、用户授权手机号及用户数据种类",
+      "limitation": "页面更新于2023年；实际资格及配额以注册后平台现行规则核验"
+    },
+    {
+      "id": "WX-VERIFY",
+      "title": "腾讯云人脸核身微信小程序接入总指引",
+      "url": "https://cloud.tencent.com/document/product/1007/112653",
+      "kind": "official_provider_documentation",
+      "read_scope": "独立核验流程、特定医疗主体要求、身份证 OCR 及结果查询",
+      "limitation": "仅对应此产品和接入模式，不代表所有核验产品统一准入条件"
+    },
+    {
+      "id": "MAP-COORDINATES",
+      "title": "腾讯位置服务小程序地图快速开始与最佳实践",
+      "url": "https://github.com/TencentLBS/tencentmap-miniprogram-skill/blob/main/quick_start_and_best_practices.md",
+      "kind": "official_provider_repository",
+      "read_scope": "地图坐标系说明及 wx.getLocation 的 GCJ-02 用法",
+      "limitation": "技术示例；不采用强制或持续定位建议，实际接口权限另行核验"
+    },
+    {
+      "id": "CHAIN-TONGCE",
+      "title": "通策医疗2025年年度报告",
+      "url": "https://static.cninfo.com.cn/finalpage/2026-04-18/1225117888.PDF",
+      "kind": "issuer_regulatory_filing",
+      "read_scope": "PDF第8至10页：区域总院与分院、2025年末89家运营医疗机构",
+      "limitation": "公司对应时点披露；不作为当前全国排名或经营效果独立验证"
+    },
+    {
+      "id": "CHAIN-ARRAIL-2025",
+      "title": "瑞尔集团2024至2025年度报告",
+      "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2025/0725/2025072500879.pdf",
+      "kind": "issuer_regulatory_filing",
+      "read_scope": "PDF第25至27页：品牌定位、居住区服务点、2025年3月末15城118家门店",
+      "limitation": "历史数量，不作为2026年当前网络数量或独立医疗质量证明"
+    },
+    {
+      "id": "CHAIN-ARRAIL-2026",
+      "title": "瑞尔集团季度更新及继续暂停买卖",
+      "url": "https://www.hkexnews.hk/listedco/listconews/sehk/2026/0601/2026060103473_c.pdf",
+      "kind": "issuer_operational_update",
+      "read_scope": "PDF第3页：2026年6月1日111个服务点，其中100家诊所及11家医院",
+      "limitation": "截至公告日运营披露，不是10月24日现场营业核验；不作投资判断"
+    },
+    {
+      "id": "LOCAL-CHANGSHA",
+      "title": "长沙市口腔医院地理位置",
+      "url": "https://www.csskqyy.cn/yygk/diliwz/",
+      "kind": "official_provider_directory",
+      "read_scope": "友谊路、五一路、梅溪湖、星沙、八方等公开位置和电话",
+      "limitation": "正文与页脚名单不一致；不计算在营总数，不复制电话至 ADC 合成门店"
+    },
+    {
+      "id": "INS-DESIGNATION",
+      "title": "医疗机构医疗保障定点管理暂行办法",
+      "url": "https://www.nhsa.gov.cn/art/2021/1/8/art_37_4243.html",
+      "kind": "official_regulation",
+      "read_scope": "第5至6、12、14至15、21、24、34条：准入、编码对接、合理收费及信息责任",
+      "limitation": "国家框架；具体机构仍须取得属地协议和实际接入资格"
+    },
+    {
+      "id": "INS-CHANGZHOU",
+      "title": "常州市十七届人大五次会议代表建议第026号答复",
+      "url": "https://www.changzhou.gov.cn/gi_news/25178399693317",
+      "kind": "official_local_government_response",
+      "read_scope": "2026年6月29日答复、7月14日公开：211家定点民营口腔机构及当地准入规划",
+      "limitation": "常州例子，不代表长沙准入数量或报销规则"
+    },
+    {
+      "id": "INS-FUJIAN",
+      "title": "福建医保关于牙科费用统筹基金支付的说明",
+      "url": "https://ybj.fj.gov.cn/bsfw/syldylbzfw/ybbnx/202604/t20260401_7118262.htm",
+      "kind": "official_policy_explanation",
+      "read_scope": "页面标注2026年2月27日；治疗性费用与正畸、修复、美白等的区别",
+      "limitation": "地方解释；湖南项目仍按湖南及长沙有效目录核验"
+    },
+    {
+      "id": "INS-HUNAN-2026",
+      "title": "湖南关于确定九大类医疗服务项目医保支付政策的通知",
+      "url": "https://ybj.hunan.gov.cn/ybj/first113541/firstF/f3113607/202603/t20260331_33945644.html",
+      "kind": "official_local_policy",
+      "read_scope": "湘医保发〔2026〕12号正文：甲乙类、分担关系及口腔自2026年6月1日起执行",
+      "limitation": "附件逐项口腔支付表尚未校验；不以九大类汇总计算口腔数量或个人报销比例"
+    },
+    {
+      "id": "INS-IMPLANT-PRICES",
+      "title": "国家医保局口腔种植医疗服务收费和耗材价格专项治理通知",
+      "url": "https://www.nhsa.gov.cn/art/2022/9/8/art_104_9041.html?type=bgxz",
+      "kind": "official_pricing_policy",
+      "read_scope": "2022年9月8日公布：收费、耗材、价格及采购治理",
+      "limitation": "价格治理不是基金待遇；不以此设定2026年具体价格或覆盖范围"
+    }
+  ],
+  "retrieval_notes": [
+    "微信开放文档直接访问未成功，采用腾讯官方接入文档交叉说明；执行前核对实际平台接口。",
+    "拜博门店页未稳定读取，不将索引或第三方门店数量作为定量结论。",
+    "八城二十店、拟定名称及1000元金额拆分为合成设计。"
+  ]
+}

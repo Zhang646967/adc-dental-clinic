@@ -1,5 +1,7 @@
 # Next stage: trustworthy identity and continuous dental care
 
+2026-10-24 后续安排：[患者门店发现、微信账号及中国医保计划](PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。其中C0.4、C1-WX与C6.1–C6.2均为待实施扩展；本页C1–C2既有交付及剩余临床要求继续按各自证据解释。
+
 Clinic contract → verified person and authority → structured encounter → staged care → recall/readiness → measured acceptance.
 
 **下一阶段目标：让同一患者跨多次就诊得到连续、可追溯的服务，让前台知道下一步应由谁、在何时、完成什么。**
