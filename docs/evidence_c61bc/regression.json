@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "source": "immutable checkpoint-3",
+  "source_parent": "bb7eb14c9e98ed94c26a79822805dbed9f6093ff",
+  "postgresql_tests": 1935,
+  "test_seconds": 694.952,
+  "total_seconds": 707.404,
+  "source_rules": 1117,
+  "targeted_pg_http": 150,
+  "old_migrations_preserved": 56,
+  "new_migrations": 4,
+  "scope": "Independent synthetic PostgreSQL; not final exact-image release",
+  "known_initial_failures": "Two new fixture cases reused the same occupied appointment slot; corrected fixture times, then targeted and full suites passed. No production invariant was relaxed."
+}

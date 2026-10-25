@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}<div class="business-flow"><p><a href="{% url 'fund_issues' %}">← 基金跟进事项</a></p><h1>{{ row.get_kind_display }} · {{ row.claim.invoice.invoice_no }}</h1>
+<p>待核对金额 {% if row.amount is None %}尚未明确{% else %}{{ row.amount }} CNY{% endif %}。跟进记录不变更患者责任、现金和基金核销。</p>
+<div class="actions">{% if can_follow %}<a class="button" href="{% url 'fund_issue_followup' row.pk %}">记录联系／调整责任／结束跟进</a>{% endif %}<a class="button secondary" href="{% url 'fund_claim_detail' row.claim_id %}">查看原申报清算</a></div>
+{% for event in events %}<section class="panel"><h2>第 {{ event.sequence }} 次 · {{ event.get_state_display }}</h2><p>责任人 {{ event.owner }} · 联系期限 {{ event.due_at }}{% if forloop.first and can_follow and event.due_at < now %} · <strong>已逾期</strong>{% endif %}</p><p>{{ event.basis }}</p><p>记录人 {{ event.actor }} · {{ event.created_at }}</p></section>{% endfor %}
+</div>{% endblock %}

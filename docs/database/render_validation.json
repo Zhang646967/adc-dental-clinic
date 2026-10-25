@@ -1,4 +1,32 @@
 {
+  "er_insurance_settlement": {
+    "nodes": 7,
+    "edges": 8,
+    "width": 734,
+    "height": 621,
+    "minPrintedFontPt": 8.650626702997275
+  },
+  "er_fund_allocation": {
+    "nodes": 7,
+    "edges": 8,
+    "width": 698,
+    "height": 671,
+    "minPrintedFontPt": 9.09679083094556
+  },
+  "er_fund_followup": {
+    "nodes": 4,
+    "edges": 5,
+    "width": 377,
+    "height": 532,
+    "minPrintedFontPt": 16.842334217506632
+  },
+  "er_insurance_reversal": {
+    "nodes": 5,
+    "edges": 4,
+    "width": 595,
+    "height": 483,
+    "minPrintedFontPt": 10.671529411764707
+  },
   "er_insurance_policy": {
     "nodes": 6,
     "edges": 7,

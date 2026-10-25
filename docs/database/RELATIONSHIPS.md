@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-318条实际SQL外键，其中317条对应ORM单列关系，1条为账单同次就诊复合外键。
+352条实际SQL外键，其中351条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -117,6 +117,19 @@
 | adc_equipment_event | asset_id | adc_equipment_asset | id |
 | adc_equipment_event | recorded_by_id | adc_user | id |
 | adc_external_identity | user_id | adc_user | id |
+| adc_fund_allocation | prepared_by_id | adc_user | id |
+| adc_fund_allocation | reviewed_by_id | adc_user | id |
+| adc_fund_allocation | transfer_id | adc_fund_transfer | id |
+| adc_fund_allocation_line | allocation_id | adc_fund_allocation | id |
+| adc_fund_allocation_line | claim_id | adc_insurance_settlement | id |
+| adc_fund_issue | claim_id | adc_insurance_settlement | id |
+| adc_fund_issue | opened_by_id | adc_user | id |
+| adc_fund_issue_event | actor_id | adc_user | id |
+| adc_fund_issue_event | issue_id | adc_fund_issue | id |
+| adc_fund_issue_event | owner_id | adc_user | id |
+| adc_fund_transfer | line_id | adc_statement_line | id |
+| adc_fund_transfer | prepared_by_id | adc_user | id |
+| adc_fund_transfer | reviewed_by_id | adc_user | id |
 | adc_inbox_message | clinic_id | adc_clinic | id |
 | adc_inbox_message | event_id | adc_notification_outbox | id |
 | adc_inbox_message | grant_id | adc_role_assignment | id |
@@ -125,6 +138,10 @@
 | adc_insurance_arrangement | prepared_by_id | adc_user | id |
 | adc_insurance_arrangement | reviewed_by_id | adc_user | id |
 | adc_insurance_arrangement | clinic_id | adc_clinic | id |
+| adc_insurance_cancellation | prepared_by_id | adc_user | id |
+| adc_insurance_cancellation | request_id | adc_insurance_settlement | id |
+| adc_insurance_cancellation_review | cancellation_id | adc_insurance_cancellation | id |
+| adc_insurance_cancellation_review | reviewed_by_id | adc_user | id |
 | adc_insurance_catalogue | previous_id | adc_insurance_catalogue | id |
 | adc_insurance_catalogue | prepared_by_id | adc_user | id |
 | adc_insurance_catalogue | reviewed_by_id | adc_user | id |
@@ -143,6 +160,20 @@
 | adc_insurance_fee_mapping | treatment_type_id | adc_treatment_type | id |
 | adc_insurance_fee_mapping | clinic_id | adc_clinic | id |
 | adc_insurance_policy_item | catalogue_id | adc_insurance_catalogue | id |
+| adc_insurance_reversal | cancellation_id | adc_insurance_cancellation | id |
+| adc_insurance_settlement | arrangement_id | adc_insurance_arrangement | id |
+| adc_insurance_settlement | eligibility_id | adc_insurance_eligibility | id |
+| adc_insurance_settlement | record_version_id | adc_visit_record_version | id |
+| adc_insurance_settlement | created_by_id | adc_user | id |
+| adc_insurance_settlement | invoice_id | adc_invoice | id |
+| adc_insurance_settlement_event | request_id | adc_insurance_settlement | id |
+| adc_insurance_settlement_event | actor_id | adc_user | id |
+| adc_insurance_settlement_line | mapping_id | adc_insurance_fee_mapping | id |
+| adc_insurance_settlement_line | request_id | adc_insurance_settlement | id |
+| adc_insurance_settlement_line | treatment_record_id | adc_treatment_record | id |
+| adc_insurance_settlement_review | request_id | adc_insurance_settlement | id |
+| adc_insurance_settlement_review | reviewed_by_id | adc_user | id |
+| adc_insurance_simulation | request_id | adc_insurance_settlement | id |
 | adc_invoice | current_record_version_id | adc_visit_record_version | id |
 | adc_invoice | visit_id | adc_visit | id |
 | adc_invoice | current_record_version_id, visit_id | adc_visit_record_version | id, visit_id |
@@ -281,6 +312,9 @@
 | adc_statement_batch | created_by_id | adc_user | id |
 | adc_statement_line | account_id | adc_payment_account | id |
 | adc_statement_line | batch_id | adc_statement_batch | id |
+| adc_statement_use | cash_match_id | adc_reconciliation_match | id |
+| adc_statement_use | fund_transfer_id | adc_fund_transfer | id |
+| adc_statement_use | line_id | adc_statement_line | id |
 | adc_tooth_finding | record_id | adc_clinical_record_version | id |
 | adc_treatment_plan | opened_by_id | adc_user | id |
 | adc_treatment_plan | origin_encounter_id | adc_clinical_encounter | id |

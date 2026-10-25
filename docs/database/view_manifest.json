@@ -1,4 +1,170 @@
 {
+  "er_insurance_settlement": {
+    "title": "原实际费用、唯一结算与独立分担",
+    "tables": 7,
+    "relationships": 8,
+    "note": "每笔请求保留原账单的确切发布版本和全部实际收费行；同一账单至多一个未终结请求。原始模拟结果和独立分担复核分别一对一引用请求，回复未知时查询原编号，不重新申报。逐行现金责任、个人账户与基金之和等于原行金额；独立通过才影响患者待缴，不产生现金或新增收入。目录、待遇、操作人及事件外键见完整目录。",
+    "columns": {
+      "adc_invoice": [
+        "id",
+        "current_record_version_id"
+      ],
+      "adc_visit_record_version": [
+        "id",
+        "revision_no"
+      ],
+      "adc_treatment_record": [
+        "id",
+        "record_version_id",
+        "line_no"
+      ],
+      "adc_insurance_settlement": [
+        "id",
+        "request_id",
+        "invoice_id",
+        "record_version_id",
+        "state"
+      ],
+      "adc_insurance_settlement_line": [
+        "id",
+        "request_id",
+        "treatment_record_id",
+        "patient_cash",
+        "personal_account",
+        "fund_amount"
+      ],
+      "adc_insurance_simulation": [
+        "id",
+        "request_id",
+        "reference",
+        "result"
+      ],
+      "adc_insurance_settlement_review": [
+        "id",
+        "request_id",
+        "decision"
+      ]
+    }
+  },
+  "er_fund_allocation": {
+    "title": "银行流水独占使用与基金逐笔分配",
+    "tables": 7,
+    "relationships": 8,
+    "note": "流水用途恰好引用现金匹配或基金凭据之一，两个来源各唯一且可空；每条流水至多一个活动用途。旧活动匹配仅派生用途记录，不重写原决定。已核对基金凭据可分批关联多笔同店同币种申报；分配行在批次内按申报唯一。待审及已通过分配共同限制可用银行金额；待审退回不能使用尚未确认的入账。到账、退回、现金账及原收入分开，完整账户和人员关系见目录。",
+    "columns": {
+      "adc_statement_line": [
+        "id",
+        "account_id",
+        "amount",
+        "direction"
+      ],
+      "adc_reconciliation_match": [
+        "id",
+        "line_id",
+        "state"
+      ],
+      "adc_fund_transfer": [
+        "id",
+        "line_id",
+        "kind",
+        "state"
+      ],
+      "adc_statement_use": [
+        "id",
+        "line_id",
+        "cash_match_id",
+        "fund_transfer_id",
+        "state"
+      ],
+      "adc_fund_allocation": [
+        "id",
+        "transfer_id",
+        "total",
+        "state"
+      ],
+      "adc_fund_allocation_line": [
+        "id",
+        "allocation_id",
+        "claim_id",
+        "amount"
+      ],
+      "adc_insurance_settlement": [
+        "id",
+        "request_id",
+        "fund_amount"
+      ]
+    }
+  },
+  "er_fund_followup": {
+    "title": "基金差额责任与追加跟进记录",
+    "tables": 4,
+    "relationships": 5,
+    "note": "未到账、少到账、扣减或用途未知均关联原申报；金额可空表示尚未核实。事项的责任人、期限、依据和状态由追加事件表达，每项按顺序唯一。负责人失效后可由现任财务明确重分配，原责任和沟通保留。结束跟进不核销基金，不生成平衡分录，也不转为患者欠款。",
+    "columns": {
+      "adc_insurance_settlement": [
+        "id",
+        "request_id"
+      ],
+      "adc_user": [
+        "id",
+        "username"
+      ],
+      "adc_fund_issue": [
+        "id",
+        "claim_id",
+        "opened_by_id",
+        "kind",
+        "amount"
+      ],
+      "adc_fund_issue_event": [
+        "id",
+        "issue_id",
+        "sequence",
+        "owner_id",
+        "actor_id",
+        "state",
+        "due_at"
+      ]
+    }
+  },
+  "er_insurance_reversal": {
+    "title": "原结算撤销、原结果查询与独立退回核对",
+    "tables": 5,
+    "relationships": 4,
+    "note": "每笔原结算至多一个保留的撤销请求，撤销结果一对一引用；未知和处理中继续查询同一编号。复核可追加未通过决定，但至多一次通过；实际通过须已核对原撤销结果、基金净到账归零且没有待审分配或患者现金。撤销中的原已通过分担保持，原未通过分担不会产生抵扣。事件记录当时撤销状态；撤销不作废实际费用，不自动收退款。",
+    "columns": {
+      "adc_insurance_settlement": [
+        "id",
+        "request_id",
+        "state"
+      ],
+      "adc_insurance_cancellation": [
+        "id",
+        "request_id",
+        "cancellation_id",
+        "state",
+        "revision"
+      ],
+      "adc_insurance_reversal": [
+        "id",
+        "cancellation_id",
+        "reference",
+        "result"
+      ],
+      "adc_insurance_cancellation_review": [
+        "id",
+        "cancellation_id",
+        "sequence",
+        "decision"
+      ],
+      "adc_insurance_settlement_event": [
+        "id",
+        "request_id",
+        "sequence",
+        "action"
+      ]
+    }
+  },
   "er_insurance_policy": {
     "title": "医保目录版本、门店安排与收费适配",
     "tables": 6,
@@ -974,9 +1140,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 115,
-    "orm_tables": 114,
-    "columns_types_and_nullability_checked": 1128,
+    "tables": 129,
+    "orm_tables": 128,
+    "columns_types_and_nullability_checked": 1266,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -985,10 +1151,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 317,
-    "sql_foreign_keys": 318,
+    "orm_foreign_keys": 351,
+    "sql_foreign_keys": 352,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "76e7c39ab9d7bc841fbf3f71e6dd9fdb57ba8237bef5eecb83ed2aa712db93a6",
+    "snapshot_sha256": "8ebc88cdf8f8f8570639df100d3073400a988cbe59bab018544bb7b8fd83a0d0",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

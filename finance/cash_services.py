@@ -21,9 +21,14 @@ from finance.cash_models import CashEntry
 from finance.cash_selectors import cash_scope,cursor,invoice_balance,event_net,projected_balance
 from finance.policies import money
 
-REQUEST='adc.cash.request.v2'
-REVIEW='adc.cash.review.v2'
+REQUEST='adc.cash.request.v3'
+REVIEW='adc.cash.review.v3'
 ROLES=('FRONT_DESK','MANAGER')
+
+def _insurance_cursor(source_type,source_id):
+    if source_type!='invoice':return [0,0,0]
+    from insurance.settlement_projection import invoice_insurance_facts
+    return invoice_insurance_facts(source_id)['cursor']
 
 def _date(value):
     if type(value) is str:
@@ -37,7 +42,7 @@ def _reason(value):
     return value.strip()
 
 def _request_payload(data):
-    keys={'source_type','source','clinic','version','cursor','kind','amount','occurred_on','reason','reversal','account','account_version','reference'}
+    keys={'source_type','source','clinic','version','cursor','insurance_cursor','kind','amount','occurred_on','reason','reversal','account','account_version','reference'}
     if set(data)!=keys or data['source_type'] not in ('invoice','equipment'):
         raise RuleError('申请确认内容无效。')
     if any(type(data[k]) is not int or not 0<data[k]<2**63 for k in ('source','clinic')):
@@ -90,6 +95,8 @@ def _source(source_type,source_id,lock=False):
 def _validate(source_type,source,rows,kind,amount,occurred_on,reversal=None,request_id=None):
     if amount<=0:raise RuleError('记账金额必须大于零。')
     if source_type=='invoice':
+        from insurance.settlement_projection import require_cash_ready
+        require_cash_ready(source.pk)
         if source.current_record_version.state!='PUBLISHED':raise RuleError('只能针对已发布结算单核对。')
         first=timezone.localtime(source.first_issued_at).date()
         if occurred_on<first:raise RuleError('事实日期不能早于开单日期。')
@@ -137,6 +144,7 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
         if source_type=='equipment' and reversal is None and rows.filter(state='PENDING',kind=kind).exists():
             raise RuleError('该设备费用已有待审核申请。')
         data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,cursor=cursor(rows),
+            insurance_cursor=_insurance_cursor(source_type,source_id),
             kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id,
             account=account.pk,account_version=account.lock_version,reference=reference)
         balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.effective_cost,net_equipment_expense=event_net(source.pk))
@@ -158,6 +166,8 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     prior=CashEntry.objects.filter(operation_id=payload['operation'],prepared_by_id=actor.pk,clinic_id=data['clinic']).first()
     if prior:return prior,True
     source,clinic,rows,version=_source(data['source_type'],data['source'],lock=True)
+    if _insurance_cursor(data['source_type'],source.pk)!=data['insurance_cursor']:
+        raise RuleError('医保结算进度已变化，请重新核对患者实际责任和收退款金额。')
     if clinic!=data['clinic'] or version!=data['version'] or cursor(rows)!=data['cursor']:
         raise RuleError('来源账单或记账申请已变化，请重新预览。')
     reversal=rows.get(pk=data['reversal']) if data['reversal'] else None
@@ -189,6 +199,7 @@ def prepare_review(*,actor,entry_id,decision,reason):
             blocker=approval_blocker(entry,source_type,source,rows)
             if blocker:raise RuleError(blocker)
         data=dict(entry=entry.pk,entry_version=entry.lock_version,source_type=source_type,source=source_id,
+            insurance_cursor=_insurance_cursor(source_type,source_id),
             version=version,cursor=cursor(rows),decision=decision,reason=_reason(reason))
         balance=invoice_balance(source) if source_type=='invoice' else dict(known_cost=source.effective_cost,net_equipment_expense=event_net(source.pk))
         return dict(entry=entry,source=source,source_type=source_type,balance=balance,
@@ -222,7 +233,7 @@ def _validate_review(entry,source_type,source,rows):
 def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None):
     if confirmed is not True:raise RuleError('请明确确认独立审核决定。')
     payload=read_proposal(actor,REVIEW,('FINANCE',),proposal_token);data=payload['data']
-    if (set(data)!={'entry','entry_version','source_type','source','version','cursor','decision','reason'} or
+    if (set(data)!={'entry','entry_version','source_type','source','version','cursor','insurance_cursor','decision','reason'} or
         data.get('decision') not in ('approve','reject') or
         type(data.get('entry')) is not int or data['entry']<=0 or
         type(data.get('entry_version')) is not int or data['entry_version']<0 or
@@ -248,6 +259,8 @@ def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None)
         raise RuleError('该条目已有其他审核结果。')
     if entry.lock_version!=data['entry_version']:raise RuleError('申请状态已变化。')
     if target=='POSTED':
+        if _insurance_cursor(data['source_type'],source.pk)!=data['insurance_cursor']:
+            raise RuleError('医保结算进度已变化，请重新核对患者责任再确认收付。')
         grant=RoleAssignment.objects.select_for_update().filter(user_id=entry.prepared_by_id,is_active=True,
             role='FRONT_DESK' if entry.invoice_id else 'MANAGER',scope_kind='CLINIC',clinic_id=clinic).first()
         if not users[entry.prepared_by_id].is_active or not grant:raise RuleError('原申请人授权已失效，请拒绝申请。')

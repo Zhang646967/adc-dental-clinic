@@ -8,6 +8,21 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'fund_claims': ('FUND_CLAIM_LIST','BILLING'), 'fund_claim_detail': ('INSURANCE_SETTLEMENT','BILLING'),
+    'fund_allocation_new': ('FUND_TRANSFER','BILLING'), 'fund_allocation_detail': ('FUND_ALLOCATION','BILLING'),
+    'fund_allocation_review': ('FUND_ALLOCATION','BILLING'), 'fund_issues': ('FUND_ISSUE_LIST','BILLING'),
+    'fund_issue_new': ('INSURANCE_SETTLEMENT','BILLING'), 'fund_issue_detail': ('FUND_ISSUE','BILLING'),
+    'fund_issue_followup': ('FUND_ISSUE','BILLING'),
+    'insurance_cancellation_new': ('INSURANCE_SETTLEMENT','BILLING'),
+    'insurance_cancellation_query': ('INSURANCE_SETTLEMENT','BILLING'),
+    'insurance_cancellation_review': ('INSURANCE_SETTLEMENT','BILLING'),
+    'fund_transfers': ('FUND_TRANSFER_LIST','BILLING'), 'fund_transfer_new': ('STATEMENT_LINE','BILLING'),
+    'fund_transfer_detail': ('FUND_TRANSFER','BILLING'), 'fund_transfer_review': ('FUND_TRANSFER','BILLING'),
+    'insurance_settlements': ('INSURANCE_REQUEST_LIST', 'BILLING'),
+    'insurance_settlement_new': ('INVOICE', 'BILLING'),
+    'insurance_settlement_detail': ('INSURANCE_SETTLEMENT', 'BILLING'),
+    'insurance_settlement_query': ('INSURANCE_SETTLEMENT', 'BILLING'),
+    'insurance_settlement_review': ('INSURANCE_SETTLEMENT', 'BILLING'),
     'insurance_eligibility': ('INSURANCE_ELIGIBILITY', 'BILLING'),
     'clinical_recalls':('RECALL_LIST','COORDINATION'),'clinical_recall_claim':('NEXT_VISIT','COORDINATION'),
     'clinical_recall_detail':('RECALL','COORDINATION'),'clinical_recall_action':('RECALL','COORDINATION'),

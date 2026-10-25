@@ -4,7 +4,9 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**C6.1A 已在本机交付：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立审阅链、明确单位和待遇历史可核对；准确CI、1,106项规则／1,826项PG回归、67项同镜像浏览器及权限、115表加密恢复和原系统保护更新通过。183页报告与22幅实际ER同步。[本地办理](docs/C61A_LOCAL_GUIDE.md) · [业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [交付证据](docs/evidence_c61a/README.md)。费用分担、基金到账及退费继续开发。
+**C6.1B/C 源码已实现：原账单模拟结算、基金到账分配、差异跟进和撤销。** 1,935项完整PostgreSQL回归通过；同镜像业务、容量、恢复及原系统更新继续按[专项证据](docs/evidence_c61bc/README.md)执行，尚不标记最终交付。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
+
+**C6.1A 已在本机交付：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立审阅链、明确单位和待遇历史可核对；准确CI、1,106项规则／1,826项PG回归、67项同镜像浏览器及权限、115表加密恢复和原系统保护更新通过。183页报告与22幅实际ER同步。[本地办理](docs/C61A_LOCAL_GUIDE.md) · [业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [交付证据](docs/evidence_c61a/README.md)。后续结算与基金清算已进入C6.1B/C最终验收。
 
 **C1-WX 已在本机交付：患者账号、联络来源、本人建档与独立前台核验。** 网站／小程序沿用原预约、改期、候补与患者切换，暂停可复核恢复原关联。[执行证据](docs/evidence_c1wx/README.md) · [本地试用](docs/C1WX_LOCAL_GUIDE.md)。真实微信及医保联网另行验收。
 
@@ -26,7 +28,7 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 The wider clinical V2 program continues; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
-**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX及C6.1A本地流程已交付；真实微信和C6医保资金阶段继续实施。
+**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX及C6.1A本地流程已交付；C6.1B/C本地资金流程已实现并继续最终验收，真实联网另行验收。
 
 **2026-10-23 商业化调研与下一阶段：** [六类成熟牙科系统与诊所业务差距](docs/research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 患者身份与连续诊疗计划](docs/COMMERCIAL_V2_NEXT_STAGE.md)。附 34 项外部来源、16 项需求追踪、24 个待执行验收场景及两幅明确标注为规划的领域关系图。当前实际 ER 与已执行验收保持独立。
 

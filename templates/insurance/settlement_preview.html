@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="business-flow"><div class="eyebrow">确认前核对 · 尚未申报</div><h1>确认医保模拟分担</h1>
+<p>{{ invoice.invoice_no }} · 原费用 ¥ {{ source.total }} · 接诊业务日 {{ source.service_on }}</p>
+<p class="notice">确认后保留唯一请求及原结果；取得结果后仍须另一财务账号复核。个人账户和基金承担不计作患者现金。</p>
+{% for row in rows %}<section class="panel"><h2>{{ row.source.line_no }}. {{ row.source.name }}</h2><p>原数量 {{ row.source.quantity }} {{ row.source.unit }} · 原金额 ¥ {{ row.source.amount }}</p>
+<dl class="detail-grid"><dt>患者现金责任</dt><dd>¥ {{ row.result.patient_cash }}</dd><dt>个人账户承担</dt><dd>¥ {{ row.result.personal_account }}</dd><dt>基金承担</dt><dd>¥ {{ row.result.fund_amount }}</dd><dt>已核对基金上限</dt><dd>¥ {{ row.source.fund_limit }}</dd></dl>{% if row.source.exception %}<p class="notice">{{ row.source.exception }}</p>{% endif %}</section>{% endfor %}
+<p>模拟响应：{{ simulation_label }}；分担依据：{{ data.reason }}</p>
+<form method="post" class="panel form-panel">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="confirm">{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{% include 'components/form_errors.html' %}{% for field in form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+<div class="actions"><button type="submit"{% if adc_read_only %} disabled{% endif %}>明确确认并保留请求</button><a class="button secondary" href="{% url 'insurance_settlement_new' invoice.pk %}">返回重新核对</a></div></form></div>{% endblock %}

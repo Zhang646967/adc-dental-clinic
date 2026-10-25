@@ -6,6 +6,7 @@ from finance.cash_models import CashEntry
 from finance.reconciliation_models import PaymentAccount, CashEvidenceVersion, StatementBatch, StatementLine, ReconciliationMatch
 from finance.evidence_policies import reconciliation_scope
 from finance.reconciliation_services import ACTIVE
+from finance.fund_models import StatementUse
 
 def scoped(qs,clinic,path):
     return qs.filter(**{path:clinic}) if clinic is not None else qs
@@ -24,9 +25,10 @@ def dashboard(actor,page='1'):
         clinic=reconciliation_scope(actor,detail=False)
         data=dict(summary=evidence_summary(clinic),clinic=clinic)
         statements=scoped(StatementLine.objects.all(),clinic,'account__clinic_id')
-        active=ReconciliationMatch.objects.filter(line_id=OuterRef('pk'),state__in=ACTIVE)
+        active=StatementUse.objects.filter(line_id=OuterRef('pk'),state='ACTIVE')
         data['statement_count']=statements.count()
         data['unmatched_count']=statements.annotate(active=Exists(active)).filter(active=False).count()
+        data['fund_used_count']=statements.annotate(fund_used=Exists(active.filter(fund_transfer__isnull=False))).filter(fund_used=True).count()
         if actor._adc_workspace.role=='HQ':return data
         data['batches']=Paginator(scoped(StatementBatch.objects.select_related('account__clinic','created_by'),clinic,'account__clinic_id').order_by('-pk'),20).get_page(page)
         matches=scoped(ReconciliationMatch.objects.select_related('line__account__clinic','prepared_by'),clinic,'cash_entry__clinic_id')
@@ -51,6 +53,7 @@ def candidates(actor,line):
     active=ReconciliationMatch.objects.filter(cash_entry_id=OuterRef('cash_entry_id'),state__in=ACTIVE)
     kinds=['RECEIPT','EXPENSE_REVERSAL'] if line.direction=='IN' else ['REFUND','EQUIPMENT_EXPENSE']
     if line.currency!='CNY':return []
+    if StatementUse.objects.filter(line=line,state='ACTIVE').exists():return []
     return list(CashEvidenceVersion.objects.filter(account_id=line.account_id,reference=line.reference,state='APPROVED',
         cash_entry__state='POSTED',cash_entry__amount=line.amount,cash_entry__kind__in=kinds,
         cash_entry__clinic_id=line.account.clinic_id).annotate(newer=Exists(newer),active=Exists(active)).filter(newer=False,active=False)

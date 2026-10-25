@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}<div class="business-flow"><p><a href="{% url 'fund_claims' %}">← 基金申报与清算</a></p><h1>基金差额与联系待办</h1>
+<nav aria-label="跟进状态"><a href="?">待跟进</a> · <a href="?closed=1">已结束</a></nav>
+{% for row in page_obj %}<section class="panel"><h2><a href="{% url 'fund_issue_detail' row.pk %}">{{ row.get_kind_display }} · {{ row.claim.invoice.invoice_no }}</a></h2><p>责任人 {{ row.owner_name }} · 联系期限 {{ row.due }}{% if not closed and row.due < now %} · <strong>已逾期</strong>{% endif %}</p><p>待核对金额 {% if row.amount is None %}尚未明确{% else %}{{ row.amount }} CNY{% endif %}</p></section>{% empty %}<p>当前没有此类跟进事项。</p>{% endfor %}
+<nav aria-label="跟进分页">{% if page_obj.has_previous %}<a href="?closed={% if closed %}1{% else %}0{% endif %}&amp;page={{ page_obj.previous_page_number }}">上一页</a>{% endif %} 第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页 {% if page_obj.has_next %}<a href="?closed={% if closed %}1{% else %}0{% endif %}&amp;page={{ page_obj.next_page_number }}">下一页</a>{% endif %}</nav>
+</div>{% endblock %}

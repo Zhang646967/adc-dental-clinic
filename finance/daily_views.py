@@ -38,7 +38,9 @@ def _data(actor,pk):
         row=close_scope(actor).select_related('clinic','prepared_by','reviewed_by').get(pk=pk)
         current=day_facts(row.clinic_id,row.business_date)
         from finance.reconciliation_selectors import evidence_summary
+        from finance.allocation_projection import daily_fund_summary
         return dict(row=row,current=current,channel_summary=evidence_summary(row.clinic_id,row.business_date),comparison=comparison(row.snapshot,row.declared),
+            fund_summary=daily_fund_summary(row.clinic_id,row.business_date),
             changed=row.snapshot!=current,blocker=blocker(row,current) if row.state=='PENDING' else '',
             latest=latest(row.clinic_id,row.business_date))
 

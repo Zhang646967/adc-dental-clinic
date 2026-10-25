@@ -1,7 +1,22 @@
 from django.urls import path
 from finance import reconciliation_views as v
+from finance import fund_views as funds
+from finance import allocation_views as allocations
 
 urlpatterns=[
+    path('finance/fund-claims/',allocations.claim_list,name='fund_claims'),
+    path('finance/fund-claims/<int:pk>/',allocations.claim_detail,name='fund_claim_detail'),
+    path('finance/fund-claims/<int:pk>/issues/new/',allocations.issue_new,name='fund_issue_new'),
+    path('finance/fund-issues/',allocations.issue_list,name='fund_issues'),
+    path('finance/fund-issues/<int:pk>/',allocations.issue_detail,name='fund_issue_detail'),
+    path('finance/fund-issues/<int:pk>/follow/',allocations.followup,name='fund_issue_followup'),
+    path('finance/funds/<int:pk>/allocate/',allocations.create,name='fund_allocation_new'),
+    path('finance/fund-allocations/<int:pk>/',allocations.detail,name='fund_allocation_detail'),
+    path('finance/fund-allocations/<int:pk>/review/',allocations.review,name='fund_allocation_review'),
+    path('finance/funds/',funds.listing,name='fund_transfers'),
+    path('finance/funds/lines/<int:pk>/record/',funds.create,name='fund_transfer_new'),
+    path('finance/funds/<int:pk>/',funds.detail,name='fund_transfer_detail'),
+    path('finance/funds/<int:pk>/review/',funds.review,name='fund_transfer_review'),
     path('finance/payment-accounts/',v.accounts,name='payment_accounts'),
     path('finance/payment-accounts/new/',v.account_edit,name='payment_account_new'),
     path('finance/payment-accounts/<int:pk>/state/',v.account_edit,name='payment_account_state'),

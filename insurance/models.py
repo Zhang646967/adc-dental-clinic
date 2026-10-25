@@ -171,3 +171,8 @@ class InsuranceEvent(models.Model):
             Q(catalogue__isnull=True, arrangement__isnull=False, mapping__isnull=True, eligibility__isnull=True) |
             Q(catalogue__isnull=True, arrangement__isnull=True, mapping__isnull=False, eligibility__isnull=True) |
             Q(catalogue__isnull=True, arrangement__isnull=True, mapping__isnull=True, eligibility__isnull=False), name='insurance_event_one_subject')]
+
+
+# C6.1B private staging; not yet accepted or installed.
+from insurance.settlement_models import (SettlementRequest, SettlementLine, SimulationOutcome, SettlementReview, SettlementEvent)
+from insurance.cancellation_models import CancellationRequest, ReversalOutcome, CancellationReview

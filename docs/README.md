@@ -1,3 +1,5 @@
+当前新增：[本地模拟结算与基金清算](C61BC_LOCAL_GUIDE.md) · [业务合同与需求追踪](C61BC_SETTLEMENT_CONTRACT.md) · [分项执行证据](evidence_c61bc/README.md)。完整1,935项PG回归通过；同镜像验收与原系统更新按专项证据推进。
+
 **C6.1A 当前本地交付：** [医保资料办理](C61A_LOCAL_GUIDE.md) · [规则与职责](C61A_PREPARATION_CONTRACT.md) · [准确CI、恢复与原系统更新](evidence_c61a/README.md)。费用分担及基金流程继续开发。
 
 **C1-WX 历史本地交付：** [账号及本人申请](C1WX_ACCOUNT_CONTRACT.md) · [准确CI、跨端、恢复与更新](evidence_c1wx/README.md) · [私有本地试用](C1WX_LOCAL_GUIDE.md)。
@@ -40,7 +42,7 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[296条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[352条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="business-flow"><p><a href="{% url 'invoice_detail' invoice.pk %}">← 返回原结算单</a></p>
+<div class="eyebrow">医保结算 · 本地模拟</div><h1>核对逐项费用分担</h1>
+<p>{{ invoice.invoice_no }}。只使用原账单实际收费，不会新增治疗或改变原价格。逐行填写明确的合成结果，不能把目录先自付比例当作最终报销比例。</p>
+{% if blocker %}<section class="panel"><h2>先完成资料核对</h2><p class="notice">{{ blocker }}</p><div class="actions"><a class="button secondary" href="{% url 'insurance_home' %}">核对医保资料</a><a class="button secondary" href="{% url 'insurance_settlements' %}?invoice={{ invoice.pk }}">查看原请求进度</a></div></section>{% else %}
+<p>接诊业务日 {{ source.service_on }} · 原费用 ¥ {{ source.total }}。基金承担是待核对责任，不代表已收到资金。</p>
+<form method="post" class="form-panel">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">{% include 'components/form_errors.html' %}
+{% for entry in form.line_fields %}<section class="panel"><h2>{{ entry.source.line_no }}. {{ entry.source.name }}</h2><p>{{ entry.source.quantity }} {{ entry.source.unit }} × ¥ {{ entry.source.unit_price }}；本行 ¥ {{ entry.source.amount }}</p>
+{% if entry.source.exception %}<p class="notice">{{ entry.source.exception }}。本行保留自付，不填写个人账户或基金承担。</p>{% else %}<p>目录 {{ entry.source.policy_code }} · {{ entry.source.policy_quantity }} {{ entry.source.policy_unit }}；已核对基金上限 ¥ {{ entry.source.fund_limit }}</p>{% endif %}
+{% for field in entry.fields %}{% include 'components/form_field.html' %}{% endfor %}</section>{% endfor %}
+<section class="panel">{% with field=form.simulation_mode %}{% include 'components/form_field.html' %}{% endwith %}{% with field=form.reason %}{% include 'components/form_field.html' %}{% endwith %}
+<button type="submit"{% if adc_read_only %} disabled{% endif %}>预览逐项分担</button></section></form>{% endif %}</div>{% endblock %}

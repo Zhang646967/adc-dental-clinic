@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}<div class="business-flow">
+<p><a href="{% url 'fund_transfers' %}">← 银行到账与退回</a></p><h1>基金申报与清算</h1>
+<p>独立核对的分担形成基金应收；银行到账、逐笔分配和差额跟进分别办理。患者余额仍以原结算单为准。</p>
+<div class="actions"><a class="button secondary" href="{% url 'fund_issues' %}">差额与联系待办</a></div>
+<form method="get" class="panel"><label for="claim-search">账单编号或完整申报编号</label><input id="claim-search" name="q" maxlength="80" value="{{ q }}"><button type="submit">查询</button></form>
+{% for item in rows %}<section class="panel"><h2><a href="{% url 'fund_claim_detail' item.claim.pk %}">{{ item.claim.invoice.invoice_no }}</a></h2>
+<p>{{ item.claim.arrangement.clinic.name }} · {{ item.claim.get_state_display }}</p><p class="mono">{{ item.claim.request_id }}</p>
+<dl class="detail-grid"><dt>基金应收</dt><dd>{{ item.funds.receivable }} CNY</dd><dt>已到账净额</dt><dd>{{ item.funds.net_received }} CNY</dd>
+<dt>尚未到账</dt><dd>{{ item.funds.unreceived }} CNY</dd><dt>待核对入账／退回</dt><dd>{{ item.funds.reserved_in }} / {{ item.funds.reserved_out }} CNY</dd></dl></section>
+{% empty %}<p>没有符合条件的申报。可从原结算单查看受理和分担核对进度。</p>{% endfor %}
+<nav aria-label="申报分页">{% if page_obj.has_previous %}<a href="?q={{ q|urlencode }}&amp;page={{ page_obj.previous_page_number }}">上一页</a>{% endif %} 第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页 {% if page_obj.has_next %}<a href="?q={{ q|urlencode }}&amp;page={{ page_obj.next_page_number }}">下一页</a>{% endif %}</nav>
+</div>{% endblock %}

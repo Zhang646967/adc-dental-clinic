@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 114 ORM tables; django_migrations is a framework migration journal.
+// All 128 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -578,6 +578,72 @@ Table adc_external_identity {
   }
 }
 
+Table adc_fund_allocation {
+  id "bigint" [pk, not null]
+  transfer_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  state "character varying(12)" [not null]
+  total "numeric(16,2)" [not null]
+  source_snapshot "jsonb" [not null]
+  source_digest "character varying(64)" [not null]
+  basis "character varying(500)" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+}
+
+Table adc_fund_allocation_line {
+  id "bigint" [pk, not null]
+  allocation_id "bigint" [not null]
+  claim_id "bigint" [not null]
+  amount "numeric(16,2)" [not null]
+  indexes {
+    (allocation_id, claim_id) [unique, name: 'fund_allocation_once_per_claim']
+  }
+}
+
+Table adc_fund_issue {
+  id "bigint" [pk, not null]
+  claim_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  kind "character varying(16)" [not null]
+  amount "numeric(16,2)" [null]
+  opened_by_id "bigint" [not null]
+  opened_at "timestamp with time zone" [not null]
+}
+
+Table adc_fund_issue_event {
+  id "bigint" [pk, not null]
+  issue_id "bigint" [not null]
+  sequence "integer" [not null]
+  operation_id "uuid" [unique, not null]
+  state "character varying(8)" [not null]
+  owner_id "bigint" [not null]
+  due_at "timestamp with time zone" [not null]
+  actor_id "bigint" [not null]
+  basis "character varying(500)" [not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (issue_id, sequence) [unique, name: 'fund_issue_event_sequence']
+  }
+}
+
+Table adc_fund_transfer {
+  id "bigint" [pk, not null]
+  line_id "bigint" [not null]
+  kind "character varying(8)" [not null]
+  state "character varying(12)" [not null]
+  operation_id "uuid" [unique, not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  basis "character varying(500)" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+}
+
 Table adc_inbox_message {
   id "bigint" [pk, not null]
   event_id "bigint" [not null]
@@ -606,6 +672,36 @@ Table adc_insurance_arrangement {
   starts_on "date" [not null]
   ends_on "date" [not null]
   reference "character varying(80)" [not null]
+}
+
+Table adc_insurance_cancellation {
+  id "bigint" [pk, not null]
+  request_id "bigint" [unique, not null]
+  cancellation_id "uuid" [unique, not null]
+  operation_id "uuid" [unique, not null]
+  state "character varying(24)" [not null]
+  revision "integer" [not null]
+  simulation_mode "character varying(16)" [not null]
+  source_snapshot "jsonb" [not null]
+  source_digest "character varying(64)" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reason "character varying(500)" [not null]
+}
+
+Table adc_insurance_cancellation_review {
+  id "bigint" [pk, not null]
+  cancellation_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  sequence "integer" [not null]
+  decision "character varying(8)" [not null]
+  reviewed_by_id "bigint" [not null]
+  reviewed_at "timestamp with time zone" [not null]
+  reason "character varying(500)" [not null]
+  clearance_snapshot "jsonb" [not null]
+  indexes {
+    (cancellation_id, sequence) [unique, name: 'insurance_cancellation_review_seq']
+  }
 }
 
 Table adc_insurance_catalogue {
@@ -704,6 +800,95 @@ Table adc_insurance_policy_item {
   indexes {
     (catalogue_id, code) [unique, name: 'insurance_policy_code']
   }
+}
+
+Table adc_insurance_reversal {
+  id "bigint" [pk, not null]
+  cancellation_id "bigint" [unique, not null]
+  reference "character varying(80)" [unique, not null]
+  result "character varying(12)" [not null]
+  payload "jsonb" [not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_insurance_settlement {
+  id "bigint" [pk, not null]
+  request_id "uuid" [unique, not null]
+  operation_id "uuid" [unique, not null]
+  invoice_id "bigint" [not null]
+  record_version_id "bigint" [not null]
+  arrangement_id "bigint" [not null]
+  eligibility_id "bigint" [not null]
+  service_on "date" [not null]
+  currency "character varying(3)" [not null]
+  gross_amount "numeric(16,2)" [not null]
+  patient_cash "numeric(16,2)" [not null]
+  personal_account "numeric(16,2)" [not null]
+  fund_amount "numeric(16,2)" [not null]
+  source_snapshot "jsonb" [not null]
+  source_digest "character varying(64)" [not null]
+  simulation_mode "character varying(16)" [not null]
+  state "character varying(24)" [not null]
+  lock_version "integer" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+  reason "character varying(500)" [not null]
+}
+
+Table adc_insurance_settlement_event {
+  id "bigint" [pk, not null]
+  request_id "bigint" [not null]
+  sequence "integer" [not null]
+  operation_id "uuid" [unique, not null]
+  actor_id "bigint" [not null]
+  action "character varying(32)" [not null]
+  snapshot "jsonb" [not null]
+  reason "character varying(500)" [not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (request_id, sequence) [unique, name: 'insurance_settlement_event_seq']
+  }
+}
+
+Table adc_insurance_settlement_line {
+  id "bigint" [pk, not null]
+  request_id "bigint" [not null]
+  treatment_record_id "bigint" [not null]
+  line_no "integer" [not null]
+  mapping_id "bigint" [null]
+  source_snapshot "jsonb" [not null]
+  policy_quantity "numeric(24,7)" [null]
+  fund_limit "numeric(16,2)" [not null]
+  gross_amount "numeric(16,2)" [not null]
+  patient_cash "numeric(16,2)" [not null]
+  personal_account "numeric(16,2)" [not null]
+  fund_amount "numeric(16,2)" [not null]
+  exception "character varying(200)" [not null]
+  indexes {
+    (request_id, line_no) [unique, name: 'insurance_settlement_line_no']
+    (request_id, treatment_record_id) [unique, name: 'insurance_settlement_source_line']
+  }
+}
+
+Table adc_insurance_settlement_review {
+  id "bigint" [pk, not null]
+  request_id "bigint" [unique, not null]
+  operation_id "uuid" [unique, not null]
+  reviewed_by_id "bigint" [not null]
+  decision "character varying(8)" [not null]
+  reason "character varying(500)" [not null]
+  source_digest "character varying(64)" [not null]
+  reviewed_at "timestamp with time zone" [not null]
+}
+
+Table adc_insurance_simulation {
+  id "bigint" [pk, not null]
+  request_id "bigint" [unique, not null]
+  reference "character varying(80)" [unique, not null]
+  request_digest "character varying(64)" [not null]
+  result "character varying(12)" [not null]
+  payload "jsonb" [not null]
+  recorded_at "timestamp with time zone" [not null]
 }
 
 Table adc_invoice {
@@ -1353,6 +1538,17 @@ Table adc_statement_line {
   }
 }
 
+Table adc_statement_use {
+  id "bigint" [pk, not null]
+  line_id "bigint" [not null]
+  cash_match_id "bigint" [unique, null]
+  fund_transfer_id "bigint" [unique, null]
+  state "character varying(8)" [not null]
+  created_at "timestamp with time zone" [not null]
+  released_at "timestamp with time zone" [null]
+  derived_from_existing "boolean" [not null]
+}
+
 Table adc_tooth_finding {
   id "bigint" [pk, not null]
   record_id "bigint" [not null]
@@ -1697,6 +1893,19 @@ Ref: adc_equipment_cost_amendment.reviewed_by_id > adc_user.id
 Ref: adc_equipment_event.asset_id > adc_equipment_asset.id
 Ref: adc_equipment_event.recorded_by_id > adc_user.id
 Ref: adc_external_identity.user_id > adc_user.id
+Ref: adc_fund_allocation.prepared_by_id > adc_user.id
+Ref: adc_fund_allocation.reviewed_by_id > adc_user.id
+Ref: adc_fund_allocation.transfer_id > adc_fund_transfer.id
+Ref: adc_fund_allocation_line.allocation_id > adc_fund_allocation.id
+Ref: adc_fund_allocation_line.claim_id > adc_insurance_settlement.id
+Ref: adc_fund_issue.claim_id > adc_insurance_settlement.id
+Ref: adc_fund_issue.opened_by_id > adc_user.id
+Ref: adc_fund_issue_event.actor_id > adc_user.id
+Ref: adc_fund_issue_event.issue_id > adc_fund_issue.id
+Ref: adc_fund_issue_event.owner_id > adc_user.id
+Ref: adc_fund_transfer.line_id > adc_statement_line.id
+Ref: adc_fund_transfer.prepared_by_id > adc_user.id
+Ref: adc_fund_transfer.reviewed_by_id > adc_user.id
 Ref: adc_inbox_message.clinic_id > adc_clinic.id
 Ref: adc_inbox_message.event_id > adc_notification_outbox.id
 Ref: adc_inbox_message.grant_id > adc_role_assignment.id
@@ -1705,6 +1914,10 @@ Ref: adc_insurance_arrangement.catalogue_id > adc_insurance_catalogue.id
 Ref: adc_insurance_arrangement.prepared_by_id > adc_user.id
 Ref: adc_insurance_arrangement.reviewed_by_id > adc_user.id
 Ref: adc_insurance_arrangement.clinic_id > adc_clinic.id
+Ref: adc_insurance_cancellation.prepared_by_id > adc_user.id
+Ref: adc_insurance_cancellation.request_id - adc_insurance_settlement.id
+Ref: adc_insurance_cancellation_review.cancellation_id > adc_insurance_cancellation.id
+Ref: adc_insurance_cancellation_review.reviewed_by_id > adc_user.id
 Ref: adc_insurance_catalogue.previous_id - adc_insurance_catalogue.id
 Ref: adc_insurance_catalogue.prepared_by_id > adc_user.id
 Ref: adc_insurance_catalogue.reviewed_by_id > adc_user.id
@@ -1723,6 +1936,20 @@ Ref: adc_insurance_fee_mapping.reviewed_by_id > adc_user.id
 Ref: adc_insurance_fee_mapping.treatment_type_id > adc_treatment_type.id
 Ref: adc_insurance_fee_mapping.clinic_id > adc_clinic.id
 Ref: adc_insurance_policy_item.catalogue_id > adc_insurance_catalogue.id
+Ref: adc_insurance_reversal.cancellation_id - adc_insurance_cancellation.id
+Ref: adc_insurance_settlement.arrangement_id > adc_insurance_arrangement.id
+Ref: adc_insurance_settlement.eligibility_id > adc_insurance_eligibility.id
+Ref: adc_insurance_settlement.record_version_id > adc_visit_record_version.id
+Ref: adc_insurance_settlement.created_by_id > adc_user.id
+Ref: adc_insurance_settlement.invoice_id > adc_invoice.id
+Ref: adc_insurance_settlement_event.request_id > adc_insurance_settlement.id
+Ref: adc_insurance_settlement_event.actor_id > adc_user.id
+Ref: adc_insurance_settlement_line.mapping_id > adc_insurance_fee_mapping.id
+Ref: adc_insurance_settlement_line.request_id > adc_insurance_settlement.id
+Ref: adc_insurance_settlement_line.treatment_record_id > adc_treatment_record.id
+Ref: adc_insurance_settlement_review.request_id - adc_insurance_settlement.id
+Ref: adc_insurance_settlement_review.reviewed_by_id > adc_user.id
+Ref: adc_insurance_simulation.request_id - adc_insurance_settlement.id
 Ref: adc_invoice.current_record_version_id - adc_visit_record_version.id
 Ref: adc_invoice.visit_id - adc_visit.id
 Ref: adc_invoice.(current_record_version_id, visit_id) - adc_visit_record_version.(id, visit_id)
@@ -1861,6 +2088,9 @@ Ref: adc_statement_batch.account_id > adc_payment_account.id
 Ref: adc_statement_batch.created_by_id > adc_user.id
 Ref: adc_statement_line.account_id > adc_payment_account.id
 Ref: adc_statement_line.batch_id > adc_statement_batch.id
+Ref: adc_statement_use.cash_match_id - adc_reconciliation_match.id
+Ref: adc_statement_use.fund_transfer_id - adc_fund_transfer.id
+Ref: adc_statement_use.line_id > adc_statement_line.id
 Ref: adc_tooth_finding.record_id > adc_clinical_record_version.id
 Ref: adc_treatment_plan.opened_by_id > adc_user.id
 Ref: adc_treatment_plan.origin_encounter_id > adc_clinical_encounter.id

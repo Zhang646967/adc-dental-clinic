@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-25。本目录列出114张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-25。本目录列出128张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -1622,6 +1622,201 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 
+## adc_fund_allocation
+
+模型：`finance.FundAllocation`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| transfer_id | bigint | FK | 否 | `adc_fund_transfer.id` |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| total | numeric(16,2) | — | 否 | — |
+| source_snapshot | jsonb | — | 否 | — |
+| source_digest | character varying(64) | — | 否 | — |
+| basis | character varying(500) | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_fund_allocation_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_fund_allocation_pkey`：`PRIMARY KEY (id)`。
+- `adc_fund_allocation_prepared_by_id_e91636ec_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_allocation_reviewed_by_id_fa233391_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_allocation_transfer_id_72780d6c_fk_adc_fund_`：`FOREIGN KEY (transfer_id) REFERENCES adc_fund_transfer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `fund_allocation_complete`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
+- `fund_allocation_independent`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `fund_allocation_positive`：`CHECK ((total > (0)::numeric))`。
+- `fund_allocation_review_metadata`：`CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_fund_allocation_operation_id_key`：`CREATE UNIQUE INDEX adc_fund_allocation_operation_id_key ON public.adc_fund_allocation USING btree (operation_id)`。
+- `adc_fund_allocation_pkey`：`CREATE UNIQUE INDEX adc_fund_allocation_pkey ON public.adc_fund_allocation USING btree (id)`。
+- `adc_fund_allocation_prepared_by_id_e91636ec`：`CREATE INDEX adc_fund_allocation_prepared_by_id_e91636ec ON public.adc_fund_allocation USING btree (prepared_by_id)`。
+- `adc_fund_allocation_reviewed_by_id_fa233391`：`CREATE INDEX adc_fund_allocation_reviewed_by_id_fa233391 ON public.adc_fund_allocation USING btree (reviewed_by_id)`。
+- `adc_fund_allocation_transfer_id_72780d6c`：`CREATE INDEX adc_fund_allocation_transfer_id_72780d6c ON public.adc_fund_allocation USING btree (transfer_id)`。
+
+跨表及历史触发器：
+
+- `fund_allocation_complete`：`CREATE CONSTRAINT TRIGGER fund_allocation_complete AFTER INSERT ON public.adc_fund_allocation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_fund_allocation_complete()`。
+- `fund_allocation_guard`：`CREATE TRIGGER fund_allocation_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_fund_allocation FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_allocation()`。
+
+## adc_fund_allocation_line
+
+模型：`finance.FundAllocationLine`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| allocation_id | bigint | FK | 否 | `adc_fund_allocation.id` |
+| claim_id | bigint | FK | 否 | `adc_insurance_settlement.id` |
+| amount | numeric(16,2) | — | 否 | — |
+
+数据库约束：
+
+- `adc_fund_allocation__allocation_id_c7bca508_fk_adc_fund_`：`FOREIGN KEY (allocation_id) REFERENCES adc_fund_allocation(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_allocation__claim_id_3473dbd5_fk_adc_insur`：`FOREIGN KEY (claim_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_allocation_line_pkey`：`PRIMARY KEY (id)`。
+- `fund_allocation_line_positive`：`CHECK ((amount > (0)::numeric))`。
+- `fund_allocation_once_per_claim`：`UNIQUE (allocation_id, claim_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_fund_allocation_line_allocation_id_c7bca508`：`CREATE INDEX adc_fund_allocation_line_allocation_id_c7bca508 ON public.adc_fund_allocation_line USING btree (allocation_id)`。
+- `adc_fund_allocation_line_claim_id_3473dbd5`：`CREATE INDEX adc_fund_allocation_line_claim_id_3473dbd5 ON public.adc_fund_allocation_line USING btree (claim_id)`。
+- `adc_fund_allocation_line_pkey`：`CREATE UNIQUE INDEX adc_fund_allocation_line_pkey ON public.adc_fund_allocation_line USING btree (id)`。
+- `fund_allocation_once_per_claim`：`CREATE UNIQUE INDEX fund_allocation_once_per_claim ON public.adc_fund_allocation_line USING btree (allocation_id, claim_id)`。
+
+跨表及历史触发器：
+
+- `fund_allocation_line_guard`：`CREATE TRIGGER fund_allocation_line_guard AFTER INSERT OR DELETE OR UPDATE ON public.adc_fund_allocation_line FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_allocation_line()`。
+
+## adc_fund_issue
+
+模型：`finance.FundIssue`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| claim_id | bigint | FK | 否 | `adc_insurance_settlement.id` |
+| operation_id | uuid | UK | 否 | — |
+| kind | character varying(16) | — | 否 | — |
+| amount | numeric(16,2) | — | 是 | — |
+| opened_by_id | bigint | FK | 否 | `adc_user.id` |
+| opened_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_fund_issue_claim_id_a6db816a_fk_adc_insurance_settlement_id`：`FOREIGN KEY (claim_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_issue_opened_by_id_93036901_fk_adc_user_id`：`FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_issue_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_fund_issue_pkey`：`PRIMARY KEY (id)`。
+- `fund_issue_amount`：`CHECK (((amount IS NULL) OR (amount >= (0)::numeric)))`。
+- `fund_issue_complete`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
+- `fund_issue_kind`：`CHECK (((kind)::text = ANY ((ARRAY['NOT_RECEIVED'::character varying, 'SHORTFALL'::character varying, 'DEDUCTION'::character varying, 'UNKNOWN'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_fund_issue_claim_id_a6db816a`：`CREATE INDEX adc_fund_issue_claim_id_a6db816a ON public.adc_fund_issue USING btree (claim_id)`。
+- `adc_fund_issue_opened_by_id_93036901`：`CREATE INDEX adc_fund_issue_opened_by_id_93036901 ON public.adc_fund_issue USING btree (opened_by_id)`。
+- `adc_fund_issue_operation_id_key`：`CREATE UNIQUE INDEX adc_fund_issue_operation_id_key ON public.adc_fund_issue USING btree (operation_id)`。
+- `adc_fund_issue_pkey`：`CREATE UNIQUE INDEX adc_fund_issue_pkey ON public.adc_fund_issue USING btree (id)`。
+
+跨表及历史触发器：
+
+- `fund_issue_complete`：`CREATE CONSTRAINT TRIGGER fund_issue_complete AFTER INSERT ON public.adc_fund_issue DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_fund_issue_complete()`。
+- `fund_issue_history`：`CREATE TRIGGER fund_issue_history BEFORE DELETE OR UPDATE ON public.adc_fund_issue FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_fund_issue_event
+
+模型：`finance.FundIssueEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| issue_id | bigint | FK | 否 | `adc_fund_issue.id` |
+| sequence | integer | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(8) | — | 否 | — |
+| owner_id | bigint | FK | 否 | `adc_user.id` |
+| due_at | timestamp with time zone | — | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| basis | character varying(500) | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_fund_issue_event_actor_id_921aa921_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_issue_event_issue_id_ff590698_fk_adc_fund_issue_id`：`FOREIGN KEY (issue_id) REFERENCES adc_fund_issue(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_issue_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_fund_issue_event_owner_id_e3c5eb43_fk_adc_user_id`：`FOREIGN KEY (owner_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_issue_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_fund_issue_event_sequence_check`：`CHECK ((sequence >= 0))`。
+- `fund_issue_event_sequence`：`UNIQUE (issue_id, sequence)`。
+- `fund_issue_event_state`：`CHECK (((sequence >= 1) AND ((state)::text = ANY ((ARRAY['OPEN'::character varying, 'CLOSED'::character varying])::text[]))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_fund_issue_event_actor_id_921aa921`：`CREATE INDEX adc_fund_issue_event_actor_id_921aa921 ON public.adc_fund_issue_event USING btree (actor_id)`。
+- `adc_fund_issue_event_issue_id_ff590698`：`CREATE INDEX adc_fund_issue_event_issue_id_ff590698 ON public.adc_fund_issue_event USING btree (issue_id)`。
+- `adc_fund_issue_event_operation_id_key`：`CREATE UNIQUE INDEX adc_fund_issue_event_operation_id_key ON public.adc_fund_issue_event USING btree (operation_id)`。
+- `adc_fund_issue_event_owner_id_e3c5eb43`：`CREATE INDEX adc_fund_issue_event_owner_id_e3c5eb43 ON public.adc_fund_issue_event USING btree (owner_id)`。
+- `adc_fund_issue_event_pkey`：`CREATE UNIQUE INDEX adc_fund_issue_event_pkey ON public.adc_fund_issue_event USING btree (id)`。
+- `fund_issue_event_sequence`：`CREATE UNIQUE INDEX fund_issue_event_sequence ON public.adc_fund_issue_event USING btree (issue_id, sequence)`。
+
+跨表及历史触发器：
+
+- `fund_issue_event_history`：`CREATE TRIGGER fund_issue_event_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_fund_issue_event FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_issue_event()`。
+
+## adc_fund_transfer
+
+模型：`finance.FundTransfer`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| line_id | bigint | FK | 否 | `adc_statement_line.id` |
+| kind | character varying(8) | — | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| basis | character varying(500) | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_fund_transfer_line_id_d7bffdf4_fk_adc_statement_line_id`：`FOREIGN KEY (line_id) REFERENCES adc_statement_line(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_transfer_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_fund_transfer_pkey`：`PRIMARY KEY (id)`。
+- `adc_fund_transfer_prepared_by_id_0659ea5a_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_fund_transfer_reviewed_by_id_60fd4166_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `fund_transfer_independent_review`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `fund_transfer_kind`：`CHECK (((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'RETURN'::character varying])::text[])))`。
+- `fund_transfer_review_metadata`：`CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_fund_transfer_line_id_d7bffdf4`：`CREATE INDEX adc_fund_transfer_line_id_d7bffdf4 ON public.adc_fund_transfer USING btree (line_id)`。
+- `adc_fund_transfer_operation_id_key`：`CREATE UNIQUE INDEX adc_fund_transfer_operation_id_key ON public.adc_fund_transfer USING btree (operation_id)`。
+- `adc_fund_transfer_pkey`：`CREATE UNIQUE INDEX adc_fund_transfer_pkey ON public.adc_fund_transfer USING btree (id)`。
+- `adc_fund_transfer_prepared_by_id_0659ea5a`：`CREATE INDEX adc_fund_transfer_prepared_by_id_0659ea5a ON public.adc_fund_transfer USING btree (prepared_by_id)`。
+- `adc_fund_transfer_reviewed_by_id_60fd4166`：`CREATE INDEX adc_fund_transfer_reviewed_by_id_60fd4166 ON public.adc_fund_transfer USING btree (reviewed_by_id)`。
+- `fund_transfer_active_line`：`CREATE UNIQUE INDEX fund_transfer_active_line ON public.adc_fund_transfer USING btree (line_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying])::text[]))`。
+
+跨表及历史触发器：
+
+- `fund_transfer_history`：`CREATE TRIGGER fund_transfer_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_fund_transfer FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_transfer()`。
+- `fund_transfer_statement_use`：`CREATE TRIGGER fund_transfer_statement_use AFTER INSERT OR UPDATE ON public.adc_fund_transfer FOR EACH ROW EXECUTE FUNCTION adc_sync_statement_use()`。
+
 ## adc_inbox_message
 
 模型：`notifications.InboxMessage`。
@@ -1708,6 +1903,90 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `insurance_arrangement_history`：`CREATE TRIGGER insurance_arrangement_history BEFORE DELETE OR UPDATE ON public.adc_insurance_arrangement FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_preparation()`。
+
+## adc_insurance_cancellation
+
+模型：`insurance.CancellationRequest`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | UK / FK | 否 | `adc_insurance_settlement.id` |
+| cancellation_id | uuid | UK | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(24) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| simulation_mode | character varying(16) | — | 否 | — |
+| source_snapshot | jsonb | — | 否 | — |
+| source_digest | character varying(64) | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_cancel_prepared_by_id_0ea70162_fk_adc_user_`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_cancel_request_id_851d7a91_fk_adc_insur`：`FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_cancellation_cancellation_id_key`：`UNIQUE (cancellation_id)`。
+- `adc_insurance_cancellation_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_insurance_cancellation_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_cancellation_request_id_key`：`UNIQUE (request_id)`。
+- `adc_insurance_cancellation_revision_check`：`CHECK ((revision >= 0))`。
+- `insurance_cancellation_complete`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
+- `insurance_cancellation_mode`：`CHECK (((simulation_mode)::text = ANY ((ARRAY['ACCEPT'::character varying, 'LOST_SUCCESS'::character varying, 'PROCESSING'::character varying])::text[])))`。
+- `insurance_cancellation_state`：`CHECK (((state)::text = ANY ((ARRAY['PROCESSING'::character varying, 'UNKNOWN'::character varying, 'AWAITING_REVIEW'::character varying, 'REVIEW_REJECTED'::character varying, 'CONFIRMED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_cancellation_cancellation_id_key`：`CREATE UNIQUE INDEX adc_insurance_cancellation_cancellation_id_key ON public.adc_insurance_cancellation USING btree (cancellation_id)`。
+- `adc_insurance_cancellation_operation_id_key`：`CREATE UNIQUE INDEX adc_insurance_cancellation_operation_id_key ON public.adc_insurance_cancellation USING btree (operation_id)`。
+- `adc_insurance_cancellation_pkey`：`CREATE UNIQUE INDEX adc_insurance_cancellation_pkey ON public.adc_insurance_cancellation USING btree (id)`。
+- `adc_insurance_cancellation_prepared_by_id_0ea70162`：`CREATE INDEX adc_insurance_cancellation_prepared_by_id_0ea70162 ON public.adc_insurance_cancellation USING btree (prepared_by_id)`。
+- `adc_insurance_cancellation_request_id_key`：`CREATE UNIQUE INDEX adc_insurance_cancellation_request_id_key ON public.adc_insurance_cancellation USING btree (request_id)`。
+
+跨表及历史触发器：
+
+- `insurance_cancellation_complete`：`CREATE CONSTRAINT TRIGGER insurance_cancellation_complete AFTER INSERT ON public.adc_insurance_cancellation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_cancellation_complete()`。
+- `insurance_cancellation_guard`：`CREATE TRIGGER insurance_cancellation_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_cancellation FOR EACH ROW EXECUTE FUNCTION adc_guard_cancellation()`。
+
+## adc_insurance_cancellation_review
+
+模型：`insurance.CancellationReview`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| cancellation_id | bigint | FK | 否 | `adc_insurance_cancellation.id` |
+| operation_id | uuid | UK | 否 | — |
+| sequence | integer | — | 否 | — |
+| decision | character varying(8) | — | 否 | — |
+| reviewed_by_id | bigint | FK | 否 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+| clearance_snapshot | jsonb | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_cancel_cancellation_id_bba6ea0f_fk_adc_insur`：`FOREIGN KEY (cancellation_id) REFERENCES adc_insurance_cancellation(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_cancel_reviewed_by_id_866fa7d7_fk_adc_user_`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_cancellation_review_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_insurance_cancellation_review_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_cancellation_review_sequence_check`：`CHECK ((sequence >= 0))`。
+- `insurance_cancellation_decision`：`CHECK ((((decision)::text = ANY ((ARRAY['APPROVE'::character varying, 'REJECT'::character varying])::text[])) AND (sequence >= 1)))`。
+- `insurance_cancellation_review_seq`：`UNIQUE (cancellation_id, sequence)`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_cancellation_review_cancellation_id_bba6ea0f`：`CREATE INDEX adc_insurance_cancellation_review_cancellation_id_bba6ea0f ON public.adc_insurance_cancellation_review USING btree (cancellation_id)`。
+- `adc_insurance_cancellation_review_operation_id_key`：`CREATE UNIQUE INDEX adc_insurance_cancellation_review_operation_id_key ON public.adc_insurance_cancellation_review USING btree (operation_id)`。
+- `adc_insurance_cancellation_review_pkey`：`CREATE UNIQUE INDEX adc_insurance_cancellation_review_pkey ON public.adc_insurance_cancellation_review USING btree (id)`。
+- `adc_insurance_cancellation_review_reviewed_by_id_866fa7d7`：`CREATE INDEX adc_insurance_cancellation_review_reviewed_by_id_866fa7d7 ON public.adc_insurance_cancellation_review USING btree (reviewed_by_id)`。
+- `insurance_cancellation_once_approved`：`CREATE UNIQUE INDEX insurance_cancellation_once_approved ON public.adc_insurance_cancellation_review USING btree (cancellation_id) WHERE ((decision)::text = 'APPROVE'::text)`。
+- `insurance_cancellation_review_seq`：`CREATE UNIQUE INDEX insurance_cancellation_review_seq ON public.adc_insurance_cancellation_review USING btree (cancellation_id, sequence)`。
+
+跨表及历史触发器：
+
+- `insurance_cancellation_review_guard`：`CREATE TRIGGER insurance_cancellation_review_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_cancellation_review FOR EACH ROW EXECUTE FUNCTION adc_guard_cancellation_review()`。
 
 ## adc_insurance_catalogue
 
@@ -1948,6 +2227,251 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `insurance_policy_item_history`：`CREATE TRIGGER insurance_policy_item_history BEFORE DELETE OR UPDATE ON public.adc_insurance_policy_item FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_insurance_reversal
+
+模型：`insurance.ReversalOutcome`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| cancellation_id | bigint | UK / FK | 否 | `adc_insurance_cancellation.id` |
+| reference | character varying(80) | UK | 否 | — |
+| result | character varying(12) | — | 否 | — |
+| payload | jsonb | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_revers_cancellation_id_446e533c_fk_adc_insur`：`FOREIGN KEY (cancellation_id) REFERENCES adc_insurance_cancellation(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_reversal_cancellation_id_key`：`UNIQUE (cancellation_id)`。
+- `adc_insurance_reversal_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_reversal_reference_key`：`UNIQUE (reference)`。
+- `insurance_reversal_result`：`CHECK (((result)::text = 'REVERSED'::text))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_reversal_cancellation_id_key`：`CREATE UNIQUE INDEX adc_insurance_reversal_cancellation_id_key ON public.adc_insurance_reversal USING btree (cancellation_id)`。
+- `adc_insurance_reversal_pkey`：`CREATE UNIQUE INDEX adc_insurance_reversal_pkey ON public.adc_insurance_reversal USING btree (id)`。
+- `adc_insurance_reversal_reference_a1005a3b_like`：`CREATE INDEX adc_insurance_reversal_reference_a1005a3b_like ON public.adc_insurance_reversal USING btree (reference varchar_pattern_ops)`。
+- `adc_insurance_reversal_reference_key`：`CREATE UNIQUE INDEX adc_insurance_reversal_reference_key ON public.adc_insurance_reversal USING btree (reference)`。
+
+跨表及历史触发器：
+
+- `insurance_reversal_guard`：`CREATE TRIGGER insurance_reversal_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_reversal FOR EACH ROW EXECUTE FUNCTION adc_guard_reversal()`。
+
+## adc_insurance_settlement
+
+模型：`insurance.SettlementRequest`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | uuid | UK | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| invoice_id | bigint | FK | 否 | `adc_invoice.id` |
+| record_version_id | bigint | FK | 否 | `adc_visit_record_version.id` |
+| arrangement_id | bigint | FK | 否 | `adc_insurance_arrangement.id` |
+| eligibility_id | bigint | FK | 否 | `adc_insurance_eligibility.id` |
+| service_on | date | — | 否 | — |
+| currency | character varying(3) | — | 否 | — |
+| gross_amount | numeric(16,2) | — | 否 | — |
+| patient_cash | numeric(16,2) | — | 否 | — |
+| personal_account | numeric(16,2) | — | 否 | — |
+| fund_amount | numeric(16,2) | — | 否 | — |
+| source_snapshot | jsonb | — | 否 | — |
+| source_digest | character varying(64) | — | 否 | — |
+| simulation_mode | character varying(16) | — | 否 | — |
+| state | character varying(24) | — | 否 | — |
+| lock_version | integer | — | 否 | — |
+| created_by_id | bigint | FK | 否 | `adc_user.id` |
+| created_at | timestamp with time zone | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_settle_arrangement_id_06779c4f_fk_adc_insur`：`FOREIGN KEY (arrangement_id) REFERENCES adc_insurance_arrangement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settle_eligibility_id_6778c228_fk_adc_insur`：`FOREIGN KEY (eligibility_id) REFERENCES adc_insurance_eligibility(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settle_record_version_id_0b70cf6d_fk_adc_visit`：`FOREIGN KEY (record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_created_by_id_df807ce9_fk_adc_user_id`：`FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_invoice_id_646e5e2a_fk_adc_invoice_id`：`FOREIGN KEY (invoice_id) REFERENCES adc_invoice(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_lock_version_check`：`CHECK ((lock_version >= 0))`。
+- `adc_insurance_settlement_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_insurance_settlement_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_settlement_request_id_key`：`UNIQUE (request_id)`。
+- `insurance_settlement_cny`：`CHECK (((currency)::text = 'CNY'::text))`。
+- `insurance_settlement_complete`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
+- `insurance_settlement_split`：`CHECK (((fund_amount >= (0)::numeric) AND (gross_amount > (0)::numeric) AND (patient_cash >= (0)::numeric) AND (personal_account >= (0)::numeric) AND (gross_amount = ((patient_cash + personal_account) + fund_amount))))`。
+- `insurance_settlement_state`：`CHECK (((state)::text = ANY ((ARRAY['PROCESSING'::character varying, 'UNKNOWN'::character varying, 'AWAITING_REVIEW'::character varying, 'CONFIRMED'::character varying, 'REVIEW_REJECTED'::character varying, 'DECLINED'::character varying, 'CANCEL_PENDING'::character varying, 'CANCELLED'::character varying])::text[])))`。
+- `insurance_simulation_mode`：`CHECK (((simulation_mode)::text = ANY ((ARRAY['ACCEPT'::character varying, 'LOST_SUCCESS'::character varying, 'PROCESSING'::character varying, 'DECLINE'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_settlement_arrangement_id_06779c4f`：`CREATE INDEX adc_insurance_settlement_arrangement_id_06779c4f ON public.adc_insurance_settlement USING btree (arrangement_id)`。
+- `adc_insurance_settlement_created_by_id_df807ce9`：`CREATE INDEX adc_insurance_settlement_created_by_id_df807ce9 ON public.adc_insurance_settlement USING btree (created_by_id)`。
+- `adc_insurance_settlement_eligibility_id_6778c228`：`CREATE INDEX adc_insurance_settlement_eligibility_id_6778c228 ON public.adc_insurance_settlement USING btree (eligibility_id)`。
+- `adc_insurance_settlement_invoice_id_646e5e2a`：`CREATE INDEX adc_insurance_settlement_invoice_id_646e5e2a ON public.adc_insurance_settlement USING btree (invoice_id)`。
+- `adc_insurance_settlement_operation_id_key`：`CREATE UNIQUE INDEX adc_insurance_settlement_operation_id_key ON public.adc_insurance_settlement USING btree (operation_id)`。
+- `adc_insurance_settlement_pkey`：`CREATE UNIQUE INDEX adc_insurance_settlement_pkey ON public.adc_insurance_settlement USING btree (id)`。
+- `adc_insurance_settlement_record_version_id_0b70cf6d`：`CREATE INDEX adc_insurance_settlement_record_version_id_0b70cf6d ON public.adc_insurance_settlement USING btree (record_version_id)`。
+- `adc_insurance_settlement_request_id_key`：`CREATE UNIQUE INDEX adc_insurance_settlement_request_id_key ON public.adc_insurance_settlement USING btree (request_id)`。
+- `insurance_one_active_settlement`：`CREATE UNIQUE INDEX insurance_one_active_settlement ON public.adc_insurance_settlement USING btree (invoice_id) WHERE ((state)::text = ANY ((ARRAY['PROCESSING'::character varying, 'UNKNOWN'::character varying, 'AWAITING_REVIEW'::character varying, 'CONFIRMED'::character varying, 'REVIEW_REJECTED'::character varying, 'CANCEL_PENDING'::character varying])::text[]))`。
+
+跨表及历史触发器：
+
+- `insurance_settlement_complete`：`CREATE CONSTRAINT TRIGGER insurance_settlement_complete AFTER INSERT ON public.adc_insurance_settlement DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_insurance_totals()`。
+- `insurance_settlement_guard`：`CREATE TRIGGER insurance_settlement_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_settlement FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_settlement()`。
+
+## adc_insurance_settlement_event
+
+模型：`insurance.SettlementEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | FK | 否 | `adc_insurance_settlement.id` |
+| sequence | integer | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| action | character varying(32) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_settle_request_id_8b600da4_fk_adc_insur`：`FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_event_actor_id_03fb053e_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_insurance_settlement_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_settlement_event_sequence_check`：`CHECK ((sequence >= 0))`。
+- `insurance_settlement_event_order`：`CHECK ((sequence >= 1))`。
+- `insurance_settlement_event_seq`：`UNIQUE (request_id, sequence)`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_settlement_event_actor_id_03fb053e`：`CREATE INDEX adc_insurance_settlement_event_actor_id_03fb053e ON public.adc_insurance_settlement_event USING btree (actor_id)`。
+- `adc_insurance_settlement_event_operation_id_key`：`CREATE UNIQUE INDEX adc_insurance_settlement_event_operation_id_key ON public.adc_insurance_settlement_event USING btree (operation_id)`。
+- `adc_insurance_settlement_event_pkey`：`CREATE UNIQUE INDEX adc_insurance_settlement_event_pkey ON public.adc_insurance_settlement_event USING btree (id)`。
+- `adc_insurance_settlement_event_request_id_8b600da4`：`CREATE INDEX adc_insurance_settlement_event_request_id_8b600da4 ON public.adc_insurance_settlement_event USING btree (request_id)`。
+- `insurance_settlement_event_seq`：`CREATE UNIQUE INDEX insurance_settlement_event_seq ON public.adc_insurance_settlement_event USING btree (request_id, sequence)`。
+
+跨表及历史触发器：
+
+- `insurance_settlement_event_history`：`CREATE TRIGGER insurance_settlement_event_history BEFORE DELETE OR UPDATE ON public.adc_insurance_settlement_event FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_insurance_settlement_line
+
+模型：`insurance.SettlementLine`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | FK | 否 | `adc_insurance_settlement.id` |
+| treatment_record_id | bigint | FK | 否 | `adc_treatment_record.id` |
+| line_no | integer | — | 否 | — |
+| mapping_id | bigint | FK | 是 | `adc_insurance_fee_mapping.id` |
+| source_snapshot | jsonb | — | 否 | — |
+| policy_quantity | numeric(24,7) | — | 是 | — |
+| fund_limit | numeric(16,2) | — | 否 | — |
+| gross_amount | numeric(16,2) | — | 否 | — |
+| patient_cash | numeric(16,2) | — | 否 | — |
+| personal_account | numeric(16,2) | — | 否 | — |
+| fund_amount | numeric(16,2) | — | 否 | — |
+| exception | character varying(200) | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_settle_mapping_id_0e6cc7c2_fk_adc_insur`：`FOREIGN KEY (mapping_id) REFERENCES adc_insurance_fee_mapping(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settle_request_id_e05f23da_fk_adc_insur`：`FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settle_treatment_record_id_d10e2c02_fk_adc_treat`：`FOREIGN KEY (treatment_record_id) REFERENCES adc_treatment_record(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_line_line_no_check`：`CHECK ((line_no >= 0))`。
+- `adc_insurance_settlement_line_pkey`：`PRIMARY KEY (id)`。
+- `insurance_line_quantity`：`CHECK (((policy_quantity IS NULL) OR (policy_quantity > (0)::numeric)))`。
+- `insurance_line_split`：`CHECK (((fund_amount >= (0)::numeric) AND (fund_amount <= fund_limit) AND (fund_limit >= (0)::numeric) AND (gross_amount >= (0)::numeric) AND (line_no >= 1) AND (patient_cash >= (0)::numeric) AND (personal_account >= (0)::numeric) AND (gross_amount = ((patient_cash + personal_account) + fund_amount))))`。
+- `insurance_settlement_line_no`：`UNIQUE (request_id, line_no)`。
+- `insurance_settlement_source_line`：`UNIQUE (request_id, treatment_record_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_settlement_line_mapping_id_0e6cc7c2`：`CREATE INDEX adc_insurance_settlement_line_mapping_id_0e6cc7c2 ON public.adc_insurance_settlement_line USING btree (mapping_id)`。
+- `adc_insurance_settlement_line_pkey`：`CREATE UNIQUE INDEX adc_insurance_settlement_line_pkey ON public.adc_insurance_settlement_line USING btree (id)`。
+- `adc_insurance_settlement_line_request_id_e05f23da`：`CREATE INDEX adc_insurance_settlement_line_request_id_e05f23da ON public.adc_insurance_settlement_line USING btree (request_id)`。
+- `adc_insurance_settlement_line_treatment_record_id_d10e2c02`：`CREATE INDEX adc_insurance_settlement_line_treatment_record_id_d10e2c02 ON public.adc_insurance_settlement_line USING btree (treatment_record_id)`。
+- `insurance_settlement_line_no`：`CREATE UNIQUE INDEX insurance_settlement_line_no ON public.adc_insurance_settlement_line USING btree (request_id, line_no)`。
+- `insurance_settlement_source_line`：`CREATE UNIQUE INDEX insurance_settlement_source_line ON public.adc_insurance_settlement_line USING btree (request_id, treatment_record_id)`。
+
+跨表及历史触发器：
+
+- `insurance_settlement_line_guard`：`CREATE TRIGGER insurance_settlement_line_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_settlement_line FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_line()`。
+
+## adc_insurance_settlement_review
+
+模型：`insurance.SettlementReview`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | UK / FK | 否 | `adc_insurance_settlement.id` |
+| operation_id | uuid | UK | 否 | — |
+| reviewed_by_id | bigint | FK | 否 | `adc_user.id` |
+| decision | character varying(8) | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+| source_digest | character varying(64) | — | 否 | — |
+| reviewed_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_settle_request_id_d2cccea6_fk_adc_insur`：`FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settle_reviewed_by_id_bf507820_fk_adc_user_`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_settlement_review_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_insurance_settlement_review_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_settlement_review_request_id_key`：`UNIQUE (request_id)`。
+- `insurance_settlement_review`：`CHECK (((decision)::text = ANY ((ARRAY['APPROVE'::character varying, 'REJECT'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_settlement_review_operation_id_key`：`CREATE UNIQUE INDEX adc_insurance_settlement_review_operation_id_key ON public.adc_insurance_settlement_review USING btree (operation_id)`。
+- `adc_insurance_settlement_review_pkey`：`CREATE UNIQUE INDEX adc_insurance_settlement_review_pkey ON public.adc_insurance_settlement_review USING btree (id)`。
+- `adc_insurance_settlement_review_request_id_key`：`CREATE UNIQUE INDEX adc_insurance_settlement_review_request_id_key ON public.adc_insurance_settlement_review USING btree (request_id)`。
+- `adc_insurance_settlement_review_reviewed_by_id_bf507820`：`CREATE INDEX adc_insurance_settlement_review_reviewed_by_id_bf507820 ON public.adc_insurance_settlement_review USING btree (reviewed_by_id)`。
+
+跨表及历史触发器：
+
+- `insurance_settlement_review_guard`：`CREATE TRIGGER insurance_settlement_review_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_settlement_review FOR EACH ROW EXECUTE FUNCTION adc_guard_settlement_review()`。
+
+## adc_insurance_simulation
+
+模型：`insurance.SimulationOutcome`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | UK / FK | 否 | `adc_insurance_settlement.id` |
+| reference | character varying(80) | UK | 否 | — |
+| request_digest | character varying(64) | — | 否 | — |
+| result | character varying(12) | — | 否 | — |
+| payload | jsonb | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_insurance_simula_request_id_e30a0a36_fk_adc_insur`：`FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_insurance_simulation_pkey`：`PRIMARY KEY (id)`。
+- `adc_insurance_simulation_reference_key`：`UNIQUE (reference)`。
+- `adc_insurance_simulation_request_id_key`：`UNIQUE (request_id)`。
+- `insurance_simulation_result`：`CHECK (((result)::text = ANY ((ARRAY['ACCEPTED'::character varying, 'DECLINED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_insurance_simulation_pkey`：`CREATE UNIQUE INDEX adc_insurance_simulation_pkey ON public.adc_insurance_simulation USING btree (id)`。
+- `adc_insurance_simulation_reference_e71f4027_like`：`CREATE INDEX adc_insurance_simulation_reference_e71f4027_like ON public.adc_insurance_simulation USING btree (reference varchar_pattern_ops)`。
+- `adc_insurance_simulation_reference_key`：`CREATE UNIQUE INDEX adc_insurance_simulation_reference_key ON public.adc_insurance_simulation USING btree (reference)`。
+- `adc_insurance_simulation_request_id_key`：`CREATE UNIQUE INDEX adc_insurance_simulation_request_id_key ON public.adc_insurance_simulation USING btree (request_id)`。
+
+跨表及历史触发器：
+
+- `insurance_simulation_guard`：`CREATE TRIGGER insurance_simulation_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_simulation FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_outcome()`。
 
 ## adc_invoice
 
@@ -3288,6 +3812,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+- `cash_match_statement_use`：`CREATE TRIGGER cash_match_statement_use AFTER INSERT OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_sync_statement_use()`。
 - `reconciliation_history`：`CREATE TRIGGER reconciliation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
 
 ## adc_resource_action
@@ -3781,6 +4306,44 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `statement_line_history`：`CREATE TRIGGER statement_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_line FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
+
+## adc_statement_use
+
+模型：`finance.StatementUse`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| line_id | bigint | FK | 否 | `adc_statement_line.id` |
+| cash_match_id | bigint | UK / FK | 是 | `adc_reconciliation_match.id` |
+| fund_transfer_id | bigint | UK / FK | 是 | `adc_fund_transfer.id` |
+| state | character varying(8) | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+| released_at | timestamp with time zone | — | 是 | — |
+| derived_from_existing | boolean | — | 否 | — |
+
+数据库约束：
+
+- `adc_statement_use_cash_match_id_e6cf3f01_fk_adc_recon`：`FOREIGN KEY (cash_match_id) REFERENCES adc_reconciliation_match(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_statement_use_cash_match_id_key`：`UNIQUE (cash_match_id)`。
+- `adc_statement_use_fund_transfer_id_b2238652_fk_adc_fund_`：`FOREIGN KEY (fund_transfer_id) REFERENCES adc_fund_transfer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_statement_use_fund_transfer_id_key`：`UNIQUE (fund_transfer_id)`。
+- `adc_statement_use_line_id_8cc06ea0_fk_adc_statement_line_id`：`FOREIGN KEY (line_id) REFERENCES adc_statement_line(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_statement_use_pkey`：`PRIMARY KEY (id)`。
+- `statement_use_exact_owner`：`CHECK ((((cash_match_id IS NOT NULL) AND (fund_transfer_id IS NULL)) OR ((cash_match_id IS NULL) AND (fund_transfer_id IS NOT NULL))))`。
+- `statement_use_state`：`CHECK ((((released_at IS NULL) AND ((state)::text = 'ACTIVE'::text)) OR ((released_at IS NOT NULL) AND ((state)::text = 'RELEASED'::text))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_statement_use_cash_match_id_key`：`CREATE UNIQUE INDEX adc_statement_use_cash_match_id_key ON public.adc_statement_use USING btree (cash_match_id)`。
+- `adc_statement_use_fund_transfer_id_key`：`CREATE UNIQUE INDEX adc_statement_use_fund_transfer_id_key ON public.adc_statement_use USING btree (fund_transfer_id)`。
+- `adc_statement_use_line_id_8cc06ea0`：`CREATE INDEX adc_statement_use_line_id_8cc06ea0 ON public.adc_statement_use USING btree (line_id)`。
+- `adc_statement_use_pkey`：`CREATE UNIQUE INDEX adc_statement_use_pkey ON public.adc_statement_use USING btree (id)`。
+- `statement_one_active_use`：`CREATE UNIQUE INDEX statement_one_active_use ON public.adc_statement_use USING btree (line_id) WHERE ((state)::text = 'ACTIVE'::text)`。
+
+跨表及历史触发器：
+
+- `statement_use_history`：`CREATE TRIGGER statement_use_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_use FOR EACH ROW EXECUTE FUNCTION adc_guard_statement_use()`。
 
 ## adc_tooth_finding
 

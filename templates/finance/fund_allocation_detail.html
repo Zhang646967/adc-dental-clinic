@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}<div class="business-flow">
+<p><a href="{% url 'fund_transfer_detail' row.transfer_id %}">← 原银行凭据</a></p><h1>逐笔分配 #{{ row.pk }}</h1>
+<section class="panel"><h2>{{ row.get_state_display }}</h2><dl class="detail-grid"><dt>用途</dt><dd>{{ row.transfer.get_kind_display }}</dd><dt>银行流水与日期</dt><dd>{{ row.transfer.line.transaction_id }} · {{ row.transfer.line.booked_on }}</dd><dt>本次合计</dt><dd>{{ row.total }} CNY</dd><dt>原提交人／时间</dt><dd>{{ row.prepared_by }} · {{ row.prepared_at }}</dd><dt>分配依据</dt><dd>{{ row.basis }}</dd>{% if row.reviewed_at %}<dt>独立核对人／时间</dt><dd>{{ row.reviewed_by }} · {{ row.reviewed_at }}</dd><dt>核对依据</dt><dd>{{ row.review_reason }}</dd>{% endif %}</dl>
+{% if can_review %}<a class="button" href="{% url 'fund_allocation_review' row.pk %}">独立核对逐笔分配</a>{% endif %}</section>
+{% for line in lines %}<section class="panel"><h2><a href="{% url 'fund_claim_detail' line.claim_id %}">{{ line.claim.invoice.invoice_no }}</a></h2><p class="mono">{{ line.claim.request_id }}</p><p>本次 {{ line.amount }} CNY · 原接诊业务日 {{ line.claim.service_on }}</p></section>{% endfor %}
+<p>银行日期与接诊业务日分别保留。本次分配不重复确认收入，也不生成患者收退款。</p></div>{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block content %}<div class="business-flow">
+<p><a href="{% url 'fund_claims' %}">← 基金申报与清算</a></p><h1>{{ row.invoice.invoice_no }} · 基金清算</h1>
+<p>{{ row.arrangement.clinic.name }} · 原接诊业务日 {{ row.service_on }} · {{ row.get_state_display }}</p><p class="mono">{{ row.request_id }}</p>
+<section class="panel"><h2>分担与银行资金</h2><dl class="detail-grid"><dt>当前基金应收</dt><dd>{{ funds.receivable }} CNY</dd><dt>已核对入账</dt><dd>{{ funds.received }} CNY</dd><dt>已核对退回</dt><dd>{{ funds.returned }} CNY</dd><dt>已到账净额</dt><dd>{{ funds.net_received }} CNY</dd><dt>尚未到账</dt><dd>{{ funds.unreceived }} CNY</dd><dt>待核对入账／退回</dt><dd>{{ funds.reserved_in }} / {{ funds.reserved_out }} CNY</dd></dl>
+<p>“尚未到账”包括待分配、少到账和待核实差额；不会自动增加患者待缴。撤销中的原分担在独立确认前保留。</p>
+<div class="actions"><a class="button" href="{% url 'fund_issue_new' row.pk %}">登记差额与跟进</a><a class="button secondary" href="{% url 'fund_transfers' %}">选择银行到账／退回凭据</a><a class="button secondary" href="{% url 'insurance_settlement_detail' row.pk %}">原结算与撤销进度</a></div></section>
+<section class="panel"><h2>逐笔分配历史</h2>{% for line in allocations %}<p><a href="{% url 'fund_allocation_detail' line.allocation_id %}">分配 #{{ line.allocation_id }}</a> · {{ line.allocation.transfer.get_kind_display }} {{ line.amount }} CNY · {{ line.allocation.get_state_display }}<br>银行日期 {{ line.allocation.transfer.line.booked_on }} · {{ line.allocation.transfer.line.transaction_id }}</p>{% empty %}<p>尚无逐笔分配，银行证据通过也不会自动核销本申报。</p>{% endfor %}
+<nav aria-label="分配分页">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">上一页</a>{% endif %} 第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页 {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">下一页</a>{% endif %}</nav></section>
+<section class="panel"><h2>差额与跟进事项</h2>{% for issue in issues %}<p><a href="{% url 'fund_issue_detail' issue.pk %}">事项 #{{ issue.pk }} · {{ issue.get_kind_display }}</a></p>{% empty %}<p>尚未登记跟进事项。</p>{% endfor %}<a href="{% url 'fund_issues' %}">查看全部联系待办</a></section>
+</div>{% endblock %}

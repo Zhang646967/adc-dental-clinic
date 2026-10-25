@@ -211,6 +211,62 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_equipment_event_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE a adc_equipment_asset%ROWTYPE; p adc_equipment_event%ROWTYPE;\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'equipment events are append-only' USING ERRCODE='23514';\n  END IF;\n  SELECT * INTO a FROM adc_equipment_asset WHERE id=NEW.asset_id FOR UPDATE;\n  IF NOT FOUND OR NEW.sequence<>a.lock_version OR NEW.next_state<>a.state\n      OR NEW.next_service_due IS DISTINCT FROM a.next_service_due\n      OR NEW.performed_on>(current_timestamp AT TIME ZONE 'Asia/Shanghai')::date THEN\n    RAISE EXCEPTION 'equipment event and current asset disagree' USING ERRCODE='23514';\n  END IF;\n  IF NEW.sequence=0 THEN\n    IF NEW.kind<>'REGISTER' OR NEW.previous_state<>'' OR NEW.next_state<>'IN_SERVICE'\n       OR NEW.performed_on<>a.acquired_on OR NEW.cost IS DISTINCT FROM a.acquisition_cost\n       OR NEW.recorded_by_id<>a.registered_by_id THEN\n      RAISE EXCEPTION 'invalid equipment registration event' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    SELECT * INTO p FROM adc_equipment_event WHERE asset_id=a.id AND sequence=NEW.sequence-1;\n    IF NOT FOUND OR NEW.previous_state<>p.next_state OR NEW.performed_on<p.performed_on\n       OR NOT ((NEW.kind='MAINTENANCE' AND p.next_state='IN_SERVICE' AND NEW.next_state='MAINTENANCE')\n           OR (NEW.kind='SERVICE' AND p.next_state IN ('IN_SERVICE','MAINTENANCE') AND NEW.next_state='IN_SERVICE')\n           OR (NEW.kind='RETIRE' AND p.next_state IN ('IN_SERVICE','MAINTENANCE') AND NEW.next_state='RETIRED')) THEN\n      RAISE EXCEPTION 'invalid equipment transition history' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_fund_allocation",
+      "name": "fund_allocation_complete",
+      "definition": "CREATE CONSTRAINT TRIGGER fund_allocation_complete AFTER INSERT ON public.adc_fund_allocation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_fund_allocation_complete()",
+      "function": "adc_check_fund_allocation_complete",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_fund_allocation_complete()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE a adc_fund_allocation;\nBEGIN\n  SELECT * INTO a FROM adc_fund_allocation WHERE id=NEW.id;\n  IF a.total IS DISTINCT FROM (SELECT sum(amount) FROM adc_fund_allocation_line WHERE allocation_id=a.id) THEN\n    RAISE EXCEPTION 'allocation total must equal its complete retained claim lines' USING ERRCODE='23514';\n  END IF;\n  RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "fund_allocation_guard",
+      "definition": "CREATE TRIGGER fund_allocation_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_fund_allocation FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_allocation()",
+      "function": "adc_guard_fund_allocation",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_fund_allocation()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE t adc_fund_transfer; bank_amount numeric; item record;\nBEGIN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'fund allocations are retained' USING ERRCODE='23514'; END IF;\n  SELECT * INTO t FROM adc_fund_transfer WHERE id=NEW.transfer_id;\n  SELECT amount INTO bank_amount FROM adc_statement_line WHERE id=t.line_id FOR UPDATE;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PENDING' OR t.state<>'CONFIRMED' OR btrim(NEW.basis)='' OR\n      NEW.total + coalesce((SELECT sum(total) FROM adc_fund_allocation\n        WHERE transfer_id=NEW.transfer_id AND state IN ('PENDING','CONFIRMED')),0)>bank_amount THEN\n      RAISE EXCEPTION 'allocation needs confirmed evidence and available bank amount' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    IF OLD.state<>'PENDING' OR NEW.state NOT IN ('CONFIRMED','REJECTED') OR NEW.reviewed_at<NEW.prepared_at\n       OR (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) IS DISTINCT FROM\n          (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) THEN\n      RAISE EXCEPTION 'allocation source and independent decisions are retained' USING ERRCODE='23514';\n    END IF;\n    IF NEW.state='CONFIRMED' THEN\n      FOR item IN SELECT l.claim_id,c.state,r.decision FROM adc_fund_allocation_line l\n        JOIN adc_insurance_settlement c ON c.id=l.claim_id\n        JOIN adc_insurance_settlement_review r ON r.request_id=c.id\n        WHERE l.allocation_id=NEW.id ORDER BY l.claim_id LOOP\n        PERFORM adc_check_fund_claim(item.claim_id);\n        IF item.decision<>'APPROVE' OR\n          NOT (item.state='CONFIRMED' OR (t.kind='RETURN' AND item.state='CANCEL_PENDING')) THEN\n          RAISE EXCEPTION 'allocation requires a valid independently approved claim' USING ERRCODE='23514';\n        END IF;\n      END LOOP;\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "fund_allocation_line_guard",
+      "definition": "CREATE TRIGGER fund_allocation_line_guard AFTER INSERT OR DELETE OR UPDATE ON public.adc_fund_allocation_line FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_allocation_line()",
+      "function": "adc_guard_fund_allocation_line",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_fund_allocation_line()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE a adc_fund_allocation; c adc_insurance_settlement; t record;\nBEGIN\n  IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'allocated claim amounts are immutable' USING ERRCODE='23514'; END IF;\n  SELECT * INTO c FROM adc_insurance_settlement WHERE id=NEW.claim_id FOR UPDATE;\n  SELECT * INTO a FROM adc_fund_allocation WHERE id=NEW.allocation_id;\n  SELECT f.kind, f.state, b.currency, p.clinic_id INTO t FROM adc_fund_transfer f\n    JOIN adc_statement_line b ON b.id=f.line_id JOIN adc_payment_account p ON p.id=b.account_id WHERE f.id=a.transfer_id;\n  IF a.state<>'PENDING' OR t.state<>'CONFIRMED' OR c.currency<>t.currency\n     OR t.clinic_id<>(SELECT clinic_id FROM adc_insurance_arrangement WHERE id=c.arrangement_id)\n     OR NOT (c.state='CONFIRMED' OR (t.kind='RETURN' AND c.state='CANCEL_PENDING'))\n     OR NOT EXISTS (SELECT 1 FROM adc_insurance_settlement_review WHERE request_id=c.id AND decision='APPROVE') THEN\n    RAISE EXCEPTION 'allocation line must use a confirmed claim in the same clinic and currency' USING ERRCODE='23514';\n  END IF;\n  PERFORM adc_check_fund_claim(c.id);\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "fund_issue_complete",
+      "definition": "CREATE CONSTRAINT TRIGGER fund_issue_complete AFTER INSERT ON public.adc_fund_issue DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_fund_issue_complete()",
+      "function": "adc_check_fund_issue_complete",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_fund_issue_complete()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF NOT EXISTS (SELECT 1 FROM adc_fund_issue_event WHERE issue_id=NEW.id AND sequence=1 AND state='OPEN') THEN\n    RAISE EXCEPTION 'fund issue needs its initial responsibility and deadline' USING ERRCODE='23514';\n  END IF;\n  RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "fund_issue_history",
+      "definition": "CREATE TRIGGER fund_issue_history BEFORE DELETE OR UPDATE ON public.adc_fund_issue FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "fund_issue_event_history",
+      "definition": "CREATE TRIGGER fund_issue_event_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_fund_issue_event FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_issue_event()",
+      "function": "adc_guard_fund_issue_event",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_fund_issue_event()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE last_event adc_fund_issue_event;\nBEGIN\n  IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'fund followup history is immutable' USING ERRCODE='23514'; END IF;\n  PERFORM 1 FROM adc_fund_issue WHERE id=NEW.issue_id FOR UPDATE;\n  SELECT * INTO last_event FROM adc_fund_issue_event WHERE issue_id=NEW.issue_id ORDER BY sequence DESC LIMIT 1;\n  IF NEW.sequence<>coalesce(last_event.sequence,0)+1 OR btrim(NEW.basis)='' OR last_event.state='CLOSED'\n    OR (last_event.id IS NULL AND NEW.state<>'OPEN')\n    OR (NEW.state='OPEN' AND NEW.due_at<=NEW.created_at)\n    OR (NEW.state='CLOSED' AND NEW.due_at IS DISTINCT FROM last_event.due_at) THEN\n    RAISE EXCEPTION 'followup needs an explicit responsibility, deadline and retained sequence' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "fund_transfer_history",
+      "definition": "CREATE TRIGGER fund_transfer_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_fund_transfer FOR EACH ROW EXECUTE FUNCTION adc_guard_fund_transfer()",
+      "function": "adc_guard_fund_transfer",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_fund_transfer()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'fund bank evidence is retained' USING ERRCODE='23514';\n  END IF;\n  PERFORM 1 FROM adc_statement_line WHERE id=NEW.line_id FOR UPDATE;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PENDING' OR btrim(NEW.basis)='' OR NOT EXISTS (\n      SELECT 1 FROM adc_statement_line l JOIN adc_statement_batch b ON b.id=l.batch_id\n        JOIN adc_payment_account a ON a.id=l.account_id WHERE l.id=NEW.line_id\n        AND b.state='IMPORTED' AND a.method='BANK_TRANSFER' AND l.currency='CNY'\n        AND l.direction=(CASE WHEN NEW.kind='RECEIPT' THEN 'IN' ELSE 'OUT' END)) THEN\n      RAISE EXCEPTION 'fund evidence requires an imported CNY bank transaction with matching direction' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('CONFIRMED','REJECTED') OR NEW.reviewed_at<NEW.prepared_at\n     OR (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) IS DISTINCT FROM\n        (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) THEN\n    RAISE EXCEPTION 'fund evidence source and independent decisions are immutable' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "fund_transfer_statement_use",
+      "definition": "CREATE TRIGGER fund_transfer_statement_use AFTER INSERT OR UPDATE ON public.adc_fund_transfer FOR EACH ROW EXECUTE FUNCTION adc_sync_statement_use()",
+      "function": "adc_sync_statement_use",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_sync_statement_use()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE release_time timestamptz;\nBEGIN\n  PERFORM 1 FROM adc_statement_line WHERE id=NEW.line_id FOR UPDATE;\n  IF TG_OP='INSERT' THEN\n    IF TG_TABLE_NAME='adc_reconciliation_match' THEN\n      INSERT INTO adc_statement_use(line_id,cash_match_id,fund_transfer_id,state,created_at,released_at,derived_from_existing)\n        VALUES (NEW.line_id,NEW.id,NULL,'ACTIVE',NEW.prepared_at,NULL,false);\n    ELSE\n      INSERT INTO adc_statement_use(line_id,cash_match_id,fund_transfer_id,state,created_at,released_at,derived_from_existing)\n        VALUES (NEW.line_id,NULL,NEW.id,'ACTIVE',NEW.prepared_at,NULL,false);\n    END IF;\n  ELSIF NEW.state IN ('REJECTED','STALE') THEN\n    IF TG_TABLE_NAME='adc_reconciliation_match' THEN\n      release_time=coalesce(NEW.invalidated_at,NEW.reviewed_at);\n      UPDATE adc_statement_use SET state='RELEASED',released_at=release_time WHERE cash_match_id=NEW.id AND state='ACTIVE';\n    ELSE\n      UPDATE adc_statement_use SET state='RELEASED',released_at=NEW.reviewed_at WHERE fund_transfer_id=NEW.id AND state='ACTIVE';\n    END IF;\n    IF NOT FOUND THEN RAISE EXCEPTION 'active bank evidence ownership is missing' USING ERRCODE='23514'; END IF;\n  END IF;\n  RETURN NULL;\nEND $function$\n"
+    },
+    {
       "table": "adc_inbox_message",
       "name": "inbox_ownership_guard",
       "definition": "CREATE TRIGGER inbox_ownership_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_inbox_message FOR EACH ROW EXECUTE FUNCTION adc_inbox_ownership()",
@@ -223,6 +279,27 @@
       "definition": "CREATE TRIGGER insurance_arrangement_history BEFORE DELETE OR UPDATE ON public.adc_insurance_arrangement FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_preparation()",
       "function": "adc_guard_insurance_preparation",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_insurance_preparation()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE mutable text[] := ARRAY['state','revision','reviewed_by_id','reviewed_at','review_reason'];\nBEGIN\n\n  IF TG_OP='INSERT' THEN\n    IF NEW.previous_id IS NOT NULL AND NOT EXISTS (\n      SELECT 1 FROM adc_insurance_catalogue p WHERE p.id=NEW.previous_id\n      AND p.source_digest=NEW.source_digest AND p.normalized_digest=NEW.normalized_digest\n      AND p.region=NEW.region AND p.version_code=NEW.version_code\n      AND p.review_attempt+1=NEW.review_attempt AND p.state IN ('REJECTED','DISABLED')) THEN\n        RAISE EXCEPTION 'policy review must continue the same closed source' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\n  END IF;\n\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'insurance preparation history is retained' USING ERRCODE='23514'; END IF;\n  IF (to_jsonb(NEW)-mutable) IS DISTINCT FROM (to_jsonb(OLD)-mutable) THEN\n    RAISE EXCEPTION 'insurance source facts are immutable; prepare a new record' USING ERRCODE='23514'; END IF;\n  IF OLD.state='DRAFT' AND NEW.state IN ('CONFIRMED','REJECTED') AND NEW.revision=OLD.revision+1 THEN RETURN NEW; END IF;\n  IF OLD.state='CONFIRMED' AND NEW.state='DISABLED' AND NEW.revision=OLD.revision+1\n     AND (NEW.reviewed_by_id,NEW.reviewed_at,NEW.review_reason) IS NOT DISTINCT FROM\n         (OLD.reviewed_by_id,OLD.reviewed_at,OLD.review_reason) THEN RETURN NEW; END IF;\n  RAISE EXCEPTION 'insurance decisions cannot be rewritten or revived' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "insurance_cancellation_complete",
+      "definition": "CREATE CONSTRAINT TRIGGER insurance_cancellation_complete AFTER INSERT ON public.adc_insurance_cancellation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_cancellation_complete()",
+      "function": "adc_check_cancellation_complete",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_cancellation_complete()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF NOT EXISTS(SELECT 1 FROM adc_insurance_reversal WHERE cancellation_id=NEW.id)\n    OR NOT EXISTS(SELECT 1 FROM adc_insurance_settlement WHERE id=NEW.request_id AND state IN ('CANCEL_PENDING','CANCELLED'))\n    OR NOT EXISTS(SELECT 1 FROM adc_insurance_settlement_event WHERE request_id=NEW.request_id AND action='CANCEL_START') THEN\n    RAISE EXCEPTION 'cancellation requires its original result and source progress in one transaction' USING ERRCODE='23514';\n  END IF;\n  RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "insurance_cancellation_guard",
+      "definition": "CREATE TRIGGER insurance_cancellation_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_cancellation FOR EACH ROW EXECUTE FUNCTION adc_guard_cancellation()",
+      "function": "adc_guard_cancellation",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_cancellation()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE s adc_insurance_settlement; decision text;\nBEGIN\n  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'original cancellation is retained' USING ERRCODE='23514'; END IF;\n  SELECT * INTO s FROM adc_insurance_settlement WHERE id=NEW.request_id FOR UPDATE;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PROCESSING' OR NEW.revision<>0 OR btrim(NEW.reason)=''\n      OR s.state NOT IN ('AWAITING_REVIEW','CONFIRMED','REVIEW_REJECTED')\n      OR NEW.source_snapshot->>'request_id' IS DISTINCT FROM s.request_id::text\n      OR NEW.source_snapshot->>'source_digest' IS DISTINCT FROM s.source_digest\n      OR NOT EXISTS (SELECT 1 FROM adc_insurance_simulation o WHERE o.request_id=s.id AND o.result='ACCEPTED'\n        AND o.reference=NEW.source_snapshot->>'original_reference')\n      OR EXISTS (SELECT 1 FROM adc_fund_allocation_line l JOIN adc_fund_allocation a ON a.id=l.allocation_id\n        WHERE l.claim_id=s.id AND a.state='PENDING')\n      OR EXISTS (SELECT 1 FROM adc_cash_entry WHERE invoice_id=s.invoice_id AND state='PENDING') THEN\n      RAISE EXCEPTION 'cancellation needs the known original accepted result and no pending allocations or cash' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\n  END IF;\n  IF (to_jsonb(NEW)-ARRAY['state','revision']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','revision'])\n    OR NEW.revision<>OLD.revision+1 THEN\n    RAISE EXCEPTION 'original cancellation source is immutable' USING ERRCODE='23514';\n  END IF;\n  IF OLD.state IN ('PROCESSING','UNKNOWN') AND NEW.state IN ('UNKNOWN','AWAITING_REVIEW')\n    AND OLD.state<>NEW.state AND EXISTS (SELECT 1 FROM adc_insurance_reversal WHERE cancellation_id=NEW.id AND result='REVERSED') THEN\n    RETURN NEW;\n  END IF;\n  SELECT r.decision INTO decision FROM adc_insurance_cancellation_review r WHERE cancellation_id=NEW.id ORDER BY sequence DESC LIMIT 1;\n  IF OLD.state IN ('AWAITING_REVIEW','REVIEW_REJECTED')\n    AND ((NEW.state='CONFIRMED' AND decision='APPROVE') OR (NEW.state='REVIEW_REJECTED' AND decision='REJECT')) THEN\n    IF NEW.state='CONFIRMED' THEN PERFORM adc_require_insurance_returned(s.id); END IF;\n    RETURN NEW;\n  END IF;\n  RAISE EXCEPTION 'cancellation transition needs original query or independent decision' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "insurance_cancellation_review_guard",
+      "definition": "CREATE TRIGGER insurance_cancellation_review_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_cancellation_review FOR EACH ROW EXECUTE FUNCTION adc_guard_cancellation_review()",
+      "function": "adc_guard_cancellation_review",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_cancellation_review()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE c adc_insurance_cancellation;\nBEGIN\n  IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'reversal review history is retained' USING ERRCODE='23514'; END IF;\n  SELECT * INTO c FROM adc_insurance_cancellation WHERE id=NEW.cancellation_id;\n  PERFORM 1 FROM adc_insurance_settlement WHERE id=c.request_id FOR UPDATE;\n  IF c.state NOT IN ('AWAITING_REVIEW','REVIEW_REJECTED') OR c.prepared_by_id=NEW.reviewed_by_id OR btrim(NEW.reason)=''\n    OR NEW.sequence<>(SELECT count(*)+1 FROM adc_insurance_cancellation_review WHERE cancellation_id=c.id)\n    OR NOT EXISTS(SELECT 1 FROM adc_insurance_reversal WHERE cancellation_id=c.id AND result='REVERSED') THEN\n    RAISE EXCEPTION 'reversal review requires original outcome, ordered history and another account' USING ERRCODE='23514';\n  END IF;\n  IF NEW.decision='APPROVE' THEN PERFORM adc_require_insurance_returned(c.request_id); END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_insurance_catalogue",
@@ -258,6 +335,55 @@
       "definition": "CREATE TRIGGER insurance_policy_item_history BEFORE DELETE OR UPDATE ON public.adc_insurance_policy_item FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
       "function": "adc_protect_audit",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "insurance_reversal_guard",
+      "definition": "CREATE TRIGGER insurance_reversal_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_reversal FOR EACH ROW EXECUTE FUNCTION adc_guard_reversal()",
+      "function": "adc_guard_reversal",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_reversal()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE c adc_insurance_cancellation; s adc_insurance_settlement;\nBEGIN\n  IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'original reversal outcome is immutable' USING ERRCODE='23514'; END IF;\n  SELECT * INTO c FROM adc_insurance_cancellation WHERE id=NEW.cancellation_id;\n  SELECT * INTO s FROM adc_insurance_settlement WHERE id=c.request_id FOR UPDATE;\n  IF c.state<>'PROCESSING' OR c.revision<>0\n    OR NEW.payload->>'source' IS DISTINCT FROM 'LOCAL_SIMULATION'\n    OR NEW.payload->>'cancellation_id' IS DISTINCT FROM c.cancellation_id::text\n    OR NEW.payload->>'request_id' IS DISTINCT FROM s.request_id::text\n    OR NEW.payload->>'original_reference' IS DISTINCT FROM (SELECT reference FROM adc_insurance_simulation WHERE request_id=s.id)\n    OR (NEW.payload->>'personal_account')::numeric IS DISTINCT FROM s.personal_account\n    OR (NEW.payload->>'fund_amount')::numeric IS DISTINCT FROM s.fund_amount THEN\n    RAISE EXCEPTION 'reversal outcome must refer to the same original settlement and amounts' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_settlement_complete",
+      "definition": "CREATE CONSTRAINT TRIGGER insurance_settlement_complete AFTER INSERT ON public.adc_insurance_settlement DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_insurance_totals()",
+      "function": "adc_check_insurance_totals",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_insurance_totals()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE s adc_insurance_settlement; totals record;\nBEGIN\n  SELECT * INTO s FROM adc_insurance_settlement WHERE id=NEW.id;\n  SELECT count(*) n, sum(gross_amount) gross, sum(patient_cash) cash,\n    sum(personal_account) personal, sum(fund_amount) fund INTO totals\n    FROM adc_insurance_settlement_line WHERE request_id=s.id;\n  IF totals.n<>(SELECT count(*) FROM adc_treatment_record WHERE record_version_id=s.record_version_id)\n     OR (totals.gross,totals.cash,totals.personal,totals.fund) IS DISTINCT FROM\n        (s.gross_amount,s.patient_cash,s.personal_account,s.fund_amount)\n     OR NOT EXISTS (SELECT 1 FROM adc_insurance_simulation WHERE request_id=s.id)\n     OR NOT EXISTS (SELECT 1 FROM adc_insurance_settlement_event WHERE request_id=s.id AND action='SUBMIT') THEN\n    RAISE EXCEPTION 'settlement requires all exact source lines, result and submission evidence in one transaction' USING ERRCODE='23514';\n  END IF;\n  RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_settlement_guard",
+      "definition": "CREATE TRIGGER insurance_settlement_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_settlement FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_settlement()",
+      "function": "adc_guard_insurance_settlement",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_insurance_settlement()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'insurance settlement history is retained' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PROCESSING' OR NEW.lock_version<>0 OR NOT EXISTS (\n      SELECT 1 FROM adc_invoice i JOIN adc_visit v ON v.id=i.visit_id\n      JOIN adc_visit_record_version r ON r.id=i.current_record_version_id\n      JOIN adc_insurance_arrangement a ON a.id=NEW.arrangement_id\n      JOIN adc_insurance_catalogue c ON c.id=a.catalogue_id\n      JOIN adc_insurance_eligibility e ON e.id=NEW.eligibility_id\n      WHERE i.id=NEW.invoice_id AND r.id=NEW.record_version_id AND r.visit_id=v.id\n        AND v.status='COMPLETED' AND r.state='PUBLISHED' AND r.outcome='TREATED'\n        AND r.total_amount=NEW.gross_amount AND r.currency=NEW.currency\n        AND NEW.service_on=(v.attended_at AT TIME ZONE 'Asia/Shanghai')::date\n        AND a.clinic_id=v.clinic_id AND a.state='CONFIRMED' AND c.state='CONFIRMED'\n        AND NEW.service_on BETWEEN a.starts_on AND a.ends_on\n        AND e.clinic_id=v.clinic_id AND e.patient_id=v.patient_id AND e.state='VERIFIED'\n        AND e.insured_region=c.region AND NEW.service_on BETWEEN e.starts_on AND e.ends_on\n    ) THEN\n      RAISE EXCEPTION 'settlement must start from the exact published bill and clinic eligibility' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\n  END IF;\n  IF (to_jsonb(NEW)-ARRAY['state','lock_version']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','lock_version'])\n      OR NEW.lock_version<>OLD.lock_version+1 THEN\n    RAISE EXCEPTION 'settlement source and result amounts are immutable' USING ERRCODE='23514';\n  END IF;\n  IF OLD.state IN ('PROCESSING','UNKNOWN') AND NEW.state IN ('UNKNOWN','AWAITING_REVIEW','DECLINED')\n     AND OLD.state<>NEW.state AND EXISTS (\n       SELECT 1 FROM adc_insurance_simulation s WHERE s.request_id=NEW.id\n         AND s.request_digest=NEW.source_digest\n         AND ((NEW.state IN ('UNKNOWN','AWAITING_REVIEW') AND s.result='ACCEPTED')\n           OR (NEW.state='DECLINED' AND s.result='DECLINED'))) THEN\n    RETURN NEW;\n  END IF;\n  IF OLD.state='AWAITING_REVIEW' AND EXISTS (\n      SELECT 1 FROM adc_insurance_settlement_review r WHERE r.request_id=NEW.id\n        AND ((NEW.state='CONFIRMED' AND r.decision='APPROVE')\n          OR (NEW.state='REVIEW_REJECTED' AND r.decision='REJECT'))) THEN\n    RETURN NEW;\n  END IF;\n\n  IF NEW.state='CANCEL_PENDING' AND OLD.state IN ('AWAITING_REVIEW','CONFIRMED','REVIEW_REJECTED','CANCEL_PENDING')\n     AND EXISTS (SELECT 1 FROM adc_insurance_cancellation c JOIN adc_insurance_reversal o ON o.cancellation_id=c.id\n       WHERE c.request_id=NEW.id AND c.state<>'CONFIRMED' AND o.result='REVERSED') THEN\n    RETURN NEW;\n  END IF;\n  IF OLD.state='CANCEL_PENDING' AND NEW.state='CANCELLED' AND EXISTS (\n      SELECT 1 FROM adc_insurance_cancellation c JOIN adc_insurance_cancellation_review r ON r.cancellation_id=c.id\n      WHERE c.request_id=NEW.id AND c.state='CONFIRMED' AND r.decision='APPROVE') THEN\n    PERFORM adc_require_insurance_returned(NEW.id);\n    RETURN NEW;\n  END IF;\n  RAISE EXCEPTION 'settlement transition requires its retained original result and independent decision' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "insurance_settlement_event_history",
+      "definition": "CREATE TRIGGER insurance_settlement_event_history BEFORE DELETE OR UPDATE ON public.adc_insurance_settlement_event FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_settlement_line_guard",
+      "definition": "CREATE TRIGGER insurance_settlement_line_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_settlement_line FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_line()",
+      "function": "adc_guard_insurance_line",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_insurance_line()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE s adc_insurance_settlement; t adc_treatment_record; m record;\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'settlement line evidence is immutable' USING ERRCODE='23514';\n  END IF;\n  SELECT * INTO s FROM adc_insurance_settlement WHERE id=NEW.request_id FOR UPDATE;\n  SELECT * INTO t FROM adc_treatment_record WHERE id=NEW.treatment_record_id;\n  IF s.id IS NULL OR s.state<>'PROCESSING' OR s.lock_version<>0 OR t.id IS NULL\n     OR t.record_version_id<>s.record_version_id OR t.line_no<>NEW.line_no OR t.line_amount<>NEW.gross_amount\n     OR EXISTS (SELECT 1 FROM adc_insurance_simulation WHERE request_id=s.id) THEN\n    RAISE EXCEPTION 'settlement lines must be the original request bill lines' USING ERRCODE='23514';\n  END IF;\n  IF NEW.mapping_id IS NULL THEN\n    IF NEW.personal_account<>0 OR NEW.fund_amount<>0 OR NEW.fund_limit<>0 OR NEW.policy_quantity IS NOT NULL THEN\n      RAISE EXCEPTION 'unmapped charges cannot create insurance credit' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    SELECT f.*, p.payment_class, p.pre_self_pay_percent, p.catalogue_id, p.unit INTO m\n      FROM adc_insurance_fee_mapping f JOIN adc_insurance_policy_item p ON p.id=f.policy_item_id\n      WHERE f.id=NEW.mapping_id;\n    IF NOT FOUND OR m.state<>'CONFIRMED' OR m.treatment_type_id<>t.treatment_type_id\n       OR m.clinic_id<>(SELECT clinic_id FROM adc_insurance_arrangement WHERE id=s.arrangement_id)\n       OR m.catalogue_id<>(SELECT catalogue_id FROM adc_insurance_arrangement WHERE id=s.arrangement_id)\n       OR m.fee_snapshot->>'unit' IS DISTINCT FROM t.unit_snapshot\n       OR m.fee_snapshot->>'name' IS DISTINCT FROM t.name_snapshot\n       OR NEW.policy_quantity IS DISTINCT FROM t.quantity*m.policy_units_per_fee\n       OR m.unit IS NULL OR m.payment_class='UNKNOWN' OR m.pre_self_pay_percent IS NULL\n       OR NEW.fund_limit IS DISTINCT FROM (CASE WHEN m.payment_class IN ('A','B')\n            THEN trunc(t.line_amount*(1-m.pre_self_pay_percent/100),2) ELSE 0 END) THEN\n      RAISE EXCEPTION 'settlement line mapping and retained source limit must agree' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "insurance_settlement_review_guard",
+      "definition": "CREATE TRIGGER insurance_settlement_review_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_settlement_review FOR EACH ROW EXECUTE FUNCTION adc_guard_settlement_review()",
+      "function": "adc_guard_settlement_review",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_settlement_review()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'independent settlement review is retained' USING ERRCODE='23514';\n  END IF;\n  IF NOT EXISTS (SELECT 1 FROM adc_insurance_settlement s JOIN adc_insurance_simulation o ON o.request_id=s.id\n      WHERE s.id=NEW.request_id AND s.state='AWAITING_REVIEW' AND s.created_by_id<>NEW.reviewed_by_id\n        AND s.source_digest=NEW.source_digest AND o.result='ACCEPTED') THEN\n    RAISE EXCEPTION 'review requires the original accepted result and a different account' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "insurance_simulation_guard",
+      "definition": "CREATE TRIGGER insurance_simulation_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_insurance_simulation FOR EACH ROW EXECUTE FUNCTION adc_guard_insurance_outcome()",
+      "function": "adc_guard_insurance_outcome",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_insurance_outcome()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE s adc_insurance_settlement;\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'original simulation outcome is immutable' USING ERRCODE='23514';\n  END IF;\n  SELECT * INTO s FROM adc_insurance_settlement WHERE id=NEW.request_id FOR UPDATE;\n  IF s.id IS NULL OR s.state<>'PROCESSING' OR s.lock_version<>0\n     OR NEW.request_digest<>s.source_digest\n     OR NEW.payload->>'source' IS DISTINCT FROM 'LOCAL_SIMULATION'\n     OR NEW.payload->>'request_id' IS DISTINCT FROM s.request_id::text\n     OR (NEW.payload->>'gross_amount')::numeric IS DISTINCT FROM s.gross_amount\n     OR (NEW.payload->>'patient_cash')::numeric IS DISTINCT FROM s.patient_cash\n     OR (NEW.payload->>'personal_account')::numeric IS DISTINCT FROM s.personal_account\n     OR (NEW.payload->>'fund_amount')::numeric IS DISTINCT FROM s.fund_amount\n     OR (s.simulation_mode='DECLINE') IS DISTINCT FROM (NEW.result='DECLINED') THEN\n    RAISE EXCEPTION 'simulation outcome must retain the same original request and amounts' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_invoice",
@@ -436,6 +562,13 @@
     },
     {
       "table": "adc_reconciliation_match",
+      "name": "cash_match_statement_use",
+      "definition": "CREATE TRIGGER cash_match_statement_use AFTER INSERT OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_sync_statement_use()",
+      "function": "adc_sync_statement_use",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_sync_statement_use()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE release_time timestamptz;\nBEGIN\n  PERFORM 1 FROM adc_statement_line WHERE id=NEW.line_id FOR UPDATE;\n  IF TG_OP='INSERT' THEN\n    IF TG_TABLE_NAME='adc_reconciliation_match' THEN\n      INSERT INTO adc_statement_use(line_id,cash_match_id,fund_transfer_id,state,created_at,released_at,derived_from_existing)\n        VALUES (NEW.line_id,NEW.id,NULL,'ACTIVE',NEW.prepared_at,NULL,false);\n    ELSE\n      INSERT INTO adc_statement_use(line_id,cash_match_id,fund_transfer_id,state,created_at,released_at,derived_from_existing)\n        VALUES (NEW.line_id,NULL,NEW.id,'ACTIVE',NEW.prepared_at,NULL,false);\n    END IF;\n  ELSIF NEW.state IN ('REJECTED','STALE') THEN\n    IF TG_TABLE_NAME='adc_reconciliation_match' THEN\n      release_time=coalesce(NEW.invalidated_at,NEW.reviewed_at);\n      UPDATE adc_statement_use SET state='RELEASED',released_at=release_time WHERE cash_match_id=NEW.id AND state='ACTIVE';\n    ELSE\n      UPDATE adc_statement_use SET state='RELEASED',released_at=NEW.reviewed_at WHERE fund_transfer_id=NEW.id AND state='ACTIVE';\n    END IF;\n    IF NOT FOUND THEN RAISE EXCEPTION 'active bank evidence ownership is missing' USING ERRCODE='23514'; END IF;\n  END IF;\n  RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_reconciliation_match",
       "name": "reconciliation_history",
       "definition": "CREATE TRIGGER reconciliation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()",
       "function": "adc_financial_evidence_guard",
@@ -517,6 +650,13 @@
       "definition": "CREATE TRIGGER statement_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_line FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()",
       "function": "adc_financial_evidence_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_financial_evidence_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE e adc_cash_entry%ROWTYPE; a adc_payment_account%ROWTYPE;\n        p adc_cash_evidence%ROWTYPE; b adc_statement_batch%ROWTYPE;\n        l adc_statement_line%ROWTYPE; latest_id bigint;\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'financial evidence history cannot be deleted' USING ERRCODE='23514'; END IF;\n IF TG_TABLE_NAME='adc_payment_account' THEN\n   IF NEW.code !~ '^[A-Z0-9][A-Z0-9_-]{1,39}$' THEN RAISE EXCEPTION 'invalid payment account code' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     IF NOT NEW.is_active OR NEW.lock_version<>0 OR NEW.last_operation_id<>NEW.operation_id THEN\n       RAISE EXCEPTION 'account starts active at version zero' USING ERRCODE='23514'; END IF;\n   ELSIF (to_jsonb(NEW)-ARRAY['is_active','lock_version','last_operation_id']) IS DISTINCT FROM\n         (to_jsonb(OLD)-ARRAY['is_active','lock_version','last_operation_id']) OR\n         NEW.is_active=OLD.is_active OR NEW.lock_version<>OLD.lock_version+1 OR NEW.last_operation_id=OLD.last_operation_id THEN\n     RAISE EXCEPTION 'account identity is immutable and state changes are versioned' USING ERRCODE='23514';\n   END IF;\n ELSIF TG_TABLE_NAME='adc_cash_evidence' THEN\n   SELECT * INTO e FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n   SELECT * INTO a FROM adc_payment_account WHERE id=NEW.account_id;\n   IF a.clinic_id IS DISTINCT FROM e.clinic_id OR btrim(NEW.reference)='' OR NEW.reference<>btrim(NEW.reference) OR btrim(NEW.reason)='' THEN\n     RAISE EXCEPTION 'evidence needs its own clinic account and reference' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     SELECT * INTO p FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id ORDER BY version DESC LIMIT 1;\n     IF NEW.state<>'PENDING' OR (p.id IS NULL AND (NEW.version<>1 OR NEW.previous_id IS NOT NULL)) OR\n        (p.id IS NOT NULL AND (NEW.previous_id IS DISTINCT FROM p.id OR NEW.version<>p.version+1 OR p.state='PENDING')) OR\n        (NEW.initial AND (NEW.version<>1 OR e.state<>'PENDING' OR NEW.prepared_by_id<>e.prepared_by_id)) OR\n        (NOT NEW.initial AND e.state<>'POSTED') THEN\n       RAISE EXCEPTION 'evidence version lineage is invalid' USING ERRCODE='23514'; END IF;\n   ELSE\n     IF OLD.state<>'PENDING' OR NEW.state NOT IN ('APPROVED','REJECTED') OR\n       (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) IS DISTINCT FROM\n       (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) OR NEW.reviewed_at<NEW.prepared_at OR\n       (NEW.initial AND ((NEW.state='APPROVED' AND e.state<>'POSTED') OR (NEW.state='REJECTED' AND e.state<>'REJECTED'))) OR\n       (NOT NEW.initial AND e.state<>'POSTED') THEN\n       RAISE EXCEPTION 'evidence facts and terminal decisions are immutable' USING ERRCODE='23514'; END IF;\n   END IF;\n ELSIF TG_TABLE_NAME='adc_statement_batch' THEN\n   IF octet_length(NEW.source_bytes) NOT BETWEEN 1 AND 2097152 OR NEW.parser_version<>'csv-v1' OR\n      jsonb_typeof(NEW.normalized_rows)<>'array' OR jsonb_array_length(NEW.normalized_rows) NOT BETWEEN 1 AND 1000 OR\n      NEW.digest<>encode(sha256(NEW.source_bytes),'hex') THEN\n     RAISE EXCEPTION 'invalid bounded statement evidence' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     IF NEW.state<>'DRAFT' THEN RAISE EXCEPTION 'statement starts as a private draft' USING ERRCODE='23514'; END IF;\n   ELSIF OLD.state<>'DRAFT' OR NEW.state<>'IMPORTED' OR NEW.new_count+NEW.skipped_count<>jsonb_array_length(NEW.normalized_rows) OR\n      NEW.imported_at<NEW.created_at OR\n      (to_jsonb(NEW)-ARRAY['state','operation_id','imported_at','new_count','skipped_count']) IS DISTINCT FROM\n      (to_jsonb(OLD)-ARRAY['state','operation_id','imported_at','new_count','skipped_count']) THEN\n     RAISE EXCEPTION 'statement source and accepted batches are immutable' USING ERRCODE='23514';\n   END IF;\n ELSIF TG_TABLE_NAME='adc_statement_line' THEN\n   IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'accepted statement rows are immutable' USING ERRCODE='23514'; END IF;\n   SELECT * INTO b FROM adc_statement_batch WHERE id=NEW.batch_id;\n   IF b.account_id IS DISTINCT FROM NEW.account_id OR b.state<>'DRAFT' OR\n      NOT (b.normalized_rows @> jsonb_build_array(jsonb_build_object('transaction_id',NEW.transaction_id,\n        'booked_on',to_char(NEW.booked_on,'YYYY-MM-DD'),'direction',NEW.direction,'amount',NEW.amount::text,\n        'currency',NEW.currency,'reference',NEW.reference))) THEN\n     RAISE EXCEPTION 'statement line does not belong to its retained import' USING ERRCODE='23514'; END IF;\n ELSIF TG_TABLE_NAME='adc_reconciliation_match' THEN\n   SELECT * INTO e FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n   SELECT * INTO p FROM adc_cash_evidence WHERE id=NEW.evidence_id;\n   SELECT * INTO l FROM adc_statement_line WHERE id=NEW.line_id;\n   SELECT * INTO a FROM adc_payment_account WHERE id=l.account_id;\n   SELECT id INTO latest_id FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id AND state='APPROVED' ORDER BY version DESC LIMIT 1;\n   IF TG_OP='INSERT' THEN\n     IF NEW.state<>'PENDING' THEN RAISE EXCEPTION 'matching starts pending independent review' USING ERRCODE='23514'; END IF;\n   ELSE\n     IF (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','invalidated_by_id','invalidated_at']) IS DISTINCT FROM\n        (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','invalidated_by_id','invalidated_at']) THEN\n       RAISE EXCEPTION 'matching source identity is immutable' USING ERRCODE='23514'; END IF;\n     IF NEW.state='STALE' THEN\n       IF OLD.state NOT IN ('PENDING','CONFIRMED') OR latest_id IS NULL OR latest_id=NEW.evidence_id OR\n          (NEW.reviewed_by_id,NEW.reviewed_at,NEW.review_reason) IS DISTINCT FROM (OLD.reviewed_by_id,OLD.reviewed_at,OLD.review_reason) OR\n          NEW.invalidated_at<NEW.prepared_at THEN\n         RAISE EXCEPTION 'only new approved evidence invalidates an active match' USING ERRCODE='23514'; END IF;\n     ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('CONFIRMED','REJECTED') OR NEW.reviewed_at<NEW.prepared_at THEN\n       RAISE EXCEPTION 'matching decisions are retained' USING ERRCODE='23514';\n     END IF;\n   END IF;\n   IF NEW.state IN ('PENDING','CONFIRMED') AND\n      (e.state<>'POSTED' OR p.state<>'APPROVED' OR p.cash_entry_id<>e.id OR p.id IS DISTINCT FROM latest_id OR\n       p.account_id<>l.account_id OR e.clinic_id<>a.clinic_id OR e.amount<>l.amount OR l.currency<>'CNY' OR p.reference<>l.reference OR\n       l.direction<>CASE WHEN e.kind IN ('RECEIPT','EXPENSE_REVERSAL') THEN 'IN' ELSE 'OUT' END OR\n       NOT EXISTS(SELECT 1 FROM adc_statement_batch WHERE id=l.batch_id AND state='IMPORTED')) THEN\n     RAISE EXCEPTION 'matching requires exact current approved evidence and posted cash' USING ERRCODE='23514'; END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "statement_use_history",
+      "definition": "CREATE TRIGGER statement_use_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_use FOR EACH ROW EXECUTE FUNCTION adc_guard_statement_use()",
+      "function": "adc_guard_statement_use",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_statement_use()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE owner_line bigint; owner_state text; owner_created timestamptz; owner_released timestamptz;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'statement use history is retained' USING ERRCODE='23514';\n  END IF;\n  PERFORM 1 FROM adc_statement_line WHERE id=NEW.line_id FOR UPDATE;\n  IF NEW.cash_match_id IS NOT NULL THEN\n    SELECT line_id,state,prepared_at,coalesce(invalidated_at,reviewed_at)\n      INTO owner_line,owner_state,owner_created,owner_released FROM adc_reconciliation_match WHERE id=NEW.cash_match_id;\n  ELSE\n    SELECT line_id,state,prepared_at,reviewed_at INTO owner_line,owner_state,owner_created,owner_released\n      FROM adc_fund_transfer WHERE id=NEW.fund_transfer_id;\n  END IF;\n  IF owner_line IS DISTINCT FROM NEW.line_id OR owner_created IS DISTINCT FROM NEW.created_at THEN\n    RAISE EXCEPTION 'statement use must refer to its retained source owner' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'ACTIVE' OR NEW.derived_from_existing OR owner_state NOT IN ('PENDING','CONFIRMED') THEN\n      RAISE EXCEPTION 'new use is active and cannot fabricate old source history' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'ACTIVE' OR NEW.state<>'RELEASED' OR owner_state NOT IN ('REJECTED','STALE')\n      OR NEW.released_at IS DISTINCT FROM owner_released\n      OR (to_jsonb(NEW)-ARRAY['state','released_at']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','released_at']) THEN\n    RAISE EXCEPTION 'statement use releases only with its original owner decision' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_tooth_finding",
@@ -6379,6 +6519,636 @@
       "unique_together": []
     },
     {
+      "table": "adc_fund_allocation",
+      "model": "finance.FundAllocation",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "transfer",
+          "column": "transfer_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_fund_transfer",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "total",
+          "column": "total",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_snapshot",
+          "column": "source_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_digest",
+          "column": "source_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_reason",
+          "column": "review_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "model": "finance.FundAllocationLine",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "allocation",
+          "column": "allocation_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_fund_allocation",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "claim",
+          "column": "claim_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "amount",
+          "column": "amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_fund_issue",
+      "model": "finance.FundIssue",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "claim",
+          "column": "claim_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "amount",
+          "column": "amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "opened_by",
+          "column": "opened_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "opened_at",
+          "column": "opened_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "model": "finance.FundIssueEvent",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "issue",
+          "column": "issue_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_fund_issue",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "owner",
+          "column": "owner_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "due_at",
+          "column": "due_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_fund_transfer",
+      "model": "finance.FundTransfer",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "line",
+          "column": "line_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_statement_line",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_reason",
+          "column": "review_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_inbox_message",
       "model": "notifications.InboxMessage",
       "app": "notifications",
@@ -6662,6 +7432,297 @@
           "unique": false,
           "null": false,
           "max_length": 80,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "model": "insurance.CancellationRequest",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "cancellation_id",
+          "column": "cancellation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "simulation_mode",
+          "column": "simulation_mode",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_snapshot",
+          "column": "source_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_digest",
+          "column": "source_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "model": "insurance.CancellationReview",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "cancellation",
+          "column": "cancellation_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_cancellation",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "decision",
+          "column": "decision",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clearance_snapshot",
+          "column": "clearance_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -7652,6 +8713,892 @@
           "column": "raw_cells",
           "type": "JSONField",
           "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "model": "insurance.ReversalOutcome",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "cancellation",
+          "column": "cancellation_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_cancellation",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(80)",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 80,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "result",
+          "column": "result",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "payload",
+          "column": "payload",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "model": "insurance.SettlementRequest",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request_id",
+          "column": "request_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "invoice",
+          "column": "invoice_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_invoice",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "record_version",
+          "column": "record_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "arrangement",
+          "column": "arrangement_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_arrangement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "eligibility",
+          "column": "eligibility_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_eligibility",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "service_on",
+          "column": "service_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "currency",
+          "column": "currency",
+          "type": "CharField",
+          "db_type": "varchar(3)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 3,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "gross_amount",
+          "column": "gross_amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient_cash",
+          "column": "patient_cash",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "personal_account",
+          "column": "personal_account",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "fund_amount",
+          "column": "fund_amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_snapshot",
+          "column": "source_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_digest",
+          "column": "source_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "simulation_mode",
+          "column": "simulation_mode",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "lock_version",
+          "column": "lock_version",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_by",
+          "column": "created_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "model": "insurance.SettlementEvent",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "model": "insurance.SettlementLine",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "treatment_record",
+          "column": "treatment_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_record",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "line_no",
+          "column": "line_no",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "mapping",
+          "column": "mapping_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_insurance_fee_mapping",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_snapshot",
+          "column": "source_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "policy_quantity",
+          "column": "policy_quantity",
+          "type": "DecimalField",
+          "db_type": "numeric(24, 7)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "fund_limit",
+          "column": "fund_limit",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "gross_amount",
+          "column": "gross_amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient_cash",
+          "column": "patient_cash",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "personal_account",
+          "column": "personal_account",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "fund_amount",
+          "column": "fund_amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "exception",
+          "column": "exception",
+          "type": "CharField",
+          "db_type": "varchar(200)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 200,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "model": "insurance.SettlementReview",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "decision",
+          "column": "decision",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_digest",
+          "column": "source_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "model": "insurance.SimulationOutcome",
+      "app": "insurance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_insurance_settlement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(80)",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 80,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request_digest",
+          "column": "request_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "result",
+          "column": "result",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "payload",
+          "column": "payload",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
           "pk": false,
           "unique": false,
           "null": false,
@@ -14253,6 +16200,119 @@
       "unique_together": []
     },
     {
+      "table": "adc_statement_use",
+      "model": "finance.StatementUse",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "line",
+          "column": "line_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_statement_line",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "cash_match",
+          "column": "cash_match_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_reconciliation_match",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "fund_transfer",
+          "column": "fund_transfer_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_fund_transfer",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "released_at",
+          "column": "released_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "derived_from_existing",
+          "column": "derived_from_existing",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_tooth_finding",
       "model": "clinical.ToothFinding",
       "app": "clinical",
@@ -16346,13 +18406,26 @@
     "adc_equipment_cost_amendment",
     "adc_equipment_event",
     "adc_external_identity",
+    "adc_fund_allocation",
+    "adc_fund_allocation_line",
+    "adc_fund_issue",
+    "adc_fund_issue_event",
+    "adc_fund_transfer",
     "adc_inbox_message",
     "adc_insurance_arrangement",
+    "adc_insurance_cancellation",
+    "adc_insurance_cancellation_review",
     "adc_insurance_catalogue",
     "adc_insurance_eligibility",
     "adc_insurance_event",
     "adc_insurance_fee_mapping",
     "adc_insurance_policy_item",
+    "adc_insurance_reversal",
+    "adc_insurance_settlement",
+    "adc_insurance_settlement_event",
+    "adc_insurance_settlement_line",
+    "adc_insurance_settlement_review",
+    "adc_insurance_simulation",
     "adc_invoice",
     "adc_lab_case",
     "adc_lab_event",
@@ -16399,6 +18472,7 @@
     "adc_service_requirement",
     "adc_statement_batch",
     "adc_statement_line",
+    "adc_statement_use",
     "adc_tooth_finding",
     "adc_treatment_plan",
     "adc_treatment_record",
@@ -18271,6 +20345,228 @@
       "definition": "CHECK (((provider)::text = 'LOCAL'::text))"
     },
     {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_prepared_by_id_e91636ec_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_reviewed_by_id_fa233391_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_transfer_id_72780d6c_fk_adc_fund_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (transfer_id) REFERENCES adc_fund_transfer(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "fund_allocation_complete",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "fund_allocation_independent",
+      "kind": "c",
+      "definition": "CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "fund_allocation_positive",
+      "kind": "c",
+      "definition": "CHECK ((total > (0)::numeric))"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "fund_allocation_review_metadata",
+      "kind": "c",
+      "definition": "CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "adc_fund_allocation__allocation_id_c7bca508_fk_adc_fund_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (allocation_id) REFERENCES adc_fund_allocation(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "adc_fund_allocation__claim_id_3473dbd5_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (claim_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "adc_fund_allocation_line_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "fund_allocation_line_positive",
+      "kind": "c",
+      "definition": "CHECK ((amount > (0)::numeric))"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "fund_allocation_once_per_claim",
+      "kind": "u",
+      "definition": "UNIQUE (allocation_id, claim_id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_claim_id_a6db816a_fk_adc_insurance_settlement_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (claim_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_opened_by_id_93036901_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "fund_issue_amount",
+      "kind": "c",
+      "definition": "CHECK (((amount IS NULL) OR (amount >= (0)::numeric)))"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "fund_issue_complete",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "fund_issue_kind",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['NOT_RECEIVED'::character varying, 'SHORTFALL'::character varying, 'DEDUCTION'::character varying, 'UNKNOWN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_actor_id_921aa921_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_issue_id_ff590698_fk_adc_fund_issue_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (issue_id) REFERENCES adc_fund_issue(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_owner_id_e3c5eb43_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (owner_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "fund_issue_event_sequence",
+      "kind": "u",
+      "definition": "UNIQUE (issue_id, sequence)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "fund_issue_event_state",
+      "kind": "c",
+      "definition": "CHECK (((sequence >= 1) AND ((state)::text = ANY ((ARRAY['OPEN'::character varying, 'CLOSED'::character varying])::text[]))))"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_line_id_d7bffdf4_fk_adc_statement_line_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (line_id) REFERENCES adc_statement_line(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_prepared_by_id_0659ea5a_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_reviewed_by_id_60fd4166_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "fund_transfer_independent_review",
+      "kind": "c",
+      "definition": "CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "fund_transfer_kind",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'RETURN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "fund_transfer_review_metadata",
+      "kind": "c",
+      "definition": "CHECK (((((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['CONFIRMED'::character varying, 'REJECTED'::character varying])::text[])) AND (NOT ((review_reason)::text = ''::text)))))"
+    },
+    {
       "table": "adc_inbox_message",
       "name": "adc_inbox_message_clinic_id_0cd4c427_fk_adc_clinic_id",
       "kind": "f",
@@ -18383,6 +20679,108 @@
       "name": "insurance_arrangement_no_overlap",
       "kind": "x",
       "definition": "EXCLUDE USING gist (clinic_id WITH =, daterange(starts_on, ends_on, '[]'::text) WITH &&) WHERE (((state)::text = 'CONFIRMED'::text))"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancel_prepared_by_id_0ea70162_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancel_request_id_851d7a91_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_cancellation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (cancellation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_request_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (request_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "insurance_cancellation_complete",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "insurance_cancellation_mode",
+      "kind": "c",
+      "definition": "CHECK (((simulation_mode)::text = ANY ((ARRAY['ACCEPT'::character varying, 'LOST_SUCCESS'::character varying, 'PROCESSING'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "insurance_cancellation_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PROCESSING'::character varying, 'UNKNOWN'::character varying, 'AWAITING_REVIEW'::character varying, 'REVIEW_REJECTED'::character varying, 'CONFIRMED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancel_cancellation_id_bba6ea0f_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (cancellation_id) REFERENCES adc_insurance_cancellation(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancel_reviewed_by_id_866fa7d7_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "insurance_cancellation_decision",
+      "kind": "c",
+      "definition": "CHECK ((((decision)::text = ANY ((ARRAY['APPROVE'::character varying, 'REJECT'::character varying])::text[])) AND (sequence >= 1)))"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "insurance_cancellation_review_seq",
+      "kind": "u",
+      "definition": "UNIQUE (cancellation_id, sequence)"
     },
     {
       "table": "adc_insurance_catalogue",
@@ -18671,6 +21069,282 @@
       "name": "insurance_policy_share",
       "kind": "c",
       "definition": "CHECK (((pre_self_pay_percent IS NULL) OR ((pre_self_pay_percent >= (0)::numeric) AND (pre_self_pay_percent <= (100)::numeric))))"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_revers_cancellation_id_446e533c_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (cancellation_id) REFERENCES adc_insurance_cancellation(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_cancellation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (cancellation_id)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_reference_key",
+      "kind": "u",
+      "definition": "UNIQUE (reference)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "insurance_reversal_result",
+      "kind": "c",
+      "definition": "CHECK (((result)::text = 'REVERSED'::text))"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settle_arrangement_id_06779c4f_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (arrangement_id) REFERENCES adc_insurance_arrangement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settle_eligibility_id_6778c228_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (eligibility_id) REFERENCES adc_insurance_eligibility(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settle_record_version_id_0b70cf6d_fk_adc_visit",
+      "kind": "f",
+      "definition": "FOREIGN KEY (record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_created_by_id_df807ce9_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_invoice_id_646e5e2a_fk_adc_invoice_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (invoice_id) REFERENCES adc_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_lock_version_check",
+      "kind": "c",
+      "definition": "CHECK ((lock_version >= 0))"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_request_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (request_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_settlement_cny",
+      "kind": "c",
+      "definition": "CHECK (((currency)::text = 'CNY'::text))"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_settlement_complete",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_settlement_split",
+      "kind": "c",
+      "definition": "CHECK (((fund_amount >= (0)::numeric) AND (gross_amount > (0)::numeric) AND (patient_cash >= (0)::numeric) AND (personal_account >= (0)::numeric) AND (gross_amount = ((patient_cash + personal_account) + fund_amount))))"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_settlement_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PROCESSING'::character varying, 'UNKNOWN'::character varying, 'AWAITING_REVIEW'::character varying, 'CONFIRMED'::character varying, 'REVIEW_REJECTED'::character varying, 'DECLINED'::character varying, 'CANCEL_PENDING'::character varying, 'CANCELLED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_simulation_mode",
+      "kind": "c",
+      "definition": "CHECK (((simulation_mode)::text = ANY ((ARRAY['ACCEPT'::character varying, 'LOST_SUCCESS'::character varying, 'PROCESSING'::character varying, 'DECLINE'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settle_request_id_8b600da4_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_actor_id_03fb053e_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "insurance_settlement_event_order",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 1))"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "insurance_settlement_event_seq",
+      "kind": "u",
+      "definition": "UNIQUE (request_id, sequence)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settle_mapping_id_0e6cc7c2_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (mapping_id) REFERENCES adc_insurance_fee_mapping(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settle_request_id_e05f23da_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settle_treatment_record_id_d10e2c02_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (treatment_record_id) REFERENCES adc_treatment_record(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settlement_line_line_no_check",
+      "kind": "c",
+      "definition": "CHECK ((line_no >= 0))"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settlement_line_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_line_quantity",
+      "kind": "c",
+      "definition": "CHECK (((policy_quantity IS NULL) OR (policy_quantity > (0)::numeric)))"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_line_split",
+      "kind": "c",
+      "definition": "CHECK (((fund_amount >= (0)::numeric) AND (fund_amount <= fund_limit) AND (fund_limit >= (0)::numeric) AND (gross_amount >= (0)::numeric) AND (line_no >= 1) AND (patient_cash >= (0)::numeric) AND (personal_account >= (0)::numeric) AND (gross_amount = ((patient_cash + personal_account) + fund_amount))))"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_settlement_line_no",
+      "kind": "u",
+      "definition": "UNIQUE (request_id, line_no)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_settlement_source_line",
+      "kind": "u",
+      "definition": "UNIQUE (request_id, treatment_record_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settle_request_id_d2cccea6_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settle_reviewed_by_id_bf507820_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_request_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (request_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "insurance_settlement_review",
+      "kind": "c",
+      "definition": "CHECK (((decision)::text = ANY ((ARRAY['APPROVE'::character varying, 'REJECT'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simula_request_id_e30a0a36_fk_adc_insur",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_insurance_settlement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_reference_key",
+      "kind": "u",
+      "definition": "UNIQUE (reference)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_request_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (request_id)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "insurance_simulation_result",
+      "kind": "c",
+      "definition": "CHECK (((result)::text = ANY ((ARRAY['ACCEPTED'::character varying, 'DECLINED'::character varying])::text[])))"
     },
     {
       "table": "adc_invoice",
@@ -20737,6 +23411,54 @@
       "definition": "UNIQUE (account_id, transaction_id)"
     },
     {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_cash_match_id_e6cf3f01_fk_adc_recon",
+      "kind": "f",
+      "definition": "FOREIGN KEY (cash_match_id) REFERENCES adc_reconciliation_match(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_cash_match_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (cash_match_id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_fund_transfer_id_b2238652_fk_adc_fund_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (fund_transfer_id) REFERENCES adc_fund_transfer(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_fund_transfer_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (fund_transfer_id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_line_id_8cc06ea0_fk_adc_statement_line_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (line_id) REFERENCES adc_statement_line(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "statement_use_exact_owner",
+      "kind": "c",
+      "definition": "CHECK ((((cash_match_id IS NOT NULL) AND (fund_transfer_id IS NULL)) OR ((cash_match_id IS NULL) AND (fund_transfer_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "statement_use_state",
+      "kind": "c",
+      "definition": "CHECK ((((released_at IS NULL) AND ((state)::text = 'ACTIVE'::text)) OR ((released_at IS NOT NULL) AND ((state)::text = 'RELEASED'::text))))"
+    },
+    {
       "table": "adc_tooth_finding",
       "name": "adc_tooth_finding_line_no_check",
       "kind": "c",
@@ -22520,6 +25242,131 @@
       "definition": "CREATE UNIQUE INDEX external_identity_application_subject ON public.adc_external_identity USING btree (provider, app_id, subject)"
     },
     {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_fund_allocation_operation_id_key ON public.adc_fund_allocation USING btree (operation_id)"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_fund_allocation_pkey ON public.adc_fund_allocation USING btree (id)"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_prepared_by_id_e91636ec",
+      "definition": "CREATE INDEX adc_fund_allocation_prepared_by_id_e91636ec ON public.adc_fund_allocation USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_reviewed_by_id_fa233391",
+      "definition": "CREATE INDEX adc_fund_allocation_reviewed_by_id_fa233391 ON public.adc_fund_allocation USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_fund_allocation",
+      "name": "adc_fund_allocation_transfer_id_72780d6c",
+      "definition": "CREATE INDEX adc_fund_allocation_transfer_id_72780d6c ON public.adc_fund_allocation USING btree (transfer_id)"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "adc_fund_allocation_line_allocation_id_c7bca508",
+      "definition": "CREATE INDEX adc_fund_allocation_line_allocation_id_c7bca508 ON public.adc_fund_allocation_line USING btree (allocation_id)"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "adc_fund_allocation_line_claim_id_3473dbd5",
+      "definition": "CREATE INDEX adc_fund_allocation_line_claim_id_3473dbd5 ON public.adc_fund_allocation_line USING btree (claim_id)"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "adc_fund_allocation_line_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_fund_allocation_line_pkey ON public.adc_fund_allocation_line USING btree (id)"
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "name": "fund_allocation_once_per_claim",
+      "definition": "CREATE UNIQUE INDEX fund_allocation_once_per_claim ON public.adc_fund_allocation_line USING btree (allocation_id, claim_id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_claim_id_a6db816a",
+      "definition": "CREATE INDEX adc_fund_issue_claim_id_a6db816a ON public.adc_fund_issue USING btree (claim_id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_opened_by_id_93036901",
+      "definition": "CREATE INDEX adc_fund_issue_opened_by_id_93036901 ON public.adc_fund_issue USING btree (opened_by_id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_fund_issue_operation_id_key ON public.adc_fund_issue USING btree (operation_id)"
+    },
+    {
+      "table": "adc_fund_issue",
+      "name": "adc_fund_issue_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_fund_issue_pkey ON public.adc_fund_issue USING btree (id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_actor_id_921aa921",
+      "definition": "CREATE INDEX adc_fund_issue_event_actor_id_921aa921 ON public.adc_fund_issue_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_issue_id_ff590698",
+      "definition": "CREATE INDEX adc_fund_issue_event_issue_id_ff590698 ON public.adc_fund_issue_event USING btree (issue_id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_fund_issue_event_operation_id_key ON public.adc_fund_issue_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_owner_id_e3c5eb43",
+      "definition": "CREATE INDEX adc_fund_issue_event_owner_id_e3c5eb43 ON public.adc_fund_issue_event USING btree (owner_id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "adc_fund_issue_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_fund_issue_event_pkey ON public.adc_fund_issue_event USING btree (id)"
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "name": "fund_issue_event_sequence",
+      "definition": "CREATE UNIQUE INDEX fund_issue_event_sequence ON public.adc_fund_issue_event USING btree (issue_id, sequence)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_line_id_d7bffdf4",
+      "definition": "CREATE INDEX adc_fund_transfer_line_id_d7bffdf4 ON public.adc_fund_transfer USING btree (line_id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_fund_transfer_operation_id_key ON public.adc_fund_transfer USING btree (operation_id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_fund_transfer_pkey ON public.adc_fund_transfer USING btree (id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_prepared_by_id_0659ea5a",
+      "definition": "CREATE INDEX adc_fund_transfer_prepared_by_id_0659ea5a ON public.adc_fund_transfer USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "adc_fund_transfer_reviewed_by_id_60fd4166",
+      "definition": "CREATE INDEX adc_fund_transfer_reviewed_by_id_60fd4166 ON public.adc_fund_transfer USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_fund_transfer",
+      "name": "fund_transfer_active_line",
+      "definition": "CREATE UNIQUE INDEX fund_transfer_active_line ON public.adc_fund_transfer USING btree (line_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying])::text[]))"
+    },
+    {
       "table": "adc_inbox_message",
       "name": "adc_inbox_message_clinic_id_0cd4c427",
       "definition": "CREATE INDEX adc_inbox_message_clinic_id_0cd4c427 ON public.adc_inbox_message USING btree (clinic_id)"
@@ -22583,6 +25430,61 @@
       "table": "adc_insurance_arrangement",
       "name": "insurance_arrangement_no_overlap",
       "definition": "CREATE INDEX insurance_arrangement_no_overlap ON public.adc_insurance_arrangement USING gist (clinic_id, daterange(starts_on, ends_on, '[]'::text)) WHERE ((state)::text = 'CONFIRMED'::text)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_cancellation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_cancellation_cancellation_id_key ON public.adc_insurance_cancellation USING btree (cancellation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_cancellation_operation_id_key ON public.adc_insurance_cancellation USING btree (operation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_cancellation_pkey ON public.adc_insurance_cancellation USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_prepared_by_id_0ea70162",
+      "definition": "CREATE INDEX adc_insurance_cancellation_prepared_by_id_0ea70162 ON public.adc_insurance_cancellation USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "name": "adc_insurance_cancellation_request_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_cancellation_request_id_key ON public.adc_insurance_cancellation USING btree (request_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_cancellation_id_bba6ea0f",
+      "definition": "CREATE INDEX adc_insurance_cancellation_review_cancellation_id_bba6ea0f ON public.adc_insurance_cancellation_review USING btree (cancellation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_cancellation_review_operation_id_key ON public.adc_insurance_cancellation_review USING btree (operation_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_cancellation_review_pkey ON public.adc_insurance_cancellation_review USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "adc_insurance_cancellation_review_reviewed_by_id_866fa7d7",
+      "definition": "CREATE INDEX adc_insurance_cancellation_review_reviewed_by_id_866fa7d7 ON public.adc_insurance_cancellation_review USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "insurance_cancellation_once_approved",
+      "definition": "CREATE UNIQUE INDEX insurance_cancellation_once_approved ON public.adc_insurance_cancellation_review USING btree (cancellation_id) WHERE ((decision)::text = 'APPROVE'::text)"
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "name": "insurance_cancellation_review_seq",
+      "definition": "CREATE UNIQUE INDEX insurance_cancellation_review_seq ON public.adc_insurance_cancellation_review USING btree (cancellation_id, sequence)"
     },
     {
       "table": "adc_insurance_catalogue",
@@ -22753,6 +25655,166 @@
       "table": "adc_insurance_policy_item",
       "name": "insurance_policy_code",
       "definition": "CREATE UNIQUE INDEX insurance_policy_code ON public.adc_insurance_policy_item USING btree (catalogue_id, code)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_cancellation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_reversal_cancellation_id_key ON public.adc_insurance_reversal USING btree (cancellation_id)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_reversal_pkey ON public.adc_insurance_reversal USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_reference_a1005a3b_like",
+      "definition": "CREATE INDEX adc_insurance_reversal_reference_a1005a3b_like ON public.adc_insurance_reversal USING btree (reference varchar_pattern_ops)"
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "name": "adc_insurance_reversal_reference_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_reversal_reference_key ON public.adc_insurance_reversal USING btree (reference)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_arrangement_id_06779c4f",
+      "definition": "CREATE INDEX adc_insurance_settlement_arrangement_id_06779c4f ON public.adc_insurance_settlement USING btree (arrangement_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_created_by_id_df807ce9",
+      "definition": "CREATE INDEX adc_insurance_settlement_created_by_id_df807ce9 ON public.adc_insurance_settlement USING btree (created_by_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_eligibility_id_6778c228",
+      "definition": "CREATE INDEX adc_insurance_settlement_eligibility_id_6778c228 ON public.adc_insurance_settlement USING btree (eligibility_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_invoice_id_646e5e2a",
+      "definition": "CREATE INDEX adc_insurance_settlement_invoice_id_646e5e2a ON public.adc_insurance_settlement USING btree (invoice_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_operation_id_key ON public.adc_insurance_settlement USING btree (operation_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_pkey ON public.adc_insurance_settlement USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_record_version_id_0b70cf6d",
+      "definition": "CREATE INDEX adc_insurance_settlement_record_version_id_0b70cf6d ON public.adc_insurance_settlement USING btree (record_version_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "adc_insurance_settlement_request_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_request_id_key ON public.adc_insurance_settlement USING btree (request_id)"
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "name": "insurance_one_active_settlement",
+      "definition": "CREATE UNIQUE INDEX insurance_one_active_settlement ON public.adc_insurance_settlement USING btree (invoice_id) WHERE ((state)::text = ANY ((ARRAY['PROCESSING'::character varying, 'UNKNOWN'::character varying, 'AWAITING_REVIEW'::character varying, 'CONFIRMED'::character varying, 'REVIEW_REJECTED'::character varying, 'CANCEL_PENDING'::character varying])::text[]))"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_actor_id_03fb053e",
+      "definition": "CREATE INDEX adc_insurance_settlement_event_actor_id_03fb053e ON public.adc_insurance_settlement_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_event_operation_id_key ON public.adc_insurance_settlement_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_event_pkey ON public.adc_insurance_settlement_event USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "adc_insurance_settlement_event_request_id_8b600da4",
+      "definition": "CREATE INDEX adc_insurance_settlement_event_request_id_8b600da4 ON public.adc_insurance_settlement_event USING btree (request_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "name": "insurance_settlement_event_seq",
+      "definition": "CREATE UNIQUE INDEX insurance_settlement_event_seq ON public.adc_insurance_settlement_event USING btree (request_id, sequence)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settlement_line_mapping_id_0e6cc7c2",
+      "definition": "CREATE INDEX adc_insurance_settlement_line_mapping_id_0e6cc7c2 ON public.adc_insurance_settlement_line USING btree (mapping_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settlement_line_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_line_pkey ON public.adc_insurance_settlement_line USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settlement_line_request_id_e05f23da",
+      "definition": "CREATE INDEX adc_insurance_settlement_line_request_id_e05f23da ON public.adc_insurance_settlement_line USING btree (request_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "adc_insurance_settlement_line_treatment_record_id_d10e2c02",
+      "definition": "CREATE INDEX adc_insurance_settlement_line_treatment_record_id_d10e2c02 ON public.adc_insurance_settlement_line USING btree (treatment_record_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_settlement_line_no",
+      "definition": "CREATE UNIQUE INDEX insurance_settlement_line_no ON public.adc_insurance_settlement_line USING btree (request_id, line_no)"
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "name": "insurance_settlement_source_line",
+      "definition": "CREATE UNIQUE INDEX insurance_settlement_source_line ON public.adc_insurance_settlement_line USING btree (request_id, treatment_record_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_review_operation_id_key ON public.adc_insurance_settlement_review USING btree (operation_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_review_pkey ON public.adc_insurance_settlement_review USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_request_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_settlement_review_request_id_key ON public.adc_insurance_settlement_review USING btree (request_id)"
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "name": "adc_insurance_settlement_review_reviewed_by_id_bf507820",
+      "definition": "CREATE INDEX adc_insurance_settlement_review_reviewed_by_id_bf507820 ON public.adc_insurance_settlement_review USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_simulation_pkey ON public.adc_insurance_simulation USING btree (id)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_reference_e71f4027_like",
+      "definition": "CREATE INDEX adc_insurance_simulation_reference_e71f4027_like ON public.adc_insurance_simulation USING btree (reference varchar_pattern_ops)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_reference_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_simulation_reference_key ON public.adc_insurance_simulation USING btree (reference)"
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "name": "adc_insurance_simulation_request_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_insurance_simulation_request_id_key ON public.adc_insurance_simulation USING btree (request_id)"
     },
     {
       "table": "adc_invoice",
@@ -23958,6 +27020,31 @@
       "table": "adc_statement_line",
       "name": "statement_transaction_unique",
       "definition": "CREATE UNIQUE INDEX statement_transaction_unique ON public.adc_statement_line USING btree (account_id, transaction_id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_cash_match_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_statement_use_cash_match_id_key ON public.adc_statement_use USING btree (cash_match_id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_fund_transfer_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_statement_use_fund_transfer_id_key ON public.adc_statement_use USING btree (fund_transfer_id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_line_id_8cc06ea0",
+      "definition": "CREATE INDEX adc_statement_use_line_id_8cc06ea0 ON public.adc_statement_use USING btree (line_id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "adc_statement_use_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_statement_use_pkey ON public.adc_statement_use USING btree (id)"
+    },
+    {
+      "table": "adc_statement_use",
+      "name": "statement_one_active_use",
+      "definition": "CREATE UNIQUE INDEX statement_one_active_use ON public.adc_statement_use USING btree (line_id) WHERE ((state)::text = 'ACTIVE'::text)"
     },
     {
       "table": "adc_tooth_finding",
@@ -26929,6 +30016,276 @@
       "null": true
     },
     {
+      "table": "adc_fund_allocation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "state",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "total",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "source_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "source_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "basis",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "review_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_fund_allocation",
+      "column": "transfer_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "column": "amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "column": "allocation_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_allocation_line",
+      "column": "claim_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "kind",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "amount",
+      "db_type": "numeric(16,2)",
+      "null": true
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "opened_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "claim_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue",
+      "column": "opened_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "state",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "due_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "basis",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "issue_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_issue_event",
+      "column": "owner_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "kind",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "state",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "basis",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "review_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "line_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_fund_transfer",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_inbox_message",
       "column": "id",
       "db_type": "bigint",
@@ -27051,6 +30408,132 @@
     {
       "table": "adc_insurance_arrangement",
       "column": "catalogue_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "cancellation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "state",
+      "db_type": "character varying(24)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "simulation_mode",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "source_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "source_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "decision",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "clearance_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "cancellation_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_cancellation_review",
+      "column": "reviewed_by_id",
       "db_type": "bigint",
       "null": false
     },
@@ -27489,6 +30972,390 @@
     {
       "table": "adc_insurance_policy_item",
       "column": "catalogue_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "column": "reference",
+      "db_type": "character varying(80)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "column": "result",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "column": "payload",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_reversal",
+      "column": "cancellation_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "request_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "service_on",
+      "db_type": "date",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "currency",
+      "db_type": "character varying(3)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "gross_amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "patient_cash",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "personal_account",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "fund_amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "source_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "source_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "simulation_mode",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "state",
+      "db_type": "character varying(24)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "lock_version",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "arrangement_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "eligibility_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "invoice_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement",
+      "column": "record_version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "action",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_event",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "line_no",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "source_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "policy_quantity",
+      "db_type": "numeric(24,7)",
+      "null": true
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "fund_limit",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "gross_amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "patient_cash",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "personal_account",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "fund_amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "exception",
+      "db_type": "character varying(200)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "mapping_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "treatment_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_line",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "decision",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "source_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_settlement_review",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "reference",
+      "db_type": "character varying(80)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "request_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "result",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "payload",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_insurance_simulation",
+      "column": "request_id",
       "db_type": "bigint",
       "null": false
     },
@@ -30343,6 +34210,54 @@
       "null": false
     },
     {
+      "table": "adc_statement_use",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "state",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "released_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "derived_from_existing",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "cash_match_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "fund_transfer_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_statement_use",
+      "column": "line_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_tooth_finding",
       "column": "id",
       "db_type": "bigint",
@@ -31409,12 +35324,28 @@
       "name": "0009_evidence_history_guards"
     },
     {
+      "app": "finance",
+      "name": "0010_fundtransfer_statementuse_and_more"
+    },
+    {
+      "app": "finance",
+      "name": "0011_fundallocation_fundallocationline_fundissue_and_more"
+    },
+    {
       "app": "insurance",
       "name": "0001_initial"
     },
     {
       "app": "insurance",
       "name": "0002_remove_policycatalogue_insurance_policy_version_and_more"
+    },
+    {
+      "app": "insurance",
+      "name": "0003_settlementrequest_settlementline_settlementevent_and_more"
+    },
+    {
+      "app": "insurance",
+      "name": "0004_cancellationrequest_cancellationreview_and_more"
     },
     {
       "app": "notifications",
@@ -31506,5 +35437,5 @@
     }
   ],
   "observed_on": "2026-10-25",
-  "observation_scope": "C6.1A source candidate including explicit policy review resubmission; independent PG17 structural observation only. C1-WX is still the accepted installed version."
+  "source": "Isolated PostgreSQL; frozen C6.1B/C checkpoint-3; not installed"
 }

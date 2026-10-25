@@ -25,6 +25,8 @@ def request_line_correction(*,actor,visit_id,expected_version,line_id,quantity,u
     v=_lock_care(actor,visit_id);assert_revision(v,expected_version)
     if v.status!='COMPLETED':raise RuleError('本版只支持已治疗完成账单的数量或单价误录更正。')
     invoice=Invoice.objects.select_for_update().get(visit=v)
+    from insurance.settlement_projection import require_correction_ready
+    require_correction_ready(invoice.pk)
     base=VisitRecordVersion.objects.get(pk=invoice.current_record_version_id,state='PUBLISHED')
     source=list(base.treatment_lines.order_by('line_no'))
     item=next((line for line in source if line.pk==line_id),None)
@@ -80,6 +82,8 @@ def review_correction(*,actor,request_id,decision,reason):
         draft.state='ABANDONED';draft.save(update_fields=['state']);_bump(v)
         emit(actor,'CORRECTION_REJECTED',req,visit=v,reason=reason.strip());return invoice
     guard_review(req.requester_id,actor.pk,req.status,req.base_record_version_id,invoice.current_record_version_id,req.expected_visit_lock_version,v.lock_version)
+    from insurance.settlement_projection import require_correction_ready
+    require_correction_ready(invoice.pk)
     if req.kind!='RECORD_CONTENT' or draft.visit_id!=v.pk or draft.previous_version_id!=req.base_record_version_id or draft.outcome!='TREATED':
         raise RuleError('更正范围或版本关联不一致。')
     # Authorization of the preparer must still exist at application time.

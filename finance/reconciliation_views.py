@@ -22,6 +22,7 @@ from finance.cash_evidence_services import prepare_evidence,confirm_evidence,pre
 from finance.statement_services import prepare_import,confirm_import
 from finance.reconciliation_services import prepare_match,confirm_match,prepare_match_review,confirm_match_review,ACTIVE
 from finance.reconciliation_selectors import dashboard,line_scope,match_scope,candidates
+from finance.fund_models import StatementUse
 
 def proposal_page(request,title,summary,token,recovery,*,status=200,form=None):
     return render(request,'business/proposal.html',dict(title=title,summary=summary,
@@ -114,7 +115,8 @@ def batch_detail(request,pk):
     qs=StatementBatch.objects.select_related('account__clinic','created_by')
     if clinic is not None:qs=qs.filter(account__clinic_id=clinic)
     batch=get_object_or_404(qs,pk=pk)
-    rows=batch.lines.annotate(active=Exists(ReconciliationMatch.objects.filter(line_id=OuterRef('pk'),state__in=ACTIVE))).order_by('pk')
+    uses=StatementUse.objects.filter(line_id=OuterRef('pk'),state='ACTIVE')
+    rows=batch.lines.annotate(active=Exists(uses),fund_used=Exists(uses.filter(fund_transfer__isnull=False))).order_by('pk')
     if request.GET.get('unmatched')=='1':rows=rows.filter(active=False)
     return render(request,'finance/statement_batch.html',dict(batch=batch,page=Paginator(rows,20).get_page(request.GET.get('page','1')),unmatched=request.GET.get('unmatched')=='1'))
 

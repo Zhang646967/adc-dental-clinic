@@ -13,11 +13,13 @@ from finance.cash_models import CashEntry
 from finance.cash_evidence_services import effective
 from finance.reconciliation_models import StatementLine, ReconciliationMatch, CashEvidenceVersion
 
-REQUEST='adc.reconciliation.request.v1'
+REQUEST='adc.reconciliation.request.v2'
 REVIEW='adc.reconciliation.review.v1'
 ACTIVE=('PENDING','CONFIRMED')
 
 def validate_match(entry,evidence,line,*,exclude=None):
+    from finance.statement_use import require_available
+    require_available(line.pk,cash_match_id=exclude)
     direction='IN' if entry.kind in ('RECEIPT','EXPENSE_REVERSAL') else 'OUT'
     if (entry.state!='POSTED' or evidence is None or evidence.cash_entry_id!=entry.pk or evidence.state!='APPROVED' or
         evidence.account_id!=line.account_id or entry.clinic_id!=line.account.clinic_id or line.batch.state!='IMPORTED' or
@@ -35,7 +37,8 @@ def prepare_match(*,actor,line_id,entry_id):
         line=StatementLine.objects.select_related('account','batch').get(pk=line_id,account__clinic_id=clinic)
         entry=CashEntry.objects.get(pk=entry_id,clinic_id=clinic)
         evidence=effective(entry.pk);validate_match(entry,evidence,line)
-        d=dict(line=line.pk,entry=entry.pk,evidence=evidence.pk)
+        from finance.statement_use import usage_cursor
+        d=dict(line=line.pk,entry=entry.pk,evidence=evidence.pk,usage_cursor=usage_cursor(line.pk))
         return dict(line=line,entry=entry,evidence=evidence,proposal_token=proposal(actor,REQUEST,('MANAGER',),d))
 
 @business_errors
@@ -43,7 +46,7 @@ def prepare_match(*,actor,line_id,entry_id):
 def confirm_match(*,actor,proposal_token,confirmed,expected_line_id):
     if confirmed is not True:raise RuleError('请明确确认提交逐笔匹配。')
     p=read_proposal(actor,REQUEST,('MANAGER',),proposal_token);d=p['data']
-    if set(d)!={'line','entry','evidence'} or any(type(v) is not int or v<=0 for v in d.values()) or d['line']!=expected_line_id:raise RuleError('匹配确认目标无效。')
+    if set(d)!={'line','entry','evidence','usage_cursor'} or any(type(d[k]) is not int or d[k]<=0 for k in ('line','entry','evidence')) or d['line']!=expected_line_id:raise RuleError('匹配确认目标无效。')
     lock_people(actor.pk);clinic=manager_clinic(actor,lock=True)
     # Canonical order shared with evidence corrections and match review:
     # actor/grant -> cash entry -> evidence -> statement line -> match.
@@ -52,6 +55,8 @@ def confirm_match(*,actor,proposal_token,confirmed,expected_line_id):
     if prior:return prior,True
     evidence=CashEvidenceVersion.objects.select_for_update().get(pk=d['evidence'],cash_entry=entry)
     line=StatementLine.objects.select_for_update().get(pk=d['line'],account__clinic_id=clinic)
+    from finance.statement_use import usage_cursor
+    if usage_cursor(line.pk)!=d['usage_cursor']:raise RuleError('流水用途历史已变化，请先核对原办理结果再重新预览。')
     validate_match(entry,evidence,line)
     row=ReconciliationMatch.objects.create(cash_entry=entry,evidence=evidence,line=line,prepared_by=actor,operation_id=p['operation'])
     emit(actor,'RECONCILIATION_REQUESTED',row,summary={'entry_id':entry.pk,'line_id':line.pk})

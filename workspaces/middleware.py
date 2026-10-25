@@ -17,6 +17,15 @@ PUBLIC.update({'patient_local_login','patient_account','patient_account_activate
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'fund_transfers':{'FINANCE'},'fund_transfer_new':{'FINANCE'},'fund_transfer_detail':{'FINANCE'},'fund_transfer_review':{'FINANCE'},
+ 'insurance_settlements':{'FRONT_DESK','FINANCE'},'insurance_settlement_new':{'FRONT_DESK'},
+ 'insurance_settlement_detail':{'FRONT_DESK','FINANCE'},'insurance_settlement_query':{'FRONT_DESK','FINANCE'},
+ 'insurance_settlement_review':{'FINANCE'},
+ 'insurance_cancellation_new':{'FRONT_DESK','FINANCE'},'insurance_cancellation_query':{'FRONT_DESK','FINANCE'},
+ 'insurance_cancellation_review':{'FINANCE'},
+ 'fund_claims':{'FINANCE'},'fund_claim_detail':{'FINANCE'},'fund_allocation_new':{'FINANCE'},
+ 'fund_allocation_detail':{'FINANCE'},'fund_allocation_review':{'FINANCE'},
+ 'fund_issues':{'FINANCE'},'fund_issue_new':{'FINANCE'},'fund_issue_detail':{'FINANCE'},'fund_issue_followup':{'FINANCE'},
  'insurance_home':{'FRONT_DESK','MANAGER','FINANCE','HQ'},
  'insurance_catalogue':{'FRONT_DESK','MANAGER','FINANCE'},'insurance_source':{'FRONT_DESK','MANAGER','FINANCE'},
  'insurance_import':{'FINANCE'},'insurance_resubmit':{'FINANCE'},'insurance_arrangement_new':{'MANAGER'},'insurance_mapping_new':{'MANAGER'},

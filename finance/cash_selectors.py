@@ -28,6 +28,12 @@ def cursor(qs):
     r=qs.aggregate(last=Max('pk'),count=Count('pk'),versions=Sum('lock_version'))
     return [r['last'] or 0,r['count'],r['versions'] or 0]
 
+def invoice_cash_facts(invoice_id):
+    """Finance-owned cursor, including pending requests; no grant is inferred."""
+    r=CashEntry.objects.filter(invoice_id=invoice_id).aggregate(last=Max('pk'),count=Count('pk'),
+        versions=Sum('lock_version'),pending=Count('pk',filter=Q(state='PENDING')))
+    return dict(cursor=[r['last'] or 0,r['count'],r['versions'] or 0],pending=r['pending'])
+
 def posted_amount(qs,plus,minus):
     values=qs.filter(state='POSTED').aggregate(
         incoming=Sum('amount',filter=Q(kind=plus)),outgoing=Sum('amount',filter=Q(kind=minus)))
@@ -43,8 +49,11 @@ def invoice_balance(invoice):
         pending_refunds=Sum('amount',filter=Q(state='PENDING',kind='REFUND')))
     net=(values['receipts'] or ZERO)-(values['refunds'] or ZERO)
     total=invoice.current_record_version.total_amount
-    return dict(billed=total,net_received=net,remaining=max(total-net,ZERO),
-        refund_due=max(net-total,ZERO),pending=values['pending'],
+    from insurance.settlement_projection import invoice_insurance_facts
+    from insurance.settlement_rules import patient_balance
+    insurance=invoice_insurance_facts(invoice.pk)
+    return dict(**patient_balance(total,net,personal_account=insurance['personal_account'],fund_amount=insurance['fund_amount']),
+        insurance_pending=insurance['unresolved'],pending=values['pending'],
         pending_receipts=values['pending_receipts'] or ZERO,pending_refunds=values['pending_refunds'] or ZERO,
         current_revision=invoice.current_record_version.revision_no)
 
@@ -54,8 +63,9 @@ def projected_balance(balance,kind,amount,decision='approve'):
     if decision!='approve':return result
     if kind in ('RECEIPT','REFUND'):
         net=balance['net_received']+(amount if kind=='RECEIPT' else -amount)
-        result.update(net_received=net,remaining=max(balance['billed']-net,ZERO),
-                      refund_due=max(net-balance['billed'],ZERO))
+        responsibility=balance.get('patient_responsibility',balance['billed'])
+        result.update(net_received=net,remaining=max(responsibility-net,ZERO),
+                      refund_due=max(net-responsibility,ZERO))
     else:
         result['net_equipment_expense']=balance['net_equipment_expense']+(amount if kind=='EQUIPMENT_EXPENSE' else -amount)
     return result
@@ -125,13 +135,19 @@ def receivables(actor,state='',page='1'):
         qs=qs.annotate(pending_count=Coalesce(Subquery(pending.annotate(value=Count('pk')).values('value'),output_field=IntegerField()),Value(0)),
             pending_receipts=Coalesce(Subquery(pending.filter(kind='RECEIPT').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)),
             pending_refunds=Coalesce(Subquery(pending.filter(kind='REFUND').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)))
-        qs=qs.annotate(remaining=Greatest(F('current_record_version__total_amount')-F('net_received'),Value(ZERO),output_field=output),
-                       refund_due=Greatest(F('net_received')-F('current_record_version__total_amount'),Value(ZERO),output_field=output))
+        from insurance.settlement_projection import credit_expressions
+        qs=qs.annotate(**credit_expressions()).annotate(patient_responsibility=F('current_record_version__total_amount')-F('insurance_personal_account')-F('insurance_fund'))
+        qs=qs.annotate(remaining=Greatest(F('patient_responsibility')-F('net_received'),Value(ZERO),output_field=output),
+                       refund_due=Greatest(F('net_received')-F('patient_responsibility'),Value(ZERO),output_field=output))
         totals=qs.aggregate(bills=Count('pk'),billed=Sum('current_record_version__total_amount'),
+                            insurance_personal_total=Sum('insurance_personal_account'),insurance_fund_total=Sum('insurance_fund'),
+                            patient_responsibility_total=Sum('patient_responsibility'),
                             net_total=Sum('net_received'),remaining_total=Sum('remaining'),refund_total=Sum('refund_due'))
-        for source,target in [('net_total','net_received'),('remaining_total','remaining'),('refund_total','refund_due')]:
+        for source,target in [('net_total','net_received'),('remaining_total','remaining'),('refund_total','refund_due'),
+            ('insurance_personal_total','insurance_personal_account'),('insurance_fund_total','insurance_fund'),
+            ('patient_responsibility_total','patient_responsibility')]:
             totals[target]=totals.pop(source)
-        for key in ('billed','net_received','remaining','refund_due'):totals[key]=totals[key] or ZERO
+        for key in ('billed','net_received','remaining','refund_due','insurance_personal_account','insurance_fund','patient_responsibility'):totals[key]=totals[key] or ZERO
         if state=='due':qs=qs.filter(remaining__gt=0)
         elif state=='credit':qs=qs.filter(refund_due__gt=0)
         elif state=='settled':qs=qs.filter(remaining=0,refund_due=0)

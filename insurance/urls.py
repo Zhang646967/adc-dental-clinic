@@ -1,7 +1,17 @@
 from django.urls import path
 from insurance import views
+from insurance import settlement_views
+from insurance import cancellation_views
 
 urlpatterns = [
+    path('insurance/settlements/<int:pk>/cancel/', cancellation_views.create, name='insurance_cancellation_new'),
+    path('insurance/settlements/<int:pk>/cancel/query/', cancellation_views.query, name='insurance_cancellation_query'),
+    path('insurance/settlements/<int:pk>/cancel/review/', cancellation_views.review, name='insurance_cancellation_review'),
+    path('insurance/settlements/', settlement_views.listing, name='insurance_settlements'),
+    path('insurance/invoices/<int:pk>/settle/', settlement_views.create, name='insurance_settlement_new'),
+    path('insurance/settlements/<int:pk>/', settlement_views.detail, name='insurance_settlement_detail'),
+    path('insurance/settlements/<int:pk>/query/', settlement_views.query, name='insurance_settlement_query'),
+    path('insurance/settlements/<int:pk>/review/', settlement_views.review, name='insurance_settlement_review'),
     path('insurance/', views.home, name='insurance_home'),
     path('insurance/catalogues/new/', views.import_catalogue, name='insurance_import'),
     path('insurance/catalogues/<int:pk>/', views.catalogue, name='insurance_catalogue'),
