@@ -1,0 +1,30 @@
+{
+  "starts_on": "2026-10-25",
+  "ends_on": "2026-11-24",
+  "business_before": {
+    "patients": 4,
+    "visits": 0,
+    "treatments": 0,
+    "invoices": 0,
+    "cash": 0
+  },
+  "business_after": {
+    "patients": 4,
+    "visits": 0,
+    "treatments": 0,
+    "invoices": 0,
+    "cash": 0
+  },
+  "synthetic": true,
+  "patients_and_money_not_created": true,
+  "passed": true,
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73",
+  "new_finance_accounts": 1,
+  "published_policy_catalogues": 1,
+  "retained_policy_items": 202,
+  "synthetic_clinic_arrangements": 4,
+  "new_fee_mappings": 0,
+  "new_patient_eligibilities": 0,
+  "existing_account_passwords_unchanged": true,
+  "created_through_owned_business_commands": true
+}

@@ -4,7 +4,7 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**C6.1A 源码候选：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立复核和历史版本可核对；1,106项源码规则及1,826项PostgreSQL／HTTP／并发回归通过。准确提交CI、同镜像浏览器、恢复与本机更新仍在进行，当前在用仍为C1-WX。[业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [执行边界](docs/evidence_c61a/README.md)。
+**C6.1A 已在本机交付：医保目录、本店安排、收费适配与模拟待遇。** 原件、独立审阅链、明确单位和待遇历史可核对；准确CI、1,106项规则／1,826项PG回归、67项同镜像浏览器及权限、115表加密恢复和原系统保护更新通过。183页报告与22幅实际ER同步。[本地办理](docs/C61A_LOCAL_GUIDE.md) · [业务合同](docs/C61A_PREPARATION_CONTRACT.md) · [交付证据](docs/evidence_c61a/README.md)。费用分担、基金到账及退费继续开发。
 
 **C1-WX 已在本机交付：患者账号、联络来源、本人建档与独立前台核验。** 网站／小程序沿用原预约、改期、候补与患者切换，暂停可复核恢复原关联。[执行证据](docs/evidence_c1wx/README.md) · [本地试用](docs/C1WX_LOCAL_GUIDE.md)。真实微信及医保联网另行验收。
 
@@ -26,13 +26,13 @@ including electronic records and prescribing. [Product and release plan](docs/CO
 The wider clinical V2 program continues; the current local baseline has not been qualified for
 production patient care. Historical engineering and academic materials follow.
 
-**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX本地流程已交付；真实微信和C6医保资金阶段继续实施。
+**2026-10-24 患者入口与中国医保规划：** [定位找店、微信身份与中国口腔连锁调研](docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4访客入口、C1-WX账号绑定与C6医保分批计划](docs/PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md)。默认由近到远，已准备含长沙的八省会二十店合成场景；真实微信和医保接入单独验收。C0.4准确CI、同镜像浏览器、独立恢复、本机保护更新与报告已通过；C1-WX及C6.1A本地流程已交付；真实微信和C6医保资金阶段继续实施。
 
 **2026-10-23 商业化调研与下一阶段：** [六类成熟牙科系统与诊所业务差距](docs/research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 患者身份与连续诊疗计划](docs/COMMERCIAL_V2_NEXT_STAGE.md)。附 34 项外部来源、16 项需求追踪、24 个待执行验收场景及两幅明确标注为规划的领域关系图。当前实际 ER 与已执行验收保持独立。
 
 **C0.3患者服务验证：** [网站／小程序与交付记录](docs/C03_RELEASE_ACCEPTANCE.md) · [执行证据](docs/evidence_c03/README.md)。已完成1,095项规则、1,474项数据库回归及五店187项跨端检查，修复接诊路径冲突，新增公开页面大字模式，ER与正式报告同步。准确应用提交CI、加密恢复及本机更新已通过，原业务与私有配置保留。
 
-**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C1.2交付记录为准。
+**历史系统入口与本人核验：** [打开本地入口](START_HERE.html)连接运行中的本机系统，提供六条完整业务核验路线及个人记录下载。[B1.6实施与执行边界](docs/B16_ENTRY_AND_VERIFICATION.md)区分新入口源码、自动检查和原运行实例；当前入口更新状态以C6.1A交付记录为准。
 
 **新增患者服务中心与小程序候补衔接。** [页面与业务说明](docs/B153_PATIENT_SERVICE_CENTRE.md) · [执行证据](docs/evidence_b153/README.md)。
 

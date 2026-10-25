@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "role": "FRONT_DESK",
+      "route": "home",
+      "status": 200
+    },
+    {
+      "role": "FRONT_DESK",
+      "route": "patient_eligibility",
+      "status": 200
+    },
+    {
+      "role": "MANAGER",
+      "route": "home",
+      "status": 200
+    },
+    {
+      "role": "MANAGER",
+      "route": "patient_eligibility",
+      "status": 403
+    },
+    {
+      "role": "FINANCE",
+      "route": "home",
+      "status": 200
+    },
+    {
+      "role": "FINANCE",
+      "route": "patient_eligibility",
+      "status": 403
+    },
+    {
+      "role": "HQ",
+      "route": "home",
+      "status": 200
+    },
+    {
+      "role": "HQ",
+      "route": "patient_eligibility",
+      "status": 403
+    },
+    {
+      "role": "DENTIST",
+      "route": "home",
+      "status": 403
+    },
+    {
+      "role": "DENTIST",
+      "route": "patient_eligibility",
+      "status": 403
+    },
+    {
+      "role": "SYSADMIN",
+      "route": "home",
+      "status": 403
+    },
+    {
+      "role": "SYSADMIN",
+      "route": "patient_eligibility",
+      "status": 403
+    },
+    {
+      "role": "PATIENT",
+      "route": "home",
+      "status": 403
+    },
+    {
+      "role": "PATIENT",
+      "route": "patient_eligibility",
+      "status": 403
+    }
+  ],
+  "scope": "Exact image actual Django HTTP/middleware and database session contexts, GET only; not seven browser journeys",
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73"
+}

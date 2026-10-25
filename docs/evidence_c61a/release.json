@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "status": "C6.1A_LOCAL_PREPARATION_DELIVERED",
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73",
+  "application_image": "sha256:9590ff4ade2983b0d73e20bef65e9da960108c187a68cad243a96df476ce1882",
+  "exact_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40177691768",
+  "source_rules": 1106,
+  "postgresql_http_concurrency_cases": 1826,
+  "same_image_Chrome_checks": 53,
+  "seven_role_HTTP_checks": 14,
+  "installed_Chrome_checks": 14,
+  "encrypted_restore_tables": 115,
+  "encrypted_restore_rows": 2739,
+  "encrypted_restore_seconds": 10.617,
+  "original_model_groups_preserved": 106,
+  "original_configurations_preserved": 70,
+  "original_passwords_and_database_volume_preserved": true,
+  "original_migrations_preserved": 54,
+  "current_application_migrations": 56,
+  "new_patient_treatment_invoice_or_cash_rows": 0,
+  "formal_report_pages": 183,
+  "business_use_cases": 90,
+  "shared_subfunctions": 1,
+  "tables": 109,
+  "figures": 55,
+  "actual_ER_views": 22,
+  "remaining_local_work": [
+    "C6.1B actual fees and unique simulated settlement",
+    "C6.1C fund arrival allocation and cancellation/refunds"
+  ],
+  "not_passed": [
+    "real WeChat/phone/identity authorization",
+    "actual insurance institution interface",
+    "public cloud",
+    "new capacity workload",
+    "24-hour observation",
+    "professional qualification"
+  ],
+  "historical_windows_data_recovery": "UNRESOLVED",
+  "historical_unknown_and_undetermined_preserved": true,
+  "final_documentation_ci": "Follow-up commit tracked by GitHub Actions; app remains identified above"
+}

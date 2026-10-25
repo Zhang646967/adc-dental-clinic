@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73",
+  "image": "sha256:9590ff4ade2983b0d73e20bef65e9da960108c187a68cad243a96df476ce1882",
+  "original_model_groups_preserved": 106,
+  "original_model_rows_and_passwords_preserved": true,
+  "all_original_private_configurations_preserved": 70,
+  "additional_rows_separately_listed": {
+    "auth.Permission": 24,
+    "contenttypes.ContentType": 6,
+    "accounts.UserAccount": 1,
+    "accounts.RoleAssignment": 1,
+    "care.AuditEvent": 12,
+    "clinical.SensitiveReadEvent": 3
+  },
+  "new_synthetic_configuration_rows": {
+    "insurance.PolicyCatalogue": 1,
+    "insurance.PolicyItem": 202,
+    "insurance.ClinicArrangement": 4,
+    "insurance.FeeMapping": 0,
+    "insurance.EligibilityFact": 0,
+    "insurance.InsuranceEvent": 10
+  },
+  "new_finance_account_created_through_governance": true,
+  "new_patient_treatment_invoice_or_cash_rows": 0,
+  "immutable_feature_files_compared": 789,
+  "database_container_and_volume_preserved": true,
+  "rc_tag_preserved": true,
+  "formal_report_bytes_equal": true,
+  "post_update_database_encryption_and_archive_verified": true,
+  "post_update_encrypted_configuration_and_new_private_guide_verified": 72,
+  "after_database_backup_sha256": "e59d662af2bee98989948fcd9188812b33ba722abf6ee89e02cb37cf3834bbf5",
+  "after_configuration_backup_sha256": "cbbb19c2b0628c9fc47affaa1a3f178dcf9ecccff7e9aeb59c4e2a1335b9e957",
+  "six_application_conditions": "HEALTHY",
+  "host_state": "HEALTHY",
+  "fresh_independent_host_samples": [
+    1792919813.953084,
+    1792919844.093216
+  ],
+  "enabled_triggers": 83,
+  "runtime_database_role": "LEGACY_LOOPBACK_RC_OWNER_RETAINED",
+  "historical_UNKNOWN_and_UNDETERMINED_retained": true,
+  "scope": "Protected local C6.1A preparation delivery only; short fresh samples are not24-hour acceptance; fund settlement and real platforms remain unimplemented/unverified"
+}

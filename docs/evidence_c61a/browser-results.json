@@ -1,0 +1,221 @@
+{
+  "passed": true,
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73",
+  "image": "sha256:9590ff4ade2983b0d73e20bef65e9da960108c187a68cad243a96df476ce1882",
+  "checks": [
+    {
+      "name": "Preview before save 0",
+      "passed": true
+    },
+    {
+      "name": "Prior mapping explicitly disabled with retained history",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 2",
+      "passed": true
+    },
+    {
+      "name": "Prior arrangement explicitly disabled with retained history",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 4",
+      "passed": true
+    },
+    {
+      "name": "Prior catalogue explicitly disabled with retained history",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 6",
+      "passed": true
+    },
+    {
+      "name": "Resubmission preserves original decisions and independent review",
+      "passed": true
+    },
+    {
+      "name": "First import awaits a different finance reviewer",
+      "passed": true
+    },
+    {
+      "name": "Lost-response retry resolves to existing catalogue",
+      "passed": true
+    },
+    {
+      "name": "Self-review explicitly rejected",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 11",
+      "passed": true
+    },
+    {
+      "name": "Retained independent reject catalogue",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 13",
+      "passed": true
+    },
+    {
+      "name": "Explicit retry keeps separate linked review record",
+      "passed": true
+    },
+    {
+      "name": "Previous rejection remains readable",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 16",
+      "passed": true
+    },
+    {
+      "name": "Retained independent approve catalogue",
+      "passed": true
+    },
+    {
+      "name": "Unknown source classification preserved",
+      "passed": true
+    },
+    {
+      "name": "Both missing units remain visibly missing",
+      "passed": true
+    },
+    {
+      "name": "Download preserves actual Word format",
+      "passed": true
+    },
+    {
+      "name": "390px large arrangement form",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 22",
+      "passed": true
+    },
+    {
+      "name": "390px large arrangement preview",
+      "passed": true
+    },
+    {
+      "name": "Manager preparation does not self-publish",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 25",
+      "passed": true
+    },
+    {
+      "name": "Retained independent approve arrangement",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 27",
+      "passed": true
+    },
+    {
+      "name": "Missing unit remains pending",
+      "passed": true
+    },
+    {
+      "name": "Missing unit cannot be approved",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 30",
+      "passed": true
+    },
+    {
+      "name": "Retained independent reject mapping",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 32",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 33",
+      "passed": true
+    },
+    {
+      "name": "Retained independent approve mapping",
+      "passed": true
+    },
+    {
+      "name": "390px large patient eligibility form",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 36",
+      "passed": true
+    },
+    {
+      "name": "390px large eligibility preview",
+      "passed": true
+    },
+    {
+      "name": "First eligibility retains explicit region and result",
+      "passed": true
+    },
+    {
+      "name": "Eligibility confirmation replay remains successful",
+      "passed": true
+    },
+    {
+      "name": "Repeated request creates no second version",
+      "passed": true
+    },
+    {
+      "name": "Preview before save 41",
+      "passed": true
+    },
+    {
+      "name": "Latest unknown does not fall back to older verified",
+      "passed": true
+    },
+    {
+      "name": "Both original eligibility versions retained",
+      "passed": true
+    },
+    {
+      "name": "390px large retained eligibility history",
+      "passed": true
+    },
+    {
+      "name": "Current clinic rejects other-clinic patient",
+      "passed": true
+    },
+    {
+      "name": "HQ receives aggregate preparation summary",
+      "passed": true
+    },
+    {
+      "name": "doctor_a cannot acquire insurance role",
+      "passed": true
+    },
+    {
+      "name": "tech_demo cannot acquire insurance role",
+      "passed": true
+    },
+    {
+      "name": "390px large official source detail",
+      "passed": true
+    },
+    {
+      "name": "Keyboard reaches issue selector",
+      "passed": true
+    },
+    {
+      "name": "Keyboard search returns exact retained source",
+      "passed": true
+    },
+    {
+      "name": "No browser script errors",
+      "passed": true
+    }
+  ],
+  "page_errors": 0,
+  "scope": "Exact-commit image, Chrome desktop and390px large text, keyboard, retained source and independent staff decisions; not actual医保联网"
+}

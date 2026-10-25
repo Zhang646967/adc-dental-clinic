@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "counts": {
+    "patients": 4,
+    "visits": 0,
+    "treatments": 0,
+    "invoices": 0,
+    "cash": 0
+  },
+  "source_review_versions": 4,
+  "policy_item_rows": 808,
+  "independent_review": true,
+  "unknown_does_not_reuse_old_result": true,
+  "missing_unit_not_activated": true,
+  "original_review_and_eligibility_histories_retained": true,
+  "preparation_creates_no_financial_or_clinical_facts": true,
+  "new_table_rows": {
+    "adc_insurance_catalogue": 4,
+    "adc_insurance_policy_item": 808,
+    "adc_insurance_arrangement": 2,
+    "adc_insurance_fee_mapping": 4,
+    "adc_insurance_eligibility": 4,
+    "adc_insurance_event": 27
+  },
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73"
+}

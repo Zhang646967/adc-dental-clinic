@@ -2,7 +2,7 @@
 
 业务事实 → 真实表与主外键 → 分模块ER → 一致性规则 → 下一阶段优化。
 
-本目录解释独立PostgreSQL验证库中已实际迁移的表、键和基数。领域图解释业务责任，状态图解释生命周期；ER按真实元数据生成。当前C6.1A追加政策准备及待遇版本两个视图；准确版本和安装状态见[执行证据](../evidence_c61a/README.md)。原C1-WX的109表结构完整保存在[历史快照](../evidence_c1wx/schema_snapshot.json)，其[安装核对](../evidence_c1wx/mac-schema.json)继续按原日期解释。
+本目录解释独立PostgreSQL验证库中已实际迁移的表、键和基数。领域图解释业务责任，状态图解释生命周期；ER按真实元数据生成。当前C6.1A追加政策准备及待遇版本两个视图；原本机安装后的表、键、索引和触发器已[逐项核对相同](../evidence_c61a/mac-schema.json)，准确版本和安装状态见[执行证据](../evidence_c61a/README.md)。原C1-WX的109表结构完整保存在[历史快照](../evidence_c1wx/schema_snapshot.json)，其[安装核对](../evidence_c1wx/mac-schema.json)继续按原日期解释。
 
 ## 结构基线与阅读方式
 

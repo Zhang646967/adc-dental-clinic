@@ -1,0 +1,64 @@
+{
+  "passed": true,
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73",
+  "image": "sha256:9590ff4ade2983b0d73e20bef65e9da960108c187a68cad243a96df476ce1882",
+  "checks": [
+    {
+      "name": "Public clinic discovery remains available",
+      "passed": true
+    },
+    {
+      "name": "Insurance requires staff authentication",
+      "passed": true
+    },
+    {
+      "name": "Installed retained policy visible",
+      "passed": true
+    },
+    {
+      "name": "Installed catalogue approved by a separate account",
+      "passed": true
+    },
+    {
+      "name": "Installed source has202 codes",
+      "passed": true
+    },
+    {
+      "name": "Installed policy reflows390px large",
+      "passed": true
+    },
+    {
+      "name": "New independent finance login works",
+      "passed": true
+    },
+    {
+      "name": "Current clinic arrangement retained",
+      "passed": true
+    },
+    {
+      "name": "Manager can prepare current-clinic mapping",
+      "passed": true
+    },
+    {
+      "name": "Frontdesk receives today arrangement",
+      "passed": true
+    },
+    {
+      "name": "Frontdesk has patient selection action",
+      "passed": true
+    },
+    {
+      "name": "Frontdesk does not receive manager maintenance links",
+      "passed": true
+    },
+    {
+      "name": "Existing patient login remains patient-only",
+      "passed": true
+    },
+    {
+      "name": "Patient cannot access employee insurance data",
+      "passed": true
+    }
+  ],
+  "scope": "Installed original system; real Chrome login/GET and390px large checks only. No new patient, treatment, invoice or cash fixtures."
+}

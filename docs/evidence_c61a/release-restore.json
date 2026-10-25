@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "scope": "encrypted C6.1A insurance source/review/eligibility and twenty-branch populated rehearsal data restored into an independent empty database using all56 current migrations (all54 previous bytes unchanged); all row and schema fingerprints compared",
+  "application_commit": "6db99688fca0ff4be1e049360c3ab8eeddc03f73",
+  "runtime_equivalence": "candidate.json",
+  "database": "PostgreSQL 17",
+  "method": "PG17_JSONB_SHA256_V1",
+  "tables": 115,
+  "rows": 2739,
+  "facts_sha256": "ebec1816658e8880f3ab3e9b4eff1221819745d99d5cbecf22f9287d109ab0d9",
+  "restore_seconds_after_empty_database_ready": 10.617,
+  "total_seconds": 13.735,
+  "encrypted_dump_sha256": "b5aa07b5b4f1a885d3151b0cf6168398ba08d2c3b18a9067a3eac7646c47eb60",
+  "original_bytes_evidence_and_history_included": true,
+  "new_table_rows": {
+    "adc_insurance_catalogue": 4,
+    "adc_insurance_policy_item": 808,
+    "adc_insurance_arrangement": 2,
+    "adc_insurance_fee_mapping": 4,
+    "adc_insurance_eligibility": 4,
+    "adc_insurance_event": 27
+  },
+  "original_runtime_untouched": true,
+  "trigger_definitions_and_enabled_states_compared": 83
+}

@@ -1,8 +1,14 @@
-# In progress: C6.1A
+# Current delivery: C6.1A
 
-医保资料准备源码已实现并通过1,106项规则、1,826项PostgreSQL／HTTP／并发回归；56份应用迁移与实际115表／318外键／83触发器、22幅ER及183页正式报告同步。准确CI、同镜像浏览器、恢复与本机更新仍在执行；当前在用应用仍为下列C1-WX。[执行证据](docs/evidence_c61a/README.md)。C6.1B/C资金闭环继续开发。
+官方目录原件 → 独立资料复核 → 本店安排与收费适配 → 患者待遇版本 → 原费用结算准备。
 
-# Current delivery: C1-WX
+准确应用6db99688fca0ff4be1e049360c3ab8eeddc03f73已在原本机交付，CI、1,106项规则／1,826项PG、53项同镜像Chrome及14项七角色HTTP、115表2739行加密恢复、原库副本升级及保护更新通过。原106组数据、70配置、旧密码、数据库容器卷和RC标签保留；课程配置与新审计单独列明。183页正式报告、90项业务用例加SF-01与22幅实际ER同步。[交付证据](docs/evidence_c61a/README.md) · [本地办理](docs/C61A_LOCAL_GUIDE.md)。
+
+C6.1B/C资金闭环继续开发。真实微信、医保机构、云端、专业、新容量及24小时分别验收；历史UNKNOWN、UNDETERMINED及Windows资料未恢复状态保留。
+
+## Historical delivery
+
+# Historical delivery: C1-WX
 
 本地账号 → 联络来源 → 本人申请 → 独立前台核验 → 明确进入 → 原预约、改期与候补。
 
