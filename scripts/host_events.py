@@ -35,7 +35,8 @@ INSPECT = ('{{.Id}}|{{index .Config.Labels "' + LABEL + 'project"}}|'
 ACTION_FORMAT = ('{{if or ' + ' '.join('(eq .Action "' + a + '")' for a in EVENTS) +
                  '}}{{.Action}}{{else}}IGNORED{{end}}')
 EVENT_FORMAT = ('{{.TimeNano}}|' + ACTION_FORMAT + '|{{.Actor.ID}}|'
-                '{{index .Actor.Attributes "' + LABEL + 'service"}}')
+                '{{index .Actor.Attributes "' + LABEL + 'service"}}|'
+                '{{index .Actor.Attributes "' + LABEL + 'oneoff"}}')
 
 
 def clock():
@@ -100,8 +101,8 @@ def docker_sample(target, since, until):
         '--format', EVENT_FORMAT).splitlines()
     events = []
     for line in raw:
-        ns, action, cid, service = line.split('|')
-        if action in EVENTS and service in SERVICES:
+        ns, action, cid, service, oneoff = line.split('|')
+        if action in EVENTS and service in SERVICES and oneoff == 'False':
             events.append(dict(ns=int(ns), code=EVENTS[action], id=cid, service=service))
     return rows, events, len(raw) >= 256
 

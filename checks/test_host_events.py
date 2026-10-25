@@ -123,7 +123,7 @@ class HostEventsTests(unittest.TestCase):
             if args[0]=='ps':return ''
             filters={args[i+1] for i,key in enumerate(args[:-1]) if key=='--filter'}
             # Unknown actions must have a fixed projection, never command text.
-            return '1|IGNORED|'+('a'*64)+'|web'
+            return '1|IGNORED|'+('a'*64)+'|web|False'
         with patch('scripts.host_events.run',side_effect=daemon):
             containers,events,saturated=docker_sample(TARGET,1,2)
         self.assertEqual((containers,events,saturated),([],[],False))
@@ -136,7 +136,7 @@ class HostEventsTests(unittest.TestCase):
         self.assertNotIn('|{{.Action}}|',EVENT_FORMAT)
 
     def test_filtered_oom_and_stop_events_are_still_projected(self):
-        output='1|oom|'+('a'*64)+'|web\n2|stop|'+('b'*64)+'|notification-worker'
+        output='1|oom|'+('a'*64)+'|web|False\n2|stop|'+('b'*64)+'|notification-worker|False'
         def daemon(target,*args):
             if args[0]=='context':return 'unix:///synthetic/docker.sock'
             if args[0]=='ps':return ''
@@ -147,7 +147,31 @@ class HostEventsTests(unittest.TestCase):
         self.assertEqual([e['code'] for e in events],['CONTAINER_OOM','CONTAINER_STOPPED'])
 
     def test_ignored_events_still_reveal_full_daemon_history_ring(self):
-        output='\n'.join(str(i)+'|IGNORED|'+('a'*64)+'|web' for i in range(256))
+        output='\n'.join(str(i)+'|IGNORED|'+('a'*64)+'|web|False' for i in range(256))
+        def daemon(target,*args):
+            if args[0]=='context':return 'unix:///synthetic/docker.sock'
+            if args[0]=='ps':return ''
+            return output
+        with patch('scripts.host_events.run',side_effect=daemon):
+            _,events,saturated=docker_sample(TARGET,1,2)
+        self.assertEqual(events,[])
+        self.assertTrue(saturated)
+
+    def test_oneoff_web_maintenance_does_not_raise_runtime_incidents(self):
+        output='\n'.join(str(i)+'|'+action+'|'+('a'*64)+'|web|True'
+                         for i,action in enumerate(('start','die','destroy','oom'),1))
+        output+='\n5|stop|'+('b'*64)+'|web|False'
+        def daemon(target,*args):
+            if args[0]=='context':return 'unix:///synthetic/docker.sock'
+            if args[0]=='ps':return ''
+            return output
+        with patch('scripts.host_events.run',side_effect=daemon):
+            _,events,saturated=docker_sample(TARGET,1,6)
+        self.assertFalse(saturated)
+        self.assertEqual(events,[dict(ns=5,code='CONTAINER_STOPPED',id='b'*64,service='web')])
+
+    def test_full_history_of_oneoff_events_is_still_incomplete(self):
+        output='\n'.join(str(i)+'|start|'+('a'*64)+'|web|True' for i in range(256))
         def daemon(target,*args):
             if args[0]=='context':return 'unix:///synthetic/docker.sock'
             if args[0]=='ps':return ''

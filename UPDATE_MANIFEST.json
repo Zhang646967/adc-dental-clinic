@@ -122,7 +122,7 @@
     "checks/test_g4_mac_demo.py": "ef800e8029c96cb9bc3be4b080c0f3fd39fca759cd3a8cb70e350c3f5e00cc70",
     "checks/test_g4_preparation.py": "f42a11195b47e626e5f20ecdebf8fe340d5a004bccd0f306fcbad3b99b05b94a",
     "checks/test_g4_transport.py": "3d586c19c11d1db1afc50d4d50ecfd29bdd016cdb8f5b1220ea0a168d4e3ca93",
-    "checks/test_host_events.py": "1bf6ac516f812373202f49cce52b26d3dee7610d5adae2a3943399a4ed04f97e",
+    "checks/test_host_events.py": "40c20ce6304240deb451af94d6dc4aad62ef5498c4d85250581af1bb51a90956",
     "checks/test_intake_rules.py": "403773fbb163f8fe77d28325734a599cfec6101aee65d97b9ca4ca9055a8ac62",
     "checks/test_macos_launcher.py": "861b85d6ed5e52fe38cfe458a7e784394b79113a03240447eeedb7410c437cd3",
     "checks/test_management_rules.py": "fb0febd99282f7cf8f072212057f39ddf2c340df2d4a5b72ddb5c31d122c200a",
@@ -1947,7 +1947,7 @@
     "scripts/g4_prepare.py": "9309d6ec1a5e26032cf1869a5bda43847ffd3c5ff59e3c126c2aa9743f0cce29",
     "scripts/g4_remote.py": "4571438e2ac3688837aaa1b9afa23884afab0e42b6c29ebb8d606ab0475f9747",
     "scripts/g4_worker.py": "ec79a02920db46fcdf4c34ba53f7b5839bb6f5a12b88cf2e9202b013fdf1f6f6",
-    "scripts/host_events.py": "18edf031dae523c4d7e32ffd752ebb5c89b942201991f71533a32245fd42373e",
+    "scripts/host_events.py": "25e12509dd01cca043b487a879b53af9d04e752d39ac9aac5d18a1d5a7358701",
     "scripts/init_local.py": "9a5f280faef2901e6d9426a1e8db46641ade59667ff2a088a2509cf885434b50",
     "scripts/integration_gate.py": "c06e78844fc918b3f1737144d0b09cc86c7e60e00925ee602f475a04fe933eb9",
     "scripts/migration_core.py": "2d071d5941f9020c79c26f50d0c2d36ac77d6d5ae85dd3885059639371aadbf3",
@@ -2510,5 +2510,6 @@
     "schema_change": "C0.4 locally delivered:52 application migrations,49 prior bytes unchanged;103 observed/installed SQL tables,102ORM,993ORMcolumns,285SQLFKs,75triggers.",
     "user_release_validation": "C0.4 exact application f9df57d CI1104/1714,77 isolated and42 installed browser/native checks,103-table encrypted recovery, original-copy upgrade and protected installation passed. Preparation-only ba611d4 CI1104/1715,27 existing-profile cases; application image unchanged. Real WeChat/insurance/cloud/20-clinic/24-hour/professional gates separate.",
     "documentation_update": "C0.4 business contract added. Formal report and actual ER updates are pending executed migration/browser/release acceptance."
-  }
+  },
+  "host_tool_followup": "Candidate host-only projection fix excludes one-off containers from runtime incidents while preserving full-history detection.37 targeted and1106source checks plus real Docker reproduction passed; exact follow-up CI and original collector replacement pending. Application image remains accepted d0a05fe."
 }
