@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "postgresql_cases": 161,
+  "scope": "final public contact presentation; real PG/HTTP booking, retained offers, rescheduling, public catalogue and guest continuation",
+  "new_scenarios": [
+    "new booking forms and native preview show the published name/address",
+    "pending offer preserves its promised public contact after a public profile revision"
+  ]
+}

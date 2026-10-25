@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import reverse
 from accounts.policies import has_role,bindings
 from workspaces.rules import ROLES, CLINIC_ROLES
-from workspaces.context import token_for, available_roles
+from workspaces.context import token_for, available_roles,channel_roles
 
 NAV={
  'PATIENT':[('portal_home','服务首页'),('portal_slots','预约时间'),('portal_appointments','我的预约与账单'),('waitlist','我的候补'),('portal_assistant','操作问答')],
@@ -21,6 +21,7 @@ NAV['DENTIST'].insert(1,('clinical_doctor_lab_queue','加工验收工作台'))
 NAV['PATIENT'].append(('portal_history','我的健康自述'))
 NAV['PATIENT'].append(('portal_plans','我的治疗计划'))
 NAV['FRONT_DESK'].insert(5,('clinical_next_list','后续就诊安排'))
+NAV['MANAGER'].append(('branch_directory_maintain','门店公开资料'))
 NAV['FRONT_DESK'].insert(6,('clinical_recalls','复诊随访与责任'))
 NAV['FRONT_DESK'].insert(7,('clinical_labs','加工件送返协调'))
 for _role in ('MANAGER','HQ'):NAV[_role].append(('clinical_coordination_summary','复诊与准备汇总'))
@@ -40,7 +41,7 @@ def navigation(request):
       'can_correct':role in ('DENTIST','FINANCE'),'can_assist':role in ('FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE'),
       'workspace_role':role,'workspace_label':ROLES.get(role,('选择工作身份',''))[0],
       'workspace_scope':clinic.name if clinic else ('请先选择诊所' if choose_clinic else {'DENTIST':'本人负责接诊','PATIENT':'本人资料','HQ':'全链授权汇总','FINANCE':'全链财务','SYSADMIN':'基础资料、账号与技术配置'}.get(role,'')),
-      'workspace_can_switch_role':len(available_roles(user)) > 1,
+      'workspace_can_switch_role':len(channel_roles(user,ctx) if ctx else available_roles(user)) > 1,
       'workspace_needs_clinic':choose_clinic,'workspace_has_clinics':role in CLINIC_ROLES,
       'workspace_token_value':token_for(ctx) if ctx else '',
       'workspace_revision':ctx.revision if ctx else 0,

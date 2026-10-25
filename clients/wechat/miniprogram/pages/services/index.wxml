@@ -1,4 +1,4 @@
-<view class="page"><view class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><navigator url="/pages/patients/index" open-type="reLaunch">切换就诊人</navigator></view>
+<view class="page"><view wx:if="{{authenticated}}" class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><navigator url="/pages/patients/index" open-type="reLaunch">切换就诊人</navigator></view>
   <view class="service-hero"><view class="brand">ADC DENTAL CARE · 就诊服务</view><view class="title">先了解服务，再安排就诊</view><view class="hero-note">看看本次可以讨论什么、包含哪些内容，以及到诊前需要准备什么。</view></view>
   <label class="label" for="keyword">搜索服务或就诊需求</label><input id="keyword" class="input" value="{{keyword}}" maxlength="100" bindinput="keyword" placeholder="输入服务名称或你关心的问题" aria-label="搜索服务或就诊需求" />
   <label class="label">服务分类</label><picker class="picker" range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="pickCategory">{{categories[categoryIndex].name}}</picker>

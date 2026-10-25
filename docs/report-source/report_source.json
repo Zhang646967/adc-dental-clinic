@@ -1,6 +1,6 @@
 {
   "title": "ADC 牙科连锁运营管理系统分析与设计",
-  "version": "连续诊疗、复诊责任与加工协同",
+  "version": "患者服务入口与连锁门店协同",
   "date": "2026年10月24日",
   "file_stem": "课程报告_张加良_8210241102",
   "reference_pdf": {
@@ -17,12 +17,12 @@
     "class": "信管 T2401"
   },
   "abstract_cn": [
-    "连锁牙科诊所的预约、接诊、治疗、结算和设备使用具有连续性，任何环节的信息脱节都可能造成重复预约、患者等待、费用争议或服务中断。本文以Andrew’s Dental Chain（ADC）课程案例为背景，面向一家约5至20家诊所的连锁机构，分析七类岗位的业务责任与交接关系。 连续诊疗进一步区分方案讨论、本人决定、实际执行和后续目标；复诊责任与加工件验收各有明确岗位及完成依据，避免把预约、联系或物理返回当成实际完成。",
+    "连锁牙科诊所的预约、接诊、治疗、结算和设备使用具有连续性，任何环节的信息脱节都可能造成重复预约、患者等待、费用争议或服务中断。本文以Andrew’s Dental Chain（ADC）课程案例为背景，面向一家约5至20家诊所的连锁机构，分析七类岗位的业务责任与交接关系。 连续诊疗进一步区分方案讨论、本人决定、实际执行和后续目标；复诊责任与加工件验收各有明确岗位及完成依据，避免把预约、联系或物理返回当成实际完成。 患者可以先按城市或主动定位查找门店，核对地址、电话、营业时间与服务后再登录；公开信息、账号通道及具体就诊人授权分别管理，保持预约与诊疗历史连续。",
     "系统以患者服务过程为主线，区分电话咨询、完整患者建档、候选协商、明确确认和正式预约。网站与原生微信小程序从门店明确发布的服务出发，说明接诊范围、费用和到诊准备，再共用患者预约服务；本人或经核验的代约人选择就诊人后明确确认改期，保留原承诺与候补接受历史。科室开放、服务时长、医师出诊、椅位及必要设备统一核验；设备故障保留原承诺并进入责任协调。实际治疗、版本化账单、收退款、资金凭据、渠道对账和独立审核共同构成诊疗与财务闭环，取消分析进一步支持原因核实及改进措施复核。",
     "研究采用用例驱动、领域关系和状态模型表达业务规则，以模块化结构、事务约束及追加式历史保持结果可追溯。课程合成场景覆盖跨岗位办理、资源竞争、授权隔离和数据恢复；统计指标说明分母与资料完整性。合成验证用于检验系统规则，不预设真实取消率下降或商业运营成效。"
   ],
   "abstract_en": [
-    "Dental-chain operations connect appointment intake, clinical care, billing and equipment availability. This report studies ADC as one chain of approximately five to twenty clinics and defines the responsibilities and handoffs of seven roles. Continuing care separates retained plan versions, exact patient decisions, actual performed work and follow-up goals. Attributed recall and cycle-specific laboratory review preserve existing appointment commitments.",
+    "Dental-chain operations connect appointment intake, clinical care, billing and equipment availability. This report studies ADC as one chain of approximately five to twenty clinics and defines the responsibilities and handoffs of seven roles. Continuing care separates retained plan versions, exact patient decisions, actual performed work and follow-up goals. Attributed recall and cycle-specific laboratory review preserve existing appointment commitments. Patients can discover published branches by city or optional location before signing in. Public branch information, patient and staff login channels, and explicit patient authorization remain separate from resource commitments and retained clinical records.",
     "Telephone consultation, complete patient registration, candidate negotiation, explicit consent and formal booking remain distinct. The website and native WeChat mini-program share patient booking services. Patients explicitly confirm replacements while original promises and accepted-offer history remain traceable. All booking channels check department hours, service duration, providers, chairs and required equipment. Equipment faults preserve existing promises and open accountable coordination. Actual treatment, versioned bills, independently reviewed cash entries and transaction reconciliation support traceable clinical and financial workflows. Published clinic offerings distinguish unknown fees from confirmed prices and continue into the same authorized booking workflow in both patient channels.",
     "Use cases, domain relationships and lifecycle models specify observable outcomes and exceptions. Synthetic scenarios examine cross-role workflows, resource contention, authorization and recovery. Cancellation measures retain denominators and incomplete results. These findings validate course-system rules and do not establish commercial-scale capacity or real-world improvement."
   ],
@@ -254,6 +254,14 @@
         "加工件返回后由具有相应服务记录范围的医师核对适配，分别记录通过与返工。返工进入新的送返周期；方案换版后沿用加工件也须明确核对新版步骤。物理返回不等于临床验收，缺少依赖信息不能自动判定为无需加工。",
         "前台查阅安排、期限和交接投影，医师查阅临床规格及验收详情；主管和总部只查看状态与逾期汇总。加工件全部满足本周期和具体步骤要求后，实际执行才能继续确认；这一准备状态本身不生成收费。"
       ]
+    },
+    {
+      "heading": "3.17 公开找店与按需登录",
+      "paragraphs": [
+        "患者首次进入网站或小程序时，可以浏览已发布门店和服务，按城市、区域或名称筛选。主动授权位置后按由近到远排列，直线距离仅供估算；拒绝或无法定位时仍能继续选择。门店显示明确地址入口、电话、每周营业安排与已确认的临时说明，营业中不代表该时段一定可预约。",
+        "患者选定服务后才进入患者登录和就诊人选择，继续查询原服务候选并明确确认。患者与员工采用独立登录入口，服务器限制该通道可激活的岗位；同一人有多个岗位也不在患者小程序切换员工权限。待选服务不是授权，登录、查询和就诊人选择本身都不创建预约。",
+        "公开资料只包括门店、服务及必要出诊参考，不披露患者、内部停用依据或员工私有联络信息。位置在客户端用于排序，不记录精确位置轨迹。微信账号、核验手机号、患者本人身份和关系授权继续分别办理，不以昵称、手机号或定位推断患者身份。"
+      ]
     }
   ],
   "design": [
@@ -301,7 +309,7 @@
     {
       "heading": "4.13 数据库实体关系设计",
       "paragraphs": [
-        "数据库按预约接待、服务资源、资金与设备、身份专业范围、检查来源、方案执行、后续预约、随访责任和加工验收划分十七个真实关系视图。实际结构为101张表，含100张ORM业务与框架表及1张迁移日志，966个ORM列；281条普通外键及1条账单同次就诊复合外键共282条。领域关系用于解释业务责任，ER解释实际主外键，状态模型解释生命周期，三者不互相替代。",
+        "数据库按业务责任分成十八个真实关系视图。独立PostgreSQL实际观察103张表，含102张ORM业务与框架表及1张迁移日志，共993个ORM字段；284条普通外键及1条账单同次就诊复合外键共285条。新增门店公开资料及发布版本，保留原诊所身份、患者、诊疗与资金历史。领域关系、真实ER及状态模型分别解释责任、主外键与生命周期。",
         "PK表示主键，FK表示外键，UK表示单列唯一，问号表示可空。关系端点采用乌鸦脚记法：双竖线为恰好一个，圆圈加竖线为零或一个，圆圈加三叉为零到多个。条件唯一、状态与时间规则在图后单独说明。",
         "方案及检查的患者与诊所从原就诊推导，避免重复维护归属。方案步骤保留发布时的项目单位、服务名称、科室和时长；历史未登记定义与加工依赖保持空值。条件唯一、追加历史、完成依据和当前有效占用分别由实际数据库约束及对应业务命令核验；JSON快照不伪画为外键。"
       ]
@@ -385,6 +393,15 @@
         "一条医师后续要求至多一份随访责任，状态为继续协调、本人暂不继续转医师核对、已核对实际完成、原指示已撤回。责任、期限及联系变化追加历史。完成只选择明确关联预约及其唯一改期链上，同患者同店同服务且已经关闭的实际就诊；确认检查或指定步骤完成依据二选一。晚于原窗口照实记录，不改原建议日期。",
         "加工请求保留原检查及具体步骤，状态为待安排、已送出、已返回、已验收、需返工和明确撤回。验收绑定物理周期和确切目标步骤，实际验收时间不晚于记录时间；实际执行不能早于所依据的验收。行政责任交接不会使未改变的临床验收失效。",
         "候选查询、送返登记、临床验收与实际执行分别由各模块拥有。重新确认时核对当前主体、岗位、诊所、服务范围、版本及依赖；同一提交返回原成功结果。设备故障仍调用原资源替换和改期合同，既有预约与原始关联均保留，不以准备状态静默改变临床或资金事实。"
+      ]
+    },
+    {
+      "heading": "4.20 门店资料版本与患者入口",
+      "paragraphs": [
+        "门店业务身份与对外资料通过唯一外键关联。当前资料保存展示名称、行政区、地址入口、公开电话、发布状态和坐标来源；每次明确确认追加具体版本与操作者，版本不可普通更新或删除。营业时间从原科室开放及有效停用区间计算，避免两套营业表相互矛盾。",
+        "距离计算使用同一WGS84坐标系，导航单独使用核对后的GCJ02坐标。未知坐标保持空值，不能作为零点；用户位置只在客户端参与排序。合成门店明确标识，拨号和地图操作在外部调用前拦截，不能把虚构号码及地址当成真实服务机构。",
+        "登录通道是服务器工作上下文中的受约束属性，不是另一套岗位授权。患者通道只激活有效患者身份，员工通道只激活有效员工岗位；具体患者或预约代办范围仍由原关系规则核验。服务延续绑定明确服务及短期提示，过期、撤回或撤权后重新选择，不自动替换服务或创建患者。",
+        "公开资料更新与资源目录共用锁并递增版本，旧预约预览不能在资料变化后直接确认。既有预约与有效邀约保留，新增资源方案保存当时公开联系快照；历史缺失快照不补造。实际搬迁及停诊影响交由前台明确协调，公开改名不静默移动原承诺。"
       ]
     }
   ],
@@ -740,6 +757,14 @@
         "临床完成、开单收入、实际收退款和渠道对账分别核算。不同财务账号独立审核收款和部分退款，原实际执行与原账单不因退款而改写。主管和总部仅查看状态与逾期汇总，临床规格、联系文字及本人方案不进入汇总。",
         "独立核对上述五例新增业务：五次中间治疗均为零金额结算，五次完成治疗各产生一条200元原收费，共开单1000元；另行审核收款1000元、退款500元，净收款500元、未收余额500元。退款不自动改写原开单收入，需要调减账单时另走独立更正；预约、方案和联系记录均不直接产生资金。"
       ]
+    },
+    {
+      "heading": "5.11 门店发现与登录延续核对",
+      "paragraphs": [
+        "网站与原生小程序共用已发布门店和服务来源，访客入口仅提供公开只读投影。核对匿名访问不建立工作上下文或业务记录，定位失败可手动选城，同名距离采用稳定编号排序。患者选择服务后，经普通登录及合法就诊人选择继续原预约流程。",
+        "业务核对包括多岗位账号的登录通道、跨店与撤权、资料版本竞争、重复确认、公开撤回后旧预览、营业例外和原约联系快照。课程门店网络覆盖长沙等八省会二十份合成资料，其中长沙四店准备服务、牙椅设备与前台出诊，其余门店只提供已准备的公开资料，不因门店数量推断业务容量。",
+        "关系图由实际迁移后的数据库结构生成，逐列核对类型、可空、唯一及外键。已核对的软件业务路径与微信平台运行、真实手机号授权及医保联网分别记录；尚无平台及机构测试条件时，不将本地接口或合成数据称为真实授权或医保结算。"
+      ]
     }
   ],
   "conclusion": [
@@ -753,7 +778,8 @@
     {
       "heading": "6.2 下一阶段业务完善计划",
       "paragraphs": [
-        "现有合成系统已形成服务发布、患者关系、限定专业范围和转诊、多渠道预约、前台排班、检查方案、实际执行、复诊加工及资金设备协同。后续面向单一连锁独立部署，确认真实机构政策与专业责任，重点推进临床签署归档、处方药事和材料执行；预约、方案讨论或账单记录不能替代完整临床专业制度。"
+        "现有合成系统已形成服务发布、患者关系、限定专业范围和转诊、多渠道预约、前台排班、检查方案、实际执行、复诊加工及资金设备协同。后续面向单一连锁独立部署，确认真实机构政策与专业责任，重点推进临床签署归档、处方药事和材料执行；预约、方案讨论或账单记录不能替代完整临床专业制度。",
+        "下一阶段先完善本地微信身份、手机号核验与本人建档申请，再建立湖南版本目录、合成医保结算和退费核对。普通微信登录不会取得居民身份证；真实微信能力需平台条件，真实医保结算需具体定点机构及接口条件，目录分类不能直接视为患者报销比例。"
       ],
       "table": {
         "headers": [
@@ -817,8 +843,8 @@
   "mind_maps": {
     "1": "业务背景 → {患者服务、岗位协作、经营核对} → 研究目标 → 范围与方法 → 六章分析设计。",
     "2": "分析方法 → {用例、业务序列、领域、状态}；设计原则 → {信息隐藏、职责分离、一致性}；评价 → {业务结果、分母、异常}。",
-    "3": "参与者与实际问题 → {关系核验、接待排班、检查方案、复诊加工、收退款、设备维护} → 可观察行为 → 异常继续与最低保证 → 用例及验收。",
-    "4": "模块拥有规则 → 真实主外键 → {检查版本、方案决定、实际执行、唯一开单、随访完成、加工周期} → 原预约与历史保护 → 当前岗位及具体服务核验。",
+    "3": "实际患者问题 → {找店、身份与关系、接待排班、检查方案、复诊加工、收退款、设备} → 岗位和可观察规则 → 异常继续 → 用例验收。",
+    "4": "模块责任 → 真实主外键及基数 → {公开资料版本、授权、资源、临床、资金} → 明确状态与历史 → 同一数据库核对。",
     "5": "合成跨岗位场景 → 正常与异常路径 → 独立业务核算 → 数据库并发与浏览器 → 容量、恢复与权限 → 分别记录软件和目标环境证据。",
     "6": "现有业务闭环 → {身份与专业责任、连续诊疗、签署归档、处方药事、护理材料} → 财务外部衔接 → 目标环境验收与监督试用。"
   },
@@ -1098,7 +1124,7 @@
   "use_case_titles": {
     "SU-15": "SU-15　核对并发布限时邀约"
   },
-  "engineering_evidence": "docs/evidence_c23/README.md",
+  "engineering_evidence": "docs/evidence_c04/README.md",
   "state_legends": {
     "recall": [
       "1 前台明确认领责任和下次内部期限。",

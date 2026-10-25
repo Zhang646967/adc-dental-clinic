@@ -10,7 +10,8 @@ def published_profiles():
     return ServicePresentation.objects.filter(is_published=True, service__is_active=True,
         service__department__is_active=True, service__department__clinic__is_active=True,
         service__department__clinic_id__in=ResourcePolicy.objects.filter(state='ENABLED').values('clinic_id'),
-        service__dentists__is_active=True).select_related('service__department__clinic').prefetch_related(
+        service__dentists__is_active=True).exclude(service__department__clinic__public_directory__is_published=False).select_related(
+            'service__department__clinic__public_directory').prefetch_related(
             Prefetch('service__dentists', queryset=Dentist.objects.filter(is_active=True).only('pk', 'name'),
                      to_attr='public_dentists')).distinct()
 

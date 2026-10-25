@@ -17,6 +17,11 @@ class Clinic(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def public_contact(self):
+        from registry.branch_projection import public_contact
+        return public_contact(self)
+
 class Dentist(models.Model):
     employee_no = models.CharField(max_length=24, unique=True)
     name = models.CharField(max_length=80)
@@ -69,3 +74,8 @@ class TreatmentType(models.Model):
         constraints = [models.CheckConstraint(condition=Q(standard_unit_price__gte=0), name="treatment_price_nonnegative")]
     def __str__(self):
         return self.name
+
+
+# Kept in a separate file so public information cannot become the asset or
+# financial directory's implicit editable field list.
+from registry.directory_models import ClinicDirectory, ClinicDirectoryRevision

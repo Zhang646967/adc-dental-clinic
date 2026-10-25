@@ -90,7 +90,7 @@ def session_data(request):
             try:
                 access = patient_access(request.user)
                 data.update(patient_name=access.patient.name,subject_key=access.pk if access.delegated else 'self',
-                    delegated=access.delegated,acting_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.name) if access.delegated else '本人')
+                    delegated=access.delegated,acting_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.public_contact['name']) if access.delegated else '本人')
             except SubjectRequired:data['subject_required']=True
     return data
 
@@ -113,7 +113,7 @@ def sign_in(request):
             raise PermissionDenied
         login(request, user)
         request.session.set_expiry(3600)
-        begin_login_workspace(request)
+        begin_login_workspace(request,channel='PATIENT')
         # This endpoint explicitly selects only the authorized patient role,
         # including for a person who also has an employee role.
         if request.workspace.role != 'PATIENT':
@@ -129,20 +129,21 @@ def sign_out(request):
 
 def visit_data(visit, *, actor=None):
     plan = current_plan(visit)
+    contact=(plan.snapshot.get('public_clinic') if plan else None) or dict(name=visit.clinic.name,address=visit.clinic.postal_address,phone=visit.clinic.phone)
     successor = Visit.objects.filter(replaces_visit_id=visit.pk, patient_id=visit.patient_id).values_list('pk', flat=True).first()
-    return dict(id=visit.pk, clinic_id=visit.clinic_id, clinic=visit.clinic.name,
+    return dict(id=visit.pk, clinic_id=visit.clinic_id, clinic=contact['name'],
         dentist=visit.dentist.name, start=visit.scheduled_start.isoformat(), end=visit.scheduled_end.isoformat(),
         status=visit.status, status_label=visit.get_status_display(), version=visit.lock_version,
         service=(plan.snapshot.get('service', {}).get('name') or plan.service.name) if plan else '常规预约',
         service_id=plan.service_id if plan else None, predecessor=visit.replaces_visit_id, successor=successor,
         can_change=visit.status == 'SCHEDULED' and visit.scheduled_start > timezone.now(),
-        address=visit.clinic.postal_address, phone=visit.clinic.phone,
+        address=contact['address'], phone=contact['phone'],
         patient_request=visit.chief_complaint if actor and not patient_access(actor).delegated else '')
 
 
 def option_data(row):
     slot = row['slot']
-    return dict(id=f"{slot.pk}:{row['start'].isoformat()}", slot=slot.pk, clinic=slot.clinic.name, dentist=slot.dentist.name,
+    return dict(id=f"{slot.pk}:{row['start'].isoformat()}", slot=slot.pk, clinic=slot.clinic.public_contact['name'], dentist=slot.dentist.name,
         start=row['start'].isoformat(), end=row['end'].isoformat(),
         service=row['service'].pk if row.get('service') else None)
 
@@ -152,7 +153,9 @@ def catalogue(request):
     access=patient_access(request.user)
     clinics_qs=Clinic.objects.filter(is_active=True)
     if access.delegated:clinics_qs=clinics_qs.filter(pk=access.clinic_id)
-    clinics = list(clinics_qs.values('id', 'name', 'postal_address', 'phone'))
+    from registry.branch_projection import public_contact
+    clinics = [dict(id=c.pk,name=public_contact(c)['name'],postal_address=public_contact(c)['address'],phone=public_contact(c)['phone'])
+        for c in clinics_qs.select_related('public_directory')]
     offerings = [service_data(p,actor=request.user) for p in public_profiles(clinic_id=access.clinic_id)]
     return result(request, dict(clinics=clinics, offerings=offerings,
         services=[s for s in offerings if s['self_booking']],
@@ -226,7 +229,7 @@ def book_preview(request):
             raise RuleError('服务与所选诊所不一致，请重新选择。')
         offering = service_data(profile,actor=request.user)
         wrapped = proposal(request.user, BOOK, ('PATIENT',), dict(token=token, patient_request=d['patient_request']))
-        return result(request, dict(proposal_token=wrapped, clinic=slot.clinic.name, dentist=slot.dentist.name,
+        return result(request, dict(proposal_token=wrapped, clinic=slot.clinic.public_contact['name'], dentist=slot.dentist.name,
             start=d['start'].isoformat(), end=end.isoformat(), service=offering['name'],
             fee_label=offering['fee_label'], fee_note=offering['fee_note'],
             preparation=offering['preparation'], patient_request=d['patient_request']))
@@ -279,7 +282,7 @@ def reschedule_preview(request, pk):
     prepared = rescheduling.prepare(actor=request.user, visit_id=pk, expected_version=d['expected_version'],
         slot_id=d['slot_id'], start=d['start'], reason=d['reason'], offer_id=d['offer_id'])
     return result(request, dict(original=visit_data(prepared['original'],actor=request.user), proposal_token=prepared['proposal_token'],
-        clinic=prepared['destination'].clinic.name, dentist=prepared['destination'].dentist.name,
+        clinic=(prepared.get('resources') or {}).get('public_clinic',prepared['destination'].clinic.public_contact)['name'], dentist=prepared['destination'].dentist.name,
         start=prepared['start'].isoformat(), end=prepared['end'].isoformat(), reason=prepared['reason'],
         duration_changed=prepared['duration_changed']))
 

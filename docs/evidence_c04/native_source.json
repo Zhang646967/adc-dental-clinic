@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "checks": 170,
+  "services": {
+    "passed": true,
+    "cases": 37,
+    "case_names": [
+      "typed service hint selects its clinic and exact service",
+      "invalid, withdrawn, child and cross-clinic hints never substitute",
+      "empty catalogue cannot invent a legacy service",
+      "older catalogue responses fail with a patient-facing error",
+      "home starts with service discovery",
+      "discovery filters published offerings by need, category and clinic",
+      "guest discovery reads only public catalogue without forcing login",
+      "guest service choice survives typed login navigation",
+      "service detail hands off the exact service and clinic",
+      "child and read-only detail cannot navigate into self booking",
+      "detail refresh clears withdrawn content before displaying an error",
+      "invalid detail link does not issue a path request",
+      "booking preserves the non-first service, clinic and duration",
+      "removed service hint blocks booking instead of choosing a replacement",
+      "empty booking catalogue stays empty without a fake default",
+      "own historical reschedule works without a public catalogue",
+      "legacy own visit retains a source-only rescheduling option",
+      "older visit responses fail before constructing a rescheduling choice",
+      "busy search ignores selection changes and failed search clears old results",
+      "patient request is sent once to preview and server text is reviewed",
+      "confirmation submits signed token only, not editable reason or fee fields",
+      "waitlist preserves selected service and never invents a generic fallback",
+      "historical reschedule cannot redirect to new public waitlist registration",
+      "visit refresh removes private cached text if authorization fails",
+      "subject selector submits exact server choice and clears prior review",
+      "stale subject review cannot reach confirmation transport",
+      "same subject and context permit a refreshed transport signature",
+      "appointment delegate cannot load clinical referral controls",
+      "referral termination previews before sending only its signed decision",
+      "referral preview cannot cross patient subject revision",
+      "appointment delegate cannot load or submit patient clinical history",
+      "patient history preserves unknown and requires explicit confirmation",
+      "patient history submits the displayed source revision and no other patient identifier",
+      "uncertain history save freezes edits and retries the same intent",
+      "history subject switch clears private draft before any write",
+      "foreground refresh keeps acknowledged unsaved history work",
+      "read-only history client cannot issue a reporting write"
+    ],
+    "scope": "actual Page handlers with mocked API; not Django/PostgreSQL, official compilation or WeChat runtime"
+  },
+  "plans": {
+    "passed": true,
+    "cases": 9,
+    "scope": "mocked API Page handlers; not WeChat runtime",
+    "details": [
+      "self plan list opens its exact typed plan",
+      "delegated subject never loads clinical plans",
+      "invalid plan link never sends a path request",
+      "unknown estimate and partial actual progress remain distinct",
+      "decision preview binds exact plan step and edited values clear confirmation",
+      "unconfirmed network retry uses the original signed operation",
+      "subject switch clears clinical values before any decision submission",
+      "read-only and retained historical versions cannot start a decision",
+      "server conflict preserves entered discussion and removes stale confirmation"
+    ]
+  },
+  "discovery": {
+    "passed": true,
+    "cases": 12,
+    "details": [
+      "browser and native distance source bytes match",
+      "analytic zero and quarter-equator distance",
+      "unknown coordinates remain unknown and sort after measured points",
+      "manual city and district filtering works without GPS",
+      "guest startup requests only public discovery without login or automatic location",
+      "permission denial preserves manual browsing",
+      "location success changes order without sending coordinates to the API",
+      "all synthetic contact actions stop before external calls",
+      "failed refresh clears previously published cards",
+      "return to discovery retains manual city choice",
+      "typed intent survives patient selection and is consumed only at continuation",
+      "invalid and expired intent cannot become arbitrary navigation"
+    ],
+    "scope": "actual discovery Page handlers with mocked transport; analytic distance and typed continuation; not WeChat runtime"
+  },
+  "compiler": {
+    "status": "not_run"
+  },
+  "scope": "native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution"
+}

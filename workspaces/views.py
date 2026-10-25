@@ -11,26 +11,34 @@ from accounts.models import UserAccount
 from registry.models import Clinic
 from accounts.policies import has_role
 from workspaces.worklists import workspace_worklist
-from workspaces.context import (ensure_context, available_roles, authorized_clinics,
+from workspaces.context import (ensure_context, available_roles, channel_roles, authorized_clinics,
     valid_context, attach, check_token, SESSION_KEY)
 from workspaces.models import WorkspaceContext
 from workspaces.rules import ROLES, CLINIC_ROLES
 
 class WorkspaceLoginView(LoginView):
+    login_channel='STAFF'
     def get_success_url(self):
         return reverse('select_role')
 
     def form_valid(self, form):
+        from portal.policies import has_patient_access
+        permitted=has_patient_access(form.get_user()) if self.login_channel=='PATIENT' else any(
+            r!='PATIENT' for r in available_roles(form.get_user()))
+        if not permitted:
+            form.add_error(None,'该账号尚未开通患者服务，请联系门店前台。' if self.login_channel=='PATIENT' else
+                '该账号没有员工岗位，请使用患者登录入口。')
+            return self.form_invalid(form)
         # Django performs authentication/session rotation, then our scoped activation.
         super().form_valid(form)
         from workspaces.activation import begin_login_workspace
-        return redirect(begin_login_workspace(self.request))
+        return redirect(begin_login_workspace(self.request,channel=self.login_channel))
 
 @login_required
 @require_GET
 def select_role(request):
     ctx = ensure_context(request)
-    current_roles = available_roles(request.user)
+    current_roles = channel_roles(request.user,ctx)
     if len(current_roles) == 1 and valid_context(request.user, ctx):
         return redirect(ROLES[current_roles[0]][1])
     roles=[{'code':r,'label':ROLES[r][0]} for r in current_roles]

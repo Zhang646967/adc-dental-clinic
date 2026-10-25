@@ -6,6 +6,7 @@ from adc_core.entry_views import system_entry
 from portal import views as portal_views
 from portal import service_views
 from scheduling import service_content_views
+from registry import branch_views
 from portal import reschedule_views as portal_reschedule_views
 from care import views as care_views
 from assistants import views as ai_views
@@ -23,6 +24,7 @@ urlpatterns = [
     path('services/<int:service_id>/', service_views.detail, name='public_service_detail'),
     path('care/guides/<str:category>/', service_views.guide, name='public_service_guide'),
     path('clinics/', service_views.clinics, name='public_clinics'),
+    path('clinic-directory/', branch_views.maintain, name='branch_directory_maintain'),
     path('scheduling/service-content/', service_content_views.home, name='service_content_home'),
     path('scheduling/service-content/<int:pk>/preview/', service_content_views.preview, name='service_content_preview'),
     path('api/mini/v1/', include('portal.mini_urls')),

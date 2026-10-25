@@ -12,6 +12,8 @@ class SystemEntryHTTPTests(SimpleTestCase):
     def setUp(self):
         self.catalogue=patch('portal.service_views.public_profiles',return_value=[])
         self.catalogue.start();self.addCleanup(self.catalogue.stop)
+        self.discovery=patch('portal.service_views.discovery_data',return_value={'clinics':[],'offerings':[]})
+        self.discovery.start();self.addCleanup(self.discovery.stop)
 
     def test_anonymous_entry_does_not_need_a_workspace_or_database(self):
         response = Client().get(reverse('system_entry'))

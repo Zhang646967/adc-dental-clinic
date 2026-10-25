@@ -63,7 +63,7 @@ async function signIn(username, password) {
   return request('login/', 'POST', {username, password});
 }
 async function signOut() {
-  await request('logout/', 'POST'); reset(); getApp().globalData.review = null;
+  await request('logout/', 'POST'); reset(); getApp().globalData.review = null;getApp().globalData.bookingIntent=null;
 }
 function sessionInfo() { return session; }
 function showSubject(page){

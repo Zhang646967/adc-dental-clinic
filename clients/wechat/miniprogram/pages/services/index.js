@@ -1,15 +1,15 @@
 const api=require('../../utils/api');
 const {showError}=require('../../utils/format');
 Page({
-  data:{all:[],rows:[],categories:[{id:'',name:'全部服务'}],clinics:[{id:'',name:'全部门店'}],categoryIndex:0,clinicIndex:0,keyword:'',busy:false,error:'',environmentLabel:''},
+  data:{all:[],rows:[],authenticated:false,categories:[{id:'',name:'全部服务'}],clinics:[{id:'',name:'全部门店'}],categoryIndex:0,clinicIndex:0,keyword:'',busy:false,error:'',environmentLabel:''},
   async onShow(){ api.showSubject(this);await this.load();},
   async load(){
     if(this.data.busy)return;
     this.setData({busy:true,error:'',rows:[],all:[]});
     try{
       const session=await api.bootstrap();api.showSubject(this);
-      if(!session.authenticated){this.setData({busy:false});wx.reLaunch({url:'/pages/login/index'});return;}
-      const cat=await api.request('catalogue/');
+      this.setData({authenticated:session.authenticated&&!session.subject_required});
+      const cat=await api.request(session.authenticated&&!session.subject_required?'catalogue/':'discovery/');
       if(!Array.isArray(cat.offerings)||!Array.isArray(cat.clinics))throw Error('服务目录暂不可用，请稍后重试或联系前台。');
       const categories=[{id:'',name:'全部服务'}];
       for(const row of cat.offerings)if(!categories.some(c=>c.id===row.category))categories.push({id:row.category,name:row.category_label});

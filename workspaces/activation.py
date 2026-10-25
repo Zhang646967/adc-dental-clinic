@@ -2,7 +2,7 @@
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from accounts.models import UserAccount
-from workspaces.context import (SESSION_KEY, available_roles, ensure_context, attach, check_token)
+from workspaces.context import (SESSION_KEY, available_roles, channel_roles, ensure_context, attach, check_token)
 from workspaces.models import WorkspaceContext
 from workspaces.rules import ROLES
 from workspaces.selection import sole_role
@@ -10,7 +10,7 @@ from workspaces.selection import sole_role
 
 def apply_role(request, ctx, role):
     """Caller must hold user/context locks; grant check never trusts a request role."""
-    if role not in available_roles(request.user):
+    if role not in channel_roles(request.user,ctx):
         raise PermissionDenied('该身份已失效；请重新登录或核对授权。')
     ctx.role = role
     ctx.clinic = None
@@ -23,7 +23,8 @@ def apply_role(request, ctx, role):
 
 
 @transaction.atomic
-def begin_login_workspace(request):
+def begin_login_workspace(request,channel='STAFF'):
+    if channel not in ('STAFF','PATIENT'):raise ValueError('Unknown login channel')
     if not UserAccount.objects.select_for_update().filter(pk=request.user.pk, is_active=True).exists():
         raise PermissionDenied('账号已停用，请重新登录或联系管理人员。')
     # New authenticated session context; old browser sessions retain their own contexts.
@@ -31,8 +32,10 @@ def begin_login_workspace(request):
     request.session.pop('adc_guide', None)
     request.session.pop('adc_booking_intent', None)
     ctx = ensure_context(request)
+    ctx.login_channel=channel
+    ctx.save(update_fields=['login_channel'])
     attach(request, ctx)
-    role = sole_role(available_roles(request.user))
+    role = sole_role(channel_roles(request.user,ctx))
     if role is None:
         return 'select_role'
     return apply_role(request, ctx, role)

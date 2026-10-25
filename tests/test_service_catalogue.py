@@ -266,32 +266,35 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
         request.session={INTENT_KEY:signing.dumps(payload,salt=INTENT_SALT)}
         return request
 
-    def test_multi_role_patient_selection_survives_explicit_role_choice(self):
+    def test_multi_role_patient_channel_continues_exact_service_without_staff_selection(self):
         self.add_manager_role()
         response=self.login_with_selection()
-        self.assertRedirects(response,reverse('select_role'),fetch_redirect_response=False)
-        self.assertIn(INTENT_KEY,self.client.session)
-        response=self.client.post(reverse('activate_role'),{'role':'PATIENT'})
         self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk),fetch_redirect_response=False)
+        ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
+        self.assertEqual((ctx.role,ctx.login_channel),('PATIENT','PATIENT'));self.assertIsNone(ctx.clinic_id)
+        self.assertNotIn(INTENT_KEY,self.client.session)
+        self.assertFalse(Visit.objects.exists())
+
+    def test_patient_channel_rejects_staff_selection_without_changing_scope(self):
+        self.add_manager_role();self.login_with_selection()
+        response=self.client.post(reverse('activate_role'),{'role':'MANAGER','clinic':self.b.pk})
+        self.assertEqual(response.status_code,403)
         ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
         self.assertEqual(ctx.role,'PATIENT');self.assertIsNone(ctx.clinic_id)
         self.assertNotIn(INTENT_KEY,self.client.session)
 
-    def test_selecting_staff_role_discards_patient_selection_without_changing_scope(self):
-        self.add_manager_role();self.login_with_selection()
-        response=self.client.post(reverse('activate_role'),{'role':'MANAGER','clinic':self.b.pk})
-        self.assertRedirects(response,reverse('manager_home'),fetch_redirect_response=False)
-        ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
-        self.assertEqual(ctx.role,'MANAGER');self.assertIsNone(ctx.clinic_id)
-        self.assertNotIn(INTENT_KEY,self.client.session)
-
     def test_new_login_clears_previous_pending_patient_selection(self):
         self.add_manager_role();self.login_with_selection()
-        self.assertIn(INTENT_KEY,self.client.session)
-        self.client.post(reverse('login'),{'username':self.patient_user.username,'password':'synthetic-service-only'})
+        old=self.client.session[SESSION_KEY]
+        session=self.client.session;session[INTENT_KEY]='previous-pending-choice';session.save()
+        response=self.client.post(reverse('login'),{'username':self.patient_user.username,'password':'synthetic-service-only'})
+        self.assertRedirects(response,reverse('manager_home'),fetch_redirect_response=False)
         self.assertNotIn(INTENT_KEY,self.client.session)
+        self.assertNotEqual(old,self.client.session[SESSION_KEY])
+        ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
+        self.assertEqual((ctx.role,ctx.login_channel),('MANAGER','STAFF'))
         response=self.client.post(reverse('activate_role'),{'role':'PATIENT'})
-        self.assertRedirects(response,reverse('portal_home'),fetch_redirect_response=False)
+        self.assertEqual(response.status_code,403)
 
     def test_already_active_patient_continues_without_get_activating_anything(self):
         self.login_patient()

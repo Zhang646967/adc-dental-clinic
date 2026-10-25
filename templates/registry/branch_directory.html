@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}
+<div class="workspace-heading"><p class="eyebrow">门店资料</p><h1>让患者准确找到本店</h1><p>维护公开名称、位置和联系电话。营业时间来自科室开放及临时停用安排，日周排班继续由前台办理。</p></div>
+<section class="card"><h2>当前营业来源</h2><p>{{ opening.state_label }} · 今日 {{ opening.today }}</p><p>{% for day in opening.week %}{{ day.day }} {{ day.hours }}{% if not forloop.last %}；{% endif %}{% endfor %}</p><a href="{% url 'resource_catalogue' %}">维护科室开放及临时停用 →</a></section>
+<form method="post" class="card">{% csrf_token %}{% workspace_token %}{{ form.non_field_errors }}{% for field in form %}<div class="field">{{ field.label_tag }}{{ field }}{{ field.errors }}{% if field.help_text %}<p class="muted">{{ field.help_text }}</p>{% endif %}</div>{% endfor %}<button class="button" type="submit">预览公开资料 →</button></form>
+<section class="card"><h2>资料更新历史</h2>{% for version in versions %}<p>版本 {{ version.revision }} · {{ version.created_at|date:'Y-m-d H:i' }} · {{ version.actor }} · {{ version.snapshot.display_name }} · {% if version.snapshot.is_published %}公开{% else %}未公开{% endif %}</p>{% empty %}<p>尚无公开资料更新。</p>{% endfor %}</section>
+{% endblock %}

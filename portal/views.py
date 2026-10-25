@@ -18,6 +18,7 @@ from portal.policies import patient_access, form_authority, read_form_authority
 from portal.services import public_options, preview_booking, confirm_booking, cancel_booking
 
 class PortalLoginView(LoginView):
+    login_channel='PATIENT'
     template_name = "portal/login.html"
     def get_success_url(self):
         return reverse("select_role")
@@ -46,6 +47,7 @@ class PortalLoginView(LoginView):
 
     def form_valid(self,form):
         response=super().form_valid(form)
+        if response.status_code!=302:return response
         # The ordinary authenticated activation completes first. This typed
         # service hint cannot choose a role, clinic scope or arbitrary URL.
         from portal.booking_intent import remember_service,destination_after_activation

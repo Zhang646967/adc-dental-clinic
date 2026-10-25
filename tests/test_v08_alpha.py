@@ -22,8 +22,9 @@ OP_PASSWORD='test-only-pass-abc'
 
 class LoginShortcutTests(V07Fixture,TransactionTestCase):
     def setUp(self):self.setup07()
-    def real_login(self,user,route='login',extra=None):
+    def real_login(self,user,route=None,extra=None):
         user.set_password(PASSWORD);user.save(update_fields=['password'])
+        route=route or ('portal_login' if user.pk==self.pa.pk else 'login')
         return self.c.post(reverse(route),dict(username=user.username,password=PASSWORD,**(extra or {})))
     def test_patient_single_redirect(self):
         r=self.real_login(self.pa,'portal_login');self.assertEqual(r.url,reverse('portal_home'));self.assertEqual(self.ctx().role,'PATIENT')
@@ -36,12 +37,16 @@ class LoginShortcutTests(V07Fixture,TransactionTestCase):
         r=self.real_login(self.manager);self.assertEqual(r.url,reverse('select_role'));self.assertEqual(self.ctx().role,'')
     def test_no_roles_remain_unselected(self):
         u=UserAccount.objects.create_user(username='norole');r=self.real_login(u)
-        self.assertEqual(r.url,reverse('select_role'));self.assertContains(self.c.get(r.url),'尚未')
+        self.assertContains(r,'该账号没有员工岗位')
+        self.assertNotIn('_auth_user_id',self.c.session);self.assertNotIn(SESSION_KEY,self.c.session)
     def test_disabled_patient_access_not_activated(self):
-        self.access.is_active=False;self.access.save();self.real_login(self.pa)
-        self.assertEqual(self.ctx().role,'')
+        self.access.is_active=False;self.access.save();r=self.real_login(self.pa)
+        self.assertContains(r,'该账号尚未开通患者服务')
+        self.assertNotIn('_auth_user_id',self.c.session);self.assertNotIn(SESSION_KEY,self.c.session)
     def test_only_inactive_clinic_role_not_activated(self):
-        self.a.is_active=False;self.a.save();self.real_login(self.manager);self.assertEqual(self.ctx().role,'')
+        self.a.is_active=False;self.a.save();r=self.real_login(self.manager)
+        self.assertContains(r,'该账号没有员工岗位')
+        self.assertNotIn('_auth_user_id',self.c.session);self.assertNotIn(SESSION_KEY,self.c.session)
     def test_switch_link_hidden_for_single_patient(self):
         r=self.real_login(self.pa);self.assertNotContains(self.c.get(reverse('portal_home')),'data-switch>切换身份')
     def test_switch_link_visible_for_multi_role(self):

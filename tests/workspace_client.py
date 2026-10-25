@@ -19,6 +19,11 @@ class WorkspaceClient(Client):
         roles=available_roles(user)
         if not roles:return
         role=roles[0]
+        # force_login is trusted fixture setup; model the selected HTTP channel
+        # before exercising the real role/clinic activation boundary.
+        ctx=WorkspaceContext.objects.get(pk=self.session[SESSION_KEY])
+        ctx.login_channel='PATIENT' if role=='PATIENT' else 'STAFF'
+        ctx.save(update_fields=['login_channel'])
         csrf=self.cookies['csrftoken'].value if 'csrftoken' in self.cookies else ''
         r=self.post(reverse('activate_role'),{'role':role,'csrfmiddlewaretoken':csrf})
         if r.status_code!=302:raise AssertionError(f'Role setup failed: {r.status_code}')

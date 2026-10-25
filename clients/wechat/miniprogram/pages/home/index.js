@@ -23,5 +23,5 @@ Page({
   turn(e) { if (this.data.busy) return; this.setData({page:this.data.page+Number(e.currentTarget.dataset.step)}); this.load(); },
   open(e) { wx.navigateTo({url:`/pages/visit/index?id=${e.currentTarget.dataset.id}`}); },
   book() { wx.navigateTo({url:'/pages/services/index'}); },
-  async logout() { try { await api.signOut(); wx.reLaunch({url:'/pages/login/index'}); } catch(e) { showError(this,e); } }
+  async logout() { try { await api.signOut(); getApp().globalData.bookingIntent=null;wx.reLaunch({url:'/pages/discovery/index'}); } catch(e) { showError(this,e); } }
 });

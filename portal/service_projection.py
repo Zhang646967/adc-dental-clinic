@@ -9,8 +9,11 @@ def service_data(profile, *, actor=None):
         access=patient_access(actor)
     service = profile.service
     clinic = service.department.clinic
+    # Model profiles supply their explicit public contact property. Framework-
+    # independent projections may omit the new optional property.
+    contact=getattr(profile,'public_contact',None) or dict(name=clinic.name,address=clinic.postal_address,phone=clinic.phone,synthetic=True)
     return dict(id=service.pk, name=profile.title, clinic=clinic.pk,
-        clinic_name=clinic.name, address=clinic.postal_address, phone=clinic.phone,
+        clinic_name=contact['name'], address=contact['address'], phone=contact['phone'],synthetic=contact['synthetic'],
         department=service.department.name, duration=service.duration_minutes,
         category=profile.category, category_label=dict(CATEGORY_CHOICES)[profile.category],
         summary=profile.summary, suitable_for=profile.suitable_for,

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 from django.db.models import F, Q
 from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeBoundary, RangeOperators
@@ -61,6 +62,12 @@ class Visit(models.Model):
             ExclusionConstraint(name="visit_dentist_no_overlap", expressions=[(TsTzRange("scheduled_start", "scheduled_end", RangeBoundary()), RangeOperators.OVERLAPS), ("dentist", RangeOperators.EQUAL)], condition=Q(status__in=OCCUPYING_STATUSES)),
             ExclusionConstraint(name="visit_patient_no_overlap", expressions=[(TsTzRange("scheduled_start", "scheduled_end", RangeBoundary()), RangeOperators.OVERLAPS), ("patient", RangeOperators.EQUAL)], condition=Q(status__in=OCCUPYING_STATUSES)),
         ]
+
+    @cached_property
+    def public_contact(self):
+        plan=self.resource_plans.filter(is_current=True).first()
+        return (plan.snapshot.get('public_clinic') if plan else None) or {
+            'name':self.clinic.name,'address':self.clinic.postal_address,'phone':self.clinic.phone}
 
 class VisitRequest(models.Model):
     visit = models.ForeignKey("scheduling.Visit", on_delete=models.PROTECT, related_name="requests")

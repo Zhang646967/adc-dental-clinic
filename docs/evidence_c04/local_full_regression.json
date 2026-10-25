@@ -1,0 +1,86 @@
+{
+  "timestamp_utc": "2026-10-25T01:49:50.740218+00:00",
+  "python": "3.13.16",
+  "source_sha256": "e9841a47740512a320f22afd6d28b61620d1a871bcc6a10d983d418d29e0f2a8",
+  "results": [
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/verify_update.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "checks",
+        "-v"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "scripts/record_runtime.py"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "check"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "makemigrations",
+        "--check",
+        "--dry-run"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "migrate",
+        "--noinput"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/usr/local/bin/python",
+        "manage.py",
+        "test",
+        "tests",
+        "--settings=config.settings.test",
+        "--noinput",
+        "--verbosity=2"
+      ],
+      "returncode": 0
+    }
+  ],
+  "all_gates_passed": true,
+  "scope": "working source full regression before final current-contact presentation follow-up; exact release CI recorded separately",
+  "source_rules": 1104,
+  "postgresql_cases": 1712,
+  "failed_prior_attempts": [
+    {
+      "attempt": 2,
+      "result": "child terminated with -9, root cause not established"
+    },
+    {
+      "attempt": 3,
+      "result": "No space left on verification tmpfs plus old login-channel/mock assumptions; corrected and rerun"
+    }
+  ]
+}

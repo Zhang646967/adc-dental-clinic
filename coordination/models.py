@@ -31,6 +31,12 @@ class SchedulePlan(models.Model):
     class Meta: db_table='adc_schedule_plan'
 
 class WaitOffer(models.Model):
+    @property
+    def public_contact(self):
+        plan=self.resource_plans.order_by('-version','-pk').first()
+        return (plan.snapshot.get('public_clinic') if plan else None) or {
+            'name':self.slot.clinic.name,'address':self.slot.clinic.postal_address,'phone':self.slot.clinic.phone}
+
     request=models.ForeignKey(WaitRequest,on_delete=models.PROTECT,related_name='offers')
     plan=models.ForeignKey(SchedulePlan,on_delete=models.PROTECT,related_name='offers')
     slot=models.ForeignKey('scheduling.AvailabilitySlot',on_delete=models.PROTECT)

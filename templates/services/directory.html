@@ -1,0 +1,15 @@
+{% load static %}
+<section class="care-section clinic-discovery" aria-label="查找门店" data-limit="{{ directory_limit|default:'0' }}">
+<div class="clinic-search"><div class="field"><label for="clinic-city">城市</label><select id="clinic-city"><option value="">全部城市</option></select></div><div class="field"><label for="clinic-area">区域或门店名称</label><input id="clinic-area" type="search" maxlength="80" placeholder="例如：梅溪湖、星沙"></div><button id="clinic-locate" class="care-button" type="button">使用当前位置 · 由近到远</button></div>
+<p class="care-muted" id="clinic-location-status" role="status" aria-live="polite">可直接浏览；使用定位后按直线距离由近到远排序，位置不作为住址保存。</p>
+<div class="care-branch-grid" id="clinic-results">{% for branch in discovery.clinics %}<article class="care-branch-card" id="clinic-{{ branch.id }}" data-clinic="{{ branch.id }}" {% if directory_limit and forloop.counter > directory_limit %}hidden{% endif %}>
+<div class="clinic-card-top"><span class="clinic-status {% if branch.opening.state == 'OPEN' %}clinic-open{% endif %}">{{ branch.opening.state_label }}</span><span class="clinic-distance" aria-label="距离"></span></div>
+<h2>{{ branch.name }}</h2><p class="care-muted">{{ branch.city }} · {{ branch.district }}</p><dl><dt>门店地址</dt><dd>{{ branch.address }}<br>{{ branch.entrance }}</dd><dt>联系电话</dt><dd>{{ branch.phone }}</dd><dt>今日营业</dt><dd>{{ branch.opening.today }}</dd></dl>
+<details><summary>每周营业与临时安排</summary><ul class="clinic-hours">{% for day in branch.opening.week %}<li><span>{{ day.day }}</span><span>{{ day.hours }}</span></li>{% endfor %}</ul>{% for notice in branch.opening.notices %}<p class="notice">{{ notice.text }}<br>{{ notice.start }} — {{ notice.end }}</p>{% endfor %}</details>
+<div class="care-actions">{% if branch.synthetic %}<button class="care-text-link clinic-contact" type="button" data-action="call">联系门店</button><button class="care-text-link clinic-contact" type="button" data-action="map">查看位置</button>{% else %}<a class="care-text-link" href="tel:{{ branch.phone }}">联系门店 ↗</a>{% if branch.map_latitude != None %}<button class="care-text-link clinic-contact" type="button" data-action="map">查看位置 ↗</button>{% endif %}{% endif %}</div>
+<h3>本店服务</h3><ul>{% for service in branch.services %}<li><a href="{% url 'public_service_detail' service.id %}">{{ service.name }} →</a></li>{% empty %}<li>服务安排正在准备，请联系前台。</li>{% endfor %}</ul><p class="care-muted">营业不代表有空余号源，选择服务后核对医师与时间。</p></article>{% empty %}<div class="care-empty"><h2>门店资料正在准备</h2><p>可以先了解诊疗服务，门店核对位置和营业安排后将在这里发布。</p></div>{% endfor %}</div>
+<p id="clinic-empty" class="care-empty" hidden>所选城市或区域暂无匹配门店，请更换城市或清除搜索条件。</p>
+{% if directory_limit %}<p><a class="care-text-link" href="{% url 'public_clinics' %}">查看全部门店与营业安排 →</a></p>{% endif %}
+{{ discovery|json_script:'clinic-discovery-data' }}
+</section>
+<script defer src="{% static 'nearby.js' %}"></script><script defer src="{% static 'clinic_directory.js' %}"></script>

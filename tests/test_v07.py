@@ -24,7 +24,9 @@ class V07Fixture(V04Fixture):
   return c.post(reverse(name,args=args),payload)
  def login(self,user,role=None,clinic=None,c=None):
   c=c or self.c;c.force_login(user);s=c.session;s.pop(SESSION_KEY,None);s.save();c.get(reverse('select_role'))
-  if role:self.assertEqual(self.post('activate_role',{'role':role},c=c).status_code,302)
+  if role:
+   ctx=self.ctx(c);ctx.login_channel='PATIENT' if role=='PATIENT' else 'STAFF';ctx.save(update_fields=['login_channel'])
+   self.assertEqual(self.post('activate_role',{'role':role},c=c).status_code,302)
   if clinic:self.assertEqual(self.post('activate_clinic',{'clinic':clinic.pk},c=c).status_code,302)
   return c
  def join(self,actor=None,**kwargs):

@@ -46,16 +46,24 @@ def existing_context(request):
 def ensure_context(request):
     ctx=existing_context(request)
     if ctx is None:
-        ctx=WorkspaceContext.objects.create(user=request.user)
+        ctx=WorkspaceContext.objects.create(user=request.user,login_channel='STAFF')
         request.session[SESSION_KEY]=str(ctx.pk)
     return ctx
 
 def valid_context(user,ctx):
     if ctx.user_id!=user.pk or ctx.role not in available_roles(user):
         return False
+    if ctx.login_channel=='PATIENT' and ctx.role!='PATIENT' or ctx.login_channel=='STAFF' and ctx.role=='PATIENT':
+        return False
     if ctx.clinic_id is not None:
         return authorized_clinics(user,ctx.role).filter(pk=ctx.clinic_id).exists()
     return True
+
+def channel_roles(user,ctx):
+    roles=available_roles(user)
+    if ctx.login_channel=='PATIENT':return [r for r in roles if r=='PATIENT']
+    if ctx.login_channel=='STAFF':return [r for r in roles if r!='PATIENT']
+    return roles  # Trusted non-HTTP command/test contexts; HTTP creation is explicit.
 
 def attach(request,ctx):
     request.workspace=ctx

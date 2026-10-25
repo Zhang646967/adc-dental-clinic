@@ -11,6 +11,16 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_clinic_directory': {
+        'title':'门店公开资料与发布历史',
+        'tables': {
+            'adc_clinic':['id','clinic_code','name'],
+            'adc_user':['id','username'],
+            'adc_clinic_directory':['id','clinic_id','display_name','city','is_published','revision'],
+            'adc_clinic_directory_revision':['id','directory_id','actor_id','revision','operation_id'],
+        },
+        'note':'每家诊所至多一份当前公开资料；业务名称和既有单据身份不随公开别名改写。发布版本按资料及版号唯一，操作编号唯一，历史只追加。营业时间由科室开放和明确停用区间推导，不在资料中重复维护；WGS84排序与GCJ02导航坐标分开，坐标缺失保持未知。外键不授予岗位权限。',
+    },
     'er_clinical_history': {
         'title':'患者自述来源与医师核对',
         'tables': {

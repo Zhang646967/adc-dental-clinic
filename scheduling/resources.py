@@ -109,8 +109,10 @@ class ResourceCalendar:
         return results
 
     def snapshot(self, service, room, bindings, start, end):
+        from registry.branch_projection import public_contact
         return {'contract': 'ADC-RESOURCES-1', 'clinic': self.clinic_id, 'policy_revision': self.policy.revision,
             'service': {'id': service.pk, 'code': service.code, 'name': service.name, 'duration': service.duration_minutes},
+            'public_clinic': public_contact(service.department.clinic),
             'department': {'id': service.department_id, 'name': service.department.name},
             'room': {'id': room.pk, 'code': room.code, 'name': room.name},
             'resources': [{'id': b.asset_id, 'code': b.asset.asset_code, 'name': b.asset.name,

@@ -1,0 +1,610 @@
+{
+  "total": 169,
+  "exact_approved_body_pixels": [
+    {
+      "current": "page-1.png",
+      "previous": "page-1.png"
+    },
+    {
+      "current": "page-6.png",
+      "previous": "page-6.png"
+    },
+    {
+      "current": "page-7.png",
+      "previous": "page-7.png"
+    },
+    {
+      "current": "page-8.png",
+      "previous": "page-8.png"
+    },
+    {
+      "current": "page-9.png",
+      "previous": "page-9.png"
+    },
+    {
+      "current": "page-10.png",
+      "previous": "page-10.png"
+    },
+    {
+      "current": "page-11.png",
+      "previous": "page-11.png"
+    },
+    {
+      "current": "page-12.png",
+      "previous": "page-12.png"
+    },
+    {
+      "current": "page-13.png",
+      "previous": "page-13.png"
+    },
+    {
+      "current": "page-14.png",
+      "previous": "page-14.png"
+    },
+    {
+      "current": "page-15.png",
+      "previous": "page-15.png"
+    },
+    {
+      "current": "page-16.png",
+      "previous": "page-16.png"
+    },
+    {
+      "current": "page-17.png",
+      "previous": "page-17.png"
+    },
+    {
+      "current": "page-18.png",
+      "previous": "page-18.png"
+    },
+    {
+      "current": "page-19.png",
+      "previous": "page-19.png"
+    },
+    {
+      "current": "page-20.png",
+      "previous": "page-20.png"
+    },
+    {
+      "current": "page-21.png",
+      "previous": "page-21.png"
+    },
+    {
+      "current": "page-25.png",
+      "previous": "page-25.png"
+    },
+    {
+      "current": "page-26.png",
+      "previous": "page-26.png"
+    },
+    {
+      "current": "page-27.png",
+      "previous": "page-27.png"
+    },
+    {
+      "current": "page-28.png",
+      "previous": "page-28.png"
+    },
+    {
+      "current": "page-29.png",
+      "previous": "page-29.png"
+    },
+    {
+      "current": "page-30.png",
+      "previous": "page-30.png"
+    },
+    {
+      "current": "page-31.png",
+      "previous": "page-31.png"
+    },
+    {
+      "current": "page-32.png",
+      "previous": "page-32.png"
+    },
+    {
+      "current": "page-34.png",
+      "previous": "page-34.png"
+    },
+    {
+      "current": "page-35.png",
+      "previous": "page-35.png"
+    },
+    {
+      "current": "page-36.png",
+      "previous": "page-36.png"
+    },
+    {
+      "current": "page-37.png",
+      "previous": "page-37.png"
+    },
+    {
+      "current": "page-38.png",
+      "previous": "page-38.png"
+    },
+    {
+      "current": "page-39.png",
+      "previous": "page-39.png"
+    },
+    {
+      "current": "page-40.png",
+      "previous": "page-40.png"
+    },
+    {
+      "current": "page-41.png",
+      "previous": "page-41.png"
+    },
+    {
+      "current": "page-42.png",
+      "previous": "page-42.png"
+    },
+    {
+      "current": "page-43.png",
+      "previous": "page-43.png"
+    },
+    {
+      "current": "page-44.png",
+      "previous": "page-44.png"
+    },
+    {
+      "current": "page-45.png",
+      "previous": "page-45.png"
+    },
+    {
+      "current": "page-46.png",
+      "previous": "page-46.png"
+    },
+    {
+      "current": "page-47.png",
+      "previous": "page-47.png"
+    },
+    {
+      "current": "page-48.png",
+      "previous": "page-48.png"
+    },
+    {
+      "current": "page-49.png",
+      "previous": "page-49.png"
+    },
+    {
+      "current": "page-51.png",
+      "previous": "page-51.png"
+    },
+    {
+      "current": "page-52.png",
+      "previous": "page-52.png"
+    },
+    {
+      "current": "page-53.png",
+      "previous": "page-53.png"
+    },
+    {
+      "current": "page-55.png",
+      "previous": "page-55.png"
+    },
+    {
+      "current": "page-56.png",
+      "previous": "page-56.png"
+    },
+    {
+      "current": "page-57.png",
+      "previous": "page-57.png"
+    },
+    {
+      "current": "page-58.png",
+      "previous": "page-58.png"
+    },
+    {
+      "current": "page-63.png",
+      "previous": "page-63.png"
+    },
+    {
+      "current": "page-64.png",
+      "previous": "page-64.png"
+    },
+    {
+      "current": "page-65.png",
+      "previous": "page-65.png"
+    },
+    {
+      "current": "page-66.png",
+      "previous": "page-66.png"
+    },
+    {
+      "current": "page-67.png",
+      "previous": "page-67.png"
+    },
+    {
+      "current": "page-69.png",
+      "previous": "page-68.png"
+    },
+    {
+      "current": "page-70.png",
+      "previous": "page-69.png"
+    },
+    {
+      "current": "page-71.png",
+      "previous": "page-70.png"
+    },
+    {
+      "current": "page-77.png",
+      "previous": "page-75.png"
+    },
+    {
+      "current": "page-78.png",
+      "previous": "page-76.png"
+    },
+    {
+      "current": "page-79.png",
+      "previous": "page-77.png"
+    },
+    {
+      "current": "page-80.png",
+      "previous": "page-78.png"
+    },
+    {
+      "current": "page-81.png",
+      "previous": "page-79.png"
+    },
+    {
+      "current": "page-82.png",
+      "previous": "page-80.png"
+    },
+    {
+      "current": "page-83.png",
+      "previous": "page-81.png"
+    },
+    {
+      "current": "page-84.png",
+      "previous": "page-82.png"
+    },
+    {
+      "current": "page-89.png",
+      "previous": "page-86.png"
+    },
+    {
+      "current": "page-90.png",
+      "previous": "page-87.png"
+    },
+    {
+      "current": "page-91.png",
+      "previous": "page-88.png"
+    },
+    {
+      "current": "page-92.png",
+      "previous": "page-89.png"
+    },
+    {
+      "current": "page-93.png",
+      "previous": "page-90.png"
+    },
+    {
+      "current": "page-94.png",
+      "previous": "page-91.png"
+    },
+    {
+      "current": "page-95.png",
+      "previous": "page-92.png"
+    },
+    {
+      "current": "page-96.png",
+      "previous": "page-93.png"
+    },
+    {
+      "current": "page-97.png",
+      "previous": "page-94.png"
+    },
+    {
+      "current": "page-98.png",
+      "previous": "page-95.png"
+    },
+    {
+      "current": "page-99.png",
+      "previous": "page-96.png"
+    },
+    {
+      "current": "page-100.png",
+      "previous": "page-97.png"
+    },
+    {
+      "current": "page-101.png",
+      "previous": "page-98.png"
+    },
+    {
+      "current": "page-102.png",
+      "previous": "page-99.png"
+    },
+    {
+      "current": "page-103.png",
+      "previous": "page-100.png"
+    },
+    {
+      "current": "page-104.png",
+      "previous": "page-101.png"
+    },
+    {
+      "current": "page-105.png",
+      "previous": "page-102.png"
+    },
+    {
+      "current": "page-106.png",
+      "previous": "page-103.png"
+    },
+    {
+      "current": "page-107.png",
+      "previous": "page-104.png"
+    },
+    {
+      "current": "page-108.png",
+      "previous": "page-105.png"
+    },
+    {
+      "current": "page-109.png",
+      "previous": "page-106.png"
+    },
+    {
+      "current": "page-110.png",
+      "previous": "page-107.png"
+    },
+    {
+      "current": "page-111.png",
+      "previous": "page-108.png"
+    },
+    {
+      "current": "page-112.png",
+      "previous": "page-109.png"
+    },
+    {
+      "current": "page-113.png",
+      "previous": "page-110.png"
+    },
+    {
+      "current": "page-114.png",
+      "previous": "page-111.png"
+    },
+    {
+      "current": "page-115.png",
+      "previous": "page-112.png"
+    },
+    {
+      "current": "page-116.png",
+      "previous": "page-113.png"
+    },
+    {
+      "current": "page-117.png",
+      "previous": "page-114.png"
+    },
+    {
+      "current": "page-118.png",
+      "previous": "page-115.png"
+    },
+    {
+      "current": "page-119.png",
+      "previous": "page-116.png"
+    },
+    {
+      "current": "page-120.png",
+      "previous": "page-117.png"
+    },
+    {
+      "current": "page-121.png",
+      "previous": "page-118.png"
+    },
+    {
+      "current": "page-122.png",
+      "previous": "page-119.png"
+    },
+    {
+      "current": "page-123.png",
+      "previous": "page-120.png"
+    },
+    {
+      "current": "page-124.png",
+      "previous": "page-121.png"
+    },
+    {
+      "current": "page-126.png",
+      "previous": "page-123.png"
+    },
+    {
+      "current": "page-127.png",
+      "previous": "page-124.png"
+    },
+    {
+      "current": "page-128.png",
+      "previous": "page-125.png"
+    },
+    {
+      "current": "page-129.png",
+      "previous": "page-126.png"
+    },
+    {
+      "current": "page-130.png",
+      "previous": "page-127.png"
+    },
+    {
+      "current": "page-131.png",
+      "previous": "page-128.png"
+    },
+    {
+      "current": "page-132.png",
+      "previous": "page-129.png"
+    },
+    {
+      "current": "page-133.png",
+      "previous": "page-130.png"
+    },
+    {
+      "current": "page-134.png",
+      "previous": "page-131.png"
+    },
+    {
+      "current": "page-135.png",
+      "previous": "page-132.png"
+    },
+    {
+      "current": "page-136.png",
+      "previous": "page-133.png"
+    },
+    {
+      "current": "page-137.png",
+      "previous": "page-134.png"
+    },
+    {
+      "current": "page-138.png",
+      "previous": "page-135.png"
+    },
+    {
+      "current": "page-139.png",
+      "previous": "page-136.png"
+    },
+    {
+      "current": "page-140.png",
+      "previous": "page-137.png"
+    },
+    {
+      "current": "page-141.png",
+      "previous": "page-138.png"
+    },
+    {
+      "current": "page-142.png",
+      "previous": "page-139.png"
+    },
+    {
+      "current": "page-143.png",
+      "previous": "page-140.png"
+    },
+    {
+      "current": "page-144.png",
+      "previous": "page-141.png"
+    },
+    {
+      "current": "page-145.png",
+      "previous": "page-142.png"
+    },
+    {
+      "current": "page-146.png",
+      "previous": "page-143.png"
+    },
+    {
+      "current": "page-147.png",
+      "previous": "page-144.png"
+    },
+    {
+      "current": "page-148.png",
+      "previous": "page-145.png"
+    },
+    {
+      "current": "page-149.png",
+      "previous": "page-146.png"
+    },
+    {
+      "current": "page-150.png",
+      "previous": "page-147.png"
+    },
+    {
+      "current": "page-151.png",
+      "previous": "page-148.png"
+    },
+    {
+      "current": "page-152.png",
+      "previous": "page-149.png"
+    },
+    {
+      "current": "page-153.png",
+      "previous": "page-150.png"
+    },
+    {
+      "current": "page-154.png",
+      "previous": "page-151.png"
+    },
+    {
+      "current": "page-155.png",
+      "previous": "page-152.png"
+    },
+    {
+      "current": "page-156.png",
+      "previous": "page-153.png"
+    },
+    {
+      "current": "page-157.png",
+      "previous": "page-154.png"
+    },
+    {
+      "current": "page-158.png",
+      "previous": "page-155.png"
+    },
+    {
+      "current": "page-159.png",
+      "previous": "page-156.png"
+    },
+    {
+      "current": "page-160.png",
+      "previous": "page-157.png"
+    },
+    {
+      "current": "page-161.png",
+      "previous": "page-158.png"
+    },
+    {
+      "current": "page-162.png",
+      "previous": "page-159.png"
+    },
+    {
+      "current": "page-163.png",
+      "previous": "page-160.png"
+    },
+    {
+      "current": "page-164.png",
+      "previous": "page-161.png"
+    },
+    {
+      "current": "page-165.png",
+      "previous": "page-162.png"
+    },
+    {
+      "current": "page-166.png",
+      "previous": "page-163.png"
+    },
+    {
+      "current": "page-167.png",
+      "previous": "page-164.png"
+    }
+  ],
+  "new_or_changed": [
+    "page-2.png",
+    "page-3.png",
+    "page-4.png",
+    "page-5.png",
+    "page-22.png",
+    "page-23.png",
+    "page-24.png",
+    "page-33.png",
+    "page-50.png",
+    "page-54.png",
+    "page-59.png",
+    "page-60.png",
+    "page-61.png",
+    "page-62.png",
+    "page-68.png",
+    "page-72.png",
+    "page-73.png",
+    "page-74.png",
+    "page-75.png",
+    "page-76.png",
+    "page-85.png",
+    "page-86.png",
+    "page-87.png",
+    "page-88.png",
+    "page-125.png",
+    "page-168.png",
+    "page-169.png"
+  ],
+  "body_crop_points": [
+    60,
+    780
+  ],
+  "reference": "Previously approved C2.3 report, private render-9",
+  "all_changed_pages_inspected_at_original_size": true,
+  "original_reference_unchanged": true,
+  "layout_defects_observed": false
+}

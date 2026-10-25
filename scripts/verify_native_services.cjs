@@ -23,15 +23,16 @@ function page(name,options={}){
   const api={selectSubject:async key=>{calls.push({route:'patients/select/',method:'POST',data:{subject:key}});state.globalData.review=null;},showSubject:p=>p.setData({patientName:currentSession.patient_name||'',patientCapacity:currentSession.acting_capacity||''}),bootstrap:async()=>currentSession,sessionInfo:()=>currentSession,request:async(route,method='GET',data)=>{
     calls.push({route,method,data});
     if(options.request)return options.request(route,method,data);
-    if(route==='catalogue/')return options.catalogue||catalogue;
+    if(route==='catalogue/'||route==='discovery/')return options.catalogue||catalogue;
     if(route.startsWith('services/'))return offerings.find(s=>String(s.id)===route.split('/')[1]);
+    if(route.startsWith('discovery/services/'))return offerings.find(s=>String(s.id)===route.split('/')[2]);
     throw Error('Unexpected request '+route);
   }};
   const format={exports:{}};
   vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
   vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
     Page:value=>{definition=value;},wx,getApp:()=>state,
-    require:module=>module.endsWith('/api')?api:module.endsWith('/format')?format.exports:{selectedCatalogue}
+    require:module=>module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};
   return {p:instance,calls,navigation,state,session:currentSession};
@@ -64,8 +65,11 @@ async function verify(){
     p.keyword({detail:{value:''}});p.pickCategory({detail:{value:'1'}});assert.equal(p.data.rows.length,1);
     p.pickClinic({detail:{value:'2'}});assert.equal(p.data.rows.length,0);
   });
-  await test('unauthenticated discovery returns to login before catalogue access',async()=>{
-    const {p,calls,navigation}=page('services',{session:{authenticated:false}});await p.onShow();assert.equal(calls.length,0);assert.equal(navigation[0].url,'/pages/login/index');
+  await test('guest discovery reads only public catalogue without forcing login',async()=>{
+    const {p,calls,navigation}=page('services',{session:{authenticated:false}});await p.onShow();assert.equal(calls.length,1);assert.equal(calls[0].route,'discovery/');assert.equal(p.data.rows.length,3);assert.equal(navigation.length,0);
+  });
+  await test('guest service choice survives typed login navigation',async()=>{
+    const {p,calls,navigation,state}=page('service',{session:{authenticated:false}});p.onLoad({id:'22'});await p.onShow();p.book();assert.equal(calls[0].route,'discovery/services/22/');assert.equal(navigation[0].url,'/pages/login/index');assert.equal(state.globalData.bookingIntent.service,22);assert.equal(state.globalData.bookingIntent.clinic,2);
   });
   await test('service detail hands off the exact service and clinic',async()=>{
     const {p,navigation}=page('service');p.onLoad({id:'22'});await p.onShow();p.book();assert.equal(navigation[0].url,'/pages/booking/index?clinic=2&service=22');

@@ -1311,5 +1311,69 @@
       "tests/test_recall_laboratory.py",
       "tests/test_recall_laboratory_http.py"
     ]
+  },
+  {
+    "id": "SU-81",
+    "name": "发现附近门店并延续预约选择",
+    "actor": "访客、患者或有权预约代办人",
+    "status": "已实现；软件流程采用明确合成资料核对，平台运行另行验收。",
+    "precondition": "存在明确发布的有效门店或服务；浏览不要求登录。",
+    "inputs": "手动城市、区域或名称，主动定位选择，明确门店及服务。",
+    "flow": [
+      "浏览已发布门店及营业、电话和详细入口。",
+      "手动筛选，或主动授权后由近到远排序。",
+      "选定明确服务，再按需登录患者通道。",
+      "选择合法就诊人，继续原服务候选及明确预约确认。"
+    ],
+    "alternatives": [
+      "拒绝定位或缺少坐标：继续手动选择，不显示伪造距离。",
+      "服务撤回、提示过期、撤权或跨店：重新核对，不替换为其他服务。",
+      "合成电话及地址：说明课程资料，不执行真实拨号或导航。"
+    ],
+    "result": "保留明确门店和服务选择，后续预约仍由统一规则确认。",
+    "minimum_guarantee": "浏览、定位、登录和患者选择均不制造预约、患者、治疗或资金记录。",
+    "rules": "公开只读字段与私有工作台分开；用户精确位置只在客户端排序；营业状态与资源余位分别表达。",
+    "acceptance": [
+      "AT-DISC-01—06：访客、定位拒绝、排序、登录延续、撤回、患者切换、窄屏大字与键盘。"
+    ],
+    "source": [
+      "portal/discovery.py",
+      "portal/booking_intent.py",
+      "portal/relationship_views.py",
+      "clients/wechat/miniprogram/pages/discovery/index.js",
+      "tests/test_branch_discovery.py",
+      "scripts/verify_native_discovery.cjs"
+    ]
+  },
+  {
+    "id": "SU-82",
+    "name": "维护并发布本店公开资料",
+    "actor": "当前店主管",
+    "status": "已实现；正常预览确认与数据库版本核对。",
+    "precondition": "有效主管工作上下文及当前诊所授权；发布前已有科室开放安排。",
+    "inputs": "展示名、行政区、地址入口、公开电话、两种坐标及来源、发布状态。",
+    "flow": [
+      "查看本店当前资料与版本。",
+      "输入公开字段并预览营业来源和影响。",
+      "核对后明确确认，追加发布版本。",
+      "公开撤回时隐藏新服务入口，保留原约、有效邀约及历史。"
+    ],
+    "alternatives": [
+      "跨店、撤权或只读实例：拒绝写入。",
+      "旧预览或同时确认：核对当前版本后继续；重复同次提交返回原结果。",
+      "实际停诊或搬迁：前台明确协调原承诺，不由公开文字改写预约。"
+    ],
+    "result": "当前公开资料与不可覆盖的操作者版本记录。",
+    "minimum_guarantee": "失败不留下部分资料确认；业务诊所身份、单据及原承诺保持。",
+    "rules": "一店一份当前资料；版本及操作编号唯一；开放日历复用原表，历史缺失不补造。",
+    "acceptance": [
+      "AT-DIRECTORY-01—08：字段、营业来源、并发、重复、撤权、历史和SQL约束。"
+    ],
+    "source": [
+      "registry/branch_services.py",
+      "registry/branch_projection.py",
+      "registry/directory_models.py",
+      "tests/test_branch_discovery.py"
+    ]
   }
 ]

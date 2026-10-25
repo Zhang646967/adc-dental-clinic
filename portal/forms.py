@@ -25,10 +25,11 @@ class SlotFilterForm(forms.Form):
         from registry.models import Clinic
         services=public_services(actor)
         self.fields['clinic'].queryset=Clinic.objects.filter(pk__in=services.values('department__clinic_id'))
+        self.fields['clinic'].label_from_instance=lambda c:c.public_contact['name']
         clinic_id=positive_id(str(self.data.get('clinic',''))) if self.is_bound else None
         if clinic_id:services=services.filter(department__clinic_id=clinic_id)
         self.fields['service'].queryset=services
-        self.fields['service'].label_from_instance=lambda s:s.patient_presentation.title+' · '+s.department.clinic.name
+        self.fields['service'].label_from_instance=lambda s:s.patient_presentation.title+' · '+s.department.clinic.public_contact['name']
         self.fields['service'].help_text='先选服务，再查看接诊医师与时间。'
         selected=positive_id(str(self.data.get('service',''))) if self.is_bound else None
         self.fields['dentist'].queryset=self.Dentist.objects.filter(is_active=True,

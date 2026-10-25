@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-24。本目录列出100张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-24。本目录列出102张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -507,6 +507,83 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+
+## adc_clinic_directory
+
+模型：`registry.ClinicDirectory`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | UK / FK | 否 | `adc_clinic.id` |
+| display_name | character varying(120) | — | 否 | — |
+| province | character varying(40) | — | 否 | — |
+| city | character varying(40) | — | 否 | — |
+| district | character varying(60) | — | 否 | — |
+| address | character varying(255) | — | 否 | — |
+| entrance | character varying(160) | — | 否 | — |
+| public_phone | character varying(32) | — | 否 | — |
+| latitude | numeric(9,6) | — | 是 | — |
+| longitude | numeric(10,6) | — | 是 | — |
+| map_latitude | numeric(9,6) | — | 是 | — |
+| map_longitude | numeric(10,6) | — | 是 | — |
+| coordinate_source | character varying(160) | — | 否 | — |
+| synthetic | boolean | — | 否 | — |
+| is_published | boolean | — | 否 | — |
+| revision | integer | — | 否 | — |
+| updated_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinic_directory_clinic_id_a0fe496b_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinic_directory_clinic_id_key`：`UNIQUE (clinic_id)`。
+- `adc_clinic_directory_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinic_directory_revision_check`：`CHECK ((revision >= 0))`。
+- `directory_gcj02_pair`：`CHECK ((((map_latitude IS NULL) AND (map_longitude IS NULL)) OR ((map_latitude >= ('-90'::integer)::numeric) AND (map_latitude IS NOT NULL) AND (map_latitude <= (90)::numeric) AND (map_longitude >= ('-180'::integer)::numeric) AND (map_longitude IS NOT NULL) AND (map_longitude <= (180)::numeric))))`。
+- `directory_wgs84_pair`：`CHECK ((((latitude IS NULL) AND (longitude IS NULL)) OR ((latitude >= ('-90'::integer)::numeric) AND (latitude IS NOT NULL) AND (latitude <= (90)::numeric) AND (longitude >= ('-180'::integer)::numeric) AND (longitude IS NOT NULL) AND (longitude <= (180)::numeric))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinic_directory_clinic_id_key`：`CREATE UNIQUE INDEX adc_clinic_directory_clinic_id_key ON public.adc_clinic_directory USING btree (clinic_id)`。
+- `adc_clinic_directory_pkey`：`CREATE UNIQUE INDEX adc_clinic_directory_pkey ON public.adc_clinic_directory USING btree (id)`。
+
+跨表及历史触发器：
+
+
+## adc_clinic_directory_revision
+
+模型：`registry.ClinicDirectoryRevision`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| directory_id | bigint | FK | 否 | `adc_clinic_directory.id` |
+| revision | integer | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinic_directory_directory_id_1f7f6192_fk_adc_clini`：`FOREIGN KEY (directory_id) REFERENCES adc_clinic_directory(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinic_directory_revision_actor_id_8340c772_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinic_directory_revision_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_clinic_directory_revision_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinic_directory_revision_revision_check`：`CHECK ((revision >= 0))`。
+- `directory_revision_unique`：`UNIQUE (directory_id, revision)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinic_directory_revision_actor_id_8340c772`：`CREATE INDEX adc_clinic_directory_revision_actor_id_8340c772 ON public.adc_clinic_directory_revision USING btree (actor_id)`。
+- `adc_clinic_directory_revision_directory_id_1f7f6192`：`CREATE INDEX adc_clinic_directory_revision_directory_id_1f7f6192 ON public.adc_clinic_directory_revision USING btree (directory_id)`。
+- `adc_clinic_directory_revision_operation_id_key`：`CREATE UNIQUE INDEX adc_clinic_directory_revision_operation_id_key ON public.adc_clinic_directory_revision USING btree (operation_id)`。
+- `adc_clinic_directory_revision_pkey`：`CREATE UNIQUE INDEX adc_clinic_directory_revision_pkey ON public.adc_clinic_directory_revision USING btree (id)`。
+- `directory_revision_unique`：`CREATE UNIQUE INDEX directory_revision_unique ON public.adc_clinic_directory_revision USING btree (directory_id, revision)`。
+
+跨表及历史触发器：
+
+- `directory_revision_history`：`CREATE TRIGGER directory_revision_history BEFORE DELETE OR UPDATE ON public.adc_clinic_directory_revision FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
 
 ## adc_clinical_authority_event
 
@@ -2800,6 +2877,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | starts_at | timestamp with time zone | — | 否 | — |
 | ends_at | timestamp with time zone | — | 否 | — |
 | reason | character varying(500) | — | 否 | — |
+| public_notice | character varying(240) | — | 否 | — |
 | is_active | boolean | — | 否 | — |
 | recorded_by_id | bigint | FK | 否 | `adc_user.id` |
 | created_at | timestamp with time zone | — | 否 | — |
@@ -3754,6 +3832,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | id | uuid | PK | 否 | — |
 | user_id | bigint | FK | 否 | `adc_user.id` |
 | role | character varying(16) | — | 否 | — |
+| login_channel | character varying(8) | — | 否 | — |
 | clinic_id | bigint | FK | 是 | `adc_clinic.id` |
 | patient_grant_id | bigint | FK | 是 | `adc_patient_appointment_grant.id` |
 | revision | integer | — | 否 | — |
@@ -3767,6 +3846,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_workspace_context_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_workspace_context_user_id_88d56c99_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `workspace_clinic_role`：`CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying])::text[]))))`。
+- `workspace_login_channel`：`CHECK ((((login_channel)::text = ''::text) OR (((login_channel)::text = 'PATIENT'::text) AND ((role)::text = ANY ((ARRAY[''::character varying, 'PATIENT'::character varying])::text[]))) OR (((login_channel)::text = 'STAFF'::text) AND (NOT ((role)::text = 'PATIENT'::text)))))`。
 - `workspace_patient_subject`：`CHECK (((patient_grant_id IS NULL) OR ((role)::text = 'PATIENT'::text)))`。
 
 索引（含条件唯一索引）：

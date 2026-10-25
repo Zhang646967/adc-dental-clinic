@@ -33,7 +33,8 @@ class JoinForm(forms.Form):
             if access.delegated:self.fields['clinic'].queryset=self.fields['clinic'].queryset.filter(pk=access.clinic_id)
         self.fields['preferred_dentist'].queryset=Dentist.objects.filter(is_active=True)
         self.fields['service'].queryset=self.BookingService.objects.filter(is_active=True,department__clinic__in=self.fields['clinic'].queryset).select_related('department__clinic')
-        self.fields['service'].label_from_instance=lambda s:s.department.clinic.name+' · '+str(s)
+        self.fields['clinic'].label_from_instance=lambda c:c.public_contact['name']
+        self.fields['service'].label_from_instance=lambda s:s.department.clinic.public_contact['name']+' · '+str(s)
         self.window_limits['service_durations']={str(s.pk):s.duration_minutes for s in self.fields['service'].queryset}
     def clean(self):
         data = super().clean()

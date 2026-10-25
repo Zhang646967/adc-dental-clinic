@@ -50,6 +50,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_evidence_commit_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE latest_id bigint;\nBEGIN\n IF TG_TABLE_NAME='adc_cash_evidence' AND NEW.state='APPROVED' THEN\n   SELECT id INTO latest_id FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id AND state='APPROVED' ORDER BY version DESC LIMIT 1;\n   IF EXISTS(SELECT 1 FROM adc_reconciliation_match WHERE cash_entry_id=NEW.cash_entry_id AND state IN ('PENDING','CONFIRMED') AND evidence_id<>latest_id) THEN\n     RAISE EXCEPTION 'new evidence must invalidate old active matches atomically' USING ERRCODE='23514'; END IF;\n ELSIF TG_TABLE_NAME='adc_statement_batch' AND NEW.state='IMPORTED' THEN\n   IF NEW.new_count<>(SELECT count(*) FROM adc_statement_line WHERE batch_id=NEW.id) THEN\n     RAISE EXCEPTION 'import counts must match accepted rows' USING ERRCODE='23514'; END IF;\n END IF;\n RETURN NULL;\nEND $function$\n"
     },
     {
+      "table": "adc_clinic_directory_revision",
+      "name": "directory_revision_history",
+      "definition": "CREATE TRIGGER directory_revision_history BEFORE DELETE OR UPDATE ON public.adc_clinic_directory_revision FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
       "table": "adc_clinical_authority_event",
       "name": "clinical_authority_history",
       "definition": "CREATE TRIGGER clinical_authority_history BEFORE DELETE OR UPDATE ON public.adc_clinical_authority_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
@@ -2295,6 +2302,349 @@
           "column": "is_active",
           "type": "BooleanField",
           "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_clinic_directory",
+      "model": "registry.ClinicDirectory",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "display_name",
+          "column": "display_name",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "province",
+          "column": "province",
+          "type": "CharField",
+          "db_type": "varchar(40)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 40,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "city",
+          "column": "city",
+          "type": "CharField",
+          "db_type": "varchar(40)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 40,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "district",
+          "column": "district",
+          "type": "CharField",
+          "db_type": "varchar(60)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 60,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "address",
+          "column": "address",
+          "type": "CharField",
+          "db_type": "varchar(255)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 255,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "entrance",
+          "column": "entrance",
+          "type": "CharField",
+          "db_type": "varchar(160)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 160,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "public_phone",
+          "column": "public_phone",
+          "type": "CharField",
+          "db_type": "varchar(32)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "latitude",
+          "column": "latitude",
+          "type": "DecimalField",
+          "db_type": "numeric(9, 6)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "longitude",
+          "column": "longitude",
+          "type": "DecimalField",
+          "db_type": "numeric(10, 6)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "map_latitude",
+          "column": "map_latitude",
+          "type": "DecimalField",
+          "db_type": "numeric(9, 6)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "map_longitude",
+          "column": "map_longitude",
+          "type": "DecimalField",
+          "db_type": "numeric(10, 6)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "coordinate_source",
+          "column": "coordinate_source",
+          "type": "CharField",
+          "db_type": "varchar(160)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 160,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "synthetic",
+          "column": "synthetic",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "is_published",
+          "column": "is_published",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "updated_at",
+          "column": "updated_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "model": "registry.ClinicDirectoryRevision",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "directory",
+          "column": "directory_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic_directory",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
           "pk": false,
           "unique": false,
           "null": false,
@@ -10543,6 +10893,19 @@
           "on_delete": null
         },
         {
+          "name": "public_notice",
+          "column": "public_notice",
+          "type": "CharField",
+          "db_type": "varchar(240)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 240,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
           "name": "is_active",
           "column": "is_active",
           "type": "BooleanField",
@@ -13699,6 +14062,19 @@
           "on_delete": null
         },
         {
+          "name": "login_channel",
+          "column": "login_channel",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
           "name": "clinic",
           "column": "clinic_id",
           "type": "ForeignKey",
@@ -14023,6 +14399,8 @@
     "adc_cash_entry",
     "adc_cash_evidence",
     "adc_clinic",
+    "adc_clinic_directory",
+    "adc_clinic_directory_revision",
     "adc_clinical_authority_event",
     "adc_clinical_authority_policy",
     "adc_clinical_draft",
@@ -14670,6 +15048,78 @@
       "name": "clinic_area_positive",
       "kind": "c",
       "definition": "CHECK ((area_sqm > (0)::numeric))"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "adc_clinic_directory_clinic_id_a0fe496b_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "adc_clinic_directory_clinic_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id)"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "adc_clinic_directory_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "adc_clinic_directory_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "directory_gcj02_pair",
+      "kind": "c",
+      "definition": "CHECK ((((map_latitude IS NULL) AND (map_longitude IS NULL)) OR ((map_latitude >= ('-90'::integer)::numeric) AND (map_latitude IS NOT NULL) AND (map_latitude <= (90)::numeric) AND (map_longitude >= ('-180'::integer)::numeric) AND (map_longitude IS NOT NULL) AND (map_longitude <= (180)::numeric))))"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "directory_wgs84_pair",
+      "kind": "c",
+      "definition": "CHECK ((((latitude IS NULL) AND (longitude IS NULL)) OR ((latitude >= ('-90'::integer)::numeric) AND (latitude IS NOT NULL) AND (latitude <= (90)::numeric) AND (longitude >= ('-180'::integer)::numeric) AND (longitude IS NOT NULL) AND (longitude <= (180)::numeric))))"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_directory_id_1f7f6192_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (directory_id) REFERENCES adc_clinic_directory(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_actor_id_8340c772_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "directory_revision_unique",
+      "kind": "u",
+      "definition": "UNIQUE (directory_id, revision)"
     },
     {
       "table": "adc_clinical_authority_event",
@@ -18483,6 +18933,12 @@
     },
     {
       "table": "adc_workspace_context",
+      "name": "workspace_login_channel",
+      "kind": "c",
+      "definition": "CHECK ((((login_channel)::text = ''::text) OR (((login_channel)::text = 'PATIENT'::text) AND ((role)::text = ANY ((ARRAY[''::character varying, 'PATIENT'::character varying])::text[]))) OR (((login_channel)::text = 'STAFF'::text) AND (NOT ((role)::text = 'PATIENT'::text)))))"
+    },
+    {
+      "table": "adc_workspace_context",
       "name": "workspace_patient_subject",
       "kind": "c",
       "definition": "CHECK (((patient_grant_id IS NULL) OR ((role)::text = 'PATIENT'::text)))"
@@ -18896,6 +19352,41 @@
       "table": "adc_clinic",
       "name": "adc_clinic_pkey",
       "definition": "CREATE UNIQUE INDEX adc_clinic_pkey ON public.adc_clinic USING btree (id)"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "adc_clinic_directory_clinic_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_clinic_directory_clinic_id_key ON public.adc_clinic_directory USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_clinic_directory",
+      "name": "adc_clinic_directory_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_clinic_directory_pkey ON public.adc_clinic_directory USING btree (id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_actor_id_8340c772",
+      "definition": "CREATE INDEX adc_clinic_directory_revision_actor_id_8340c772 ON public.adc_clinic_directory_revision USING btree (actor_id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_directory_id_1f7f6192",
+      "definition": "CREATE INDEX adc_clinic_directory_revision_directory_id_1f7f6192 ON public.adc_clinic_directory_revision USING btree (directory_id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_clinic_directory_revision_operation_id_key ON public.adc_clinic_directory_revision USING btree (operation_id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "adc_clinic_directory_revision_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_clinic_directory_revision_pkey ON public.adc_clinic_directory_revision USING btree (id)"
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "name": "directory_revision_unique",
+      "definition": "CREATE UNIQUE INDEX directory_revision_unique ON public.adc_clinic_directory_revision USING btree (directory_id, revision)"
     },
     {
       "table": "adc_clinical_authority_event",
@@ -21910,6 +22401,156 @@
       "table": "adc_clinic",
       "column": "is_active",
       "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "display_name",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "province",
+      "db_type": "character varying(40)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "city",
+      "db_type": "character varying(40)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "district",
+      "db_type": "character varying(60)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "address",
+      "db_type": "character varying(255)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "entrance",
+      "db_type": "character varying(160)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "public_phone",
+      "db_type": "character varying(32)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "latitude",
+      "db_type": "numeric(9,6)",
+      "null": true
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "longitude",
+      "db_type": "numeric(10,6)",
+      "null": true
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "map_latitude",
+      "db_type": "numeric(9,6)",
+      "null": true
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "map_longitude",
+      "db_type": "numeric(10,6)",
+      "null": true
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "coordinate_source",
+      "db_type": "character varying(160)",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "synthetic",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "is_published",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "updated_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_directory_revision",
+      "column": "directory_id",
+      "db_type": "bigint",
       "null": false
     },
     {
@@ -25501,6 +26142,12 @@
       "null": true
     },
     {
+      "table": "adc_resource_block",
+      "column": "public_notice",
+      "db_type": "character varying(240)",
+      "null": false
+    },
+    {
       "table": "adc_resource_claim",
       "column": "id",
       "db_type": "bigint",
@@ -26851,6 +27498,12 @@
       "null": true
     },
     {
+      "table": "adc_workspace_context",
+      "column": "login_channel",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
       "table": "auth_group",
       "column": "id",
       "db_type": "integer",
@@ -27187,6 +27840,10 @@
       "name": "0001_initial"
     },
     {
+      "app": "registry",
+      "name": "0002_clinicdirectory_clinicdirectoryrevision_and_more"
+    },
+    {
       "app": "scheduling",
       "name": "0001_initial"
     },
@@ -27211,6 +27868,10 @@
       "name": "0006_servicepresentation"
     },
     {
+      "app": "scheduling",
+      "name": "0007_resourceblock_public_notice"
+    },
+    {
       "app": "sessions",
       "name": "0001_initial"
     },
@@ -27221,8 +27882,12 @@
     {
       "app": "workspaces",
       "name": "0002_workspacecontext_patient_grant_and_more"
+    },
+    {
+      "app": "workspaces",
+      "name": "0003_workspacecontext_login_channel_and_more"
     }
   ],
   "observed_on": "2026-10-24",
-  "scope": "C2.3 isolated working candidate PostgreSQL after all 49 application migrations; structural metadata only, no business rows or credentials"
+  "scope": "C0.4 isolated PostgreSQL observation after all52 additive application migrations; working source candidate, structural metadata only, no business records or credentials"
 }

@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-282条实际SQL外键，其中281条对应ORM单列关系，1条为账单同次就诊复合外键。
+285条实际SQL外键，其中284条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -36,6 +36,9 @@
 | adc_cash_evidence | prepared_by_id | adc_user | id |
 | adc_cash_evidence | previous_id | adc_cash_evidence | id |
 | adc_cash_evidence | reviewed_by_id | adc_user | id |
+| adc_clinic_directory | clinic_id | adc_clinic | id |
+| adc_clinic_directory_revision | directory_id | adc_clinic_directory | id |
+| adc_clinic_directory_revision | actor_id | adc_user | id |
 | adc_clinical_authority_event | authorization_id | adc_professional_authorization | id |
 | adc_clinical_authority_event | clinic_id | adc_clinic | id |
 | adc_clinical_authority_event | reviewer_id | adc_clinical_reviewer | id |

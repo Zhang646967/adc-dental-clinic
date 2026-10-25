@@ -120,6 +120,11 @@ class ServicePresentation(models.Model):
     def __str__(self):
         return (self.title or self.service.name) + (' · 已公开' if self.is_published else ' · 草稿')
 
+    @property
+    def public_contact(self):
+        from registry.branch_projection import public_contact
+        return public_contact(self.service.department.clinic)
+
 
 class ResourceBinding(models.Model):
     asset = models.OneToOneField('equipment.EquipmentAsset', on_delete=models.PROTECT, related_name='scheduling_binding')
@@ -139,6 +144,7 @@ class ResourceBlock(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
     reason = models.CharField(max_length=500)
+    public_notice = models.CharField(max_length=240, blank=True, default='')
     is_active = models.BooleanField(default=True)
     recorded_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)

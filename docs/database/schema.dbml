@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 100 ORM tables; django_migrations is a framework migration journal.
+// All 102 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_ai_usage_bucket {
@@ -176,6 +176,40 @@ Table adc_clinic {
   email "character varying(254)" [not null]
   area_sqm "numeric(10,2)" [not null]
   is_active "boolean" [not null]
+}
+
+Table adc_clinic_directory {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [unique, not null]
+  display_name "character varying(120)" [not null]
+  province "character varying(40)" [not null]
+  city "character varying(40)" [not null]
+  district "character varying(60)" [not null]
+  address "character varying(255)" [not null]
+  entrance "character varying(160)" [not null]
+  public_phone "character varying(32)" [not null]
+  latitude "numeric(9,6)" [null]
+  longitude "numeric(10,6)" [null]
+  map_latitude "numeric(9,6)" [null]
+  map_longitude "numeric(10,6)" [null]
+  coordinate_source "character varying(160)" [not null]
+  synthetic "boolean" [not null]
+  is_published "boolean" [not null]
+  revision "integer" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinic_directory_revision {
+  id "bigint" [pk, not null]
+  directory_id "bigint" [not null]
+  revision "integer" [not null]
+  snapshot "jsonb" [not null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (directory_id, revision) [unique, name: 'directory_revision_unique']
+  }
 }
 
 Table adc_clinical_authority_event {
@@ -988,6 +1022,7 @@ Table adc_resource_block {
   starts_at "timestamp with time zone" [not null]
   ends_at "timestamp with time zone" [not null]
   reason "character varying(500)" [not null]
+  public_notice "character varying(240)" [not null]
   is_active "boolean" [not null]
   recorded_by_id "bigint" [not null]
   created_at "timestamp with time zone" [not null]
@@ -1319,6 +1354,7 @@ Table adc_workspace_context {
   id "uuid" [pk, not null]
   user_id "bigint" [not null]
   role "character varying(16)" [not null]
+  login_channel "character varying(8)" [not null]
   clinic_id "bigint" [null]
   patient_grant_id "bigint" [null]
   revision "integer" [not null]
@@ -1396,6 +1432,9 @@ Ref: adc_cash_evidence.cash_entry_id > adc_cash_entry.id
 Ref: adc_cash_evidence.prepared_by_id > adc_user.id
 Ref: adc_cash_evidence.previous_id - adc_cash_evidence.id
 Ref: adc_cash_evidence.reviewed_by_id > adc_user.id
+Ref: adc_clinic_directory.clinic_id - adc_clinic.id
+Ref: adc_clinic_directory_revision.directory_id > adc_clinic_directory.id
+Ref: adc_clinic_directory_revision.actor_id > adc_user.id
 Ref: adc_clinical_authority_event.authorization_id > adc_professional_authorization.id
 Ref: adc_clinical_authority_event.clinic_id > adc_clinic.id
 Ref: adc_clinical_authority_event.reviewer_id > adc_clinical_reviewer.id

@@ -1,4 +1,11 @@
 {
+  "er_clinic_directory": {
+    "nodes": 4,
+    "edges": 3,
+    "width": 305,
+    "height": 532,
+    "minPrintedFontPt": 20.818229508196723
+  },
   "er_clinical_history": {
     "nodes": 6,
     "edges": 7,

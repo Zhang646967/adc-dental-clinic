@@ -92,13 +92,17 @@ def confirm(request):
 def subjects(request):
     problem=''
     if request.method=='POST':
+        if request.POST.get('action')=='cancel_intent':
+            request.session.pop('adc_booking_intent',None);return redirect('portal_home')
         try:
             svc.select_subject(actor=request.user,key=request.POST.get('subject',''))
         except EXPECTED_ERRORS as exc:problem=str(exc)
         else:
-            request.session.pop('adc_guide',None);request.session.pop('adc_booking_intent',None)
+            from portal.booking_intent import destination_after_activation
+            request.session.pop('adc_guide',None)
+            destination=destination_after_activation(request)
             messages.success(request,'已切换就诊人，请按页面上的姓名和授权范围重新办理。')
-            return redirect('portal_home')
+            return redirect(destination or 'portal_home')
     current=None
     try:
         access=patient_access(request.user);current=access.pk if access.delegated else 'self'
@@ -108,4 +112,5 @@ def subjects(request):
     from django.utils import timezone
     for row in rows:
         if row['expires']:row['expires']=timezone.localtime(datetime.fromisoformat(row['expires'])).strftime('%Y-%m-%d %H:%M')
-    return render(request,'portal/subjects.html',{'subjects':rows,'selected':current,'problem':problem})
+    from portal.booking_intent import pending_profile
+    return render(request,'portal/subjects.html',{'subjects':rows,'selected':current,'problem':problem,'pending_profile':pending_profile(request)})

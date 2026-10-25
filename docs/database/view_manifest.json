@@ -1,4 +1,36 @@
 {
+  "er_clinic_directory": {
+    "title": "门店公开资料与发布历史",
+    "tables": 4,
+    "relationships": 3,
+    "note": "每家诊所至多一份当前公开资料；业务名称和既有单据身份不随公开别名改写。发布版本按资料及版号唯一，操作编号唯一，历史只追加。营业时间由科室开放和明确停用区间推导，不在资料中重复维护；WGS84排序与GCJ02导航坐标分开，坐标缺失保持未知。外键不授予岗位权限。",
+    "columns": {
+      "adc_clinic": [
+        "id",
+        "clinic_code",
+        "name"
+      ],
+      "adc_user": [
+        "id",
+        "username"
+      ],
+      "adc_clinic_directory": [
+        "id",
+        "clinic_id",
+        "display_name",
+        "city",
+        "is_published",
+        "revision"
+      ],
+      "adc_clinic_directory_revision": [
+        "id",
+        "directory_id",
+        "actor_id",
+        "revision",
+        "operation_id"
+      ]
+    }
+  },
   "er_clinical_history": {
     "title": "患者自述来源与医师核对",
     "tables": 6,
@@ -763,9 +795,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 101,
-    "orm_tables": 100,
-    "columns_types_and_nullability_checked": 966,
+    "tables": 103,
+    "orm_tables": 102,
+    "columns_types_and_nullability_checked": 993,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -774,10 +806,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 281,
-    "sql_foreign_keys": 282,
+    "orm_foreign_keys": 284,
+    "sql_foreign_keys": 285,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "41a4887f481c19effd057be2059e6dfcf62d2736c1fc0ea2e31b4e19adc7335f",
+    "snapshot_sha256": "36d1bba9760e5861cca131adcae96dff1144550b4357c666d6c365275808605c",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

@@ -90,8 +90,8 @@ class BindingForm(forms.ModelForm):
 
 class BlockForm(forms.ModelForm):
     class Meta:
-        model=ResourceBlock;fields=['department','room','asset','starts_at','ends_at','reason']
-        labels={'department':'停用科室（目标三选一）','room':'停用诊室','asset':'停用设备','starts_at':'开始','ends_at':'结束','reason':'停用依据'}
+        model=ResourceBlock;fields=['department','room','asset','starts_at','ends_at','reason','public_notice']
+        labels={'department':'停用科室（目标三选一）','room':'停用诊室','asset':'停用设备','starts_at':'开始','ends_at':'结束','reason':'内部停用依据','public_notice':'对外说明（可留空，不含患者资料）'}
         widgets={'starts_at':DATE_TIME,'ends_at':DATE_TIME}
     def clean(self):
         d=super().clean()

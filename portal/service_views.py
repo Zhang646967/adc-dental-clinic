@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_safe
 from scheduling.service_content import CATEGORY_CHOICES, GUIDES, GUIDE_BY_KEY, SOURCES, URGENT_NOTICE, positive_id
 from portal.service_catalogue import public_profiles
+from portal.discovery import discovery_data,service_discovery
 
 
 def public_page(request, template, **context):
@@ -19,7 +20,8 @@ def public_page(request, template, **context):
 def landing(request):
     profiles = public_profiles()
     return public_page(request, 'services/landing.html', guides=GUIDES, featured=profiles[:4],
-        service_count=len(profiles), clinic_count=len({p.service.department.clinic_id for p in profiles}))
+        service_count=len(profiles), clinic_count=len({p.service.department.clinic_id for p in profiles}),
+        discovery=discovery_data(),directory_limit=4)
 
 
 @require_safe
@@ -48,7 +50,7 @@ def detail(request, service_id):
     if profile is None:
         raise Http404
     return public_page(request, 'services/detail.html', profile=profile,
-        guide=GUIDE_BY_KEY.get(profile.category))
+        guide=GUIDE_BY_KEY.get(profile.category),public_service=service_discovery(service_id))
 
 
 @require_safe
@@ -64,9 +66,4 @@ def guide(request, category):
 def clinics(request):
     # Public branches are those with a complete, published offering. Employee
     # contacts, qualification notes, home addresses and patient data are absent.
-    by_clinic = {}
-    for profile in public_profiles():
-        clinic = profile.service.department.clinic
-        by_clinic.setdefault(clinic.pk, {'clinic': clinic, 'profiles': []})['profiles'].append(profile)
-    return public_page(request, 'services/clinics.html', branches=sorted(by_clinic.values(),
-        key=lambda row: (row['clinic'].name, row['clinic'].pk)))
+    return public_page(request, 'services/clinics.html', discovery=discovery_data())
