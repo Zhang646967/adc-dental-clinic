@@ -2,12 +2,14 @@ const api = require('../../utils/api');
 const {showError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 Page({
-  data: {passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
+  data: {smsMode:true,captchaKey:'',captchaImage:'',passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
   async onLoad() {
-    try { const session=await api.bootstrap();this.setData({auth:session.auth_capabilities||{},passwordMode:!(session.auth_capabilities||{}).sms_enabled,environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)wx.reLaunch({url:intent.destination(getApp(),session)}); }
+    try { const session=await api.bootstrap();this.setData({auth:session.auth_capabilities||{},smsMode:!(session.auth_capabilities||{}).wechat_mini,passwordMode:!((session.auth_capabilities||{}).sms_enabled||(session.auth_capabilities||{}).wechat_mini),environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)wx.reLaunch({url:intent.destination(getApp(),session)}); }
     catch (e) { showError(this, e); }
   },
   field(e) { this.setData({[e.currentTarget.dataset.field]: e.detail.value}); },
+  toggleSms(){this.setData({smsMode:!this.data.smsMode});},
+  async captcha(){try{const result=await api.request('auth/sms/captcha/','POST',{});this.setData({captchaImage:result.image,captchaKey:''});}catch(e){showError(this,e);}},
   togglePassword(){this.setData({passwordMode:!this.data.passwordMode,password:'',error:''});},
   consent(e){this.setData({localConfirmed:e.detail.value.includes('agree')});},
   authConsent(e){this.setData({authConfirmed:e.detail.value.includes('agree')});},
@@ -26,8 +28,8 @@ Page({
     if(!this.data.authConfirmed){this.setData({error:'请先同意接收验证码并办理本人账号。'});return;}
     this.setData({busy:true,error:''});
     try{
-      const sent=await api.request('auth/sms/send/','POST',{phone:this.data.phone,confirmed:'on'});
-      this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:sent.demo?'测试验证码：'+sent.test_code+'（未发送短信）':'验证码已提交发送，五分钟内有效；60秒后可重发。'});
+      const sent=await api.request('auth/sms/send/','POST',{phone:this.data.phone,confirmed:'on',captcha_key:this.data.captchaKey});
+      this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:sent.demo?'测试验证码：'+sent.test_code+'（未发送短信）':'验证码已提交发送，'+Math.ceil((sent.expires_seconds||300)/60)+'分钟内有效；60秒后可重发。'});
     }catch(e){showError(this,e);}finally{this.setData({busy:false});}
   },
   async smsLogin(){
@@ -51,7 +53,7 @@ Page({
   },
   async login() {
     if (this.data.busy) return;
-    if (!this.data.username.trim() || !this.data.password) { this.setData({error:'请填写分配的账号和密码。'}); return; }
+    if (!this.data.username.trim() || !this.data.password) { this.setData({error:'请填写原患者账号和密码。'}); return; }
     this.setData({busy:true, error:''});
     try {
       const session=await api.signIn(this.data.username.trim(), this.data.password);

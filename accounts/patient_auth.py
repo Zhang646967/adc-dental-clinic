@@ -55,6 +55,9 @@ def exchange_identity(*,provider,app_id,subject,existing_user=None,existing_pass
         _account_actor(binding_actor);existing_user=binding_actor
     ids={pk for pk in (identity.user_id,getattr(existing_user,'pk',None)) if pk}
     users={user.pk:user for user in UserAccount.objects.select_for_update().filter(pk__in=ids).order_by('pk')}
+    if provider=='SMS' and auth_providers.capabilities()['sms_demo']:
+        from accounts.auth_config import has_live_credentials
+        if any(has_live_credentials(u) for u in users.values()):raise PermissionDenied('真实认证账号不能使用演示验证码。')
     if existing_user is not None:
         user=users[existing_user.pk]
         from portal.policies import has_patient_account
@@ -88,7 +91,7 @@ def _phone_record(user,phone,source):
 
 
 @sensitive_variables()
-def request_sms(*,request,phone,purpose,confirmed):
+def request_sms(*,request,phone,purpose,confirmed,captcha_key=''):
     writable();caps=auth_providers.capabilities()
     if confirmed is not True:raise RuleError('请同意使用此号码接收验证码并办理本人账号。')
     if not caps['sms_enabled']:raise RuleError('短信注册尚未开通，请使用账号密码登录。')
@@ -100,10 +103,14 @@ def request_sms(*,request,phone,purpose,confirmed):
     try:address=str(ipaddress.ip_address(address or request.META.get('REMOTE_ADDR','127.0.0.1')))
     except ValueError:raise RuleError('无法确认访问来源，请稍后重试。') from None
     ip=digest('ip:'+address);now=timezone.now();code=f'{secrets.randbelow(1000000):06d}';pk=uuid4()
+    if settings.ADC_SMS_PROVIDER=='cloudbase' and phone not in settings.ADC_SMS_ALLOWED_TEST_PHONES:
+        raise RuleError('当前仅向已约定的免费联调号码发送验证码。')
     with transaction.atomic():
         # One short database lock serializes cost limits across all web workers.
         with connection.cursor() as cursor:cursor.execute('SELECT pg_advisory_xact_lock(%s)',[87040581])
         rows=SmsChallenge.objects.all()
+        if settings.ADC_SMS_PROVIDER=='cloudbase' and rows.filter(provider='cloudbase').count()>=min(10,settings.ADC_SMS_LIVE_TEST_LIMIT):
+            raise RuleError('本轮免费短信联调次数已用完，未继续调用平台。')
         if rows.filter(phone=phone,created_at__gt=now-timedelta(seconds=60)).exists():raise RuleError('验证码刚刚发送，请60秒后再试。')
         if (rows.filter(phone=phone,created_at__gt=now-timedelta(days=1)).count()>=5 or
                 rows.filter(ip_digest=ip,created_at__gt=now-timedelta(hours=1)).count()>=10 or
@@ -111,15 +118,23 @@ def request_sms(*,request,phone,purpose,confirmed):
             raise RuleError('验证码请求次数已达上限，请稍后再试或使用账号密码。')
         SmsChallenge.objects.filter(phone=phone,session_digest=session,purpose=purpose,consumed_at__isnull=True).update(expires_at=now)
         row=SmsChallenge.objects.create(id=pk,phone=phone,purpose=purpose,user=user,provider=settings.ADC_SMS_PROVIDER,session_digest=session,ip_digest=ip,
-            code_digest=digest(str(pk)+':'+code),expires_at=now+timedelta(minutes=5))
+            code_digest='' if settings.ADC_SMS_PROVIDER=='cloudbase' else digest(str(pk)+':'+code),expires_at=now+timedelta(minutes=5))
     # Sending happens after reservation commits. A timeout never frees a rate
     # allowance and never silently switches to the synthetic delivery provider.
-    try:auth_providers.send_sms(phone,code)
+    expires=300;reference=''
+    try:
+        if settings.ADC_SMS_PROVIDER=='cloudbase':
+            captcha_token=None;captcha=request.session.pop('adc_sms_captcha',None)
+            if captcha:
+                if captcha['expires']<=timezone.now().timestamp() or captcha['session']!=session:raise RuleError('图片验证码已过期，请刷新。')
+                captcha_token=auth_providers.cloudbase_verify_captcha(captcha['token'],captcha_key.strip())
+            reference,expires=auth_providers.cloudbase_send(phone,captcha_token=captcha_token)
+        else:auth_providers.send_sms(phone,code)
     except RuleError:
         SmsChallenge.objects.filter(pk=pk).update(state='FAILED')
         raise
-    SmsChallenge.objects.filter(pk=pk).update(state='SENT')
-    result=dict(challenge=str(pk),expires_seconds=300,retry_after_seconds=60,demo=caps['sms_demo'])
+    SmsChallenge.objects.filter(pk=pk).update(state='SENT',provider_reference=reference,expires_at=now+timedelta(seconds=expires))
+    result=dict(challenge=str(pk),expires_seconds=expires,retry_after_seconds=60,demo=caps['sms_demo'])
     if caps['sms_demo']:result['test_code']=code
     return result
 
@@ -135,13 +150,18 @@ def confirm_sms(*,request,challenge,phone,code,purpose,confirmed):
         if (row is None or row.state!='SENT' or row.provider!=settings.ADC_SMS_PROVIDER or row.phone!=phone or row.session_digest!=session or row.purpose!=purpose or
                 row.consumed_at or row.expires_at<=timezone.now() or row.attempts>=5 or row.user_id!=(request.user.pk if purpose=='BIND' else None)):
             error='验证码无效、已使用或已过期，请重新获取。'
-        elif not isinstance(code,str) or not re.fullmatch(r'[0-9]{6}',code) or not secrets.compare_digest(row.code_digest,digest(str(row.pk)+':'+code)):
-            row.attempts+=1;row.save(update_fields=['attempts']);error='验证码不正确，请重新核对。'
         else:
-            actor=request.user if purpose=='BIND' else None
-            user=exchange_identity(provider='SMS',app_id=SMS_APP,subject=phone,binding_actor=actor)
-            _phone_record(user,phone,'DEMO_SMS' if row.provider=='demo' else 'SMS_VERIFIED')
-            row.consumed_at=timezone.now();row.save(update_fields=['consumed_at'])
+            try:
+                if not isinstance(code,str) or not re.fullmatch(r'[0-9]{6}',code):raise RuleError('请填写六位验证码。')
+                if row.provider=='cloudbase':auth_providers.cloudbase_verify(row.provider_reference,code)
+                elif not secrets.compare_digest(row.code_digest,digest(str(row.pk)+':'+code)):raise RuleError('验证码不正确，请重新核对。')
+            except RuleError as exc:
+                row.attempts+=1;row.save(update_fields=['attempts']);error=str(exc)
+            if not error:
+                actor=request.user if purpose=='BIND' else None
+                user=exchange_identity(provider='SMS',app_id=SMS_APP,subject=phone,binding_actor=actor)
+                _phone_record(user,phone,'DEMO_SMS' if row.provider=='demo' else 'SMS_VERIFIED')
+                row.consumed_at=timezone.now();row.save(update_fields=['consumed_at'])
     # Raise after the transaction so incorrect attempts remain counted.
     if error:raise RuleError(error)
     return user

@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q
 from adc_core.rules import ROLE_CHOICES, SCOPE_CHOICES
-from accounts.external_models import ExternalIdentity, LocalIdentityCode, AccountPhone, AccountIdentityEvent, SmsChallenge
+from accounts.external_models import ExternalIdentity, LocalIdentityCode, AccountPhone, AccountIdentityEvent, SmsChallenge, WebLoginTicket
 
 class UserAccount(AbstractUser):
     dentist = models.OneToOneField("registry.Dentist", on_delete=models.PROTECT, null=True, blank=True)

@@ -9,18 +9,23 @@ from urllib.error import HTTPError,URLError
 from urllib.parse import urlencode
 from urllib.request import Request,build_opener,HTTPRedirectHandler
 from django.conf import settings
+from django.core.cache import cache
 from django.views.decorators.debug import sensitive_variables
 from adc_core.rules import RuleError
 
 
 def capabilities():
-    mini=bool(settings.ADC_WECHAT_MINI_APP_ID and settings.ADC_WECHAT_MINI_APP_SECRET)
+    from accounts.auth_config import live
+    real=live()
+    mini=real and bool(settings.ADC_WECHAT_MINI_APP_ID and settings.ADC_WECHAT_MINI_APP_SECRET)
     sms=settings.ADC_SMS_PROVIDER
-    demo=sms=='demo' and settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_TEACHER_TEST_MODE
-    live=sms=='tencent' and all((settings.ADC_SMS_SECRET_ID,settings.ADC_SMS_SECRET_KEY,settings.ADC_SMS_APP_ID,settings.ADC_SMS_SIGN_NAME,settings.ADC_SMS_TEMPLATE_ID))
+    demo=not real and sms=='demo' and settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_TEACHER_TEST_MODE
+    tencent=real and sms=='tencent' and all((settings.ADC_SMS_SECRET_ID,settings.ADC_SMS_SECRET_KEY,settings.ADC_SMS_APP_ID,settings.ADC_SMS_SIGN_NAME,settings.ADC_SMS_TEMPLATE_ID))
+    cloudbase=real and sms=='cloudbase' and bool(settings.ADC_CLOUDBASE_ENV_ID and settings.ADC_CLOUDBASE_PUBLISHABLE_KEY and settings.ADC_SMS_FREE_QUOTA_CONFIRMED and settings.ADC_SMS_ALLOWED_TEST_PHONES and settings.ADC_CLOUDBASE_REGION=='ap-shanghai')
     return dict(wechat_mini=mini,wechat_phone=mini and settings.ADC_WECHAT_PHONE_ENABLED,
-        wechat_web=bool(settings.ADC_WECHAT_WEB_APP_ID and settings.ADC_WECHAT_WEB_APP_SECRET),
-        wechat_mp=bool(settings.ADC_WECHAT_MP_APP_ID and settings.ADC_WECHAT_MP_APP_SECRET),sms_enabled=bool(demo or live),sms_demo=bool(demo))
+        wechat_web=real and bool(settings.ADC_WECHAT_WEB_APP_ID and settings.ADC_WECHAT_WEB_APP_SECRET),
+        wechat_mp=real and bool(settings.ADC_WECHAT_MP_APP_ID and settings.ADC_WECHAT_MP_APP_SECRET),
+        wechat_qr=mini,sms_captcha=bool(cloudbase),sms_enabled=bool(demo or tencent or cloudbase),sms_demo=bool(demo),auth_mode=settings.ADC_PATIENT_AUTH_MODE)
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -28,18 +33,94 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 @sensitive_variables()
-def _request(url,*,data=None,headers=None):
+def _request(url,*,data=None,headers=None,error_payload=False):
     body=None if data is None else json.dumps(data,separators=(',',':'),ensure_ascii=False).encode()
     req=Request(url,data=body,headers=headers or {'Content-Type':'application/json'})
     try:
-        with build_opener(NoRedirect).open(req,timeout=10) as response:
-            raw=response.read(65537)
+        try:
+            response=build_opener(NoRedirect).open(req,timeout=10)
+        except HTTPError as exc:
+            if not error_payload or exc.code not in (400,401,403,429):raise
+            response=exc
+        with response:raw=response.read(65537)
         if len(raw)>65536:raise ValueError
         result=json.loads(raw)
         if not isinstance(result,dict):raise ValueError
         return result
     except (HTTPError,URLError,TimeoutError,OSError,ValueError):
         raise RuleError('授权或短信服务暂不可用，请稍后重试；也可使用账号密码登录。') from None
+
+
+@sensitive_variables()
+def mini_access_token():
+    if not capabilities()['wechat_mini']:raise RuleError('微信小程序登录尚未配置。')
+    key='adc-wechat-token:'+hashlib.sha256((settings.ADC_WECHAT_MINI_APP_ID+settings.ADC_WECHAT_MINI_APP_SECRET).encode()).hexdigest()
+    cached=cache.get(key)
+    if cached:return cached
+    value=_request('https://api.weixin.qq.com/cgi-bin/stable_token',data={'grant_type':'client_credential','appid':settings.ADC_WECHAT_MINI_APP_ID,'secret':settings.ADC_WECHAT_MINI_APP_SECRET,'force_refresh':False})
+    token=value.get('access_token')
+    if value.get('errcode',0)!=0 or not isinstance(token,str) or not token:raise RuleError('微信服务暂不可用，请稍后重试。')
+    cache.set(key,token,max(1,min(int(value.get('expires_in',7200)),7200)-120))
+    return token
+
+
+@sensitive_variables()
+def mini_login_image(scene):
+    token=mini_access_token()
+    payload={'scene':scene,'page':'pages/web-login/index','check_path':False,'env_version':settings.ADC_WECHAT_QR_ENV_VERSION,'width':280}
+    req=Request('https://api.weixin.qq.com/wxa/getwxacodeunlimit?'+urlencode({'access_token':token}),data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
+    try:
+        with build_opener(NoRedirect).open(req,timeout=10) as response:raw=response.read(1048577)
+        if len(raw)>1048576 or not raw.startswith(b'\x89PNG\r\n\x1a\n'):raise ValueError
+        return raw
+    except (HTTPError,URLError,TimeoutError,OSError,ValueError):
+        raise RuleError('暂未取得微信小程序码，请刷新重试或使用其他登录方式。') from None
+
+
+@sensitive_variables()
+def cloudbase(path,data,*,captcha_token=None):
+    env=settings.ADC_CLOUDBASE_ENV_ID
+    if (settings.ADC_SMS_PROVIDER!='cloudbase' or not capabilities()['sms_enabled'] or
+            not re.fullmatch(r'[a-zA-Z0-9-]{3,100}',env)):
+        raise RuleError('免费短信联调条件尚未确认，暂未发送短信。')
+    headers={'Content-Type':'application/json','Authorization':'Bearer '+settings.ADC_CLOUDBASE_PUBLISHABLE_KEY}
+    if captcha_token:headers['x-captcha-token']=captcha_token
+    return _request('https://'+env+'.api.tcloudbasegateway.com/auth/v1/'+path,data=data,headers=headers,error_payload=True)
+
+
+@sensitive_variables()
+def cloudbase_send(phone,*,captcha_token=None):
+    # The provider creates the OTP; ADC stores only the returned challenge ID.
+    value=cloudbase('verification',{'phone_number':'+86 '+phone,'target':'ANY'},captcha_token=captcha_token)
+    reference=value.get('verification_id')
+    if not isinstance(reference,str) or not 1<=len(reference)<=512:
+        raise RuleError('短信平台未接受发送，请核对免费额度、测试号码或图片验证码后重试。')
+    return reference,min(600,max(1,int(value.get('expires_in',600))))
+
+
+@sensitive_variables()
+def cloudbase_verify(reference,code):
+    value=cloudbase('verification/verify',{'verification_id':reference,'verification_code':code})
+    if value.get('error') or not isinstance(value.get('verification_token'),str) or not value['verification_token']:
+        raise RuleError('验证码未通过平台核验，请核对或重新获取。')
+    # Provider tokens never become ADC sessions and are never returned to clients.
+
+
+@sensitive_variables()
+def cloudbase_captcha():
+    value=cloudbase('captcha/data',{})
+    image=value.get('data','');token=value.get('token','')
+    if not isinstance(image,str) or len(image)>60000 or not re.fullmatch(r'data:image/(?:gif|png|jpeg);base64,[A-Za-z0-9+/=]+',image) or not isinstance(token,str) or not 1<=len(token)<=4096:
+        raise RuleError('暂未取得图片验证码，请稍后重试。')
+    return image,token
+
+
+@sensitive_variables()
+def cloudbase_verify_captcha(token,key):
+    value=cloudbase('captcha/data/verify',{'token':token,'key':key})
+    result=value.get('captcha_token')
+    if not isinstance(result,str) or not result:raise RuleError('图片验证码不正确或已过期，请刷新后重试。')
+    return result
 
 
 def _code(code):

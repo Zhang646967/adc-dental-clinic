@@ -488,6 +488,9 @@ class Course:
             # Historical source observations must not overwrite a new instance's
             # heartbeat/clock/identity or make the new collector look healthy.
             atomic_text(self.bundle / 'private/recovered-observations.json', canonical(observations).decode() + '\n')
+        # Compare retained evidence first, then invalidate uncompleted restored logins.
+        self.dc('--profile', 'maintenance', 'run', '--rm', 'schema',
+                'python', 'manage.py', 'invalidate_auth_challenges', timeout=60)
         self.start_runtime()
         if proof is not None:
             proof.update(elapsed_ms=round((time.monotonic() - started) * 1000),

@@ -1,3 +1,14 @@
+# WX1 live auth is independent from synthetic clinical data. No secrets in source.
+ADC_PATIENT_AUTH_MODE=live
+ADC_PATIENT_IDENTITY_PROVIDER=disabled
+ADC_WECHAT_QR_ENV_VERSION=develop
+ADC_CLOUDBASE_ENV_ID=
+ADC_CLOUDBASE_REGION=ap-shanghai
+ADC_CLOUDBASE_PUBLISHABLE_KEY=
+ADC_SMS_FREE_QUOTA_CONFIRMED=0
+ADC_SMS_ALLOWED_TEST_PHONES=
+ADC_SMS_LIVE_TEST_LIMIT=10
+
 # Copy selected settings to a private server environment; never commit secrets.
 # A registered/approved website app, service-account web app and mini-program
 # use their own application credentials. Configure only the channels you own.
@@ -20,6 +31,7 @@ ADC_SMS_REGION=ap-guangzhou
 ADC_SMS_GLOBAL_DAILY_LIMIT=200
 
 # Synthetic teacher trial ONLY: requires both flags plus ADC_SMS_PROVIDER=demo.
+# Also set ADC_PATIENT_AUTH_MODE=demo for this explicitly separate rehearsal.
 # It accepts only 0-prefixed synthetic numbers and does not send a real SMS.
 ADC_RC_SYNTHETIC=0
 ADC_TEACHER_TEST_MODE=0

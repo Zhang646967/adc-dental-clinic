@@ -1,7 +1,7 @@
 const api=require('../../utils/api'),{showError,dateTime}=require('../../utils/format'),intent=require('../../utils/booking-intent');
 function consent(content){return new Promise(resolve=>wx.showModal({title:'核对本人账号',content,success:r=>resolve(!!r.confirm),fail:()=>resolve(false)}));}
 Page({
-  data:{profile:null,phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',auth:{},smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:'',readOnly:false,busy:false,error:''},
+  data:{captchaImage:'',captchaKey:'',profile:null,phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',auth:{},smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:'',readOnly:false,busy:false,error:''},
   async onShow(){await this.load();},
   async load(){
     this.setData({busy:true,error:'',profile:null});
@@ -28,10 +28,11 @@ Page({
     try{await api.request('account/phone/wechat/','POST',{code:e.detail.code,confirmed:'on'});await this.load();}
     catch(error){showError(this,error);}finally{this.setData({busy:false});}
   },
+  async captcha(){try{const result=await api.request('auth/sms/captcha/','POST',{});this.setData({captchaImage:result.image,captchaKey:''});}catch(e){showError(this,e);}},
   async sendPhoneSms(){
     if(this.data.busy||this.data.readOnly||!await consent('同意向填写的号码发送验证码，核验后用于本人账号联络和登录？'))return;
     this.setData({busy:true,error:''});
-    try{const sent=await api.request('account/phone/sms/send/','POST',{phone:this.data.smsPhone,confirmed:'on'});this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:sent.demo?'测试验证码：'+sent.test_code+'（未发送短信）':'验证码已提交发送，五分钟内有效。'});}
+    try{const sent=await api.request('account/phone/sms/send/','POST',{phone:this.data.smsPhone,confirmed:'on',captcha_key:this.data.captchaKey});this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:sent.demo?'测试验证码：'+sent.test_code+'（未发送短信）':'验证码已提交发送，五分钟内有效。'});}
     catch(error){showError(this,error);}finally{this.setData({busy:false});}
   },
   async bindPhoneSms(){

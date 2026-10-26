@@ -5,6 +5,7 @@ function remember(app,service,clinic){
   app.globalData.bookingIntent={service:Number(service),clinic:Number(clinic),expires:Date.now()+10*60000};
 }
 function destination(app,session){
+  if(session.account_authenticated&&app.globalData.webLoginTicket)return '/pages/web-login/index?ticket='+app.globalData.webLoginTicket;
   if(session.account_authenticated&&!session.authenticated)return '/pages/account/index';
   if(session.subject_required)return '/pages/patients/index';
   const intent=app.globalData.bookingIntent;app.globalData.bookingIntent=null;

@@ -16,6 +16,8 @@ PUBLIC.update({'patient_local_login','patient_account','patient_account_activate
     'mini_account_unlink','mini_account_password','mini_account_activate','mini_enrollment_preview','mini_enrollment_confirm','mini_enrollment_withdraw'})
 PUBLIC.update({'patient_sms_login','patient_sms_bind','patient_wechat_start','patient_wechat_callback',
     'mini_wechat_login','mini_wechat_bind','mini_sms_send','mini_sms_confirm','mini_wechat_phone','mini_sms_bind_send','mini_sms_bind_confirm'})
+PUBLIC.update({'patient_wechat_qr_start','patient_wechat_qr_status','patient_wechat_qr_image','patient_wechat_qr_complete',
+    'mini_web_login','patient_sms_captcha','mini_sms_captcha'})
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={

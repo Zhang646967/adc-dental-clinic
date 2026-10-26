@@ -21,6 +21,7 @@ class SmsAuthForm(forms.Form):
     phone=forms.CharField(label='手机号码',max_length=16,widget=forms.TextInput(attrs={'inputmode':'tel','autocomplete':'tel','placeholder':'请输入手机号'}))
     code=forms.CharField(label='短信验证码',required=False,min_length=6,max_length=6,widget=forms.TextInput(attrs={'inputmode':'numeric','autocomplete':'one-time-code'}))
     challenge=forms.UUIDField(required=False,widget=forms.HiddenInput)
+    captcha_key=forms.CharField(label='图片验证码（平台要求时填写）',required=False,max_length=6)
     confirmed=forms.BooleanField(label='我同意接收验证码，并使用此号码办理本人登录账号。')
 
 

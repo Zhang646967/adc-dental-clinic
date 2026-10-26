@@ -22,7 +22,8 @@ APP='adc-local-patient-v1'
 
 
 def require_local():
-    if not settings.ADC_CLINICAL_SYNTHETIC or settings.ADC_PATIENT_IDENTITY_PROVIDER!='local':
+    from accounts.auth_config import local_enabled
+    if not local_enabled():
         raise PermissionDenied('当前环境未启用本地授权替身；请使用已分配患者账号。')
     if settings.ADC_READ_ONLY:raise PermissionDenied('只读实例不能办理账号和联络变更。')
 
@@ -89,6 +90,9 @@ def exchange_login(*,code,existing_user=None,existing_password=None):
     identity=ExternalIdentity.objects.select_for_update().get(pk=row.identity_id,provider='LOCAL',app_id=APP)
     user_ids={value for value in (identity.user_id,getattr(existing_user,'pk',None)) if value}
     users={u.pk:u for u in UserAccount.objects.select_for_update().filter(pk__in=user_ids).order_by('pk')}
+    from accounts.auth_config import has_live_credentials
+    if any(has_live_credentials(u) for u in users.values()):
+        raise PermissionDenied('已接入真实认证的账号不能使用本地模拟凭据。')
     if existing_user is not None:
         user=users[existing_user.pk]
         if not user.is_active or not user.check_password(existing_password or ''):raise PermissionDenied('原账号核对未通过。')
@@ -116,6 +120,8 @@ def verify_phone(*,actor,code,confirmed):
     row=_consume(code,'PHONE')
     user=UserAccount.objects.select_for_update().get(pk=actor.pk)
     _account_actor(actor)
+    from accounts.auth_config import has_live_credentials
+    if has_live_credentials(user):raise PermissionDenied('真实认证账号不能使用模拟手机凭据。')
     if row.user_id!=user.pk:raise PermissionDenied('此手机号凭证不属于当前账号。')
     phone=AccountPhone.objects.select_for_update().filter(user=user).first()
     if phone:
@@ -151,6 +157,8 @@ def set_login_password(*,actor,code,new_password,confirmed):
     identity=ExternalIdentity.objects.select_for_update().get(pk=row.identity_id)
     user=UserAccount.objects.select_for_update().get(pk=actor.pk)
     _account_actor(actor)
+    from accounts.auth_config import has_live_credentials
+    if has_live_credentials(user):raise PermissionDenied('真实认证账号不能使用模拟凭据设置密码。')
     if identity.user_id!=user.pk:raise PermissionDenied('请使用当前绑定身份的新授权凭证。')
     from django.contrib.auth.password_validation import validate_password
     try:validate_password(new_password,user=user)

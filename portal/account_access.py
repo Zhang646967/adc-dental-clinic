@@ -1,4 +1,5 @@
 """Own-account channel access without prematurely granting PATIENT authority."""
+from accounts.auth_config import local_enabled
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from accounts.external_identity import _account_actor
@@ -33,7 +34,7 @@ def account_data(request):
     for item in identities:item['provider_label']=labels[item['provider']]
     from portal.models import PatientAccess
     own=PatientAccess.objects.filter(user=request.user).values('is_active','patient__is_active').first()
-    return dict(account_authenticated=True,auth_capabilities=capabilities(),local_identity_enabled=settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local',account_token=token_for(ctx),account_name=request.user.username,workspace_id=str(ctx.pk),subject_revision=ctx.revision,
+    return dict(account_authenticated=True,auth_capabilities=capabilities(),local_identity_enabled=local_enabled(),account_token=token_for(ctx),account_name=request.user.username,workspace_id=str(ctx.pk),subject_revision=ctx.revision,
         enrollment_required=not has_patient_access(request.user),password_ready=request.user.has_usable_password(),
         can_request_enrollment=own is None or (not own['is_active'] and own['patient__is_active']),self_binding_needs_review=own is not None and not (own['is_active'] and own['patient__is_active']),
         phone=dict(number=phone.phone,source=phone.source,source_label=phone_sources[phone.source],verified_at=phone.verified_at.isoformat(),revision=phone.revision) if phone else None,

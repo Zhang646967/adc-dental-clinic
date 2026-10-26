@@ -39,7 +39,7 @@ def login_context(request,*,form=None,sms_form=None,sent=None,booking_service=No
     return dict(form=form if form is not None else AuthenticationForm(request),
         sms_form=sms_form if sms_form is not None else forms.SmsAuthForm(),sent=sent,auth=caps,
         booking_service=booking_service,
-        password_mode=request.POST.get('login_method')=='password' or bool(form is not None and form.is_bound) or not caps['sms_enabled'],
+        password_mode=request.POST.get('login_method')=='password' or bool(form is not None and form.is_bound) or not (caps['sms_enabled'] or caps['wechat_qr']),
         wechat_in_browser='micromessenger' in request.headers.get('User-Agent','').lower())
 
 
@@ -51,12 +51,14 @@ def sms(request,binding=False,inline=False):
     context=login_context(request) if inline else None
     if inline and context['booking_service']:
         request.session['adc_auth_service']=context['booking_service'].service_id
-    form=forms.SmsAuthForm(request.POST or None)
+    payload=request.POST.copy() if request.method=='POST' else None
+    if payload is not None and payload.get('action')=='send':payload['code']='';payload['challenge']=''
+    form=forms.SmsAuthForm(payload)
     if request.method=='POST' and form.is_valid():
         d=form.cleaned_data;purpose='BIND' if binding else 'LOGIN'
         try:
             if request.POST.get('action')=='send':
-                sent=patient_auth.request_sms(request=request,phone=d['phone'],purpose=purpose,confirmed=d['confirmed'])
+                sent=patient_auth.request_sms(request=request,phone=d['phone'],purpose=purpose,confirmed=d['confirmed'],captcha_key=d['captcha_key'])
                 data=request.POST.copy();data['challenge']=sent['challenge'];data['code']='';form=forms.SmsAuthForm(data)
             else:
                 if not d['challenge'] or not d['code']:raise RuleError('请先获取验证码，再输入收到的六位验证码。')
@@ -135,7 +137,7 @@ def mini_wechat_login(request,binding=False):
 def mini_sms_send(request,binding=False):
     if binding:account_context(request,unsafe=True)
     d=validated(forms.SmsAuthForm(request.POST))
-    sent=patient_auth.request_sms(request=request,phone=d['phone'],purpose='BIND' if binding else 'LOGIN',confirmed=d['confirmed'])
+    sent=patient_auth.request_sms(request=request,phone=d['phone'],purpose='BIND' if binding else 'LOGIN',confirmed=d['confirmed'],captcha_key=d['captcha_key'])
     return result(request,sent)
 
 

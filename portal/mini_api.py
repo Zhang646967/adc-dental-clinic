@@ -8,6 +8,7 @@ from functools import wraps
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from accounts.auth_config import local_enabled
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -80,7 +81,7 @@ def session_data(request):
     from accounts.auth_providers import capabilities
     data = dict(authenticated=False, csrf_token=get_token(request), read_only=settings.ADC_READ_ONLY,
         auth_capabilities=capabilities(),
-        account_authenticated=False,identity_provider='local' if settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local' else 'disabled',
+        account_authenticated=False,identity_provider='local' if local_enabled() else 'disabled',
         environment_label=settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
         business_timezone='Asia/Shanghai', today=timezone.localdate().isoformat(),
         last_day=(timezone.localdate()+timedelta(days=14)).isoformat())

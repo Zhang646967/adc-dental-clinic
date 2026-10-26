@@ -1,8 +1,14 @@
 from django.urls import path
 from portal import account_views as views
 from portal import auth_views as auth
+from portal import web_login_views as qr
 
 urlpatterns=[
+    path('portal/auth/wechat/qr/start/',qr.start,name='patient_wechat_qr_start'),
+    path('portal/auth/wechat/qr/status/',qr.status,name='patient_wechat_qr_status'),
+    path('portal/auth/wechat/qr/image/',qr.image,name='patient_wechat_qr_image'),
+    path('portal/auth/wechat/qr/complete/',qr.complete,name='patient_wechat_qr_complete'),
+    path('portal/auth/sms/captcha/',qr.captcha,name='patient_sms_captcha'),
     path('portal/auth/sms/',auth.sms,name='patient_sms_login'),
     path('portal/account/phone/sms/',auth.sms,{'binding':True},name='patient_sms_bind'),
     path('portal/auth/wechat/start/',auth.wechat_start,name='patient_wechat_start'),

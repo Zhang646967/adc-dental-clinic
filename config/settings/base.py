@@ -59,7 +59,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
 ADC_READ_ONLY = os.environ.get("ADC_READ_ONLY", "0") == "1"
 ADC_CLINICAL_SYNTHETIC = os.environ.get("ADC_RC_SYNTHETIC", "0") == "1"
-ADC_PATIENT_IDENTITY_PROVIDER = os.environ.get('ADC_PATIENT_IDENTITY_PROVIDER', 'local' if ADC_CLINICAL_SYNTHETIC else 'disabled')
+ADC_PATIENT_AUTH_MODE = os.environ.get('ADC_PATIENT_AUTH_MODE', 'demo' if ADC_CLINICAL_SYNTHETIC else 'live')
+ADC_PATIENT_IDENTITY_PROVIDER = os.environ.get('ADC_PATIENT_IDENTITY_PROVIDER', 'local' if ADC_CLINICAL_SYNTHETIC and ADC_PATIENT_AUTH_MODE=='demo' else 'disabled')
 ADC_TEACHER_TEST_MODE = os.environ.get('ADC_TEACHER_TEST_MODE') == '1'
 ADC_SMS_PROVIDER = os.environ.get('ADC_SMS_PROVIDER', 'disabled')
 ADC_SMS_SECRET_ID = os.environ.get('ADC_SMS_SECRET_ID', '')
@@ -76,6 +77,13 @@ ADC_WECHAT_WEB_APP_SECRET = os.environ.get('ADC_WECHAT_WEB_APP_SECRET', '')
 ADC_WECHAT_MP_APP_ID = os.environ.get('ADC_WECHAT_MP_APP_ID', '')
 ADC_WECHAT_MP_APP_SECRET = os.environ.get('ADC_WECHAT_MP_APP_SECRET', '')
 ADC_WECHAT_PHONE_ENABLED = os.environ.get('ADC_WECHAT_PHONE_ENABLED') == '1'
+ADC_WECHAT_QR_ENV_VERSION = os.environ.get('ADC_WECHAT_QR_ENV_VERSION', 'develop')
+ADC_CLOUDBASE_ENV_ID = os.environ.get('ADC_CLOUDBASE_ENV_ID', '')
+ADC_CLOUDBASE_REGION = os.environ.get('ADC_CLOUDBASE_REGION', 'ap-shanghai')
+ADC_CLOUDBASE_PUBLISHABLE_KEY = os.environ.get('ADC_CLOUDBASE_PUBLISHABLE_KEY', '')
+ADC_SMS_FREE_QUOTA_CONFIRMED = os.environ.get('ADC_SMS_FREE_QUOTA_CONFIRMED') == '1'
+ADC_SMS_ALLOWED_TEST_PHONES = tuple(x.strip() for x in os.environ.get('ADC_SMS_ALLOWED_TEST_PHONES','').split(',') if x.strip())
+ADC_SMS_LIVE_TEST_LIMIT = int(os.environ.get('ADC_SMS_LIVE_TEST_LIMIT', '10'))
 ADC_VERSION = "1.0.0-rc.1"
 # A production label requires the production settings and explicit deployment
 # stage. Synthetic or local/staging environments retain a compact visible label.

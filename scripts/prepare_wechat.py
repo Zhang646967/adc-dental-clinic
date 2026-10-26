@@ -18,7 +18,7 @@ def prepare(output, *, api_base, appid='touristappid', mode='local'):
     if mode == 'local':
         if parsed.scheme != 'http' or parsed.hostname not in ('127.0.0.1', 'localhost'):
             raise ValueError('Local packages use the developer-tool simulator and a loopback HTTP address.')
-    elif mode == 'experience':
+    elif mode in ('development','experience'):
         if parsed.scheme != 'https' or not parsed.hostname or not re.fullmatch(r'[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+', parsed.hostname):
             raise ValueError('Experience packages require an HTTPS DNS hostname and a valid certificate.')
         if not re.fullmatch(r'wx[a-fA-F0-9]{16}', appid):
@@ -45,6 +45,7 @@ def prepare(output, *, api_base, appid='touristappid', mode='local'):
     return dict(mode=mode, output=str(output), backend=api_base.rstrip('/'),
         uploaded=False, platform_verified=False,
         next_step='Import in WeChat developer tools; local simulator only.' if mode == 'local' else
+        'Import with your registered AppID; development debugging may relax request-domain validation. Real WeChat login still requires server credentials.' if mode=='development' else
         'Configure the approved request domain, upload, assign experience members and verify on WeChat.')
 
 
@@ -53,6 +54,6 @@ if __name__ == '__main__':
     p.add_argument('--output', required=True)
     p.add_argument('--api-base', default='http://127.0.0.1:18000')
     p.add_argument('--appid', default='touristappid')
-    p.add_argument('--mode', choices=('local','experience'), default='local')
+    p.add_argument('--mode', choices=('local','development','experience'), default='local')
     args = p.parse_args()
     print(json.dumps(prepare(**vars(args)), ensure_ascii=False, indent=2))

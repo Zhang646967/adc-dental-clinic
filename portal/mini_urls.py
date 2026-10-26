@@ -7,8 +7,11 @@ from portal import mini_plans as plans
 from portal import mini_discovery as discovery
 from portal import mini_account as account
 from portal import auth_views as auth
+from portal import web_login_views as qr
 
 urlpatterns = [
+    path('account/web-login/',qr.mini,name='mini_web_login'),
+    path('auth/sms/captcha/',qr.captcha,name='mini_sms_captcha'),
     path('auth/wechat/',auth.mini_wechat_login,name='mini_wechat_login'),
     path('account/wechat/bind/',auth.mini_wechat_login,{'binding':True},name='mini_wechat_bind'),
     path('auth/sms/send/',auth.mini_sms_send,name='mini_sms_send'),

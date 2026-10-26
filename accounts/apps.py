@@ -5,6 +5,7 @@ class AccountsConfig(AppConfig):
     name = "accounts"
 
     def ready(self):
+        from accounts import auth_config
         import logging
         logging.captureWarnings(True)
         from django.contrib.auth.signals import user_logged_in, user_login_failed, user_logged_out

@@ -26,8 +26,8 @@ from scheduling.models import Visit
 from tests.fixtures import FixtureMixin
 from workspaces.models import WorkspaceContext
 
-DEMO=dict(ADC_SMS_PROVIDER='demo',ADC_CLINICAL_SYNTHETIC=True,ADC_TEACHER_TEST_MODE=True,ADC_SMS_GLOBAL_DAILY_LIMIT=200,ADC_READ_ONLY=False)
-LIVE=dict(ADC_SMS_PROVIDER='tencent',ADC_SMS_SECRET_ID='isolated-test-id',ADC_SMS_SECRET_KEY='isolated-test-key',ADC_SMS_APP_ID='1400000000',ADC_SMS_SIGN_NAME='合成测试',ADC_SMS_TEMPLATE_ID='100000')
+DEMO=dict(ADC_PATIENT_AUTH_MODE='demo',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='demo',ADC_CLINICAL_SYNTHETIC=True,ADC_TEACHER_TEST_MODE=True,ADC_SMS_GLOBAL_DAILY_LIMIT=200,ADC_READ_ONLY=False)
+LIVE=dict(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='tencent',ADC_SMS_SECRET_ID='isolated-test-id',ADC_SMS_SECRET_KEY='isolated-test-key',ADC_SMS_APP_ID='1400000000',ADC_SMS_SIGN_NAME='合成测试',ADC_SMS_TEMPLATE_ID='100000')
 
 
 @override_settings(**DEMO)
@@ -244,14 +244,14 @@ class PatientLiveAuthTests(FixtureMixin,TransactionTestCase):
         allowed=client.post('/api/mini/v1/account/phone/sms/send/',{'phone':'00000000111','confirmed':'on'},HTTP_X_ADC_ACCOUNT=token)
         self.assertEqual(allowed.status_code,200)
 
-    @override_settings(ADC_WECHAT_MINI_APP_ID='wx-isolated-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret')
+    @override_settings(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_WECHAT_MINI_APP_ID='wx-isolated-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret')
     def test_mini_wechat_uses_server_identity_and_does_not_return_provider_tokens(self):
         with patch('accounts.auth_providers._request',return_value={'openid':'server_subject_001','session_key':'NEVER_RETURN_THIS'}):
             response=Client().post('/api/mini/v1/auth/wechat/',{'code':'valid-provider-code','confirmed':'on','openid':'attacker_subject'})
         self.assertEqual(response.status_code,200);self.assertNotContains(response,'NEVER_RETURN_THIS');self.assertTrue(response.json()['data']['account_authenticated'])
         self.assertEqual(ExternalIdentity.objects.get().subject,'server_subject_001');self.assertFalse(PatientAccess.objects.exists())
 
-    @override_settings(ADC_WECHAT_WEB_APP_ID='wx-web-test',ADC_WECHAT_WEB_APP_SECRET='not-a-live-secret')
+    @override_settings(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_WECHAT_WEB_APP_ID='wx-web-test',ADC_WECHAT_WEB_APP_SECRET='not-a-live-secret')
     def test_web_oauth_state_is_required_and_one_use(self):
         client=Client();started=client.post('/portal/auth/wechat/start/',{'confirmed':'on','kind':'WEB'})
         self.assertIn('open.weixin.qq.com/connect/qrconnect',started.url);state=client.session['adc_wechat_oauth']['state']
@@ -266,7 +266,7 @@ class PatientLiveAuthTests(FixtureMixin,TransactionTestCase):
             client.get('/portal/auth/wechat/callback/',{'state':state,'code':'provider-code-001'})
         self.assertEqual(provider.call_count,1);self.assertEqual(ExternalIdentity.objects.count(),1)
 
-    @override_settings(ADC_WECHAT_MINI_APP_ID='wx-isolated-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret',ADC_WECHAT_PHONE_ENABLED=True)
+    @override_settings(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_WECHAT_MINI_APP_ID='wx-isolated-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret',ADC_WECHAT_PHONE_ENABLED=True)
     def test_wechat_phone_needs_own_bound_mini_identity(self):
         user=self.account('wechat-phone',self.p1)
         with patch('accounts.auth_providers.wechat_phone',return_value='13800000000') as provider:
@@ -277,10 +277,12 @@ class PatientLiveAuthTests(FixtureMixin,TransactionTestCase):
         self.assertEqual(phone.source,'WECHAT_PHONE');self.assertEqual(ExternalIdentity.objects.get(provider='SMS').user_id,user.pk)
         self.assertEqual(PatientAccess.objects.get(user=user).patient_id,self.p1.pk)
 
-    @override_settings(ADC_WECHAT_MINI_APP_ID='wx-isolated-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret')
+    @override_settings(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_WECHAT_MINI_APP_ID='wx-isolated-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret')
     def test_mini_can_bind_wechat_to_current_sms_account_without_merging(self):
-        client=Client();sent=client.post('/api/mini/v1/auth/sms/send/',{'phone':'00000000110','confirmed':'on'}).json()['data']
-        profile=client.post('/api/mini/v1/auth/sms/confirm/',{'phone':'00000000110','confirmed':'on','challenge':sent['challenge'],'code':sent['test_code']}).json()['data']
+        client=Client()
+        with self.settings(**DEMO):
+            sent=client.post('/api/mini/v1/auth/sms/send/',{'phone':'00000000110','confirmed':'on'}).json()['data']
+            profile=client.post('/api/mini/v1/auth/sms/confirm/',{'phone':'00000000110','confirmed':'on','challenge':sent['challenge'],'code':sent['test_code']}).json()['data']
         with patch('accounts.auth_providers._request',return_value={'openid':'bound_mini_subject','session_key':'NEVER_RETURN_THIS'}) as provider:
             denied=client.post('/api/mini/v1/account/wechat/bind/',{'code':'provider-code-001','confirmed':'on'})
             self.assertEqual(denied.status_code,403);self.assertEqual(provider.call_count,0)
@@ -289,7 +291,7 @@ class PatientLiveAuthTests(FixtureMixin,TransactionTestCase):
         self.assertEqual(ExternalIdentity.objects.get(provider='SMS').user_id,ExternalIdentity.objects.get(provider='WECHAT_MINI').user_id)
         self.assertEqual(allowed.json()['data']['workspace_id'],profile['workspace_id'])
 
-    @override_settings(ADC_WECHAT_WEB_APP_ID='wx-web-test',ADC_WECHAT_WEB_APP_SECRET='not-a-live-secret')
+    @override_settings(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_WECHAT_WEB_APP_ID='wx-web-test',ADC_WECHAT_WEB_APP_SECRET='not-a-live-secret')
     def test_web_oauth_can_bind_existing_patient_without_changing_chart(self):
         user=self.account('web-bind-patient',self.p1);client=Client()
         client.post('/portal/login/',{'username':user.username,'password':'test-only-patient-password'})
@@ -311,7 +313,7 @@ class ProviderAdapterTests(SimpleTestCase):
             with self.assertRaises(RuleError):providers.send_sms('13800000000','123456')
         self.assertEqual(network.call_count,0)
 
-    @override_settings(ADC_WECHAT_MINI_APP_ID='wx-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret')
+    @override_settings(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_WECHAT_MINI_APP_ID='wx-test',ADC_WECHAT_MINI_APP_SECRET='not-a-live-secret')
     def test_wechat_error_is_generic_and_has_no_provider_payload(self):
         with patch('accounts.auth_providers._request',return_value={'errcode':40029,'errmsg':'SECRET_PROVIDER_DETAIL'}):
             with self.assertRaises(RuleError) as error:providers.wechat_subject('provider-code','MINI')

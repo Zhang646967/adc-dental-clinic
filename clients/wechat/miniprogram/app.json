@@ -2,6 +2,7 @@
   "pages": [
     "pages/discovery/index",
     "pages/login/index",
+    "pages/web-login/index",
     "pages/account/index",
     "pages/enrollment/index",
     "pages/patients/index",
