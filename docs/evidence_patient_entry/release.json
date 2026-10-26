@@ -65,7 +65,7 @@
     "configuration_backup_sha256": "3d678e1e4ea7853ea60b7e7971ab3cdac8035698a8f4c5eda2afc8b1992396a9",
     "scope": "Independent synthetic teacher trial on the Mac; not independent cloud or platform acceptance."
   },
-  "current_teacher_url": "https://foo-simply-volumes-applied.trycloudflare.com",
+  "current_teacher_url": "https://ordering-designed-sports-salaries.trycloudflare.com",
   "local_browser_checks": 12,
   "teacher_browser_checks": 12,
   "roles_verified_each_environment": 7,
@@ -171,5 +171,22 @@
     "narrow_screen": "Real screenshot found the old form-button width rule squeezing the OTP input; fixed in99aa4b4 before either protected update.",
     "prior_teacher_tunnel": "courier-block-salon-festival.trycloudflare.com retired with Unauthorized: Tunnel not found; retained private history, renewed and rechecked actual HTTPS.",
     "original_observer": "Prior UNKNOWN_OBSERVER_UNAVAILABLE preserved in encrypted history; fresh health recorded separately."
+  },
+  "hostname_renewal": {
+    "previous_url": "https://foo-simply-volumes-applied.trycloudflare.com",
+    "previous_state": "RETIRED: Unauthorized: Tunnel not found",
+    "current_browser": {
+      "passed": true,
+      "url": "https://ordering-designed-sports-salaries.trycloudflare.com",
+      "verified_at": "2026-10-26T02:19:34.924Z",
+      "health_status": 200,
+      "patient_login_status": 200,
+      "primary_phone_form_visible": true,
+      "employee_shortcut_and_display_switch_absent": true,
+      "scope": "Hostname-only renewal after the prior free tunnel was retired; business version and existing tests retained."
+    },
+    "current_roles_verified": 7,
+    "application_unchanged": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "previous_full_browser_and_restore_records_retained": true
   }
 }

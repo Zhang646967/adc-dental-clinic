@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "url": "https://ordering-designed-sports-salaries.trycloudflare.com",
+  "verified_at": "2026-10-26T02:19:34.924Z",
+  "health_status": 200,
+  "patient_login_status": 200,
+  "primary_phone_form_visible": true,
+  "employee_shortcut_and_display_switch_absent": true,
+  "scope": "Hostname-only renewal after the prior free tunnel was retired; business version and existing tests retained."
+}

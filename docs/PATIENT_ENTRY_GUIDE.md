@@ -6,7 +6,7 @@
 
 - 本机患者：[登录／注册](http://127.0.0.1:18000/portal/login/)。手机号验证码是默认方式，无需先有用户名密码。已有患者账号在同页展开“账号密码登录”。
 - 本机员工：[独立工作台](http://127.0.0.1:18000/accounts/login/)。患者界面不再放员工登录或单独大字模式。
-- 教师异地：[HTTPS网站](https://foo-simply-volumes-applied.trycloudflare.com)、[患者登录／注册](https://foo-simply-volumes-applied.trycloudflare.com/portal/login/)、[员工独立工作台](https://foo-simply-volumes-applied.trycloudflare.com/accounts/login/)。它使用从空库准备的独立合成数据，密码与本机不同。
+- 教师异地：[HTTPS网站](https://ordering-designed-sports-salaries.trycloudflare.com)、[患者登录／注册](https://ordering-designed-sports-salaries.trycloudflare.com/portal/login/)、[员工独立工作台](https://ordering-designed-sports-salaries.trycloudflare.com/accounts/login/)。它使用从空库准备的独立合成数据，密码与本机不同。
 
 当前使用测试验证码。输入0开头的十一位未用合成号码，例如 `00000000201`，勾选同意，点击“获取验证码”，填写本页测试码，再点“登录／注册”。页面明确显示未发送短信；真实手机号暂不能用此测试通道核验。新账号可填写本人资料申请，前台独立核验后办理预约；注册不会自动取得病历或员工权限。
 
@@ -27,3 +27,5 @@
 准确应用 `99aa4b4920f8e99b743aea04f6c303a688b635e2` 已同步GitHub，并装到原本机与独立教师实例。[执行证据](evidence_patient_entry/README.md)包括准确CI、真实浏览器、七角色、数据库核对、迁移保护和加密独立恢复。当前130表与既有登录增量ER一致；正式课程报告保持上一版范围。
 
 旧临时隧道已退役，当前地址已重新通过真实Chrome验证。临时访问仍依赖所有者电脑、Docker和隧道；地址可能变化，不能当作独立云部署或持续可用证明。
+
+当前临时域名在最终交付前已重新通过健康、患者表单和七角色登录检查；先前域名上的完整注册与恢复证据保留原时间和地址。

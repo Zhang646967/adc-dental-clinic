@@ -4,7 +4,7 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**患者入口修正已交付：** [教师HTTPS试用系统](https://foo-simply-volumes-applied.trycloudflare.com)与原本机18000均已更新；手机号验证码注册／登录直接显示，员工从独立入口进入，重复联系按钮与大字模式已移除。[直接使用与小程序位置](docs/PATIENT_ENTRY_GUIDE.md) · [准确CI及交付证据](docs/evidence_patient_entry/README.md)。七岗位密码私下交付，真实微信与短信配置仍待提供。
+**患者入口修正已交付：** [教师HTTPS试用系统](https://ordering-designed-sports-salaries.trycloudflare.com)与原本机18000均已更新；手机号验证码注册／登录直接显示，员工从独立入口进入，重复联系按钮与大字模式已移除。[直接使用与小程序位置](docs/PATIENT_ENTRY_GUIDE.md) · [准确CI及交付证据](docs/evidence_patient_entry/README.md)。七岗位密码私下交付，真实微信与短信配置仍待提供。
 
 **C6.1B/C 已在本机交付：原账单模拟结算、基金到账分配、差异跟进和撤销。** 准确CI、1,935项PostgreSQL回归、359项浏览器检查、五店二十账号三十分钟容量及129表加密恢复通过，原数据和70份配置保留。[完整证据](docs/evidence_c61bc/README.md)。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
 

@@ -1,6 +1,6 @@
 # 当前交付：患者入口与可见试用包
 
-准确应用 `99aa4b4920f8e99b743aea04f6c303a688b635e2` 已安装到原本机18000和独立合成教师实例。手机号验证码是同页登录／注册主入口；密码登录同页展开，患者页没有员工入口或独立大字模式，门店卡片删除重复联系／位置按钮。[使用与小程序位置](docs/PATIENT_ENTRY_GUIDE.md) · [实际证据](docs/evidence_patient_entry/README.md) · [当前教师网站](https://foo-simply-volumes-applied.trycloudflare.com)。
+准确应用 `99aa4b4920f8e99b743aea04f6c303a688b635e2` 已安装到原本机18000和独立合成教师实例。手机号验证码是同页登录／注册主入口；密码登录同页展开，患者页没有员工入口或独立大字模式，门店卡片删除重复联系／位置按钮。[使用与小程序位置](docs/PATIENT_ENTRY_GUIDE.md) · [实际证据](docs/evidence_patient_entry/README.md) · [当前教师网站](https://ordering-designed-sports-salaries.trycloudflare.com)。
 
 完整CI1,122规则／1,972PG通过；两套系统真实Chrome与七角色登录通过。126组原业务记录和密码保留；原60迁移、数据库卷和RC标签不变，显式启用本地合成验证码。当前130表／353外键／103启用触发器。更新后教师130表／1996行加密空库恢复13.156秒。
 

@@ -23,8 +23,8 @@
     "PATIENT_AUTH_ENV.example": "e8be6993564fadfa74ae86eb691b30d7383f83104f1642e262558d31d66d8e40",
     "RC_MACOS.sh": "3c2a66737dc9f5f7e57476264382375b3433edcce02ab0f8b6ae6b217e5186f2",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "5b5932eac84357720da66fe5eefa2d9a67a47290655c3cc80caf3ac7d2e131e4",
-    "RELEASE_CURRENT.md": "0267d55900a623110dcb759171b05154775402ee0b5667a1f16acda6926b9ba3",
+    "README.md": "531b108a990c58a9f5bc593340f27991be9d7c3e9a6316ee37f96479d91dd07e",
+    "RELEASE_CURRENT.md": "82f55c22c255e4f78befbdb207206ec2f16434b975484b9ebc50f61e8fcf7206",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
@@ -420,7 +420,7 @@
     "docs/UX2_NATIVE_WORKFLOWS.md": "659a7b06980e5e45ce85cc81a5b6049c5ff20adf7ba5621368c6621dcb004ea3",
     "docs/V1_SCOPE_AND_REMAINING.md": "240864f7578eb2938f7f6936cd0b19fa4ee216b0d7251d9b5674e7a18efb3f23",
     "docs/VERIFY_AND_UPGRADE_09A3.md": "10ce0deb36b6bc00eb82b82c56b3d0f4165d33e2751fb83d6b5da7fcb63b0742",
-    "docs/WECHAT_SMS_TEACHER_TEST.md": "b1d814d462e098c20554e1e0e254cc634c7b900b85e8b323392f18d978ce2516",
+    "docs/WECHAT_SMS_TEACHER_TEST.md": "9506b9cc34b60423c5fc67829725c962d48349328d9c78f5897d1988ffe8bb41",
     "docs/WORKER_PROCESS_ACCEPTANCE.md": "3f52ed32c7c04e8aeddb9eba66e2fb32f522ad4f4baf811ffc93c12408212150",
     "docs/archive_v0.3/AGENTS.md": "f6fef724870d7620ba41b0d186f6c9bef3c781513b8fa70cb114c1f7ed5a1f51",
     "docs/archive_v0.3/FIELD_CATALOG.md": "781dcc5802f730632b53e43dd7f44acbfae8bcb0ece3ce4b2072777be602b078",
@@ -2547,7 +2547,7 @@
     "课程报告/README.md": "6a02f1b95105e4d409a9b151e19944645f1508b827793ff1c67cc7a14f837d55",
     "课程报告/课程报告_张加良_8210241102.docx": "907859c666321e08625692256a039adc5b2fadf02a29e429ee133d48c31cdaf7",
     "课程报告/课程报告_张加良_8210241102.pdf": "770e0f329f3ddc0756c10b1726c23b0bebb48b55a706db0cfabc5ee5ee96f03f",
-    "docs/PATIENT_ENTRY_GUIDE.md": "7f3cce7e27c3ced09ece5e3be8870cceb199a0c349bfa147b303e377fb1a95d0"
+    "docs/PATIENT_ENTRY_GUIDE.md": "19c2f0492d333f01926af58d0ac6da38698b5545d0928843584a62dd4c9f5593"
   },
   "host_migration": "macOS migration authorized 2026-10-12; original Windows host reset; source baseline preserved by tag v1.0.0-rc.1. No previous database backup was supplied.",
   "documentation_update": "Updated authentication ER,field catalogue,private teacher guide and public acceptance records. Formal193-page C6.1 report retains its dated baseline.",

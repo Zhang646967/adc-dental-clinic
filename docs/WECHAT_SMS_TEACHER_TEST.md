@@ -4,7 +4,7 @@
 
 ## 当前试用
 
-[教师试用系统](https://foo-simply-volumes-applied.trycloudflare.com)已使用从空库生成的课程合成数据开通。未设置邮箱门槛；业务操作仍需岗位账号。私有岗位密码由项目所有者另行提供，公开仓库不保存凭据。
+[教师试用系统](https://ordering-designed-sports-salaries.trycloudflare.com)已使用从空库生成的课程合成数据开通。未设置邮箱门槛；业务操作仍需岗位账号。私有岗位密码由项目所有者另行提供，公开仓库不保存凭据。
 
 当前准确应用`99aa4b4920f8e99b743aea04f6c303a688b635e2`已同时安装原本机18000和独立教师环境，CI通过1,122规则与1,972项PG回归；两套环境的真实浏览器和七角色登录通过，130表加密恢复通过。[当前执行记录](evidence_patient_entry/README.md) · [使用与小程序位置](PATIENT_ENTRY_GUIDE.md)。前一轮33项公网浏览器结果保留为[历史验证](evidence_patient_auth/README.md)，不混作本次结果。真实微信和短信仍待实际平台条件。旧临时网址已退役，以本页当前地址为准。
 
