@@ -38,7 +38,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .current-scope>strong { color: var(--ink); font-size: 1rem; }
 .current-scope .scope-badge { margin: 0; color: var(--teal); font-size: .87rem; }
 .user-menu { gap: .55rem .85rem; }
-.user-menu .mode-toggle { min-height: 44px; padding: .4rem .65rem; font-size: .8rem; }
 .utility-link, .user-menu .quiet { display: inline-flex; align-items: center; min-height: 44px; font-size: .85rem; }
 .signed-user { font-size: .8rem; color: var(--muted); max-width: 12rem; overflow-wrap: anywhere; }
 .staff-body .workspace main { padding: 2rem; max-width: 90rem; }
@@ -80,7 +79,6 @@ tbody tr:hover { background: #f6faf7; }
 .login-intro-note { color: #bed5c9; font-size: .75rem; margin-bottom: 0; }
 .login-layout .login-card { max-width: none; border: 0; border-radius: 0; padding: 3rem; align-self: center; }
 .login-card-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .7rem; margin-bottom: 1.8rem; }
-.login-card-heading .mode-toggle { width: auto; min-height: 44px; padding: .45rem .65rem; font-size: .8rem; }
 .login-layout h1 { font-size: 1.75rem; margin: 0 0 .55rem; }
 .login-layout .login-card>.muted { font-size: .92rem; margin-bottom: 1.7rem; }
 .login-layout form { margin: 0; }
@@ -93,11 +91,6 @@ tbody tr:hover { background: #f6faf7; }
 .patient-entry>span { color: var(--muted); }
 .patient-entry strong { font-weight: 600; }
 .login-safety { color: var(--muted); font-size: .78rem; margin: 1.8rem 0 0; }
-html[data-display=comfortable] .login-layout { grid-template-columns: 1fr; max-width: 45rem; }
-html[data-display=comfortable] .login-intro { padding: 1.5rem; }
-html[data-display=comfortable] .login-story { margin: 1.3rem 0 0; }
-html[data-display=comfortable] .login-steps { display: none; }
-html[data-display=comfortable] .login-layout .login-card { padding: 1.7rem; }
 @media(max-width:900px) {
   .staff-body .shell { display: block; }
   .staff-body .sidebar { width: auto; padding: 1rem; display: flex; flex-flow: row wrap; align-items: center; gap: .75rem; }
@@ -137,7 +130,6 @@ html[data-display=comfortable] .login-layout .login-card { padding: 1.7rem; }
   .password-control { flex-wrap: wrap; }
   .password-control input { width: 100%; }
   .login-card .password-toggle { min-height: 44px; width: 100%; }
-  .login-card-heading .mode-toggle { width: 100%; }
 }
 @media print {
   .nav-toggle, .quick-actions { display: none !important; }
@@ -147,4 +139,3 @@ html[data-display=comfortable] .login-layout .login-card { padding: 1.7rem; }
 
 /* Keep the login form first in the mobile and large-text reading path. */
 @media(max-width:900px) { .login-story { display: none; } }
-html[data-display=comfortable] .login-story { display: none; }
