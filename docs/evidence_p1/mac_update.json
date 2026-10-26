@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "application_commit": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "image": "sha256:b8b8fc087308ac04e633ce4c7ffa275f332e4736230b578b8c132269a5ac0285",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40312653209",
+  "original_database_container_preserved": true,
+  "database_volume": "adc_rc1_c65a09cf5683_rc_data",
+  "old_business_model_groups_preserved": 128,
+  "old_rows_and_password_hashes_preserved": true,
+  "new_P1_tables_initially_empty": true,
+  "additive_permission_rows": 44,
+  "additive_content_type_rows": 11,
+  "private_configurations_preserved": 70,
+  "explicit_auth_additions": [],
+  "rc_tag_preserved": true,
+  "old_observer_state": "UNKNOWN_OBSERVER_UNAVAILABLE",
+  "old_observations_encrypted": {
+    "file": "previous-observations.tar.age",
+    "sha256": "bdd73251b8a1722a3c5b1fcea51079fe2911d6dfababfaa1e8e75511199e6b65",
+    "decryption_verified": true
+  },
+  "old_host_history_encrypted": {
+    "file": "previous-host-events.tar.age",
+    "sha256": "fb3422c396935a02826a064af426384c8ca991288984abb7946b197048b98559",
+    "decryption_verified": true
+  },
+  "new_six_conditions": "HEALTHY",
+  "host_collector_pid": 87002
+}

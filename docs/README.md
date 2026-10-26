@@ -1,4 +1,6 @@
-当前WX1：[业务合同](WX1_IMPLEMENTATION.md) · [使用与平台联调](WX1_GUIDE.md) · [完整CI、更新、恢复和真实平台待办](evidence_wx1/README.md)。
+当前P1：[选诊及经营试用](P1_TRIAL_GUIDE.md) · [画像与月度核算设计](P1_PROFILE_MANAGEMENT.md) · [准确CI、两组容量、恢复及两套实例交付](evidence_p1/README.md)。正式报告224页、112项业务用例、31幅实际ER；真实平台与云端验收独立保留。
+
+WX1历史：[业务合同](WX1_IMPLEMENTATION.md) · [使用与平台联调](WX1_GUIDE.md) · [完整CI、更新、恢复和真实平台待办](evidence_wx1/README.md)。
 
 **当前患者入口修正：** [直接登录、私有账号与小程序导入](PATIENT_ENTRY_GUIDE.md) · [原本机及教师HTTPS验证](evidence_patient_entry/README.md)。
 
@@ -48,7 +50,7 @@
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[352条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[388条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。

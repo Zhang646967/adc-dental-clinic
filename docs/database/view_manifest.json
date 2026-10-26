@@ -1186,11 +1186,247 @@
       ]
     }
   },
+  "er_profile_affiliation": {
+    "title": "统一医师身份、门店任职与专业授权",
+    "tables": 7,
+    "relationships": 8,
+    "note": "统一医师可有多个接诊门店，每对医师与门店唯一；常驻与轮诊不复制身份。任职有效期、独立专业授权及前台出诊为不同合同，任职不自动授予诊疗权限。门店任职控制须先核对原出诊和承诺再明确启用；退出阻止新增排班与预约，保留原约并交前台协调，单纯撤回介绍不结束任职。",
+    "columns": {
+      "adc_dentist": [
+        "id",
+        "employee_no",
+        "name",
+        "is_active"
+      ],
+      "adc_clinic": [
+        "id",
+        "clinic_code",
+        "name"
+      ],
+      "adc_user": [
+        "id",
+        "dentist_id",
+        "username"
+      ],
+      "adc_dentist_clinic_affiliation": [
+        "id",
+        "dentist_id",
+        "clinic_id",
+        "kind",
+        "starts_on",
+        "ends_on",
+        "state",
+        "listing_published"
+      ],
+      "adc_clinic_profile_policy": [
+        "id",
+        "clinic_id",
+        "roster_enforced",
+        "revision"
+      ],
+      "adc_professional_authorization": [
+        "id",
+        "user_id",
+        "clinic_id",
+        "state"
+      ],
+      "adc_availability_slot": [
+        "id",
+        "dentist_id",
+        "clinic_id",
+        "starts_at",
+        "ends_at",
+        "is_active"
+      ]
+    }
+  },
+  "er_public_profiles": {
+    "title": "公开画像、不可变提交版本与门店采用",
+    "tables": 7,
+    "relationships": 13,
+    "note": "画像恰好属于一个医师或门店，各自唯一。草稿可编辑，提交版本与发布决定追加保留；门店采用医师的确切版本，其他门店不被自动替换。图片规范化字节保存在数据库，版本JSON中的图片编号是应用校验的逻辑引用，并非额外SQL外键；仅当前发布所引用的图片公开。职称来源留在内部，不把课程资料当作真实资格。",
+    "columns": {
+      "adc_dentist": [
+        "id",
+        "employee_no"
+      ],
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_public_profile": [
+        "id",
+        "dentist_id",
+        "clinic_id",
+        "revision",
+        "submitted_version_id",
+        "published_version_id"
+      ],
+      "adc_profile_version": [
+        "id",
+        "profile_id",
+        "sequence",
+        "content",
+        "submitted_by_id"
+      ],
+      "adc_profile_media": [
+        "id",
+        "profile_id",
+        "digest",
+        "width",
+        "height",
+        "alt_text"
+      ],
+      "adc_dentist_clinic_affiliation": [
+        "id",
+        "dentist_id",
+        "clinic_id",
+        "published_version_id",
+        "listing_published"
+      ],
+      "adc_profile_action": [
+        "id",
+        "profile_id",
+        "affiliation_id",
+        "version_id",
+        "clinic_id",
+        "action",
+        "operation_id"
+      ]
+    }
+  },
+  "er_profile_booking": {
+    "title": "任职与选诊意向进入统一预约资源",
+    "tables": 8,
+    "relationships": 10,
+    "note": "公开医师选择只是可恢复意向，不授予患者权限。登录并选择本人或授权就诊人后，所有成约入口重核服务、专业范围、任职、出诊与物理资源。资源计划保留服务时长与原方案；任职结束、原约改期和资源历史分别保留。排程排斥约束及事务锁维持有效占用互斥；完整科室、设备与候补关联见既有资源视图。",
+    "columns": {
+      "adc_dentist": [
+        "id",
+        "employee_no"
+      ],
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_dentist_clinic_affiliation": [
+        "id",
+        "dentist_id",
+        "clinic_id",
+        "starts_on",
+        "ends_on",
+        "state"
+      ],
+      "adc_availability_slot": [
+        "id",
+        "clinic_id",
+        "dentist_id",
+        "starts_at",
+        "ends_at"
+      ],
+      "adc_visit": [
+        "id",
+        "patient_id",
+        "clinic_id",
+        "dentist_id",
+        "availability_slot_id",
+        "status"
+      ],
+      "adc_booking_service": [
+        "id",
+        "department_id",
+        "duration_minutes"
+      ],
+      "adc_resource_plan": [
+        "id",
+        "visit_id",
+        "offer_id",
+        "service_id",
+        "is_current"
+      ],
+      "adc_resource_claim": [
+        "id",
+        "plan_id",
+        "asset_id",
+        "starts_at",
+        "ends_at",
+        "kind",
+        "active"
+      ]
+    }
+  },
+  "er_monthly_management": {
+    "title": "月度成本、独立复核、工时分摊与留存月报",
+    "tables": 8,
+    "relationships": 11,
+    "note": "门店月份唯一，总部月份使用独立空门店成本中心。主管提交，财务独立复核；来源及原金额不可覆写，修订引用上一笔。已确认公共成本按当月有效已发布工时分摊，稳定医师编号分配分币尾差，无工时保留门店未分摊。类别缺失不同于明确零费用。月报保存账单版本、工时、成本、来源修订及覆盖依据的JSON快照；这些快照编号是逻辑来源引用，不虚构月报到账单或出诊的SQL外键。登记成本不产生现金，旧季度台账不自动导入。",
+    "columns": {
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_dentist": [
+        "id",
+        "employee_no"
+      ],
+      "adc_cost_month": [
+        "id",
+        "clinic_id",
+        "year",
+        "month",
+        "coverage",
+        "revision"
+      ],
+      "adc_monthly_cost": [
+        "id",
+        "period_id",
+        "dentist_id",
+        "category",
+        "amount",
+        "equipment_event_id",
+        "replaces_id",
+        "state",
+        "prepared_by_id",
+        "reviewed_by_id"
+      ],
+      "adc_equipment_event": [
+        "id",
+        "asset_id",
+        "kind",
+        "cost"
+      ],
+      "adc_management_report": [
+        "id",
+        "period_id",
+        "sequence",
+        "digest",
+        "confirmed_by_id"
+      ],
+      "adc_cost_allocation": [
+        "id",
+        "report_id",
+        "dentist_id",
+        "shift_minutes",
+        "direct_cost",
+        "shared_cost",
+        "production",
+        "contribution"
+      ],
+      "adc_management_action": [
+        "id",
+        "period_id",
+        "cost_id",
+        "report_id",
+        "action",
+        "operation_id"
+      ]
+    }
+  },
   "validation": {
     "passed": true,
-    "tables": 131,
-    "orm_tables": 130,
-    "columns_types_and_nullability_checked": 1295,
+    "tables": 142,
+    "orm_tables": 141,
+    "columns_types_and_nullability_checked": 1389,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -1199,10 +1435,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 355,
-    "sql_foreign_keys": 356,
+    "orm_foreign_keys": 387,
+    "sql_foreign_keys": 388,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "4e903c4a480bd5f4b2ead767cf11459244a87469cd98800c38f272cfcb3c64d3",
+    "snapshot_sha256": "eed8c33066ab7d948a39573d41e175d50c02745df79ef36cf606c9a8571a3c7d",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

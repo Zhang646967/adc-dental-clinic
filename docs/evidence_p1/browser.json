@@ -1,0 +1,153 @@
+{
+  "passed": true,
+  "source": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "checks": 36,
+  "details": [
+    {
+      "name": "Twenty clinics render; city filter narrows to four Changsha branches",
+      "passed": true
+    },
+    {
+      "name": "All four Changsha branches expose online services",
+      "passed": true
+    },
+    {
+      "name": "All twenty branches provide at least three reviewed doctors and four published services",
+      "passed": true
+    },
+    {
+      "name": "Doctor catalogue paginates sixty distinct identities",
+      "passed": true
+    },
+    {
+      "name": "Clinic detail joins the reviewed team, services, hours and facilities",
+      "passed": true
+    },
+    {
+      "name": "Doctor detail offers its actual clinic and compatible services",
+      "passed": true
+    },
+    {
+      "name": "A visiting doctor remains one identity with two clinic schedules",
+      "passed": true
+    },
+    {
+      "name": "Public doctor selection survives normal website authentication",
+      "passed": true
+    },
+    {
+      "name": "Selected doctor and service create an appointment using the shared resource confirmation",
+      "passed": true
+    },
+    {
+      "name": "Repeated booking confirmation returns the same saved appointment",
+      "passed": true
+    },
+    {
+      "name": "The native API reads the website account appointment through the same patient authority",
+      "passed": true
+    },
+    {
+      "name": "Self-rescheduling retains the original and creates its unique resource-checked successor",
+      "passed": true
+    },
+    {
+      "name": "Single-submit draft saving retains the old public version",
+      "passed": true
+    },
+    {
+      "name": "Manager opens current-clinic workload, costs and management contribution",
+      "passed": true
+    },
+    {
+      "name": "A current-clinic manager cannot read another clinic financial projection",
+      "passed": true
+    },
+    {
+      "name": "Finance sees twenty clinics and the separate HQ cost centre",
+      "passed": true
+    },
+    {
+      "name": "Confirmed costs and explicit zero categories make the monthly report usable",
+      "passed": true
+    },
+    {
+      "name": "Doctor can maintain own introduction and internal evidence reference",
+      "passed": true
+    },
+    {
+      "name": "Doctor sees own aggregate contribution without store cost documents",
+      "passed": true
+    },
+    {
+      "name": "Returning a submitted doctor introduction keeps the prior published version",
+      "passed": true
+    },
+    {
+      "name": "Doctor submission and independent clinic publication complete through normal forms",
+      "passed": true
+    },
+    {
+      "name": "Manager submits a monthly cost without creating a payment",
+      "passed": true
+    },
+    {
+      "name": "Independent cost review, completeness confirmation and retained monthly revision complete",
+      "passed": true
+    },
+    {
+      "name": "Staff form reflows at 390px with 200-percent text /profiles/clinic/edit/",
+      "passed": true
+    },
+    {
+      "name": "Staff form reflows at 390px with 200-percent text /operations/management/?clinic=1",
+      "passed": true
+    },
+    {
+      "name": "Role boundary p1_patient /profiles/",
+      "passed": true
+    },
+    {
+      "name": "Role boundary front_a /profiles/",
+      "passed": true
+    },
+    {
+      "name": "Role boundary front_a /operations/management/?clinic=1",
+      "passed": true
+    },
+    {
+      "name": "Role boundary hq_demo /operations/management/chain/",
+      "passed": true
+    },
+    {
+      "name": "Role boundary hq_demo /operations/management/costs/new/",
+      "passed": true
+    },
+    {
+      "name": "Role boundary tech_demo /operations/management/",
+      "passed": true
+    },
+    {
+      "name": "Role boundary finance_demo /profiles/",
+      "passed": true
+    },
+    {
+      "name": "390px and 200-percent text reflow /dentists/",
+      "passed": true
+    },
+    {
+      "name": "390px and 200-percent text reflow /dentists/5/",
+      "passed": true
+    },
+    {
+      "name": "390px and 200-percent text reflow /clinics/1/",
+      "passed": true
+    },
+    {
+      "name": "Keyboard entry exposes the skip link",
+      "passed": true
+    }
+  ],
+  "scope": "Real Chrome and native HTTP projection on independent synthetic data; not a WeChat-device or cloud test",
+  "environment": "Independent loopback synthetic rehearsal"
+}

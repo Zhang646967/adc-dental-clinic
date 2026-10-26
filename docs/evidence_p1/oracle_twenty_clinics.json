@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "checks": {
+    "one_audit_per_write": true,
+    "all_clinic_deltas": true,
+    "distinct_actions": true,
+    "no_business_effects": true,
+    "changed_tables": [],
+    "stable_tables": 66,
+    "per_clinic": {
+      "2": true,
+      "4": true,
+      "6": true,
+      "11": true,
+      "13": true,
+      "14": true,
+      "16": true,
+      "17": true,
+      "10": true,
+      "1": true,
+      "15": true,
+      "5": true,
+      "19": true,
+      "20": true,
+      "9": true,
+      "8": true,
+      "3": true,
+      "18": true,
+      "7": true,
+      "12": true
+    }
+  },
+  "expected_writes": 1800,
+  "scope": "Each clinic revision and action delta90;1800 audit rows;all66 stable business tables unchanged.",
+  "clinics_with_90_unique_writes": 20
+}

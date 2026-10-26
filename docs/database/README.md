@@ -1,5 +1,11 @@
 # 当前数据库设计与ER图
 
+## P1 当前结构
+
+64份追加式应用迁移形成142张SQL表、388条外键及110项业务触发器；原62份迁移保持原字节。当前31幅实际ER在正式报告中可查，四个P1视图为[身份任职](er_profile_affiliation.svg)、[公开画像](er_public_profiles.svg)、[预约资源](er_profile_booking.svg)及[月度经营核算](er_monthly_management.svg)。[字段与约束](FIELD_CATALOG.md)、[外键目录](RELATIONSHIPS.md)、[DBML](schema.dbml)与结构快照同步。JSON来源快照是逻辑追踪，不伪造SQL关系。执行与安装范围见[P1证据](../evidence_p1/README.md)。
+
+下方为前阶段结构说明，保留日期与当时范围；当前关系以本节及最新结构快照为准。
+
 业务事实 → 真实表与主外键 → 分模块ER → 一致性规则 → 下一阶段优化。
 
 本目录解释独立PostgreSQL验证库中已实际迁移的表、键和基数。领域图说明业务责任，状态图说明生命周期；ER按真实元数据生成。当前C6.1B/C追加结算、资金分配、差异跟进及撤销四个视图，交付状态见[执行证据](../evidence_c61bc/README.md)。原C6.1A的115表[历史快照](../evidence_c61a/schema_snapshot.json)及其[安装核对](../evidence_c61a/mac-schema.json)保留原日期和范围。

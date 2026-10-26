@@ -1,0 +1,21 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad="0.3",nodesep="0.35",ranksep="0.55"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4ef",color="#497165",fontname="Noto Sans CJK SC",fontsize=18,margin="0.2,0.15"];
+ edge [fontname="Noto Sans CJK SC",fontsize=16,color="#497165"];
+ pending [label="成本待独立复核"];
+ approved [label="成本已确认\n原金额及来源固定"];
+ rejected [label="成本已退回\n保留原提交与决定"];
+ incomplete [label="月份待核算\n类别缺失、待审或来源变化"];
+ ready [label="类别完整或明确为零\n可核对管理利润与分摊"];
+ retained [label="留存月报版本 N\n来源快照与分摊不可变"];
+ pending -> approved [label="另一财务账号确认"];
+ pending -> rejected [label="另一财务账号退回"];
+ approved -> pending [label="新记录引用原成本修订\n原记录不改写"];
+ approved -> incomplete [label="加入当前期间的已确认部分"];
+ incomplete -> ready [label="财务逐类核实\n来源金额与覆盖依据一致"];
+ ready -> retained [label="核对快照后明确确认"];
+ ready -> incomplete [label="新增成本、费用来源变化"];
+ retained -> incomplete [label="后续账单、工时或成本变化\n旧报告保持，另核新版本"];
+ note [shape=note,fillcolor="#fff7e8",label="月份完整性是计算结果，不是伪造的账务状态。\n成本登记和分摊不产生付款；\n无工时公共成本保留未分摊，缺失不当作零。"];
+ retained -> note [style=dashed,arrowhead=none];
+}

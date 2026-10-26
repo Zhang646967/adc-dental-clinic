@@ -1,0 +1,19 @@
+digraph G {
+ graph [rankdir=TB, bgcolor="white", pad="0.3", nodesep="0.35", ranksep="0.5"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4ef",color="#497165",fontname="Noto Sans CJK SC",fontsize=18,margin="0.2,0.15"];
+ edge [fontname="Noto Sans CJK SC",fontsize=16,color="#497165"];
+ draft [label="本人可编辑草稿"];
+ submitted [label="不可变提交版本\n等待本店审核"];
+ returned [label="本店退回决定\n原公开版本保持"];
+ adopted [label="本店采用确切版本\n其他门店各自审核"];
+ hidden [label="本店撤回展示\n旧版本与决定保留"];
+ draft -> submitted [label="本人核对并提交"];
+ submitted -> returned [label="主管记录退回依据"];
+ returned -> draft [label="本人完善新草稿"];
+ submitted -> adopted [label="主管独立核对并发布"];
+ adopted -> draft [label="本人另起修改\n原发布保持"];
+ adopted -> hidden [label="主管明确撤回"];
+ hidden -> adopted [label="重新核对并采用"];
+ note [shape=note,fillcolor="#fff7e8",label="业务状态由版本指针与追加决定表达。\n介绍撤回不结束任职，不取消预约；\n专业授权与前台排班分别办理。"];
+ hidden -> note [style=dashed,arrowhead=none];
+}

@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "oom_events": 0,
+  "all_services_running": true,
+  "source": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "image": "sha256:b8b8fc087308ac04e633ce4c7ffa275f332e4736230b578b8c132269a5ac0285",
+  "resource_limits": {
+    "web": {
+      "id": "70ab56b9c33ddbc05180753c614f2a210abd590bd39e1179ecac8ffa4eef5e42",
+      "memory": 2147483648,
+      "cpus": 2000000000
+    },
+    "notification-worker": {
+      "id": "890b0731549b7f28cc3f4c2b6ca9429e6a10ea768ff6d41c9040b148ca9efe9a",
+      "memory": 268435456,
+      "cpus": 500000000
+    },
+    "gateway": {
+      "id": "a200c84ff4064fb19d27d418591427c2202009ea3ec5c9cce7fd16aaf3b89ba8",
+      "memory": 134217728,
+      "cpus": 250000000
+    },
+    "db": {
+      "id": "122e1fa7d44bb9d86a51dc543d78bad57691186bb8d20f62f952c6c2ac9a375c",
+      "memory": 1073741824,
+      "cpus": 2000000000
+    }
+  }
+}

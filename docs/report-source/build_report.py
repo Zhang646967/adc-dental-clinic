@@ -377,6 +377,14 @@ def build(folder,repo,output=None):
    page();heading('4.13.27 网站扫码票据与微信独立确认',3,False)
    figure(repo/'docs/database/er_wechat_web_login.png','图4-47 网站扫码票据数据库ER图',16,max_height=18)
    p(manifest['er_wechat_web_login']['note'],10.5)
+   for number,name in enumerate(['er_profile_affiliation','er_public_profiles','er_profile_booking','er_monthly_management'],28):
+    page();heading('4.13.'+str(number)+' '+manifest[name]['title'],3,False)
+    figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number+21)+' '+manifest[name]['title']+'数据库ER图',16,max_height=18)
+    p(manifest[name]['note'],10.5)
+  if item['heading'].startswith('4.24 '):
+   figure(repo/'docs/diagrams/profile_publication_state.png','图4-53 医师介绍与门店采用的状态',16,max_height=17)
+  if item['heading'].startswith('4.25 '):
+   figure(repo/'docs/diagrams/monthly_cost_state.png','图4-54 月度成本与留存月报的状态',16,max_height=17)
   if item['heading'].startswith('4.21 '):
    figure(repo/'docs/diagrams/wechat_web_login_state.png','图4-48 网站扫码登录的状态与责任',16,max_height=17)
    p('手机确认与浏览器领取是两个独立阶段。到期、刷新或权限变化均须重新核对；恢复时未完成票据失效，既有账号和病历保留。')

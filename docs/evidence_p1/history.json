@@ -1,0 +1,13 @@
+{
+  "retained_failed_candidate_checks": [
+    {
+      "commit": "6fd9fcf467e42b684c54307415fb59d5737a1cda",
+      "workflow": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40310585715",
+      "reason": "Candidate retained old UPDATE_MANIFEST checksums; verification stopped before PostgreSQL tests. Corrected committed-byte manifests in c11450a; final793a3ef fully passed."
+    }
+  ],
+  "build_retry": "One final local build encountered PyPI timeouts; normal TLS retry with the same dependencies succeeded. No substitute provider or dependency version was used.",
+  "historical_Windows_data_recovery": "UNRESOLVED",
+  "historical_incident_cause": "UNDETERMINED",
+  "historical_observation_gaps": "Preserved separately; P1 results do not rewrite prior UNKNOWN statuses."
+}

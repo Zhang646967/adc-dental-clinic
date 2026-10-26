@@ -1,0 +1,102 @@
+{
+  "project": "adc_rc1_d1ca834b5a20",
+  "scope": "Independent synthetic Mac Docker rehearsal, per-service caps; not independent cloud capacity.",
+  "started_utc": "2026-10-26T11:26:27.937050+00:00",
+  "arrival_mode": "waves",
+  "seconds": 1800,
+  "target_rps": 5,
+  "elapsed_seconds": 1800.006,
+  "wall_elapsed_seconds": 1800.012,
+  "max_offer_gap_seconds": 4.004,
+  "continuity_passed": true,
+  "actual_rps": 5.0,
+  "distinct_users": 20,
+  "clinics": 5,
+  "offered": 9000,
+  "dropped": [],
+  "max_in_flight": 20,
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.326,
+    "max_seconds": 0.7084
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.32,
+    "max_seconds": 0.7064
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.347,
+    "max_seconds": 0.7084
+  },
+  "by_role": {
+    "FRONT_DESK": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.325,
+      "max_seconds": 0.6781
+    },
+    "DENTIST": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.343,
+      "max_seconds": 0.7084
+    },
+    "MANAGER": {
+      "requests": 2250,
+      "failures": 0,
+      "p95_seconds": 0.328,
+      "max_seconds": 0.7064
+    },
+    "FINANCE": {
+      "requests": 1350,
+      "failures": 0,
+      "p95_seconds": 0.3,
+      "max_seconds": 0.6812
+    },
+    "HQ": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.305,
+      "max_seconds": 0.5432
+    }
+  },
+  "by_clinic": {
+    "1": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.317,
+      "max_seconds": 0.6483
+    },
+    "2": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.342,
+      "max_seconds": 0.7064
+    },
+    "3": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.298,
+      "max_seconds": 0.6781
+    },
+    "4": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.314,
+      "max_seconds": 0.4776
+    },
+    "5": {
+      "requests": 900,
+      "failures": 0,
+      "p95_seconds": 0.354,
+      "max_seconds": 0.6652
+    }
+  },
+  "http_passed": true,
+  "source_commit": "793a3ef61e19501d8f9a06e9a184293e49173645"
+}

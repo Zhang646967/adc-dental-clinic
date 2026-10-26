@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "origin": "https://waves-heath-jason-chamber.trycloudflare.com",
+  "checks": [
+    {
+      "role": "PATIENT",
+      "path": "/portal/",
+      "passed": true
+    },
+    {
+      "role": "FRONT_DESK",
+      "path": "/frontdesk/",
+      "passed": true
+    },
+    {
+      "role": "DENTIST",
+      "path": "/doctor/",
+      "passed": true
+    },
+    {
+      "role": "MANAGER",
+      "path": "/manager/",
+      "passed": true
+    },
+    {
+      "role": "HQ",
+      "path": "/headquarters/",
+      "passed": true
+    },
+    {
+      "role": "FINANCE",
+      "path": "/financial-workspace/",
+      "passed": true
+    },
+    {
+      "role": "SYSADMIN",
+      "path": "/technical/",
+      "passed": true
+    }
+  ]
+}

@@ -1,29 +1,27 @@
 {
   "passed": true,
-  "pdf_pages": 202,
-  "business_use_cases": 101,
+  "pdf_pages": 224,
+  "business_use_cases": 112,
   "support_case": "SF-01",
-  "tables": 120,
-  "images": 61,
-  "er_views": 27,
+  "tables": 131,
+  "images": 67,
+  "er_views": 31,
   "table_and_figure_numbering": "SEQUENTIAL",
-  "toc_entries": 80,
+  "toc_entries": 87,
   "all_page_text_bounds_checked": true,
   "all_fonts_embedded": true,
-  "old_contract_fields_retained": 425,
-  "docx_sha256": "fb736ce7ba4ebff9a0b9a13a668d903b6fbcfaf33fe490688df86b208addd438",
-  "pdf_sha256": "19050f9ea8d2324b5a9221280110233e5499d923ad9f54d52a6de0897e24676e",
+  "old_contract_fields_retained": 450,
+  "docx_sha256": "1349d58778e6338cf3c7564284494bd36f928c3ea9c4839c92528698ed4735ee",
+  "pdf_sha256": "e3e40d6d9efcb37dba4aab99032fa0cd65d528ea12caff0b134a18bc3f962c6c",
   "actual_schema": {
-    "tables": 131,
-    "foreign_keys": 356,
-    "triggers": 103
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110
   },
   "platform_acceptance": "NOT_RUN",
   "visual_review": {
-    "passed": true,
-    "all_page_overviews_reviewed": true,
-    "changed_diagrams_and_auth_use_cases_inspected": true,
-    "prior_contract_fields_retained": 425,
-    "final_polish": "Abstract, chapter ending and bibliography pagination; no development-host chapter"
+    "all_224_pages_reviewed_in_10_overviews": true,
+    "six_new_ER_and_state_figures_inspected_at_full_page": true,
+    "abstract_condensed_to_one_page": true
   }
 }

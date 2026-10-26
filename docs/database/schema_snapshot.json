@@ -169,6 +169,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_closed_correction()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF OLD.status<>'OPEN' THEN\n    RAISE EXCEPTION 'resolved corrections are immutable' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_cost_allocation",
+      "name": "cost_allocation_history",
+      "definition": "CREATE TRIGGER cost_allocation_history BEFORE DELETE OR UPDATE ON public.adc_cost_allocation FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
       "table": "adc_daily_close",
       "name": "daily_close_history",
       "definition": "CREATE TRIGGER daily_close_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_daily_close FOR EACH ROW EXECUTE FUNCTION adc_daily_close_guard()",
@@ -449,6 +456,27 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_maintenance_order_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE a adc_equipment_asset%ROWTYPE; source adc_equipment_event%ROWTYPE;\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'maintenance history cannot be deleted' USING ERRCODE='23514'; END IF;\n SELECT * INTO a FROM adc_equipment_asset WHERE id=NEW.asset_id FOR UPDATE;\n SELECT * INTO source FROM adc_equipment_event WHERE id=NEW.maintenance_event_id;\n IF source.asset_id IS DISTINCT FROM a.id OR source.kind IS DISTINCT FROM 'MAINTENANCE' OR btrim(NEW.issue)='' THEN\n  RAISE EXCEPTION 'maintenance requires its own stop-use source' USING ERRCODE='23514';\n END IF;\n IF TG_OP='INSERT' THEN\n  IF NEW.state<>'ASSIGNED' OR NEW.lock_version<>0 OR a.state<>'MAINTENANCE' OR a.lock_version<>source.sequence\n     OR NEW.due_on<(now() AT TIME ZONE 'Asia/Shanghai')::date THEN\n   RAISE EXCEPTION 'maintenance must start assigned against current stop-use source' USING ERRCODE='23514';\n  END IF;\n ELSE\n  IF OLD.state IN ('CLOSED','CANCELLED') OR NEW.lock_version<>OLD.lock_version+1\n     OR (NEW.asset_id,NEW.maintenance_event_id,NEW.issue,NEW.created_by_id,NEW.created_at)\n        IS DISTINCT FROM (OLD.asset_id,OLD.maintenance_event_id,OLD.issue,OLD.created_by_id,OLD.created_at)\n     OR NOT ((OLD.state='ASSIGNED' AND NEW.state IN ('ASSIGNED','IN_PROGRESS','CANCELLED'))\n       OR (OLD.state='IN_PROGRESS' AND NEW.state IN ('ASSIGNED','READY','CANCELLED'))\n       OR (OLD.state='READY' AND NEW.state IN ('IN_PROGRESS','CLOSED'))) THEN\n   RAISE EXCEPTION 'invalid maintenance transition or immutable origin' USING ERRCODE='23514';\n  END IF;\n  IF (NEW.assigned_to_id,NEW.due_on) IS DISTINCT FROM (OLD.assigned_to_id,OLD.due_on) AND\n     (NEW.state<>'ASSIGNED' OR NEW.due_on<(now() AT TIME ZONE 'Asia/Shanghai')::date) THEN\n   RAISE EXCEPTION 'assignment requires explicit new current deadline' USING ERRCODE='23514';\n  END IF;\n  IF NEW.state='CLOSED' AND ((NEW.performed_on,NEW.cost,NEW.next_service_due,NEW.completion_note,NEW.schedule_checked,NEW.submitted_by_id,NEW.submitted_at)\n       IS DISTINCT FROM (OLD.performed_on,OLD.cost,OLD.next_service_due,OLD.completion_note,OLD.schedule_checked,OLD.submitted_by_id,OLD.submitted_at)\n       OR btrim(NEW.review_reason)='' OR NEW.reviewed_at<NEW.submitted_at) THEN\n   RAISE EXCEPTION 'acceptance must retain submitted repair evidence' USING ERRCODE='23514';\n  END IF;\n END IF;\n IF NEW.state IN ('READY','CLOSED') AND\n    (NEW.performed_on<source.performed_on OR NEW.performed_on>(now() AT TIME ZONE 'Asia/Shanghai')::date\n     OR NEW.next_service_due<=NEW.performed_on OR btrim(NEW.completion_note)='' OR NEW.submitted_at<NEW.created_at) THEN\n  RAISE EXCEPTION 'invalid repair facts' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_management_action",
+      "name": "management_action_history",
+      "definition": "CREATE TRIGGER management_action_history BEFORE DELETE OR UPDATE ON public.adc_management_action FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "management_report_history",
+      "definition": "CREATE TRIGGER management_report_history BEFORE DELETE OR UPDATE ON public.adc_management_report FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_history",
+      "definition": "CREATE TRIGGER monthly_cost_history BEFORE DELETE OR UPDATE ON public.adc_monthly_cost FOR EACH ROW EXECUTE FUNCTION adc_monthly_cost_history()",
+      "function": "adc_monthly_cost_history",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_monthly_cost_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Monthly cost history is retained'; END IF;\n IF OLD.state<>'PENDING' OR NEW.state NOT IN ('APPROVED','REJECTED') OR\n    (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_note']) IS DISTINCT FROM\n    (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_note']) THEN\n   RAISE EXCEPTION 'Cost evidence is immutable; submit a reviewed correction';\n END IF;\n RETURN NEW;\nEND; $function$\n"
+    },
+    {
       "table": "adc_next_visit_instruction",
       "name": "next_visit_instruction_retained",
       "definition": "CREATE TRIGGER next_visit_instruction_retained BEFORE DELETE OR UPDATE ON public.adc_next_visit_instruction FOR EACH ROW EXECUTE FUNCTION adc_next_visit_instruction_guard()",
@@ -545,6 +573,27 @@
       "definition": "CREATE TRIGGER professional_source_history BEFORE DELETE OR UPDATE ON public.adc_professional_authorization FOR EACH ROW EXECUTE FUNCTION adc_clinical_source_guard()",
       "function": "adc_clinical_source_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_source_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF TG_OP = 'DELETE' OR (to_jsonb(OLD) - 'state' - 'revision') IS DISTINCT FROM\n      (to_jsonb(NEW) - 'state' - 'revision') THEN\n    RAISE EXCEPTION 'Clinical source evidence is immutable; create a new reviewed case';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "profile_action_history",
+      "definition": "CREATE TRIGGER profile_action_history BEFORE DELETE OR UPDATE ON public.adc_profile_action FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "profile_media_history",
+      "definition": "CREATE TRIGGER profile_media_history BEFORE DELETE OR UPDATE ON public.adc_profile_media FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "profile_version_history",
+      "definition": "CREATE TRIGGER profile_version_history BEFORE DELETE OR UPDATE ON public.adc_profile_version FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
+      "function": "adc_protect_audit",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
     },
     {
       "table": "adc_reception_case",
@@ -3040,6 +3089,67 @@
       "unique_together": []
     },
     {
+      "table": "adc_clinic_profile_policy",
+      "model": "registry.ClinicProfilePolicy",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "roster_enforced",
+          "column": "roster_enforced",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_clinical_authority_event",
       "model": "clinical.ClinicalAuthorityEvent",
       "app": "clinical",
@@ -5181,6 +5291,219 @@
       "unique_together": []
     },
     {
+      "table": "adc_cost_allocation",
+      "model": "finance.CostAllocation",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "report",
+          "column": "report_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_management_report",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "dentist",
+          "column": "dentist_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_dentist",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "shift_minutes",
+          "column": "shift_minutes",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "direct_cost",
+          "column": "direct_cost",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "shared_cost",
+          "column": "shared_cost",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "production",
+          "column": "production",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "contribution",
+          "column": "contribution",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_cost_month",
+      "model": "finance.CostMonth",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "year",
+          "column": "year",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "month",
+          "column": "month",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "coverage",
+          "column": "coverage",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_daily_close",
       "model": "finance.DailyClose",
       "app": "finance",
@@ -5510,6 +5833,145 @@
         {
           "name": "is_active",
           "column": "is_active",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "model": "registry.DentistClinicAffiliation",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "dentist",
+          "column": "dentist_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_dentist",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "starts_on",
+          "column": "starts_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "ends_on",
+          "column": "ends_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "published_version",
+          "column": "published_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_profile_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "listing_published",
+          "column": "listing_published",
           "type": "BooleanField",
           "db_type": "boolean",
           "pk": false,
@@ -10727,6 +11189,436 @@
       "unique_together": []
     },
     {
+      "table": "adc_management_action",
+      "model": "finance.ManagementAction",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "period",
+          "column": "period_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_cost_month",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "cost",
+          "column": "cost_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_monthly_cost",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "report",
+          "column": "report_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_management_report",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_management_report",
+      "model": "finance.ManagementReport",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "period",
+          "column": "period_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_cost_month",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "digest",
+          "column": "digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "confirmed_by",
+          "column": "confirmed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "confirmed_at",
+          "column": "confirmed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_monthly_cost",
+      "model": "finance.MonthlyCost",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "period",
+          "column": "period_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_cost_month",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "dentist",
+          "column": "dentist_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_dentist",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "category",
+          "column": "category",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "amount",
+          "column": "amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(160)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 160,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "equipment_event",
+          "column": "equipment_event_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_equipment_event",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "replaces",
+          "column": "replaces_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_monthly_cost",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_note",
+          "column": "review_note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_next_visit_instruction",
       "model": "clinical.NextVisitInstruction",
       "app": "clinical",
@@ -13740,6 +14632,484 @@
         {
           "name": "created_at",
           "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_profile_action",
+      "model": "registry.ProfileAction",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "profile",
+          "column": "profile_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_public_profile",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "affiliation",
+          "column": "affiliation_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_dentist_clinic_affiliation",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "version",
+          "column": "version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_profile_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_profile_media",
+      "model": "registry.ProfileMedia",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "profile",
+          "column": "profile_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_public_profile",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "image",
+          "column": "image",
+          "type": "BinaryField",
+          "db_type": "bytea",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "digest",
+          "column": "digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "width",
+          "column": "width",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "height",
+          "column": "height",
+          "type": "PositiveSmallIntegerField",
+          "db_type": "smallint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "alt_text",
+          "column": "alt_text",
+          "type": "CharField",
+          "db_type": "varchar(160)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 160,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "uploaded_by",
+          "column": "uploaded_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_profile_version",
+      "model": "registry.ProfileVersion",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "profile",
+          "column": "profile_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_public_profile",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "content",
+          "column": "content",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "submitted_by",
+          "column": "submitted_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "submitted_at",
+          "column": "submitted_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_public_profile",
+      "model": "registry.PublicProfile",
+      "app": "registry",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "dentist",
+          "column": "dentist_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_dentist",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "draft",
+          "column": "draft",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "submitted_version",
+          "column": "submitted_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_profile_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "published_version",
+          "column": "published_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_profile_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "updated_at",
+          "column": "updated_at",
           "type": "DateTimeField",
           "db_type": "timestamp with time zone",
           "pk": false,
@@ -18777,6 +20147,7 @@
     "adc_clinic",
     "adc_clinic_directory",
     "adc_clinic_directory_revision",
+    "adc_clinic_profile_policy",
     "adc_clinical_authority_event",
     "adc_clinical_authority_policy",
     "adc_clinical_draft",
@@ -18791,8 +20162,11 @@
     "adc_clinical_reviewer",
     "adc_coordination_task",
     "adc_correction_request",
+    "adc_cost_allocation",
+    "adc_cost_month",
     "adc_daily_close",
     "adc_dentist",
+    "adc_dentist_clinic_affiliation",
     "adc_dentist_qualification",
     "adc_dentist_quarter_cost",
     "adc_department",
@@ -18828,6 +20202,9 @@
     "adc_local_identity_code",
     "adc_maintenance_action",
     "adc_maintenance_order",
+    "adc_management_action",
+    "adc_management_report",
+    "adc_monthly_cost",
     "adc_next_visit_instruction",
     "adc_notification_outbox",
     "adc_patient",
@@ -18848,6 +20225,10 @@
     "adc_plan_version",
     "adc_portal_booking_receipt",
     "adc_professional_authorization",
+    "adc_profile_action",
+    "adc_profile_media",
+    "adc_profile_version",
+    "adc_public_profile",
     "adc_qualification",
     "adc_quarter",
     "adc_reception_case",
@@ -19576,6 +20957,30 @@
       "name": "directory_revision_unique",
       "kind": "u",
       "definition": "UNIQUE (directory_id, revision)"
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "name": "adc_clinic_profile_policy_clinic_id_6e3d8dc0_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "name": "adc_clinic_profile_policy_clinic_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id)"
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "name": "adc_clinic_profile_policy_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "name": "adc_clinic_profile_policy_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
     },
     {
       "table": "adc_clinical_authority_event",
@@ -20322,6 +21727,72 @@
       "definition": "CHECK (((status)::text = ANY ((ARRAY['OPEN'::character varying, 'APPLIED'::character varying, 'REJECTED'::character varying, 'WITHDRAWN'::character varying])::text[])))"
     },
     {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_dentist_id_932816a7_fk_adc_dentist_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_report_id_24e605be_fk_adc_manag",
+      "kind": "f",
+      "definition": "FOREIGN KEY (report_id) REFERENCES adc_management_report(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_shift_minutes_check",
+      "kind": "c",
+      "definition": "CHECK ((shift_minutes >= 0))"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "report_dentist_allocation_unique",
+      "kind": "u",
+      "definition": "UNIQUE (report_id, dentist_id)"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_clinic_id_cba48857_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_month_check",
+      "kind": "c",
+      "definition": "CHECK ((month >= 0))"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_year_check",
+      "kind": "c",
+      "definition": "CHECK ((year >= 0))"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "cost_month_range",
+      "kind": "c",
+      "definition": "CHECK (((month >= 1) AND (month <= 12) AND (year >= 1900) AND (year <= 9998)))"
+    },
+    {
       "table": "adc_daily_close",
       "name": "adc_daily_close_clinic_id_e236946f_fk_adc_clinic_id",
       "kind": "f",
@@ -20410,6 +21881,54 @@
       "name": "adc_dentist_pkey",
       "kind": "p",
       "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_a_clinic_id_683ad1d3_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_a_dentist_id_710bad25_fk_adc_denti",
+      "kind": "f",
+      "definition": "FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_a_published_version_id_2caf4920_fk_adc_profi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (published_version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_affiliation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_affiliation_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "affiliation_date_order",
+      "kind": "c",
+      "definition": "CHECK (((ends_on IS NULL) OR (ends_on >= starts_on)))"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "affiliation_state_valid",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['ACTIVE'::character varying, 'ENDED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "dentist_clinic_affiliation_unique",
+      "kind": "u",
+      "definition": "UNIQUE (dentist_id, clinic_id)"
     },
     {
       "table": "adc_dentist_qualification",
@@ -22122,6 +23641,138 @@
       "definition": "CHECK (((state)::text = ANY ((ARRAY['ASSIGNED'::character varying, 'IN_PROGRESS'::character varying, 'READY'::character varying, 'CLOSED'::character varying, 'CANCELLED'::character varying])::text[])))"
     },
     {
+      "table": "adc_management_action",
+      "name": "adc_management_actio_report_id_9e328ca7_fk_adc_manag",
+      "kind": "f",
+      "definition": "FOREIGN KEY (report_id) REFERENCES adc_management_report(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_actor_id_9951c76d_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_cost_id_3ed36afd_fk_adc_monthly_cost_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (cost_id) REFERENCES adc_monthly_cost(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_period_id_7df65535_fk_adc_cost_month_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (period_id) REFERENCES adc_cost_month(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_confirmed_by_id_888039ce_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (confirmed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_period_id_c6af5b17_fk_adc_cost_month_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (period_id) REFERENCES adc_cost_month(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "management_report_sequence",
+      "kind": "u",
+      "definition": "UNIQUE (period_id, sequence)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_dentist_id_5d7c80c0_fk_adc_dentist_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_equipment_event_id_97c0b3a3_fk_adc_equip",
+      "kind": "f",
+      "definition": "FOREIGN KEY (equipment_event_id) REFERENCES adc_equipment_event(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_period_id_7f47c420_fk_adc_cost_month_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (period_id) REFERENCES adc_cost_month(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_prepared_by_id_34091f54_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_replaces_id_6fed1645_fk_adc_monthly_cost_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (replaces_id) REFERENCES adc_monthly_cost(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_reviewed_by_id_efc21320_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_independent",
+      "kind": "c",
+      "definition": "CHECK ((NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_nonnegative",
+      "kind": "c",
+      "definition": "CHECK ((amount >= (0)::numeric))"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_review_metadata",
+      "kind": "c",
+      "definition": "CHECK ((((reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['APPROVED'::character varying, 'REJECTED'::character varying])::text[])))))"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying])::text[])))"
+    },
+    {
       "table": "adc_next_visit_instruction",
       "name": "adc_next_visit_instr_recorded_by_id_f5ae630d_fk_adc_user_",
       "kind": "f",
@@ -23098,6 +24749,162 @@
       "name": "professional_within_evidence",
       "kind": "c",
       "definition": "CHECK (((valid_until > valid_from) AND (valid_from >= credential_from) AND (valid_until <= credential_until)))"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_actor_id_b008933f_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_affiliation_id_8d06a108_fk_adc_denti",
+      "kind": "f",
+      "definition": "FOREIGN KEY (affiliation_id) REFERENCES adc_dentist_clinic_affiliation(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_clinic_id_f32fc922_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_profile_id_2c5f6e0a_fk_adc_public_profile_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (profile_id) REFERENCES adc_public_profile(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_version_id_b37b6287_fk_adc_profi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_height_check",
+      "kind": "c",
+      "definition": "CHECK ((height >= 0))"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_profile_id_06731de2_fk_adc_public_profile_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (profile_id) REFERENCES adc_public_profile(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_uploaded_by_id_36546aee_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (uploaded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_width_check",
+      "kind": "c",
+      "definition": "CHECK ((width >= 0))"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_profile_id_4912bf22_fk_adc_publi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (profile_id) REFERENCES adc_public_profile(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_submitted_by_id_a8104db2_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (submitted_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "profile_version_sequence",
+      "kind": "u",
+      "definition": "UNIQUE (profile_id, sequence)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_clinic_id_fbed5e98_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_clinic_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_dentist_id_6c660591_fk_adc_dentist_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_dentist_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (dentist_id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_published_version_id_30406f0a_fk_adc_profi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (published_version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_submitted_version_id_c5e28c60_fk_adc_profi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (submitted_version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "public_profile_one_subject",
+      "kind": "c",
+      "definition": "CHECK ((((clinic_id IS NULL) AND (dentist_id IS NOT NULL)) OR ((clinic_id IS NOT NULL) AND (dentist_id IS NULL))))"
     },
     {
       "table": "adc_qualification",
@@ -25093,6 +26900,16 @@
       "definition": "CREATE UNIQUE INDEX directory_revision_unique ON public.adc_clinic_directory_revision USING btree (directory_id, revision)"
     },
     {
+      "table": "adc_clinic_profile_policy",
+      "name": "adc_clinic_profile_policy_clinic_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_clinic_profile_policy_clinic_id_key ON public.adc_clinic_profile_policy USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "name": "adc_clinic_profile_policy_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_clinic_profile_policy_pkey ON public.adc_clinic_profile_policy USING btree (id)"
+    },
+    {
       "table": "adc_clinical_authority_event",
       "name": "adc_clinical_authority_event_actor_id_132e9bac",
       "definition": "CREATE INDEX adc_clinical_authority_event_actor_id_132e9bac ON public.adc_clinical_authority_event USING btree (actor_id)"
@@ -25493,6 +27310,46 @@
       "definition": "CREATE UNIQUE INDEX one_open_correction_per_visit ON public.adc_correction_request USING btree (visit_id) WHERE ((status)::text = 'OPEN'::text)"
     },
     {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_dentist_id_932816a7",
+      "definition": "CREATE INDEX adc_cost_allocation_dentist_id_932816a7 ON public.adc_cost_allocation USING btree (dentist_id)"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_cost_allocation_pkey ON public.adc_cost_allocation USING btree (id)"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "adc_cost_allocation_report_id_24e605be",
+      "definition": "CREATE INDEX adc_cost_allocation_report_id_24e605be ON public.adc_cost_allocation USING btree (report_id)"
+    },
+    {
+      "table": "adc_cost_allocation",
+      "name": "report_dentist_allocation_unique",
+      "definition": "CREATE UNIQUE INDEX report_dentist_allocation_unique ON public.adc_cost_allocation USING btree (report_id, dentist_id)"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_clinic_id_cba48857",
+      "definition": "CREATE INDEX adc_cost_month_clinic_id_cba48857 ON public.adc_cost_month USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "adc_cost_month_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_cost_month_pkey ON public.adc_cost_month USING btree (id)"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "clinic_cost_month_unique",
+      "definition": "CREATE UNIQUE INDEX clinic_cost_month_unique ON public.adc_cost_month USING btree (clinic_id, year, month) WHERE (clinic_id IS NOT NULL)"
+    },
+    {
+      "table": "adc_cost_month",
+      "name": "hq_cost_month_unique",
+      "definition": "CREATE UNIQUE INDEX hq_cost_month_unique ON public.adc_cost_month USING btree (year, month) WHERE (clinic_id IS NULL)"
+    },
+    {
       "table": "adc_daily_close",
       "name": "adc_daily_close_clinic_id_e236946f",
       "definition": "CREATE INDEX adc_daily_close_clinic_id_e236946f ON public.adc_daily_close USING btree (clinic_id)"
@@ -25551,6 +27408,31 @@
       "table": "adc_dentist",
       "name": "adc_dentist_pkey",
       "definition": "CREATE UNIQUE INDEX adc_dentist_pkey ON public.adc_dentist USING btree (id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_affiliation_clinic_id_683ad1d3",
+      "definition": "CREATE INDEX adc_dentist_clinic_affiliation_clinic_id_683ad1d3 ON public.adc_dentist_clinic_affiliation USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_affiliation_dentist_id_710bad25",
+      "definition": "CREATE INDEX adc_dentist_clinic_affiliation_dentist_id_710bad25 ON public.adc_dentist_clinic_affiliation USING btree (dentist_id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_affiliation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_dentist_clinic_affiliation_pkey ON public.adc_dentist_clinic_affiliation USING btree (id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "adc_dentist_clinic_affiliation_published_version_id_2caf4920",
+      "definition": "CREATE INDEX adc_dentist_clinic_affiliation_published_version_id_2caf4920 ON public.adc_dentist_clinic_affiliation USING btree (published_version_id)"
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "name": "dentist_clinic_affiliation_unique",
+      "definition": "CREATE UNIQUE INDEX dentist_clinic_affiliation_unique ON public.adc_dentist_clinic_affiliation USING btree (dentist_id, clinic_id)"
     },
     {
       "table": "adc_dentist_qualification",
@@ -26518,6 +28400,106 @@
       "definition": "CREATE INDEX maintenance_queue_idx ON public.adc_maintenance_order USING btree (state, due_on)"
     },
     {
+      "table": "adc_management_action",
+      "name": "adc_management_action_actor_id_9951c76d",
+      "definition": "CREATE INDEX adc_management_action_actor_id_9951c76d ON public.adc_management_action USING btree (actor_id)"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_cost_id_3ed36afd",
+      "definition": "CREATE INDEX adc_management_action_cost_id_3ed36afd ON public.adc_management_action USING btree (cost_id)"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_management_action_operation_id_key ON public.adc_management_action USING btree (operation_id)"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_period_id_7df65535",
+      "definition": "CREATE INDEX adc_management_action_period_id_7df65535 ON public.adc_management_action USING btree (period_id)"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_management_action_pkey ON public.adc_management_action USING btree (id)"
+    },
+    {
+      "table": "adc_management_action",
+      "name": "adc_management_action_report_id_9e328ca7",
+      "definition": "CREATE INDEX adc_management_action_report_id_9e328ca7 ON public.adc_management_action USING btree (report_id)"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_confirmed_by_id_888039ce",
+      "definition": "CREATE INDEX adc_management_report_confirmed_by_id_888039ce ON public.adc_management_report USING btree (confirmed_by_id)"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_period_id_c6af5b17",
+      "definition": "CREATE INDEX adc_management_report_period_id_c6af5b17 ON public.adc_management_report USING btree (period_id)"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "adc_management_report_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_management_report_pkey ON public.adc_management_report USING btree (id)"
+    },
+    {
+      "table": "adc_management_report",
+      "name": "management_report_sequence",
+      "definition": "CREATE UNIQUE INDEX management_report_sequence ON public.adc_management_report USING btree (period_id, sequence)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_dentist_id_5d7c80c0",
+      "definition": "CREATE INDEX adc_monthly_cost_dentist_id_5d7c80c0 ON public.adc_monthly_cost USING btree (dentist_id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_equipment_event_id_97c0b3a3",
+      "definition": "CREATE INDEX adc_monthly_cost_equipment_event_id_97c0b3a3 ON public.adc_monthly_cost USING btree (equipment_event_id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_period_id_7f47c420",
+      "definition": "CREATE INDEX adc_monthly_cost_period_id_7f47c420 ON public.adc_monthly_cost USING btree (period_id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_monthly_cost_pkey ON public.adc_monthly_cost USING btree (id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_prepared_by_id_34091f54",
+      "definition": "CREATE INDEX adc_monthly_cost_prepared_by_id_34091f54 ON public.adc_monthly_cost USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_replaces_id_6fed1645",
+      "definition": "CREATE INDEX adc_monthly_cost_replaces_id_6fed1645 ON public.adc_monthly_cost USING btree (replaces_id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "adc_monthly_cost_reviewed_by_id_efc21320",
+      "definition": "CREATE INDEX adc_monthly_cost_reviewed_by_id_efc21320 ON public.adc_monthly_cost USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_live_correction",
+      "definition": "CREATE UNIQUE INDEX monthly_cost_live_correction ON public.adc_monthly_cost USING btree (replaces_id) WHERE ((replaces_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_cost_source_unique",
+      "definition": "CREATE UNIQUE INDEX monthly_cost_source_unique ON public.adc_monthly_cost USING btree (period_id, reference) WHERE ((replaces_id IS NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_monthly_cost",
+      "name": "monthly_equipment_cost_once",
+      "definition": "CREATE UNIQUE INDEX monthly_equipment_cost_once ON public.adc_monthly_cost USING btree (equipment_event_id) WHERE ((equipment_event_id IS NOT NULL) AND (replaces_id IS NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[])))"
+    },
+    {
       "table": "adc_next_visit_instruction",
       "name": "adc_next_visit_instruction_pkey",
       "definition": "CREATE UNIQUE INDEX adc_next_visit_instruction_pkey ON public.adc_next_visit_instruction USING btree (id)"
@@ -27056,6 +29038,106 @@
       "table": "adc_professional_authorization",
       "name": "professional_action_lookup",
       "definition": "CREATE INDEX professional_action_lookup ON public.adc_professional_authorization USING btree (user_id, clinic_id, state)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_actor_id_b008933f",
+      "definition": "CREATE INDEX adc_profile_action_actor_id_b008933f ON public.adc_profile_action USING btree (actor_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_affiliation_id_8d06a108",
+      "definition": "CREATE INDEX adc_profile_action_affiliation_id_8d06a108 ON public.adc_profile_action USING btree (affiliation_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_clinic_id_f32fc922",
+      "definition": "CREATE INDEX adc_profile_action_clinic_id_f32fc922 ON public.adc_profile_action USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_profile_action_operation_id_key ON public.adc_profile_action USING btree (operation_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_profile_action_pkey ON public.adc_profile_action USING btree (id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_profile_id_2c5f6e0a",
+      "definition": "CREATE INDEX adc_profile_action_profile_id_2c5f6e0a ON public.adc_profile_action USING btree (profile_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "adc_profile_action_version_id_b37b6287",
+      "definition": "CREATE INDEX adc_profile_action_version_id_b37b6287 ON public.adc_profile_action USING btree (version_id)"
+    },
+    {
+      "table": "adc_profile_action",
+      "name": "profile_action_clinic_idx",
+      "definition": "CREATE INDEX profile_action_clinic_idx ON public.adc_profile_action USING btree (clinic_id, action, created_at)"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_profile_media_pkey ON public.adc_profile_media USING btree (id)"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_profile_id_06731de2",
+      "definition": "CREATE INDEX adc_profile_media_profile_id_06731de2 ON public.adc_profile_media USING btree (profile_id)"
+    },
+    {
+      "table": "adc_profile_media",
+      "name": "adc_profile_media_uploaded_by_id_36546aee",
+      "definition": "CREATE INDEX adc_profile_media_uploaded_by_id_36546aee ON public.adc_profile_media USING btree (uploaded_by_id)"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_profile_version_pkey ON public.adc_profile_version USING btree (id)"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_profile_id_4912bf22",
+      "definition": "CREATE INDEX adc_profile_version_profile_id_4912bf22 ON public.adc_profile_version USING btree (profile_id)"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "adc_profile_version_submitted_by_id_a8104db2",
+      "definition": "CREATE INDEX adc_profile_version_submitted_by_id_a8104db2 ON public.adc_profile_version USING btree (submitted_by_id)"
+    },
+    {
+      "table": "adc_profile_version",
+      "name": "profile_version_sequence",
+      "definition": "CREATE UNIQUE INDEX profile_version_sequence ON public.adc_profile_version USING btree (profile_id, sequence)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_clinic_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_public_profile_clinic_id_key ON public.adc_public_profile USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_dentist_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_public_profile_dentist_id_key ON public.adc_public_profile USING btree (dentist_id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_public_profile_pkey ON public.adc_public_profile USING btree (id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_published_version_id_30406f0a",
+      "definition": "CREATE INDEX adc_public_profile_published_version_id_30406f0a ON public.adc_public_profile USING btree (published_version_id)"
+    },
+    {
+      "table": "adc_public_profile",
+      "name": "adc_public_profile_submitted_version_id_c5e28c60",
+      "definition": "CREATE INDEX adc_public_profile_submitted_version_id_c5e28c60 ON public.adc_public_profile USING btree (submitted_version_id)"
     },
     {
       "table": "adc_qualification",
@@ -29041,6 +31123,30 @@
       "null": false
     },
     {
+      "table": "adc_clinic_profile_policy",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "column": "roster_enforced",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_clinic_profile_policy",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_clinical_authority_event",
       "column": "id",
       "db_type": "bigint",
@@ -29971,6 +32077,96 @@
       "null": true
     },
     {
+      "table": "adc_cost_allocation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "shift_minutes",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "direct_cost",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "shared_cost",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "production",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "contribution",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "basis",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "dentist_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_cost_allocation",
+      "column": "report_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_cost_month",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_cost_month",
+      "column": "year",
+      "db_type": "smallint",
+      "null": false
+    },
+    {
+      "table": "adc_cost_month",
+      "column": "month",
+      "db_type": "smallint",
+      "null": false
+    },
+    {
+      "table": "adc_cost_month",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_cost_month",
+      "column": "coverage",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_cost_month",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_daily_close",
       "column": "id",
       "db_type": "bigint",
@@ -30119,6 +32315,66 @@
       "column": "is_active",
       "db_type": "boolean",
       "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "kind",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "starts_on",
+      "db_type": "date",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "ends_on",
+      "db_type": "date",
+      "null": true
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "state",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "listing_published",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "dentist_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dentist_clinic_affiliation",
+      "column": "published_version_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_dentist_qualification",
@@ -32377,6 +34633,192 @@
       "null": true
     },
     {
+      "table": "adc_management_action",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "action",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "period_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_management_action",
+      "column": "report_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_management_action",
+      "column": "cost_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_management_report",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_management_report",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_management_report",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_management_report",
+      "column": "digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_management_report",
+      "column": "confirmed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_management_report",
+      "column": "confirmed_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_management_report",
+      "column": "period_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "category",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "reference",
+      "db_type": "character varying(160)",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "basis",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "state",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "review_note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "dentist_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "equipment_event_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "period_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "replaces_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_monthly_cost",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_next_visit_instruction",
       "column": "id",
       "db_type": "bigint",
@@ -33689,6 +36131,210 @@
       "column": "user_id",
       "db_type": "bigint",
       "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "action",
+      "db_type": "character varying(24)",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "note",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "affiliation_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_profile_action",
+      "column": "profile_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "image",
+      "db_type": "bytea",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "width",
+      "db_type": "smallint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "height",
+      "db_type": "smallint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "alt_text",
+      "db_type": "character varying(160)",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "uploaded_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_media",
+      "column": "profile_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_version",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_version",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_profile_version",
+      "column": "content",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_profile_version",
+      "column": "submitted_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_profile_version",
+      "column": "submitted_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_profile_version",
+      "column": "profile_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "draft",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "updated_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "dentist_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "published_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_public_profile",
+      "column": "submitted_version_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_qualification",
@@ -36045,6 +38691,10 @@
       "name": "0011_fundallocation_fundallocationline_fundissue_and_more"
     },
     {
+      "app": "finance",
+      "name": "0012_costmonth_managementreport_costallocation_and_more"
+    },
+    {
       "app": "insurance",
       "name": "0001_initial"
     },
@@ -36105,6 +38755,10 @@
       "name": "0002_clinicdirectory_clinicdirectoryrevision_and_more"
     },
     {
+      "app": "registry",
+      "name": "0003_clinicprofilepolicy_profileversion_and_more"
+    },
+    {
       "app": "scheduling",
       "name": "0001_initial"
     },
@@ -36149,7 +38803,7 @@
       "name": "0003_workspacecontext_login_channel_and_more"
     }
   ],
-  "observed_on": "2026-10-25",
-  "application_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
-  "observed_scope": "Independent PostgreSQL17 database with62 application migrations, mounted exact WX1 source; structure only, no patient rows exported."
+  "observed_on": "2026-10-26",
+  "application_commit": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "observed_scope": "Read-only metadata from the exact P1 image on independent PostgreSQL17 with64application migrations. No business rows or private configuration exported."
 }

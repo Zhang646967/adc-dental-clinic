@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "source": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "original_business_groups_checked": 128,
+  "original_clinical_and_cash_rows_unchanged": true,
+  "original_passwords_unchanged": true,
+  "explicit_existing_configuration_changes": [
+    {
+      "model": "scheduling.ResourcePolicy",
+      "old_rows_changed": 20
+    }
+  ],
+  "added_configuration_rows": [
+    {
+      "model": "auth.Permission",
+      "rows": 44
+    },
+    {
+      "model": "contenttypes.ContentType",
+      "rows": 11
+    },
+    {
+      "model": "accounts.UserAccount",
+      "rows": 61
+    },
+    {
+      "model": "accounts.RoleAssignment",
+      "rows": 77
+    },
+    {
+      "model": "registry.Dentist",
+      "rows": 60
+    },
+    {
+      "model": "scheduling.AvailabilitySlot",
+      "rows": 854
+    },
+    {
+      "model": "scheduling.Department",
+      "rows": 20
+    },
+    {
+      "model": "scheduling.DepartmentHours",
+      "rows": 140
+    },
+    {
+      "model": "scheduling.TreatmentRoom",
+      "rows": 20
+    },
+    {
+      "model": "scheduling.BookingService_dentists",
+      "rows": 244
+    },
+    {
+      "model": "scheduling.BookingService",
+      "rows": 80
+    },
+    {
+      "model": "scheduling.ServiceRequirement",
+      "rows": 40
+    },
+    {
+      "model": "scheduling.ServicePresentation",
+      "rows": 80
+    },
+    {
+      "model": "scheduling.ResourceBinding",
+      "rows": 80
+    },
+    {
+      "model": "scheduling.ResourceAction",
+      "rows": 440
+    },
+    {
+      "model": "care.AuditEvent",
+      "rows": 2664
+    },
+    {
+      "model": "equipment.EquipmentAsset",
+      "rows": 80
+    },
+    {
+      "model": "equipment.EquipmentEvent",
+      "rows": 80
+    },
+    {
+      "model": "clinical.ClinicalReviewerAppointment",
+      "rows": 40
+    },
+    {
+      "model": "clinical.ProfessionalAuthorization",
+      "rows": 244
+    },
+    {
+      "model": "clinical.ClinicalAuthorityEvent",
+      "rows": 528
+    }
+  ],
+  "published_clinics": 20,
+  "public_doctors": 60,
+  "images": 80,
+  "profile_versions": 80,
+  "monthly_costs": 61,
+  "retained_reports": 21,
+  "cost_allocations": 65
+}

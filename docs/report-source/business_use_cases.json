@@ -1977,5 +1977,335 @@
       "portal/web_login_views.py",
       "tests/test_wx1.py"
     ]
+  },
+  {
+    "id": "SU-102",
+    "name": "完善并提交本人医师介绍",
+    "actor": "医师",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "职称申报、方向、简介、经历来源、从业时间、语言及头像。",
+    "flow": [
+      "编辑本人草稿并保存。",
+      "核对本次内容与图片。",
+      "明确提交不可变版本，交门店审核。"
+    ],
+    "alternatives": [
+      "草稿被更新：重新读取。",
+      "来源或图片不符：保留原发布。"
+    ],
+    "result": "形成本人可追踪的提交版本。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "草稿和提交不直接覆盖公开版本。",
+    "acceptance": [
+      "P1-PROFILE-01：草稿、重复提交、撤权和图片归属。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-103",
+    "name": "审核发布或退回本店医师介绍",
+    "actor": "门店主管",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "任职关系、医师确切提交版本及审核意见。",
+    "flow": [
+      "查看本店医师提交和内部来源。",
+      "明确发布、退回或撤回。",
+      "核对版本并确认，保留决定。"
+    ],
+    "alternatives": [
+      "新提交使旧预览失效：重核版本。",
+      "本人变换角色申请自审：拒绝。"
+    ],
+    "result": "本店采用明确版本，旧展示及决定留存。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "各店独立采用；公开审核不授予专业资格。",
+    "acceptance": [
+      "P1-PROFILE-02：退回、撤回、跨店及自审拒绝。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-104",
+    "name": "维护常驻轮诊及结束任职",
+    "actor": "主管、前台",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "医师、门店、种类、有效期和原承诺。",
+    "flow": [
+      "登记统一医师的接诊关系。",
+      "核对原出诊、预约与邀约后启用控制。",
+      "结束时列出原承诺，由前台协调。"
+    ],
+    "alternatives": [
+      "原承诺不在有效范围：先核对，不能静默启用。",
+      "已有患者预约：保留原约，不能自动取消。"
+    ],
+    "result": "新出诊及成约受有效任职约束，历史保持。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "前台排班与专业授权仍独立；撤回介绍不结束任职。",
+    "acceptance": [
+      "P1-ROSTER：多店、结束与成约并发、原约保护。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-105",
+    "name": "完善并发布门店画像",
+    "actor": "本店主管",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "特色、简介、交通、停车、无障碍、费用说明及最多三图。",
+    "flow": [
+      "维护门店草稿并核对图片。",
+      "提交明确版本并发布。",
+      "读取营业、服务、设备与医保的现有配置。"
+    ],
+    "alternatives": [
+      "资料未核实：保留未知。",
+      "新草稿尚未发布：患者仍见旧版。"
+    ],
+    "result": "提供一致且可追踪的门店公开资料。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "电话地址各呈现一次；资料不替代真实机构资格。",
+    "acceptance": [
+      "P1-CLINIC：同店维护、历史、公开字段与恢复。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-106",
+    "name": "先选门店并比较团队",
+    "actor": "匿名患者、患者账号使用者",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "城市、区域、服务、线上预约条件或主动定位。",
+    "flow": [
+      "筛选门店并按已授权位置由近到远查看。",
+      "查看特色、团队、近期出诊和交通条件。",
+      "选择门店、医师及实际服务。"
+    ],
+    "alternatives": [
+      "拒绝定位：继续城市筛选。",
+      "无合适时间：明确选其他医师、同城门店或候补。"
+    ],
+    "result": "形成清晰的服务与医师意向。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "浏览不占资源、不访问病历。",
+    "acceptance": [
+      "P1-DISCOVERY：二十店筛选、两端投影及窄屏。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-107",
+    "name": "先选医师并核对接诊门店",
+    "actor": "匿名患者、患者账号使用者",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "医师方向、简介、语言及接诊日期。",
+    "flow": [
+      "查看医师目录与详情。",
+      "核对各任职门店的服务和日期。",
+      "明确选择同一医师在某店的服务。"
+    ],
+    "alternatives": [
+      "任职已结束或介绍撤回：刷新并另选。",
+      "多个门店：不默认替患者决定门店。"
+    ],
+    "result": "保留明确医师和门店的预约意向。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "统一身份不重复计为多个医师；资格来源未核验不显示认证。",
+    "acceptance": [
+      "P1-DOCTOR：轮诊身份、适配服务与失效选择。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-108",
+    "name": "在登录及患者切换后继续选医",
+    "actor": "患者本人、已核验代约人",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "登录前医师服务意向、账号会话及就诊人。",
+    "flow": [
+      "完成患者通道登录。",
+      "选择本人或有权限的就诊人。",
+      "重核医师、服务、出诊及物理资源后明确预约。"
+    ],
+    "alternatives": [
+      "切换就诊人：重新核对授权和确认。",
+      "无资源或撤权：保留原事实，返回可继续办理的选择。"
+    ],
+    "result": "形成唯一授权预约，可继续原改期及候补合同。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "意向不是授权，旧预览不绕过患者或资源检查。",
+    "acceptance": [
+      "P1-HANDOFF：登录延续、改期、候补、代约及重复确认。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-109",
+    "name": "登记月度直接及公共成本",
+    "actor": "门店主管、总部财务",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "年月、类别、金额、归属、来源编号及依据。",
+    "flow": [
+      "选择本店或总部期间。",
+      "核对直接归属医师或公共成本。",
+      "引用原维修来源或登记其他来源并提交。"
+    ],
+    "alternatives": [
+      "设备采购冒充维修、重复来源或跨店：拒绝。",
+      "缺失费用：保留待核算，不能自动为零。"
+    ],
+    "result": "形成待独立复核成本，不产生付款。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "原季度成本不自动导入，来源更正走修订。",
+    "acceptance": [
+      "P1-COST-01：来源唯一、采购区分与无资金副作用。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-110",
+    "name": "独立复核成本及核对完整性",
+    "actor": "财务、另一总部财务",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "待审成本、独立依据和各类完整／零费用结论。",
+    "flow": [
+      "核对来源、金额、期间及提交人。",
+      "确认或退回，保留独立决定。",
+      "逐类别确认完整或确实为零。"
+    ],
+    "alternatives": [
+      "提交人自行换角色审核：拒绝。",
+      "待审、新成本或来源变化：完整性待重核。"
+    ],
+    "result": "可区分已确认部分、缺失与明确零费用。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "全部类别完整且无待审和来源差异才给出利润。",
+    "acceptance": [
+      "P1-COST-02：独立复核、缺失零值、撤权及并发。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-111",
+    "name": "按月分摊公共成本并留存经营报告",
+    "actor": "财务；主管、医师与总部按范围查看",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "当前账单、出诊分钟、已确认成本和完整性。",
+    "flow": [
+      "按诊疗完成期计算产值，资金业务日计算回款。",
+      "按工时分摊公共成本并守恒分币尾差。",
+      "核对范围和差异后确认报告版本。"
+    ],
+    "alternatives": [
+      "无工时：保留门店未分摊。",
+      "来源变化或不完整：先补充核对，不确认正式利润。"
+    ],
+    "result": "保留可独立重算的月报及医师分摊依据。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "净回款不等于现金余额，管理贡献不自动发工资或报税。",
+    "acceptance": [
+      "P1-MONTH：跨月、多版本、零收入、零工时和尾差。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
+  },
+  {
+    "id": "SU-112",
+    "name": "修订费用并比较月报历史",
+    "actor": "主管、独立财务",
+    "status": "已实现；课程合成业务验证与真实运营资格分别评价。",
+    "precondition": "当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。",
+    "inputs": "原成本或设备费用来源、新金额与更正依据。",
+    "flow": [
+      "保留原成本并提交修订引用。",
+      "独立复核后重新核对类别完整性。",
+      "形成新月报并查看与旧版差异。"
+    ],
+    "alternatives": [
+      "同一来源跨月或并发重用：仅一份有效结果。",
+      "旧月报预览：刷新来源后再确认。"
+    ],
+    "result": "当前核算采用已确认新版本，原报告和资金仍保留。",
+    "minimum_guarantee": "失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。",
+    "rules": "更正不覆写金额、不制造平衡资金、不自动重算旧报告。",
+    "acceptance": [
+      "P1-REVISION：设备来源修订、旧报保留、并发重复。"
+    ],
+    "source": [
+      "registry/profile_services.py",
+      "registry/profile_projection.py",
+      "finance/management_services.py",
+      "finance/management_selectors.py",
+      "tests/test_profiles_management.py"
+    ]
   }
 ]

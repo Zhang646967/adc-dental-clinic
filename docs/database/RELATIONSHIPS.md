@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-356条实际SQL外键，其中355条对应ORM单列关系，1条为账单同次就诊复合外键。
+388条实际SQL外键，其中387条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -42,6 +42,7 @@
 | adc_clinic_directory | clinic_id | adc_clinic | id |
 | adc_clinic_directory_revision | directory_id | adc_clinic_directory | id |
 | adc_clinic_directory_revision | actor_id | adc_user | id |
+| adc_clinic_profile_policy | clinic_id | adc_clinic | id |
 | adc_clinical_authority_event | authorization_id | adc_professional_authorization | id |
 | adc_clinical_authority_event | clinic_id | adc_clinic | id |
 | adc_clinical_authority_event | reviewer_id | adc_clinical_reviewer | id |
@@ -97,10 +98,16 @@
 | adc_correction_request | requester_id | adc_user | id |
 | adc_correction_request | reviewer_id | adc_user | id |
 | adc_correction_request | visit_id | adc_visit | id |
+| adc_cost_allocation | dentist_id | adc_dentist | id |
+| adc_cost_allocation | report_id | adc_management_report | id |
+| adc_cost_month | clinic_id | adc_clinic | id |
 | adc_daily_close | clinic_id | adc_clinic | id |
 | adc_daily_close | prepared_by_id | adc_user | id |
 | adc_daily_close | previous_id | adc_daily_close | id |
 | adc_daily_close | reviewed_by_id | adc_user | id |
+| adc_dentist_clinic_affiliation | clinic_id | adc_clinic | id |
+| adc_dentist_clinic_affiliation | dentist_id | adc_dentist | id |
+| adc_dentist_clinic_affiliation | published_version_id | adc_profile_version | id |
 | adc_dentist_qualification | qualification_id | adc_qualification | id |
 | adc_dentist_qualification | dentist_id | adc_dentist | id |
 | adc_dentist_quarter_cost | confirmed_by_id | adc_user | id |
@@ -199,6 +206,18 @@
 | adc_maintenance_order | created_by_id | adc_user | id |
 | adc_maintenance_order | reviewed_by_id | adc_user | id |
 | adc_maintenance_order | submitted_by_id | adc_user | id |
+| adc_management_action | report_id | adc_management_report | id |
+| adc_management_action | actor_id | adc_user | id |
+| adc_management_action | cost_id | adc_monthly_cost | id |
+| adc_management_action | period_id | adc_cost_month | id |
+| adc_management_report | confirmed_by_id | adc_user | id |
+| adc_management_report | period_id | adc_cost_month | id |
+| adc_monthly_cost | dentist_id | adc_dentist | id |
+| adc_monthly_cost | equipment_event_id | adc_equipment_event | id |
+| adc_monthly_cost | period_id | adc_cost_month | id |
+| adc_monthly_cost | prepared_by_id | adc_user | id |
+| adc_monthly_cost | replaces_id | adc_monthly_cost | id |
+| adc_monthly_cost | reviewed_by_id | adc_user | id |
 | adc_next_visit_instruction | recorded_by_id | adc_user | id |
 | adc_next_visit_instruction | service_id | adc_booking_service | id |
 | adc_next_visit_instruction | source_record_id | adc_clinical_record_version | id |
@@ -264,6 +283,19 @@
 | adc_professional_authorization | created_by_id | adc_user | id |
 | adc_professional_authorization | service_id | adc_booking_service | id |
 | adc_professional_authorization | user_id | adc_user | id |
+| adc_profile_action | actor_id | adc_user | id |
+| adc_profile_action | affiliation_id | adc_dentist_clinic_affiliation | id |
+| adc_profile_action | clinic_id | adc_clinic | id |
+| adc_profile_action | profile_id | adc_public_profile | id |
+| adc_profile_action | version_id | adc_profile_version | id |
+| adc_profile_media | profile_id | adc_public_profile | id |
+| adc_profile_media | uploaded_by_id | adc_user | id |
+| adc_profile_version | profile_id | adc_public_profile | id |
+| adc_profile_version | submitted_by_id | adc_user | id |
+| adc_public_profile | clinic_id | adc_clinic | id |
+| adc_public_profile | dentist_id | adc_dentist | id |
+| adc_public_profile | published_version_id | adc_profile_version | id |
+| adc_public_profile | submitted_version_id | adc_profile_version | id |
 | adc_quarter | roster_confirmed_by_id | adc_user | id |
 | adc_reception_case | clinic_id | adc_clinic | id |
 | adc_reception_case | created_by_id | adc_user | id |

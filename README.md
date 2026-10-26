@@ -4,7 +4,9 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**WX1本地交付：** 小程序微信换码、网站小程序扫码确认、CloudBase短信与账号关联已实现并通过隔离验证；准确CI为1,122项规则／2,005项PG。原本机及[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新。**真实微信、真机扫码与实际短信仍待AppSecret及免费平台条件补齐。** [使用与联调](docs/WX1_GUIDE.md) · [分项交付证据](docs/evidence_wx1/README.md)。课程报告已更新为202页、101项业务用例和27幅实际ER；文件名不变。
+**P1已交付：医师与门店画像、二十店选诊和月度经营核算。** 八城二十店、60名新增医师、版本审核及轮诊、网站／小程序选医预约、独立成本复核与工时分摊均可试用；排班继续由前台负责。准确CI通过1,127项规则／2,071项PG，两轮30分钟容量及142表加密独立恢复通过。原本机与[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新，原业务与密码保留。[试用路线](docs/P1_TRIAL_GUIDE.md) · [业务设计](docs/P1_PROFILE_MANAGEMENT.md) · [完整证据](docs/evidence_p1/README.md)。正式报告224页、112项业务用例、31幅实际ER，文件名不变。真实微信／短信与独立云端继续单独待验收。
+
+**WX1历史本地交付：** 小程序微信换码、网站小程序扫码确认、CloudBase短信与账号关联已实现并通过隔离验证；准确CI为1,122项规则／2,005项PG。原本机及[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新。**真实微信、真机扫码与实际短信仍待AppSecret及免费平台条件补齐。** [使用与联调](docs/WX1_GUIDE.md) · [分项交付证据](docs/evidence_wx1/README.md)。课程报告已更新为202页、101项业务用例和27幅实际ER；文件名不变。
 
 **C6.1B/C 已在本机交付：原账单模拟结算、基金到账分配、差异跟进和撤销。** 准确CI、1,935项PostgreSQL回归、359项浏览器检查、五店二十账号三十分钟容量及129表加密恢复通过，原数据和70份配置保留。[完整证据](docs/evidence_c61bc/README.md)。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
 
@@ -57,7 +59,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-正式报告共193页，包含96项业务用例及1项共享核验、115张表和59幅图。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
+B1.4时点的历史报告共193页，包含96项业务用例及1项共享核验、115张表和59幅图；当前正式报告以顶部P1入口为准。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

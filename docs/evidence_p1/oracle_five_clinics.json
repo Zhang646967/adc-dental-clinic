@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "assertions": 1063,
+  "unchanged_models": 134,
+  "max_business_gap_seconds": 4.125617,
+  "patients_created": 900,
+  "note_saves": 900,
+  "cash_total_cny": "50000.00",
+  "bill_total_cny": "50000.00"
+}

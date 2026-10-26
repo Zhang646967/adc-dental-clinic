@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "conclusion": "success",
+  "tested_source_commit": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "exact_checkout_recorded_in_log": true,
+  "rules": 1127,
+  "postgresql_tests": 2071,
+  "native_source_checks": 255,
+  "run_id": 40312653209,
+  "job_id": 121537396293,
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40312653209",
+  "selected_log": [
+    "2026-10-26T11:07:28.0392075Z ADC_TESTED_SOURCE=793a3ef61e19501d8f9a06e9a184293e49173645",
+    "2026-10-26T11:08:13.8623295Z verify-1     | Ran 1127 tests in 18.868s",
+    "2026-10-26T11:08:13.8623762Z verify-1     | OK",
+    "2026-10-26T11:42:17.9404668Z verify-1     | Ran 2071 tests in 1969.399s",
+    "2026-10-26T11:42:17.9405293Z verify-1     | OK",
+    "2026-10-26T11:42:23.6266890Z Verification exit: 0; cleanup exit: 0"
+  ]
+}

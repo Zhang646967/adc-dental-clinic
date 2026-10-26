@@ -1,0 +1,101 @@
+{
+  "status": "P1_LOCAL_AND_SYNTHETIC_TEACHER_DELIVERED",
+  "application_commit": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40312653209",
+  "image": "sha256:b8b8fc087308ac04e633ce4c7ffa275f332e4736230b578b8c132269a5ac0285",
+  "rules": 1127,
+  "postgresql_tests": 2071,
+  "native_checks": 255,
+  "native_P1_handler_cases": 12,
+  "native_offline_pages": 23,
+  "isolated_browser_checks": 36,
+  "installed_browser_checks": {
+    "mac": 27,
+    "teacher": 27
+  },
+  "installed_seven_role_logins": {
+    "mac": 7,
+    "teacher": 7
+  },
+  "capacity": {
+    "five_clinics": {
+      "concurrent_accounts": 20,
+      "seconds": 1800,
+      "requests": 9000,
+      "writes": 1800,
+      "p95_seconds": 0.326,
+      "passed": true
+    },
+    "twenty_clinics": {
+      "concurrent_accounts": 20,
+      "seconds": 1800,
+      "requests": 9000,
+      "writes": 1800,
+      "p95_seconds": 0.753,
+      "passed": true
+    }
+  },
+  "recovery": {
+    "tables": 142,
+    "rows": 11962,
+    "enabled_triggers": 110,
+    "seconds_after_empty_database_ready": 15.266,
+    "bytes_and_history_equal": true
+  },
+  "schema": {
+    "prior_migrations_unchanged": 62,
+    "migrations": 64,
+    "tables": 142,
+    "foreign_keys": 388,
+    "enabled_triggers": 110,
+    "ER_views": 31
+  },
+  "report": {
+    "pages": 224,
+    "business_use_cases": 112,
+    "support_case": "SF-01",
+    "tables": 131,
+    "figures": 67,
+    "fixed_filenames": true
+  },
+  "installations": {
+    "original_local": "http://127.0.0.1:18000",
+    "synthetic_teacher": "https://waves-heath-jason-chamber.trycloudflare.com",
+    "same_verified_application_image": true,
+    "original_business_groups_preserved": 128,
+    "old_passwords_preserved": true,
+    "original_private_configurations_preserved": 70,
+    "original_database_volume_and_RC_tag_preserved": true
+  },
+  "synthetic_configuration_each": {
+    "published_clinics": 20,
+    "public_doctors": 60,
+    "images": 80,
+    "profile_versions": 80,
+    "new_services": 80,
+    "new_chairs": 40,
+    "new_equipment_assets": 80,
+    "new_published_shifts": 854,
+    "prepared_days": 14,
+    "monthly_costs": 61,
+    "retained_reports": 21,
+    "cost_allocations": 65
+  },
+  "remaining": {
+    "real_wechat": "NOT_RUN_PLATFORM_CONFIGURATION_PENDING",
+    "real_sms": "NOT_RUN_FREE_PLATFORM_CONDITIONS_PENDING",
+    "independent_cloud": "SERVER_NOT_PURCHASED",
+    "mainland_without_proxy": "NOT_VERIFIED",
+    "continuous_24_hour_observation": "NOT_ESTABLISHED",
+    "historical_windows_data_recovery": "UNRESOLVED"
+  },
+  "limitations": [
+    "Synthetic course identities, services, addresses and qualifications are not real medical credentials.",
+    "Teacher HTTPS still depends on this Mac and the temporary tunnel.",
+    "Native handler/offline compiler checks do not establish real WeChat or device acceptance.",
+    "Load results are bounded per-service Docker workloads, not an independent 2GB cloud qualification.",
+    "Cash balance remains unavailable without a verified opening balance; net receipts are not a balance.",
+    "Restore uses same-version migration then data restore; arbitrary equivalent-DDL comparison remains limited.",
+    "Historical UNKNOWN/UNDETERMINED events remain retained; fresh health is not 24-hour evidence."
+  ]
+}

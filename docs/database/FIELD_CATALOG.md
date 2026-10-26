@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-25。本目录列出130张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-26。本目录列出141张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -646,6 +646,32 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `directory_revision_history`：`CREATE TRIGGER directory_revision_history BEFORE DELETE OR UPDATE ON public.adc_clinic_directory_revision FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
 
+## adc_clinic_profile_policy
+
+模型：`registry.ClinicProfilePolicy`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | UK / FK | 否 | `adc_clinic.id` |
+| roster_enforced | boolean | — | 否 | — |
+| revision | integer | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinic_profile_policy_clinic_id_6e3d8dc0_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinic_profile_policy_clinic_id_key`：`UNIQUE (clinic_id)`。
+- `adc_clinic_profile_policy_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinic_profile_policy_revision_check`：`CHECK ((revision >= 0))`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinic_profile_policy_clinic_id_key`：`CREATE UNIQUE INDEX adc_clinic_profile_policy_clinic_id_key ON public.adc_clinic_profile_policy USING btree (clinic_id)`。
+- `adc_clinic_profile_policy_pkey`：`CREATE UNIQUE INDEX adc_clinic_profile_policy_pkey ON public.adc_clinic_profile_policy USING btree (id)`。
+
+跨表及历史触发器：
+
+
 ## adc_clinical_authority_event
 
 模型：`clinical.ClinicalAuthorityEvent`。
@@ -1244,6 +1270,73 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `correction_history_guard`：`CREATE TRIGGER correction_history_guard BEFORE DELETE OR UPDATE ON public.adc_correction_request FOR EACH ROW EXECUTE FUNCTION adc_protect_closed_correction()`。
 
+## adc_cost_allocation
+
+模型：`finance.CostAllocation`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| report_id | bigint | FK | 否 | `adc_management_report.id` |
+| dentist_id | bigint | FK | 否 | `adc_dentist.id` |
+| shift_minutes | integer | — | 否 | — |
+| direct_cost | numeric(16,2) | — | 否 | — |
+| shared_cost | numeric(16,2) | — | 否 | — |
+| production | numeric(16,2) | — | 否 | — |
+| contribution | numeric(16,2) | — | 否 | — |
+| basis | jsonb | — | 否 | — |
+
+数据库约束：
+
+- `adc_cost_allocation_dentist_id_932816a7_fk_adc_dentist_id`：`FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_cost_allocation_pkey`：`PRIMARY KEY (id)`。
+- `adc_cost_allocation_report_id_24e605be_fk_adc_manag`：`FOREIGN KEY (report_id) REFERENCES adc_management_report(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_cost_allocation_shift_minutes_check`：`CHECK ((shift_minutes >= 0))`。
+- `report_dentist_allocation_unique`：`UNIQUE (report_id, dentist_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_cost_allocation_dentist_id_932816a7`：`CREATE INDEX adc_cost_allocation_dentist_id_932816a7 ON public.adc_cost_allocation USING btree (dentist_id)`。
+- `adc_cost_allocation_pkey`：`CREATE UNIQUE INDEX adc_cost_allocation_pkey ON public.adc_cost_allocation USING btree (id)`。
+- `adc_cost_allocation_report_id_24e605be`：`CREATE INDEX adc_cost_allocation_report_id_24e605be ON public.adc_cost_allocation USING btree (report_id)`。
+- `report_dentist_allocation_unique`：`CREATE UNIQUE INDEX report_dentist_allocation_unique ON public.adc_cost_allocation USING btree (report_id, dentist_id)`。
+
+跨表及历史触发器：
+
+- `cost_allocation_history`：`CREATE TRIGGER cost_allocation_history BEFORE DELETE OR UPDATE ON public.adc_cost_allocation FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_cost_month
+
+模型：`finance.CostMonth`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | FK | 是 | `adc_clinic.id` |
+| year | smallint | — | 否 | — |
+| month | smallint | — | 否 | — |
+| revision | integer | — | 否 | — |
+| coverage | jsonb | — | 否 | — |
+
+数据库约束：
+
+- `adc_cost_month_clinic_id_cba48857_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_cost_month_month_check`：`CHECK ((month >= 0))`。
+- `adc_cost_month_pkey`：`PRIMARY KEY (id)`。
+- `adc_cost_month_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_cost_month_year_check`：`CHECK ((year >= 0))`。
+- `cost_month_range`：`CHECK (((month >= 1) AND (month <= 12) AND (year >= 1900) AND (year <= 9998)))`。
+
+索引（含条件唯一索引）：
+
+- `adc_cost_month_clinic_id_cba48857`：`CREATE INDEX adc_cost_month_clinic_id_cba48857 ON public.adc_cost_month USING btree (clinic_id)`。
+- `adc_cost_month_pkey`：`CREATE UNIQUE INDEX adc_cost_month_pkey ON public.adc_cost_month USING btree (id)`。
+- `clinic_cost_month_unique`：`CREATE UNIQUE INDEX clinic_cost_month_unique ON public.adc_cost_month USING btree (clinic_id, year, month) WHERE (clinic_id IS NOT NULL)`。
+- `hq_cost_month_unique`：`CREATE UNIQUE INDEX hq_cost_month_unique ON public.adc_cost_month USING btree (year, month) WHERE (clinic_id IS NULL)`。
+
+跨表及历史触发器：
+
+
 ## adc_daily_close
 
 模型：`finance.DailyClose`。
@@ -1325,6 +1418,45 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_dentist_employee_no_16716599_like`：`CREATE INDEX adc_dentist_employee_no_16716599_like ON public.adc_dentist USING btree (employee_no varchar_pattern_ops)`。
 - `adc_dentist_employee_no_key`：`CREATE UNIQUE INDEX adc_dentist_employee_no_key ON public.adc_dentist USING btree (employee_no)`。
 - `adc_dentist_pkey`：`CREATE UNIQUE INDEX adc_dentist_pkey ON public.adc_dentist USING btree (id)`。
+
+跨表及历史触发器：
+
+
+## adc_dentist_clinic_affiliation
+
+模型：`registry.DentistClinicAffiliation`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| dentist_id | bigint | FK | 否 | `adc_dentist.id` |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| kind | character varying(12) | — | 否 | — |
+| starts_on | date | — | 否 | — |
+| ends_on | date | — | 是 | — |
+| state | character varying(8) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| published_version_id | bigint | FK | 是 | `adc_profile_version.id` |
+| listing_published | boolean | — | 否 | — |
+
+数据库约束：
+
+- `adc_dentist_clinic_a_clinic_id_683ad1d3_fk_adc_clini`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_dentist_clinic_a_dentist_id_710bad25_fk_adc_denti`：`FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_dentist_clinic_a_published_version_id_2caf4920_fk_adc_profi`：`FOREIGN KEY (published_version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_dentist_clinic_affiliation_pkey`：`PRIMARY KEY (id)`。
+- `adc_dentist_clinic_affiliation_revision_check`：`CHECK ((revision >= 0))`。
+- `affiliation_date_order`：`CHECK (((ends_on IS NULL) OR (ends_on >= starts_on)))`。
+- `affiliation_state_valid`：`CHECK (((state)::text = ANY ((ARRAY['ACTIVE'::character varying, 'ENDED'::character varying])::text[])))`。
+- `dentist_clinic_affiliation_unique`：`UNIQUE (dentist_id, clinic_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_dentist_clinic_affiliation_clinic_id_683ad1d3`：`CREATE INDEX adc_dentist_clinic_affiliation_clinic_id_683ad1d3 ON public.adc_dentist_clinic_affiliation USING btree (clinic_id)`。
+- `adc_dentist_clinic_affiliation_dentist_id_710bad25`：`CREATE INDEX adc_dentist_clinic_affiliation_dentist_id_710bad25 ON public.adc_dentist_clinic_affiliation USING btree (dentist_id)`。
+- `adc_dentist_clinic_affiliation_pkey`：`CREATE UNIQUE INDEX adc_dentist_clinic_affiliation_pkey ON public.adc_dentist_clinic_affiliation USING btree (id)`。
+- `adc_dentist_clinic_affiliation_published_version_id_2caf4920`：`CREATE INDEX adc_dentist_clinic_affiliation_published_version_id_2caf4920 ON public.adc_dentist_clinic_affiliation USING btree (published_version_id)`。
+- `dentist_clinic_affiliation_unique`：`CREATE UNIQUE INDEX dentist_clinic_affiliation_unique ON public.adc_dentist_clinic_affiliation USING btree (dentist_id, clinic_id)`。
 
 跨表及历史触发器：
 
@@ -2782,6 +2914,130 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `maintenance_final_consistency`：`CREATE CONSTRAINT TRIGGER maintenance_final_consistency AFTER INSERT OR UPDATE ON public.adc_maintenance_order DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_maintenance_final_guard()`。
 - `maintenance_order_history`：`CREATE TRIGGER maintenance_order_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_maintenance_order FOR EACH ROW EXECUTE FUNCTION adc_maintenance_order_guard()`。
 
+## adc_management_action
+
+模型：`finance.ManagementAction`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| period_id | bigint | FK | 否 | `adc_cost_month.id` |
+| cost_id | bigint | FK | 是 | `adc_monthly_cost.id` |
+| report_id | bigint | FK | 是 | `adc_management_report.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| action | character varying(16) | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_management_actio_report_id_9e328ca7_fk_adc_manag`：`FOREIGN KEY (report_id) REFERENCES adc_management_report(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_management_action_actor_id_9951c76d_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_management_action_cost_id_3ed36afd_fk_adc_monthly_cost_id`：`FOREIGN KEY (cost_id) REFERENCES adc_monthly_cost(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_management_action_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_management_action_period_id_7df65535_fk_adc_cost_month_id`：`FOREIGN KEY (period_id) REFERENCES adc_cost_month(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_management_action_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_management_action_actor_id_9951c76d`：`CREATE INDEX adc_management_action_actor_id_9951c76d ON public.adc_management_action USING btree (actor_id)`。
+- `adc_management_action_cost_id_3ed36afd`：`CREATE INDEX adc_management_action_cost_id_3ed36afd ON public.adc_management_action USING btree (cost_id)`。
+- `adc_management_action_operation_id_key`：`CREATE UNIQUE INDEX adc_management_action_operation_id_key ON public.adc_management_action USING btree (operation_id)`。
+- `adc_management_action_period_id_7df65535`：`CREATE INDEX adc_management_action_period_id_7df65535 ON public.adc_management_action USING btree (period_id)`。
+- `adc_management_action_pkey`：`CREATE UNIQUE INDEX adc_management_action_pkey ON public.adc_management_action USING btree (id)`。
+- `adc_management_action_report_id_9e328ca7`：`CREATE INDEX adc_management_action_report_id_9e328ca7 ON public.adc_management_action USING btree (report_id)`。
+
+跨表及历史触发器：
+
+- `management_action_history`：`CREATE TRIGGER management_action_history BEFORE DELETE OR UPDATE ON public.adc_management_action FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_management_report
+
+模型：`finance.ManagementReport`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| period_id | bigint | FK | 否 | `adc_cost_month.id` |
+| sequence | integer | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| digest | character varying(64) | — | 否 | — |
+| confirmed_by_id | bigint | FK | 否 | `adc_user.id` |
+| confirmed_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_management_report_confirmed_by_id_888039ce_fk_adc_user_id`：`FOREIGN KEY (confirmed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_management_report_period_id_c6af5b17_fk_adc_cost_month_id`：`FOREIGN KEY (period_id) REFERENCES adc_cost_month(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_management_report_pkey`：`PRIMARY KEY (id)`。
+- `adc_management_report_sequence_check`：`CHECK ((sequence >= 0))`。
+- `management_report_sequence`：`UNIQUE (period_id, sequence)`。
+
+索引（含条件唯一索引）：
+
+- `adc_management_report_confirmed_by_id_888039ce`：`CREATE INDEX adc_management_report_confirmed_by_id_888039ce ON public.adc_management_report USING btree (confirmed_by_id)`。
+- `adc_management_report_period_id_c6af5b17`：`CREATE INDEX adc_management_report_period_id_c6af5b17 ON public.adc_management_report USING btree (period_id)`。
+- `adc_management_report_pkey`：`CREATE UNIQUE INDEX adc_management_report_pkey ON public.adc_management_report USING btree (id)`。
+- `management_report_sequence`：`CREATE UNIQUE INDEX management_report_sequence ON public.adc_management_report USING btree (period_id, sequence)`。
+
+跨表及历史触发器：
+
+- `management_report_history`：`CREATE TRIGGER management_report_history BEFORE DELETE OR UPDATE ON public.adc_management_report FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_monthly_cost
+
+模型：`finance.MonthlyCost`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| period_id | bigint | FK | 否 | `adc_cost_month.id` |
+| dentist_id | bigint | FK | 是 | `adc_dentist.id` |
+| category | character varying(16) | — | 否 | — |
+| amount | numeric(16,2) | — | 否 | — |
+| reference | character varying(160) | — | 否 | — |
+| basis | character varying(500) | — | 否 | — |
+| equipment_event_id | bigint | FK | 是 | `adc_equipment_event.id` |
+| replaces_id | bigint | FK | 是 | `adc_monthly_cost.id` |
+| state | character varying(12) | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_note | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_monthly_cost_dentist_id_5d7c80c0_fk_adc_dentist_id`：`FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_monthly_cost_equipment_event_id_97c0b3a3_fk_adc_equip`：`FOREIGN KEY (equipment_event_id) REFERENCES adc_equipment_event(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_monthly_cost_period_id_7f47c420_fk_adc_cost_month_id`：`FOREIGN KEY (period_id) REFERENCES adc_cost_month(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_monthly_cost_pkey`：`PRIMARY KEY (id)`。
+- `adc_monthly_cost_prepared_by_id_34091f54_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_monthly_cost_replaces_id_6fed1645_fk_adc_monthly_cost_id`：`FOREIGN KEY (replaces_id) REFERENCES adc_monthly_cost(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_monthly_cost_reviewed_by_id_efc21320_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `monthly_cost_independent`：`CHECK ((NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL))))`。
+- `monthly_cost_nonnegative`：`CHECK ((amount >= (0)::numeric))`。
+- `monthly_cost_review_metadata`：`CHECK ((((reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['APPROVED'::character varying, 'REJECTED'::character varying])::text[])))))`。
+- `monthly_cost_state`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'REJECTED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_monthly_cost_dentist_id_5d7c80c0`：`CREATE INDEX adc_monthly_cost_dentist_id_5d7c80c0 ON public.adc_monthly_cost USING btree (dentist_id)`。
+- `adc_monthly_cost_equipment_event_id_97c0b3a3`：`CREATE INDEX adc_monthly_cost_equipment_event_id_97c0b3a3 ON public.adc_monthly_cost USING btree (equipment_event_id)`。
+- `adc_monthly_cost_period_id_7f47c420`：`CREATE INDEX adc_monthly_cost_period_id_7f47c420 ON public.adc_monthly_cost USING btree (period_id)`。
+- `adc_monthly_cost_pkey`：`CREATE UNIQUE INDEX adc_monthly_cost_pkey ON public.adc_monthly_cost USING btree (id)`。
+- `adc_monthly_cost_prepared_by_id_34091f54`：`CREATE INDEX adc_monthly_cost_prepared_by_id_34091f54 ON public.adc_monthly_cost USING btree (prepared_by_id)`。
+- `adc_monthly_cost_replaces_id_6fed1645`：`CREATE INDEX adc_monthly_cost_replaces_id_6fed1645 ON public.adc_monthly_cost USING btree (replaces_id)`。
+- `adc_monthly_cost_reviewed_by_id_efc21320`：`CREATE INDEX adc_monthly_cost_reviewed_by_id_efc21320 ON public.adc_monthly_cost USING btree (reviewed_by_id)`。
+- `monthly_cost_live_correction`：`CREATE UNIQUE INDEX monthly_cost_live_correction ON public.adc_monthly_cost USING btree (replaces_id) WHERE ((replaces_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[])))`。
+- `monthly_cost_source_unique`：`CREATE UNIQUE INDEX monthly_cost_source_unique ON public.adc_monthly_cost USING btree (period_id, reference) WHERE ((replaces_id IS NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[])))`。
+- `monthly_equipment_cost_once`：`CREATE UNIQUE INDEX monthly_equipment_cost_once ON public.adc_monthly_cost USING btree (equipment_event_id) WHERE ((equipment_event_id IS NOT NULL) AND (replaces_id IS NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[])))`。
+
+跨表及历史触发器：
+
+- `monthly_cost_history`：`CREATE TRIGGER monthly_cost_history BEFORE DELETE OR UPDATE ON public.adc_monthly_cost FOR EACH ROW EXECUTE FUNCTION adc_monthly_cost_history()`。
+
 ## adc_next_visit_instruction
 
 模型：`clinical.NextVisitInstruction`。
@@ -3605,6 +3861,153 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `professional_source_history`：`CREATE TRIGGER professional_source_history BEFORE DELETE OR UPDATE ON public.adc_professional_authorization FOR EACH ROW EXECUTE FUNCTION adc_clinical_source_guard()`。
+
+## adc_profile_action
+
+模型：`registry.ProfileAction`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| profile_id | bigint | FK | 是 | `adc_public_profile.id` |
+| affiliation_id | bigint | FK | 是 | `adc_dentist_clinic_affiliation.id` |
+| version_id | bigint | FK | 是 | `adc_profile_version.id` |
+| clinic_id | bigint | FK | 是 | `adc_clinic.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| action | character varying(24) | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| note | character varying(500) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_profile_action_actor_id_b008933f_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_action_affiliation_id_8d06a108_fk_adc_denti`：`FOREIGN KEY (affiliation_id) REFERENCES adc_dentist_clinic_affiliation(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_action_clinic_id_f32fc922_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_action_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_profile_action_pkey`：`PRIMARY KEY (id)`。
+- `adc_profile_action_profile_id_2c5f6e0a_fk_adc_public_profile_id`：`FOREIGN KEY (profile_id) REFERENCES adc_public_profile(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_action_version_id_b37b6287_fk_adc_profi`：`FOREIGN KEY (version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_profile_action_actor_id_b008933f`：`CREATE INDEX adc_profile_action_actor_id_b008933f ON public.adc_profile_action USING btree (actor_id)`。
+- `adc_profile_action_affiliation_id_8d06a108`：`CREATE INDEX adc_profile_action_affiliation_id_8d06a108 ON public.adc_profile_action USING btree (affiliation_id)`。
+- `adc_profile_action_clinic_id_f32fc922`：`CREATE INDEX adc_profile_action_clinic_id_f32fc922 ON public.adc_profile_action USING btree (clinic_id)`。
+- `adc_profile_action_operation_id_key`：`CREATE UNIQUE INDEX adc_profile_action_operation_id_key ON public.adc_profile_action USING btree (operation_id)`。
+- `adc_profile_action_pkey`：`CREATE UNIQUE INDEX adc_profile_action_pkey ON public.adc_profile_action USING btree (id)`。
+- `adc_profile_action_profile_id_2c5f6e0a`：`CREATE INDEX adc_profile_action_profile_id_2c5f6e0a ON public.adc_profile_action USING btree (profile_id)`。
+- `adc_profile_action_version_id_b37b6287`：`CREATE INDEX adc_profile_action_version_id_b37b6287 ON public.adc_profile_action USING btree (version_id)`。
+- `profile_action_clinic_idx`：`CREATE INDEX profile_action_clinic_idx ON public.adc_profile_action USING btree (clinic_id, action, created_at)`。
+
+跨表及历史触发器：
+
+- `profile_action_history`：`CREATE TRIGGER profile_action_history BEFORE DELETE OR UPDATE ON public.adc_profile_action FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_profile_media
+
+模型：`registry.ProfileMedia`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| profile_id | bigint | FK | 否 | `adc_public_profile.id` |
+| image | bytea | — | 否 | — |
+| digest | character varying(64) | — | 否 | — |
+| width | smallint | — | 否 | — |
+| height | smallint | — | 否 | — |
+| alt_text | character varying(160) | — | 否 | — |
+| uploaded_by_id | bigint | FK | 否 | `adc_user.id` |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_profile_media_height_check`：`CHECK ((height >= 0))`。
+- `adc_profile_media_pkey`：`PRIMARY KEY (id)`。
+- `adc_profile_media_profile_id_06731de2_fk_adc_public_profile_id`：`FOREIGN KEY (profile_id) REFERENCES adc_public_profile(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_media_uploaded_by_id_36546aee_fk_adc_user_id`：`FOREIGN KEY (uploaded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_media_width_check`：`CHECK ((width >= 0))`。
+
+索引（含条件唯一索引）：
+
+- `adc_profile_media_pkey`：`CREATE UNIQUE INDEX adc_profile_media_pkey ON public.adc_profile_media USING btree (id)`。
+- `adc_profile_media_profile_id_06731de2`：`CREATE INDEX adc_profile_media_profile_id_06731de2 ON public.adc_profile_media USING btree (profile_id)`。
+- `adc_profile_media_uploaded_by_id_36546aee`：`CREATE INDEX adc_profile_media_uploaded_by_id_36546aee ON public.adc_profile_media USING btree (uploaded_by_id)`。
+
+跨表及历史触发器：
+
+- `profile_media_history`：`CREATE TRIGGER profile_media_history BEFORE DELETE OR UPDATE ON public.adc_profile_media FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_profile_version
+
+模型：`registry.ProfileVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| profile_id | bigint | FK | 否 | `adc_public_profile.id` |
+| sequence | integer | — | 否 | — |
+| content | jsonb | — | 否 | — |
+| submitted_by_id | bigint | FK | 否 | `adc_user.id` |
+| submitted_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_profile_version_pkey`：`PRIMARY KEY (id)`。
+- `adc_profile_version_profile_id_4912bf22_fk_adc_publi`：`FOREIGN KEY (profile_id) REFERENCES adc_public_profile(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_profile_version_sequence_check`：`CHECK ((sequence >= 0))`。
+- `adc_profile_version_submitted_by_id_a8104db2_fk_adc_user_id`：`FOREIGN KEY (submitted_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `profile_version_sequence`：`UNIQUE (profile_id, sequence)`。
+
+索引（含条件唯一索引）：
+
+- `adc_profile_version_pkey`：`CREATE UNIQUE INDEX adc_profile_version_pkey ON public.adc_profile_version USING btree (id)`。
+- `adc_profile_version_profile_id_4912bf22`：`CREATE INDEX adc_profile_version_profile_id_4912bf22 ON public.adc_profile_version USING btree (profile_id)`。
+- `adc_profile_version_submitted_by_id_a8104db2`：`CREATE INDEX adc_profile_version_submitted_by_id_a8104db2 ON public.adc_profile_version USING btree (submitted_by_id)`。
+- `profile_version_sequence`：`CREATE UNIQUE INDEX profile_version_sequence ON public.adc_profile_version USING btree (profile_id, sequence)`。
+
+跨表及历史触发器：
+
+- `profile_version_history`：`CREATE TRIGGER profile_version_history BEFORE DELETE OR UPDATE ON public.adc_profile_version FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_public_profile
+
+模型：`registry.PublicProfile`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| dentist_id | bigint | UK / FK | 是 | `adc_dentist.id` |
+| clinic_id | bigint | UK / FK | 是 | `adc_clinic.id` |
+| draft | jsonb | — | 否 | — |
+| revision | integer | — | 否 | — |
+| submitted_version_id | bigint | FK | 是 | `adc_profile_version.id` |
+| published_version_id | bigint | FK | 是 | `adc_profile_version.id` |
+| updated_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_public_profile_clinic_id_fbed5e98_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_public_profile_clinic_id_key`：`UNIQUE (clinic_id)`。
+- `adc_public_profile_dentist_id_6c660591_fk_adc_dentist_id`：`FOREIGN KEY (dentist_id) REFERENCES adc_dentist(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_public_profile_dentist_id_key`：`UNIQUE (dentist_id)`。
+- `adc_public_profile_pkey`：`PRIMARY KEY (id)`。
+- `adc_public_profile_published_version_id_30406f0a_fk_adc_profi`：`FOREIGN KEY (published_version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_public_profile_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_public_profile_submitted_version_id_c5e28c60_fk_adc_profi`：`FOREIGN KEY (submitted_version_id) REFERENCES adc_profile_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `public_profile_one_subject`：`CHECK ((((clinic_id IS NULL) AND (dentist_id IS NOT NULL)) OR ((clinic_id IS NOT NULL) AND (dentist_id IS NULL))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_public_profile_clinic_id_key`：`CREATE UNIQUE INDEX adc_public_profile_clinic_id_key ON public.adc_public_profile USING btree (clinic_id)`。
+- `adc_public_profile_dentist_id_key`：`CREATE UNIQUE INDEX adc_public_profile_dentist_id_key ON public.adc_public_profile USING btree (dentist_id)`。
+- `adc_public_profile_pkey`：`CREATE UNIQUE INDEX adc_public_profile_pkey ON public.adc_public_profile USING btree (id)`。
+- `adc_public_profile_published_version_id_30406f0a`：`CREATE INDEX adc_public_profile_published_version_id_30406f0a ON public.adc_public_profile USING btree (published_version_id)`。
+- `adc_public_profile_submitted_version_id_c5e28c60`：`CREATE INDEX adc_public_profile_submitted_version_id_c5e28c60 ON public.adc_public_profile USING btree (submitted_version_id)`。
+
+跨表及历史触发器：
+
 
 ## adc_qualification
 

@@ -187,5 +187,33 @@
     "width": 430,
     "height": 809,
     "minPrintedFontPt": 14.766418604651165
+  },
+  "er_profile_affiliation": {
+    "nodes": 7,
+    "edges": 8,
+    "width": 792,
+    "height": 582,
+    "minPrintedFontPt": 8.017121212121213
+  },
+  "er_public_profiles": {
+    "nodes": 7,
+    "edges": 13,
+    "width": 472,
+    "height": 958,
+    "minPrintedFontPt": 13.452457627118646
+  },
+  "er_profile_booking": {
+    "nodes": 8,
+    "edges": 10,
+    "width": 439,
+    "height": 958,
+    "minPrintedFontPt": 14.46369020501139
+  },
+  "er_monthly_management": {
+    "nodes": 8,
+    "edges": 11,
+    "width": 548,
+    "height": 894,
+    "minPrintedFontPt": 11.586788321167884
   }
 }

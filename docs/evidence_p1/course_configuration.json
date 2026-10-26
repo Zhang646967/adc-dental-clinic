@@ -1,0 +1,360 @@
+{
+  "synthetic": true,
+  "clinics": [
+    {
+      "clinic": 1,
+      "city": "长沙",
+      "doctors": [
+        6,
+        7,
+        8
+      ],
+      "services": [
+        17,
+        18,
+        19,
+        20
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 2,
+      "city": "长沙",
+      "doctors": [
+        9,
+        10,
+        11
+      ],
+      "services": [
+        21,
+        22,
+        23,
+        24
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 3,
+      "city": "长沙",
+      "doctors": [
+        12,
+        13,
+        14
+      ],
+      "services": [
+        25,
+        26,
+        27,
+        28
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 4,
+      "city": "长沙",
+      "doctors": [
+        15,
+        16,
+        17
+      ],
+      "services": [
+        29,
+        30,
+        31,
+        32
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 5,
+      "city": "武汉",
+      "doctors": [
+        18,
+        19,
+        20
+      ],
+      "services": [
+        33,
+        34,
+        35,
+        36
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 6,
+      "city": "武汉",
+      "doctors": [
+        21,
+        22,
+        23
+      ],
+      "services": [
+        37,
+        38,
+        39,
+        40
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 7,
+      "city": "武汉",
+      "doctors": [
+        24,
+        25,
+        26
+      ],
+      "services": [
+        41,
+        42,
+        43,
+        44
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 8,
+      "city": "成都",
+      "doctors": [
+        27,
+        28,
+        29
+      ],
+      "services": [
+        45,
+        46,
+        47,
+        48
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 9,
+      "city": "成都",
+      "doctors": [
+        30,
+        31,
+        32
+      ],
+      "services": [
+        49,
+        50,
+        51,
+        52
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 10,
+      "city": "成都",
+      "doctors": [
+        33,
+        34,
+        35
+      ],
+      "services": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 11,
+      "city": "广州",
+      "doctors": [
+        36,
+        37,
+        38
+      ],
+      "services": [
+        57,
+        58,
+        59,
+        60
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 12,
+      "city": "广州",
+      "doctors": [
+        39,
+        40,
+        41
+      ],
+      "services": [
+        61,
+        62,
+        63,
+        64
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 13,
+      "city": "广州",
+      "doctors": [
+        42,
+        43,
+        44
+      ],
+      "services": [
+        65,
+        66,
+        67,
+        68
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 14,
+      "city": "杭州",
+      "doctors": [
+        45,
+        46,
+        47
+      ],
+      "services": [
+        69,
+        70,
+        71,
+        72
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 15,
+      "city": "杭州",
+      "doctors": [
+        48,
+        49,
+        50
+      ],
+      "services": [
+        73,
+        74,
+        75,
+        76
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 16,
+      "city": "南京",
+      "doctors": [
+        51,
+        52,
+        53
+      ],
+      "services": [
+        77,
+        78,
+        79,
+        80
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 17,
+      "city": "南京",
+      "doctors": [
+        54,
+        55,
+        56
+      ],
+      "services": [
+        81,
+        82,
+        83,
+        84
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 18,
+      "city": "西安",
+      "doctors": [
+        57,
+        58,
+        59
+      ],
+      "services": [
+        85,
+        86,
+        87,
+        88
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 19,
+      "city": "西安",
+      "doctors": [
+        60,
+        61,
+        62
+      ],
+      "services": [
+        89,
+        90,
+        91,
+        92
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    },
+    {
+      "clinic": 20,
+      "city": "郑州",
+      "doctors": [
+        63,
+        64,
+        65
+      ],
+      "services": [
+        93,
+        94,
+        95,
+        96
+      ],
+      "chairs": 2,
+      "prepared_days": 14
+    }
+  ],
+  "rotation": {
+    "dentist": 8,
+    "source": 1,
+    "destination": 2,
+    "slots": [
+      922,
+      924,
+      926,
+      928,
+      930,
+      932,
+      934
+    ]
+  },
+  "scope": "Synthetic P1 catalogue; clinical and cash rows are not seeded. Passwords are private."
+}

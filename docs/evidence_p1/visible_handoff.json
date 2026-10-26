@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "application_commit": "793a3ef61e19501d8f9a06e9a184293e49173645",
+  "backend": "https://waves-heath-jason-chamber.trycloudflare.com",
+  "pages": 23,
+  "mode": "development",
+  "registered_appid_preserved": true,
+  "private_devtools_settings_preserved": true,
+  "assigned_passwords_excluded_from_client": true,
+  "report_pages": 224,
+  "report_hashes": {
+    "课程报告_张加良_8210241102.docx": "1349d58778e6338cf3c7564284494bd36f928c3ea9c4839c92528698ed4735ee",
+    "课程报告_张加良_8210241102.pdf": "e3e40d6d9efcb37dba4aab99032fa0cd65d528ea12caff0b134a18bc3f962c6c"
+  },
+  "package_sha256": "e07054690c091d9d26f55525621946c60f2dbcbf012f45a64282cacb359df9cf",
+  "real_wechat_acceptance": "NOT_RUN",
+  "real_sms_acceptance": "NOT_RUN"
+}

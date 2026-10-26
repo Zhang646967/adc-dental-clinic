@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "old_read_history_unchanged": true,
+  "expected": 2945,
+  "measured_allowed_reads": 2925,
+  "setup_care_reads": 5,
+  "setup_home_reads": 15,
+  "setup_clinic_choice_views": 5,
+  "typed_actor_role_purpose_and_scope_match": true
+}
