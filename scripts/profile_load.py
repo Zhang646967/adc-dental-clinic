@@ -55,6 +55,11 @@ class Client:
         fields=self.fields('/accounts/login/',('csrfmiddlewaretoken','username','password'))
         status,body=self.follow('POST','/accounts/login/',fields|dict(username=actor['username'],password=actor['password']))
         if status!=200:raise ValueError('Synthetic manager login failed')
+        choices=[f for f in Forms(body).forms if f['action']=='/workspace/clinic/activate/'
+            and f['inputs'].get('clinic')==str(actor['clinic'])]
+        if len(choices)!=1:raise ValueError('Expected signed current-clinic choice')
+        status,body=self.follow('POST','/workspace/clinic/activate/',choices[0]['inputs'])
+        if status!=200:raise ValueError('Synthetic manager workspace failed')
         return self.fields('/profiles/clinic/edit/',('csrfmiddlewaretoken','workspace_token','draft_token'))
 
 
