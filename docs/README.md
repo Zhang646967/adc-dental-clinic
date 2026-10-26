@@ -1,3 +1,5 @@
+当前WX1：[业务合同](WX1_IMPLEMENTATION.md) · [使用与平台联调](WX1_GUIDE.md) · [完整CI、更新、恢复和真实平台待办](evidence_wx1/README.md)。
+
 **当前患者入口修正：** [直接登录、私有账号与小程序导入](PATIENT_ENTRY_GUIDE.md) · [原本机及教师HTTPS验证](evidence_patient_entry/README.md)。
 
 **前轮教师试用历史：** [准确CI及原地址的执行记录](evidence_patient_auth/README.md) · [微信／短信与合成注册办理](WECHAT_SMS_TEACHER_TEST.md)。

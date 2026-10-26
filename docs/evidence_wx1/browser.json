@@ -1,0 +1,312 @@
+{
+  "original": {
+    "passed": true,
+    "origin": "http://127.0.0.1:18000",
+    "source": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "checks": 12,
+    "details": [
+      {
+        "name": "Phone registration is primary; password alternative stays on the page",
+        "passed": true
+      },
+      {
+        "name": "No employee shortcut or display mode; old preference cleared",
+        "passed": true
+      },
+      {
+        "name": "WeChat shortcut and truthful unconfigured state are visible",
+        "passed": true
+      },
+      {
+        "name": "390px with browser large text reflows without horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "Keyboard focus works without changing display mode",
+        "passed": true
+      },
+      {
+        "name": "Code request stays on the same page and labels synthetic delivery",
+        "passed": true
+      },
+      {
+        "name": "A first-time user registers without a username or password",
+        "passed": true
+      },
+      {
+        "name": "Website session is accepted by the native account API without employee/patient-chart grants",
+        "passed": true
+      },
+      {
+        "name": "patient_demo_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "front_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "manager_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "Public clinic listing has no repeated contact/location or employee controls",
+        "passed": true
+      }
+    ],
+    "scope": "Real Chrome and shared native HTTP account endpoint; WeChat/SMS external providers are unconfigured"
+  },
+  "teacher_public": {
+    "passed": true,
+    "origin": "https://waves-heath-jason-chamber.trycloudflare.com",
+    "source": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "checks": 12,
+    "details": [
+      {
+        "name": "Phone registration is primary; password alternative stays on the page",
+        "passed": true
+      },
+      {
+        "name": "No employee shortcut or display mode; old preference cleared",
+        "passed": true
+      },
+      {
+        "name": "WeChat shortcut and truthful unconfigured state are visible",
+        "passed": true
+      },
+      {
+        "name": "390px with browser large text reflows without horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "Keyboard focus works without changing display mode",
+        "passed": true
+      },
+      {
+        "name": "Code request stays on the same page and labels synthetic delivery",
+        "passed": true
+      },
+      {
+        "name": "A first-time user registers without a username or password",
+        "passed": true
+      },
+      {
+        "name": "Website session is accepted by the native account API without employee/patient-chart grants",
+        "passed": true
+      },
+      {
+        "name": "patient_demo_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "front_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "manager_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "Public clinic listing has no repeated contact/location or employee controls",
+        "passed": true
+      }
+    ],
+    "scope": "Real Chrome and shared native HTTP account endpoint; WeChat/SMS external providers are unconfigured"
+  },
+  "isolated": {
+    "passed": true,
+    "origin": "http://127.0.0.1:18193",
+    "source": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "checks": 12,
+    "details": [
+      {
+        "name": "Phone registration is primary; password alternative stays on the page",
+        "passed": true
+      },
+      {
+        "name": "No employee shortcut or display mode; old preference cleared",
+        "passed": true
+      },
+      {
+        "name": "WeChat shortcut and truthful unconfigured state are visible",
+        "passed": true
+      },
+      {
+        "name": "390px with browser large text reflows without horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "Keyboard focus works without changing display mode",
+        "passed": true
+      },
+      {
+        "name": "Code request stays on the same page and labels synthetic delivery",
+        "passed": true
+      },
+      {
+        "name": "A first-time user registers without a username or password",
+        "passed": true
+      },
+      {
+        "name": "Website session is accepted by the native account API without employee/patient-chart grants",
+        "passed": true
+      },
+      {
+        "name": "patient_demo_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "front_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "manager_a existing password and independent channel work",
+        "passed": true
+      },
+      {
+        "name": "Public clinic listing has no repeated contact/location or employee controls",
+        "passed": true
+      }
+    ],
+    "scope": "Real Chrome and shared native HTTP account endpoint; WeChat/SMS external providers are unconfigured"
+  },
+  "private_provider_fixture": {
+    "passed": true,
+    "source": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "checks": 8,
+    "details": [
+      "Website defaults to mini-program scan; phone/password stay inline",
+      "QR login at390px and large browser text has no horizontal overflow",
+      "Different browser cannot query private ticket status",
+      "Native session login grants an account without patient-chart authority",
+      "Phone confirmation receives exact target website and expiry",
+      "Actual browser polling plus POST consumes approval into the same ADC account",
+      "Provider-verified phone UI hides test codes and Enter verifies instead of resending",
+      "Phone registration never creates chart access or employee grants"
+    ],
+    "scope": "Real Chrome and real HTTP against exact image with PRIVATE provider fixtures; no camera scanning, WeChat platform exchange or SMS delivery accepted"
+  },
+  "original_roles": {
+    "passed": true,
+    "origin": "http://127.0.0.1:18000",
+    "checks": [
+      {
+        "role": "PATIENT",
+        "path": "/portal/",
+        "passed": true
+      },
+      {
+        "role": "FRONT_DESK",
+        "path": "/frontdesk/",
+        "passed": true
+      },
+      {
+        "role": "DENTIST",
+        "path": "/doctor/",
+        "passed": true
+      },
+      {
+        "role": "MANAGER",
+        "path": "/manager/",
+        "passed": true
+      },
+      {
+        "role": "HQ",
+        "path": "/headquarters/",
+        "passed": true
+      },
+      {
+        "role": "FINANCE",
+        "path": "/financial-workspace/",
+        "passed": true
+      },
+      {
+        "role": "SYSADMIN",
+        "path": "/technical/",
+        "passed": true
+      }
+    ]
+  },
+  "teacher_roles": {
+    "passed": true,
+    "origin": "https://waves-heath-jason-chamber.trycloudflare.com",
+    "checks": [
+      {
+        "role": "PATIENT",
+        "path": "/portal/",
+        "passed": true
+      },
+      {
+        "role": "FRONT_DESK",
+        "path": "/frontdesk/",
+        "passed": true
+      },
+      {
+        "role": "DENTIST",
+        "path": "/doctor/",
+        "passed": true
+      },
+      {
+        "role": "MANAGER",
+        "path": "/manager/",
+        "passed": true
+      },
+      {
+        "role": "HQ",
+        "path": "/headquarters/",
+        "passed": true
+      },
+      {
+        "role": "FINANCE",
+        "path": "/financial-workspace/",
+        "passed": true
+      },
+      {
+        "role": "SYSADMIN",
+        "path": "/technical/",
+        "passed": true
+      }
+    ]
+  },
+  "isolated_roles": {
+    "passed": true,
+    "origin": "http://127.0.0.1:18193",
+    "checks": [
+      {
+        "role": "PATIENT",
+        "path": "/portal/",
+        "passed": true
+      },
+      {
+        "role": "FRONT_DESK",
+        "path": "/frontdesk/",
+        "passed": true
+      },
+      {
+        "role": "DENTIST",
+        "path": "/doctor/",
+        "passed": true
+      },
+      {
+        "role": "MANAGER",
+        "path": "/manager/",
+        "passed": true
+      },
+      {
+        "role": "HQ",
+        "path": "/headquarters/",
+        "passed": true
+      },
+      {
+        "role": "FINANCE",
+        "path": "/financial-workspace/",
+        "passed": true
+      },
+      {
+        "role": "SYSADMIN",
+        "path": "/technical/",
+        "passed": true
+      }
+    ]
+  }
+}

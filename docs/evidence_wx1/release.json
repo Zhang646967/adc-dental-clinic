@@ -1,0 +1,71 @@
+{
+  "recorded_at": "2026-10-26T07:24:53.094562+00:00",
+  "application_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+  "image": "sha256:a8b949cd9b350d5b5be4835427968aa9afb8406673bdb2f5b89fc0ac95946929",
+  "architecture": "arm64",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40279432272",
+  "source_rules": 1122,
+  "postgresql_tests": 2005,
+  "local_development": "DELIVERED",
+  "WX1_overall": "EXTERNAL_PLATFORM_ACCEPTANCE_PENDING",
+  "original_install": {
+    "passed": true,
+    "origin": "http://127.0.0.1:18000",
+    "old_model_groups_preserved": 127,
+    "old_rows_and_passwords_preserved": true,
+    "private_configuration_files_preserved": 70,
+    "database_container_volume_and_RC_tag_preserved": true,
+    "new_six_conditions": "HEALTHY",
+    "old_observer_state": "UNKNOWN_OBSERVER_UNAVAILABLE",
+    "old_observer_history": "ARCHIVED_ENCRYPTED_NOT_REWRITTEN"
+  },
+  "teacher_install": {
+    "passed": true,
+    "url": "https://waves-heath-jason-chamber.trycloudflare.com",
+    "old_rows_passwords_and_volume_preserved": true,
+    "source": "Existing independently seeded synthetic database; original Mac database was never published",
+    "new_six_conditions": "HEALTHY",
+    "temporary_tunnel_renewed_after_server_retirement": true,
+    "prior_tunnel": "RETIRED_HISTORY_RETAINED",
+    "first_public_browser_attempt": "TIMEOUT_RETAINED",
+    "diagnostic_and_complete_rerun": "PASSED"
+  },
+  "structure": {
+    "application_migrations": 62,
+    "prior_migrations_unchanged": 61,
+    "sql_tables": 131,
+    "foreign_keys": 356,
+    "triggers": 103,
+    "er_views": 27
+  },
+  "report": {
+    "pages": 202,
+    "business_use_cases": 101,
+    "support_use_cases": 1,
+    "Word_PDF_names_unchanged": true
+  },
+  "visible_client": {
+    "pages": 20,
+    "mode": "development",
+    "user_appid_and_private_devtools_settings_preserved": true,
+    "AppSecret_in_client": false,
+    "package": "ADC微信小程序.zip"
+  },
+  "platform": {
+    "appid_format_present": true,
+    "appsecret_present": false,
+    "cloudbase_environment_and_free_quota_ready": false,
+    "real_wechat_login": "NOT_RUN",
+    "real_phone_scan": "NOT_RUN",
+    "real_sms": "NOT_RUN",
+    "real_SMS_sent": 0,
+    "owner_instruction": "Continue development; platform configuration later"
+  },
+  "retained_boundaries": {
+    "Windows_original_data_recovery": "UNRESOLVED",
+    "historical_incident_root_cause": "UNDETERMINED",
+    "independent_cloud": "AWAITING_SERVER",
+    "mainland_access_without_proxy": "NOT_RUN",
+    "new_capacity_24h_and_professional_qualification": "NOT_ESTABLISHED_BY_WX1"
+  }
+}

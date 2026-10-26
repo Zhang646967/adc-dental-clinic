@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 129 ORM tables; django_migrations is a framework migration journal.
+// All 130 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -1516,6 +1516,7 @@ Table adc_sms_challenge {
   session_digest "character varying(64)" [not null]
   ip_digest "character varying(64)" [not null]
   code_digest "character varying(64)" [not null]
+  provider_reference "character varying(512)" [not null]
   state "character varying(8)" [not null]
   attempts "smallint" [not null]
   expires_at "timestamp with time zone" [not null]
@@ -1744,6 +1745,24 @@ Table adc_wait_request {
   created_by_id "bigint" [not null]
   created_at "timestamp with time zone" [not null]
   revision "integer" [not null]
+}
+
+Table adc_web_login_ticket {
+  id "uuid" [pk, not null]
+  browser_digest "character varying(64)" [not null]
+  origin "character varying(255)" [not null]
+  state "character varying(8)" [not null]
+  identity_id "bigint" [null]
+  identity_revision "integer" [null]
+  user_id "bigint" [null]
+  workspace_id "uuid" [null]
+  workspace_revision "integer" [null]
+  auth_digest "character varying(64)" [not null]
+  image "bytea" [not null]
+  expires_at "timestamp with time zone" [not null]
+  decided_at "timestamp with time zone" [null]
+  consumed_at "timestamp with time zone" [null]
+  created_at "timestamp with time zone" [not null]
 }
 
 Table adc_workspace_context {
@@ -2143,6 +2162,9 @@ Ref: adc_wait_request.created_by_id > adc_user.id
 Ref: adc_wait_request.patient_id > adc_patient.id
 Ref: adc_wait_request.preferred_dentist_id > adc_dentist.id
 Ref: adc_wait_request.service_id > adc_booking_service.id
+Ref: adc_web_login_ticket.identity_id > adc_external_identity.id
+Ref: adc_web_login_ticket.user_id > adc_user.id
+Ref: adc_web_login_ticket.workspace_id > adc_workspace_context.id
 Ref: adc_workspace_context.patient_grant_id > adc_patient_appointment_grant.id
 Ref: adc_workspace_context.clinic_id > adc_clinic.id
 Ref: adc_workspace_context.user_id > adc_user.id

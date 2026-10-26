@@ -11,6 +11,16 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_wechat_web_login': {
+        'title':'网站扫码票据与微信独立确认',
+        'tables': {
+            'adc_user':['id','username'],
+            'adc_external_identity':['id','provider','app_id','user_id','revision'],
+            'adc_workspace_context':['id','user_id','login_channel','revision'],
+            'adc_web_login_ticket':['id','browser_digest','state','identity_id','identity_revision','user_id','workspace_id','workspace_revision','expires_at','consumed_at'],
+        },
+        'note':'票据使用随机UUID，二维码仅携带公开票据编号；browser_digest是原浏览器私有凭据摘要，不是用户外键。待确认票据的账号、微信身份及会话引用均可空。手机明确确认时，新换取微信code且核对已绑定身份，再保留三条实际外键和身份、会话版本。浏览器消费时重核归属、版本、账号状态及期限；票据至多消费一次，解绑及恢复不复活旧授权。',
+    },
     'er_insurance_settlement': {
         'title':'原实际费用、唯一结算与独立分担',
         'tables': {
@@ -87,12 +97,12 @@ VIEWS = {
             'adc_user':['id','username'],
             'adc_external_identity':['id','provider','app_id','subject','user_id','revision'],
             'adc_local_identity_code':['id','purpose','identity_id','user_id','digest','expires_at','consumed_at'],
-            'adc_sms_challenge':['id','purpose','user_id','state','attempts','expires_at','consumed_at'],
+            'adc_sms_challenge':['id','purpose','user_id','provider','provider_reference','state','attempts','expires_at','consumed_at'],
             'adc_account_phone':['id','user_id','source','revision'],
             'adc_account_identity_event':['id','user_id','identity_id','operation_id','action'],
             'adc_workspace_context':['id','user_id','login_channel','role','revision'],
         },
-        'note':'外部身份按provider、app_id及subject联合唯一，当前账号引用可空；每个账号至多一个有效SMS登录身份，此条件不限制其余微信或本地绑定。解绑保留账号与事件。短信挑战仅BIND用途必须引用当前账号，LOGIN用途引用为空；会话摘要不是关系外键。验证码只存HMAC摘要，受期限、次数与一次性核验约束。账号联络按user一对一，不按手机号连接Patient。微信身份由服务端交换，LOCAL与DEMO来源仍明确标注；登录与手机号核验不授予员工、临床或患者档案权限。',
+        'note':'外部身份按provider、app_id及subject联合唯一，当前账号引用可空；每个账号至多一个有效SMS登录身份，此条件不限制其余微信或本地绑定。解绑保留账号与事件。短信挑战仅BIND用途必须引用当前账号，LOGIN用途引用为空；会话摘要不是关系外键。ADC生成的验证码只存HMAC摘要；CloudBase生成并核验验证码，ADC只保存provider_reference挑战引用。两类均与用途、会话、期限及一次性使用绑定。账号联络按user一对一，不按手机号连接Patient。微信身份由服务端交换，LOCAL与DEMO来源仍明确标注；登录与手机号核验不授予员工、临床或患者档案权限。',
     },
     'er_patient_enrollment': {
         'title':'本人建档申请、前台决定与唯一档案关联',

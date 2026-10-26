@@ -1,4 +1,11 @@
 {
+  "er_wechat_web_login": {
+    "nodes": 4,
+    "edges": 5,
+    "width": 401,
+    "height": 607,
+    "minPrintedFontPt": 15.834314214463841
+  },
   "er_insurance_settlement": {
     "nodes": 7,
     "edges": 8,
@@ -44,9 +51,9 @@
   "er_patient_account": {
     "nodes": 7,
     "edges": 8,
-    "width": 867,
-    "height": 582,
-    "minPrintedFontPt": 7.323598615916955
+    "width": 877,
+    "height": 632,
+    "minPrintedFontPt": 7.2400912200684155
   },
   "er_patient_enrollment": {
     "nodes": 6,

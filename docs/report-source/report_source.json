@@ -1,6 +1,6 @@
 {
   "title": "ADC 牙科连锁运营管理系统分析与设计",
-  "version": "牙科服务与医保资金协同",
+  "version": "多渠道预约与微信账号协同",
   "date": "2026年10月25日",
   "file_stem": "课程报告_张加良_8210241102",
   "reference_pdf": {
@@ -17,14 +17,14 @@
     "class": "信管 T2401"
   },
   "abstract_cn": [
-    "连锁牙科诊所的预约、接诊、治疗、结算和设备使用具有连续性，任何环节的信息脱节都可能造成重复预约、患者等待、费用争议或服务中断。本文以Andrew’s Dental Chain（ADC）课程案例为背景，面向一家约5至20家诊所的连锁机构，分析七类岗位的业务责任与交接关系。 连续诊疗进一步区分方案讨论、本人决定、实际执行和后续目标；复诊责任与加工件验收各有明确岗位及完成依据，避免把预约、联系或物理返回当成实际完成。 患者可以先按城市或主动定位查找门店，核对地址、电话、营业时间与服务后再登录；公开信息、账号通道及具体就诊人授权分别管理，保持预约与诊疗历史连续。 患者账号、联络号码与就诊人档案分别管理，通过本人申请和门店前台独立核验建立关联；账号登录与具体业务授权分开，保持暂停及恢复的历史。 医保资料以地区目录版本、门店模拟安排、收费项目适配和患者待遇历史分别核对，原始来源、独立复核及未知项目保留；资料准备与实际资金结算分开。 医保结算从实际收费形成唯一模拟请求，经独立分担复核后分别核对患者现金、个人账户承担和基金应收；银行到账、逐笔分配、差额责任与原结算撤销保留完整依据。",
+    "连锁牙科诊所的预约、接诊、治疗、结算和设备使用具有连续性，任何环节的信息脱节都可能造成重复预约、患者等待、费用争议或服务中断。本文以Andrew’s Dental Chain（ADC）课程案例为背景，面向一家约5至20家诊所的连锁机构，分析七类岗位的业务责任与交接关系。 连续诊疗进一步区分方案讨论、本人决定、实际执行和后续目标；复诊责任与加工件验收各有明确岗位及完成依据，避免把预约、联系或物理返回当成实际完成。 患者可以先按城市或主动定位查找门店，核对地址、电话、营业时间与服务后再登录；公开信息、账号通道及具体就诊人授权分别管理，保持预约与诊疗历史连续。 患者账号、联络号码与就诊人档案分别管理，通过本人申请和门店前台独立核验建立关联；账号登录与具体业务授权分开，保持暂停及恢复的历史。 医保资料以地区目录版本、门店模拟安排、收费项目适配和患者待遇历史分别核对，原始来源、独立复核及未知项目保留；资料准备与实际资金结算分开。 医保结算从实际收费形成唯一模拟请求，经独立分担复核后分别核对患者现金、个人账户承担和基金应收；银行到账、逐笔分配、差额责任与原结算撤销保留完整依据。 患者端增加微信小程序登录、网站扫码确认和短信核验的统一账号流程，保留独立本人建档与代约授权；账号认证不直接授予病历或员工权限。",
     "系统以患者服务过程为主线，区分电话咨询、完整患者建档、候选协商、明确确认和正式预约。网站与原生微信小程序从门店明确发布的服务出发，说明接诊范围、费用和到诊准备，再共用患者预约服务；本人或经核验的代约人选择就诊人后明确确认改期，保留原承诺与候补接受历史。科室开放、服务时长、医师出诊、椅位及必要设备统一核验；设备故障保留原承诺并进入责任协调。实际治疗、版本化账单、收退款、资金凭据、渠道对账和独立审核共同构成诊疗与财务闭环，取消分析进一步支持原因核实及改进措施复核。",
     "研究采用用例驱动、领域关系和状态模型表达业务规则，以模块化结构、事务约束及追加式历史保持结果可追溯。课程合成场景覆盖跨岗位办理、资源竞争、授权隔离和数据恢复；统计指标说明分母与资料完整性。合成验证用于检验系统规则，不预设真实取消率下降或商业运营成效。"
   ],
   "abstract_en": [
-    "Dental-chain operations require coordinated appointments, clinical care, billing and equipment. This report analyses ADC as one chain of approximately five to twenty clinics and defines the responsibilities of seven roles. Patients discover published branches before signing in. Patient-channel accounts, contact provenance and patient records remain separate; explicit applications and independent front-desk verification establish or restore the original self association. Sign-in, location and shared phone numbers do not grant clinical access or prove insurance eligibility. Insurance settlement starts from actual charges and retains one original simulated request. Independent review separates patient cash, personal-account responsibility and fund receivables. Bank evidence, claim allocations, discrepancy follow-up and reversals preserve their original facts.",
-    "Telephone intake separates consultation, complete registration, candidate negotiation, consent and formal booking. The website and native WeChat client reuse appointment and resource rules, preserving original commitments during rescheduling and equipment faults. Continuing care links retained plans, patient decisions, actual work, recall responsibility and laboratory review. Versioned bills, independently reviewed cash and transaction evidence support financial traceability. Insurance preparation retains regional source documents, explicit fee mappings, simulated clinic arrangements and eligibility history, without creating settlement or cash facts.",
-    "Testable requirements connect business problems to actors, observable outcomes, invariants and failure recovery. Domain, state and database relationship models explain ownership and retained history. Synthetic scenarios examine permissions, resource contention and recovery; unknown results and statistical denominators remain visible. These findings assess course-system rules and usability, while commercial capacity, real-world outcomes, professional approval and external-platform acceptance require separate evidence."
+    "Dental chains coordinate appointments, clinical care, shared resources and financial review across multiple clinics. This study analyzes a dental chain of approximately five to twenty clinics. Patients discover services before signing in through a shared account. Telephone reception, the website and the native WeChat client reuse booking and resource rules. Patient relationships and chart access are verified separately from authentication.",
+    "The analysis connects observable business problems to actor responsibilities, use cases, state transitions, database relations and acceptance conditions. The design follows information hiding and uses a modular monolith. It retains treatment versions, actual performed procedures, appointment promises, independent financial decisions, payment evidence and reconciliation history. Maintenance and follow-up responsibilities remain explicit without fabricating clinical completion or financial facts.",
+    "An implemented synthetic system supports workflow, authorization, concurrency, browser and recovery evaluation. WeChat identity exchange, website scan approval and provider-verified phone challenges have separate real-platform acceptance requirements. The results establish tested system behavior within the observed scope; they do not establish professional qualification, clinical effectiveness or independent commercial operation."
   ],
   "methods": [
     {
@@ -266,9 +266,9 @@
     {
       "heading": "3.18 患者账号与本人建档核验",
       "paragraphs": [
-        "患者先找店和服务，再按需登录。本地首次授权只建账号，旧账号绑定须原密码。手机号保留来源，不合并或换绑患者。",
-        "账号向明确门店申请新档或旧档核验。有权前台核对本人、账号与资料并记录依据，不得自审；待补充继续原申请，撤回保留历史。",
-        "新档批准原子建档关联，旧档不改资料。暂停只恢复原关联，安全停用先技术恢复。批准后明确进入，原预约、改期及候补另核权限。"
+        "患者先浏览服务，按需选择小程序微信、网站小程序扫码或手机验证码。微信首次使用只建账号，不强制密码或手机号；旧账号关联须有效密码或先前短信核验，归属冲突不合并。",
+        "账号向明确门店申请新档或原档核验。有职责的前台核对本人、账号及完整资料并记录依据，不得自审；补充继续原申请，撤回保留历史。新档批准原子建档关联，原档不改资料，暂停仅恢复原关联。",
+        "短信挑战绑定用途、会话、账号及期限，换绑不改患者联络资料。微信身份、账号联络、患者档案及代约授权分开；批准后明确激活，预约、改期及候补继续核对原资源与权限。"
       ]
     },
     {
@@ -334,7 +334,7 @@
     {
       "heading": "4.13 数据库实体关系设计",
       "paragraphs": [
-        "数据库按业务责任分成二十六个真实关系视图。独立PostgreSQL实际核对129张表，含128张ORM业务与框架表及1张迁移日志；1266个ORM字段逐项核对，351条普通外键及1条账单复合外键共352条。医保请求、原始结果、独立分担、银行用途、逐笔分配、差额跟进及撤销使用明确关联，原患者、诊疗和资金历史保留。",
+        "数据库按业务责任分成二十七个真实关系视图。独立PostgreSQL实际核对131张表，含130张ORM业务与框架表及1张迁移日志；355条普通外键及1条账单复合外键共356条。新增网站扫码票据，扩展短信平台挑战引用，原患者、诊疗和财务模型不改动。字段、类型、可空性和主外键均与实际结构核对，103个业务触发器保留。",
         "PK表示主键，FK表示外键，UK表示单列唯一，问号表示可空。关系端点采用乌鸦脚记法：双竖线为恰好一个，圆圈加竖线为零或一个，圆圈加三叉为零到多个。条件唯一、状态与时间规则在图后单独说明。",
         "方案及检查的患者与诊所从原就诊推导，避免重复维护归属。方案步骤保留发布时的项目单位、服务名称、科室和时长；历史未登记定义与加工依赖保持空值。条件唯一、追加历史、完成依据和当前有效占用分别由实际数据库约束及对应业务命令核验；JSON快照不伪画为外键。"
       ]
@@ -432,9 +432,11 @@
     {
       "heading": "4.21 账号身份与建档决定设计",
       "paragraphs": [
-        "账号模块拥有身份、凭证、联络及追加事件。身份按提供方、应用和主体组合唯一；解绑保留身份历史。本地凭证私有交付，仅存摘要、用途、期限及消费时间。登录与手机凭证不可互换，客户端自报身份或号码不能作为证明。",
+        "账号模块拥有微信身份、手机凭证与追加事件。微信身份按提供方、应用和主体联合唯一，服务端以一次性code换取身份，不接受客户端自报OpenID。短信由平台生成并核验验证码，ADC保留挑战引用、用途、会话和期限；本系统只签发自己的账号会话。真实认证环境关闭本地身份替身和演示短信，旧记录仍保留来源。",
         "门户拥有申请及决定。一个账号至多一件待核验或待补充申请，批准后才引用患者。事件保留操作者、依据和当时快照。审核人与申请人必须不同，核验职责及诊所由原岗位规则决定。",
-        "账号、患者授权及工作上下文分开。批准不自动激活；预约仍核对原本人或代约权限。恢复启用同一关联，旧业务预览不复活。服务器版本、事务锁及重复操作回执共同保证唯一结果，失败不留下部分档案或授权。"
+        "账号、患者授权及工作上下文分开。批准不自动激活；预约仍核对原本人或代约权限。恢复启用同一关联，旧业务预览不复活。服务器版本、事务锁及重复操作回执共同保证唯一结果，失败不留下部分档案或授权。",
+        "扫码票据有效期180秒，仅携带随机编号，另与原浏览器私有凭据绑定。手机确认重新取得微信code，核对其属于当前账号的已绑定身份；仅密码或短信会话不能代替微信证明。APPROVED表示手机同意，CONSUMED才表示原浏览器成功领取，查询本身不登录。",
+        "确认和消费均锁定票据并重新核对状态、身份版本、账号与会话。拒绝、过期、刷新、解绑、停用或恢复使旧票据无法领取；并发请求至多一次生效。服务选择、本人核验和患者切换仍由原有模块处理。"
       ]
     },
     {
@@ -587,6 +589,11 @@
             "原结算撤销与基金退回",
             "已实现",
             "同一原撤销结果、独立核对及已到账退回；患者现金按原流程办理。"
+          ],
+          [
+            "微信与手机账号协同",
+            "代码与隔离流程已实现",
+            "真实微信、真机扫码和实际短信等待平台配置及实测；不以替代响应认定通过。"
           ]
         ],
         "widths": [
@@ -841,7 +848,8 @@
       "paragraphs": [
         "网站与原生小程序共用账号、联络、本人申请和结果页面。前台核对本店明确档案后预览决定，申请人再明确进入患者服务；未批准时不读取患者业务。",
         "合成场景核对新档、旧档、补充、撤回、同一关联恢复、同号不合并及凭证有效性，并覆盖撤权、跨店、并发和独立审批。真实后端联调接续预约、改期及候补，断网重试保持唯一结果；窄屏大字检查长账号换行。",
-        "本地凭证和号码只证明合成来源。微信平台身份不等于患者实名，真实微信运行和手机号能力须另验收；人工本人建档路线不以外部平台资料为前提。"
+        "本地凭证和号码只证明合成来源。微信平台身份不等于患者实名，真实微信运行和手机号能力须另验收；人工本人建档路线不以外部平台资料为前提。",
+        "网站和小程序使用同一ADC账号及已授权患者列表。微信快捷登录、原账号关联、网站扫码确认和手机号换绑均保持账号与患者档案分离；登录后的服务选择、改期和候补仍核对原资源与当前授权。"
       ]
     },
     {
@@ -860,6 +868,15 @@
         "结算或撤销回复丢失时均查询原唯一编号。已到账500元而只退回200元时，撤销继续处置并保留原分担；全部退回且独立核对后才撤回分担。若患者已净付300元，撤销后原1000元实际费用仍在，余额显示待缴700元，不制造退款或作废费用。",
         "验证分别核对金额投影和持久化事实，覆盖跨店、币种、超额、待审预留、重复操作、撤权、独立复核、并发分配、未知结果和已到账撤销。银行入账日期与接诊业务日分开，原治疗、账单版本、日结及现金凭据可继续追溯。"
       ]
+    },
+    {
+      "heading": "5.15 微信登录和短信核验的验证",
+      "paragraphs": [
+        "隔离PostgreSQL覆盖微信首次及重复登录、原账号关联、扫码确认与领取分离，以及不同浏览器、过期、刷新、解绑、停用、会话变化和并发领取。受控提供方响应仅验证系统合同，不代表实际微信或手机网络交互。",
+        "CloudBase按官方接口生成并核验验证码，ADC保存服务端挑战。错误、过期、重放、其他会话、号码冲突、发送失败及免费条件未确认均不产生错误关联。仅向约定号码联调，整轮最多10次且失败计入上限，不充值或启用付费通道。",
+        "真实验收须由两名授权微信用户完成登录和手机扫码确认、拒绝；两部授权手机须实际收到并核验验证码。配套平台条件尚未完成，真实微信、真机扫码和实际短信均记为未完成，整轮目标不标全通过。",
+        "个人小程序不启用一键取手机号，微信登录不强制电话。身份、联络、本人档案及代约分开；恢复后未完成认证票据失效，账号、密码及原授权保留。"
+      ]
     }
   ],
   "conclusion": [
@@ -874,7 +891,7 @@
       "heading": "6.2 下一阶段业务完善计划",
       "paragraphs": [
         "现有合成系统已形成服务发布、患者关系、限定专业范围和转诊、多渠道预约、前台排班、检查方案、实际执行、复诊加工及资金设备协同。后续面向单一连锁独立部署，确认真实机构政策与专业责任，重点推进临床签署归档、处方药事和材料执行；预约、方案讨论或账单记录不能替代完整临床专业制度。",
-        "湖南版本目录、合成待遇、原实际费用模拟结算及基金到账分配和撤销核对已形成明确流程。后续在具备资格后验收真实微信身份和手机号接口、具体定点机构的结算接口。普通微信登录不会取得居民身份证；真实医保结算仍须按机构及地区条件逐项验证，目录分类不能直接视为患者报销比例。"
+        "微信小程序登录、网站扫码确认和短信核验已形成统一账号设计及实现，真实平台联调仍须配套应用配置和零费用短信条件。普通微信登录不提供居民身份证；医保真实结算须取得具体机构资质、地区规则和接口条件，不能由模拟资金或目录分类推断。"
       ],
       "table": {
         "headers": [
@@ -939,7 +956,7 @@
     "1": "业务背景 → {患者服务、岗位协作、经营核对} → 研究目标 → 范围与方法 → 六章分析设计。",
     "2": "分析方法 → {用例、业务序列、领域、状态}；设计原则 → {信息隐藏、职责分离、一致性}；评价 → {业务结果、分母、异常}。",
     "3": "实际患者问题 → {找店、账号联络、本人及关系核验、接待排班、检查方案、复诊加工、资金设备} → 岗位和可观察规则 → 异常继续 → 用例验收。",
-    "4": "模块责任 → 真实主外键及基数 → {患者接待、资源临床、原费用与分担、银行分配、差额与撤销} → 追加历史及独立核对 → 业务不变量。",
+    "4": "模块责任 → {患者与接待、资源与临床、原费用与资金、微信身份与浏览器票据} → 实际主外键及状态守卫 → 追加历史与独立核对 → 可验证的不变量。",
     "5": "合成跨岗位场景 → 正常与异常路径 → 独立业务核算 → 数据库并发与浏览器 → 容量、恢复与权限 → 分别记录软件和目标环境证据。",
     "6": "现有业务闭环 → {身份与专业责任、连续诊疗、签署归档、处方药事、护理材料} → 财务外部衔接 → 目标环境验收与监督试用。"
   },
@@ -949,7 +966,11 @@
     "[18] W3C. Understanding Reflow[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/reflow.html（访问日期2026-10-18）.",
     "[19] W3C. Understanding Target Size Minimum[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html（访问日期2026-10-18）.",
     "[20] W3C. Understanding Focus Not Obscured Minimum[EB/OL]. https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html（访问日期2026-10-18）.",
-    "[21] 湖南省医疗保障局 湖南省人力资源和社会保障厅. 关于确定耳鼻喉、神经系统等九大类医疗服务项目医保支付政策的通知 湘医保发〔2026〕12号[EB/OL]. https://ybj.hunan.gov.cn/ybj/first113541/firstF/f3113607/202603/t20260331_33945644.html（访问日期2026-10-25）."
+    "[21] 湖南省医疗保障局 湖南省人力资源和社会保障厅. 关于确定耳鼻喉、神经系统等九大类医疗服务项目医保支付政策的通知 湘医保发〔2026〕12号[EB/OL]. https://ybj.hunan.gov.cn/ybj/first113541/firstF/f3113607/202603/t20260331_33945644.html（访问日期2026-10-25）.",
+    "[22] 微信开放文档. 小程序登录[EB/OL]. https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html（访问日期2026-10-25）.",
+    "[23] 微信开放文档. 获取不限制的小程序码[EB/OL]. https://developers.weixin.qq.com/miniprogram/dev/server/API/qrcode-link/qr-code/api_getunlimitedqrcode.html（访问日期2026-10-25）.",
+    "[24] 腾讯云开发. 发送与验证短信验证码[EB/OL]. https://docs.cloudbase.net/http-api/auth/auth-send-verification ; https://docs.cloudbase.net/http-api/auth/auth-verify-verification（访问日期2026-10-25）.",
+    "[25] 微信开放文档. 手机号快速验证组件[EB/OL]. https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/getPhoneNumber.html（访问日期2026-10-25）."
   ],
   "document_kind": "formal_system_analysis_and_design",
   "introduction": [
@@ -1220,7 +1241,7 @@
   "use_case_titles": {
     "SU-15": "SU-15　核对并发布限时邀约"
   },
-  "engineering_evidence": "docs/evidence_c61bc/README.md",
+  "engineering_evidence": "docs/evidence_wx1/README.md",
   "state_legends": {
     "recall": [
       "1 前台明确认领责任和下次内部期限。",

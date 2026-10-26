@@ -1,0 +1,58 @@
+{
+  "original_copy": {
+    "passed": true,
+    "independent_empty_database": true,
+    "encrypted_backup_decryption_verified": true,
+    "same_version_build_then_data_restore": true,
+    "old_business_model_groups": 127,
+    "old_rows_and_passwords_equal": true,
+    "additive_permission_rows": 4,
+    "additive_content_type_rows": 1,
+    "new_web_login_tickets": 0,
+    "source_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "schema": {
+      "tables": 131,
+      "application_migrations": 62
+    },
+    "restore_and_additive_upgrade_seconds": 14.844,
+    "original_database_modified": false,
+    "structural_comparison_limit": "Same-version migration path; arbitrary equivalent-DDL comparison remains outside scope."
+  },
+  "populated_auth_fixture": {
+    "passed": true,
+    "source_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "tables": 131,
+    "all_rows_and_binary_images_equal_before_invalidation": true,
+    "populated_qr_tickets": 11,
+    "sms_challenges": 5,
+    "history_preserved_after_invalidation": true,
+    "pending_challenges_expired": true,
+    "restore_seconds": 12.974,
+    "independent_empty_database": true,
+    "same_version_migration_then_data_restore": true,
+    "scope": "Private synthetic provider fixture; separate database in verification cluster. Not real WeChat/SMS or independent-host acceptance."
+  },
+  "teacher": {
+    "passed": true,
+    "application_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+    "tables": 131,
+    "rows": 2073,
+    "all_table_rows_including_sessions_and_contexts_equal": true,
+    "enabled_trigger_definitions_and_states_equal": 103,
+    "independent_empty_database": true,
+    "restore_seconds_after_empty_database_ready": 13.254,
+    "same_version_migration_then_data_restore": true,
+    "accounts_permissions_phone_binding_enrollment_booking_and_otp_history_equal": true,
+    "source_during_dump_unchanged": true,
+    "configuration_and_private_account_files": 13,
+    "encrypted_configuration_decryption_verified": true,
+    "database_backup_sha256": "dd14703fdb46aea45a650a08023b6aff7a0ffeae17f8b2f85255f92a4fcf2242",
+    "config_backup_sha256": "cb2a156ed7232379d412ced10e36be1592b5cec3473d7820fc6d2cd2cd137a74",
+    "structural_equivalence_scope": "Same-version migration path; arbitrary equivalent-DDL automatic comparison limitation retained.",
+    "scope": "Independent synthetic teacher trial recovery, not actual cloud or production operating acceptance"
+  },
+  "final_configuration": {
+    "passed": true,
+    "all_downloaded_configuration_and_private_guides_match_current": true
+  }
+}

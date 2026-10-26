@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-25。本目录列出129张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-25。本目录列出130张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -4242,6 +4242,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | session_digest | character varying(64) | — | 否 | — |
 | ip_digest | character varying(64) | — | 否 | — |
 | code_digest | character varying(64) | — | 否 | — |
+| provider_reference | character varying(512) | — | 否 | — |
 | state | character varying(8) | — | 否 | — |
 | attempts | smallint | — | 否 | — |
 | expires_at | timestamp with time zone | — | 否 | — |
@@ -4254,7 +4255,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_sms_challenge_pkey`：`PRIMARY KEY (id)`。
 - `adc_sms_challenge_user_id_3c51cd3c_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `sms_attempt_limit`：`CHECK ((attempts <= 5))`。
-- `sms_known_provider`：`CHECK (((provider)::text = ANY ((ARRAY['tencent'::character varying, 'demo'::character varying])::text[])))`。
+- `sms_known_provider`：`CHECK (((provider)::text = ANY ((ARRAY['tencent'::character varying, 'demo'::character varying, 'cloudbase'::character varying])::text[])))`。
 - `sms_purpose_owner`：`CHECK (((((purpose)::text = 'LOGIN'::text) AND (user_id IS NULL)) OR (((purpose)::text = 'BIND'::text) AND (user_id IS NOT NULL))))`。
 
 索引（含条件唯一索引）：
@@ -4911,6 +4912,50 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_wait_request_preferred_dentist_id_bc68cadd`：`CREATE INDEX adc_wait_request_preferred_dentist_id_bc68cadd ON public.adc_wait_request USING btree (preferred_dentist_id)`。
 - `adc_wait_request_service_id_4da6945a`：`CREATE INDEX adc_wait_request_service_id_4da6945a ON public.adc_wait_request USING btree (service_id)`。
 - `wait_one_open_patient`：`CREATE UNIQUE INDEX wait_one_open_patient ON public.adc_wait_request USING btree (patient_id) WHERE ((state)::text = ANY ((ARRAY['WAITING'::character varying, 'OFFERED'::character varying])::text[]))`。
+
+跨表及历史触发器：
+
+
+## adc_web_login_ticket
+
+模型：`accounts.WebLoginTicket`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | uuid | PK | 否 | — |
+| browser_digest | character varying(64) | — | 否 | — |
+| origin | character varying(255) | — | 否 | — |
+| state | character varying(8) | — | 否 | — |
+| identity_id | bigint | FK | 是 | `adc_external_identity.id` |
+| identity_revision | integer | — | 是 | — |
+| user_id | bigint | FK | 是 | `adc_user.id` |
+| workspace_id | uuid | FK | 是 | `adc_workspace_context.id` |
+| workspace_revision | integer | — | 是 | — |
+| auth_digest | character varying(64) | — | 否 | — |
+| image | bytea | — | 否 | — |
+| expires_at | timestamp with time zone | — | 否 | — |
+| decided_at | timestamp with time zone | — | 是 | — |
+| consumed_at | timestamp with time zone | — | 是 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_web_login_ticket_identity_id_868f07ed_fk_adc_exter`：`FOREIGN KEY (identity_id) REFERENCES adc_external_identity(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_web_login_ticket_identity_revision_check`：`CHECK ((identity_revision >= 0))`。
+- `adc_web_login_ticket_pkey`：`PRIMARY KEY (id)`。
+- `adc_web_login_ticket_user_id_e19a483d_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_web_login_ticket_workspace_id_ee39afab_fk_adc_works`：`FOREIGN KEY (workspace_id) REFERENCES adc_workspace_context(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_web_login_ticket_workspace_revision_check`：`CHECK ((workspace_revision >= 0))`。
+- `web_login_approval_proof`：`CHECK (((NOT ((state)::text = ANY ((ARRAY['APPROVED'::character varying, 'CONSUMED'::character varying])::text[]))) OR ((identity_id IS NOT NULL) AND (identity_revision IS NOT NULL) AND (user_id IS NOT NULL) AND (workspace_id IS NOT NULL) AND (workspace_revision IS NOT NULL))))`。
+- `web_login_known_state`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CONSUMED'::character varying, 'REJECTED'::character varying, 'EXPIRED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_web_login_ticket_identity_id_868f07ed`：`CREATE INDEX adc_web_login_ticket_identity_id_868f07ed ON public.adc_web_login_ticket USING btree (identity_id)`。
+- `adc_web_login_ticket_pkey`：`CREATE UNIQUE INDEX adc_web_login_ticket_pkey ON public.adc_web_login_ticket USING btree (id)`。
+- `adc_web_login_ticket_user_id_e19a483d`：`CREATE INDEX adc_web_login_ticket_user_id_e19a483d ON public.adc_web_login_ticket USING btree (user_id)`。
+- `adc_web_login_ticket_workspace_id_ee39afab`：`CREATE INDEX adc_web_login_ticket_workspace_id_ee39afab ON public.adc_web_login_ticket USING btree (workspace_id)`。
+- `web_login_expiry`：`CREATE INDEX web_login_expiry ON public.adc_web_login_ticket USING btree (expires_at)`。
 
 跨表及历史触发器：
 

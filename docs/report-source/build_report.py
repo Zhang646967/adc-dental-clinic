@@ -79,6 +79,7 @@ def build(folder,repo,output=None):
  D.styles['Caption'].paragraph_format.first_line_indent=Pt(0)
  D.core_properties.title=source['title'];D.core_properties.subject=source['version'];D.core_properties.author=source['author']['name'];D.core_properties.keywords='系统分析与设计 预约业务 患者服务 财务 设备 用例规约'
  next_page=[False]
+ figure_numbers={}
  toc=[];markdown=['# '+source['title'],'',source['version']+' '+source['date'],'']
  def p(text='',size=12,bold=False,center=False,indent=True,space=0):
   x=D.add_paragraph();font(x.add_run(text),size,bold)
@@ -111,7 +112,7 @@ def build(folder,repo,output=None):
     for n,chunk in enumerate(chunks):bounded.append([label if n==0 else label+'（续'+str(n)+'）',chunk])
    rows=bounded
   if headers[0]=='标题':
-   case=rows[0][1];number=int(case[3:5]) if case.startswith('SU-') else 26;label=case_label or ('A' if case.startswith('SF-') or number<=25 else 'B');ordinal=number if label=='A' else number-(38 if label=='C' else 25)
+   case=rows[0][1];number=int(re.match(r'SU-(\d+)',case).group(1)) if case.startswith('SU-') else 26;label=case_label or ('A' if case.startswith('SF-') or number<=25 else 'B');ordinal=number if label=='A' else number-(38 if label=='C' else 25)
    cap=p('表'+label+'-'+str(ordinal)+' '+case+'用例规约',10.5,False,True);cap.paragraph_format.keep_with_next=True
   widths=widths or [3.2,12.8];t=D.add_table(rows=1,cols=len(headers));t.alignment=WD_TABLE_ALIGNMENT.CENTER;t.autofit=False
   for col,w in zip(t.columns,widths):col.width=Cm(w)
@@ -146,6 +147,10 @@ def build(folder,repo,output=None):
    v=spec['table'];label={'3.8':'表3-7 财务与设备补充需求','3.9':'表3-8 通知进度与监测需求','5.4':'表5-1 分层测试与执行结果','5.6':'表5-2 需求至验收追踪','5.7':'表5-3 页面调研与落实','5.8':'表5-4 业务体验问题与可验证行为','6.2':'表6-1 后续工作与验收门槛'}.get(spec['heading'][:3],spec['heading'])
    p(spec.get('caption') or label,10.5,False,True);table(v['headers'],v['rows'],v['widths'])
  def figure(path,caption,width=16,max_height=None):
+  chapter=re.match(r'^图(\d+)-',caption).group(1)
+  prior=[int(m[1]) for paragraph in D.paragraphs if (m:=re.match('^图'+chapter+r'-(\d+)\s',paragraph.text))]
+  figure_numbers[chapter]=max(prior,default=0)+1
+  caption=re.sub(r'^图\d+-\d+', '图'+chapter+'-'+str(figure_numbers[chapter]),caption)
   if not path.exists():raise FileNotFoundError(path)
   if max_height is not None:
    from PIL import Image
@@ -369,6 +374,12 @@ def build(folder,repo,output=None):
     heading('4.13.'+str(number-14)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number)+' '+manifest[name]['title']+'数据库ER图',16,max_height=12.5 if number==15 else 18)
     p(manifest[name]['note'],10.5)
+   page();heading('4.13.27 网站扫码票据与微信独立确认',3,False)
+   figure(repo/'docs/database/er_wechat_web_login.png','图4-47 网站扫码票据数据库ER图',16,max_height=18)
+   p(manifest['er_wechat_web_login']['note'],10.5)
+  if item['heading'].startswith('4.21 '):
+   figure(repo/'docs/diagrams/wechat_web_login_state.png','图4-48 网站扫码登录的状态与责任',16,max_height=17)
+   p('手机确认与浏览器领取是两个独立阶段。到期、刷新或权限变化均须重新核对；恢复时未完成票据失效，既有账号和病历保留。')
   if item['heading'].startswith('4.17'):
    figure(repo/'docs/diagrams/clinical_record_state.png','图4-41 检查草稿与确认版本的业务状态',16,max_height=18)
    p('状态图描述可观察的业务阶段，不增加虚构的状态列。旧确认版本在更正草稿期间继续保留；确认及保存不等于合格电子签名或实际治疗。')
@@ -385,7 +396,8 @@ def build(folder,repo,output=None):
  for item in source['conclusion']:add(item)
  mind(6)
  page();heading('参考文献',1)
- for text in old_refs+source['extra_references']:p(text,10.5,False,False,False,space=5)
+ for text in old_refs+source['extra_references']:
+  reference=p(text,10.5,False,False,False,space=5);reference.paragraph_format.line_spacing=Pt(20)
  page();heading('附录A 基础系统用例规约',1)
  p('本附录给出SU-01—25及共享核验SF-01。规约以业务目标、交互、正常与异常结果为核心；验收编号为需求追踪标识，功能完成状态见第5章。',10.5)
  appendix_b=False
@@ -413,7 +425,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 扩展业务用例规约',1)
- p('本附录补充SU-39—96，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作及连续诊疗。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
+ p('本附录补充SU-39—101，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作、连续诊疗及微信账号协同。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

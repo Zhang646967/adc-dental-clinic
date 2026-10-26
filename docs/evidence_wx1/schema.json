@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "source_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+  "tables": 131,
+  "foreign_keys": 356,
+  "triggers": 103,
+  "model_columns_types_nullability_and_sql_constraints_equal": true,
+  "checked_sections": [
+    "triggers",
+    "models",
+    "tables",
+    "constraints",
+    "indexes",
+    "columns",
+    "migrations"
+  ]
+}

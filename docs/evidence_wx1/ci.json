@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "conclusion": "success",
+  "workflow_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+  "tested_source_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+  "exact_checkout_recorded_in_log": true,
+  "run_id": 40279432272,
+  "job_id": 121429206390,
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40279432272",
+  "source_rules": 1122,
+  "postgresql_tests": 2005,
+  "scope": "Exact Linux CI, mocked provider contracts; no real WeChat/SMS acceptance"
+}

@@ -16006,6 +16006,19 @@
           "on_delete": null
         },
         {
+          "name": "provider_reference",
+          "column": "provider_reference",
+          "type": "CharField",
+          "db_type": "varchar(512)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 512,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
           "name": "state",
           "column": "state",
           "type": "CharField",
@@ -18174,6 +18187,210 @@
       "unique_together": []
     },
     {
+      "table": "adc_web_login_ticket",
+      "model": "accounts.WebLoginTicket",
+      "app": "accounts",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "browser_digest",
+          "column": "browser_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "origin",
+          "column": "origin",
+          "type": "CharField",
+          "db_type": "varchar(255)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 255,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "identity",
+          "column": "identity_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_external_identity",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "identity_revision",
+          "column": "identity_revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "user",
+          "column": "user_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "workspace",
+          "column": "workspace_id",
+          "type": "ForeignKey",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_workspace_context",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "workspace_revision",
+          "column": "workspace_revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "auth_digest",
+          "column": "auth_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "image",
+          "column": "image",
+          "type": "BinaryField",
+          "db_type": "bytea",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "expires_at",
+          "column": "expires_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "decided_at",
+          "column": "decided_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "consumed_at",
+          "column": "consumed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_workspace_context",
       "model": "workspaces.WorkspaceContext",
       "app": "workspaces",
@@ -18666,6 +18883,7 @@
     "adc_visit_request",
     "adc_wait_offer",
     "adc_wait_request",
+    "adc_web_login_ticket",
     "adc_workspace_context",
     "auth_group",
     "auth_group_permissions",
@@ -23533,7 +23751,7 @@
       "table": "adc_sms_challenge",
       "name": "sms_known_provider",
       "kind": "c",
-      "definition": "CHECK (((provider)::text = ANY ((ARRAY['tencent'::character varying, 'demo'::character varying])::text[])))"
+      "definition": "CHECK (((provider)::text = ANY ((ARRAY['tencent'::character varying, 'demo'::character varying, 'cloudbase'::character varying])::text[])))"
     },
     {
       "table": "adc_sms_challenge",
@@ -24302,6 +24520,54 @@
       "name": "wait_time_order",
       "kind": "c",
       "definition": "CHECK ((latest > earliest))"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_identity_id_868f07ed_fk_adc_exter",
+      "kind": "f",
+      "definition": "FOREIGN KEY (identity_id) REFERENCES adc_external_identity(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_identity_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((identity_revision >= 0))"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_user_id_e19a483d_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_workspace_id_ee39afab_fk_adc_works",
+      "kind": "f",
+      "definition": "FOREIGN KEY (workspace_id) REFERENCES adc_workspace_context(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_workspace_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((workspace_revision >= 0))"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "web_login_approval_proof",
+      "kind": "c",
+      "definition": "CHECK (((NOT ((state)::text = ANY ((ARRAY['APPROVED'::character varying, 'CONSUMED'::character varying])::text[]))) OR ((identity_id IS NOT NULL) AND (identity_revision IS NOT NULL) AND (user_id IS NOT NULL) AND (workspace_id IS NOT NULL) AND (workspace_revision IS NOT NULL))))"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "web_login_known_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'CONSUMED'::character varying, 'REJECTED'::character varying, 'EXPIRED'::character varying])::text[])))"
     },
     {
       "table": "adc_workspace_context",
@@ -27650,6 +27916,31 @@
       "table": "adc_wait_request",
       "name": "wait_one_open_patient",
       "definition": "CREATE UNIQUE INDEX wait_one_open_patient ON public.adc_wait_request USING btree (patient_id) WHERE ((state)::text = ANY ((ARRAY['WAITING'::character varying, 'OFFERED'::character varying])::text[]))"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_identity_id_868f07ed",
+      "definition": "CREATE INDEX adc_web_login_ticket_identity_id_868f07ed ON public.adc_web_login_ticket USING btree (identity_id)"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_web_login_ticket_pkey ON public.adc_web_login_ticket USING btree (id)"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_user_id_e19a483d",
+      "definition": "CREATE INDEX adc_web_login_ticket_user_id_e19a483d ON public.adc_web_login_ticket USING btree (user_id)"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "adc_web_login_ticket_workspace_id_ee39afab",
+      "definition": "CREATE INDEX adc_web_login_ticket_workspace_id_ee39afab ON public.adc_web_login_ticket USING btree (workspace_id)"
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "name": "web_login_expiry",
+      "definition": "CREATE INDEX web_login_expiry ON public.adc_web_login_ticket USING btree (expires_at)"
     },
     {
       "table": "adc_workspace_context",
@@ -34396,6 +34687,12 @@
       "null": true
     },
     {
+      "table": "adc_sms_challenge",
+      "column": "provider_reference",
+      "db_type": "character varying(512)",
+      "null": false
+    },
+    {
       "table": "adc_statement_batch",
       "column": "id",
       "db_type": "bigint",
@@ -35290,6 +35587,96 @@
       "null": true
     },
     {
+      "table": "adc_web_login_ticket",
+      "column": "id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "browser_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "origin",
+      "db_type": "character varying(255)",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "state",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "identity_revision",
+      "db_type": "integer",
+      "null": true
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "workspace_revision",
+      "db_type": "integer",
+      "null": true
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "auth_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "image",
+      "db_type": "bytea",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "expires_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "decided_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "consumed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "identity_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "user_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_web_login_ticket",
+      "column": "workspace_id",
+      "db_type": "uuid",
+      "null": true
+    },
+    {
       "table": "adc_workspace_context",
       "column": "id",
       "db_type": "uuid",
@@ -35468,6 +35855,10 @@
     {
       "app": "accounts",
       "name": "0004_patient_live_auth"
+    },
+    {
+      "app": "accounts",
+      "name": "0005_wx1_web_login_and_cloudbase"
     },
     {
       "app": "assistants",
@@ -35759,5 +36150,6 @@
     }
   ],
   "observed_on": "2026-10-25",
-  "observed_scope": "Independent empty PostgreSQL17 database with61 application migrations; authentication source candidate mounted read-only; no business rows exported."
+  "application_commit": "117e9d7ca3d7066e352f5264d067636c4719f0b4",
+  "observed_scope": "Independent PostgreSQL17 database with62 application migrations, mounted exact WX1 source; structure only, no patient rows exported."
 }

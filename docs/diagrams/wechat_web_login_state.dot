@@ -1,0 +1,19 @@
+digraph QR {
+ graph [rankdir=TB,bgcolor="white",pad="0.3",nodesep="0.45",ranksep="0.7",fontname="Arial"];
+ node [shape=box,style="rounded",fontname="Arial",fontsize=17,width=3.1,margin="0.18,0.14",color="#335a55"];
+ edge [fontname="Arial",fontsize=13,color="#48645f",arrowsize=.8];
+ pending [label="PENDING 待手机确认\n公开随机票据编号\n原浏览器私有凭据\n180秒有效"];
+ approved [label="APPROVED 手机已同意\n新微信code\n核对已绑定身份\n保留身份及会话版本"];
+ consumed [label="CONSUMED 已领取\n原浏览器已登录\n事务重核且只生效一次\n继续原账号核验",penwidth=2];
+ rejected [label="REJECTED 已拒绝\n手机拒绝或网站刷新\n身份、账号或会话变化"];
+ expired [label="EXPIRED 已过期\n到期或独立恢复后失效"];
+ pending -> approved [label="本人在微信明确确认"];
+ approved -> consumed [label="原浏览器POST领取\n身份、会话、账号仍有效"];
+ pending -> rejected [label="拒绝／刷新"];
+ approved -> rejected [label="解绑／停用／版本变化"];
+ pending -> expired [label="到期／恢复"];
+ approved -> expired [label="到期／恢复"];
+ {rank=same;consumed;rejected;expired;}
+ note [shape=note,label="状态查询只读取进度\n不执行登录或建立病历\n代约及员工权限另行核验",fontsize=13,color="#888888"];
+ consumed -> note [style=invis];
+}
