@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "source_checks": 216,
+  "account_handler_cases": 22,
+  "official_offline_compilation": {
+    "status": "passed",
+    "wxml_pages": 19,
+    "wxss_files": 1,
+    "scope": "Official offline syntax only; not an IDE preview or WeChat runtime"
+  },
+  "platform_runtime_verified": false,
+  "visible_project": "/Users/zhang/Downloads/ADC系统试用/微信小程序",
+  "zip_file": "ADC微信小程序.zip",
+  "zip_sha256": "70f8e31d1f7aa58094cdf1cdbfbf3862e27b9bbfbda559501ee1c1b7e75bf6c0",
+  "private_passwords_excluded": true,
+  "official_tool_opened": true,
+  "user_wechat_login_and_service_port_pending": true
+}

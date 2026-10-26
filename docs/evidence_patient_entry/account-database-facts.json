@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "environments": [
+    {
+      "passed": true,
+      "new_account": true,
+      "phone_identity_same_user": true,
+      "password_not_required": true,
+      "employee_grants": 0,
+      "patient_access_grants": 0,
+      "consumed_challenges": 1,
+      "schema": {
+        "tables": 130,
+        "foreign_keys": 353,
+        "enabled_triggers": 103
+      },
+      "environment": "mac",
+      "clinical_booking_and_money_facts_unchanged": true
+    },
+    {
+      "passed": true,
+      "new_account": true,
+      "phone_identity_same_user": true,
+      "password_not_required": true,
+      "employee_grants": 0,
+      "patient_access_grants": 0,
+      "consumed_challenges": 1,
+      "schema": {
+        "tables": 130,
+        "foreign_keys": 353,
+        "enabled_triggers": 103
+      },
+      "environment": "teacher",
+      "clinical_booking_and_money_facts_unchanged": true
+    }
+  ],
+  "scope": "Independent database verification of accounts created through the new inline browser flow; no real SMS or WeChat identity."
+}

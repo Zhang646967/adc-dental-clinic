@@ -1,4 +1,6 @@
-**教师异地试用与患者快捷登录：** [当前入口、准确CI及执行记录](evidence_patient_auth/README.md) · [微信／短信与合成注册办理](WECHAT_SMS_TEACHER_TEST.md)。
+**当前患者入口修正：** [直接登录、私有账号与小程序导入](PATIENT_ENTRY_GUIDE.md) · [原本机及教师HTTPS验证](evidence_patient_entry/README.md)。
+
+**前轮教师试用历史：** [准确CI及原地址的执行记录](evidence_patient_auth/README.md) · [微信／短信与合成注册办理](WECHAT_SMS_TEACHER_TEST.md)。
 
 当前新增：[本地模拟结算与基金清算](C61BC_LOCAL_GUIDE.md) · [业务合同与需求追踪](C61BC_SETTLEMENT_CONTRACT.md) · [分项执行证据](evidence_c61bc/README.md)。准确CI、完整1,935项PG、同镜像浏览器／容量／恢复及原系统保护更新通过，正式报告和实际ER已同步。
 

@@ -1,0 +1,175 @@
+{
+  "application_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+  "image": "sha256:95a2d01023701c6269507f15f2794b33f3c8bbc6d9bbb7093d088d1a702f023f",
+  "ci": {
+    "headSha": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "tested_source_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "workflow_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40251853346",
+    "run_id": 40251853346,
+    "job_id": 121345284029,
+    "exact_checkout_recorded_in_log": true,
+    "source_rules": 1122,
+    "postgresql_cases": 1972,
+    "verification_exit": 0,
+    "cleanup_exit": 0
+  },
+  "original_local_update": {
+    "passed": true,
+    "application_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "image": "sha256:95a2d01023701c6269507f15f2794b33f3c8bbc6d9bbb7093d088d1a702f023f",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40251853346",
+    "original_database_container_preserved": true,
+    "database_volume": "adc_rc1_c65a09cf5683_rc_data",
+    "old_business_model_groups_preserved": 126,
+    "old_rows_and_password_hashes_preserved": true,
+    "new_sms_table_initially_empty": true,
+    "additive_permission_rows": 4,
+    "additive_content_type_rows": 1,
+    "private_configurations_preserved_except_explicit_test_auth": 70,
+    "explicit_auth_additions": [
+      "RC_SMS_PROVIDER=demo",
+      "RC_TEACHER_TEST_MODE=1"
+    ],
+    "rc_tag_preserved": true,
+    "old_observer_state": "UNKNOWN_OBSERVER_UNAVAILABLE",
+    "old_observations_encrypted": {
+      "file": "previous-observations.tar.age",
+      "sha256": "669df1039062dd314cacb139bbdca552afa42385d03a6fc2d40d129412044cd1",
+      "decryption_verified": true
+    },
+    "old_host_history_encrypted": {
+      "file": "previous-host-events.tar.age",
+      "sha256": "b9b518fe8fbd8ca9553c68a995b944397eae899a9b21691b0ac721d2bf81dfc6",
+      "decryption_verified": true
+    },
+    "new_six_conditions": "HEALTHY",
+    "host_collector_pid": 58307
+  },
+  "independent_teacher_update": {
+    "passed": true,
+    "application_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "image": "sha256:95a2d01023701c6269507f15f2794b33f3c8bbc6d9bbb7093d088d1a702f023f",
+    "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40251853346",
+    "project": "adc_g4_de62b0730edd",
+    "business_model_groups_preserved": 127,
+    "old_rows_and_passwords_preserved": true,
+    "database_container_and_volume_preserved": true,
+    "url_and_tunnel_unchanged": true,
+    "old_observations_archived_encrypted": true,
+    "configuration_and_credentials_backed_up": true,
+    "new_six_conditions": "HEALTHY",
+    "database_backup_sha256": "91cd2ecc91fcb5ec69969ca4a3ed45e1106956f1b1176fd523fa7495aef62b4e",
+    "configuration_backup_sha256": "3d678e1e4ea7853ea60b7e7971ab3cdac8035698a8f4c5eda2afc8b1992396a9",
+    "scope": "Independent synthetic teacher trial on the Mac; not independent cloud or platform acceptance."
+  },
+  "current_teacher_url": "https://foo-simply-volumes-applied.trycloudflare.com",
+  "local_browser_checks": 12,
+  "teacher_browser_checks": 12,
+  "roles_verified_each_environment": 7,
+  "database_facts": {
+    "passed": true,
+    "environments": [
+      {
+        "passed": true,
+        "new_account": true,
+        "phone_identity_same_user": true,
+        "password_not_required": true,
+        "employee_grants": 0,
+        "patient_access_grants": 0,
+        "consumed_challenges": 1,
+        "schema": {
+          "tables": 130,
+          "foreign_keys": 353,
+          "enabled_triggers": 103
+        },
+        "environment": "mac",
+        "clinical_booking_and_money_facts_unchanged": true
+      },
+      {
+        "passed": true,
+        "new_account": true,
+        "phone_identity_same_user": true,
+        "password_not_required": true,
+        "employee_grants": 0,
+        "patient_access_grants": 0,
+        "consumed_challenges": 1,
+        "schema": {
+          "tables": 130,
+          "foreign_keys": 353,
+          "enabled_triggers": 103
+        },
+        "environment": "teacher",
+        "clinical_booking_and_money_facts_unchanged": true
+      }
+    ],
+    "scope": "Independent database verification of accounts created through the new inline browser flow; no real SMS or WeChat identity."
+  },
+  "original_backup_restore_upgrade": {
+    "passed": true,
+    "independent_empty_database": true,
+    "encrypted_backup_decryption_verified": true,
+    "same_version_build_then_data_restore": true,
+    "old_business_model_groups": 126,
+    "old_rows_and_passwords_equal": true,
+    "additive_permission_rows": 4,
+    "additive_content_type_rows": 1,
+    "new_sms_challenges": 0,
+    "source_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "schema": {
+      "tables": 130,
+      "application_migrations": 61
+    },
+    "restore_and_additive_upgrade_seconds": 17.604,
+    "original_database_modified": false,
+    "structural_comparison_limit": "Same-version migration path; arbitrary equivalent-DDL comparison remains outside scope."
+  },
+  "teacher_current_encrypted_recovery": {
+    "passed": true,
+    "application_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+    "tables": 130,
+    "rows": 1996,
+    "all_table_rows_including_sessions_and_contexts_equal": true,
+    "enabled_trigger_definitions_and_states_equal": 103,
+    "independent_empty_database": true,
+    "restore_seconds_after_empty_database_ready": 13.156,
+    "same_version_migration_then_data_restore": true,
+    "accounts_permissions_phone_binding_enrollment_booking_and_otp_history_equal": true,
+    "source_during_dump_unchanged": true,
+    "configuration_and_private_account_files": 13,
+    "encrypted_configuration_decryption_verified": true,
+    "database_backup_sha256": "1600ce8b01c61e3a7a0523579fcf73947a6a72582f09591f01de025159270a8e",
+    "config_backup_sha256": "4f0ed938bb79cafabc8575a03e2498ccadd25c56608989dcac9f8a5791f33acd",
+    "structural_equivalence_scope": "Same-version migration path; arbitrary equivalent-DDL automatic comparison limitation retained.",
+    "scope": "Independent synthetic teacher trial recovery, not actual cloud or production operating acceptance"
+  },
+  "native": {
+    "passed": true,
+    "source_checks": 216,
+    "account_handler_cases": 22,
+    "official_offline_compilation": {
+      "status": "passed",
+      "wxml_pages": 19,
+      "wxss_files": 1,
+      "scope": "Official offline syntax only; not an IDE preview or WeChat runtime"
+    },
+    "platform_runtime_verified": false,
+    "visible_project": "/Users/zhang/Downloads/ADC系统试用/微信小程序",
+    "zip_file": "ADC微信小程序.zip",
+    "zip_sha256": "70f8e31d1f7aa58094cdf1cdbfbf3862e27b9bbfbda559501ee1c1b7e75bf6c0",
+    "private_passwords_excluded": true,
+    "official_tool_opened": true,
+    "user_wechat_login_and_service_port_pending": true
+  },
+  "scope": "Synthetic local and temporary teacher release. Real WeChat, real SMS, IDE preview/device/experience, independent cloud/mainland/24h and commercial clinical qualification are not established.",
+  "formal_course_report": "Existing C6.1 report files retained; this UI/auth delivery has a separate engineering guide.",
+  "historical_windows_data_recovery": "UNRESOLVED",
+  "history": {
+    "initial_ci": "559b7b6 failed the unchanged update manifest before tests; corrected in01f7285.",
+    "narrow_screen": "Real screenshot found the old form-button width rule squeezing the OTP input; fixed in99aa4b4 before either protected update.",
+    "prior_teacher_tunnel": "courier-block-salon-festival.trycloudflare.com retired with Unauthorized: Tunnel not found; retained private history, renewed and rechecked actual HTTPS.",
+    "original_observer": "Prior UNKNOWN_OBSERVER_UNAVAILABLE preserved in encrypted history; fresh health recorded separately."
+  }
+}

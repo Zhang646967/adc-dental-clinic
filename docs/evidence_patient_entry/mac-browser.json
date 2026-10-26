@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "origin": "http://127.0.0.1:18000",
+  "source": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+  "checks": 12,
+  "details": [
+    {
+      "name": "Phone registration is primary; password alternative stays on the page",
+      "passed": true
+    },
+    {
+      "name": "No employee shortcut or display mode; old preference cleared",
+      "passed": true
+    },
+    {
+      "name": "WeChat shortcut and truthful unconfigured state are visible",
+      "passed": true
+    },
+    {
+      "name": "390px with browser large text reflows without horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "Keyboard focus works without changing display mode",
+      "passed": true
+    },
+    {
+      "name": "Code request stays on the same page and labels synthetic delivery",
+      "passed": true
+    },
+    {
+      "name": "A first-time user registers without a username or password",
+      "passed": true
+    },
+    {
+      "name": "Website session is accepted by the native account API without employee/patient-chart grants",
+      "passed": true
+    },
+    {
+      "name": "patient_demo_a existing password and independent channel work",
+      "passed": true
+    },
+    {
+      "name": "front_a existing password and independent channel work",
+      "passed": true
+    },
+    {
+      "name": "manager_a existing password and independent channel work",
+      "passed": true
+    },
+    {
+      "name": "Public clinic listing has no repeated contact/location or employee controls",
+      "passed": true
+    }
+  ],
+  "scope": "Real Chrome and shared native HTTP account endpoint; WeChat/SMS external providers are unconfigured"
+}

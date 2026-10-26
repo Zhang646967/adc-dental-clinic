@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "old_application_migrations_byte_equal": 60,
+  "current_application_migrations": 61,
+  "host_collector_state": "HEALTHY",
+  "source_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+  "rc_tag": "d2b64c34553f273e3ce15e10dced8e8bf9e03620"
+}

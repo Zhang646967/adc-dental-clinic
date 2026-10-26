@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "independent_empty_database": true,
+  "encrypted_backup_decryption_verified": true,
+  "same_version_build_then_data_restore": true,
+  "old_business_model_groups": 126,
+  "old_rows_and_passwords_equal": true,
+  "additive_permission_rows": 4,
+  "additive_content_type_rows": 1,
+  "new_sms_challenges": 0,
+  "source_commit": "99aa4b4920f8e99b743aea04f6c303a688b635e2",
+  "schema": {
+    "tables": 130,
+    "application_migrations": 61
+  },
+  "restore_and_additive_upgrade_seconds": 17.604,
+  "original_database_modified": false,
+  "structural_comparison_limit": "Same-version migration path; arbitrary equivalent-DDL comparison remains outside scope."
+}
