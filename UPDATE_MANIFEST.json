@@ -2230,7 +2230,7 @@
     "scripts/patient_identity_demo.py": "e7e6911f9361a3c76d015e4bf54f3b31a3c407f5d2be6155a9eef612184a9aa4",
     "scripts/portal_reschedule_load.py": "1e40f478242652c6242e3368d5a93236ae07d571b60b405472be83b28799a9d5",
     "scripts/prepare_wechat.py": "9289e759f8cf41259e8f9309161bd621c64e5e21e80717f338f1be89b13fb5a7",
-    "scripts/profile_load.py": "de5fcb2bdb2b9e3dda4f490605fdbf877726f965bf35b18a3ad271043d2960b6",
+    "scripts/profile_load.py": "3be2e836cfb348e62df7650bc178ab48ca384c4499d194bb05a8f37aa3a3bfb1",
     "scripts/rc_config.py": "e0d5674f7d47c5da761c75746eb23937566c97851745438d5a8783ac2984f126",
     "scripts/rc_database_guard.py": "892a3d2d6601c43d0555971f24c3a10d8e2c129c83f2ec4326356e8737618d1b",
     "scripts/rc_legacy_snapshot.sql": "1004faf5bca22097b8572d87106db1a15f19ac03fe5cec343850ad8e6799e807",

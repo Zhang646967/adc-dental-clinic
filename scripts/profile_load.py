@@ -112,7 +112,7 @@ def load(args):
         while True:
             item=queues[index].get()
             if item is None:queues[index].task_done();break
-            seq,write=item;started=time.monotonic();row={'seq':seq,'actor':index,'clinic':actor['clinic'],'write':write}
+            seq,write,due=item;started=time.monotonic();row={'seq':seq,'actor':index,'clinic':actor['clinic'],'write':write}
             with lock:active+=1;peak=max(peak,active)
             try:
                 if write:
@@ -132,7 +132,7 @@ def load(args):
                 row['status']=status
             except Exception as exc:row.update(ok=False,error=type(exc).__name__)
             finally:
-                row['seconds']=time.monotonic()-started
+                finished=time.monotonic();row['seconds']=finished-due;row['service_seconds']=finished-started;row['queue_seconds']=started-due
                 with lock:active-=1;results.append(row)
                 queues[index].task_done()
         client.close()
@@ -143,12 +143,12 @@ def load(args):
     start_utc=datetime.now(timezone.utc).isoformat();wall=time.time();base=time.monotonic();last_offer=base;max_gap=0;dropped=[]
     total=args.seconds*5
     for seq in range(total):
-        due=base+seq/5
+        due=base+((seq//20)*4 if args.arrival_mode=='waves' else seq/5)
         delay=due-time.monotonic()
         if delay>0:time.sleep(delay)
         now=time.monotonic();max_gap=max(max_gap,now-last_offer);last_offer=now
         index=seq%20;write=write_request(seq)
-        try:queues[index].put_nowait((seq,write))
+        try:queues[index].put_nowait((seq,write,due))
         except queue.Full:dropped.append(seq)
         if seq and seq%300==0:
             progress={'completed':len(results),'target':total,'elapsed_seconds':round(now-base,1),'failures':sum(not r['ok'] for r in results),'dropped':len(dropped)}
@@ -167,7 +167,7 @@ def load(args):
     oom_events=subprocess.check_output(d+event_args,text=True,timeout=30).strip().splitlines()
     oom=bool(oom_events) or any(m['State']['OOMKilled'] for m in meta)
     result=dict(source=data['source'],project=data['project'],run=run,started_utc=start_utc,seconds=args.seconds,
-        elapsed_seconds=round(elapsed,3),wall_elapsed_seconds=round(wall_elapsed,3),max_offer_gap_seconds=round(max_gap,3),
+        arrival_mode=args.arrival_mode,elapsed_seconds=round(elapsed,3),wall_elapsed_seconds=round(wall_elapsed,3),max_offer_gap_seconds=round(max_gap,3),
         target_rps=5,actual_rps=round(len(results)/elapsed,3),users=20,clinics=20,offered=total,dropped=dropped,
         max_in_flight=peak,summary=summary(results),reads=summary([r for r in results if not r['write']]),
         writes=summary([r for r in results if r['write']]),oom=oom,oom_events=len(oom_events),
@@ -184,5 +184,5 @@ def load(args):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--manifest',required=True);p.add_argument('--output',required=True)
-    p.add_argument('--seconds',type=int,default=1800);p.add_argument('--docker',default='/Applications/Docker.app/Contents/Resources/bin/docker')
+    p.add_argument('--arrival-mode',choices=('paced','waves'),default='waves');p.add_argument('--seconds',type=int,default=1800);p.add_argument('--docker',default='/Applications/Docker.app/Contents/Resources/bin/docker')
     raise SystemExit(load(p.parse_args()))
