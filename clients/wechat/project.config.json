@@ -1,8 +1,13 @@
 {
-  "description": "ADC课程患者小程序",
+  "description": "ADC口腔患者服务",
   "miniprogramRoot": "miniprogram/",
-  "projectname": "adc-patient-course",
+  "projectname": "adc-patient",
   "appid": "touristappid",
   "compileType": "miniprogram",
-  "setting": {"es6": true, "urlCheck": false, "minified": true, "postcss": true}
+  "setting": {
+    "es6": true,
+    "urlCheck": false,
+    "minified": true,
+    "postcss": true
+  }
 }

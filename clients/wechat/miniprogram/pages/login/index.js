@@ -2,12 +2,13 @@ const api = require('../../utils/api');
 const {showError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 Page({
-  data: {username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
+  data: {passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
   async onLoad() {
-    try { const session=await api.bootstrap();this.setData({auth:session.auth_capabilities||{},environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)wx.reLaunch({url:intent.destination(getApp(),session)}); }
+    try { const session=await api.bootstrap();this.setData({auth:session.auth_capabilities||{},passwordMode:!(session.auth_capabilities||{}).sms_enabled,environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)wx.reLaunch({url:intent.destination(getApp(),session)}); }
     catch (e) { showError(this, e); }
   },
   field(e) { this.setData({[e.currentTarget.dataset.field]: e.detail.value}); },
+  togglePassword(){this.setData({passwordMode:!this.data.passwordMode,password:'',error:''});},
   consent(e){this.setData({localConfirmed:e.detail.value.includes('agree')});},
   authConsent(e){this.setData({authConfirmed:e.detail.value.includes('agree')});},
   async wechatLogin(){

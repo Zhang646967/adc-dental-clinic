@@ -7,3 +7,5 @@ page{background:#f3f6f5;color:#18333b;font-size:34rpx;line-height:1.6;font-famil
 .subject-banner{background:#e8f3ef;color:#173d35;border-radius:16rpx;padding:22rpx;margin:0 0 24rpx;line-height:1.6}.subject-banner navigator{color:#176454;text-decoration:underline;padding:12rpx 0}.subject-banner text{font-weight:600}
 
 .clinic-card-top{display:flex;justify-content:space-between;gap:16rpx;flex-wrap:wrap}.hours-grid{font-size:26rpx;color:#486155;margin-top:16rpx}.hours-grid view{margin-bottom:6rpx}.action-row{display:flex;gap:16rpx;flex-wrap:wrap}.action-row button{flex:1;min-width:180rpx}
+
+.auth-other{margin:32rpx 0 12rpx;text-align:center;font-size:24rpx;color:#66786f}.wechat-login{background:#eff8f1;color:#087b40;border:1rpx solid #c7e2ce}.wechat-login[disabled]{background:#f2f6f3;color:#61776a}

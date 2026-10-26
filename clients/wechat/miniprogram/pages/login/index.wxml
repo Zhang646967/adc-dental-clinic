@@ -1,17 +1,27 @@
 <view class="page">
-  <view class="brand">ADC DENTAL CARE</view><view class="title">把就诊安排好</view>
-  <view class="subtitle">查询合适时段，预约与改期都在这里。</view>
-  <view class="card"><view class="section-title">快捷登录</view><checkbox-group bindchange="authConsent"><label><checkbox value="agree" checked="{{authConfirmed}}" /> 我同意使用微信身份或验证码办理本人账号。</label></checkbox-group><button wx:if="{{auth.wechat_mini}}" class="primary" bindtap="wechatLogin" disabled="{{busy||!authConfirmed}}" loading="{{busy}}">微信一键登录</button><view wx:else class="muted">微信登录正在开通，可先使用账号{{auth.sms_enabled?'或验证码':''}}登录。</view>
-    <block wx:if="{{auth.sms_enabled}}"><view wx:if="{{auth.sms_demo}}" class="notice">课程测试：使用0开头的十一位合成号码，验证码在本页显示，不发送真实短信。</view><label class="label" for="sms-phone">手机号码</label><input id="sms-phone" class="input" type="number" maxlength="11" value="{{phone}}" data-field="phone" bindinput="field" aria-label="手机号码" /><button bindtap="sendSms" disabled="{{busy||!authConfirmed}}">发送验证码</button><view wx:if="{{smsNotice}}" class="notice">{{smsNotice}}</view><label class="label" for="sms-code">六位验证码</label><input id="sms-code" class="input" type="number" maxlength="6" value="{{smsCode}}" data-field="smsCode" bindinput="field" aria-label="六位验证码" /><button class="primary" bindtap="smsLogin" disabled="{{busy||!authConfirmed||!smsChallenge}}">验证并登录／注册</button><view class="muted">首次验证创建患者账号，就诊档案仍由门店前台核验。</view></block>
-  </view>
+  <view class="brand">ADC 口腔</view><view class="title">登录与注册</view>
+  <view class="subtitle">用手机号码，管理你和家人的就诊安排。</view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
   <view class="card">
-    <view class="time">患者登录</view>
-    <label class="label" for="username">账号</label><input id="username" class="input" value="{{username}}" maxlength="150" placeholder="请输入患者账号" data-field="username" bindinput="field" aria-label="患者账号" />
-    <label class="label" for="password">密码</label><input id="password" class="input" value="{{password}}" password maxlength="128" data-field="password" bindinput="field" confirm-type="go" bindconfirm="login" aria-label="密码" />
-    <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
-    <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="login">登录并继续</button>
-    <view class="muted">首次使用或无法登录时，请联系门店前台核验账号。</view>
-  </view>
-  <view wx:if="{{identityProvider==='local'}}" class="card"><view class="section-title">本地授权体验</view><view class="muted">尚未接通微信授权；使用私下签发的合成凭证。首次体验不填上方账号；绑定原账号时填写原账号密码。</view><label class="label" for="local-code">新本地授权码</label><input id="local-code" class="input" password maxlength="160" value="{{localCode}}" data-field="localCode" bindinput="field" /><checkbox-group bindchange="consent"><label><checkbox value="agree" checked="{{localConfirmed}}" /> 我同意使用本地模拟身份继续。</label></checkbox-group><button bindtap="localLogin" disabled="{{busy||!localConfirmed}}" loading="{{busy}}">核对凭证并继续</button></view>
-  <navigator class="link" url="/pages/discovery/index" open-type="reLaunch">先看附近门店与营业安排</navigator><navigator class="link" url="/pages/help/index">登录与就诊协助</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+    <block wx:if="{{auth.sms_enabled}}">
+      <view wx:if="{{auth.sms_demo}}" class="notice">试用环境：输入0开头的十一位测试号码（如00000000201），验证码显示在本页，未发送真实短信。</view>
+      <label class="label" for="sms-phone">手机号码</label><input id="sms-phone" class="input" type="number" maxlength="11" value="{{phone}}" data-field="phone" bindinput="field" aria-label="手机号码" />
+      <label class="label" for="sms-code">验证码</label><input id="sms-code" class="input" type="number" maxlength="6" value="{{smsCode}}" data-field="smsCode" bindinput="field" aria-label="六位验证码" />
+      <checkbox-group bindchange="authConsent"><label><checkbox value="agree" checked="{{authConfirmed}}" /> 同意接收验证码，并使用此号码登录或注册本人账号。</label></checkbox-group>
+      <button class="secondary" bindtap="sendSms" disabled="{{busy||!authConfirmed}}" loading="{{busy}}">获取验证码</button>
+      <view wx:if="{{smsNotice}}" class="notice">{{smsNotice}}</view>
+      <button class="primary" bindtap="smsLogin" disabled="{{busy||!authConfirmed||!smsChallenge}}" loading="{{busy}}">登录／注册</button>
+      <view class="muted">未注册的手机号验证后自动注册。</view>
+    </block><view wx:else class="notice">短信服务尚未配置，请使用已有账号登录。</view>
+    <view class="auth-other">其他登录方式</view>
+    <checkbox-group wx:if="{{auth.wechat_mini}}" bindchange="authConsent"><label><checkbox value="agree" checked="{{authConfirmed}}" /> 同意使用微信身份登录本人账号。</label></checkbox-group>
+    <button class="wechat-login" bindtap="wechatLogin" disabled="{{busy||!auth.wechat_mini||!authConfirmed}}" loading="{{busy}}">微信一键登录</button>
+    <view wx:if="{{!auth.wechat_mini}}" class="muted">尚未配置微信授权，请先使用手机号登录。</view>
+    <button class="secondary" bindtap="togglePassword" aria-expanded="{{passwordMode}}">账号密码登录 {{passwordMode?'收起':'展开'}}</button>
+    <view wx:if="{{passwordMode}}">
+      <label class="label" for="username">账号</label><input id="username" class="input" value="{{username}}" maxlength="150" placeholder="请输入患者账号" data-field="username" bindinput="field" aria-label="患者账号" />
+      <label class="label" for="password">密码</label><input id="password" class="input" value="{{password}}" password maxlength="128" data-field="password" bindinput="field" confirm-type="go" bindconfirm="login" aria-label="密码" />
+      <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="login">账号登录</button>
+    </view>
+  </view><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

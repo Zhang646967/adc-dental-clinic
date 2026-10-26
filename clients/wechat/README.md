@@ -1,81 +1,30 @@
-**C1-WX本地账号流程已交付：** 当前19页包含账号、手机来源及本人申请；与网站共用独立前台核验及原预约权限。[本地导入与私有凭证](../../docs/C1WX_LOCAL_GUIDE.md) · [执行边界](../../docs/evidence_c1wx/README.md)。官方离线编译和实际处理器联调通过；无注册AppID，尚未验收微信运行时或体验版。
+# ADC 口腔患者小程序
 
-# ADC native patient client / 患者微信小程序
+这是原生微信小程序项目，包含 19 个页面，与网站共用账号、患者授权、资源排班和预约数据。支持附近门店、服务查询、验证码登录／注册、本人资料申请、就诊人切换、预约、改期、候补和预约历史。员工使用独立的网站工作台。
 
-Published service → scope and fee terms → exact service and time → explicit
-confirmation → own appointment and waitlist progress.
+## 本机运行
 
-This native WXML/WXSS/JavaScript client shares the website's patient authorization,
-resource inventory and booking commands. The service journey includes service discovery,
-service detail, selected-service continuation and a signed optional visit request.
-It includes appointment/history, same-service rescheduling, cancellation, waitlist
-registration/withdrawal and explicit offer acceptance/decline. It does not create
-clinical assessments, payments or a WeChat identity/phone binding.
+1. 先打开已更新的后台：`http://127.0.0.1:18000/`。
+2. 使用微信开发者工具导入本目录，即包含 `project.config.json` 的目录。当前使用游客 AppID `touristappid`，用于开发工具本地调试。
+3. 从门店页进入“登录／注册”。试用环境输入 0 开头的十一位合成手机号，获取并输入本页展示的验证码。没有账号也可以注册；未发送真实短信。
+4. 新账号提交本人资料，由前台核验后可办理预约；已有患者账号可在同页展开“账号密码登录”。手机号注册账号也能在网站登录，使用同一套业务数据。
 
-## Matched backend and content
-
-Use the current client with the matching C2.2–C2.3 backend. [Current source/image and delivery evidence](../../docs/evidence_c23/release.json) identifies the accepted application. The subject-selection, self-history and exact-version plan APIs require a matched backend; do not pair this client with older versions.
-
-Before patients can book, a current-clinic manager must configure the actual
-service/resources, complete its patient description and explicitly publish it
-through **患者服务内容**. Templates remain drafts. No service, price or clinical
-capability is invented by the client. Active but unpublished services cannot
-start new native bookings or waitlist requests. Child services require a verified appointment grant from the front desk. Retained own appointments/offers use their existing domain rules.
-
-## Local developer-tool import
-
-1. Verify the identified matched backend and `/health/` in the isolated/protected
-   workflow; do not point verification at an existing real-data database.
-2. Import this directory in WeChat developer tools. The source uses `touristappid`
-   and local loopback configuration for simulator development only.
-3. Local domain-check relaxation is for the simulator, not an experience release.
-   `127.0.0.1` on a phone refers to that phone, not the Mac.
-4. Use a separately assigned synthetic patient account. No password is included
-   in the repository or package. Existing local private credentials stay local;
-   they must not become customer credentials.
-5. Check **了解服务并预约** → offering details/fees/preparation → booking/request →
-   confirmation → own appointment. Also check child services, stale descriptions,
-   failed networking, fee changes, waitlist and existing-appointment rescheduling.
-
-Prepare a separate import directory without changing source configuration:
+导出一个独立、可导入的项目目录：
 
 ```sh
-python scripts/prepare_wechat.py --output /tmp/adc-mini-local --api-base http://127.0.0.1:18000
+python3 scripts/prepare_wechat.py --output /tmp/ADC微信小程序 --api-base http://127.0.0.1:18000
 ```
 
-The command prepares files only. It does not update that backend or establish
-simulator/device acceptance.
+本地关闭域名检查仅适用于开发工具模拟器；手机的 `127.0.0.1` 指向手机本身。异地老师可先用已交付的 HTTPS 网站测试。项目包不含用户密码、AppSecret、短信密钥或数据库。
 
-## Experience release inputs
+## 微信和短信能力
 
-A registered AppID, authorized developer, accepted HTTPS backend/request domain,
-platform configuration and experience members are required. AppSecret must never
-be placed in the client. Account activation/recovery and real-data initialization
-remain separate commercial requirements; assigned-account login is retained.
+微信一键登录、微信手机号授权和真实短信适配已实现，须配置对应平台资质和服务。当前尚无注册 AppID／AppSecret 和短信服务配置，因此不声称真实微信登录、真实短信、手机预览或微信体验版已经验收。
+
+有正式 AppID 和已批准的 HTTPS 后端后，可生成开启域名校验的体验版配置：
 
 ```sh
-python scripts/prepare_wechat.py --mode experience --appid wx0123456789abcdef --api-base https://YOUR-APPROVED-HOST --output /tmp/adc-mini-experience
+python3 scripts/prepare_wechat.py --mode experience --appid wx0123456789abcdef --api-base https://YOUR-APPROVED-HOST --output /tmp/adc-mini-experience
 ```
 
-Replace the example AppID/domain with the actual permitted values. The generator
-keeps domain checks on for this mode, but does not upload, configure the platform
-or verify a device. Current platform setup must be checked when that release is
-actually undertaken.
-
-## Actual verification scope
-
-`node scripts/verify_wechat.cjs` runs158 source/transport checks and45 Page-handler scenarios with mocked API responses. Separate five-clinic runs use actual Page handlers over real HTTP/PostgreSQL, plus Chrome website checks. All16 WXML pages and the WXSS bundle passed the official offline compiler. [Current evidence](../../docs/evidence_c23/README.md) records these different scopes.
-
-These scopes do not establish WeChat developer-tool runtime, phone execution or experience release. AppID and independent cloud setup are still pending. Set `ADC_WECHAT_COMPILER_DIR` to available official compiler binaries for the offline syntax gate.
-
-## C1.1 patient subjects
-
-The native client now has 12 pages, including an explicit patient selector. Assigned accounts can use their own PatientAccess or a clinic-verified, time-limited appointment grant. Subject switching clears pending reviews and stale responses; booking, rescheduling and waitlist share the website commands. Delegation does not grant chart, invoice or clinical-consent access. Official offline compilation and Page/HTTP tests remain separate from WeChat runtime/device/experience acceptance.
-
-C2.1 adds the own-patient health-history page (`pages/history/index`). It shares the website command, independent self-report versions, explicit confirmation and uncertain-response retry. Appointment delegates cannot report clinical history. There are14 native pages; official offline syntax, backend/Page-over-HTTP and actual WeChat runtime remain distinct. See [C2.1 evidence](../../docs/evidence_c21/README.md).
-
-## C2.2–C2.3 own-patient continuity
-
-There are16 native pages. `pages/plans/index` and `pages/plan/index` show released own-patient plan versions, retained service/fee definitions, exact-step decisions, actual partial/completed progress and follow-up status. An explicit preview and checkbox precede a decision. A lost response retains the same pending confirmation for retry; switching subject clears clinical/review content. Appointment delegates have no clinical plan/history/referral authority. Front-desk recall and manual lab logistics remain staff website work. Discussion decisions are not qualified signatures or treatment consent.
-
-The original local backend and separately prepared import package are updated only after protected delivery. Check the release record for installed status. Local loopback packages remain simulator-only; no actual WeChat upload or phone operation is implied.
+这条命令只生成项目，不上传微信、不配置平台，也不证明真机可运行。服务必须由授权主管配置资源并发布；小程序不会创建治疗事实、自动收款或越过前台身份核验。

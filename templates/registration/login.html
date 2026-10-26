@@ -8,7 +8,7 @@
 <div class="login-story"><p class="eyebrow">诊所的日常工作，有序衔接</p><h2 id="login-intro-title">从预约到结算<br>让每次交接有据可查</h2><p>在自己的工作范围内，处理待办、记录实际服务、核对办理结果。</p></div>
 <ol class="login-steps"><li><span>01</span><div><strong>预约与到诊</strong><small>核对安排，清楚交接</small></div></li><li><span>02</span><div><strong>接诊与治疗记录</strong><small>记录事实，保留历史</small></div></li><li><span>03</span><div><strong>结算与财务核对</strong><small>明确凭据，独立复核</small></div></li></ol>
 <p class="login-intro-note">ADC · 连锁口腔诊所工作平台</p></section>
-<section class="login-card"><div class="login-card-heading"><span class="eyebrow">欢迎回来</span><button class="button secondary mode-toggle" type="button" aria-pressed="false">大字简明模式</button></div>
+<section class="login-card"><div class="login-card-heading"><span class="eyebrow">欢迎回来</span></div>
 <h1>登录运营工作台</h1><p class="muted">使用分配给你的账号，进入对应工作台。</p>
 <form method="post" id="login-form">{% csrf_token %}{% workspace_token %}{{ form.non_field_errors }}
 {% for field in form %}<div class="field">{{ field.label_tag }}{% if field.name == 'password' %}<div class="password-control">{{ field }}<button class="password-toggle secondary" type="button" data-password-toggle aria-controls="{{ field.id_for_label }}" aria-pressed="false" hidden>显示密码</button></div>{% else %}{{ field }}{% endif %}{{ field.errors }}</div>{% endfor %}

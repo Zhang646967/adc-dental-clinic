@@ -27,11 +27,30 @@ def complete_login(request,user,service=None):
     return resume_service(request) or route if has_patient_access(user) else reverse('patient_account')
 
 
+def login_context(request,*,form=None,sms_form=None,sent=None,booking_service=None):
+    """Both password and OTP errors stay on the same patient entry page."""
+    if booking_service is None:
+        from scheduling.service_content import positive_id
+        from portal.service_catalogue import public_profiles
+        raw=request.POST.get('booking_service','') if request.method=='POST' else request.GET.get('service','')
+        selected=positive_id(raw)
+        booking_service=next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
+    caps=auth_providers.capabilities()
+    return dict(form=form if form is not None else AuthenticationForm(request),
+        sms_form=sms_form if sms_form is not None else forms.SmsAuthForm(),sent=sent,auth=caps,
+        booking_service=booking_service,
+        password_mode=request.POST.get('login_method')=='password' or bool(form is not None and form.is_bound) or not caps['sms_enabled'],
+        wechat_in_browser='micromessenger' in request.headers.get('User-Agent','').lower())
+
+
 @sensitive_post_parameters()
 @require_http_methods(['GET','POST'])
-def sms(request,binding=False):
+def sms(request,binding=False,inline=False):
     if binding:account_context(request,unsafe=request.method=='POST')
     caps=auth_providers.capabilities();sent=None
+    context=login_context(request) if inline else None
+    if inline and context['booking_service']:
+        request.session['adc_auth_service']=context['booking_service'].service_id
     form=forms.SmsAuthForm(request.POST or None)
     if request.method=='POST' and form.is_valid():
         d=form.cleaned_data;purpose='BIND' if binding else 'LOGIN'
@@ -50,6 +69,9 @@ def sms(request,binding=False):
         from scheduling.service_content import positive_id
         service=positive_id(request.GET.get('service',''))
         if service:request.session['adc_auth_service']=service
+    if inline:
+        context.update(sms_form=form,sent=sent)
+        return render(request,'portal/login.html',context)
     return render(request,'portal/sms_login.html',dict(form=form,sent=sent,binding=binding,auth=caps,account_token=account_data(request)['account_token'] if binding else ''))
 
 

@@ -28,7 +28,10 @@ def validate(root):
     env={}
     for line in (root/'.rc/compose.env').read_text().splitlines():
         k,v=line.split('=',1);env[k]=v
-    if set(env)!={'RC_PROJECT','RC_APP_SECRET','RC_DB_PASSWORD','RC_WEB_PORT','RC_READ_ONLY'}:raise ValueError('Unexpected configuration keys.')
+    required={'RC_PROJECT','RC_APP_SECRET','RC_DB_PASSWORD','RC_WEB_PORT','RC_READ_ONLY'}
+    if not required<=set(env) or set(env)-required-{'RC_SMS_PROVIDER','RC_TEACHER_TEST_MODE'}:raise ValueError('Unexpected configuration keys.')
+    if env.get('RC_SMS_PROVIDER','disabled') not in ('disabled','demo') or env.get('RC_TEACHER_TEST_MODE','0') not in ('0','1'):raise ValueError('Invalid local authentication configuration.')
+    if env.get('RC_SMS_PROVIDER')=='demo' and env.get('RC_TEACHER_TEST_MODE')!='1':raise ValueError('Test SMS requires the explicit synthetic teacher flag.')
     if env['RC_PROJECT']!=project or len(env['RC_APP_SECRET'])<50 or len(env['RC_DB_PASSWORD'])<30:raise ValueError('Incomplete private configuration.')
     if env['RC_READ_ONLY'] not in ('0','1'):raise ValueError('Invalid read-only switch.')
     if not env['RC_WEB_PORT'].isdigit() or not 1024<=int(env['RC_WEB_PORT'])<=65535:raise ValueError('Invalid port.')

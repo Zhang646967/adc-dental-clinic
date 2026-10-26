@@ -24,13 +24,5 @@
       status.textContent='已按直线距离由近到远排序；实际路程请以导航为准，可继续筛选城市。';render();
     },()=>{button.disabled=false;status.textContent='未取得位置权限或定位暂不可用，仍可手动选择城市和浏览门店。';},{enableHighAccuracy:false,timeout:10000,maximumAge:60000});
   });
-  list.addEventListener('click',event=>{
-    const control=event.target.closest('.clinic-contact');if(!control)return;
-    const row=rows.find(r=>r.id===Number(control.closest('[data-clinic]').dataset.clinic));
-    if(row.synthetic){status.textContent='这是合成测试门店，联系电话和地图位置仅供核对，不发起实际拨号或导航。';return;}
-    if(control.dataset.action==='map'&&row.map_latitude!==null&&row.map_longitude!==null){
-      window.open('https://uri.amap.com/marker?position='+row.map_longitude+','+row.map_latitude+'&name='+encodeURIComponent(row.name),'_blank','noopener,noreferrer');
-    }
-  });
   render();
 })();

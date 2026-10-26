@@ -18,6 +18,15 @@ class ReleaseContractTests(unittest.TestCase):
    prepare(d);p=Path(d)/'.rc/compose.env';before=p.read_bytes()
    with self.assertRaises(ValueError):prepare(d)
    self.assertEqual(p.read_bytes(),before)
+ def test_existing_rc_can_explicitly_enable_test_registration_without_resetting_secrets(self):
+  with TemporaryDirectory() as d:
+   name=prepare(d);p=Path(d)/'.rc/compose.env';original=p.read_text()
+   p.write_text(original+'RC_SMS_PROVIDER=demo\nRC_TEACHER_TEST_MODE=1\n')
+   self.assertEqual(validate(d),name);self.assertTrue(p.read_text().startswith(original))
+ def test_test_registration_requires_the_explicit_teacher_flag(self):
+  with TemporaryDirectory() as d:
+   prepare(d);p=Path(d)/'.rc/compose.env';p.write_text(p.read_text()+'RC_SMS_PROVIDER=demo\n')
+   with self.assertRaises(ValueError):validate(d)
  def test_reject_bad_port(self):
   for port in (0,80,65536):
    with TemporaryDirectory() as d,self.assertRaises(ValueError):prepare(d,port)

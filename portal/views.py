@@ -31,9 +31,16 @@ class PortalLoginView(LoginView):
         return next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
 
     def get_context_data(self,**kwargs):
-        from django.conf import settings
-        from accounts.auth_providers import capabilities
-        return dict(super().get_context_data(**kwargs),booking_service=self.chosen_service(),auth=capabilities(),local_identity_enabled=settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local',wechat_in_browser='micromessenger' in self.request.headers.get('User-Agent','').lower())
+        from portal.auth_views import login_context
+        context=super().get_context_data(**kwargs)
+        context.update(login_context(self.request,form=context['form'],booking_service=self.chosen_service()))
+        return context
+
+    def post(self,request,*args,**kwargs):
+        if request.POST.get('action') in ('send','confirm'):
+            from portal.auth_views import sms
+            return sms(request,inline=True)
+        return super().post(request,*args,**kwargs)
 
     def get(self,request,*args,**kwargs):
         # A signed-in patient can continue without another password prompt.

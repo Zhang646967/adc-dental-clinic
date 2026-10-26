@@ -14,7 +14,7 @@
 <div class="workspace"><header class="topbar"><div class="current-scope"><small>当前工作范围</small><strong>{{ workspace_label }}</strong><span class="scope-badge">{{ workspace_scope }}</span></div>
 {% if user.is_authenticated %}<div class="user-menu">
 {% if workspace_can_switch_role %}<a class="utility-link" href="{% url 'select_role' %}" data-switch>切换身份</a>{% endif %}{% if workspace_has_clinics %}<a class="utility-link" href="{% url 'select_clinic' %}" data-switch>切换诊所</a>{% endif %}
-<a href="{% url 'public_home' %}">患者服务网站</a><button class="button secondary mode-toggle" type="button" aria-pressed="false">大字简明模式</button><span class="signed-user">{{ user.username }}</span><a class="utility-link" href="{% url 'own_password_change' %}">修改我的密码</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}{% workspace_token %}<button class="quiet" type="submit">退出</button></form>
+<a href="{% url 'public_home' %}">患者服务网站</a><span class="signed-user">{{ user.username }}</span><a class="utility-link" href="{% url 'own_password_change' %}">修改我的密码</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}{% workspace_token %}<button class="quiet" type="submit">退出</button></form>
 </div>{% endif %}</header>
 <main id="main" tabindex="-1">{% for message in messages %}<div class="notice" role="status">{{ message }}</div>{% endfor %}{% include 'release/read_only.html' %}{% include 'guidance/panel.html' %}{% block content %}{% endblock %}</main>
 <footer>北京时间（UTC+8） · 业务操作由你明确确认，助手不会代为提交。</footer>

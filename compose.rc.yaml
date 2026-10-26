@@ -19,7 +19,9 @@
       "AI_MODE": "demo",
       "AI_API_KEY": "",
       "OPENAI_API_KEY": "",
-      "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+      "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}",
+      "ADC_SMS_PROVIDER": "${RC_SMS_PROVIDER:-disabled}",
+      "ADC_TEACHER_TEST_MODE": "${RC_TEACHER_TEST_MODE:-0}"
     },
     "networks": [
       "private"
@@ -81,7 +83,9 @@
         "AI_MODE": "demo",
         "AI_API_KEY": "",
         "OPENAI_API_KEY": "",
-        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}",
+        "ADC_SMS_PROVIDER": "${RC_SMS_PROVIDER:-disabled}",
+        "ADC_TEACHER_TEST_MODE": "${RC_TEACHER_TEST_MODE:-0}"
       },
       "networks": [
         "private"
@@ -129,7 +133,9 @@
         "AI_MODE": "demo",
         "AI_API_KEY": "",
         "OPENAI_API_KEY": "",
-        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}",
+        "ADC_SMS_PROVIDER": "${RC_SMS_PROVIDER:-disabled}",
+        "ADC_TEACHER_TEST_MODE": "${RC_TEACHER_TEST_MODE:-0}"
       },
       "networks": [
         "private"
@@ -178,7 +184,9 @@
         "AI_MODE": "demo",
         "AI_API_KEY": "",
         "OPENAI_API_KEY": "",
-        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}",
+        "ADC_SMS_PROVIDER": "${RC_SMS_PROVIDER:-disabled}",
+        "ADC_TEACHER_TEST_MODE": "${RC_TEACHER_TEST_MODE:-0}"
       },
       "networks": [
         "private"
@@ -269,7 +277,9 @@
         "AI_MODE": "demo",
         "AI_API_KEY": "",
         "OPENAI_API_KEY": "",
-        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}",
+        "ADC_SMS_PROVIDER": "${RC_SMS_PROVIDER:-disabled}",
+        "ADC_TEACHER_TEST_MODE": "${RC_TEACHER_TEST_MODE:-0}"
       },
       "networks": [
         "private"
@@ -307,7 +317,9 @@
         "AI_MODE": "demo",
         "AI_API_KEY": "",
         "OPENAI_API_KEY": "",
-        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}"
+        "ADC_OPERATIONS_INSTANCE": "${RC_PROJECT:?}",
+        "ADC_SMS_PROVIDER": "${RC_SMS_PROVIDER:-disabled}",
+        "ADC_TEACHER_TEST_MODE": "${RC_TEACHER_TEST_MODE:-0}"
       },
       "networks": [
         "private"

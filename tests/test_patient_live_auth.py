@@ -57,6 +57,36 @@ class PatientLiveAuthTests(FixtureMixin,TransactionTestCase):
         SmsChallenge.objects.update(created_at=timezone.now()-timedelta(minutes=2))
         request2,sent2=self.issue();self.assertEqual(self.confirm(request2,sent2).pk,user.pk)
 
+    def test_patient_entry_registers_on_same_page_without_employee_or_display_links(self):
+        client=Client(enforce_csrf_checks=True)
+        page=client.get('/portal/login/')
+        self.assertContains(page,'id="sms-auth-form"')
+        self.assertContains(page,'未注册的手机号验证后自动注册')
+        self.assertContains(page,'微信快捷登录')
+        self.assertNotContains(page,'mode-toggle');self.assertNotContains(page,'员工登录')
+        self.assertNotContains(page,'href="/accounts/login/"')
+        token=client.cookies['csrftoken'].value
+        response=client.post('/portal/login/',{'action':'send','phone':'00000000501','confirmed':'on','csrfmiddlewaretoken':token})
+        self.assertContains(response,'data-test-code')
+        sent=response.context['sent']
+        wrong='999999' if sent['test_code']!='999999' else '888888'
+        response=client.post('/portal/login/',{'action':'confirm','phone':'00000000501','challenge':sent['challenge'],'code':wrong,'confirmed':'on','csrfmiddlewaretoken':token})
+        self.assertEqual(response.status_code,200);self.assertFalse(ExternalIdentity.objects.filter(subject='00000000501').exists())
+        response=client.post('/portal/login/',{'action':'confirm','phone':'00000000501','challenge':sent['challenge'],'code':sent['test_code'],'confirmed':'on','csrfmiddlewaretoken':token})
+        self.assertRedirects(response,'/portal/account/')
+        user=ExternalIdentity.objects.get(subject='00000000501').user
+        self.assertFalse(user.has_usable_password());self.assertFalse(PatientAccess.objects.filter(user=user).exists())
+        self.assertFalse(RoleAssignment.objects.filter(user=user).exists())
+        self.assertFalse(Visit.objects.exists());self.assertFalse(CashEntry.objects.exists())
+
+    def test_inline_send_requires_consent_and_failed_password_opens_only_its_panel(self):
+        client=Client()
+        response=client.post('/portal/login/',{'action':'send','phone':'00000000502'})
+        self.assertEqual(response.status_code,200);self.assertFalse(SmsChallenge.objects.exists())
+        response=client.post('/portal/login/',{'username':'missing','password':'invalid','login_method':'password'})
+        self.assertContains(response,'class="auth-password" open')
+        self.assertContains(response,'id="sms-auth-form"')
+
     def test_code_is_hashed_and_purpose_session_bound(self):
         request,sent=self.issue();row=SmsChallenge.objects.get()
         self.assertEqual(len(row.code_digest),64)

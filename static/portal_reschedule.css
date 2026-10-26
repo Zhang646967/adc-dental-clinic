@@ -4,4 +4,3 @@
 .portal-reschedule-filter label{display:block}.portal-reschedule-filter select,.portal-reschedule-filter input{width:100%;min-width:0}
 .patient-main .errorlist{overflow-wrap:anywhere}.patient-main .actions{flex-wrap:wrap}
 @media(max-width:650px){.portal-comparison,.portal-reschedule-filter{grid-template-columns:1fr}.patient-main .actions .button{width:100%}}
-html[data-display="comfortable"] .portal-comparison{grid-template-columns:1fr}
