@@ -1,0 +1,1 @@
+.profile-cover{width:100%;border-radius:20rpx}.profile-person{display:flex;gap:24rpx;padding:24rpx 0;border-bottom:1rpx solid #dce5df}.profile-avatar{width:100rpx;height:130rpx;flex-shrink:0;border-radius:14rpx}

@@ -61,10 +61,16 @@ class ResourceCalendar:
         self.busy = defaultdict(list)
         self.eligible_dentists = {}
         self.requirements = {}
+        from registry.profile_models import ClinicProfilePolicy,DentistClinicAffiliation
+        self.roster_enforced=ClinicProfilePolicy.objects.filter(clinic_id=clinic_id,roster_enforced=True).exists()
+        self.affiliations={a.dentist_id:a for a in DentistClinicAffiliation.objects.filter(clinic_id=clinic_id)} if self.roster_enforced else {}
         for asset_id, a, b in claims.values_list('asset_id', 'starts_at', 'ends_at'):
             self.busy[asset_id].append((a, b))
 
     def bundles(self, service, dentist_id, start, end, *, selected=None, limit=10, requirements=None):
+        if self.roster_enforced:
+            from registry.profile_services import valid_affiliation
+            if not valid_affiliation(self.affiliations.get(dentist_id),start,end):return []
         if not self.ready:
             raise RuleError('本店诊疗资源尚在核对中，暂不能新增预约；已有预约和邀约请通过协调入口办理。')
         if service.pk not in self.eligible_dentists:
@@ -131,6 +137,8 @@ def choose_bundle(*, slot, start, end, service_id=None, expected=None, ignore_vi
     if locked:
         lock_physical(slot.clinic_id)
         release_expired_locked(slot.clinic_id)
+        from registry.profile_services import require_affiliation
+        require_affiliation(slot.clinic_id,slot.dentist_id,start,end,lock=True)
     row = policy(slot.clinic_id)
     if row is None:
         if service_id or expected:

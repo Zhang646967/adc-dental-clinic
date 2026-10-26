@@ -51,7 +51,9 @@ class PortalLoginView(LoginView):
             if ctx and ctx.role=='PATIENT' and valid_context(request.user,ctx):
                 profile=self.chosen_service()
                 if profile and profile.category!='CHILDREN':
-                    return redirect(reverse('portal_slots')+'?service='+str(profile.service_id))
+                    from portal.profile_intent import capture
+                    doctor=capture(request,profile.service_id)
+                    return redirect(reverse('portal_slots')+'?service='+str(profile.service_id)+(('&dentist='+str(doctor)) if doctor else ''))
         return super().get(request,*args,**kwargs)
 
     def form_valid(self,form):

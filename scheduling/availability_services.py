@@ -215,6 +215,8 @@ def confirm_availability_change(*, actor, slot_id, proposal_token, confirmed):
     replacement = None
     if payload['action'] == 'replace':
         # Existing PG exclusion is the final guard for races with ANY new-slot creator.
+        from registry.profile_services import require_affiliation
+        require_affiliation(slot.clinic_id,slot.dentist_id,start,end,lock=True)
         replacement = AvailabilitySlot.objects.create(dentist_id=slot.dentist_id, clinic_id=slot.clinic_id,
             starts_at=start, ends_at=end, is_active=True, booking_paused=slot.booking_paused)
     summary = {'contract': CONTRACT, 'operation': payload['operation'], 'action': payload['action'],

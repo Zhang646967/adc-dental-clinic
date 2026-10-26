@@ -69,5 +69,6 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const discovery=await require('./verify_native_discovery.cjs').verify();
   const accounts=await require('./verify_native_accounts.cjs').verify();
   const wechat=await require('./verify_native_wechat.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,accounts,wechat,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const profiles=await require('./verify_native_profiles.cjs').verify();
+  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,accounts,wechat,profiles,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

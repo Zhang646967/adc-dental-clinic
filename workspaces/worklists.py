@@ -16,7 +16,7 @@ from care.models import CorrectionRequest, Invoice
 from coordination.models import CoordinationTask, WaitOffer, WaitRequest
 from finance.models import Quarter
 from finance.selectors import _quarter_work_rows
-from scheduling.models import AvailabilitySlot
+from scheduling.models import AvailabilitySlot,Visit
 from scheduling.selectors import visible_visits
 from scheduling.worklists import visit_queue
 from workspaces.context import valid_context
@@ -202,5 +202,32 @@ def workspace_worklist(actor):
             result['cards'].append({'label':'资源故障待协调','count':issues.count(),
                 'url':reverse('resource_summary') if role=='HQ' else reverse('resource_coordination_list'),
                 'note':'原承诺保留；替换资源、改期和取消分别明确办理。'})
+        if role in ('FRONT_DESK','MANAGER'):
+            from registry.profile_models import ClinicProfilePolicy,DentistClinicAffiliation
+            if ClinicProfilePolicy.objects.filter(clinic_id=context.clinic_id,roster_enforced=True).exists():
+                from scheduling.resource_models import DepartmentHours
+                days=[timezone.localdate()+timezone.timedelta(days=i) for i in range(1,15)]
+                weekdays=set(DepartmentHours.objects.filter(department__clinic_id=context.clinic_id,department__is_active=True).values_list('weekday',flat=True))
+                staff=list(DentistClinicAffiliation.objects.filter(clinic_id=context.clinic_id,state='ACTIVE',kind='RESIDENT',dentist__is_active=True))
+                expected={(a.dentist_id,d) for a in staff for d in days if d.weekday() in weekdays and a.starts_on<=d and (a.ends_on is None or d<=a.ends_on)}
+                covered=set()
+                for slot in AvailabilitySlot.objects.filter(clinic_id=context.clinic_id,is_active=True,booking_paused=False,
+                    ends_at__gt=now,starts_at__lt=now+timezone.timedelta(days=15)):
+                    begin=timezone.localtime(slot.starts_at).date();finish=timezone.localtime(slot.ends_at-timezone.timedelta(microseconds=1)).date()
+                    for d in days:
+                        if begin<=d<=finish:covered.add((slot.dentist_id,d))
+                result['cards'].append({'label':'未来十四天常驻医师排班缺口','count':len(expected-covered),
+                    'url':reverse('schedule_calendar') if role=='FRONT_DESK' else reverse('profile_home'),
+                    'note':'按开放日统计尚无出诊的人日，前台核对休假与接诊需求后补排，不自动发布。'})
+                ended=DentistClinicAffiliation.objects.filter(clinic_id=context.clinic_id).filter(Q(state='ENDED')|Q(ends_on__lt=timezone.localdate()))
+                affected=Visit.objects.filter(clinic_id=context.clinic_id,dentist_id__in=ended.values('dentist_id'),
+                    status__in=['SCHEDULED','CHECKED_IN'],scheduled_end__gt=now)
+                result['cards'].append({'label':'任职变化原约待协调','count':affected.count(),
+                    'url':reverse('profile_coordination'),'note':'原约保留；前台核对患者意愿后办理改期或其他安排。'})
+        if role=='FINANCE':
+            from finance.management_models import MonthlyCost
+            count=MonthlyCost.objects.filter(state='PENDING').exclude(prepared_by=actor).count()
+            if count:result['cards'].append({'label':'月度成本待独立复核','count':count,
+                'url':reverse('management_home'),'note':'先核对成本期间、来源与归属，成本确认不产生付款。'})
         result['has_items'] = any(group['total'] for group in groups) or any(card['count'] for card in result['cards'])
         return result

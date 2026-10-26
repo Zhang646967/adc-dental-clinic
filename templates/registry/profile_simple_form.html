@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<h1>{{ title }}</h1><form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button>预览接诊安排</button></form><p><a href="{% url 'profile_home' %}">返回工作台</a></p>{% endblock %}

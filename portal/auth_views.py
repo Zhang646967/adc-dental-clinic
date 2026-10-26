@@ -36,9 +36,12 @@ def login_context(request,*,form=None,sms_form=None,sent=None,booking_service=No
         selected=positive_id(raw)
         booking_service=next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
     caps=auth_providers.capabilities()
+    from portal.profile_intent import capture
+    booking_dentist=capture(request,booking_service.service_id if booking_service else None)
     return dict(form=form if form is not None else AuthenticationForm(request),
         sms_form=sms_form if sms_form is not None else forms.SmsAuthForm(),sent=sent,auth=caps,
         booking_service=booking_service,
+        booking_dentist=booking_dentist,
         password_mode=request.POST.get('login_method')=='password' or bool(form is not None and form.is_bound) or not (caps['sms_enabled'] or caps['wechat_qr']),
         wechat_in_browser='micromessenger' in request.headers.get('User-Agent','').lower())
 

@@ -79,3 +79,5 @@ class TreatmentType(models.Model):
 # Kept in a separate file so public information cannot become the asset or
 # financial directory's implicit editable field list.
 from registry.directory_models import ClinicDirectory, ClinicDirectoryRevision
+from registry.profile_models import (PublicProfile, ProfileVersion, ProfileMedia,
+    DentistClinicAffiliation, ClinicProfilePolicy, ProfileAction)

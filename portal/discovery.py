@@ -25,9 +25,11 @@ def discovery_data():
                 'opening':opening_data(clinic.pk)}
     for row in by_id.values():
         row['services']=[service_data(p) for p in profiles if p.service.department.clinic_id==row['id']]
-    return {'clinics':sorted(by_id.values(),key=lambda r:(r['city'],r['name'],r['id'])),
+    result={'clinics':sorted(by_id.values(),key=lambda r:(r['city'],r['name'],r['id'])),
         'offerings':[service_data(p) for p in profiles],'environment_label':settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
         'read_only':settings.ADC_READ_ONLY,'business_timezone':'Asia/Shanghai'}
+    from registry.profile_projection import enrich_discovery
+    return enrich_discovery(result)
 
 
 def service_discovery(service_id):

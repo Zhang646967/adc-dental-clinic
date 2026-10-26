@@ -6,13 +6,17 @@
   const limit=Number(document.querySelector('.clinic-discovery').dataset.limit)||0;
   const cards=new Map([...list.querySelectorAll('[data-clinic]')].map(c=>[Number(c.dataset.clinic),c]));
   let origin=null;
+  const service=document.getElementById('clinic-service'),online=document.getElementById('clinic-online');
+  const categories=new Map(data.offerings.map(s=>[s.category,s.category_label]));
+  if(service)for(const [key,name] of categories){const option=document.createElement('option');option.value=key;option.textContent=name;service.append(option);}
   for(const name of [...new Set(rows.map(r=>r.city))].sort()){const o=document.createElement('option');o.value=name;o.textContent=name;city.append(o);}
   function render(){
     for(const c of cards.values())c.hidden=true;
-    const selected=nearby.select(rows,{city:city.value,keyword:area.value,origin});
+    const selected=nearby.select(rows,{city:city.value,keyword:area.value,origin}).filter(row=>(!online||!online.checked||row.online_booking)&&(!service||!service.value||row.services.some(s=>s.category===service.value)));
     for(const row of (limit?selected.slice(0,limit):selected)){const c=cards.get(row.id);if(!c)continue;c.hidden=false;c.querySelector('.clinic-distance').textContent=nearby.distanceLabel(row.distance);list.append(c);}
     document.getElementById('clinic-empty').hidden=selected.length!==0;
   }
+  if(service)service.addEventListener('change',render);if(online)online.addEventListener('change',render);
   city.addEventListener('change',render);area.addEventListener('input',render);
   button.addEventListener('click',()=>{
     if(!navigator.geolocation){status.textContent='当前浏览器无法定位，请手动选择城市或区域。';return;}

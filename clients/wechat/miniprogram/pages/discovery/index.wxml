@@ -4,12 +4,12 @@
   <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><view wx:if="{{busy}}" class="notice">正在读取门店资料…</view>
   <view wx:for="{{rows}}" wx:key="id" class="card">
     <view class="clinic-card-top"><text class="status">{{item.opening.state_label}}</text><text class="fee">{{item.distanceLabel}}</text></view>
-    <view class="section-title">{{item.name}}</view><view class="muted">{{item.city}} · {{item.district}}</view><view class="line">{{item.address}}</view><view class="muted">{{item.entrance}}</view>
+    <view class="section-title">{{item.name}}</view><view wx:if="{{item.summary}}" class="line">{{item.summary}}</view><view class="muted">{{item.city}} · {{item.district}}</view><view class="line">{{item.address}}</view><view class="muted">{{item.entrance}}</view>
     <view wx:if="{{item.synthetic}}" class="line">联系电话 {{item.phone}}</view><view wx:else class="line link" bindtap="contact" data-id="{{item.id}}" data-action="call">联系电话 {{item.phone}}</view><view class="line">今日营业 {{item.opening.today}}</view>
     <view class="hours-grid"><view wx:for="{{item.opening.week}}" wx:for-item="day" wx:key="day">{{day.day}} {{day.hours}}</view></view>
     <view wx:for="{{item.opening.notices}}" wx:for-item="notice" wx:key="start" class="notice">{{notice.text}}</view>
-    <view class="label">本店服务</view><button wx:for="{{item.services}}" wx:for-item="service" wx:key="id" bindtap="openService" data-id="{{service.id}}" class="secondary">{{service.name}} →</button><view wx:if="{{!item.services.length}}" class="muted">暂未开放线上预约，当前仅展示门店信息。</view><view wx:if="{{item.services.length}}" class="muted line">选择服务后查看可约医师与时间。</view>
+    <button class="secondary" bindtap="clinic" data-id="{{item.id}}">了解团队与门店 →</button><view class="label">本店服务</view><button wx:for="{{item.services}}" wx:for-item="service" wx:key="id" bindtap="openService" data-id="{{service.id}}" class="secondary">{{service.name}} →</button><view wx:if="{{!item.services.length}}" class="muted">暂未开放线上预约，当前仅展示门店信息。</view><view wx:if="{{item.services.length}}" class="muted line">选择服务后查看可约医师与时间。</view>
   </view>
   <view wx:if="{{!busy && !rows.length}}" class="notice">所选城市或区域暂无匹配门店，请更换城市或清除搜索条件。</view>
-  <button bindtap="services" class="secondary">了解全部诊疗服务</button><button bindtap="account" class="primary">登录查看我的预约</button><button bindtap="load" class="secondary" disabled="{{busy}}">更新门店资料</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+  <button bindtap="doctors" class="secondary">按医师选择就诊</button><button bindtap="services" class="secondary">了解全部诊疗服务</button><button bindtap="account" class="primary">登录查看我的预约</button><button bindtap="load" class="secondary" disabled="{{busy}}">更新门店资料</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

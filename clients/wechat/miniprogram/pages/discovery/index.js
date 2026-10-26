@@ -37,6 +37,8 @@ Page({
     if(e.currentTarget.dataset.action==='call')wx.makePhoneCall({phoneNumber:row.phone});
     else if(row.map_latitude!==null&&row.map_longitude!==null)wx.openLocation({latitude:row.map_latitude,longitude:row.map_longitude,name:row.name,address:row.address+' '+row.entrance});
   },
+  clinic(e){wx.navigateTo({url:'/pages/clinic/index?id='+e.currentTarget.dataset.id});},
+  doctors(){wx.navigateTo({url:'/pages/dentists/index'});},
   services(){wx.navigateTo({url:'/pages/services/index'});},
   openService(e){wx.navigateTo({url:'/pages/service/index?id='+e.currentTarget.dataset.id});},
   account(){wx.navigateTo({url:'/pages/login/index'});}

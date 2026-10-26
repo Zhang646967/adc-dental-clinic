@@ -123,6 +123,20 @@ ROUTES={
  'schedule_plans':{'FRONT_DESK'},'schedule_plan':{'FRONT_DESK'},'expire_offers':{'MANAGER','FRONT_DESK'},
 }
 
+PUBLIC.update({'public_clinic_detail','public_dentists','public_dentist_detail','profile_media',
+    'mini_public_clinic','mini_public_dentists','mini_public_dentist'})
+ROUTES.update({
+    'profile_home':{'DENTIST','MANAGER'},'profile_edit':{'DENTIST','MANAGER'},'profile_upload':{'DENTIST','MANAGER'},
+    'profile_confirm':{'DENTIST','MANAGER'},'profile_transition':{'DENTIST','MANAGER'},
+    'profile_affiliation':{'MANAGER'},'profile_affiliation_confirm':{'MANAGER'},
+    'profile_roster_transition':{'MANAGER'},'profile_review':{'MANAGER'},'profile_review_confirm':{'MANAGER'},
+    'profile_coordination':{'FRONT_DESK','MANAGER'},
+    'management_home':{'FRONT_DESK','DENTIST','MANAGER','FINANCE','HQ'},
+    'management_cost_new':{'MANAGER','FINANCE'},'management_action':{'MANAGER','FINANCE'},
+    'management_confirm':{'MANAGER','FINANCE'},'management_retained':{'MANAGER','FINANCE','HQ'},
+    'management_chain':{'FINANCE','HQ'},
+})
+
 def route_roles(name,kwargs):
     if name=='assistant_api':
         return {'PATIENT'} if kwargs.get('audience')=='patient' else {'FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE'}

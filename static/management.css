@@ -11,3 +11,8 @@
 .directory-details dd { margin: 0; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .directory-details + p { overflow-wrap: anywhere; }
 @media(max-width: 560px) { .directory-details > div { grid-template-columns: minmax(0, 1fr); gap: .25rem; } }
+
+/* P1 monthly analysis and profile lists keep wide tables inside the page. */
+.table-wrap{width:100%;max-width:100%;overflow-x:auto;margin:1rem 0;overscroll-behavior-x:contain}.table-wrap:focus-visible{outline:3px solid var(--teal);outline-offset:3px}.table-wrap table{min-width:36rem}.table-wrap th,.table-wrap td{overflow-wrap:anywhere}.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin:1.3rem 0}.stat-grid article{min-width:0;padding:1.2rem;background:var(--paper);border:1px solid var(--line);border-radius:10px}.stat-grid article p{font-size:1.6rem;font-weight:700;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.filter-form>label{min-width:0;flex:1}.filter-form select{max-width:100%}
+@media(max-width:950px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.stat-grid{grid-template-columns:1fr}.filter-form>label{margin-bottom:.75rem}.table-wrap{border:1px solid var(--line);border-radius:6px}.table-wrap table{margin:0}}

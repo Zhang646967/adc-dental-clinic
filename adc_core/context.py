@@ -30,6 +30,13 @@ for _role in ('FRONT_DESK', 'MANAGER', 'FINANCE', 'HQ'):
 for _role in ('DENTIST','FRONT_DESK','MANAGER','PATIENT'):
     NAV[_role].append(('clinical_referrals','跨店转诊'))
 
+for _role in ('DENTIST','MANAGER'):NAV[_role].append(('profile_home','医师与门店画像'))
+for _role in ('DENTIST','MANAGER','FRONT_DESK','FINANCE','HQ'):NAV[_role].append(('management_home','工作与经营分析'))
+
+NAV['FRONT_DESK'].append(('profile_coordination','医师任职与原约协调'))
+NAV['MANAGER'].append(('profile_coordination','接诊范围协调'))
+for _role in ('FINANCE','HQ'):NAV[_role].append(('management_chain','全链经营汇总'))
+
 def navigation(request):
     user=request.user;ctx=getattr(request,'workspace',None)
     role=ctx.role if ctx else '';clinic=ctx.clinic if ctx and ctx.clinic_id else None

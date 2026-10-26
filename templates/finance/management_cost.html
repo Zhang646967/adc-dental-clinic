@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<h1>登记或修订月度成本</h1><p>{{ selection.period }} · 同一来源不重复归集；修订保留原费用及复核决定。</p><form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_p }}<button>预览成本归集</button></form>{% endblock %}

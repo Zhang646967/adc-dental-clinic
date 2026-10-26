@@ -63,6 +63,8 @@ def create_visit_locked(*, actor, patient, slot, start, end, chief_complaint="",
     from scheduling.resources import choose_bundle, claim_locked, accept_offer_resources_locked, validate_reserved_resources_locked
     if honor_offer_id is not None:
         validate_reserved_resources_locked(promise)
+        from registry.profile_services import require_affiliation
+        require_affiliation(slot.clinic_id,slot.dentist_id,start,end,lock=True)
         bundle = None
     else:
         bundle = choose_bundle(slot=slot, start=start, end=end, service_id=service_id,
@@ -91,6 +93,8 @@ def create_slot(*, actor, clinic_id, dentist_id, start, end, operation_id=None):
         raise RuleError("新出诊安排必须位于未来。")
     clinic = Clinic.objects.get(pk=clinic_id, is_active=True)
     dentist = Dentist.objects.get(pk=dentist_id, is_active=True)
+    from registry.profile_services import require_affiliation
+    require_affiliation(clinic_id,dentist_id,start,end,lock=True)
     obj = AvailabilitySlot.objects.create(clinic=clinic, dentist=dentist, starts_at=start, ends_at=end)
     emit(actor, "SLOT_CREATED", obj, summary={"clinic_id": clinic_id, "dentist_id": dentist_id,
         **({'operation':operation_id} if operation_id else {})})

@@ -11,6 +11,8 @@ def remember_service(request,service_id):
     ctx=request.workspace
     request.session[INTENT_KEY]=signing.dumps({'uid':request.user.pk,
         'workspace':str(ctx.pk),'service':service_id},salt=INTENT_SALT)
+    from portal.profile_intent import remember
+    remember(request,service_id)
 
 
 def pending_profile(request):
@@ -35,4 +37,6 @@ def destination_after_activation(request):
     if access.delegated and access.clinic_id!=profile.service.department.clinic_id:
         return reverse('portal_subjects')
     request.session.pop(INTENT_KEY,None)
-    return reverse('portal_slots')+'?service='+str(profile.service_id)
+    from portal.profile_intent import consume
+    doctor=consume(request,profile.service_id)
+    return reverse('portal_slots')+'?service='+str(profile.service_id)+(('&dentist='+str(doctor)) if doctor else '')

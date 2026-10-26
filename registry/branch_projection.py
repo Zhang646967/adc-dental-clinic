@@ -38,13 +38,14 @@ def label(intervals):
     return '、'.join(f'{a:%H:%M}—{b:%H:%M}' for a,b in intervals) or '休息'
 
 
-def opening_data(clinic_id,*,now=None):
+def opening_data(clinic_id,*,now=None,prepared=None):
     now=timezone.localtime(now or timezone.now())
-    hours=list(DepartmentHours.objects.filter(department__clinic_id=clinic_id,department__is_active=True))
+    hours=(prepared[0] if prepared is not None else list(DepartmentHours.objects.filter(department__clinic_id=clinic_id,department__is_active=True)))
     week=[{'day':DAYS[i],'hours':label(merge([(h.opens_at,h.closes_at) for h in hours if h.weekday==i]))} for i in range(7)]
     a=timezone.make_aware(datetime.combine(now.date(),time.min));b=a+timedelta(days=1)
-    blocks=list(ResourceBlock.objects.filter(clinic_id=clinic_id,is_active=True,department_id__isnull=False,
-        starts_at__lt=b,ends_at__gt=a))
+    all_blocks=(prepared[1] if prepared is not None else list(ResourceBlock.objects.filter(clinic_id=clinic_id,is_active=True,
+        ends_at__gt=a,starts_at__lt=now+timedelta(days=14))))
+    blocks=[x for x in all_blocks if x.department_id is not None and x.starts_at<b and x.ends_at>a]
     today=[]
     for h in hours:
         if h.weekday!=now.weekday():continue
@@ -59,21 +60,33 @@ def opening_data(clinic_id,*,now=None):
     return {'state':state,'state_label':{'OPEN':'营业中','CLOSED':'当前休息','UNKNOWN':'营业时间待核对'}[state],
         'today':label(today) if hours else '请联系前台核对','week':week,
         'notices':[{'start':x.starts_at.isoformat(),'end':x.ends_at.isoformat(),'text':x.public_notice}
-            for x in ResourceBlock.objects.filter(clinic_id=clinic_id,is_active=True,public_notice__gt='',
-                ends_at__gt=now,starts_at__lt=now+timedelta(days=14)).order_by('starts_at','pk')[:20]]}
+            for x in sorted((x for x in all_blocks if x.public_notice and x.ends_at>now and x.starts_at<now+timedelta(days=14)),
+                key=lambda x:(x.starts_at,x.pk))[:20]]}
 
 
-def directory_data(row):
+def opening_batch(clinic_ids,*,now=None):
+    from collections import defaultdict
+    now=timezone.localtime(now or timezone.now());a=timezone.make_aware(datetime.combine(now.date(),time.min))
+    hours=defaultdict(list);blocks=defaultdict(list)
+    for h in DepartmentHours.objects.filter(department__clinic_id__in=clinic_ids,department__is_active=True).select_related('department'):
+        hours[h.department.clinic_id].append(h)
+    for x in ResourceBlock.objects.filter(clinic_id__in=clinic_ids,is_active=True,ends_at__gt=a,starts_at__lt=now+timedelta(days=14)):
+        blocks[x.clinic_id].append(x)
+    return {i:opening_data(i,now=now,prepared=(hours[i],blocks[i])) for i in clinic_ids}
+
+
+def directory_data(row,*,opening=None):
     return {'id':row.clinic_id,'name':row.display_name,'province':row.province,'city':row.city,'district':row.district,
         'address':row.address,'entrance':row.entrance,'phone':row.public_phone,'revision':row.revision,
         'latitude':float(row.latitude) if row.latitude is not None else None,
         'longitude':float(row.longitude) if row.longitude is not None else None,'coordinate_system':'WGS-84',
         'map_latitude':float(row.map_latitude) if row.map_latitude is not None else None,
         'map_longitude':float(row.map_longitude) if row.map_longitude is not None else None,'map_coordinate_system':'GCJ-02',
-        'synthetic':row.synthetic or settings.ADC_CLINICAL_SYNTHETIC,'opening':opening_data(row.clinic_id)}
+        'synthetic':row.synthetic or settings.ADC_CLINICAL_SYNTHETIC,'opening':opening if opening is not None else opening_data(row.clinic_id)}
 
 
 def public_directory(*,city=None):
     rows=ClinicDirectory.objects.filter(is_published=True,clinic__is_active=True).select_related('clinic')
     if city:rows=rows.filter(city=city)
-    return [directory_data(row) for row in rows]
+    rows=list(rows);openings=opening_batch([r.clinic_id for r in rows])
+    return [directory_data(row,opening=openings[row.clinic_id]) for row in rows]

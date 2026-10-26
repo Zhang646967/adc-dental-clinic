@@ -14,6 +14,11 @@ Page({
       const selection=source ? {clinics:[{id:source.clinic_id,name:source.clinic}],allServices:[source.reschedule_service],clinicIndex:0,selectedId:source.service_id} : selectedCatalogue(await api.request('catalogue/'),query);
       this.setData({...selection,source,day:session.today,firstDay:session.today,lastDay:session.last_day});
       this.rebuild(selection.selectedId);
+      if(!source&&query.dentist){
+        const index=this.data.doctors.findIndex(d=>String(d.id)===String(query.dentist));
+        if(index<1)throw Error('所选医师接诊安排已变化，请重新核对医师。');
+        this.setData({doctorIndex:index});
+      }
     } catch(e) { showError(this,e); }
   },
   rebuild(selectedId=null) {
@@ -35,7 +40,8 @@ Page({
   waitlist() {
     const c=this.data.clinics[this.data.clinicIndex],s=this.data.services[this.data.serviceIndex];
     if(this.data.source || !c || !s)return;
-    wx.navigateTo({url:`/pages/waitjoin/index?clinic=${c?c.id:''}&service=${s?s.id:''}&day=${this.data.day}`});
+    const d=this.data.doctors[this.data.doctorIndex];
+    wx.navigateTo({url:`/pages/waitjoin/index?clinic=${c?c.id:''}&service=${s?s.id:''}&day=${this.data.day}&dentist=${d?d.id:''}`});
   },
   async search() {
     if (this.data.busy) return;

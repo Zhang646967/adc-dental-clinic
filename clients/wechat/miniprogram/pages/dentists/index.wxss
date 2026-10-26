@@ -1,0 +1,1 @@
+.profile-person{display:flex;gap:24rpx;align-items:center}.profile-avatar{width:100rpx;height:130rpx;flex-shrink:0;border-radius:14rpx}.profile-tags{display:flex;flex-wrap:wrap;gap:12rpx;margin-top:16rpx}.profile-tags text{background:#edf4ee;padding:8rpx 16rpx;border-radius:10rpx;color:#3d604f}

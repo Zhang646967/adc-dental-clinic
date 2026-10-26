@@ -67,3 +67,44 @@ def clinics(request):
     # Public branches are those with a complete, published offering. Employee
     # contacts, qualification notes, home addresses and patient data are absent.
     return public_page(request, 'services/clinics.html', discovery=discovery_data())
+
+
+@require_safe
+def clinic_detail(request,pk):
+    data=discovery_data();clinic=next((x for x in data['clinics'] if x['id']==pk),None)
+    if not clinic:raise Http404
+    return public_page(request,'services/clinic_detail.html',clinic=clinic)
+
+
+def doctor_filter(data,params):
+    q=str(params.get('q','')).strip()[:80];city=str(params.get('city',''))[:40]
+    category=str(params.get('category',''))[:30];clinic=positive_id(str(params.get('clinic','')))
+    rows=[]
+    for doctor in data['dentists']:
+        branches=[c for c in doctor['clinics'] if (not city or c['city']==city) and (not clinic or c['id']==clinic)]
+        if not branches:continue
+        if q and q.casefold() not in (doctor['name']+' '+doctor['summary']+' '+' '.join(doctor['specialty_labels'])).casefold():continue
+        if category and not any(s['category']==category for c in branches for s in c['services']):continue
+        if params.get('scheduled')=='1' and not any(c['shifts'] for c in branches):continue
+        rows.append({**doctor,'clinics':branches})
+    return rows
+
+
+@require_safe
+def dentists(request):
+    from django.core.paginator import Paginator
+    data=discovery_data()
+    return public_page(request,'services/dentists.html',page=Paginator(doctor_filter(data,request.GET),12).get_page(request.GET.get('page')),
+        cities=sorted({r['city'] for r in data['clinics']}),categories=CATEGORY_CHOICES,filters=request.GET)
+
+
+@require_safe
+def dentist_detail(request,pk):
+    data=discovery_data();doctor=next((x for x in data['dentists'] if x['id']==pk),None)
+    if not doctor:raise Http404
+    clinic=positive_id(request.GET.get('clinic',''))
+    if clinic:
+        local=next((d for c in data['clinics'] if c['id']==clinic for d in c['team'] if d['id']==pk),None)
+        if not local:raise Http404
+        doctor={**local,'clinics':doctor['clinics']}
+    return public_page(request,'services/dentist_detail.html',doctor=doctor)

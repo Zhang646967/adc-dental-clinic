@@ -11,6 +11,8 @@ Page({
       const day=query.day && query.day>session.today && query.day<=session.last_day ? query.day : tomorrow;
       this.setData({...selection,firstDay:session.today,lastDay:session.last_day,startDay:day,endDay:day});
       this.rebuild(selection.selectedId);
+      if(query.dentist){const index=this.data.doctors.findIndex(d=>String(d.id)===String(query.dentist));
+        if(index<1)throw Error('所选医师已不适配该候补服务，请重新选择。');this.setData({doctorIndex:index});}
     }catch(e){showError(this,e);}
   },
   rebuild(selectedId=null){const c=this.data.clinics[this.data.clinicIndex];const services=c?this.data.allServices.filter(s=>s.clinic===c.id):[];
