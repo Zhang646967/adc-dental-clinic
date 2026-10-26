@@ -22,7 +22,7 @@ from tests.fixtures import FixtureMixin
 from workspaces.models import WorkspaceContext
 
 
-@override_settings(ADC_CLINICAL_SYNTHETIC=True,ADC_PATIENT_IDENTITY_PROVIDER='local',ADC_READ_ONLY=False)
+@override_settings(ADC_PATIENT_AUTH_MODE='demo',ADC_CLINICAL_SYNTHETIC=True,ADC_PATIENT_IDENTITY_PROVIDER='local',ADC_READ_ONLY=False)
 class PatientAccountIdentityTests(FixtureMixin,TransactionTestCase):
     def setUp(self):
         self.make_fixture()
