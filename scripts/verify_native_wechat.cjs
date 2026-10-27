@@ -7,7 +7,7 @@ function page(options={}){
  const api={bootstrap:async()=>({account_authenticated:options.logged!==false}),signOut:async()=>{},request:async(route,method,data)=>{
   calls.push({route,method,data});if(options.fail)throw Error('授权已变化');return {state:method==='POST'?(data.decision==='approve'?'APPROVED':'REJECTED'):'PENDING',origin:'https://adc.example.test',expires_at:'2026-10-25T12:03:00+08:00'};
  }};
- vm.runInNewContext(fs.readFileSync(path.join(root,'pages/web-login/index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,decodeURIComponent,require:n=>n.endsWith('/api')?api:{showError:(p,e)=>p.setData({error:e.message}),dateTime:x=>x}});
+ vm.runInNewContext(fs.readFileSync(path.join(root,'pages/web-login/index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,decodeURIComponent,require:n=>n.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:n.endsWith('/api')?api:{showError:(p,e)=>p.setData({error:e.message}),dateTime:x=>x}});
  const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData:v=>Object.assign(p.data,v)};return {p,calls,navigation,state,proof:()=>proof};
 }
 async function verify(){

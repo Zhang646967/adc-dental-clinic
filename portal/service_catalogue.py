@@ -20,12 +20,14 @@ def complete(profile):
     return not validate_presentation(presentation_values(profile))
 
 
-def public_profiles(*, category=None, clinic_id=None):
+def public_profiles(*, category=None, clinic_id=None, clinic_ids=None):
     rows = published_profiles()
     if category:
         rows = rows.filter(category=category)
     if clinic_id:
         rows = rows.filter(service__department__clinic_id=clinic_id)
+    if clinic_ids is not None:
+        rows = rows.filter(service__department__clinic_id__in=clinic_ids)
     # Fail closed even if a maintenance/import path bypassed ModelForm.clean().
     return [profile for profile in rows if complete(profile)]
 
@@ -34,7 +36,7 @@ def public_services(actor=None):
     from portal.policies import patient_access
     access=patient_access(actor) if actor else None
     return BookingService.objects.filter(pk__in=[p.service_id for p in public_profiles()
-        if (p.category!='CHILDREN' or access and access.delegated) and
+        if (p.category!='CHILDREN' or access and access.guardian) and
         (not access or not access.delegated or p.service.department.clinic_id==access.clinic_id)]).select_related(
         'department__clinic', 'patient_presentation')
 
@@ -59,6 +61,6 @@ def require_self_service(service_id, *, clinic_id=None, actor=None):
     from portal.policies import patient_access
     access=patient_access(actor) if actor else None
     if access:access.require_clinic(profile.service.department.clinic_id)
-    if profile.category == 'CHILDREN' and not (access and access.delegated):
+    if profile.category == 'CHILDREN' and not (access and access.guardian):
         raise RuleError('儿童就诊需由前台核验监护人与就诊人，请联系本店前台。')
     return profile

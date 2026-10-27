@@ -42,6 +42,7 @@ def login_context(request,*,form=None,sms_form=None,sent=None,booking_service=No
         sms_form=sms_form if sms_form is not None else forms.SmsAuthForm(),sent=sent,auth=caps,
         booking_service=booking_service,
         booking_dentist=booking_dentist,
+        booking_day=request.session.get('adc_profile_entry',{}).get('day'),
         password_mode=request.POST.get('login_method')=='password' or bool(form is not None and form.is_bound) or not (caps['sms_enabled'] or caps['wechat_qr']),
         wechat_in_browser='micromessenger' in request.headers.get('User-Agent','').lower())
 

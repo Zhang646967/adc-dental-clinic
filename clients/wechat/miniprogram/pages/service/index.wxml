@@ -11,5 +11,5 @@
     <button wx:if="{{service.self_booking}}" class="primary" disabled="{{readOnly || busy}}" bindtap="book">选择本服务的就诊时间 →</button>
     <navigator class="link" url="/pages/help/index">联系前台协助</navigator>
   </block>
-  <button class="secondary" bindtap="load" disabled="{{busy}}">重新核对服务</button><navigator class="link" url="/pages/services/index">返回服务目录</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
-</view>
+  <button class="secondary" bindtap="load" disabled="{{busy}}">重新核对服务</button><navigator open-type="switchTab" class="link" url="/pages/services/index">返回服务目录</navigator><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+<view wx:if="{{service&&service.category=='CHILDREN'&&!service.self_booking}}" class="card"><view class="line">儿童预约需选择经本店前台核验监护关系的就诊人；代约不包含临床和账单查看权限。</view><button class="primary" bindtap="book" disabled="{{busy||readOnly}}">登录或选择已核验儿童就诊人</button></view></view>

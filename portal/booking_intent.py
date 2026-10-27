@@ -30,13 +30,17 @@ def destination_after_activation(request):
     ctx=getattr(request,'workspace',None)
     if ctx is None or not ctx.role:return None
     profile=pending_profile(request)
-    if not profile or profile.category=='CHILDREN':
+    if not profile:
         request.session.pop(INTENT_KEY,None);return None
     try:access=patient_access(request.user)
     except SubjectRequired:return reverse('portal_subjects')
+    if profile.category=='CHILDREN' and not access.guardian:return reverse('portal_subjects')
     if access.delegated and access.clinic_id!=profile.service.department.clinic_id:
         return reverse('portal_subjects')
     request.session.pop(INTENT_KEY,None)
-    from portal.profile_intent import consume
-    doctor=consume(request,profile.service_id)
-    return reverse('portal_slots')+'?service='+str(profile.service_id)+(('&dentist='+str(doctor)) if doctor else '')
+    from portal.profile_intent import consume_selection
+    from urllib.parse import urlencode
+    selected=consume_selection(request,profile.service_id)
+    query={'service':profile.service_id,'clinic':profile.service.department.clinic_id}
+    query.update({k:v for k,v in selected.items() if v})
+    return reverse('portal_slots')+'?'+urlencode(query)

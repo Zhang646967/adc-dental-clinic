@@ -20,7 +20,7 @@ class Client:
     def close(self):
         if self.connection:self.connection.close()
         self.connection=None
-    def request(self,method,route,fields=None,*,json_response=False):
+    def request(self,method,route,fields=None,*,json_response=False,extra_headers=None):
         if not route.startswith('/') or route.startswith('//') or urlsplit(route).netloc:raise ValueError('Local routes only')
         if self.connection is None:self.connection=HTTPConnection('127.0.0.1',self.port,timeout=12)
         origin='http://127.0.0.1:'+str(self.port)
@@ -29,6 +29,7 @@ class Client:
             body=urlencode(fields or {},doseq=True)
             headers.update({'Content-Type':'application/x-www-form-urlencoded','Origin':origin,'Referer':origin+route})
         if json_response:headers['Accept']='application/json'
+        if extra_headers:headers.update(extra_headers)
         try:
             self.connection.request(method,route,body,headers);reply=self.connection.getresponse();data=reply.read(2*1024*1024+1)
             if len(data)>2*1024*1024:raise ValueError('Oversized response')

@@ -50,10 +50,16 @@ class PortalLoginView(LoginView):
             ctx=existing_context(request)
             if ctx and ctx.role=='PATIENT' and valid_context(request.user,ctx):
                 profile=self.chosen_service()
-                if profile and profile.category!='CHILDREN':
+                if profile:
                     from portal.profile_intent import capture
                     doctor=capture(request,profile.service_id)
-                    return redirect(reverse('portal_slots')+'?service='+str(profile.service_id)+(('&dentist='+str(doctor)) if doctor else ''))
+                    from urllib.parse import urlencode
+                    from portal.profile_intent import ENTRY,valid_day
+                    query={'service':profile.service_id,'clinic':profile.service.department.clinic_id}
+                    if doctor:query['dentist']=doctor
+                    day=valid_day(request.session.get(ENTRY,{}).get('day'))
+                    if day:query['day']=day
+                    return redirect(reverse('portal_slots')+'?'+urlencode(query))
         return super().get(request,*args,**kwargs)
 
     def form_valid(self,form):
@@ -67,7 +73,7 @@ class PortalLoginView(LoginView):
         # service hint cannot choose a role, clinic scope or arbitrary URL.
         from portal.booking_intent import remember_service,destination_after_activation
         profile=self.chosen_service()
-        if profile and profile.category!='CHILDREN':
+        if profile:
             remember_service(self.request,profile.service_id)
             destination=destination_after_activation(self.request)
             if destination:return redirect(destination)
@@ -99,7 +105,19 @@ def appointments(request):
 @require_GET
 def slots(request):
     patient_access(request.user)
-    form=SlotFilterForm(request.GET or None,actor=request.user)
+    query=request.GET.copy()
+    from scheduling.service_content import positive_id
+    from portal.service_catalogue import public_profiles
+    from portal.discovery import service_discovery
+    selected=positive_id(query.get('service',''))
+    profile=next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
+    if profile and not query.get('day'):
+        doctor=positive_id(query.get('dentist',''))
+        if not doctor or any(d.pk==doctor for d in profile.service.public_dentists):
+            info=service_discovery(selected,dentist_id=doctor)
+            if info['default_day']:query['day']=info['default_day']
+        if not query.get('clinic'):query['clinic']=str(profile.service.department.clinic_id)
+    form=SlotFilterForm(query or None,actor=request.user)
     rows=[];profile=None;searched=False;query_failed=False
     if form.is_valid():
         searched=True

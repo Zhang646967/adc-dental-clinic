@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {arrangement,dateTime,showError}=require('../../utils/format');
 Page({
@@ -21,8 +22,8 @@ Page({
     if(this.data.busy)return;this.setData({busy:true,error:''});
     try{const p=source ? await api.request(`visits/${source.id}/reschedule/preview/`,'POST',{action:'preview',offer_id:this.id,slot_id:this.data.offer.slot,start:this.data.offer.start,expected_version:source.version,reason:this.data.reason}) : await api.request(`offers/${this.id}/preview/`,'POST',{action});
       getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':action==='accept'?'offer_accept':'offer_decline',preview:arrangement(p),path:source?`visits/${source.id}/reschedule/confirm/`:`offers/${this.id}/confirm/`};
-      this.setData({busy:false});wx.navigateTo({url:'/pages/confirm/index'});
+      this.setData({busy:false});navigation.navigateTo({url:'/pages/confirm/index'});
     }catch(e){showError(this,e);}
   },
-  visit(){wx.redirectTo({url:`/pages/visit/index?id=${this.data.offer.visit.id}`});}
+  visit(){navigation.redirectTo({url:`/pages/visit/index?id=${this.data.offer.visit.id}`});}
 });

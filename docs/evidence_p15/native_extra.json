@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": 11,
+  "detail": [
+    "Own visit links to native invoice with current published amount180",
+    "Actual history picker retains amount200 and identifies current balance revision2",
+    "Actual self-history consent saves a retained self-report version",
+    "Authorized clinical/coordination page /pages/plans/index loads from live backend",
+    "Authorized clinical/coordination page /pages/referrals/index loads from live backend",
+    "Authorized clinical/coordination page /pages/waitlist/index loads from live backend",
+    "Guangzhou Yuexiu detail has3 published images and restoration service",
+    "Frontdesk-verified guardian explicitly confirms child service appointment",
+    "Guardian cannot access invoice1; denied screen contains no cached bill",
+    "Actual waitlist preview and explicit registration retain selected clinic/service",
+    "Explicit waitlist withdrawal retains history without cancelling another appointment"
+  ],
+  "scope": "Official tool controls with live Django; assigned synthetic users, not physical phone or real-provider identity"
+}

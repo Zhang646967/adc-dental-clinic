@@ -23,16 +23,21 @@ function page(name,options={}){
   const api={selectSubject:async key=>{calls.push({route:'patients/select/',method:'POST',data:{subject:key}});state.globalData.review=null;},showSubject:p=>p.setData({patientName:currentSession.patient_name||'',patientCapacity:currentSession.acting_capacity||''}),bootstrap:async()=>currentSession,sessionInfo:()=>currentSession,request:async(route,method='GET',data)=>{
     calls.push({route,method,data});
     if(options.request)return options.request(route,method,data);
+    if(route==='discovery/services/'){
+      const source=options.catalogue||catalogue;if(!Array.isArray(source.offerings))return source;
+      const rows=source.offerings.filter(s=>(!data.category||s.category===data.category)&&(!data.clinic||String(s.clinic)===String(data.clinic))&&(!data.q||[s.name,s.summary,s.suitable_for].join(' ').includes(data.q)));
+      return {offerings:rows,categories:[...new Map(source.offerings.map(s=>[s.category,{id:s.category,name:s.category_label,count:source.offerings.filter(x=>x.category===s.category).length}])).values()],clinic_choices:source.clinics.map(c=>({...c,count:source.offerings.filter(s=>s.clinic===c.id).length})),alternatives:[],message:rows.length?'':'没有匹配服务',page:1,pages:1,count:rows.length};
+    }
     if(route==='catalogue/'||route==='discovery/')return options.catalogue||catalogue;
-    if(route.startsWith('services/'))return offerings.find(s=>String(s.id)===route.split('/')[1]);
-    if(route.startsWith('discovery/services/'))return offerings.find(s=>String(s.id)===route.split('/')[2]);
+    if(route.startsWith('services/'))return {...offerings.find(s=>String(s.id)===route.split('/')[1]),default_day:'2026-10-23'};
+    if(route.startsWith('discovery/services/'))return {...offerings.find(s=>String(s.id)===route.split('/')[2]),default_day:'2026-10-23'};
     throw Error('Unexpected request '+route);
   }};
   const format={exports:{}};
   vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
   vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
     Page:value=>{definition=value;},wx,getApp:()=>state,
-    require:module=>module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
+    require:module=>module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};
   return {p:instance,calls,navigation,state,session:currentSession};
@@ -61,22 +66,22 @@ async function verify(){
   });
   await test('discovery filters published offerings by need, category and clinic',async()=>{
     const {p}=page('services');await p.onShow();assert.equal(p.data.rows.length,3);
-    p.keyword({detail:{value:'孩子'}});assert.equal(p.data.rows[0].id,33);
-    p.keyword({detail:{value:''}});p.pickCategory({detail:{value:'1'}});assert.equal(p.data.rows.length,1);
-    p.pickClinic({detail:{value:'2'}});assert.equal(p.data.rows.length,0);
+    p.keyword({detail:{value:'孩子'}});await p.search();assert.equal(p.data.rows[0].id,33);
+    p.keyword({detail:{value:''}});await p.pickCategory({detail:{value:'1'}});assert.equal(p.data.rows.length,1);
+    await p.pickClinic({detail:{value:'2'}});assert.equal(p.data.rows.length,0);
   });
   await test('guest discovery reads only public catalogue without forcing login',async()=>{
-    const {p,calls,navigation}=page('services',{session:{authenticated:false}});await p.onShow();assert.equal(calls.length,1);assert.equal(calls[0].route,'discovery/');assert.equal(p.data.rows.length,3);assert.equal(navigation.length,0);
+    const {p,calls,navigation}=page('services',{session:{authenticated:false}});await p.onShow();assert.equal(calls.length,1);assert.equal(calls[0].route,'discovery/services/');assert.equal(p.data.rows.length,3);assert.equal(navigation.length,0);
   });
   await test('guest service choice survives typed login navigation',async()=>{
     const {p,calls,navigation,state}=page('service',{session:{authenticated:false}});p.onLoad({id:'22'});await p.onShow();p.book();assert.equal(calls[0].route,'discovery/services/22/');assert.equal(navigation[0].url,'/pages/login/index');assert.equal(state.globalData.bookingIntent.service,22);assert.equal(state.globalData.bookingIntent.clinic,2);
   });
   await test('service detail hands off the exact service and clinic',async()=>{
-    const {p,navigation}=page('service');p.onLoad({id:'22'});await p.onShow();p.book();assert.equal(navigation[0].url,'/pages/booking/index?clinic=2&service=22');
+    const {p,navigation}=page('service');p.onLoad({id:'22'});await p.onShow();p.book();assert.equal(navigation[0].url,'/pages/booking/index?clinic=2&service=22&day=2026-10-23');
   });
-  await test('child and read-only detail cannot navigate into self booking',async()=>{
+  await test('child detail leads to verification and read-only cannot book',async()=>{
     for(const options of [{id:'33'},{id:'22',session:{read_only:true}}]){
-      const {p,navigation}=page('service',options);p.onLoad({id:options.id});await p.onShow();p.book();assert.equal(navigation.length,0);
+      const {p,navigation}=page('service',options);p.onLoad({id:options.id});await p.onShow();p.book();if(options.id==='33')assert(!navigation.some(n=>n.url.startsWith('/pages/booking/')));else assert.equal(navigation.length,0);
     }
   });
   await test('detail refresh clears withdrawn content before displaying an error',async()=>{
@@ -87,7 +92,7 @@ async function verify(){
     const {p,calls}=page('service');p.onLoad({id:'../visits'});await p.onShow();assert.equal(calls.length,0);assert(p.data.error);
   });
   await test('booking preserves the non-first service, clinic and duration',async()=>{
-    const {p}=page('booking');await p.onLoad({service:'22'});assert.equal(p.data.clinics[p.data.clinicIndex].id,2);assert.equal(p.data.selectedService.id,22);assert.equal(p.data.selectedService.duration,45);
+    const {p}=page('booking');await p.onLoad({service:'22'});assert.equal(p.data.clinics[p.data.clinicIndex].id,2);assert.equal(p.data.selectedService.id,22);assert.equal(p.data.selectedService.duration,45);assert.equal(p.data.day,'2026-10-23');
   });
   await test('removed service hint blocks booking instead of choosing a replacement',async()=>{
     const {p,calls}=page('booking');await p.onLoad({service:'999'});assert(p.data.error);assert.equal(p.data.services.length,0);assert.equal(calls.length,1);
@@ -118,11 +123,12 @@ async function verify(){
   await test('patient request is sent once to preview and server text is reviewed',async()=>{
     const {p,calls,state,navigation}=page('booking',{request:async(route,method,data)=>{
       if(route==='catalogue/')return catalogue;
+      if(route==='services/22/')return {...offerings[1],default_day:'2026-10-23'};
       assert.equal(route,'booking/preview/');assert.equal(method,'POST');assert.equal(data.patient_request,'希望检查一下');
       return {...slot,service:'复查',patient_request:'服务器确认的需求',proposal_token:'signed',fee_label:'¥0.00 / 本次服务'};
     }});
     await p.onLoad({service:'22'});p.patientRequest({detail:{value:'希望检查一下'}});p.setData({rows:[slot]});await p.choose({currentTarget:{dataset:{index:0}}});
-    assert.equal(calls.length,2);assert.equal(state.globalData.review.preview.patient_request,'服务器确认的需求');assert.equal(state.globalData.review.preview.fee_label,'¥0.00 / 本次服务');assert.equal(navigation[0].url,'/pages/confirm/index');
+    assert.equal(calls.length,3);assert.equal(state.globalData.review.preview.patient_request,'服务器确认的需求');assert.equal(state.globalData.review.preview.fee_label,'¥0.00 / 本次服务');assert.equal(navigation[0].url,'/pages/confirm/index');
   });
   await test('confirmation submits signed token only, not editable reason or fee fields',async()=>{
     const {p,calls,state}=page('confirm',{request:async()=>({...slot,id:42,status_label:'已预约'})});

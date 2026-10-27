@@ -1,19 +1,23 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api'),{showError,dateTime}=require('../../utils/format'),intent=require('../../utils/booking-intent');
 function consent(content){return new Promise(resolve=>wx.showModal({title:'核对本人账号',content,success:r=>resolve(!!r.confirm),fail:()=>resolve(false)}));}
 Page({
-  data:{captchaImage:'',captchaKey:'',profile:null,phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',auth:{},smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:'',readOnly:false,busy:false,error:''},
+  data:{guest:false,captchaImage:'',captchaKey:'',profile:null,phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',auth:{},smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:'',readOnly:false,busy:false,error:''},
   async onShow(){await this.load();},
   async load(){
     this.setData({busy:true,error:'',profile:null});
     try{
       const session=await api.bootstrap();
-      if(!session.account_authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
+      if(!session.account_authenticated){this.setData({guest:true,busy:false});return;}
+      this.setData({guest:false});
       if(this.ownerContext&&this.ownerContext!==session.workspace_id)this.setData({phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:''});
       this.ownerContext=session.workspace_id;
       const profile=await api.request('account/');profile.cases=profile.cases.map(c=>({...c,createdLabel:dateTime(c.created_at)}));
       this.setData({profile,auth:session.auth_capabilities||{},readOnly:session.read_only});
     }catch(e){showError(this,e);}finally{this.setData({busy:false});}
   },
+  login(){navigation.navigateTo({url:'/pages/login/index'});},
+  onHide(){this.setData({loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',smsCode:''});},
   field(e){this.setData({[e.currentTarget.dataset.field]:e.detail.value});},
   async bindWechat(){
     if(this.data.busy||this.data.readOnly||!await consent('同意将当前微信身份绑定到这个ADC账号，用于后续快捷登录？'))return;
@@ -67,16 +71,16 @@ Page({
   async activate(){
     if(this.data.busy)return;
     this.setData({busy:true,error:''});
-    try{const session=await api.request('account/activate/','POST',{confirmed:'on'});wx.reLaunch({url:intent.destination(getApp(),session)});}
+    try{const session=await api.request('account/activate/','POST',{confirmed:'on'});navigation.reLaunch({url:intent.destination(getApp(),session)});}
     catch(e){showError(this,e);}finally{this.setData({busy:false});}
   },
-  edit(e){wx.navigateTo({url:'/pages/enrollment/index?case='+e.currentTarget.dataset.id});},
+  edit(e){navigation.navigateTo({url:'/pages/enrollment/index?case='+e.currentTarget.dataset.id});},
   async withdraw(e){
     if(this.data.busy||this.data.readOnly||!await consent('确认撤回本次档案申请？原业务及其他记录保留。'))return;
     this.setData({busy:true,error:''});
     try{await api.request('account/enrollment/'+e.currentTarget.dataset.id+'/withdraw/','POST',{revision:e.currentTarget.dataset.revision,confirmed:'on'});await this.load();}
     catch(error){showError(this,error);}finally{this.setData({busy:false});}
   },
-  async logout(){try{await api.signOut();wx.reLaunch({url:'/pages/discovery/index'});}catch(e){showError(this,e);}},
+  async logout(){try{await api.signOut();navigation.reLaunch({url:'/pages/discovery/index'});}catch(e){showError(this,e);}},
   onUnload(){this.setData({phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',smsCode:'',smsChallenge:'',smsNotice:''});}
 });

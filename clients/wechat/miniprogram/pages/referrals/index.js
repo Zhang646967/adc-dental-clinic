@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {dateTime,showError}=require('../../utils/format');
 Page({
@@ -6,8 +7,8 @@ Page({
   this.setData({rows:[],preview:null,checked:false,done:'',error:'',busy:true});api.showSubject(this);
   try{
    const s=await api.bootstrap();api.showSubject(this);
-   if(!s.authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
-   if(s.subject_required){wx.reLaunch({url:'/pages/patients/index'});return;}
+   if(!s.authenticated){navigation.reLaunch({url:'/pages/login/index'});return;}
+   if(s.subject_required){navigation.reLaunch({url:'/pages/patients/index'});return;}
    if(s.delegated){this.setData({busy:false,error:'代约范围不包含临床转诊披露，请切换到本人。'});return;}
    this.setData({readOnly:s.read_only});await this.load();
   }catch(e){showError(this,e);}

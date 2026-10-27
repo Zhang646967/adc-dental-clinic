@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {dateTime,showError}=require('../../utils/format');
 const intent=require('../../utils/booking-intent');
@@ -7,7 +8,7 @@ Page({
   this.setData({busy:true,error:'',rows:[]});
   try{
    const session=await api.bootstrap();
-   if(!session.authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
+   if(!session.authenticated){navigation.reLaunch({url:'/pages/login/index'});return;}
    const d=await api.request('patients/');
    this.setData({rows:d.rows.map(r=>Object.assign({},r,{expiresLabel:r.expires?dateTime(r.expires):''})),busy:false});
   }catch(e){showError(this,e);}
@@ -15,7 +16,7 @@ Page({
  async choose(e){
   if(this.data.busy)return;
   this.setData({busy:true,error:''});
-  try{await api.selectSubject(e.currentTarget.dataset.key);wx.reLaunch({url:intent.destination(getApp(),api.sessionInfo())});}
+  try{await api.selectSubject(e.currentTarget.dataset.key);navigation.reLaunch({url:intent.destination(getApp(),api.sessionInfo())});}
   catch(e){showError(this,e);}
  }
 });

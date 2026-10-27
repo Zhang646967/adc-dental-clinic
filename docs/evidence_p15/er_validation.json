@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "migrations_unchanged": 64,
+  "tables": 142,
+  "foreign_keys": 388,
+  "triggers": 110,
+  "er_views": 31,
+  "full_observed_schema_matches_previous": true,
+  "notes": "No new table, field, FK, index or trigger; shared projections and guardian policy use existing relations."
+}

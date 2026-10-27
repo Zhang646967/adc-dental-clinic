@@ -4,19 +4,32 @@ from scheduling.service_content import CATEGORY_CHOICES
 
 
 @endpoint(public=True)
+def index(request):
+    from portal.discovery_queries import clinic_index
+    return result(request,clinic_index())
+
+
+@endpoint(public=True)
+def services(request):
+    from portal.discovery_queries import service_listing
+    return result(request,service_listing(request.GET))
+
+
+@endpoint(public=True)
 def listing(request):
     return result(request,discovery_data())
 
 
 @endpoint(public=True)
 def service(request,pk):
-    return result(request,service_discovery(pk))
+    from scheduling.service_content import positive_id
+    return result(request,service_discovery(pk,dentist_id=positive_id(request.GET.get('dentist',''))))
 
 
 @endpoint(public=True)
 def clinic(request,pk):
     from django.http import Http404
-    row=next((x for x in discovery_data()['clinics'] if x['id']==pk),None)
+    row=next((x for x in discovery_data(clinic_id=pk)['clinics'] if x['id']==pk),None)
     if not row:raise Http404
     return result(request,row)
 
@@ -25,7 +38,8 @@ def clinic(request,pk):
 def dentists(request):
     from portal.service_views import doctor_filter
     from django.core.paginator import Paginator
-    data=discovery_data();page=Paginator(doctor_filter(data,request.GET),12).get_page(request.GET.get('page'))
+    from portal.discovery_queries import doctor_listing_data
+    data=doctor_listing_data();page=Paginator(doctor_filter(data,request.GET),12).get_page(request.GET.get('page'))
     return result(request,dict(rows=list(page),page=page.number,pages=page.paginator.num_pages,
         cities=sorted({c['city'] for c in data['clinics']}),
         categories=[dict(id=code,name=name) for code,name in CATEGORY_CHOICES]))
@@ -34,7 +48,7 @@ def dentists(request):
 @endpoint(public=True)
 def dentist(request,pk):
     from django.http import Http404
-    data=discovery_data();doctor=next((x for x in data['dentists'] if x['id']==pk),None)
+    data=discovery_data(dentist_id=pk);doctor=next((x for x in data['dentists'] if x['id']==pk),None)
     if not doctor:raise Http404
     clinic_id=request.GET.get('clinic','')
     if clinic_id:

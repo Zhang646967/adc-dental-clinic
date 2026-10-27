@@ -3,7 +3,7 @@
 Standard Django sessions, CSRF and signed workspace contexts are retained. This
 is assigned-account login, not WeChat identity verification or phone registration.
 """
-from datetime import timedelta
+from datetime import datetime,time,timedelta
 from functools import wraps
 from django.conf import settings
 from django.contrib.auth import login, logout
@@ -20,6 +20,7 @@ from accounts.models import UserAccount
 from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
 from adc_core.snapshots import reporting_snapshot
+from care.models import Invoice
 from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
 from portal import mini_forms as forms, services, rescheduling
@@ -94,11 +95,11 @@ def session_data(request):
             except PermissionDenied:pass
         if valid_context(request.user, ctx) and ctx.role == 'PATIENT':
             data.update(authenticated=True,workspace_token=token_for(ctx),workspace_id=str(ctx.pk),subject_revision=ctx.revision,
-                subject_required=False,patient_name='',subject_key=None,acting_capacity='',delegated=False)
+                subject_required=False,patient_name='',subject_key=None,acting_capacity='',delegated=False,guardian=False)
             try:
                 access = patient_access(request.user)
                 data.update(patient_name=access.patient.name,subject_key=access.pk if access.delegated else 'self',
-                    delegated=access.delegated,acting_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.public_contact['name']) if access.delegated else '本人')
+                    delegated=access.delegated,guardian=access.guardian,acting_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.public_contact['name']) if access.delegated else '本人')
             except SubjectRequired:data['subject_required']=True
     return data
 
@@ -175,7 +176,9 @@ def catalogue(request):
 def service_detail(request, pk):
     profile=public_profile(pk)
     patient_access(request.user).require_clinic(profile.service.department.clinic_id)
-    return result(request, service_data(profile,actor=request.user))
+    from portal.discovery import service_discovery
+    from scheduling.service_content import positive_id
+    return result(request,service_discovery(pk,dentist_id=positive_id(request.GET.get('dentist','')),actor=request.user))
 
 
 @endpoint()
@@ -190,10 +193,16 @@ def overview(request):
 @endpoint()
 def candidates(request):
     d = validated(forms.CandidateForm(request.GET))
-    require_self_service(d['service'], clinic_id=d['clinic'], actor=request.user)
+    profile=require_self_service(d['service'], clinic_id=d['clinic'], actor=request.user)
     rows = services.public_options(request.user, d['clinic'], d['day'], d['service'], d['dentist'])
+    start=timezone.make_aware(datetime.combine(d['day'],time.min))
+    published=AvailabilitySlot.objects.filter(clinic_id=d['clinic'],is_active=True,booking_paused=False,
+        dentist_id__in=[x.pk for x in profile.service.public_dentists],starts_at__lt=start+timedelta(days=1),ends_at__gt=start)
+    if d['dentist']:published=published.filter(dentist_id=d['dentist'])
+    status='AVAILABLE' if rows else 'NO_COMBINATION' if published.exists() else 'NO_SCHEDULE'
+    message='' if rows else '该日暂无符合就诊人与资源条件的组合，可换医师、日期或登记候补。' if status=='NO_COMBINATION' else '该日暂无对应的已发布出诊，可换日期或登记候补。'
     return result(request, dict(rows=[option_data(r) for r in rows], observed_at=timezone.now().isoformat(),
-        note='候选不占位；确认时重新核对。时间均为北京时间。'))
+        status=status,message=message,note='候选不占位；确认时重新核对。时间均为北京时间。'))
 
 
 @endpoint()
@@ -213,6 +222,8 @@ def visits(request):
 def detail(request, pk):
     visit = rescheduling.owned_visit(request.user, pk)
     data = visit_data(visit,actor=request.user)
+    access=patient_access(request.user)
+    data['invoice_id']=Invoice.objects.filter(visit=visit).values_list('pk',flat=True).first() if not access.delegated else None
     plan = current_plan(visit)
     # Own historical service, deliberately absent from the general catalogue.
     if plan:

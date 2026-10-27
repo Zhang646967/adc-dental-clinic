@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {arrangement,showError}=require('../../utils/format');
 const actions={
@@ -29,6 +30,6 @@ Page({
       this.setData({done:r.kind==='waitlist'?r.wait:arrangement(r.visit||r),doneType:r.kind==='waitlist'?'waitlist':'visit',busy:false});
     }catch(e){showError(this,e);}
   },
-  home(){getApp().globalData.review=null;wx.reLaunch({url:'/pages/home/index'});},
-  result(){wx.redirectTo({url:this.data.doneType==='waitlist'?'/pages/waitlist/index':`/pages/visit/index?id=${this.data.done.id}`});}
+  home(){getApp().globalData.review=null;navigation.reLaunch({url:'/pages/home/index'});},
+  result(){navigation.redirectTo({url:this.data.doneType==='waitlist'?'/pages/waitlist/index':`/pages/visit/index?id=${this.data.done.id}`});}
 });

@@ -7,16 +7,16 @@ const clinics=[
  {id:2,name:'长沙梅溪湖门店',city:'长沙',district:'岳麓区',address:'合成地址',latitude:28.18,longitude:112.9,synthetic:true},
  {id:3,name:'武汉光谷门店',city:'武汉',district:'洪山区',address:'合成地址',latitude:30.5,longitude:114.4,synthetic:true},
  {id:4,name:'尚未核对坐标',city:'长沙',district:'长沙县',address:'合成地址',latitude:null,longitude:null,synthetic:true}
-];
+].map(c=>({...c,images:[],services:[],service_categories:[],team_count:0,online_booking:false}));
 function page(options={}){
  let definition,geo,requests=[],navigation=[],dialogs=[],phone=0,map=0;
  const wx={getLocation(o){geo=o;},showModal(o){dialogs.push(o);},makePhoneCall(){phone++;},openLocation(){map++;},
    navigateTo(o){navigation.push(o);},reLaunch(o){navigation.push(o);}};
- const api={request:async route=>{requests.push(route);if(options.fail)throw Error('暂时无法更新');return {clinics,environment_label:'测试环境'};}};
+ const api={request:async route=>{requests.push(route);if(options.fail)throw Error('暂时无法更新');return {clinics,categories:[],environment_label:'测试环境'};}};
  const module={exports:{}};
  vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module,wx});
  vm.runInNewContext(fs.readFileSync(path.join(root,'pages/discovery/index.js'),'utf8'),{
-   Page:d=>definition=d,wx,require:name=>name.endsWith('/api')?api:name.endsWith('/nearby')?nearby:module.exports
+   Page:d=>definition=d,wx,require:name=>name.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,consume:()=>null}:name.endsWith('/config')?{apiBase:'https://fixture.invalid'}:name.endsWith('/api')?api:name.endsWith('/nearby')?nearby:module.exports
  });
  const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}};
  return {p,requests,navigation,dialogs,geo:()=>geo,external:()=>({phone,map})};
@@ -37,7 +37,7 @@ async function verify(){
    assert.equal(nearby.select(clinics,{city:'不存在的城市'}).length,0);
  });
  await test('guest startup requests only public discovery without login or automatic location',async()=>{
-   const d=page();await d.p.onShow();assert.deepEqual(d.requests,['discovery/']);assert.equal(d.navigation.length,0);assert.equal(d.geo(),undefined);assert.equal(d.p.data.rows.length,4);
+   const d=page();await d.p.onShow();assert.deepEqual(d.requests,['discovery/index/']);assert.equal(d.navigation.length,0);assert.equal(d.geo(),undefined);assert.equal(d.p.data.rows.length,4);
  });
  await test('permission denial preserves manual browsing',async()=>{
    const d=page();await d.p.onShow();d.p.locate();assert.equal(d.geo().type,'wgs84');d.geo().fail();
@@ -45,12 +45,12 @@ async function verify(){
  });
  await test('location success changes order without sending coordinates to the API',async()=>{
    const d=page();await d.p.onShow();d.p.locate();d.geo().success({latitude:28.18,longitude:112.9});
-   assert.equal(d.p.data.rows[0].id,2);assert.equal(d.p.data.rows[0].distanceLabel,'约0米');assert.deepEqual(d.requests,['discovery/']);
+   assert.equal(d.p.data.rows[0].id,2);assert.equal(d.p.data.rows[0].distanceLabel,'约0米');assert.deepEqual(d.requests,['discovery/index/']);
  });
  await test('all synthetic contact actions stop before external calls',async()=>{
    const d=page();await d.p.onShow();
-   for(const action of ['call','map'])d.p.contact({currentTarget:{dataset:{id:1,action}}});
-   assert.deepEqual(d.external(),{phone:0,map:0});assert.equal(d.dialogs.length,2);
+   d.p.clinic({currentTarget:{dataset:{id:1}}});
+   assert.deepEqual(d.external(),{phone:0,map:0});assert.equal(d.navigation[0].url,'/pages/clinic/index?id=1');
  });
  await test('failed refresh clears previously published cards',async()=>{
    const d=page({fail:true});d.p.setData({all:clinics,rows:clinics});await d.p.load();

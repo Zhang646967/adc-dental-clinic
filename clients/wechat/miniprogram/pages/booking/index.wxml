@@ -12,6 +12,6 @@
   <view wx:if="{{note}}" class="notice">{{note}}</view>
   <view wx:for="{{rows}}" wx:key="id" class="card"><view class="time">{{item.startLabel}}</view><view>至 {{item.endLabel}} · {{item.dentist}}</view><button class="secondary" disabled="{{busy}}" data-index="{{index}}" bindtap="choose">选择并核对</button></view>
   <view wx:if="{{searched && !rows.length}}" class="card empty">这天没有可用组合。可以换日期或医师，或登记候补；原有预约继续保留。<button wx:if="{{!source}}" class="secondary" bindtap="waitlist">沿用服务偏好登记候补</button></view>
-  <navigator wx:if="{{!source}}" class="link" url="/pages/services/index">返回查看服务</navigator>
+  <navigator open-type="switchTab" wx:if="{{!source}}" class="link" url="/pages/services/index">返回查看服务</navigator>
   <navigator class="link" url="/pages/help/index">联系前台协调候补或其他安排</navigator>
 </view>

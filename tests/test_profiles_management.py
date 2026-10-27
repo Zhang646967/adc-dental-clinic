@@ -185,6 +185,30 @@ class ProfileTests(ResourceFixture,TransactionTestCase):
         self.assertEqual(a.dentist_id,b.dentist_id)
         self.assertNotEqual(a.clinic_id,b.clinic_id)
 
+    def test_clinic_search_and_detail_use_that_clinics_adopted_version(self):
+        from portal.service_views import doctor_filter
+        from portal.discovery_queries import doctor_listing_data
+        first=self.publish();version=self.submit(summary='轮诊门店独立采用的复诊说明')
+        RoleAssignment.objects.create(user=self.manager,role='MANAGER',scope_kind='CLINIC',clinic=self.b)
+        activate(self.manager,'MANAGER',self.b);second=self.affiliate(kind='VISITING')
+        from registry.branch_services import prepare_directory,confirm_directory
+        from scheduling.resource_models import Department,DepartmentHours
+        from datetime import time
+        department=Department.objects.create(clinic=self.b,code='P15-HOURS',name='课程综合科')
+        DepartmentHours.objects.create(department=department,weekday=self.t.weekday(),opens_at=time(8),closes_at=time(18))
+        fields=dict(display_name='ADC口腔·同城轮诊门店',province='湖南省',city='长沙',district='课程区',
+            address='课程合成门址',entrance='合成接待入口',public_phone='000-0000-0020',latitude=None,longitude=None,
+            map_latitude=None,map_longitude=None,coordinate_source='课程示意点',synthetic=True,is_published=True)
+        proposal=prepare_directory(actor=self.manager,fields=fields)
+        confirm_directory(actor=self.manager,proposal_token=proposal['proposal_token'],confirmed=True)
+        proposal=ps.prepare_review(actor=self.manager,affiliation_id=second.pk,action='PUBLISH',version_id=version.pk)
+        ps.confirm_review(actor=self.manager,proposal_token=proposal['proposal_token'],confirmed=True)
+        data=doctor_listing_data()
+        rows=doctor_filter(data,{'clinic':str(self.b.pk),'q':'独立采用'})
+        self.assertEqual(len(rows),1);self.assertEqual(rows[0]['summary'],version.content['summary'])
+        self.assertEqual(doctor_filter(data,{'clinic':str(self.a.pk),'q':'独立采用'}),[])
+        self.assertContains(Client().get(reverse('public_dentist_detail',args=[self.d1.pk]),{'clinic':self.b.pk}),version.content['summary'])
+
     def test_avatar_is_normalized_and_private_until_publication(self):
         out=BytesIO();Image.new('RGB',(120,150),'#bccfc1').save(out,'PNG')
         image=ps.upload_media(actor=self.doc,kind='dentist',uploaded=SimpleUploadedFile('avatar.png',out.getvalue()),alt_text='课程合成头像')

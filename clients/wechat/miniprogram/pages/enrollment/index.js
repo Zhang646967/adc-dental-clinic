@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api'),{showError}=require('../../utils/format'),intent=require('../../utils/booking-intent');
 function emptyForm(){return {name:'',date_of_birth:'',phone:'',billing_address:'',email:'',emergency_name:'',emergency_phone:'',patient_reference:''};}
 Page({
@@ -7,7 +8,7 @@ Page({
     if(this.data.invalidLink)return;
     this.setData({busy:true,error:''});
     try{
-      const session=await api.bootstrap();if(!session.account_authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
+      const session=await api.bootstrap();if(!session.account_authenticated){navigation.reLaunch({url:'/pages/login/index'});return;}
       if(this.ownerContext&&this.ownerContext!==session.workspace_id){this.ownerContext=session.workspace_id;this.setData({form:emptyForm(),caseId:null,preview:null,uncertain:false,clinics:[],patientMessage:'',error:'账号已变化，原申请内容已清除。请从当前账号重新打开办理页。'});return;}
       this.ownerContext=session.workspace_id;this.setData({readOnly:session.read_only,restoreOnly:!!session.self_binding_needs_review});
       const discovery=await api.request('discovery/');const clinics=discovery.clinics.map(c=>({id:c.id,name:c.name}));
@@ -35,7 +36,7 @@ Page({
   async confirm(){
     if(this.data.busy||this.data.readOnly||!this.data.preview)return;
     this.setData({busy:true,error:''});
-    try{await api.request('account/enrollment/confirm/','POST',{proposal_token:this.data.preview.proposal_token,confirmed:'on'});this.setData({uncertain:false});wx.redirectTo({url:'/pages/account/index'});}
+    try{await api.request('account/enrollment/confirm/','POST',{proposal_token:this.data.preview.proposal_token,confirmed:'on'});this.setData({uncertain:false});navigation.redirectTo({url:'/pages/account/index'});}
     catch(e){if(e.code==='NETWORK_UNCONFIRMED')this.setData({uncertain:true});else this.setData({preview:null});showError(this,e);}finally{this.setData({busy:false});}
   },
   revise(){if(!this.data.uncertain)this.setData({preview:null});}

@@ -1,15 +1,15 @@
 <view class="page">
-  <view class="service-hero"><view class="brand">ADC 口腔 · 附近门店</view><view class="title">找到方便到达的门店</view><view class="hero-note">先看位置、营业安排和服务，再登录预约。</view></view>
-  <view class="card"><view class="label">选择城市</view><picker range="{{cities}}" value="{{cityIndex}}" bindchange="city"><view class="picker">{{cities[cityIndex]}} ▾</view></picker><label class="label" for="clinic-keyword">区域或门店名称</label><input id="clinic-keyword" value="{{keyword}}" bindinput="keyword" placeholder="例如：梅溪湖、星沙" maxlength="80"/><button class="primary" bindtap="locate" loading="{{locating}}" disabled="{{locating}}">使用当前位置 · 由近到远</button><view class="muted line">{{locationNote}}</view></view>
-  <view wx:if="{{error}}" class="error" role="alert">{{error}}</view><view wx:if="{{busy}}" class="notice">正在读取门店资料…</view>
-  <view wx:for="{{rows}}" wx:key="id" class="card">
-    <view class="clinic-card-top"><text class="status">{{item.opening.state_label}}</text><text class="fee">{{item.distanceLabel}}</text></view>
-    <view class="section-title">{{item.name}}</view><view wx:if="{{item.summary}}" class="line">{{item.summary}}</view><view class="muted">{{item.city}} · {{item.district}}</view><view class="line">{{item.address}}</view><view class="muted">{{item.entrance}}</view>
-    <view wx:if="{{item.synthetic}}" class="line">联系电话 {{item.phone}}</view><view wx:else class="line link" bindtap="contact" data-id="{{item.id}}" data-action="call">联系电话 {{item.phone}}</view><view class="line">今日营业 {{item.opening.today}}</view>
-    <view class="hours-grid"><view wx:for="{{item.opening.week}}" wx:for-item="day" wx:key="day">{{day.day}} {{day.hours}}</view></view>
-    <view wx:for="{{item.opening.notices}}" wx:for-item="notice" wx:key="start" class="notice">{{notice.text}}</view>
-    <button class="secondary" bindtap="clinic" data-id="{{item.id}}">了解团队与门店 →</button><view class="label">本店服务</view><button wx:for="{{item.services}}" wx:for-item="service" wx:key="id" bindtap="openService" data-id="{{service.id}}" class="secondary">{{service.name}} →</button><view wx:if="{{!item.services.length}}" class="muted">暂未开放线上预约，当前仅展示门店信息。</view><view wx:if="{{item.services.length}}" class="muted line">选择服务后查看可约医师与时间。</view>
+  <view class="service-hero"><view class="brand">ADC 口腔</view><view class="title">选好门店，安心就诊</view><view class="hero-note">了解团队和服务，再安排适合你的时间。</view><view class="hero-actions"><button class="hero-button" bindtap="doctors">找接诊医师</button><button class="hero-button" bindtap="services">按服务预约</button></view></view>
+  <view class="card"><view class="filter-grid"><view><view class="label">就诊城市</view><picker range="{{cities}}" value="{{cityIndex}}" bindchange="city"><view class="picker">{{cities[cityIndex]}} ▾</view></picker></view><view><view class="label">需要的服务</view><picker range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="category"><view class="picker">{{categories[categoryIndex].name}} ▾</view></picker></view></view>
+    <input value="{{keyword}}" bindinput="keyword" placeholder="搜索区域或门店名称" maxlength="80" aria-label="搜索区域或门店名称"/>
+    <view class="filter-actions"><button class="compact secondary" bindtap="locate" loading="{{locating}}" disabled="{{locating}}">定位找附近门店</button><label class="small">仅看线上预约 <switch checked="{{onlineOnly}}" bindchange="online"/></label></view><view class="muted small">{{locationNote}}</view>
   </view>
-  <view wx:if="{{!busy && !rows.length}}" class="notice">所选城市或区域暂无匹配门店，请更换城市或清除搜索条件。</view>
-  <button bindtap="doctors" class="secondary">按医师选择就诊</button><button bindtap="services" class="secondary">了解全部诊疗服务</button><button bindtap="account" class="primary">登录查看我的预约</button><button bindtap="load" class="secondary" disabled="{{busy}}">更新门店资料</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}<button class="secondary" bindtap="load">重新连接</button></view><view wx:if="{{busy}}" class="notice">正在读取门店资料…</view>
+  <view wx:if="{{!busy&&!error}}" class="section-heading"><view class="section-title">为你找到 {{count}} 家门店</view></view>
+  <view wx:for="{{rows}}" wx:key="id" class="card branch-card">
+    <view class="clinic-card-top"><text class="status">{{item.opening.state_label}}</text><text class="muted">{{item.distanceLabel}}</text></view><view class="section-title">{{item.name}}</view><image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" class="branch-cover" lazy-load/><view class="line">{{item.summary}}</view><view class="muted">{{item.city}} · {{item.district}}</view>
+    <view class="profile-tags"><text wx:for="{{item.services}}" wx:for-item="service" wx:key="id">{{service.name}}</text></view><view class="muted line">{{item.team_count}}位接诊医师<text wx:if="{{item.next_shift_day}}"> · 最近出诊 {{item.next_shift_day}}</text><text wx:elif="{{item.online_booking}}"> · 近期暂无出诊公示</text></view>
+    <view class="muted line"><text wx:for="{{item.team}}" wx:for-item="doctor" wx:key="id">{{doctor.name}} · {{doctor.title}}　</text></view><view class="line">{{item.address}}</view><view class="muted">电话 {{item.phone}} · 今日 {{item.opening.today}}</view><button class="primary" bindtap="clinic" data-id="{{item.id}}">查看门店与接诊团队</button>
+  </view>
+  <view wx:if="{{!busy&&!error&&!rows.length}}" class="notice">没有符合当前条件的门店，可调整城市、区域或服务方向。</view><button wx:if="{{hasMore}}" class="secondary" bindtap="more">继续查看门店</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

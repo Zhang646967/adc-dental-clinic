@@ -21,5 +21,5 @@ def service_data(profile, *, actor=None):
         preparation=profile.preparation, fee_mode=profile.fee_mode,
         fee_amount=str(profile.fee_amount) if profile.fee_amount is not None else None,
         fee_label=fee_label(profile.fee_mode, profile.fee_amount), fee_note=profile.fee_note,
-        self_booking=profile.category != 'CHILDREN' or bool(access and access.delegated and access.clinic_id==clinic.pk),
+        self_booking=profile.category != 'CHILDREN' or bool(access and access.guardian and access.clinic_id==clinic.pk),
         dentists=[dict(id=d.pk, name=d.name) for d in service.public_dentists])

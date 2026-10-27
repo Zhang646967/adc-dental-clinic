@@ -154,6 +154,15 @@ class RelationshipTests(ResourceFixture,TransactionTestCase):
         self.assertEqual(self.client.get(reverse('mini_catalogue')).json()['data']['services'],[])
         self.delegate();self.assertEqual(len(self.client.get(reverse('mini_catalogue')).json()['data']['services']),1)
         self.booked()
+    def test_general_appointment_delegate_does_not_imply_guardianship(self):
+        ServicePresentation.objects.filter(pk=self.profile.pk).update(category='CHILDREN')
+        case=self.make_case(kind='DELEGATE');self.client,self.session=self.login(self.other)
+        response=self.post('mini_subject_select',{'subject':f'grant:{case.appointment_grant.pk}'})
+        self.assertEqual(response.status_code,200,response.content);self.session=response.json()['data']
+        self.assertFalse(self.session['guardian'])
+        self.assertEqual(self.client.get(reverse('mini_catalogue')).json()['data']['services'],[])
+        from portal.service_catalogue import require_self_service
+        with self.assertRaises(RuleError):require_self_service(self.service.pk,actor=self.actor())
     def test_shared_reschedule_and_cancel_preserve_original(self):
         self.delegate();v,_=self.booked();actor=self.actor()
         p=rescheduling.prepare(actor=actor,visit_id=v.pk,expected_version=0,slot_id=self.slot2.pk,start=self.t+timedelta(hours=1),reason='代患者确认改期')

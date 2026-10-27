@@ -6,4 +6,4 @@
   <view wx:if="{{cancelOpen}}" class="card"><label class="label" for="reason">取消原因</label><textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="取消原因"/><button class="danger" bindtap="previewCancel" disabled="{{busy}}" loading="{{busy}}">核对取消内容</button></view>
   <button wx:if="{{visit.predecessor}}" class="secondary" data-id="{{visit.predecessor}}" bindtap="related">查看改期前的预约</button><button wx:if="{{visit.successor}}" class="secondary" data-id="{{visit.successor}}" bindtap="related">查看改期后的预约</button>
   <navigator class="link" url="/pages/help/index">联系前台协助</navigator><button bindtap="home">返回我的预约</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
-</view>
+<view wx:if="{{visit&&!patientDelegated}}" class="card"><button wx:if="{{visit.invoice_id}}" class="primary" bindtap="invoice">查看本人结算单</button><view wx:else class="muted">尚未形成结算单。未开单不等于免费或已付款。</view></view></view>

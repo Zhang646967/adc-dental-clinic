@@ -6,7 +6,7 @@ const vm=require('node:vm');
 const root=path.resolve(__dirname,'../clients/wechat/miniprogram');
 const app=JSON.parse(fs.readFileSync(path.join(root,'app.json')));
 let checks=0;
-const css=fs.readFileSync(path.join(root,'app.wxss'),'utf8');
+const css=fs.readFileSync(path.join(root,'app.wxss'),'utf8').replace(/\/\*[\s\S]*?\*\//g,'');
 for(const selector of css.matchAll(/(?:^|})\s*([^{}]+)\{/g)) {
   assert(!selector[1].includes('*'),'WeChat WXSS rejects universal selectors; use class or descendant selectors.');
 }
@@ -35,6 +35,7 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   p=api.request('booking/confirm/','POST',{proposal_token:'signed'});assert.equal(last.header['X-ADC-Workspace'],'signed_workspace');assert(last.header.Cookie.includes('sessionid=opaque'));success({id:1});await p;checks+=2;
   p=api.request('visits/');last.success({statusCode:403,data:{ok:false,message:'当前授权失效',request_id:'123'}});await assert.rejects(p,/当前授权失效/);checks++;
   p=api.request('booking/confirm/','POST',{});last.fail({errMsg:'sensitive implementation details'});await assert.rejects(p,/结果尚未确认/);checks++;
+  p=api.request('discovery/index/');last.fail({errMsg:'private network detail'});await assert.rejects(p,e=>e.code==='NETWORK_UNAVAILABLE'&&!e.message.includes('结果尚未确认'));checks++;
   appState.globalData.review={private:'old patient preview'};
   p=api.request('visits/');last.success({statusCode:401,data:{ok:false,message:'请先登录'}});await assert.rejects(p,/请先登录/);
   assert.deepEqual(api.sessionInfo(),{});assert.equal(appState.globalData.review,null);checks+=2;
@@ -70,5 +71,6 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const accounts=await require('./verify_native_accounts.cjs').verify();
   const wechat=await require('./verify_native_wechat.cjs').verify();
   const profiles=await require('./verify_native_profiles.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,accounts,wechat,profiles,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const alignment=await require('./verify_native_alignment.cjs').verify();
+  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,accounts,wechat,profiles,alignment,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

@@ -11,7 +11,7 @@ DOCTOR_FIELDS=('title','summary','biography','practicing_since','languages','edu
 CLINIC_FIELDS=('summary','biography','transport','parking','accessibility','accessibility_note','fee_note')
 
 
-def enrich_discovery(data):
+def enrich_discovery(data,*,include_shifts=True,dentist_id=None):
     ids=[r['id'] for r in data['clinics']];today=timezone.localdate();now=timezone.now();last=now+timedelta(days=15)
     profiles={p.clinic_id:p for p in PublicProfile.objects.filter(clinic_id__in=ids,published_version__isnull=False)
         .select_related('published_version')}
@@ -23,9 +23,12 @@ def enrich_discovery(data):
     media_ids={i for c in contents for i in c.get('media_ids',[])}
     media={m.pk:dict(id=m.pk,url='/profiles/media/'+str(m.pk)+'/',alt=m.alt_text,width=m.width,height=m.height)
         for m in ProfileMedia.objects.filter(pk__in=media_ids).defer('image')}
+    if dentist_id:affiliations=[a for a in affiliations if a.dentist_id==dentist_id]
     shifts=defaultdict(list)
-    for slot in AvailabilitySlot.objects.filter(clinic_id__in=ids,is_active=True,booking_paused=False,
-        ends_at__gt=now,starts_at__lt=last).order_by('starts_at','pk'):
+    slots=AvailabilitySlot.objects.filter(clinic_id__in=ids,is_active=True,booking_paused=False,
+        ends_at__gt=now,starts_at__lt=last).order_by('starts_at','pk') if include_shifts else ()
+    if include_shifts and dentist_id:slots=slots.filter(dentist_id=dentist_id)
+    for slot in slots:
         shifts[slot.clinic_id,slot.dentist_id].append(dict(start=slot.starts_at.isoformat(),end=slot.ends_at.isoformat(),
             day=timezone.localtime(slot.starts_at).date().isoformat()))
     services=defaultdict(list)

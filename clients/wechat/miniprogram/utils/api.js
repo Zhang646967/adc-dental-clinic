@@ -53,7 +53,7 @@ function request(path, method = 'GET', data = {}) {
           reject(error);
         }
       },
-      fail() { const error=new Error('连接中断，结果尚未确认。若刚刚提交，请先查看对应业务清单，再核对是否需要重试。');error.code='NETWORK_UNCONFIRMED';reject(error); }
+      fail() { const writing=method!=='GET';const error=new Error(writing?'连接中断，结果尚未确认。若刚刚提交，请先查看对应业务清单，再核对是否需要重试。':'暂时无法连接服务，请检查网络后重试。');error.code=writing?'NETWORK_UNCONFIRMED':'NETWORK_UNAVAILABLE';reject(error); }
     });
   });
 }

@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统分析与设计
 
-医师门店画像与月度经营核算 2026年10月26日
+患者选诊与多端业务协同 2026年10月26日
 
 
 
@@ -36,7 +36,7 @@ SYSTEMS ANALYSIS AND DESIGN REPORT
 
 连锁牙科诊所的选诊、预约、检查治疗、费用结算和设备使用相互关联，资料分散容易造成患者等待、承诺冲突与费用争议。本文以Andrew’s Dental Chain（ADC）为背景，面向一家约5至20家诊所的连锁机构，分析七类岗位的责任、业务交接及可观察规则，建立需求、用例、领域关系、状态与验收之间的追踪关系。
 
-系统围绕患者服务过程，整合匿名找店选医、网站与微信小程序访问、本人及代约关系核验、电话接待和统一资源预约。医师本人提交画像，各门店主管审核采用版本，前台负责出诊与调班。检查记录、跨次方案、实际治疗和复诊加工分别保留责任与完成依据；版本化账单、独立收退款、资金凭据、逐笔对账及医保模拟清算形成财务衔接。月度经营核算区分诊疗产值、资金回款和已确认成本，按出诊分钟分摊公共费用，保留缺失、零值和修订历史。
+系统围绕患者服务过程，整合匿名找店选医、网站与微信小程序访问、本人及代约关系核验、电话接待和统一资源预约。医师本人提交画像，各门店主管审核采用版本，前台负责出诊与调班。检查记录、跨次方案、实际治疗和复诊加工分别保留责任与完成依据；版本化账单、独立收退款、资金凭据、逐笔对账及医保模拟清算形成财务衔接。月度经营核算区分诊疗产值、资金回款和已确认成本，按出诊分钟分摊公共费用，保留缺失、零值和修订历史。 患者以小程序为主要入口，网站保持同等业务规则。门店基础服务、医师专业方向与实际接诊服务分别核对，登录后保留选诊意向并重新校验就诊人与资源。轻量索引支持完整门店筛选与客户端距离排序，本人结算单显示已发布版本及当前收退款余额，代约权限不扩展到临床和账单。
 
 研究采用用例驱动与信息隐藏原则，基于模块化单体、事务约束及追加历史实现可追溯办理。八城二十店的课程合成场景用于核对多渠道流程、岗位隔离、并发、界面与恢复；统计指标明确时间、分母及完整性。验证结果只支持实际执行范围，不能替代真实专业资格、平台联调、临床有效性和独立商用运营评价。
 
@@ -48,7 +48,7 @@ SYSTEMS ANALYSIS AND DESIGN REPORT
 
 Dental chains coordinate appointments, clinical care, shared resources and financial review across multiple clinics. This study analyzes a dental chain of approximately five to twenty clinics. Patients discover services before signing in through a shared account. Telephone reception, the website and the native WeChat client reuse booking and resource rules. Patient relationships and chart access are verified separately from authentication.
 
-The analysis connects observable business problems to actor responsibilities, use cases, state transitions, database relations and acceptance conditions. The design follows information hiding and uses a modular monolith. It retains treatment versions, actual performed procedures, appointment promises, independent financial decisions, payment evidence and reconciliation history. Maintenance and follow-up responsibilities remain explicit without fabricating clinical completion or financial facts. Versioned doctor introductions are reviewed independently by each clinic. Multi-clinic affiliations do not grant clinical authority, and front-desk staff retain scheduling responsibility. Monthly management accounting separates completed-care production from collections and reviewed costs, retaining explicit missing values, shift-based allocations and report revisions.
+The analysis connects observable business problems to actor responsibilities, use cases, state transitions, database relations and acceptance conditions. The design follows information hiding and uses a modular monolith. It retains treatment versions, actual performed procedures, appointment promises, independent financial decisions, payment evidence and reconciliation history. Maintenance and follow-up responsibilities remain explicit without fabricating clinical completion or financial facts. Versioned doctor introductions are reviewed independently by each clinic. Multi-clinic affiliations do not grant clinical authority, and front-desk staff retain scheduling responsibility. Monthly management accounting separates completed-care production from collections and reviewed costs, retaining explicit missing values, shift-based allocations and report revisions. The native mini-program is the primary patient channel, with equivalent website rules. Clinic capability, reviewed doctor introductions and appointment choices are aligned. A compact complete index supports client-side distance sorting. Published invoice versions retain their original amounts while current posted-cash balances remain explicitly separate; appointment delegates cannot access clinical or billing details.
 
 An implemented synthetic system supports workflow, authorization, concurrency, browser and recovery evaluation. WeChat identity exchange, website scan approval and provider-verified phone challenges have separate real-platform acceptance requirements. The results establish tested system behavior within the observed scope; they do not establish professional qualification, clinical effectiveness or independent commercial operation.
 
@@ -505,6 +505,14 @@ SU-01—25及SF-01规约见附录A；SU-26—38见附录B。各用例表示独�
 
 直接成本归属医师，公共成本按本店当月有效已发布出诊分钟分摊；暂停接单不等于取消出诊。分币尾差按稳定医师编号分配，总额守恒。无工时保留未分摊金额；缺失费用与明确零费用区分，全部类别核对完整后才确认管理利润。月报保留版本及来源，补录、更正形成新版本，不改写旧报表。
 
+### 3.23 以小程序为主的完整患者办理
+
+患者应能在同一入口完成找店选医、服务比较、就诊人选择、预约改期、取消及候补，并找到已有的健康自述、治疗方案、转诊和本人结算单。四个主入口为主页、预约、就诊和我的。匿名浏览不强制登录，员工从独立通道办理。
+
+每店四类基础服务为初诊检查、洁牙与牙龈护理、牙痛评估与基础修复预约、复诊；正畸、缺牙修复和儿童服务按实际课程配置区别提供。介绍存在不等于该店可接诊，必须同时核对服务说明、适配医师、有效授权、出诊、椅位及必要设备。医师方向与该门店可预约服务分开呈现。
+
+筛选条件保留，结果明确区分不支持服务、未发布排班及该日无可用资源。不支持特色时仅推荐实际支持的同城门店；本市没有时明确说明。查询不占位，登录和患者切换后重新校验。儿童代约须使用本店前台已核验的监护授权；一般预约委托不能代替监护关系。
+
 思维导图  患者选择与机构经营 → {公开画像、本人关系、接待排班、诊疗连续、资金设备、月度成本} → 岗位责任 → 可观察规则 → 异常继续 → 用例验收。
 
 ## 第4章 系统设计
@@ -673,7 +681,7 @@ SU-01—25及SF-01规约见附录A；SU-26—38见附录B。各用例表示独�
 
 ### 4.13 数据库实体关系设计
 
-数据库划分为三十一幅实际关系视图。独立PostgreSQL核对142张表，含141张ORM业务与框架表及1张迁移日志；387条普通外键与1条账单复合外键共388条，110个业务触发器。新增四个视图聚焦身份任职、公开画像、预约资源衔接和月度经营核算。保留原62份迁移并追加两份，字段类型、可空性和关系端点逐项与实际结构核对。
+数据库划分为三十一幅实际关系视图。独立PostgreSQL核对142张表，含141张ORM业务与框架表及1张迁移日志；387条普通外键与1条账单复合外键共388条，110个业务触发器。新增四个视图聚焦身份任职、公开画像、预约资源衔接和月度经营核算。保留原62份迁移并追加两份，字段类型、可空性和关系端点逐项与实际结构核对。 患者多端对齐沿用全部64份迁移，不新增表；公开展示、数据版本与只读账单的查询职责补充于既有关系视图说明。
 
 PK表示主键，FK表示外键，UK表示单列唯一，问号表示可空。关系端点采用乌鸦脚记法：双竖线为恰好一个，圆圈加竖线为零或一个，圆圈加三叉为零到多个。条件唯一、状态与时间规则在图后单独说明。
 
@@ -1102,6 +1110,14 @@ ManagementReport保存序号、摘要、来源快照、确认人及时间；Cost
 
 公开医师与服务意向通过短时、受账号及会话约束的继续标记恢复，不携带授权。预约、改期、候补接受继续使用原业务命令，重核患者关系、医师出诊、专业范围、任职及椅位设备。主管查看本店核算，医师只看本人贡献，前台查看排班履约，财务与总部按既有范围处理汇总。
 
+### 4.27 多端共享投影与患者只读结算
+
+门店轻量索引一次提供二十店必要资料与服务覆盖，未压缩JSON上限100KiB。坐标只在客户端用于完整索引排序，再分批展示，不能先截取门店再声称最近。完整介绍、三张门店图片、团队与出诊在详情按需读取；旧接口保留兼容。共享筛选逻辑同时产生网站与小程序的数量、分类和替代门店。
+
+门店、医师、服务及日期作为短时选诊意向贯通登录与就诊人选择，不携带业务权限。未选日期时使用所选组合最近的真实出诊日；改期先显示原约日期与历史服务，不受当前营销介绍撤回影响。配置变化清除旧候选并说明重新核对原因。正式写入沿用原患者、医师、出诊与物理资源事务合同。
+
+本人结算查询复用诊疗发布版本和财务余额投影，只提供读取。历史版本保留原项目及金额；收退款余额明确属于当前账单版本且只汇总已记账资金。每次查询重新核对本人权限，代约人不能通过猜测编号读取临床或结算。该调整不增加数据库表，身份任职、公开画像、预约资源和经营核算ER关系继续与实际PostgreSQL结构逐项核对。
+
 思维导图  统一身份 → 任职与独立专业授权 → 版本画像及选诊 → 统一患者与资源核验 → 完成诊疗 → 产值／回款／成本 → 工时分摊与留存月报。
 
 ## 第5章 系统实现与测试
@@ -1322,11 +1338,11 @@ CloudBase按官方接口生成并核验验证码，ADC保存服务端挑战。�
 
 ### 5.16 医师与门店选诊的跨岗位核对
 
-课程场景采用八城二十家门店，每店配置至少三名可接诊医师、四项服务、两个椅位与必要设备，并由前台发布未来十四天出诊。长沙包含同城轮诊：同一医师在两店展示分别适配的服务与日期，不复制账号或专业身份。课程新增配置与原业务事实分别保留。
+课程场景采用八城二十家门店，每店配置至少三名可接诊医师、四类基础服务及按店配置的特色服务、两个椅位与必要设备，并由前台发布未来十四天出诊。长沙包含同城轮诊：同一医师在两店展示分别适配的服务与日期，不复制账号或专业身份。课程新增配置与原业务事实分别保留。
 
 浏览器场景依次完成匿名选医、登录恢复、预约确认、重复确认及患者改期；两端按同一患者权限读取预约。医师提交新介绍后，主管退回仍保持旧展示；新版本再提交并由主管发布，网站与小程序投影同步。岗位和跨店拒绝、键盘进入、390px窄屏与放大文字另行核对。
 
-微信页面使用官方离线编译器核对23页模板；页面处理与真实HTTP投影分别测试。真实微信换码、扫码及短信仍等待平台配置，不以合成身份或离线编译替代。
+小程序提供二十四页及主页、预约、就诊、我的四个稳定入口；正式编译、真实开发工具运行和手机试用分别验证。真实微信换码、扫码及短信继续等待配套平台配置，不以课程身份或账号密码登录替代。
 
 ### 5.17 经营核算的独立业务校验
 
@@ -1336,7 +1352,15 @@ CloudBase按官方接口生成并核验验证码，ADC保存服务端挑战。�
 
 原五店临床基准与新二十店画像、经营读取和合法草稿写入分别执行；持续30分钟、20个账号和80%读取／20%写入为验证条件，结果只解释对应负载与资源范围。加密恢复核对图片字节、提交版本、成本、分摊及月报历史，工程执行证据另附，不据此声称已完成独立云端商用验收。
 
-思维导图  合成跨岗位场景 → 正常与异常路径 → 独立业务核算 → 数据库并发与浏览器 → 容量、恢复与权限 → 分别记录软件和目标环境证据。
+### 5.18 二十店能力矩阵与患者渠道验证
+
+覆盖矩阵逐店核对四类基础服务在网站和小程序的服务、医师与时段，包括广州越秀牙痛评估与基础修复。特色不支持时核对同城替代；每店完成一次明确确认的预约，再以明示原因取消测试预约并保留历史。儿童场景由已核验监护人选择就诊人，预约权限与账单权限分别验证。
+
+微信开发者工具连接实际应用后端，通过真实控件操作门店筛选、服务、登录恢复、预约改期与就诊功能；工具执行与手机预览分别记录。只通过模拟页面处理或离线编译不能证明微信运行。手机预览、真实微信换码和真实短信均需各自执行证据，不能以分配账号登录替代平台验收。
+
+工程验收覆盖PostgreSQL回归与并发、七角色权限、窄屏与字体放大、二十账号三十分钟混合负载，以及图片字节、发布版本和账单历史的加密独立恢复。负载按约五请求每秒、八成读取及两成合法写入，普通请求95百分位应小于五秒；具体执行结果与版本见独立验收记录，不把目标当成已通过。
+
+思维导图  门店服务矩阵 → 两端共享查询 → {匿名选诊、登录与监护核验、预约改期候补、本人结算} → 工具与手机分别验证 → 权限、容量和独立恢复。
 
 ## 第6章 总结与展望
 
@@ -1370,7 +1394,7 @@ CloudBase按官方接口生成并核验验证码，ADC保存服务端挑战。�
 
 课程规则尚未经过真实诊所岗位访谈确认；已实现的接待与资源规则属于课程业务方案。合成数据可检验计算、权限和一致性，不能证明真实取消行为、临床质量或收入改善。未来评价应观察患者体验、前台工作量和服务可达性，不以降低取消率作为单一目标。
 
-课程演示继续使用分配账号或明确本地替身账号及合成资料。云端访问和微信平台试用需在实际环境独立验收；本地接口联调不表示已在微信发布或已部署云端。真实临床替代还须由具有相应资质的人员完成业务、专业和合规确认，本报告不将规划功能列为已实现。
+课程试用使用分配账号及合成资料。微信开发工具运行、手机预览、真实微信身份换码与实际短信分别评价；前者通过不能替代后者。真实临床使用仍须由具备相应资质的人员确认业务和专业要求，公网独立运行另行验收。
 
 思维导图  现有业务闭环 → {身份与专业责任、连续诊疗、签署归档、处方药事、护理材料} → 财务外部衔接 → 目标环境验收与监督试用。
 
@@ -3527,7 +3551,7 @@ SU-26—38说明资料维护、出诊协调和站内任务消息。消息仅提�
 | 成功结果 | 形成清晰的服务与医师意向。 |
 | 最低保证 | 失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。 |
 | 业务规则 | 浏览不占资源、不访问病历。 |
-| 验收目标 | P1-DISCOVERY：二十店筛选、两端投影及窄屏。 |
+| 验收目标 | P1-DISCOVERY：二十店筛选、两端投影及窄屏。 / P15：二十店基础能力矩阵、两端同筛选及日期恢复；小程序真实工具操作单独留证。 |
 
 #### SU-107　先选医师并核对接诊门店
 
@@ -3547,7 +3571,7 @@ SU-26—38说明资料维护、出诊协调和站内任务消息。消息仅提�
 | 成功结果 | 保留明确医师和门店的预约意向。 |
 | 最低保证 | 失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。 |
 | 业务规则 | 统一身份不重复计为多个医师；资格来源未核验不显示认证。 |
-| 验收目标 | P1-DOCTOR：轮诊身份、适配服务与失效选择。 |
+| 验收目标 | P1-DOCTOR：轮诊身份、适配服务与失效选择。 / P15：二十店基础能力矩阵、两端同筛选及日期恢复；小程序真实工具操作单独留证。 |
 
 #### SU-108　在登录及患者切换后继续选医
 
@@ -3562,12 +3586,12 @@ SU-26—38说明资料维护、出诊协调和站内任务消息。消息仅提�
 | 实现状态 | 已实现；课程合成业务验证与真实运营资格分别评价。 |
 | 前置条件 | 当前账号、岗位和门店授权有效；对应服务及资源已按职责配置。 |
 | 主要输入 | 登录前医师服务意向、账号会话及就诊人。 |
-| 基本路径 | 1）完成患者通道登录。 / 2）选择本人或有权限的就诊人。 / 3）重核医师、服务、出诊及物理资源后明确预约。 |
+| 基本路径 | 1）完成患者通道登录。 / 2）选择本人或有本店有效权限的就诊人；儿童服务需前台已核验的监护关系。 / 3）重核医师、服务、出诊及物理资源后明确预约。 |
 | 扩展路径 | 切换就诊人：重新核对授权和确认。 / 无资源或撤权：保留原事实，返回可继续办理的选择。 |
 | 成功结果 | 形成唯一授权预约，可继续原改期及候补合同。 |
 | 最低保证 | 失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。 |
-| 业务规则 | 意向不是授权，旧预览不绕过患者或资源检查。 |
-| 验收目标 | P1-HANDOFF：登录延续、改期、候补、代约及重复确认。 |
+| 业务规则 | 意向不是授权，旧预览不绕过患者或资源检查。 一般预约委托不等于儿童监护授权。 |
+| 验收目标 | P1-HANDOFF：登录延续、改期、候补、代约及重复确认。 / P15：二十店基础能力矩阵、两端同筛选及日期恢复；小程序真实工具操作单独留证。 |
 
 #### SU-109　登记月度直接及公共成本
 
@@ -3648,3 +3672,23 @@ SU-26—38说明资料维护、出诊协调和站内任务消息。消息仅提�
 | 最低保证 | 失败保留原发布、原预约、诊疗及资金事实；重试不产生第二次业务效果。 |
 | 业务规则 | 更正不覆写金额、不制造平衡资金、不自动重算旧报告。 |
 | 验收目标 | P1-REVISION：设备来源修订、旧报保留、并发重复。 |
+
+#### SU-113　核对本人结算单与历史版本
+
+表C-75 SU-113　核对本人结算单与历史版本用例规约
+
+
+
+| 标题 | 内容（SU-113） |
+| --- | --- |
+| 用例名称 | SU-113　核对本人结算单与历史版本 |
+| 执行者／触发 | 患者本人 |
+| 实现状态 | 已实现，按渠道分别验收 |
+| 前置条件 | 有效患者通道及本人档案权限；该次就诊已发布结算单。 |
+| 主要输入 | 本人预约、结算单编号及需要查看的发布版本。 |
+| 基本路径 | 1）从就诊详情打开本人结算单。 / 2）核对诊疗发布版本、收费项目、数量、单价与原版本金额。 / 3）查看已记账收退款及当前账单余额，必要时切换历史版本。 |
+| 扩展路径 | 尚未开单：说明尚未形成结算单，不显示为免费或已付款。 / 非本人、代约或权限撤销：拒绝读取并清除旧页面。 / 历史版本：明确其金额与当前资金余额适用版本不同。 |
+| 成功结果 | 患者获得可追踪的已发布项目、版本金额及当前资金情况。 |
+| 最低保证 | 只读查询不产生收费、退款、治疗或新增病历权限。 |
+| 业务规则 | 网站和小程序共用发布及余额口径；待审资金不计入已收款；代约权限不能查看本人账单。 |
+| 验收目标 | P15-INVOICE：本人、跨患者、代约、撤权、历史版本、已记账与待审资金分别验证。 |

@@ -10,7 +10,7 @@ function page(name,options={}){
   calls.push({route:'account/local-login/',data:{code,username,password,confirmed}});if(options.loginError)throw options.loginError;return session;
  },request:async(route,method='GET',data)=>{calls.push({route,method,data});if(options.request)return options.request(route,method,data);if(route==='account/')return plain(profile);if(route==='discovery/')return {clinics:[{id:1,name:'合成长沙一店'},{id:2,name:'合成长沙二店'}]};throw Error('Unexpected '+route);}};
  const format={exports:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
- vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,require:n=>n.endsWith('/api')?api:n.endsWith('/format')?format.exports:intent});
+ vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,require:n=>n.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:n.endsWith('/api')?api:n.endsWith('/format')?format.exports:intent});
  const p={...definition,data:plain(definition.data),setData:v=>Object.assign(p.data,v)};
  return {p,session,calls,navigation,state};
 }

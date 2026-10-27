@@ -41,6 +41,9 @@ class PatientAuthority:
     def clinic_id(self):
         return self.source.relationship.clinic_id if self.delegated else None
     @property
+    def guardian(self):
+        return self.delegated and self.source.relationship.kind in ('PARENT','GUARDIAN')
+    @property
     def receipt_fields(self):
         return {'appointment_grant': self.source, 'access': None} if self.delegated else {'access': self.source, 'appointment_grant': None}
     @property

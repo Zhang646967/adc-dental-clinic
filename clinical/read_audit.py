@@ -50,7 +50,7 @@ ROUTES = {
     'visits': ('VISIT_LIST', 'COORDINATION'), 'visit_detail': ('VISIT', 'COORDINATION'),
     'visit_reschedule': ('VISIT', 'COORDINATION'), 'care_workspace': ('CARE', 'CARE'),
     'care_complete': ('CARE', 'CARE'), 'invoice_detail': ('INVOICE', 'BILLING'),
-    'portal_invoice': ('INVOICE', 'BILLING'), 'portal_visit': ('VISIT', 'COORDINATION'),
+    'portal_invoice': ('INVOICE', 'BILLING'), 'mini_invoice': ('INVOICE', 'BILLING'), 'portal_visit': ('VISIT', 'COORDINATION'),
     'portal_appointments': ('VISIT_LIST', 'COORDINATION'), 'portal_reschedule': ('VISIT', 'COORDINATION'),
     'correction_create': ('CARE', 'BILLING'), 'correction_detail': ('CORRECTION', 'BILLING'),
     'clinical_referrals': ('REFERRAL_LIST', 'TRANSFER'), 'clinical_referral_detail': ('REFERRAL', 'IDENTITY'),

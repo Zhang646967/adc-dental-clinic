@@ -6,6 +6,7 @@ from portal import mini_history as history
 from portal import mini_plans as plans
 from portal import mini_discovery as discovery
 from portal import mini_account as account
+from portal import mini_invoices as invoices
 from portal import auth_views as auth
 from portal import web_login_views as qr
 
@@ -29,6 +30,8 @@ urlpatterns = [
     path('account/enrollment/confirm/',account.submit_confirm,name='mini_enrollment_confirm'),
     path('account/enrollment/<int:pk>/withdraw/',account.withdraw,name='mini_enrollment_withdraw'),
     path('discovery/',discovery.listing,name='mini_public_discovery'),
+    path('discovery/index/',discovery.index,name='mini_public_index'),
+    path('discovery/services/',discovery.services,name='mini_public_services'),
     path('discovery/clinics/<int:pk>/',discovery.clinic,name='mini_public_clinic'),
     path('discovery/dentists/',discovery.dentists,name='mini_public_dentists'),
     path('discovery/dentists/<int:pk>/',discovery.dentist,name='mini_public_dentist'),
@@ -61,6 +64,7 @@ urlpatterns = [
     path('candidates/', api.candidates, name='mini_candidates'),
     path('visits/', api.visits, name='mini_visits'),
     path('visits/<int:pk>/', api.detail, name='mini_visit'),
+    path('invoices/<int:pk>/', invoices.detail, name='mini_invoice'),
     path('booking/preview/', api.book_preview, name='mini_book_preview'),
     path('booking/confirm/', api.book_confirm, name='mini_book_confirm'),
     path('visits/<int:pk>/cancel/preview/', api.cancel_preview, name='mini_cancel_preview'),

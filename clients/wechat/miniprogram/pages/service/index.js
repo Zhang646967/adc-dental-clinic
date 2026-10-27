@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {showError}=require('../../utils/format');
 const intent=require('../../utils/booking-intent');
@@ -18,10 +19,15 @@ Page({
   },
   book(){
     const s=this.data.service;
-    if(!s||!s.self_booking||this.data.readOnly||this.data.busy)return;
-    if(!this.data.authenticated||this.data.subjectRequired){
-      intent.remember(getApp(),s.id,s.clinic);wx.navigateTo({url:!this.data.authenticated?'/pages/login/index':'/pages/patients/index'});return;
+    if(!s||this.data.readOnly||this.data.busy)return;
+    if(!s.self_booking&&s.category==='CHILDREN'){
+      intent.remember(getApp(),s.id,s.clinic,null,s.default_day,s.category);
+      navigation.navigateTo({url:api.sessionInfo().account_authenticated?'/pages/patients/index':'/pages/login/index'});return;
     }
-    wx.navigateTo({url:`/pages/booking/index?clinic=${s.clinic}&service=${s.id}`});
+    if(!s.self_booking)return;
+    if(!this.data.authenticated||this.data.subjectRequired){
+      intent.remember(getApp(),s.id,s.clinic,null,s.default_day,s.category);navigation.navigateTo({url:!this.data.authenticated?'/pages/login/index':'/pages/patients/index'});return;
+    }
+    navigation.navigateTo({url:`/pages/booking/index?clinic=${s.clinic}&service=${s.id}${s.default_day?'&day='+s.default_day:''}`});
   }
 });

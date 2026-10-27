@@ -85,8 +85,9 @@ def directory_data(row,*,opening=None):
         'synthetic':row.synthetic or settings.ADC_CLINICAL_SYNTHETIC,'opening':opening if opening is not None else opening_data(row.clinic_id)}
 
 
-def public_directory(*,city=None):
+def public_directory(*,city=None,clinic_ids=None):
     rows=ClinicDirectory.objects.filter(is_published=True,clinic__is_active=True).select_related('clinic')
     if city:rows=rows.filter(city=city)
+    if clinic_ids is not None:rows=rows.filter(clinic_id__in=clinic_ids)
     rows=list(rows);openings=opening_batch([r.clinic_id for r in rows])
     return [directory_data(row,opening=openings[row.clinic_id]) for row in rows]

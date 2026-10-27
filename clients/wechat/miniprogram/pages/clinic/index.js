@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const config=require('../../config');
 const {positive}=require('../../utils/booking-intent');
@@ -13,8 +14,9 @@ Page({
       clinic.team=clinic.team.map(d=>({...d,portrait:d.images.length?config.apiBase+d.images[0].url:''}));
       this.setData({clinic,busy:false});
     }catch(e){showError(this,e);}},
-  doctor(e){wx.navigateTo({url:`/pages/dentist/index?id=${e.currentTarget.dataset.id}&clinic=${this.id}`});},
-  service(e){wx.navigateTo({url:'/pages/service/index?id='+e.currentTarget.dataset.id});},
+  photos(){if(this.data.clinic)wx.previewImage({urls:this.data.clinic.images.map(i=>i.url)});},
+  doctor(e){navigation.navigateTo({url:`/pages/dentist/index?id=${e.currentTarget.dataset.id}&clinic=${this.id}`});},
+  service(e){navigation.navigateTo({url:'/pages/service/index?id='+e.currentTarget.dataset.id});},
   call(){const c=this.data.clinic;if(!c||c.synthetic)return;wx.makePhoneCall({phoneNumber:c.phone});},
-  doctors(){wx.navigateTo({url:'/pages/dentists/index?clinic='+this.id});}
+  doctors(){navigation.navigateTo({url:'/pages/dentists/index?clinic='+this.id});}
 });

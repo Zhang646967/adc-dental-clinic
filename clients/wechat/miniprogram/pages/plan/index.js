@@ -1,3 +1,4 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {dateTime,showError}=require('../../utils/format');
 const states=[{code:'ACCEPTED',label:'认可此步骤'},{code:'DEFERRED',label:'暂缓决定'},{code:'DECLINED',label:'不选择此步骤'}];
@@ -9,8 +10,8 @@ Page({
  async onShow(){
   this.setData({busy:true,error:''});
   try{const s=await api.bootstrap();api.showSubject(this);
-   if(!s.authenticated){this.clear();this.setData({busy:false});wx.reLaunch({url:'/pages/login/index'});return;}
-   if(s.subject_required){this.clear();this.setData({busy:false});wx.reLaunch({url:'/pages/patients/index'});return;}
+   if(!s.authenticated){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/login/index'});return;}
+   if(s.subject_required){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/patients/index'});return;}
    if(s.delegated){this.clear();this.setData({busy:false,error:'预约代办不包含临床方案，请切换至本人。'});return;}
    if(!this.planId){this.clear();this.setData({busy:false,error:'方案链接已失效，请从本人计划清单重新打开。'});return;}
    if(this._subject!==stamp())this.clear();this._subject=stamp();this.setData({readOnly:s.read_only});await this.load();

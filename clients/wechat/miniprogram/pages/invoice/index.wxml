@@ -1,0 +1,23 @@
+<view class="page">
+  <view class="page-heading"><view class="brand">本人结算单</view><view class="title">费用与收退款</view><view class="muted">按已发布账单核对，网站与小程序使用同一份记录。</view></view>
+  <view wx:if="{{busy}}" class="notice">正在读取结算单…</view><view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
+  <block wx:if="{{invoice}}">
+    <view class="card"><view class="section-title">{{invoice.invoice_no}}</view><view class="status">{{invoice.is_current?'当前发布版本':'历史发布版本'}}</view><view class="muted line">第{{invoice.revision}}版 · {{invoice.publishedLabel}}</view>
+      <view class="label">查看发布历史</view><picker range="{{versions}}" range-key="label" value="{{revisionIndex}}" bindchange="version"><view class="picker">{{versions[revisionIndex].label}} ▾</view></picker>
+    </view>
+    <view class="card"><view class="section-title">收费明细</view>
+      <view wx:for="{{invoice.lines}}" wx:key="index" class="invoice-line"><view class="label">{{item.name_snapshot}}</view><view class="row"><text>{{item.quantity}}{{item.unit_snapshot}} × ¥{{item.unit_price}}</text><text>¥{{item.line_amount}}</text></view></view>
+      <view wx:if="{{!invoice.lines.length}}" class="muted">本版没有收费项目，请结合就诊结果核对。</view><view class="invoice-total">本版账单金额 <text>¥{{invoice.total}}</text></view>
+    </view>
+    <view class="card"><view class="section-title">当前收退款与应付</view><view wx:if="{{!invoice.is_current}}" class="notice">以下余额对应当前第{{invoice.cash_balance.current_revision}}版，不是历史版本余额。</view>
+      <view class="fact-row"><text>当前账单金额</text><text>¥{{invoice.cash_balance.billed}}</text></view>
+      <view class="fact-row"><text>患者应承担</text><text>¥{{invoice.cash_balance.patient_responsibility}}</text></view>
+      <view class="fact-row"><text>已记账净收款</text><text>¥{{invoice.cash_balance.net_received}}</text></view>
+      <view class="fact-row"><text>尚需支付</text><text>¥{{invoice.cash_balance.remaining}}</text></view>
+      <view class="fact-row"><text>应退余额</text><text>¥{{invoice.cash_balance.refund_due}}</text></view>
+      <view wx:if="{{invoice.cash_balance.pending}}" class="notice">有{{invoice.cash_balance.pending}}笔收退款待复核，尚未计入已记账金额。</view>
+      <view class="muted line">付款或退款请联系原门店前台；本页不发起支付。医保处理中金额以原结算记录核对。</view>
+    </view>
+  </block>
+  <navigator open-type="switchTab" class="link" url="/pages/home/index">返回就诊记录</navigator>
+</view>

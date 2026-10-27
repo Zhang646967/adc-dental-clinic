@@ -10,4 +10,4 @@
 <label class="label" for="patient-reference">原患者编号（记得时填写）</label><input id="patient-reference" class="input" value="{{form.patient_reference}}" maxlength="40" data-field="patient_reference" bindinput="field" />
 <button class="primary" bindtap="preview" loading="{{busy}}" disabled="{{busy||readOnly}}">先核对申请资料 →</button></view>
 <view wx:else class="card"><view class="section-title">{{preview.clinic}} · {{preview.kind_label}}</view><view wx:for="{{preview.rows}}" wx:key="label" class="line"><view class="label">{{item.label}}</view><view>{{item.value}}</view></view><view class="notice">我已核对本人、账号及上述资料。确认后送交本店前台核验，尚不创建预约、治疗或资金。</view><button class="primary" bindtap="confirm" loading="{{busy}}" disabled="{{busy||readOnly}}">确认送交前台核验</button><button bindtap="revise" disabled="{{busy||readOnly}}">返回修改</button></view>
-<navigator class="link" url="/pages/account/index" open-type="redirect">返回我的办理记录</navigator></view>
+<navigator open-type="switchTab" class="link" url="/pages/account/index">返回我的办理记录</navigator></view>

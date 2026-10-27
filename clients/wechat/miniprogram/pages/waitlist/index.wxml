@@ -7,5 +7,5 @@
     <view wx:if="{{!item.offers.length && item.can_withdraw}}" class="empty">前台核对后会提供限时邀约，你可以稍后刷新查看。</view><button wx:if="{{item.can_withdraw && !readOnly}}" class="secondary" data-id="{{item.id}}" bindtap="withdraw" disabled="{{busy}}">退出这条候补</button>
   </view>
   <view wx:if="{{!busy && !rows.length && !error}}" class="card empty"><view class="section-title">还没有候补记录</view><view>暂无合适时段时，登记可接受的日期、时间和医师偏好，交由前台协调。</view></view>
-  <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view><button class="secondary" disabled="{{busy}}" bindtap="load">刷新候补进展</button><navigator class="link" open-type="reLaunch" url="/pages/home/index">返回我的预约</navigator><navigator class="link" url="/pages/help/index">联系前台协助</navigator>
+  <view class="row"><button disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view><button class="secondary" disabled="{{busy}}" bindtap="load">刷新候补进展</button><navigator open-type="switchTab" class="link" url="/pages/home/index">返回我的预约</navigator><navigator class="link" url="/pages/help/index">联系前台协助</navigator>
 </view>

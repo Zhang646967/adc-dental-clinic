@@ -1,10 +1,11 @@
+const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const {arrangement,showError}=require('../../utils/format');
 const {selectedCatalogue}=require('../../utils/service-selection');
 Page({
   data:{clinics:[],services:[],allServices:[],doctors:[],clinicIndex:0,serviceIndex:0,doctorIndex:0,firstDay:'',lastDay:'',startDay:'',endDay:'',startTime:'09:00',endTime:'18:00',busy:false,error:''},
   async onLoad(query){ api.showSubject(this);
-    try{const session=await api.bootstrap();api.showSubject(this);if(!session.authenticated){wx.reLaunch({url:'/pages/login/index'});return;}
+    try{const session=await api.bootstrap();api.showSubject(this);if(!session.authenticated){navigation.reLaunch({url:'/pages/login/index'});return;}
       if(session.read_only)throw new Error('当前实例仅供查看，暂不办理候补。');
       const selection=selectedCatalogue(await api.request('catalogue/'),query);
       const tomorrow=new Date(new Date(session.today+'T00:00:00Z').getTime()+86400000).toISOString().slice(0,10);
@@ -29,7 +30,7 @@ Page({
     try{const p=await api.request('waitlist/join/preview/','POST',{clinic:c.id,service:s.id,dentist:d.id,
       earliest:`${this.data.startDay}T${this.data.startTime}:00+08:00`,latest:`${this.data.endDay}T${this.data.endTime}:00+08:00`});
       getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:'wait_join',preview:arrangement(p),path:'waitlist/join/confirm/'};
-      this.setData({busy:false});wx.navigateTo({url:'/pages/confirm/index'});
+      this.setData({busy:false});navigation.navigateTo({url:'/pages/confirm/index'});
     }catch(e){showError(this,e);}
   }
 });

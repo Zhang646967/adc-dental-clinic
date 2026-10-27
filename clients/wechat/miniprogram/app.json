@@ -22,10 +22,11 @@
     "pages/referrals/index",
     "pages/history/index",
     "pages/plans/index",
-    "pages/plan/index"
+    "pages/plan/index",
+    "pages/invoice/index"
   ],
   "window": {
-    "navigationBarTitleText": "ADC 口腔预约",
+    "navigationBarTitleText": "ADC口腔",
     "navigationBarBackgroundColor": "#f4faf8",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#f4f7f9"
@@ -42,5 +43,37 @@
   },
   "requiredPrivateInfos": [
     "getLocation"
-  ]
+  ],
+  "tabBar": {
+    "color": "#667a72",
+    "selectedColor": "#14685d",
+    "backgroundColor": "#fcfdf9",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/discovery/index",
+        "text": "主页",
+        "iconPath": "assets/tabs/home.png",
+        "selectedIconPath": "assets/tabs/home-active.png"
+      },
+      {
+        "pagePath": "pages/services/index",
+        "text": "预约",
+        "iconPath": "assets/tabs/booking.png",
+        "selectedIconPath": "assets/tabs/booking-active.png"
+      },
+      {
+        "pagePath": "pages/home/index",
+        "text": "就诊",
+        "iconPath": "assets/tabs/visits.png",
+        "selectedIconPath": "assets/tabs/visits-active.png"
+      },
+      {
+        "pagePath": "pages/account/index",
+        "text": "我的",
+        "iconPath": "assets/tabs/account.png",
+        "selectedIconPath": "assets/tabs/account-active.png"
+      }
+    ]
+  }
 }
