@@ -250,7 +250,7 @@ class BranchDiscoveryTests(ResourceFixture,TransactionTestCase):
         self.assertContains(c.get(reverse('portal_subjects')),'继续预约')
         ctx=WorkspaceContext.objects.get(pk=c.session[SESSION_KEY])
         r=c.post(reverse('portal_subjects'),{'subject':f'grant:{case.appointment_grant.pk}','workspace_token':token_for(ctx)})
-        self.assertRedirects(r,reverse('portal_slots')+'?service='+str(self.service.pk),fetch_redirect_response=False)
+        self.assertRedirects(r,reverse('portal_slots')+'?service='+str(self.service.pk)+'&clinic='+str(self.a.pk),fetch_redirect_response=False)
         self.assertNotIn('adc_booking_intent',c.session)
         self.assertFalse(Visit.objects.exists())
 

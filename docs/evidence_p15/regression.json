@@ -1,0 +1,16 @@
+{
+  "initial_full_tests": 2092,
+  "initial_passed": 2084,
+  "initial_failures": 8,
+  "failures": "Four legacy redirect expectations omitted retained clinic; four public-entry unit tests mocked the superseded discovery dependency.",
+  "rerun_modules": [
+    "test_system_entry",
+    "test_service_catalogue",
+    "test_branch_discovery"
+  ],
+  "rerun_tests": 71,
+  "rerun_passed": true,
+  "authorization_assertions_retained": true,
+  "application_code_unchanged_by_test_repairs": true,
+  "full_exact_commit_CI": "PENDING"
+}

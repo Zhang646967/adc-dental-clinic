@@ -182,7 +182,7 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
     def test_public_login_retains_typed_service_after_normal_patient_activation(self):
         response=self.client.post(reverse('portal_login'),{'username':self.patient_user.username,
             'password':'synthetic-service-only','booking_service':self.service.pk,'next':'https://evil.invalid'})
-        self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk),fetch_redirect_response=False)
+        self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk)+'&clinic='+str(self.a.pk),fetch_redirect_response=False)
         ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
         self.assertEqual(ctx.role,'PATIENT');self.assertIsNone(ctx.clinic_id)
 
@@ -269,7 +269,7 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
     def test_multi_role_patient_channel_continues_exact_service_without_staff_selection(self):
         self.add_manager_role()
         response=self.login_with_selection()
-        self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk),fetch_redirect_response=False)
+        self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk)+'&clinic='+str(self.a.pk),fetch_redirect_response=False)
         ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
         self.assertEqual((ctx.role,ctx.login_channel),('PATIENT','PATIENT'));self.assertIsNone(ctx.clinic_id)
         self.assertNotIn(INTENT_KEY,self.client.session)
@@ -301,7 +301,7 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
         ctx=WorkspaceContext.objects.get(pk=self.client.session[SESSION_KEY])
         before=(WorkspaceContext.objects.count(),ctx.role,ctx.clinic_id,ctx.revision)
         response=self.client.get(reverse('portal_login'),{'service':self.service.pk})
-        self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk),fetch_redirect_response=False)
+        self.assertRedirects(response,reverse('portal_slots')+'?service='+str(self.service.pk)+'&clinic='+str(self.a.pk),fetch_redirect_response=False)
         ctx.refresh_from_db()
         self.assertEqual((WorkspaceContext.objects.count(),ctx.role,ctx.clinic_id,ctx.revision),before)
 
