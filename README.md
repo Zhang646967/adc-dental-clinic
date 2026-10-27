@@ -1,4 +1,4 @@
-> P1.5 开发候选：小程序患者入口、二十店基础服务与画像对齐，见[业务说明](docs/P15_PATIENT_ALIGNMENT.md)和[本轮独立验收](docs/evidence_p15/README.md)。准确版本CI、容量、恢复、保护更新及真机结果分别记录，旧P1验收保留。
+> **当前P1.5已交付本地软件：** 二十店四类基础服务、60名医师画像、小程序24页与四个主入口、本人结算单已对齐；原系统及独立教师试用实例已更新。[患者小程序指南](docs/P15_MINIPROGRAM_GUIDE.md) · [准确CI与验收证据](docs/evidence_p15/README.md)。手机实机按用户安排后置，真实微信／短信另行验收。
 
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
 
@@ -6,7 +6,7 @@
 
 教师查阅顺序：课程报告 → [业务演示路线](docs/DEMO_ROUTES_RC1.md) → [验收记录](docs/README.md#测试与验收)。报告文件名固定；封面日期及 Git 历史标明版本。
 
-**P1已交付：医师与门店画像、二十店选诊和月度经营核算。** 八城二十店、60名新增医师、版本审核及轮诊、网站／小程序选医预约、独立成本复核与工时分摊均可试用；排班继续由前台负责。准确CI通过1,127项规则／2,071项PG，两轮30分钟容量及142表加密独立恢复通过。原本机与[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新，原业务与密码保留。[试用路线](docs/P1_TRIAL_GUIDE.md) · [业务设计](docs/P1_PROFILE_MANAGEMENT.md) · [完整证据](docs/evidence_p1/README.md)。正式报告224页、112项业务用例、31幅实际ER，文件名不变。真实微信／短信与独立云端继续单独待验收。
+**P1历史交付：医师与门店画像、二十店选诊和月度经营核算。** 八城二十店、60名新增医师、版本审核及轮诊、网站／小程序选医预约、独立成本复核与工时分摊均可试用；排班继续由前台负责。准确CI通过1,127项规则／2,071项PG，两轮30分钟容量及142表加密独立恢复通过。原本机与[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新，原业务与密码保留。[试用路线](docs/P1_TRIAL_GUIDE.md) · [业务设计](docs/P1_PROFILE_MANAGEMENT.md) · [完整证据](docs/evidence_p1/README.md)。该次报告224页；当前报告已更新至227页、113项业务用例和31幅实际ER，文件名不变。真实微信／短信与独立云端继续单独待验收。
 
 **WX1历史本地交付：** 小程序微信换码、网站小程序扫码确认、CloudBase短信与账号关联已实现并通过隔离验证；准确CI为1,122项规则／2,005项PG。原本机及[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新。**真实微信、真机扫码与实际短信仍待AppSecret及免费平台条件补齐。** [使用与联调](docs/WX1_GUIDE.md) · [分项交付证据](docs/evidence_wx1/README.md)。课程报告已更新为202页、101项业务用例和27幅实际ER；文件名不变。
 

@@ -1,0 +1,22 @@
+{
+  "mac": {
+    "passed": true,
+    "source": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "migrations": 64,
+    "er_views": 31,
+    "all_observed_fields_relations_and_definitions_match_documented_schema": true
+  },
+  "teacher": {
+    "passed": true,
+    "source": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "migrations": 64,
+    "er_views": 31,
+    "all_observed_fields_relations_and_definitions_match_documented_schema": true
+  }
+}

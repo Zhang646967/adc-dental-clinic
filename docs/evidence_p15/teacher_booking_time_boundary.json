@@ -1,0 +1,12 @@
+{
+  "visit": 20,
+  "clinic": 4,
+  "status": "CANCELLED",
+  "normal_staff_command": true,
+  "patient_cutoff_respected": true,
+  "passed": true,
+  "stopped_tool_step": "Expected cancellation button absent after appointment start; patient rule remained intact",
+  "application_changed": false,
+  "test_harness_correction": "Subsequent test appointments explicitly select tomorrow",
+  "scope": "Synthetic test visit20 only; no original appointment altered"
+}

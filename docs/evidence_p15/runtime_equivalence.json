@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "accepted_application_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "application_code_templates_client_assets_and_tests_unchanged": true,
+  "all_64_migration_bytes_unchanged": true,
+  "changes_limited_to_documentation_evidence_and_integrity_inventory": true,
+  "assigned_password_scan_passed": true,
+  "current_teacher_origin_excluded_from_new_public_evidence": true,
+  "ci_scope": "Full application CI is pinned to accepted application; documentation integrity is a separate workflow."
+}

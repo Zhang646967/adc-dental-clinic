@@ -12,5 +12,9 @@
   "rerun_passed": true,
   "authorization_assertions_retained": true,
   "application_code_unchanged_by_test_repairs": true,
-  "full_exact_commit_CI": "PENDING"
+  "full_exact_commit_CI": "PASSED",
+  "tested_source_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "final_full_postgresql_tests": 2092,
+  "final_source_rules": 1127,
+  "ci_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40437905634"
 }

@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "application_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "image": "sha256:3cab25c307d473d622ac448fa1a7e342ab600b2304aeebb9fb1bc4478658c4ef",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40437905634",
+  "project": "adc_g4_de62b0730edd",
+  "business_model_groups_preserved": 139,
+  "old_rows_and_passwords_preserved": true,
+  "database_container_and_volume_preserved": true,
+  "old_observations_archived_encrypted": true,
+  "configuration_and_credentials_backed_up": true,
+  "new_six_conditions": "HEALTHY",
+  "database_backup_sha256": "5f15d8abb94b5563128546eba98fc54d449dd6d97b683b76d7f3c7fe78c209e0",
+  "configuration_backup_sha256": "088251e1ba81fa6fc54714e72745d4d9aafff741163e918c74c1e6505b395e56",
+  "scope": "Independent synthetic teacher trial on the Mac; not independent cloud or platform acceptance."
+}

@@ -1,0 +1,59 @@
+{
+  "source": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "project": "adc_p15_capacity_20261026",
+  "run": "842a121c12cf",
+  "started_utc": "2026-10-27T02:31:23.412870+00:00",
+  "finished_utc": "2026-10-27T03:01:23.522507+00:00",
+  "seconds": 1800,
+  "elapsed_seconds": 1800.005,
+  "wall_elapsed_seconds": 1800.011,
+  "users": 20,
+  "clinics": 20,
+  "target_rps": 5,
+  "actual_rps": 5.0,
+  "arrival_mode": "twenty simultaneous requests every four seconds",
+  "max_in_flight": 20,
+  "dropped": [],
+  "summary": {
+    "requests": 9000,
+    "failures": 0,
+    "p95_seconds": 0.513,
+    "max_seconds": 1.1101
+  },
+  "reads": {
+    "requests": 7200,
+    "failures": 0,
+    "p95_seconds": 0.503,
+    "max_seconds": 1.1101
+  },
+  "writes": {
+    "requests": 1800,
+    "failures": 0,
+    "p95_seconds": 0.537,
+    "max_seconds": 1.0981
+  },
+  "oom": false,
+  "oom_events": 0,
+  "services_running": true,
+  "unique_written_records": 1800,
+  "resource_limits": {
+    "adc_p15_capacity_20261026-gateway-1": {
+      "memory_bytes": 134217728,
+      "nano_cpus": 0
+    },
+    "adc_p15_capacity_20261026-web-1": {
+      "memory_bytes": 2147483648,
+      "nano_cpus": 2000000000
+    },
+    "adc_p15_capacity_20261026-notification-worker-1": {
+      "memory_bytes": 268435456,
+      "nano_cpus": 500000000
+    },
+    "adc_p1_verify_db": {
+      "memory_bytes": 805306368,
+      "nano_cpus": 2000000000
+    }
+  },
+  "scope": "Exact image on Mac; synthetic self-history writes, not real clinical outcomes or independent cloud capacity",
+  "passed": true
+}

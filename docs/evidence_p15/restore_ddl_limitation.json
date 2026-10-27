@@ -1,0 +1,9 @@
+{
+  "stage_a_strict_comparison": "STOPPED_SCHEMA_DIGEST_DIFFERENCE",
+  "all_142_tables_rows_and_bytes_equal": true,
+  "trigger_definitions_and_states_equal": true,
+  "schema_digest_differences": 63,
+  "example": "Equivalent CHECK representations: ARRAY of text-cast elements versus a varchar array cast to text[]. PostgreSQL full-schema dump/reparse was used only to clone the capacity fixture.",
+  "next_step": "Use the already migration-built empty-database restore as an explicitly identified rehearsal source; create a new encrypted backup and restore again via the same64migration files. Preserve the initial stopped result and the general comparator limitation.",
+  "live_databases_modified": false
+}

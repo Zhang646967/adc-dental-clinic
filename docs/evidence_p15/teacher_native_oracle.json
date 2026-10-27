@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "application_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "clinics": 20,
+  "checks": 42,
+  "new_test_appointments": 21,
+  "terminal_states": {
+    "CANCELLED": 20,
+    "RESCHEDULED": 1
+  },
+  "all_preexisting_visit_rows_unchanged": true,
+  "accounts_passwords_patients_treatment_invoices_and_finance_unchanged": true,
+  "exact_test_ids_and_no_extra_visit": true,
+  "boundary_result": "One test crossed its appointment start; patient change cutoff respected, only that synthetic visit cancelled through normal assigned frontdesk command. Remaining cases used future dates.",
+  "physical_device": "DEFERRED_BY_USER",
+  "scope": "Official WeChat developer-tool controls against accepted teacher HTTPS; no real-provider credentials or physical-phone acceptance implied"
+}

@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "application_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "image": "sha256:3cab25c307d473d622ac448fa1a7e342ab600b2304aeebb9fb1bc4478658c4ef",
+  "independent_empty_database": true,
+  "consistent_exported_snapshot": true,
+  "all_table_rows_and_bytes_equal": true,
+  "matching": {
+    "method": "PG17_JSONB_SHA256_V1",
+    "tables": 142,
+    "rows": 25846,
+    "facts_sha256": "267e2c44d142dcf6e179ab8e268c32a5d98a744cb5a0f0afdc0bdddd7a96d938"
+  },
+  "source_path": "Explicit same-version migration-built rehearsal database; transitive raw-capacity data and110triggers equal, initial63schema-digest differences retained separately",
+  "retained_profile_and_management_tables": {
+    "public.adc_cost_allocation": 81,
+    "public.adc_management_report": 25,
+    "public.adc_monthly_cost": 65,
+    "public.adc_profile_action": 2311,
+    "public.adc_profile_media": 200,
+    "public.adc_profile_version": 169
+  },
+  "enabled_triggers_and_definitions_equal": 110,
+  "restore_seconds_after_database_ready": 14.358,
+  "config_encrypted_and_verified": 7,
+  "decryption_key_on_Mac": true,
+  "restored_auth_challenges_expired": "AUTH_CHALLENGES_EXPIRED",
+  "backup_sha256": "a339c099f6d3f3e393457c458ce7e06ca6388c200258ee66a3894e0b6f0a1c7f",
+  "schema_scope": "Same-version migration then data restore; arbitrary equivalent-DDL automatic comparison remains outside scope."
+}

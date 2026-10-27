@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "source": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "clinics": 20,
+  "distinct_patient_accounts": 20,
+  "actual_new_history_versions": 1800,
+  "per_patient_new_versions": 90,
+  "unique_business_effects": 1800,
+  "history_revisions_contiguous": true,
+  "all_previous_history_versions_retained": true,
+  "unchanged_business_groups": [
+    "scheduling.Visit",
+    "care.Invoice",
+    "care.TreatmentRecord",
+    "care.VisitRecordVersion",
+    "finance.CashEntry",
+    "registry.ProfileVersion",
+    "registry.ProfileMedia",
+    "registry.PublicProfile"
+  ],
+  "clinical_billing_cash_and_profile_facts_unchanged": true,
+  "unexpected_failures": 0,
+  "oom": false,
+  "original_and_teacher_databases_untouched": true,
+  "scope": "Independent capacity database; physical-phone interactive preview kept separate"
+}

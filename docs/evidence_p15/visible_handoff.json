@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "application_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "pages": 24,
+  "package_bytes": 78627,
+  "registered_appid_preserved": true,
+  "private_devtools_settings_preserved": true,
+  "assigned_passwords_excluded_from_client": true,
+  "report_pages": 227,
+  "report_hashes": {
+    "课程报告_张加良_8210241102.docx": "df71aebe3f8c29362116fb74ab9e723f6bbf0f9fe18946e23298d5f445c217f0",
+    "课程报告_张加良_8210241102.pdf": "204db4ecf4ab430969594e91e09a5cdbe2a84b70b362989e377d480649d3d7fe"
+  },
+  "package_sha256": "f9f323a67c549d06d6a9b59f4787d2d92f67a945ec00d76f1f2d11c21de508cc",
+  "phone_acceptance": "DEFERRED_BY_USER",
+  "real_wechat_acceptance": "NOT_RUN_PLATFORM_CONFIGURATION_PENDING",
+  "real_sms_acceptance": "NOT_RUN",
+  "preview_qr_backend_matches_project": true,
+  "preview_qr_sha256": "3aa2c9ab8d086ddb0130046f3a11416f7781eec787b4106c453804aaf865de3c",
+  "preview_qr_is_development_not_experience": true
+}

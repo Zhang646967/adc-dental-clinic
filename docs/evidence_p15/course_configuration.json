@@ -1,0 +1,20 @@
+{
+  "mac": {
+    "clinics": 20,
+    "new_service_definitions": 14,
+    "new_published_shifts": 60,
+    "doctor_profiles_published": 60,
+    "images_per_clinic": 3,
+    "family_sample": "Synthetic frontdesk-verified PARENT/GUARDIAN scope; no clinical or invoice access",
+    "old_rows_comparison": "mac_configuration_verification.json"
+  },
+  "teacher": {
+    "clinics": 20,
+    "new_service_definitions": 14,
+    "new_published_shifts": 60,
+    "doctor_profiles_published": 60,
+    "images_per_clinic": 3,
+    "family_sample": "Synthetic frontdesk-verified PARENT/GUARDIAN scope; no clinical or invoice access",
+    "old_rows_comparison": "teacher_configuration_verification.json"
+  }
+}

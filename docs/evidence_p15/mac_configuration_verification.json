@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "source": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "existing_data_groups": 139,
+  "old_rows_retained": 9243,
+  "old_mutated_metadata_rows": {
+    "registry.PublicProfile": 80,
+    "registry.DentistClinicAffiliation": 61,
+    "scheduling.ResourcePolicy": 14
+  },
+  "existing_accounts_and_passwords_preserved": true,
+  "existing_patient_rows_preserved": true,
+  "appointments_treatment_bills_and_financial_history_unchanged": true,
+  "all_new_rows_explicitly_counted": {
+    "accounts.UserAccount": 1,
+    "registry.ProfileVersion": 80,
+    "registry.ProfileMedia": 120,
+    "registry.ProfileAction": 161,
+    "patients.Patient": 1,
+    "scheduling.AvailabilitySlot": 60,
+    "scheduling.BookingService_dentists": 27,
+    "scheduling.BookingService": 14,
+    "scheduling.ServiceRequirement": 14,
+    "scheduling.ServicePresentation": 14,
+    "scheduling.ResourceAction": 28,
+    "care.AuditEvent": 307,
+    "portal.PatientRelationship": 1,
+    "portal.PatientAppointmentGrant": 1,
+    "portal.PatientRelationshipEvent": 2,
+    "clinical.ProfessionalAuthorization": 27,
+    "clinical.ClinicalAuthorityEvent": 54
+  },
+  "scope": "Synthetic course configuration through owned versioned commands; existing immutable history retained; no treatment/cash created by profile preparation."
+}

@@ -1,0 +1,154 @@
+{
+  "release": "P1.5",
+  "status": "LOCAL_SOFTWARE_DELIVERED_PHYSICAL_DEVICE_DEFERRED",
+  "application_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "image": "sha256:3cab25c307d473d622ac448fa1a7e342ab600b2304aeebb9fb1bc4478658c4ef",
+  "ci": {
+    "status": "completed",
+    "conclusion": "success",
+    "tested_source_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+    "workflow_commit": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+    "exact_checkout_recorded_in_log": true,
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40437905634",
+    "postgresql_tests": 2092,
+    "source_rules": 1127,
+    "executed_counts": [
+      [
+        "1127",
+        "12.808"
+      ],
+      [
+        "2092",
+        "1125.657"
+      ]
+    ]
+  },
+  "capability": {
+    "clinics": 20,
+    "cities": 8,
+    "base_categories_per_clinic": 4,
+    "actual_candidate_combinations_verified": 80,
+    "doctor_profiles": 60,
+    "images_per_clinic": 3,
+    "original_configuration_history_retained": true
+  },
+  "native": {
+    "pages": 24,
+    "main_entries": [
+      "主页",
+      "预约",
+      "就诊",
+      "我的"
+    ],
+    "source_rules": 273,
+    "official_offline_pages": 24,
+    "developer_tool_real_backend": {
+      "isolated_candidate_public_checks": 82,
+      "isolated_candidate_booking_checks": 56,
+      "isolated_candidate_additional_business_checks": 11,
+      "installed_teacher_https_public_checks": 82,
+      "installed_teacher_https_booking_checks": 42,
+      "installed_teacher_clinics": 20
+    },
+    "phone": "DEFERRED_BY_USER"
+  },
+  "browser": {
+    "exact_image_checks": 60,
+    "original_mac_checks": 60,
+    "teacher_https_checks": 60,
+    "role_logins_per_installed_instance": 7,
+    "widths_px": [
+      375,
+      390,
+      430
+    ],
+    "system_zoom_percent": 200,
+    "index_bytes": {
+      "mac": 59565,
+      "teacher": 59564
+    },
+    "console_errors": 0
+  },
+  "capacity": {
+    "passed": true,
+    "users": 20,
+    "clinics": 20,
+    "seconds": 1800,
+    "actual_rps": 5.0,
+    "summary": {
+      "requests": 9000,
+      "failures": 0,
+      "p95_seconds": 0.513,
+      "max_seconds": 1.1101
+    },
+    "reads": {
+      "requests": 7200,
+      "failures": 0,
+      "p95_seconds": 0.503,
+      "max_seconds": 1.1101
+    },
+    "writes": {
+      "requests": 1800,
+      "failures": 0,
+      "p95_seconds": 0.537,
+      "max_seconds": 1.0981
+    },
+    "unique_written_records": 1800,
+    "oom": false,
+    "scope": "Exact image on Mac; synthetic self-history writes, not real clinical outcomes or independent cloud capacity"
+  },
+  "recovery": {
+    "passed": true,
+    "tables": 142,
+    "rows": 25846,
+    "seconds": 14.358,
+    "same_version_migration_source": true,
+    "original_copy_seconds": 22.918,
+    "all_images_versions_costs_allocations_reports_equal": true,
+    "initial_equivalent_DDL_digest_difference_retained": true,
+    "details": "populated_recovery.json;restore_ddl_limitation.json"
+  },
+  "installed": {
+    "original_mac": "UPDATED",
+    "independent_teacher": "UPDATED",
+    "original_groups_preserved": 139,
+    "old_private_configurations_preserved": 70,
+    "old_accounts_passwords_preserved": true,
+    "original_RC_tag_preserved": true,
+    "after_test_backups_verified": true,
+    "teacher_native_test_rows": {
+      "CANCELLED": 20,
+      "RESCHEDULED": 1
+    },
+    "teacher_previous_visits_and_all_finance_unchanged": true
+  },
+  "schema": {
+    "migrations_preserved": 64,
+    "new_migrations": 0,
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "actual_er_views": 31
+  },
+  "report": {
+    "pages": 227,
+    "business_use_cases": 113,
+    "support_case": "SF-01",
+    "tables": 132,
+    "figures": 67,
+    "er_views": 31,
+    "filenames_unchanged": true
+  },
+  "pending": {
+    "physical_phone": "DEFERRED_BY_USER",
+    "real_wechat": "PLATFORM_CONFIGURATION_PENDING",
+    "real_sms": "PLATFORM_CONFIGURATION_PENDING",
+    "formal_experience_release": "NOT_RUN",
+    "independent_cloud": "SERVER_NOT_PURCHASED",
+    "mainland_no_proxy": "NOT_RUN",
+    "twenty_four_hour_observation": "NOT_RUN",
+    "clinical_commercial_qualification": "NOT_ESTABLISHED",
+    "historical_windows_recovery": "UNRESOLVED"
+  },
+  "evidence_policy": "Historical P1, candidate tools, installed HTTPS, physical device and provider results remain separate; exact application source/image is unchanged by final documentation commit."
+}

@@ -18,5 +18,5 @@
     "foreign_keys": 388,
     "triggers": 110
   },
-  "platform_acceptance": "TOOL_RUNTIME_EXECUTED;PHYSICAL_DEVICE_PENDING;REAL_PROVIDER_NOT_RUN"
+  "platform_acceptance": "TOOL_RUNTIME_EXECUTED;PHYSICAL_DEVICE_DEFERRED_BY_USER;REAL_PROVIDER_NOT_RUN"
 }

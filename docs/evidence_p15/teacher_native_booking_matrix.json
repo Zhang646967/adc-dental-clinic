@@ -1,0 +1,134 @@
+{
+  "passed": true,
+  "checks": 42,
+  "detail": [
+    "Guangzhou Yuexiu restoration service resumes exact clinic/service/date after real password login",
+    "Guangzhou Yuexiu restoration service resumes exact clinic/service/date after real password login",
+    "Clinic 16 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Actual reschedule preserves source link and creates unique successor",
+    "Clinic 16 explicit cancellation preserves history and releases resources",
+    "Clinic 17 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 17 explicit cancellation preserves history and releases resources",
+    "Clinic 11 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 11 explicit cancellation preserves history and releases resources",
+    "Clinic 13 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 13 explicit cancellation preserves history and releases resources",
+    "Clinic 12 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 12 explicit cancellation preserves history and releases resources",
+    "Clinic 8 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 8 explicit cancellation preserves history and releases resources",
+    "Clinic 9 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 9 explicit cancellation preserves history and releases resources",
+    "Clinic 10 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 10 explicit cancellation preserves history and releases resources",
+    "Clinic 14 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 14 explicit cancellation preserves history and releases resources",
+    "Clinic 15 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 15 explicit cancellation preserves history and releases resources",
+    "Clinic 7 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 7 explicit cancellation preserves history and releases resources",
+    "Clinic 5 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 5 explicit cancellation preserves history and releases resources",
+    "Clinic 6 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 6 explicit cancellation preserves history and releases resources",
+    "Clinic 19 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 19 explicit cancellation preserves history and releases resources",
+    "Clinic 18 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 18 explicit cancellation preserves history and releases resources",
+    "Clinic 20 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 20 explicit cancellation preserves history and releases resources",
+    "Clinic 1 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 1 explicit cancellation preserves history and releases resources",
+    "Clinic4 actual signed booking persisted; crossing appointment start correctly removed patient cancellation; assigned frontdesk explicitly cancelled this synthetic test through normal coordination command",
+    "Clinic 2 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 2 explicit cancellation preserves history and releases resources",
+    "Clinic 3 actual candidate, signed preview, explicit confirmation and persisted visit",
+    "Clinic 3 explicit cancellation preserves history and releases resources"
+  ],
+  "visits": [
+    {
+      "clinic": 16,
+      "visit": 2,
+      "successor": 3
+    },
+    {
+      "clinic": 17,
+      "visit": 4
+    },
+    {
+      "clinic": 11,
+      "visit": 5
+    },
+    {
+      "clinic": 13,
+      "visit": 6
+    },
+    {
+      "clinic": 12,
+      "visit": 7
+    },
+    {
+      "clinic": 8,
+      "visit": 8
+    },
+    {
+      "clinic": 9,
+      "visit": 9
+    },
+    {
+      "clinic": 10,
+      "visit": 10
+    },
+    {
+      "clinic": 14,
+      "visit": 11
+    },
+    {
+      "clinic": 15,
+      "visit": 12
+    },
+    {
+      "clinic": 7,
+      "visit": 13
+    },
+    {
+      "clinic": 5,
+      "visit": 14
+    },
+    {
+      "clinic": 6,
+      "visit": 15
+    },
+    {
+      "clinic": 19,
+      "visit": 16
+    },
+    {
+      "clinic": 18,
+      "visit": 17
+    },
+    {
+      "clinic": 20,
+      "visit": 18
+    },
+    {
+      "clinic": 1,
+      "visit": 19
+    },
+    {
+      "clinic": 4,
+      "visit": 20,
+      "cleanup": "normal frontdesk cancellation after start"
+    },
+    {
+      "clinic": 2,
+      "visit": 21
+    },
+    {
+      "clinic": 3,
+      "visit": 22
+    }
+  ],
+  "source": "5eea097b31874fd08258a02296cb24f10b0cce4c",
+  "scope": "Official WeChat runtime with live Django/PostgreSQL; real controls and assigned synthetic account; not physical device or real WeChat provider login"
+}
