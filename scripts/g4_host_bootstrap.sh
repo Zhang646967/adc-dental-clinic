@@ -14,7 +14,7 @@ fi
 [ -z "$(ss -H -ltn 'sport = :80 or sport = :443')" ]
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y ca-certificates curl python3 age certbot
+apt-get install -y ca-certificates curl python3 python3-venv age certbot
 if ! command -v docker >/dev/null 2>&1; then
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc

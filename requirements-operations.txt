@@ -1,0 +1,2 @@
+# Optional host-only COS adapter. The clinical web/worker image does not need it.
+cos-python-sdk-v5==1.9.44

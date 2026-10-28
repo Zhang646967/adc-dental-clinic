@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from adc_core.operations_store import PrivateStore, canonical, MAX_BYTES
-from adc_core.operations import (advance, acknowledge, conditions, fresh_state, status,
+from adc_core.operations import (advance, acknowledge, conditions, fresh_state, status, clock_discontinuity,
     worker_condition, Heartbeat, age, identity, MAX_INCIDENTS)
 
 TARGET = {'instance':'adc_test_operations','source':'a'*40,'read_only':False}
@@ -34,6 +34,25 @@ class OperationPolicies(unittest.TestCase):
         state=fresh_state(TARGET,moment())
         advance(state,sample(),TARGET,moment())
         return advance(state,sample(30),TARGET,moment(30))
+
+    def test_forward_wall_monotonic_gap_is_identified_without_mutating_history(self):
+        state = self.healthy()
+        before = copy.deepcopy(state)
+        now = moment(1000) | {'mono': moment(400)['mono']}
+        self.assertTrue(clock_discontinuity(state, TARGET, now))
+        self.assertEqual(state, before)
+
+    def test_regular_elapsed_time_is_not_a_clock_gap(self):
+        self.assertFalse(clock_discontinuity(self.healthy(), TARGET, moment(1000)))
+
+    def test_clock_repair_never_accepts_a_foreign_source(self):
+        with self.assertRaises(ValueError):
+            clock_discontinuity(self.healthy(), TARGET | {'source': 'c' * 40}, moment(1000))
+
+    def test_clock_repair_does_not_accept_backward_or_other_boot_observations(self):
+        state = self.healthy()
+        self.assertFalse(clock_discontinuity(state, TARGET, moment(-1000)))
+        self.assertFalse(clock_discontinuity(state, TARGET, moment(1000, boot='b' * 36)))
 
     def test_idle_database_loop_is_healthy_without_delivery(self):
         self.assertEqual(worker_condition(worker(),TARGET,moment(80))[0],'HEALTHY')

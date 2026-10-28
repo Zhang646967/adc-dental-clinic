@@ -46,7 +46,7 @@ def write_env(path, values):
 
 def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
             bind_ip='127.0.0.1', http_port=80, https_port=443, mode='direct_tls',
-            access_mode='read-only', architecture='amd64'):
+            access_mode='read-only', architecture='amd64', dataset='rc'):
     output = Path(output)
     if output.name != '.g4' or output.exists() or output.is_symlink():
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
@@ -55,6 +55,8 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     if access_mode not in ('read-only', 'course-writable'):
         raise ValueError('Unknown access mode.')
     writable = access_mode == 'course-writable'
+    if dataset not in ('rc', 'course-20') or dataset == 'course-20' and not writable:
+        raise ValueError('The complete course dataset requires explicit course-writable access.')
     if writable and mode not in ('direct_tls', 'teacher_tunnel'):
         raise ValueError('Course writes require a separate direct HTTPS deployment.')
     if mode == 'teacher_tunnel' and not writable:
@@ -95,6 +97,9 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     if writable:
         runtime['ADC_COURSE_PROJECT'] = project
         runtime['ADC_COURSE_SYNTHETIC'] = '1'
+    if dataset == 'course-20':
+        runtime.update(ADC_RC_SYNTHETIC='1', ADC_PATIENT_AUTH_MODE='live',
+                       ADC_PATIENT_IDENTITY_PROVIDER='disabled', ADC_SOURCE_COMMIT=source_commit)
     if mode == 'teacher_tunnel':
         runtime.update(ADC_RC_SYNTHETIC='1',ADC_TEACHER_TEST_MODE='1',ADC_SMS_PROVIDER='demo')
     owner_password = secrets.token_urlsafe(48)
@@ -136,6 +141,14 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
             compose = compose.replace('  ' + service + ':\n', '  ' + service + ':\n    platform: ' + platform + '\n')
         compose = compose.replace('    profiles: [writer]\n', '')
         compose = compose.replace('restart: "on-failure:5"', 'restart: unless-stopped')
+        if dataset == 'course-20':
+            compose = compose.replace('command: [python, manage.py, bootstrap_release_demo]',
+                                      'command: [python, manage.py, bootstrap_course_release]')
+            for service, memory in {'db': '768m', 'schema': '768m', 'bootstrap': '1536m',
+                                    'web': '1536m', 'notification-worker': '256m',
+                                    'operations': '128m', 'gateway': '128m'}.items():
+                compose = compose.replace('  ' + service + ':\n',
+                                          '  ' + service + ':\n    mem_limit: ' + memory + '\n')
         (output / 'compose.yaml').write_text(compose)
     os.chmod(output / 'init-db.sh', 0o555)
     nginx_template = 'nginx.mac-tunnel.template.conf' if mode in ('mac_tunnel','teacher_tunnel') else 'nginx.template.conf'
@@ -147,6 +160,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'mode': mode,
         'requested_source_commit': source_commit, 'read_only': not writable,
         'access_mode': access_mode,
+        'dataset': dataset,
         'architecture': architecture if writable else None,
         'bind_ip': bind_ip, 'ports': [http_port] if mode in ('mac_tunnel','teacher_tunnel') else [http_port, https_port],
         'images': {'app': app_image, 'db': db_image, 'nginx': nginx_image},
@@ -202,6 +216,9 @@ def inspect_bundle(output, rendered=None):
         raise ValueError('Teacher writes are limited to the separate synthetic trial.')
     if runtime['AI_MODE'] != 'disabled' or runtime.get('ADC_MIGRATION_PASSWORD') or runtime.get('ADC_G4_MAINTENANCE'):
         raise ValueError('Runtime must not receive maintenance credentials/flags or external AI.')
+    if plan.get('dataset') == 'course-20' and (not writable or runtime.get('ADC_RC_SYNTHETIC') != '1'
+            or runtime.get('ADC_PATIENT_AUTH_MODE') != 'live'):
+        raise ValueError('Course business data and live authentication must remain separately identified.')
     if (maintenance.get('DJANGO_SETTINGS_MODULE') != 'config.settings.g4_maintenance' or
             maintenance.get('ADC_G4_MAINTENANCE') != '1' or
             maintenance.get('ADC_MIGRATION_PASSWORD') != database['G4_OWNER_DB_PASSWORD'] or
@@ -263,6 +280,7 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel', 'teacher_tunnel'), default='direct_tls')
     prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable'), default='read-only')
     prepare_parser.add_argument('--architecture', choices=('amd64', 'arm64'), default='amd64')
+    prepare_parser.add_argument('--dataset', choices=('rc', 'course-20'), default='rc')
     inspect_parser = sub.add_parser('inspect')
     inspect_parser.add_argument('--output', default=str(ROOT / '.g4'))
     inspect_parser.add_argument('--rendered-compose')
@@ -272,7 +290,8 @@ if __name__ == '__main__':
             plan = prepare(args.output, host=args.host, source_commit=args.source_commit,
                            app_image=args.app_image, db_image=args.db_image, nginx_image=args.nginx_image,
                            bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port,
-                           mode=args.mode, access_mode=args.access_mode, architecture=args.architecture)
+                           mode=args.mode, access_mode=args.access_mode, architecture=args.architecture,
+                           dataset=args.dataset)
             result = {'status': plan['status'], 'project': plan['project'], 'host': plan['host'],
                       'credentials': 'private files only; not displayed', 'public_acceptance_executed': False}
         else:

@@ -7,7 +7,8 @@ from django.core.exceptions import ImproperlyConfigured
 if os.environ.get('ADC_G4_MAINTENANCE') != '1':
     raise ImproperlyConfigured('Explicit private G4 maintenance process required.')
 if (Path(sys.argv[0]).name != 'manage.py' or len(sys.argv) < 2 or
-        sys.argv[1] not in {'migrate', 'collectstatic', 'check', 'check_g4_deployment', 'showmigrations', 'bootstrap_release_demo'}):
+        sys.argv[1] not in {'migrate', 'collectstatic', 'check', 'check_g4_deployment', 'showmigrations',
+                           'bootstrap_release_demo', 'bootstrap_course_release'}):
     raise ImproperlyConfigured('Maintenance settings are limited to explicit management commands.')
 
 # Validate the same host, proxy, TLS and runtime configuration first. Only this

@@ -275,11 +275,46 @@ class Course:
         except (OSError, ValueError, http.client.HTTPException):
             pass
         copies = backup_inventory(self.bundle / 'backups', self.plan['project'])
+        release = {'state': 'UNKNOWN'}
+        try:
+            release = json.loads(self.dc('exec', '-T', 'web', 'python', 'manage.py', 'course_release_status', timeout=20))
+        except (OSError, ValueError, RuntimeError):
+            pass
+        observed = {'state': 'UNKNOWN'}
+        try:
+            identifier = self.dc('ps', '-q', 'web').decode().strip()
+            if re.fullmatch('[0-9a-f]{12,64}', identifier):
+                container = json.loads(run(self.docker + ['inspect', identifier], self.log))[0]
+                actual_source = container['Config'].get('Labels', {}).get('org.opencontainers.image.revision')
+                expected = json.loads(run(self.docker + ['image', 'inspect', self.plan['images']['app']], self.log))[0]['Id']
+                observed = {'source_commit': actual_source, 'image': container['Image'],
+                            'matches_plan': container['Image'] == expected and actual_source == self.plan['requested_source_commit']}
+                ready = ready and observed['matches_plan']
+        except (OSError, ValueError, RuntimeError):
+            ready = False
+        from scripts.g4_offsite import offsite_status
+        try:
+            observation = self.operations()
+        except (OSError, ValueError, RuntimeError):
+            observation = {'state': 'UNKNOWN', 'code': 3, 'reason': 'OBSERVER_UNAVAILABLE'}
+        ready = ready and observed.get('matches_plan', False)
         return {'status': 'ORIGIN_READY' if ready and tls else 'DEGRADED',
                 'project': self.plan['project'], 'source_commit': self.plan['requested_source_commit'],
                 'rehearsal': self.rehearsal, 'read_only': False, 'services': states,
                 'origin_trusted_https': tls, 'public_acceptance_executed': False,
-                'course_online_readiness': 'NOT_RUN', 'last_server_backup': copies[-1]['created_at'] if copies else None}
+                'course_online_readiness': 'NOT_RUN', 'last_server_backup': copies[-1]['created_at'] if copies else None,
+                'observed_application': observed, 'database_release': release,
+                'operations': observation, 'offsite_backup': offsite_status(self.bundle)}
+
+    def upgrade(self, artifacts, recipient_file, expected_current, age='age'):
+        from scripts.g4_release import change_release
+        return change_release(self, artifacts=artifacts, recipient_file=recipient_file,
+                              expected_current=expected_current, age=age)
+
+    def rollback(self, source, recipient_file, expected_current, age='age'):
+        from scripts.g4_release import change_release
+        return change_release(self, to_source=source, recipient_file=recipient_file,
+                              expected_current=expected_current, age=age)
 
     def operations(self):
         if self.plan.get('operations_schema') != 1:
@@ -300,6 +335,14 @@ class Course:
             raise
         result['host_event'] = backup_event(self.bundle, self.plan['project'],
                                            self.plan['requested_source_commit'], True)
+        config = self.bundle / 'private/offsite.json'
+        if config.exists():
+            interpreter = self.bundle.parent / 'operations-venv/bin/python'
+            if not interpreter.is_file():
+                raise RuntimeError('The private host COS adapter has not been installed.')
+            result['off_host_copy'] = json.loads(run([str(interpreter), str(ROOT / 'scripts/g4_offsite.py'),
+                '--config', str(config), 'upload', '--bundle', str(self.bundle),
+                '--backup-name', result['name']], self.log, timeout=600))
         return result
 
     def _backup(self, recipient_file, age='age'):
@@ -361,7 +404,8 @@ class Course:
             os.chmod(pending, 0o600)
             os.replace(pending, folder / name)
             record = {'name': name, 'project': self.plan['project'], 'created_at': meta['created_at'],
-                      'size': (folder / name).stat().st_size, 'sha256': digest(folder / name)}
+                      'size': (folder / name).stat().st_size, 'sha256': digest(folder / name),
+                      'source_commit': meta['source_commit'], 'app_image': meta['images']['app']}
             atomic_text(folder / (name + '.json'), json.dumps(record) + '\n')
             book.record('created', artifact(meta, record))
             prune_backups(folder, self.plan['project'], 7)
@@ -715,6 +759,15 @@ def main():
     backup = sub.add_parser('backup')
     backup.add_argument('--recipient-file', required=True)
     backup.add_argument('--age', default='age')
+    for action in ('upgrade', 'rollback'):
+        command = sub.add_parser(action)
+        command.add_argument('--recipient-file', required=True)
+        command.add_argument('--expected-current-commit', required=True)
+        command.add_argument('--age', default='age')
+        if action == 'upgrade':
+            command.add_argument('--artifacts', required=True)
+        else:
+            command.add_argument('--to-source', required=True)
     restore = sub.add_parser('restore')
     restore.add_argument('--backup-file', required=True)
     restore.add_argument('--identity-file', required=True)
@@ -733,6 +786,19 @@ def main():
     jobs = sub.add_parser('install-server-jobs')
     jobs.add_argument('--recipient-file', required=True)
     args = parser.parse_args()
+    # Server timers keep their original entrypoint. Forward to the retained,
+    # hash-verified controller belonging to the latest installed tool release.
+    plan_path = Path(args.output) / 'plan.json'
+    if args.action != 'build' and plan_path.is_file():
+        controller = json.loads(private_file(plan_path).read_text()).get('controller_source_commit')
+        if controller:
+            if not re.fullmatch('[0-9a-f]{40}', controller):
+                raise ValueError('Invalid retained release controller.')
+            script = plan_path.parent.parent / 'release_sources' / controller / 'scripts/g4_course.py'
+            if script.resolve() != Path(__file__).resolve():
+                if not script.is_file():
+                    raise ValueError('Retained release controller is missing.')
+                os.execv(sys.executable, [sys.executable, str(script)] + sys.argv[1:])
     # Explicit flags win; ambient Compose profiles/files must not activate maintenance.
     for key in tuple(os.environ):
         if key.startswith('COMPOSE_'):
@@ -751,7 +817,12 @@ def main():
         elif args.action == 'recovery-status':
             result = course.recovery_status()
         elif args.action == 'backup':
-            result = course.backup(args.recipient_file, args.age)
+            with exclusive(course.bundle / 'private/release.lock'):
+                result = course.backup(args.recipient_file, args.age)
+        elif args.action == 'upgrade':
+            result = course.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age)
+        elif args.action == 'rollback':
+            result = course.rollback(args.to_source, args.recipient_file, args.expected_current_commit, args.age)
         elif args.action == 'restore':
             result = course.restore(args.backup_file, args.identity_file, args.age)
         elif args.action == 'restore-verified-dump':

@@ -6,7 +6,7 @@ import threading
 import time
 from django.core.management.base import BaseCommand, CommandError
 from django.db import close_old_connections
-from adc_core.operations import advance, clock, fresh_state, identity, status
+from adc_core.operations import advance, clock, clock_discontinuity, fresh_state, identity, status
 from adc_core.operations_sampling import collect_sample
 from adc_core.operations_store import PrivateStore
 
@@ -46,6 +46,14 @@ class Command(BaseCommand):
                             state = store.read('monitor.json')
                         except FileNotFoundError:
                             state = fresh_state(target, now)
+                        if clock_discontinuity(state, target, now):
+                            # Host suspend/clock jumps must not make the observer
+                            # fail forever. Preserve its complete prior state and
+                            # incidents, then require two fresh successful samples.
+                            store.archive_monitor()
+                            state = fresh_state(target, now)
+                            self.stdout.write(json.dumps({'v': 1, 'event': 'operations.clock_discontinuity',
+                                'state': 'UNKNOWN', 'prior_observation_archived': True}))
                         state = advance(state, sample, target, now)
                         store.write('monitor.json', state)
                     result = status(state, target, now)

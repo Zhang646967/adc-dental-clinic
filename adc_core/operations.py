@@ -165,6 +165,20 @@ def fresh_state(target, now):
             'sequence': 0, 'sample': None, 'conditions': {}, 'incidents': [], 'pruned_incidents': 0}
 
 
+def clock_discontinuity(state, target, now):
+    """Identify only a forward wall/monotonic gap in an otherwise valid state.
+
+    A collector may archive this observation and start UNKNOWN. A foreign,
+    malformed, backwards or different-boot record is not a repair candidate.
+    """
+    verify_state(state, target)
+    old = (state.get('sample') or {}).get('at', state['at'])
+    if not valid_clock(old) or not valid_clock(now) or old['boot'] != now['boot']:
+        return False
+    wall, mono = now['utc'] - old['utc'], now['mono'] - old['mono']
+    return wall > 0 and mono > 0 and abs(wall - mono) > 300
+
+
 def verify_state(state, target):
     verify_record(state, target, 'monitor')
     if (set(state) != {'v','kind','identity','at','run','sequence','sample','conditions','incidents','pruned_incidents'} or

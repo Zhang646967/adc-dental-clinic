@@ -57,7 +57,10 @@ class Remote:
                         '-o', 'IdentitiesOnly=yes', '-o', 'ConnectTimeout=10',
                         '-o', 'UserKnownHostsFile=' + str(hosts), '-i', str(key)]
         self.target = c['user'] + '@' + c['host']
-        self.folder = '/srv/adc-course/releases/' + self.plan['requested_source_commit'] + '-' + self.plan['project']
+        initial = self.plan.get('initial_source_commit', self.plan['requested_source_commit'])
+        if not re.fullmatch('[0-9a-f]{40}', initial):
+            raise ValueError('Invalid initial deployment source.')
+        self.folder = '/srv/adc-course/releases/' + initial + '-' + self.plan['project']
         self.remote_bundle = self.folder + '/.g4'
 
     def ssh(self, args, *, timeout=180):
@@ -86,7 +89,7 @@ class Remote:
             '--output', self.remote_bundle, '--docker', '/usr/bin/docker', '--context', 'default',
             action] + list(extra), timeout=timeout))
 
-    def publish(self, artifacts, recipient_file, restore_backup=None, identity_file=None, age='age'):
+    def publish(self, artifacts, recipient_file, restore_backup=None, identity_file=None, age='age', offsite_config=None):
         artifacts = private_directory(artifacts)
         metadata = json.loads(private_file(artifacts / 'build.json').read_text())
         recipient = private_file(recipient_file).read_text().strip()
@@ -204,10 +207,68 @@ class Remote:
                       self.remote_bundle + '/private/demo-credentials.txt', download=True)
         self.copy(self.bundle / 'private/COURSE_ACCESS.md',
                   self.remote_bundle + '/private/COURSE_ACCESS.md', download=True)
+        if offsite_config:
+            self.install_offsite(offsite_config)
         self.operation('install-server-jobs', ['--recipient-file', self.remote_bundle + '/private/backup-recipient.txt'])
         self.operation('backup', ['--recipient-file', self.remote_bundle + '/private/backup-recipient.txt'])
         return {'status': result['status'], 'hostname': self.plan['host'],
                 'source_commit': metadata['source_commit'], 'public_acceptance_executed': False}
+
+    def upgrade(self, artifacts, recipient_file, expected_current, age='age'):
+        artifacts = private_directory(artifacts)
+        meta = json.loads(private_file(artifacts / 'build.json').read_text())
+        if meta['architecture'] != 'amd64' or not re.fullmatch('[0-9a-f]{40}', meta['source_commit']):
+            raise ValueError('Use an identified amd64 cloud release.')
+        recipient = private_file(recipient_file).read_text().strip()
+        if not RECIPIENT.fullmatch(recipient):
+            raise ValueError('Only the public recovery recipient is uploaded.')
+        for name, field in [('source.tar', 'source_sha256'), ('application.tar', 'image_archive_sha256')]:
+            if digest(private_file(artifacts / name)) != meta[field]:
+                raise ValueError('Local release archive checksum differs.')
+        target = self.folder + '/artifacts/' + meta['source_commit']
+        self.ssh(['python3', '-c', 'from pathlib import Path;import os,pwd;'
+                  'p=Path(' + repr(target) + ');p.mkdir(mode=0o700,parents=True,exist_ok=True);'
+                  'u=pwd.getpwnam(' + repr(self.config['user']) + ');os.chown(p,u.pw_uid,u.pw_gid)'])
+        for name in ('build.json', 'source.tar', 'application.tar'):
+            self.copy(artifacts / name, target + '/' + name)
+        # The initial deployment controller includes upgrade dispatch. Its path
+        # remains stable even when the active application source is changed.
+        result = self.operation('upgrade', ['--artifacts', target, '--recipient-file',
+            self.remote_bundle + '/private/backup-recipient.txt', '--expected-current-commit', expected_current,
+            '--age', age], timeout=900)
+        from scripts.g4_release import update_plan
+        self.plan = update_plan(self.bundle, meta['source_commit'], meta['app_image'], controller=meta['source_commit'])
+        return result
+
+    def rollback(self, source, recipient_file, expected_current, age='age'):
+        recipient = private_file(recipient_file).read_text().strip()
+        if not RECIPIENT.fullmatch(recipient):
+            raise ValueError('Use the existing public recovery recipient.')
+        from scripts.g4_release import update_plan, versions
+        image = versions(self.plan).get(source)
+        if not image:
+            raise ValueError('Rollback source is not in the local accepted deployment history.')
+        result = self.operation('rollback', ['--to-source', source, '--recipient-file',
+            self.remote_bundle + '/private/backup-recipient.txt', '--expected-current-commit', expected_current,
+            '--age', age], timeout=900)
+        self.plan = update_plan(self.bundle, source, image)
+        return result
+
+    def install_offsite(self, config):
+        from scripts.g4_offsite import read_config
+        values = read_config(config)
+        if values['project'] != self.plan['project']:
+            raise ValueError('Object storage configuration belongs to another deployment.')
+        self.ssh(['python3', '-m', 'venv', self.folder + '/operations-venv'], timeout=120)
+        self.ssh([self.folder + '/operations-venv/bin/python', '-m', 'pip', 'install',
+                  '-r', self.folder + '/requirements-operations.txt'], timeout=600)
+        self.copy(private_file(config), self.folder + '/offsite-config.json')
+        self.ssh(['python3', '-c', 'from pathlib import Path;import os;'
+            'p=Path(' + repr(self.folder + '/offsite-config.json') + ');'
+            'q=Path(' + repr(self.remote_bundle + '/private/offsite.json') + ');'
+            'p.replace(q);os.chmod(q,0o600)'])
+        return {'status': 'OFFSITE_CONFIGURED_NOT_VERIFIED', 'retention_daily': 30,
+                'next_action': 'Create and read-back verify an encrypted backup.'}
 
     def sync(self, destination, identity_file, age='age'):
         destination = private_directory(destination)
@@ -250,9 +311,9 @@ class Remote:
                         raise ValueError('Downloaded/cached backup checksum differs.')
                     meta = decrypt_backup(encrypted, identity, work, self.log, age)
                     fact = artifact(meta, row)
+                    from scripts.g4_release import versions
                     if (fact['project'] != self.plan['project'] or
-                            fact['source_commit'] != self.plan['requested_source_commit'] or
-                            fact['app_image'] != self.plan['images']['app']):
+                            versions(self.plan).get(fact['source_commit']) != fact['app_image']):
                         raise ValueError('Downloaded/cached recovery provenance differs.')
                     # Validate clocks/schema before publishing any of the batch.
                     recovery_age(fact['created_at'], utc_now())
@@ -347,6 +408,15 @@ def main():
     publish.add_argument('--identity-file')
     publish.add_argument('--age', default='age')
     publish.add_argument('--trusted-synthetic-copy', action='store_true')
+    publish.add_argument('--offsite-config')
+    for action in ('upgrade', 'rollback'):
+        command = sub.add_parser(action)
+        command.add_argument('--recipient-file', required=True)
+        command.add_argument('--expected-current-commit', required=True)
+        command.add_argument('--age', default='age')
+        command.add_argument('--artifacts' if action == 'upgrade' else '--to-source', required=True)
+    offsite = sub.add_parser('install-offsite')
+    offsite.add_argument('--config-file', required=True)
     for name in ('sync', 'install-mac-job'):
         command = sub.add_parser(name)
         command.add_argument('--destination', required=True)
@@ -367,7 +437,13 @@ def main():
             if args.restore_backup and not args.trusted_synthetic_copy:
                 raise ValueError('Recovery requires the explicit trusted-synthetic-copy flag.')
             result = remote.publish(args.artifacts, args.recipient_file,
-                                    args.restore_backup, args.identity_file, args.age)
+                                    args.restore_backup, args.identity_file, args.age, args.offsite_config)
+        elif args.action == 'upgrade':
+            result = remote.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age)
+        elif args.action == 'rollback':
+            result = remote.rollback(args.to_source, args.recipient_file, args.expected_current_commit, args.age)
+        elif args.action == 'install-offsite':
+            result = remote.install_offsite(args.config_file)
         elif args.action == 'sync':
             result = remote.sync(args.destination, args.identity_file, args.age)
         elif args.action == 'recovery-status':
