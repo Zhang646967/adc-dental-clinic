@@ -1,0 +1,74 @@
+{
+  "mac": {
+    "passed": true,
+    "application_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+    "image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+    "services": {
+      "gateway": {
+        "running": true,
+        "oom_killed": false
+      },
+      "operations": {
+        "running": true,
+        "oom_killed": false
+      },
+      "notification-worker": {
+        "running": true,
+        "oom_killed": false
+      },
+      "web": {
+        "running": true,
+        "oom_killed": false
+      },
+      "db": {
+        "running": true,
+        "oom_killed": false
+      }
+    },
+    "conditions": {
+      "backlog": "HEALTHY",
+      "database": "HEALTHY",
+      "failed_delivery": "HEALTHY",
+      "storage": "HEALTHY",
+      "web": "HEALTHY",
+      "worker": "HEALTHY"
+    },
+    "checked_at_utc": "2026-10-28T14:56:02.120308+00:00"
+  },
+  "teacher": {
+    "passed": true,
+    "application_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+    "image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+    "services": {
+      "gateway": {
+        "running": true,
+        "oom_killed": false
+      },
+      "operations": {
+        "running": true,
+        "oom_killed": false
+      },
+      "notification-worker": {
+        "running": true,
+        "oom_killed": false
+      },
+      "web": {
+        "running": true,
+        "oom_killed": false
+      },
+      "db": {
+        "running": true,
+        "oom_killed": false
+      }
+    },
+    "conditions": {
+      "backlog": "HEALTHY",
+      "database": "HEALTHY",
+      "failed_delivery": "HEALTHY",
+      "storage": "HEALTHY",
+      "web": "HEALTHY",
+      "worker": "HEALTHY"
+    },
+    "checked_at_utc": "2026-10-28T14:56:02.825868+00:00"
+  }
+}

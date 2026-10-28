@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "application_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "all_accepted_application_dependency_client_and_workflow_bytes_unchanged": true,
+  "subsequent_changes": "Only release documents, evidence, formal-report description and integrity declarations; application image remains exact validated commit",
+  "full_application_ci_reused_for_identical_application_bytes": true,
+  "document_ci_does_not_replace_application_ci": true
+}

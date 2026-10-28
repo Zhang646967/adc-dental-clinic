@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "independent_empty_database": true,
+  "same_version_migration_built": true,
+  "old_business_groups": 139,
+  "old_rows_and_passwords_equal": true,
+  "source_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+  "original_database_modified": false,
+  "schema_comparison_limit": "General equivalent-DDL normalization remains outside scope; strict comparator unchanged."
+}

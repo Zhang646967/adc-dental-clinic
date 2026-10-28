@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "source": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+  "from_source": "227b6e94acd42df25ae9c78094664d76c70f48d8",
+  "same_database_container_and_volume": true,
+  "all_original139_groups_retained": true,
+  "successful_patient_write_after_upgrade_retained_through_rollback": true,
+  "private_configuration_and_passwords_preserved": true,
+  "duplicate_upgrade_idempotent": true,
+  "strict_local_https_passed": true,
+  "all_six_health_conditions_fresh": true,
+  "restored_old_database": false,
+  "scope": "Actual isolated local HTTPS/PostgreSQL/Docker; not target cloud or physical device"
+}

@@ -1,0 +1,45 @@
+{
+  "mac": {
+    "passed": true,
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "all_triggers_enabled": true,
+    "all_columns_constraints_indexes_models_and_79_migration_records_match": true,
+    "actual_trigger_definitions_unchanged": true,
+    "er_views": 31
+  },
+  "teacher": {
+    "passed": true,
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "all_triggers_enabled": true,
+    "all_columns_constraints_indexes_models_and_79_migration_records_match": true,
+    "actual_trigger_definitions_unchanged": true,
+    "er_views": 31
+  },
+  "fresh": {
+    "passed": true,
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "all_triggers_enabled": true,
+    "all_columns_constraints_indexes_models_and_79_migration_records_match": true,
+    "actual_trigger_definitions_unchanged": true,
+    "er_views": 31
+  },
+  "restored": {
+    "passed": true,
+    "tables": 142,
+    "foreign_keys": 388,
+    "triggers": 110,
+    "all_triggers_enabled": true,
+    "all_columns_constraints_indexes_models_and_79_migration_records_match": true,
+    "actual_trigger_definitions_unchanged": true,
+    "er_views": 31
+  },
+  "migration_files": 64,
+  "passed": true,
+  "source": "b6a8169ec62a18926b18171b98165a657b205c1d"
+}

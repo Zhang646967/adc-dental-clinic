@@ -1,3 +1,5 @@
+**当前D1已完成上线包准备与本地保护交付。** [部署操作](D1_CLOUD_RELEASE.md) · [准确CI、恢复、安装与待办](evidence_d1/README.md) · [需求到执行追踪](evidence_d1/requirements_trace.md)。服务器未购买，云端与真实平台待验收。下方历史条目保留原日期和范围。
+
 [D1 独立上线准备](D1_CLOUD_RELEASE.md) · [分项演练](evidence_d1/README.md)。
 
 当前P1.5：[患者小程序指南](P15_MINIPROGRAM_GUIDE.md) · [完整画像与业务对齐](P15_PATIENT_ALIGNMENT.md) · [准确CI、实际微信工具、容量、恢复及两套系统交付](evidence_p15/README.md)。正式报告227页、113项业务用例、31幅实际ER；手机实机由用户后续统一验收，真实平台和云端独立保留。

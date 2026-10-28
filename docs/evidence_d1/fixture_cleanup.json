@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "fixture": "rehearsal",
+      "project": "adc_g4_1b55d7bf0018",
+      "services_stopped": true,
+      "volumes_and_archives_retained": true
+    },
+    {
+      "fixture": "probe-restore",
+      "project": "adc_g4_3aa1d0ba2400",
+      "services_stopped": true,
+      "volumes_and_archives_retained": true
+    },
+    {
+      "fixture": "empty-recovery",
+      "project": "adc_g4_71ac20073893",
+      "services_stopped": true,
+      "volumes_and_archives_retained": true
+    },
+    {
+      "fixture": "final-fresh",
+      "project": "adc_g4_d86cae13a4e5",
+      "services_stopped": true,
+      "volumes_and_archives_retained": true
+    }
+  ],
+  "original_and_teacher_not_stopped": true
+}

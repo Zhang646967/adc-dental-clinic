@@ -1,0 +1,18 @@
+{
+  "mac": {
+    "measured_clock_gap_seconds": 37186,
+    "old_observation_encrypted_and_fully_decrypted": true,
+    "archive_sha256": "7d410b283734f7c176cf49ed9853dfd1fad662f50b5ef4b0264484fd95203a91",
+    "old_observation_retained_by_normal_reset": true,
+    "business_data_changed": false,
+    "prior_root_cause_history_retained": true
+  },
+  "teacher": {
+    "measured_clock_gap_seconds": 37186,
+    "old_observation_encrypted_and_fully_decrypted": true,
+    "archive_sha256": "166dec4c7b653da532938d8a1c49afda7d606b9a42e77fc1831765f81fe87819",
+    "old_observation_retained_by_normal_reset": true,
+    "business_data_changed": false,
+    "prior_root_cause_history_retained": true
+  }
+}

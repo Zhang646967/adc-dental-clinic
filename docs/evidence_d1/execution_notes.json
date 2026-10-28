@@ -1,0 +1,20 @@
+{
+  "clock_discontinuity": "Actual same-source wall/monotonic gap37186seconds measured on both old observers; prior files encrypted, ordinary reset followed by fresh healthy samples; new automatic collector recovery covered by rule and PG tests; historical root-cause verdict UNDETERMINED retained.",
+  "raw_full_dump_restore": {
+    "status": "STRICT_COMPARISON_REFUSED_RUNTIME_STOPPED",
+    "final_path": "Exact same-version migration-built schema strictly compared before data import, full facts compared after import",
+    "known_general_equivalent_ddl_limit": "RETAINED_NOT_WEAKENED"
+  },
+  "local_environment": {
+    "first_network_attempt": "Docker default address pool exhausted; used explicitly isolated nonoverlapping rehearsal-only CIDRs, no old networks deleted",
+    "tls_fixture": "Reissued local CA/leaf with AKI/SKI for Python3.15 strict verification; no certificate check disabled",
+    "build": "First standard pip transport interrupted; unchanged committed Dockerfile built via existing host CONNECT proxy with TLS validation retained; both architecture artifacts identify exact source"
+  },
+  "temporary_public": {
+    "first_rebind": "Provider429; later bounded retry registered",
+    "first_full_browser_matrix": "Transport socket hangup at a read-only services request; retained, explicit independent retest tracked separately"
+  },
+  "legacy_original_runtime": "Original loopback RC uses its historical owner/superuser connection; preserved rather than silently changing70 private settings. Never used as cloud initializer. New course20 and teacher identities pass restricted runtime check.",
+  "old_windows_recovery": "UNRESOLVED",
+  "historical_monitor_unknown_and_incident_undetermined": "RETAINED"
+}

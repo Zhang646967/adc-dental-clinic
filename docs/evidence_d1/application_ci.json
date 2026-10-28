@@ -1,0 +1,10 @@
+{
+  "status": "completed",
+  "conclusion": "success",
+  "tested_source_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "exact_checkout_recorded_in_log": true,
+  "rules": 1156,
+  "postgresql_cases": 2096,
+  "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40694177966",
+  "documentation_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40694177825"
+}

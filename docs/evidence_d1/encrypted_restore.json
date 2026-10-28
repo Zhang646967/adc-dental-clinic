@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "source": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+  "tables": 142,
+  "rows": 9755,
+  "restore_seconds": 32.751,
+  "source_and_target_volumes_independent": true,
+  "schema_mode": "migration-built",
+  "strict_full_row_binary_and_schema_comparison": true,
+  "all_15_archive_members_authenticated": true,
+  "configuration_and_private_account_bytes_verified": true,
+  "old_observations_retained_not_replayed": true,
+  "unfinished_authentication_invalidated": true,
+  "fresh_monitor_healthy": true,
+  "actual_origin_https_passed": true,
+  "live_cos": "NOT_RUN",
+  "object_transport": "In-memory SDK double; real age ciphertext readback/download and actual PostgreSQL restore",
+  "offsite_general_status": "NOT_CONFIGURED",
+  "cloud": "NOT_RUN",
+  "general_equivalent_ddl_comparator_limit_retained": true
+}

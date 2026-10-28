@@ -1,0 +1,22 @@
+{
+  "mac": {
+    "passed": true,
+    "source": "b6a8169ec62a18926b18171b98165a657b205c1d",
+    "database_full_decryption_and_inventory_verified": true,
+    "configuration_encryption_and_full_decryption_verified": true,
+    "configuration_files": 70,
+    "backup_sha256": "655dbaa98cde728e57c89a2e65d489ed44099bba3554861cf7c76d3d0b2d3fd5",
+    "configuration_sha256": "bea1ca810372501a9db666111add2dfc56f31a4fe34489e47b4440f42d067b85",
+    "private_keys_not_uploaded": true
+  },
+  "teacher": {
+    "passed": true,
+    "source": "b6a8169ec62a18926b18171b98165a657b205c1d",
+    "database_full_decryption_and_inventory_verified": true,
+    "configuration_encryption_and_full_decryption_verified": true,
+    "configuration_files": 13,
+    "backup_sha256": "e074f8ce783719f111be88177275c2af0858224dc25a05b93127e52f7d45e982",
+    "configuration_sha256": "b9ad666673d270914547f9a6324158e0b11fba46be3666177b623ea6aed7f4fd",
+    "private_keys_not_uploaded": true
+  }
+}

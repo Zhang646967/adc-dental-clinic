@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "source": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+  "project": "adc_g4_de62b0730edd",
+  "port": 18191,
+  "business_groups_preserved": 139,
+  "all_original_rows_and_password_hashes_preserved": true,
+  "database_container_and_volume_preserved": true,
+  "private_configuration_files_checked": 13,
+  "private_settings_unchanged_except_release_identity": true,
+  "old_observations_encrypted_and_fully_decrypted": true,
+  "new_six_conditions": "HEALTHY",
+  "no_new_migrations_or_tables": true,
+  "rc_tag_preserved": true,
+  "cloud_acceptance": "NOT_RUN",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/40694177966",
+  "cloud_owner_runtime_separation": "Verified separately on the independent course bundle",
+  "post_update_temporary_hostname_rebound": true,
+  "explicit_additional_config_change": "ADC_PUBLIC_HOST, plan.host, rendered gateway Host; all account passwords and business facts retained"
+}

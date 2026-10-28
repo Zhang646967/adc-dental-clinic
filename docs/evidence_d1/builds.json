@@ -1,0 +1,18 @@
+{
+  "arm64": {
+    "source_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+    "architecture": "arm64",
+    "app_image": "sha256:6c286622b0815153be5bddbcbc6b4bacef385043f0d5a3da1ce43997db34408a",
+    "source_sha256": "bbc4ac17eae56d53e334cbe39562f53a8f104a78181e17c49b78cb910a414697",
+    "image_archive_sha256": "03c257b9b8ced3ec63983405084d2d165766529b052e198bd6120b9604bd4948",
+    "build_transport": "Existing local HTTP CONNECT proxy, target HTTPS verification retained; unchanged committed Dockerfile and source archive"
+  },
+  "amd64": {
+    "source_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+    "architecture": "amd64",
+    "app_image": "sha256:1dcab0b8e8724c69f82b8387a3fe147247627671d8d61b33aa955e43aa149b15",
+    "source_sha256": "bbc4ac17eae56d53e334cbe39562f53a8f104a78181e17c49b78cb910a414697",
+    "image_archive_sha256": "93401cce211906d0fa3f7c931077c57e09337ca912263cb1041b7513dadd07df",
+    "build_transport": "Existing local HTTP CONNECT proxy, target HTTPS verification retained; unchanged committed Dockerfile and source archive"
+  }
+}

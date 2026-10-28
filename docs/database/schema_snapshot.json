@@ -38803,7 +38803,7 @@
       "name": "0003_workspacecontext_login_channel_and_more"
     }
   ],
-  "observed_on": "2026-10-26",
-  "application_commit": "793a3ef61e19501d8f9a06e9a184293e49173645",
-  "observed_scope": "Read-only metadata from the exact P1 image on independent PostgreSQL17 with64application migrations. No business rows or private configuration exported."
+  "observed_on": "2026-10-28",
+  "application_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "observed_scope": "D1 four-database read-only equality check: original, independent teacher, fresh final-image and encrypted independent recovery; all64 migration bytes unchanged"
 }

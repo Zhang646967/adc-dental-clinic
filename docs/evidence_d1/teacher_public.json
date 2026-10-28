@@ -1,0 +1,14 @@
+{
+  "url": "https://keyboards-racks-supposed-myself.trycloudflare.com",
+  "source": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "existing_synthetic_teacher_database": true,
+  "original_database_exposed": false,
+  "independent_cloud": false,
+  "external_https_verification": "PASSED_VIA_EXISTING_NETWORK_PROXY",
+  "public_certificate_validation": true,
+  "mainland_without_proxy": "NOT_RUN",
+  "scope": "Existing independent synthetic teacher database through a temporary Mac tunnel; normal HTTPS and actual seven-role browser login via configured network proxy; not a fixed cloud deployment",
+  "full_readonly_browser_matrix": "PASSED_ON_EXPLICIT_RETEST",
+  "public_browser_checks": 60,
+  "seven_role_browser_logins": 7
+}
