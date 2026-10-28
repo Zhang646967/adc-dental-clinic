@@ -165,12 +165,12 @@ class CourseSafetyTests(unittest.TestCase):
         count = []
         def bounded_next(archive):
             count.append(1)
-            if len(count) > 16:  # tarfile's constructor may read its first header.
+            if len(count) > 17:  # 15members + one refusal header + tarfile's initial read.
                 raise AssertionError('Parser continued after the accepted bound.')
             return real_next(archive)
         with patch.object(tarfile.TarFile, 'next', bounded_next), self.assertRaises(ValueError):
             self.decrypt(plain)
-        self.assertLessEqual(len(count), 16)
+        self.assertLessEqual(len(count), 17)
 
     def test_compressed_wrapper_is_not_accepted_as_the_plain_backup_format(self):
         import gzip

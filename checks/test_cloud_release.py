@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 
 from scripts.g4_prepare import prepare, inspect_bundle, read_env
 from scripts.g4_release import change_release, update_plan, versions
+from scripts.g4_remote import Remote
 
 
 class CloudReleaseTests(unittest.TestCase):
@@ -33,6 +34,27 @@ class CloudReleaseTests(unittest.TestCase):
             p.chmod(0o600)
         c.status.return_value = {'status': 'ORIGIN_READY'}
         return c
+
+    def test_remote_maintenance_requires_the_retained_recovery_recipient(self):
+        recipient = 'age1' + 'q' * 58
+        path = self.bundle / 'private/recipient.txt'
+        path.write_text(recipient + '\n')
+        path.chmod(0o600)
+        remote = object.__new__(Remote)
+        remote.remote_bundle = '/srv/adc-course/releases/unit/.g4'
+        remote.ssh = Mock(return_value=(recipient + '\n').encode())
+        remote.check_backup_recipient(path)
+        remote.ssh.assert_called_once_with(['cat', '--', remote.remote_bundle + '/private/backup-recipient.txt'])
+
+    def test_remote_recipient_mismatch_stops_before_upload_or_maintenance(self):
+        path = self.bundle / 'private/recipient.txt'
+        path.write_text('age1' + 'q' * 58 + '\n')
+        path.chmod(0o600)
+        remote = object.__new__(Remote)
+        remote.remote_bundle = '/srv/adc-course/releases/unit/.g4'
+        remote.ssh = Mock(return_value=('age1' + 'p' * 58 + '\n').encode())
+        with self.assertRaisesRegex(ValueError, 'differs from the server'):
+            remote.rollback('a' * 40, path, 'b' * 40)
 
     def test_complete_dataset_has_separate_live_auth_and_memory_budget(self):
         runtime = read_env(self.bundle / 'private/runtime.env')
@@ -136,3 +158,32 @@ class CloudReleaseTests(unittest.TestCase):
             with self.assertRaises(BlockingIOError):
                 change_release(c, to_source=self.old, recipient_file='public', expected_current=self.old)
         c.dc.assert_not_called()
+
+    def interrupted_deploy(self):
+        from scripts.g4_course import Course
+        with patch('scripts.g4_course.docker_command', return_value=['docker', '--context', 'unit']):
+            c = Course(self.bundle, context='unit', rehearsal=True)
+        phase = {'project': self.plan['project'], 'source_commit': self.old, 'phase': 'BOOTSTRAP_STARTED'}
+        for name, raw in [('deployment-phase.json', json.dumps(phase)), ('demo-credentials.txt', 'private captured credentials')]:
+            p = self.bundle / 'private' / name
+            p.write_text(raw)
+            p.chmod(0o600)
+        c.render, c.images, c.start_runtime, c.status = Mock(), Mock(), Mock(), Mock(return_value={'status': 'ORIGIN_READY'})
+        return c
+
+    def test_lost_success_reply_is_reconciled_with_status_only_not_reseeded(self):
+        c = self.interrupted_deploy()
+        c.dc = Mock(return_value=b'{"status":"ALREADY_PREPARED"}')
+        self.assertEqual(c.deploy()['status'], 'ORIGIN_READY')
+        self.assertIn('--status-only', c.dc.call_args.args)
+        c.dc.assert_called_once()
+        c.start_runtime.assert_called_once()
+
+    def test_partial_initialization_is_not_retried_as_a_new_seed(self):
+        c = self.interrupted_deploy()
+        c.dc = Mock(return_value=b'{"status":"NOT_PREPARED"}')
+        with self.assertRaises(ValueError):
+            c.deploy()
+        c.start_runtime.assert_not_called()
+        phase = json.loads((self.bundle / 'private/deployment-phase.json').read_text())
+        self.assertEqual(phase['phase'], 'BOOTSTRAP_STARTED')

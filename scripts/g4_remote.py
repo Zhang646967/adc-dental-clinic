@@ -189,7 +189,8 @@ class Remote:
             result = self.operation('restore-verified-dump', [
                 '--dump-file', self.remote_bundle + '/private/database.dump',
                 '--manifest-file', self.remote_bundle + '/private/archive.json',
-                '--trusted-synthetic-copy'])
+                '--trusted-synthetic-copy', '--schema-mode',
+                'migration-built' if meta.get('format') == 2 else 'pg-dump'])
             if meta.get('format') == 2:
                 proof = result.get('restore')
                 validate_restore(proof, meta['project'])
@@ -214,14 +215,20 @@ class Remote:
         return {'status': result['status'], 'hostname': self.plan['host'],
                 'source_commit': metadata['source_commit'], 'public_acceptance_executed': False}
 
+    def check_backup_recipient(self, recipient_file):
+        recipient = private_file(recipient_file).read_text().strip()
+        if not RECIPIENT.fullmatch(recipient):
+            raise ValueError('Use the existing public recovery recipient.')
+        retained = self.ssh(['cat', '--', self.remote_bundle + '/private/backup-recipient.txt']).decode().strip()
+        if retained != recipient:
+            raise ValueError('Recovery recipient differs from the server; verify the recovery key before maintenance.')
+
     def upgrade(self, artifacts, recipient_file, expected_current, age='age'):
         artifacts = private_directory(artifacts)
         meta = json.loads(private_file(artifacts / 'build.json').read_text())
         if meta['architecture'] != 'amd64' or not re.fullmatch('[0-9a-f]{40}', meta['source_commit']):
             raise ValueError('Use an identified amd64 cloud release.')
-        recipient = private_file(recipient_file).read_text().strip()
-        if not RECIPIENT.fullmatch(recipient):
-            raise ValueError('Only the public recovery recipient is uploaded.')
+        self.check_backup_recipient(recipient_file)
         for name, field in [('source.tar', 'source_sha256'), ('application.tar', 'image_archive_sha256')]:
             if digest(private_file(artifacts / name)) != meta[field]:
                 raise ValueError('Local release archive checksum differs.')
@@ -241,9 +248,7 @@ class Remote:
         return result
 
     def rollback(self, source, recipient_file, expected_current, age='age'):
-        recipient = private_file(recipient_file).read_text().strip()
-        if not RECIPIENT.fullmatch(recipient):
-            raise ValueError('Use the existing public recovery recipient.')
+        self.check_backup_recipient(recipient_file)
         from scripts.g4_release import update_plan, versions
         image = versions(self.plan).get(source)
         if not image:
@@ -259,6 +264,7 @@ class Remote:
         values = read_config(config)
         if values['project'] != self.plan['project']:
             raise ValueError('Object storage configuration belongs to another deployment.')
+        self.ssh(['apt-get', 'install', '-y', '--no-install-recommends', 'gcc', 'python3-dev'], timeout=600)
         self.ssh(['python3', '-m', 'venv', self.folder + '/operations-venv'], timeout=120)
         self.ssh([self.folder + '/operations-venv/bin/python', '-m', 'pip', 'install',
                   '-r', self.folder + '/requirements-operations.txt'], timeout=600)

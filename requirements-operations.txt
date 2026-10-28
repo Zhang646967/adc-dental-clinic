@@ -1,2 +1,11 @@
-# Optional host-only COS adapter. The clinical web/worker image does not need it.
+# Optional host-only COS adapter; verified resolver set. Not installed in the clinical web/worker image.
+certifi==2026.10.23
+charset-normalizer==3.5.2
 cos-python-sdk-v5==1.9.44
+crcmod==1.7
+idna==3.20
+pycryptodome==4.2.0
+requests==2.34.2
+six==1.17.0
+urllib3==2.8.0
+xmltodict==1.0.4

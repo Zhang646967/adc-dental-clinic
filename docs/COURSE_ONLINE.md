@@ -1,3 +1,5 @@
+当前D1准备版使用完整二十店资料、广州2核4GB及独立域名备案，见[当前部署与升级、异地备份指南](D1_CLOUD_RELEASE.md)。真实云端与微信验收尚未执行；下方原阶段的香港2GB、免费域名及仅依赖本机下载的方案保留为历史背景。
+
 # Course online release（课程上线版）
 
 Independent hosting → explicit business operations → encrypted recovery copies
@@ -47,7 +49,7 @@ nginx:stable-alpine by digest, selecting amd64 images on the cloud host.
 mkdir -p .course-private/cloud
 python3 scripts/g4_prepare.py prepare \
   --output .course-private/cloud/.g4 --mode direct_tls \
-  --access-mode course-writable --bind-ip 0.0.0.0 \
+  --access-mode course-writable --dataset course-20 --bind-ip 0.0.0.0 \
   --host YOUR_OWNED_HOSTNAME --source-commit FULL_TESTED_COMMIT \
   --app-image IMMUTABLE_APP_ID \
   --db-image postgres:17@sha256:VERIFIED_DIGEST \

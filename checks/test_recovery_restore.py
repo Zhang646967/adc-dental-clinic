@@ -118,6 +118,23 @@ class IndependentRestoreGateTests(unittest.TestCase):
         self.assertEqual(result['business_comparison'], 'PASSED')
         self.assertFalse((self.root/'recovery/receipts.json').exists())
 
+    def test_migration_built_recovery_rechecks_exact_schema_before_data_import(self):
+        course, dump, meta, expected = self.materials()
+        built = deepcopy(expected)
+        built['tables']['public.finance_statementbatch']['schema_sha256'] = 'f' * 64
+        with patch('scripts.g4_course.run', return_value=json.dumps({'facts': built}).encode()):
+            with self.assertRaisesRegex(ValueError, 'schema differs'):
+                course.restore_decrypted(dump, meta, schema_mode='migration-built')
+        course.start_runtime.assert_not_called()
+        self.assertFalse(any('pg_restore' in str(c) or 'TRUNCATE' in str(c) for c in course.dc.call_args_list))
+
+    def test_migration_built_route_retains_full_facts_comparison(self):
+        course, dump, meta, expected = self.materials()
+        with patch('scripts.g4_course.run', return_value=json.dumps({'facts': expected}).encode()):
+            result = course.restore_decrypted(dump, meta, schema_mode='migration-built')
+        self.assertEqual(result['business_comparison'], 'PASSED')
+        self.assertTrue(any('--data-only --disable-triggers' in str(c) for c in course.dc.call_args_list))
+
     def test_running_worker_blocks_even_if_web_stopped(self):
         course, dump, meta, _ = self.materials()
         course.dc.return_value = b'db\nnotification-worker\n'

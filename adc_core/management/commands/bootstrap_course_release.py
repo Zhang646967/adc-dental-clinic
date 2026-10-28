@@ -21,10 +21,20 @@ EVENT = 'COURSE_RELEASE_PREPARED'
 class Command(BaseCommand):
     help = 'Prepare the complete synthetic twenty-clinic course release in an empty database.'
 
+    def add_arguments(self, parser):
+        parser.add_argument('--status-only', action='store_true')
+
     def handle(self, *args, **options):
-        if (os.environ.get('ADC_RC_SYNTHETIC') != '1' or not settings.ADC_CLINICAL_SYNTHETIC
+        if (os.environ.get('ADC_G4_MAINTENANCE') != '1' or
+                os.environ.get('ADC_RC_SYNTHETIC') != '1' or not settings.ADC_CLINICAL_SYNTHETIC
                 or settings.ADC_READ_ONLY or connection.settings_dict['NAME'] != 'adc_rc_demo'):
             raise CommandError('Explicit writable adc_rc_demo synthetic course database required.')
+        if options.get('status_only'):
+            previous = AuditEvent.objects.filter(event_type=EVENT).first()
+            if not previous:
+                raise CommandError('Course initialization is not recorded complete; preserve partial progress.')
+            self.stdout.write(json.dumps({'status': 'ALREADY_PREPARED', **previous.change_summary}))
+            return
         # Serialize the whole initializer, including the completion check. Each
         # owned command retains its own transaction and append-only audit.
         with connection.cursor() as cursor:
@@ -60,6 +70,7 @@ class Command(BaseCommand):
         # Emit immediately into the operator's redirected file, so an interrupted
         # catalogue preparation does not lose the already committed passwords.
         self.stdout.write(capture.getvalue())
+        self.stdout.flush()
         technical = UserAccount.objects.get(username='tech_demo')
         technical._adc_workspace = WorkspaceContext.objects.create(
             user=technical, role='SYSADMIN', login_channel='STAFF')
@@ -83,6 +94,7 @@ class Command(BaseCommand):
         passwords = {name: secrets.token_urlsafe(24) for name in names}
         for name, value in passwords.items():
             self.stdout.write(f'LOCAL ONLY | {name} | {value}')
+        self.stdout.flush()
         reviewer = create_account(actor=technical, username='p1_finance_review',
             password=passwords['p1_finance_review'], operator_password=password,
             reason='课程独立财务复核账号')

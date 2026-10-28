@@ -10,6 +10,8 @@ on:
       - 'AGENTS.md'
       - 'RELEASE_CURRENT.md'
       - 'UPDATE_MANIFEST.json'
+      - 'CHECKSUMS.sha256'
+      - 'clients/wechat/README.md'
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -18,6 +20,8 @@ on:
       - 'AGENTS.md'
       - 'RELEASE_CURRENT.md'
       - 'UPDATE_MANIFEST.json'
+      - 'CHECKSUMS.sha256'
+      - 'clients/wechat/README.md'
   workflow_dispatch:
     inputs:
       source_commit:

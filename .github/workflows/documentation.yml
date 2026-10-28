@@ -16,4 +16,4 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Verify declared source and report files
-        run: python3 scripts/verify_update.py
+        run: python3 scripts/verify_update.py --archive

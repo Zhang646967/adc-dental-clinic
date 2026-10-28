@@ -37,6 +37,7 @@ from scripts.recovery_observations import validate as validate_observations, MAX
 BACKUP_NAME = re.compile(r'backup-[0-9]{8}T[0-9]{12}Z-adc_g4_[0-9a-f]{12}\.tar\.age')
 RECIPIENT = re.compile(r'age1[0-9a-z]{58}')
 MAX_BACKUP_BYTES = 512 * 1024 * 1024
+MAX_BACKUP_MEMBERS = 15  # Existing14 plus optional encrypted host-only COS configuration.
 
 
 def private_file(path):
@@ -207,6 +208,21 @@ class Course:
             return self.status()
         if phase.exists():
             recorded = json.loads(private_file(phase).read_text())
+            if (recorded.get('project') == self.plan['project'] and
+                    recorded.get('source_commit') == self.plan['requested_source_commit'] and
+                    recorded.get('phase') == 'BOOTSTRAP_STARTED' and self.plan.get('dataset') == 'course-20'):
+                # An SSH/client disconnect can lose the final response after a
+                # successful initializer. Read its immutable completion event;
+                # never run the seed again to infer whether it completed.
+                credentials = private_file(self.bundle / 'private/demo-credentials.txt')
+                if not credentials.stat().st_size:
+                    raise ValueError('Private initial credentials are missing; preserve initialization progress.')
+                result = json.loads(self.dc('--profile', 'maintenance', 'run', '--rm', '--no-deps', 'bootstrap',
+                    'python', 'manage.py', 'bootstrap_course_release', '--status-only', timeout=30))
+                if result.get('status') != 'ALREADY_PREPARED':
+                    raise ValueError('Course initialization completion has not been verified.')
+                recorded['phase'] = 'BOOTSTRAP_COMPLETE'
+                atomic_text(phase, json.dumps(recorded) + '\n')
             if (recorded.get('project') != self.plan['project'] or
                     recorded.get('source_commit') != self.plan['requested_source_commit'] or
                     recorded.get('phase') != 'BOOTSTRAP_COMPLETE'):
@@ -226,7 +242,8 @@ class Course:
         credentials = self.bundle / 'private/demo-credentials.txt'
         with credentials.open('xb') as stream:
             os.fchmod(stream.fileno(), 0o600)
-            self.dc('--profile', 'maintenance', 'run', '--rm', 'bootstrap', output_file=stream, timeout=180)
+            self.dc('--profile', 'maintenance', 'run', '--rm', 'bootstrap', output_file=stream,
+                    timeout=900 if self.plan.get('dataset') == 'course-20' else 180)
         atomic_text(phase, json.dumps(identity | {'phase': 'BOOTSTRAP_COMPLETE'}) + '\n')
         self.start_runtime()
         atomic_text(marker, json.dumps({'project': self.plan['project'],
@@ -300,6 +317,8 @@ class Course:
         ready = ready and observed.get('matches_plan', False)
         return {'status': 'ORIGIN_READY' if ready and tls else 'DEGRADED',
                 'project': self.plan['project'], 'source_commit': self.plan['requested_source_commit'],
+                'controller_source_commit': self.plan.get('controller_source_commit',
+                    self.plan.get('initial_source_commit', self.plan['requested_source_commit'])),
                 'rehearsal': self.rehearsal, 'read_only': False, 'services': states,
                 'origin_trusted_https': tls, 'public_acceptance_executed': False,
                 'course_online_readiness': 'NOT_RUN', 'last_server_backup': copies[-1]['created_at'] if copies else None,
@@ -377,7 +396,7 @@ class Course:
                      'database.env': self.bundle / 'private/database.env',
                      'compose.yaml': self.bundle / 'compose.yaml', 'compose.env': self.bundle / 'compose.env',
                      'nginx.conf': self.bundle / 'nginx.conf', 'init-db.sh': self.bundle / 'init-db.sh'}
-            for private_name in ('demo-credentials.txt', 'COURSE_ACCESS.md'):
+            for private_name in ('demo-credentials.txt', 'COURSE_ACCESS.md', 'offsite.json'):
                 path = self.bundle / 'private' / private_name
                 if path.exists():
                     files[private_name] = private_file(path)
@@ -417,7 +436,7 @@ class Course:
         return ReceiptBook(folder / 'recovery', self.plan['project']).status(
             self.plan['requested_source_commit'], self.plan['images']['app'], folder, mode='server')
 
-    def restore(self, encrypted, identity, age='age'):
+    def restore(self, encrypted, identity, age='age', *, schema_mode='pg-dump'):
         encrypted, identity = private_file(encrypted), private_file(identity)
         with exclusive(self.bundle / 'private/restore.lock'), tempfile.TemporaryDirectory(dir=self.bundle / 'private') as temporary:
             temporary = Path(temporary)
@@ -436,7 +455,7 @@ class Course:
                 book.load()
             if file_digest(encrypted) != cipher_sha or file_digest(identity) != key_sha:
                 raise ValueError('Recovery archive or key changed during authentication.')
-            result = self.restore_decrypted(temporary / 'database.dump', meta)
+            result = self.restore_decrypted(temporary / 'database.dump', meta, schema_mode=schema_mode)
             if result['business_comparison'] == 'PASSED':
                 if file_digest(encrypted) != cipher_sha or file_digest(identity) != key_sha:
                     raise ValueError('Recovery archive or current key changed during restoration.')
@@ -483,10 +502,14 @@ class Course:
             raise ValueError('Operational observations exceed the backup bound.')
         return validate_observations(json.loads(raw))
 
-    def restore_decrypted(self, dump, meta):
+    def restore_decrypted(self, dump, meta, *, schema_mode='pg-dump'):
         # A Mac operator can transfer a verified dump through pinned SSH without
         # ever uploading the private decryption key. Its checksum remains bound
         # to the decrypted archive manifest.
+        if schema_mode not in ('pg-dump', 'migration-built'):
+            raise ValueError('Unknown recovery schema mode.')
+        if schema_mode == 'migration-built' and meta.get('format') != 2:
+            raise ValueError('Migration-built recovery requires authenticated database facts.')
         dump = private_file(dump)
         if (meta.get('server_major') != 17 or meta.get('project') == self.plan['project'] or
                 meta.get('source_commit') != self.plan['requested_source_commit'] or
@@ -514,11 +537,27 @@ class Course:
             if fingerprint(expected) != meta['facts_sha256'] or meta['snapshot_method'] != 'EXPORTED_REPEATABLE_READ':
                 raise ValueError('Recovery facts do not bind an exported snapshot.')
             observations = validate_observations(json.loads((dump.parent / 'observations.json').read_text()))
+        restore_command = ('PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_restore -h 127.0.0.1 -U adc_g4_owner '
+                           '-d adc_rc_demo --no-owner --no-privileges --single-transaction --exit-on-error')
+        if schema_mode == 'migration-built':
+            self.dc('--profile', 'maintenance', 'run', '--rm', 'schema', timeout=300)
+            code = Path(__file__).with_name('recovery_facts.py').read_text()
+            built = json.loads(run(self.reader_command() + ['python', '-c', code], self.log, timeout=180))['facts']
+            validate_facts(built)
+            if ({n: f['schema_sha256'] for n, f in expected['tables'].items()} !=
+                    {n: f['schema_sha256'] for n, f in built['tables'].items()}):
+                raise ValueError('Migration-built schema differs from the backup; data was not imported.')
+            # Only this new, already-proven-empty target is modified. Initial
+            # migration rows are replaced by the authenticated snapshot too.
+            truncate = ("DO $$ DECLARE names text; BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') "
+                        "INTO names FROM pg_tables WHERE schemaname='public'; EXECUTE 'TRUNCATE '||names||' CASCADE'; END $$;")
+            self.dc('exec', '-T', 'db', 'psql', '-U', 'adc_g4_admin', '-d', 'adc_rc_demo',
+                    '-v', 'ON_ERROR_STOP=1', '-c', truncate, timeout=60)
+            restore_command = ('PGPASSWORD="$POSTGRES_PASSWORD" exec pg_restore -h 127.0.0.1 -U adc_g4_admin '
+                               '-d adc_rc_demo --data-only --disable-triggers --no-owner --no-privileges '
+                               '--single-transaction --exit-on-error')
         with dump.open('rb') as stream:
-            self.dc('exec', '-T', 'db', 'sh', '-c',
-                    'PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_restore -h 127.0.0.1 -U adc_g4_owner '
-                    '-d adc_rc_demo --no-owner --no-privileges --single-transaction --exit-on-error',
-                    input_file=stream, timeout=600)
+            self.dc('exec', '-T', 'db', 'sh', '-c', restore_command, input_file=stream, timeout=600)
         self.dc('--profile', 'maintenance', 'run', '--rm', 'schema', timeout=300)
         proof = None
         if expected is not None:
@@ -688,15 +727,15 @@ def decrypt_backup(encrypted, identity, target, log, age='age'):
     # at the bound, instead of allocating an unbounded getmembers() list first.
     with tarfile.open(archive_path, mode='r:') as archive:
         members = []
-        for _ in range(15):
+        for _ in range(MAX_BACKUP_MEMBERS + 1):
             member = archive.next()
             if member is None:
                 break
             members.append(member)
-        if len(members) > 14:
+        if len(members) > MAX_BACKUP_MEMBERS:
             raise ValueError('Backup member count exceeds its bound.')
         names = [m.name for m in members]
-        if (len(names) != len(set(names)) or len(names) > 14 or
+        if (len(names) != len(set(names)) or len(names) > MAX_BACKUP_MEMBERS or
                 sum(m.size for m in members) > MAX_BACKUP_BYTES + 8 * 1024 * 1024 or
                 any(not m.isfile() or m.size < 0 or m.name != PurePosixPath(m.name).name for m in members) or
                 'archive.json' not in names):
@@ -772,10 +811,12 @@ def main():
     restore.add_argument('--backup-file', required=True)
     restore.add_argument('--identity-file', required=True)
     restore.add_argument('--age', default='age')
+    restore.add_argument('--schema-mode', choices=('pg-dump', 'migration-built'), default='pg-dump')
     restore.add_argument('--trusted-synthetic-copy', action='store_true', required=True)
     plain = sub.add_parser('restore-verified-dump')
     plain.add_argument('--dump-file', required=True)
     plain.add_argument('--manifest-file', required=True)
+    plain.add_argument('--schema-mode', choices=('pg-dump', 'migration-built'), default='pg-dump')
     plain.add_argument('--trusted-synthetic-copy', action='store_true', required=True)
     tls = sub.add_parser('issue-tls')
     tls.add_argument('--public-ip', required=True)
@@ -809,7 +850,8 @@ def main():
         course = Course(args.output, args.docker, args.context, rehearsal=args.rehearsal,
                         architecture=args.architecture, ca_file=args.ca_file)
         if args.action == 'deploy':
-            result = course.deploy()
+            with exclusive(course.bundle / 'private/release.lock'):
+                result = course.deploy()
         elif args.action == 'status':
             result = course.status()
         elif args.action == 'operations-status':
@@ -824,10 +866,10 @@ def main():
         elif args.action == 'rollback':
             result = course.rollback(args.to_source, args.recipient_file, args.expected_current_commit, args.age)
         elif args.action == 'restore':
-            result = course.restore(args.backup_file, args.identity_file, args.age)
+            result = course.restore(args.backup_file, args.identity_file, args.age, schema_mode=args.schema_mode)
         elif args.action == 'restore-verified-dump':
             with exclusive(course.bundle / 'private/restore.lock'):
-                result = course.restore_decrypted(args.dump_file, json.loads(private_file(args.manifest_file).read_text()))
+                result = course.restore_decrypted(args.dump_file, json.loads(private_file(args.manifest_file).read_text()), schema_mode=args.schema_mode)
         elif args.action == 'issue-tls':
             result = course.tls(args.public_ip, args.certbot)
         elif args.action == 'renew-tls':

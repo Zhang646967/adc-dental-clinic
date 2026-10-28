@@ -199,6 +199,9 @@ def inspect_bundle(output, rendered=None):
     runtime = read_env(output / 'private/runtime.env')
     maintenance = read_env(output / 'private/maintenance.env')
     database = read_env(output / 'private/database.env')
+    if any(values.get('ADC_SOURCE_COMMIT', plan['requested_source_commit']) != plan['requested_source_commit']
+           for values in (runtime, maintenance)):
+        raise ValueError('Runtime and maintenance source identities must match the reviewed application.')
     if runtime.get('ADC_PUBLIC_HOST') != plan['host'] or maintenance.get('ADC_PUBLIC_HOST') != plan['host']:
         raise ValueError('Runtime, maintenance and plan hostname must agree.')
     inputs = validate_production_inputs(runtime)

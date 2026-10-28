@@ -1,3 +1,5 @@
+[D1 独立上线准备](D1_CLOUD_RELEASE.md) · [分项演练](evidence_d1/README.md)。
+
 当前P1.5：[患者小程序指南](P15_MINIPROGRAM_GUIDE.md) · [完整画像与业务对齐](P15_PATIENT_ALIGNMENT.md) · [准确CI、实际微信工具、容量、恢复及两套系统交付](evidence_p15/README.md)。正式报告227页、113项业务用例、31幅实际ER；手机实机由用户后续统一验收，真实平台和云端独立保留。
 
 P1历史：[选诊及经营试用](P1_TRIAL_GUIDE.md) · [画像与月度核算设计](P1_PROFILE_MANAGEMENT.md) · [准确CI、两组容量、恢复及两套实例交付](evidence_p1/README.md)。正式报告224页、112项业务用例、31幅实际ER；真实平台与云端验收独立保留。
