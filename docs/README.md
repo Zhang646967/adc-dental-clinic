@@ -1,3 +1,5 @@
+[WorkBuddy小程序部署交接](WORKBUDDY_MINIPROGRAM_HANDOFF.md) · [登录入口整改与分项证据](evidence_workbuddy/README.md)。WorkBuddy仅负责小程序部署，后端与数据库由主系统维护方负责。
+
 **当前D1已完成上线包准备与本地保护交付。** [部署操作](D1_CLOUD_RELEASE.md) · [准确CI、恢复、安装与待办](evidence_d1/README.md) · [需求到执行追踪](evidence_d1/requirements_trace.md)。服务器未购买，云端与真实平台待验收。下方历史条目保留原日期和范围。
 
 [D1 独立上线准备](D1_CLOUD_RELEASE.md) · [分项演练](evidence_d1/README.md)。

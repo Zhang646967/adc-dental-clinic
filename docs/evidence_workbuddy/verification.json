@@ -1,0 +1,13 @@
+{
+  "native_source_checks": 267,
+  "account_handler_cases": 25,
+  "official_offline_compiled_pages": 24,
+  "real_wechat": "BLOCKED_CONFIGURATION",
+  "backend_application_commit": "b6a8169ec62a18926b18171b98165a657b205c1d",
+  "backend_runtime_changed": false,
+  "database_or_migration_changed": false,
+  "scope": "Native presentation and SMS page handling only; no new server or schema",
+  "pure_rule_cases": 1156,
+  "tool_status": "NOT_VERIFIED_AUTOMATION_TIMEOUT",
+  "full_new_commit_ci": "PENDING_GITHUB_RUN"
+}

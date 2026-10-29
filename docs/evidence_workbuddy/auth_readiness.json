@@ -1,0 +1,15 @@
+{
+  "private_appid_present": true,
+  "private_appsecret_present": false,
+  "runtime_auth_mode": "demo",
+  "runtime_appid_present": false,
+  "runtime_appsecret_present": false,
+  "runtime_wechat_mini": false,
+  "runtime_sms_provider": "demo",
+  "network_calls_for_configuration_inspection": 0,
+  "real_wechat_acceptance": "BLOCKED_CONFIGURATION",
+  "platform_secrets_not_in_package": true,
+  "backend_owner": "Main system maintainer",
+  "workbuddy_scope": "Mini-program deployment only",
+  "private_appid_matches_visible_project": true
+}

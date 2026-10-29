@@ -3,9 +3,9 @@ const api = require('../../utils/api');
 const {showError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 Page({
-  data: {smsMode:true,captchaKey:'',captchaImage:'',passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
+  data: {smsMode:false,realSmsAvailable:false,captchaKey:'',captchaImage:'',passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
   async onLoad() {
-    try { const session=await api.bootstrap();this.setData({auth:session.auth_capabilities||{},smsMode:!(session.auth_capabilities||{}).wechat_mini,passwordMode:!((session.auth_capabilities||{}).sms_enabled||(session.auth_capabilities||{}).wechat_mini),environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)navigation.reLaunch({url:intent.destination(getApp(),session)}); }
+    try { const session=await api.bootstrap();const auth=session.auth_capabilities||{},realSmsAvailable=!!(auth.sms_enabled&&!auth.sms_demo);this.setData({auth,realSmsAvailable,smsMode:!auth.wechat_mini&&realSmsAvailable,passwordMode:!(realSmsAvailable||auth.wechat_mini),environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)navigation.reLaunch({url:intent.destination(getApp(),session)}); }
     catch (e) { showError(this, e); }
   },
   field(e) { this.setData({[e.currentTarget.dataset.field]: e.detail.value}); },
@@ -26,15 +26,18 @@ Page({
   },
   async sendSms(){
     if(this.data.busy)return;
+    if(!this.data.realSmsAvailable){this.setData({error:'短信登录暂未开通，请使用微信或原账号登录。'});return;}
     if(!this.data.authConfirmed){this.setData({error:'请先同意接收验证码并办理本人账号。'});return;}
     this.setData({busy:true,error:''});
     try{
       const sent=await api.request('auth/sms/send/','POST',{phone:this.data.phone,confirmed:'on',captcha_key:this.data.captchaKey});
-      this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:sent.demo?'测试验证码：'+sent.test_code+'（未发送短信）':'验证码已提交发送，'+Math.ceil((sent.expires_seconds||300)/60)+'分钟内有效；60秒后可重发。'});
+      if(sent.demo)throw new Error('短信服务配置已变化，请重新进入登录页。');
+      this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:'验证码已提交发送，'+Math.ceil((sent.expires_seconds||300)/60)+'分钟内有效；60秒后可重发。'});
     }catch(e){showError(this,e);}finally{this.setData({busy:false});}
   },
   async smsLogin(){
     if(this.data.busy)return;
+    if(!this.data.realSmsAvailable){this.setData({error:'短信登录暂未开通，请使用微信或原账号登录。'});return;}
     if(!this.data.authConfirmed||!this.data.smsChallenge||!this.data.smsCode){this.setData({error:'请获取并填写验证码，确认同意后继续。'});return;}
     this.setData({busy:true,error:''});
     try{

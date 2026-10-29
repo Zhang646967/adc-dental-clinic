@@ -1,0 +1,8 @@
+{
+  "status": "NOT_VERIFIED_AUTOMATION_TIMEOUT",
+  "attempts": 2,
+  "detail": "Developer-tool automation connection timed out for both existing and separately exported projects; no new IDE/UI pass inferred. Official offline compilation of24pages and native handler checks passed separately.",
+  "real_wechat": "BLOCKED_CONFIGURATION",
+  "business_writes_attempted": 0,
+  "backend_changed": false
+}

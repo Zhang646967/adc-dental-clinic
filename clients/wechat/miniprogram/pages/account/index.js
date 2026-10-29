@@ -2,7 +2,7 @@ const navigation=require('../../utils/navigation');
 const api=require('../../utils/api'),{showError,dateTime}=require('../../utils/format'),intent=require('../../utils/booking-intent');
 function consent(content){return new Promise(resolve=>wx.showModal({title:'核对本人账号',content,success:r=>resolve(!!r.confirm),fail:()=>resolve(false)}));}
 Page({
-  data:{guest:false,captchaImage:'',captchaKey:'',profile:null,phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',auth:{},smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:'',readOnly:false,busy:false,error:''},
+  data:{guest:false,realSmsAvailable:false,captchaImage:'',captchaKey:'',profile:null,phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',auth:{},smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:'',readOnly:false,busy:false,error:''},
   async onShow(){await this.load();},
   async load(){
     this.setData({busy:true,error:'',profile:null});
@@ -13,7 +13,8 @@ Page({
       if(this.ownerContext&&this.ownerContext!==session.workspace_id)this.setData({phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:''});
       this.ownerContext=session.workspace_id;
       const profile=await api.request('account/');profile.cases=profile.cases.map(c=>({...c,createdLabel:dateTime(c.created_at)}));
-      this.setData({profile,auth:session.auth_capabilities||{},readOnly:session.read_only});
+      const auth=session.auth_capabilities||{};
+      this.setData({profile,auth,realSmsAvailable:!!(auth.sms_enabled&&!auth.sms_demo),readOnly:session.read_only});
     }catch(e){showError(this,e);}finally{this.setData({busy:false});}
   },
   login(){navigation.navigateTo({url:'/pages/login/index'});},
@@ -34,12 +35,14 @@ Page({
   },
   async captcha(){try{const result=await api.request('auth/sms/captcha/','POST',{});this.setData({captchaImage:result.image,captchaKey:''});}catch(e){showError(this,e);}},
   async sendPhoneSms(){
+    if(!this.data.realSmsAvailable){this.setData({error:'短信绑定暂未开通。'});return;}
     if(this.data.busy||this.data.readOnly||!await consent('同意向填写的号码发送验证码，核验后用于本人账号联络和登录？'))return;
     this.setData({busy:true,error:''});
-    try{const sent=await api.request('account/phone/sms/send/','POST',{phone:this.data.smsPhone,confirmed:'on',captcha_key:this.data.captchaKey});this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:sent.demo?'测试验证码：'+sent.test_code+'（未发送短信）':'验证码已提交发送，五分钟内有效。'});}
+    try{const sent=await api.request('account/phone/sms/send/','POST',{phone:this.data.smsPhone,confirmed:'on',captcha_key:this.data.captchaKey});if(sent.demo)throw new Error('短信服务配置已变化，请刷新账号页面。');this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:'验证码已提交发送，五分钟内有效。'});}
     catch(error){showError(this,error);}finally{this.setData({busy:false});}
   },
   async bindPhoneSms(){
+    if(!this.data.realSmsAvailable){this.setData({error:'短信绑定暂未开通。'});return;}
     if(this.data.busy||this.data.readOnly||!await consent('核验并将此号码绑定到本人登录账号？不会合并患者档案。'))return;
     this.setData({busy:true,error:''});
     try{await api.request('account/phone/sms/confirm/','POST',{phone:this.data.smsPhone,code:this.data.smsCode,challenge:this.data.smsChallenge,confirmed:'on'});await this.load();}

@@ -75,13 +75,22 @@ async function verify(){
  await test('WeChat platform refusal cannot create an ADC login',async()=>{
   const d=page('login',{wechatError:true});d.p.setData({authConfirmed:true});await d.p.wechatLogin();assert.equal(d.calls.length,0);assert(d.p.data.error);assert.equal(d.p.data.busy,false);
  });
- await test('SMS test source is labelled and confirmation uses returned challenge',async()=>{
-  const d=page('login',{request:async route=>route.endsWith('/send/')?{challenge:'one-challenge',demo:true,test_code:'123456'}:plain(pending)});
-  d.p.setData({phone:'00000000110',authConfirmed:true});await d.p.sendSms();assert(d.p.data.smsNotice.includes('未发送短信'));d.p.setData({smsCode:'123456'});await d.p.smsLogin();
-  assert.deepEqual(plain(d.calls[1].data),{phone:'00000000110',challenge:'one-challenge',code:'123456',confirmed:'on'});assert.equal(d.p.data.smsCode,'');assert.equal(d.p.data.smsNotice,'');
+ await test('Mini-program never offers or invokes demo SMS login',async()=>{
+  const d=page('login',{session:{account_authenticated:false,auth_capabilities:{sms_enabled:true,sms_demo:true,wechat_mini:false}}});await d.p.onLoad();assert.equal(d.p.data.realSmsAvailable,false);assert.equal(d.p.data.smsMode,false);assert.equal(d.p.data.passwordMode,true);
+  d.p.setData({phone:'00000000110',authConfirmed:true,smsChallenge:'old-demo',smsCode:'123456'});await d.p.sendSms();await d.p.smsLogin();assert.equal(d.calls.length,0);
+  const markup=fs.readFileSync(path.join(root,'pages/login/index.wxml'),'utf8');assert(markup.includes('wx:if="{{realSmsAvailable}}"'));assert(!markup.includes('测试号码'));assert(!markup.includes('test_code'));
  });
- await test('Real SMS send acknowledgement never displays an invented test code',async()=>{
-  const d=page('login',{request:async()=>({challenge:'one-challenge',demo:false})});d.p.setData({phone:'13800000000',authConfirmed:true});await d.p.sendSms();assert(d.p.data.smsNotice.includes('提交发送'));assert(!d.p.data.smsNotice.includes('undefined'));assert.equal(d.p.data.smsCode,'');
+ await test('WeChat-first login does not add a phone or password prerequisite',async()=>{
+  const d=page('login',{session:{account_authenticated:false,auth_capabilities:{wechat_mini:true,sms_enabled:true,sms_demo:true}},request:async()=>plain(pending)});await d.p.onLoad();assert.equal(d.p.data.smsMode,false);assert.equal(d.p.data.passwordMode,false);d.p.setData({authConfirmed:true});await d.p.wechatLogin();assert.deepEqual(plain(d.calls[0].data),{code:'provider-one-use-code',confirmed:'on',username:'',password:''});
+ });
+ await test('Only real SMS uses the provider challenge; no test code is displayed',async()=>{
+  const d=page('login',{session:{account_authenticated:false,auth_capabilities:{sms_enabled:true,sms_demo:false}},request:async route=>route.endsWith('/send/')?{challenge:'one-challenge',demo:false}:plain(pending)});await d.p.onLoad();d.p.setData({phone:'13800000000',authConfirmed:true});await d.p.sendSms();assert(d.p.data.smsNotice.includes('提交发送'));assert(!d.p.data.smsNotice.includes('undefined'));d.p.setData({smsCode:'123456'});await d.p.smsLogin();assert.deepEqual(plain(d.calls[1].data),{phone:'13800000000',challenge:'one-challenge',code:'123456',confirmed:'on'});assert.equal(d.p.data.smsCode,'');assert.equal(d.p.data.smsNotice,'');
+ });
+ await test('Provider change to demo cannot expose or consume a returned test challenge',async()=>{
+  const d=page('login',{request:async()=>({challenge:'demo-challenge',demo:true,test_code:'123456'})});d.p.setData({realSmsAvailable:true,authConfirmed:true,phone:'13800000000'});await d.p.sendSms();assert.equal(d.p.data.smsChallenge,'');assert.equal(d.p.data.smsNotice,'');assert(d.p.data.error);assert.equal(d.calls.length,1);
+ });
+ await test('Account view has no simulated phone/password proof controls',async()=>{
+  const d=page('account',{session:{auth_capabilities:{sms_enabled:true,sms_demo:true}}});await d.p.onShow();assert.equal(d.p.data.realSmsAvailable,false);d.calls.length=0;await d.p.sendPhoneSms();await d.p.bindPhoneSms();assert.equal(d.calls.length,0);const markup=fs.readFileSync(path.join(root,'pages/account/index.wxml'),'utf8');for(const text of ['本地手机授权码','绑定合成号码','新本地授权码','test_code'])assert(!markup.includes(text));assert(markup.includes('wx:if="{{realSmsAvailable}}"'));
  });
  await test('Current account WeChat binding keeps the own-account endpoint',async()=>{
   const d=page('account',{request:async()=>plain(profile)});await d.p.bindWechat();assert.equal(d.calls[0].route,'account/wechat/bind/');assert.deepEqual(plain(d.calls[0].data),{code:'provider-one-use-code',confirmed:'on'});
