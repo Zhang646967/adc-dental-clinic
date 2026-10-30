@@ -1,5 +1,7 @@
 C3.1已交付：[初复诊文书、医师确认、历史比较、更正与待办](docs/C31_CLINICAL_DOCUMENT_CONTRACT.md) · [验证与交付](docs/evidence_c31/README.md) · [WorkBuddy小程序任务](docs/WORKBUDDY_C31_TASK.md)。本机已更新，正式报告240页／120业务用例／33幅实际ER。
 
+微信患者端跟进：[登录失败原页反馈、重试与独立二十店联调](docs/WORKBUDDY_FOLLOWUP_20261030.md)已交付源码及本地验证，新原生包待WorkBuddy工具复测；原C3.1后端继续运行。
+
 # ADC 牙科连锁运营管理系统
 
 当前本机已接通真实微信登录与网站小程序确认（一个真实账号，官方开发者工具）；模拟短信关闭。手机、第二账号、教师体验及固定云端分别待验收。[后端就绪与WorkBuddy交接](docs/WX1_BACKEND_READY.md)。

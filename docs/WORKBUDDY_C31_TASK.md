@@ -1,3 +1,5 @@
+2026-10-30接续：已收到上一轮回传并修复登录失败反馈；最新任务及独立业务环境见[WorkBuddy接续](WORKBUDDY_FOLLOWUP_20261030.md)和[验证记录](evidence_wb_followup/README.md)。以下保留C3.1原任务时点，客户端不再与旧c6d1e15包逐字节相同。
+
 # WorkBuddy 小程序本轮跟进任务
 
 日期：2026-10-29。用户负责转交本单；WorkBuddy只负责小程序部署，Codex已交付系统本体C3.1。

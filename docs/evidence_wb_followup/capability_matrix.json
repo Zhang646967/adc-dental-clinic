@@ -1,0 +1,408 @@
+{
+  "passed": true,
+  "clinics": 20,
+  "base_service_combinations": 80,
+  "scope": "Actual authenticated HTTP candidates in the isolated fixture; queries do not reserve resources",
+  "rows": [
+    {
+      "clinic": 16,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 16,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 16,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 16,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 17,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 17,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 17,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 17,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 11,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 11,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 11,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 11,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 13,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 13,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 13,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 13,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 12,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 12,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 12,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 12,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 8,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 8,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 8,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 8,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 9,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 9,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 9,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 9,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 10,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 10,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 10,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 10,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 14,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 14,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 14,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 14,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 15,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 15,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 15,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 15,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 7,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 7,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 7,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 7,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 5,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 5,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 5,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 5,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 6,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 6,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 6,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 6,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 19,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 19,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 19,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 19,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 18,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 18,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 18,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 18,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 20,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 20,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 20,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 20,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 1,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 1,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 1,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 1,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 4,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 4,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 4,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 4,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 2,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 2,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 2,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 2,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 3,
+      "category": "CHECKUP",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 3,
+      "category": "PREVENTION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 3,
+      "category": "RESTORATION",
+      "has_actual_resource_candidates": true
+    },
+    {
+      "clinic": 3,
+      "category": "FOLLOWUP",
+      "has_actual_resource_candidates": true
+    }
+  ]
+}

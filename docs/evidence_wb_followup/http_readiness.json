@@ -1,0 +1,54 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Actual login Page and live HTTP401 retain error, form and query identifier",
+      "passed": true
+    },
+    {
+      "name": "Explicit correct-password retry refreshes CSRF and enters the own patient account",
+      "passed": true
+    },
+    {
+      "name": "Independent twenty-clinic index available",
+      "passed": true
+    },
+    {
+      "name": "Own current invoice180, posted receipt100 and outstanding80 match prepared ledger",
+      "passed": true
+    },
+    {
+      "name": "Original200 invoice version remains readable",
+      "passed": true
+    },
+    {
+      "name": "Different self patient cannot read this invoice",
+      "passed": true
+    },
+    {
+      "name": "Two verified guardian subjects can be explicitly selected",
+      "passed": true
+    },
+    {
+      "name": "Appointment delegation does not grant invoice access",
+      "passed": true
+    },
+    {
+      "name": "Native transport booking with server preview has exactly one result on replay",
+      "passed": true
+    },
+    {
+      "name": "Reschedule retains original and creates linked successor",
+      "passed": true
+    },
+    {
+      "name": "Explicit cancellation releases the test successor",
+      "passed": true
+    },
+    {
+      "name": "Waitlist registration and explicit withdrawal use shared real business commands",
+      "passed": true
+    }
+  ],
+  "scope": "Actual native login Page and API transport connected to independent live Django/PostgreSQL; password test accounts, no wx.login substitution and no official IDE/phone acceptance"
+}

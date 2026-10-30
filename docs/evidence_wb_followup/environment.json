@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "backend": "http://127.0.0.1:18315",
+  "application_commit": "90ddb5c7ca5f6dfbc4357ef958f37715a8867719",
+  "image": "sha256:3b17edf500e0f90b7e0ac71470179227d0f8579227b3d7729d32de75bd8a9d43",
+  "source": "Fresh empty PostgreSQL; normal bootstrap_course_release commands",
+  "clinics": 20,
+  "account_passwords": "NEW_PRIVATE;NOT_ORIGINAL",
+  "real_wechat": "NOT_CONFIGURED_IN_THIS_BUSINESS_FIXTURE",
+  "sms_disabled": true,
+  "original_and_teacher_unchanged": true
+}
