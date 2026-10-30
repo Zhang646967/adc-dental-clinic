@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "final_pages": 240,
+  "reviewed_overviews": 16,
+  "body_pages_identical_to_reviewed_renders": 234,
+  "changed_body_pages": [],
+  "final_detail_pages": [
+    3,
+    37,
+    100,
+    101,
+    102,
+    103,
+    118,
+    234,
+    235,
+    236,
+    237,
+    238,
+    239,
+    240
+  ],
+  "fixes": [
+    "English abstract no longer spills onto a mostly blank page",
+    "State diagram labels separated",
+    "Existing report format and filenames retained"
+  ]
+}

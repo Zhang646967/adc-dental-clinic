@@ -381,6 +381,11 @@ def build(folder,repo,output=None):
     page();heading('4.13.'+str(number)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number+21)+' '+manifest[name]['title']+'数据库ER图',16,max_height=18)
     p(manifest[name]['note'],10.5)
+  if item['heading'].startswith('4.29 '):
+   for name,title in [('er_clinical_documents','初复诊文书版本与准确来源'),('er_document_responsibility','文书责任期限与办理凭据')]:
+    page();figure(repo/'docs/database'/(name+'.png'),'图4-55 '+title+'数据库ER图',16,max_height=18)
+    p(json.loads((repo/'docs/database/view_manifest.json').read_text())[name]['note'],10.5)
+   page();figure(repo/'docs/diagrams/clinical_document_state.png','图4-57 完整文书确认与追加更正状态',16,max_height=17)
   if item['heading'].startswith('4.24 '):
    figure(repo/'docs/diagrams/profile_publication_state.png','图4-53 医师介绍与门店采用的状态',16,max_height=17)
   if item['heading'].startswith('4.25 '):

@@ -1,4 +1,95 @@
 {
+  "er_clinical_documents": {
+    "title": "初复诊文书版本与准确临床来源",
+    "tables": 7,
+    "relationships": 11,
+    "note": "一次实际接诊至多一个完整文书入口；草稿与确认版本分开。确认版本引用准确检查与接诊处置，previous为同文书的一对一追加链，prior_visit_version为同患者同店另一就诊的可空多对一复诊来源。正文及来源JSON冻结事实与当时身份，内容摘要不等于可靠电子签名。原金额由财务模块拥有；本视图不表示知情同意或病案归档已实施。",
+    "columns": {
+      "adc_visit": [
+        "id",
+        "patient_id",
+        "clinic_id",
+        "dentist_id",
+        "status"
+      ],
+      "adc_clinical_encounter": [
+        "id",
+        "visit_id"
+      ],
+      "adc_clinical_record_version": [
+        "id",
+        "encounter_id",
+        "revision"
+      ],
+      "adc_visit_record_version": [
+        "id",
+        "visit_id",
+        "revision_no"
+      ],
+      "adc_clinical_document": [
+        "id",
+        "encounter_id",
+        "revision"
+      ],
+      "adc_clinical_document_draft": [
+        "id",
+        "document_id",
+        "base_version_id",
+        "payload"
+      ],
+      "adc_clinical_document_version": [
+        "id",
+        "document_id",
+        "previous_id",
+        "prior_visit_version_id",
+        "source_record_id",
+        "care_record_id",
+        "revision",
+        "content_digest"
+      ]
+    }
+  },
+  "er_document_responsibility": {
+    "title": "文书责任期限与追加办理凭据",
+    "tables": 5,
+    "relationships": 7,
+    "note": "新检查开始时形成责任文书待办，不补造旧签署。原办理期限保留，更正有自己的期限，下次跟进不消除超期事实；待签、来源变化和超期由当前事实推导，不是独立虚构SQL状态表。确认人与事件均为真实账号外键，事件操作号唯一。账号确认、纸质原件引用及可靠电子签名分开；既有专业范围仍须重检，责任归属不自动授予权限。",
+    "columns": {
+      "adc_user": [
+        "id",
+        "dentist_id"
+      ],
+      "adc_clinical_encounter": [
+        "id",
+        "visit_id"
+      ],
+      "adc_clinical_document": [
+        "id",
+        "encounter_id",
+        "responsible_id",
+        "due_at",
+        "review_due_at",
+        "next_action_at",
+        "revision"
+      ],
+      "adc_clinical_document_version": [
+        "id",
+        "document_id",
+        "confirmed_by_id",
+        "confirmed_at",
+        "evidence_kind"
+      ],
+      "adc_clinical_document_event": [
+        "id",
+        "document_id",
+        "version_id",
+        "actor_id",
+        "operation_id",
+        "action",
+        "recorded_at"
+      ]
+    }
+  },
   "er_wechat_web_login": {
     "title": "网站扫码票据与微信独立确认",
     "tables": 4,
@@ -1424,9 +1515,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 142,
-    "orm_tables": 141,
-    "columns_types_and_nullability_checked": 1389,
+    "tables": 146,
+    "orm_tables": 145,
+    "columns_types_and_nullability_checked": 1431,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -1435,10 +1526,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 387,
-    "sql_foreign_keys": 388,
+    "orm_foreign_keys": 401,
+    "sql_foreign_keys": 402,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "eed8c33066ab7d948a39573d41e175d50c02745df79ef36cf606c9a8571a3c7d",
+    "snapshot_sha256": "1ca768b354c80945515bd5d03ec14fa22a61ba1fd7ffbc964b3c399ccb2abbaf",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

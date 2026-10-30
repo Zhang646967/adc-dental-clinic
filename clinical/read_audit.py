@@ -8,6 +8,9 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'clinical_documents':('DOCUMENT_LIST','CARE'),'clinical_document':('CARE','DOCUMENT'),
+    'clinical_document_preview':('CARE','DOCUMENT'),'clinical_document_confirm':('CARE','DOCUMENT'),
+    'clinical_document_compare':('CARE','DOCUMENT'),'clinical_document_print':('CARE','DOCUMENT'),
     'fund_claims': ('FUND_CLAIM_LIST','BILLING'), 'fund_claim_detail': ('INSURANCE_SETTLEMENT','BILLING'),
     'fund_allocation_new': ('FUND_TRANSFER','BILLING'), 'fund_allocation_detail': ('FUND_ALLOCATION','BILLING'),
     'fund_allocation_review': ('FUND_ALLOCATION','BILLING'), 'fund_issues': ('FUND_ISSUE_LIST','BILLING'),

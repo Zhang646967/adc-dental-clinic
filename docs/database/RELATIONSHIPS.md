@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-388条实际SQL外键，其中387条对应ORM单列关系，1条为账单同次就诊复合外键。
+402条实际SQL外键，其中401条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -49,6 +49,20 @@
 | adc_clinical_authority_event | actor_id | adc_user | id |
 | adc_clinical_authority_policy | activated_by_id | adc_user | id |
 | adc_clinical_authority_policy | clinic_id | adc_clinic | id |
+| adc_clinical_document | encounter_id | adc_clinical_encounter | id |
+| adc_clinical_document | responsible_id | adc_user | id |
+| adc_clinical_document_draft | base_version_id | adc_clinical_document_version | id |
+| adc_clinical_document_draft | document_id | adc_clinical_document | id |
+| adc_clinical_document_draft | saved_by_id | adc_user | id |
+| adc_clinical_document_event | document_id | adc_clinical_document | id |
+| adc_clinical_document_event | version_id | adc_clinical_document_version | id |
+| adc_clinical_document_event | actor_id | adc_user | id |
+| adc_clinical_document_version | care_record_id | adc_visit_record_version | id |
+| adc_clinical_document_version | confirmed_by_id | adc_user | id |
+| adc_clinical_document_version | document_id | adc_clinical_document | id |
+| adc_clinical_document_version | previous_id | adc_clinical_document_version | id |
+| adc_clinical_document_version | prior_visit_version_id | adc_clinical_document_version | id |
+| adc_clinical_document_version | source_record_id | adc_clinical_record_version | id |
 | adc_clinical_draft | base_record_id | adc_clinical_record_version | id |
 | adc_clinical_draft | encounter_id | adc_clinical_encounter | id |
 | adc_clinical_draft | saved_by_id | adc_user | id |

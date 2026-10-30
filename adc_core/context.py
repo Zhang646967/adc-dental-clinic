@@ -17,6 +17,7 @@ NAV={
 for _role in ('DENTIST','MANAGER'):
     NAV[_role].insert(0,('clinical_authority_home','专业操作范围'))
 NAV['DENTIST'].insert(0,('clinical_worklist','检查记录工作台'))
+NAV['DENTIST'].insert(0,('clinical_documents','病历文书与待办'))
 NAV['DENTIST'].insert(1,('clinical_doctor_lab_queue','加工验收工作台'))
 NAV['PATIENT'].append(('portal_history','我的健康自述'))
 NAV['PATIENT'].append(('portal_plans','我的治疗计划'))

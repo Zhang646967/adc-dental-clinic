@@ -1,34 +1,22 @@
 {
   "passed": true,
-  "pdf_pages": 228,
-  "business_use_cases": 113,
+  "pdf_pages": 240,
+  "business_use_cases": 120,
   "support_case": "SF-01",
-  "tables": 132,
-  "images": 67,
-  "er_views": 31,
+  "tables": 139,
+  "images": 70,
+  "er_views": 33,
   "table_and_figure_numbering": "SEQUENTIAL",
-  "toc_entries": 93,
+  "toc_entries": 96,
   "all_page_text_bounds_checked": true,
   "all_fonts_embedded": true,
   "old_contract_fields_retained": 510,
-  "docx_sha256": "5af657511a0a1afab18374a3772a7759d349e6e9f77c166c2c084267302875fc",
-  "pdf_sha256": "42efbc9833323233b5ad1d55ce772e77956b542272d666aeae0c99049bfc1cd6",
+  "docx_sha256": "4a98c4b8098258236bc6a6681d6fc872409fabe468fadad18e093b9540dbafff",
+  "pdf_sha256": "e30760a026abba4d8c1c18a4d63a37c2e1d5b43d99fd226e3d2133dbf0b8252c",
   "actual_schema": {
-    "tables": 142,
-    "foreign_keys": 388,
-    "triggers": 110
+    "tables": 146,
+    "foreign_keys": 402,
+    "triggers": 114
   },
-  "platform_acceptance": "PREPARATION_REHEARSAL;CLOUD_NOT_RUN;PHYSICAL_DEVICE_DEFERRED;REAL_PROVIDER_NOT_RUN",
-  "visual_review": {
-    "all_228_pages_rendered": true,
-    "unchanged_92_body_pages_matched_prior_review": true,
-    "changed_136_pages_reviewed_in_12_overviews": true,
-    "new_design_and_validation_pages_reviewed_full_page": [
-      37,
-      98,
-      99,
-      113
-    ],
-    "final_page_113_reviewed_after_last_wording_change": true
-  }
+  "platform_acceptance": "C31_LOCAL_SYNTHETIC;CONSENT_SIGNATURE_ARCHIVE_NOT_IMPLEMENTED;PHYSICAL_DEVICE_WORKBUDDY"
 }

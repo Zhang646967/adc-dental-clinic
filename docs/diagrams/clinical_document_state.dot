@@ -1,0 +1,20 @@
+digraph clinical_document {
+ graph [rankdir=TB,bgcolor="white",pad="0.28",nodesep="0.35",ranksep="0.7"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4ef",color="#38665a",fontname="PingFang SC",fontsize=18,width=4.4,margin="0.20,0.16"];
+ edge [fontname="PingFang SC",fontsize=15,color="#38665a"];
+ pending [label="待完善文书\n实际接诊、责任人与期限"];
+ draft [label="已保存草稿\n初诊或复诊、诊断与医嘱\n可有依据弃用"];
+ confirmed [label="已确认准确版本\n作者、服务端时间与来源"];
+ review [label="来源变化待复核\n原确认版本继续保留"];
+ amendment [label="有依据的更正草稿\n引用当前确认版本"];
+ next [label="新确认版本\n保留前版链接与变化\n后续更正重复此流程"];
+ history [shape=note,fillcolor="#f5f5f1",label="历史可读、可比较、可打印\n确认版本与事件不可覆盖\n尚未办理病案归档"];
+ pending -> draft [label="负责医师保存"];
+ draft -> confirmed [label="结束实际接诊后\n预览并明确确认"];
+ confirmed -> amendment [label="记录更正依据"];
+ confirmed -> review [label="新检查、自述\n或接诊来源"];
+ review -> amendment [label="核对并记录\n更正依据"];
+ amendment -> next [label="重检授权、版本与来源\n明确确认"];
+ confirmed -> history [style=dashed,arrowhead=none];
+ next -> history [style=dashed,arrowhead=none];
+}

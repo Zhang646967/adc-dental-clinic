@@ -1,4 +1,18 @@
 {
+  "er_clinical_documents": {
+    "nodes": 7,
+    "edges": 11,
+    "width": 558,
+    "height": 883,
+    "minPrintedFontPt": 11.379139784946238
+  },
+  "er_document_responsibility": {
+    "nodes": 5,
+    "edges": 7,
+    "width": 356,
+    "height": 770,
+    "minPrintedFontPt": 17.835842696629214
+  },
   "er_wechat_web_login": {
     "nodes": 4,
     "edges": 5,

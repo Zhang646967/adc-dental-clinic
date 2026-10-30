@@ -103,6 +103,8 @@ def start_encounter(*,actor,visit_id,expected_visit_version,operation_id):
     op=operation(operation_id)
     if ClinicalRecordEvent.objects.filter(operation_id=op).exists():raise RuleError('此操作编号已使用，请重新打开页面。')
     row=ClinicalEncounter.objects.create(visit=visit,opened_by=actor)
+    from clinical.documents import open_document
+    open_document(row,actor)
     ClinicalRecordEvent.objects.create(actor=actor,operation_id=op,action='ENCOUNTER_OPENED',encounter=row,
         snapshot={'patient':patient.pk,'visit':visit.pk,'revision':0})
     emit(actor,'CLINICAL_ENCOUNTER_OPENED',row,visit=visit,summary={'encounter':row.pk})

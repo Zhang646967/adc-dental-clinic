@@ -409,5 +409,17 @@
     "mac_original_business": 48,
     "mac_original_configurations": 70,
     "restoration": "R2.3 historical independent restore retained; no new empty-database restore this round."
+  },
+  "C31_current": {
+    "status": "LOCAL_REPORT_VERIFIED_RELEASE_PENDING",
+    "date": "2026-10-29",
+    "pdf_pages": 240,
+    "business_use_cases": 120,
+    "support_case": "SF-01",
+    "er_views": 33,
+    "actual_sql_tables": 146,
+    "sql_foreign_keys": 402,
+    "enabled_triggers": 114,
+    "evidence_path": "docs/evidence_c31/README.md"
   }
 }

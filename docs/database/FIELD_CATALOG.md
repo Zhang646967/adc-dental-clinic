@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-26。本目录列出141张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-29。本目录列出145张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -741,6 +741,169 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `clinical_activation_history`：`CREATE TRIGGER clinical_activation_history BEFORE DELETE OR UPDATE ON public.adc_clinical_authority_policy FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_clinical_document
+
+模型：`clinical.ClinicalDocument`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| encounter_id | bigint | UK / FK | 否 | `adc_clinical_encounter.id` |
+| responsible_id | bigint | FK | 否 | `adc_user.id` |
+| due_at | timestamp with time zone | — | 否 | — |
+| next_action_at | timestamp with time zone | — | 是 | — |
+| review_due_at | timestamp with time zone | — | 是 | — |
+| revision | integer | — | 否 | — |
+| opened_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_documen_encounter_id_2d7af03a_fk_adc_clini`：`FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_document_encounter_id_key`：`UNIQUE (encounter_id)`。
+- `adc_clinical_document_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_document_responsible_id_7ea038f2_fk_adc_user_id`：`FOREIGN KEY (responsible_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_document_revision_check`：`CHECK ((revision >= 0))`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_document_encounter_id_key`：`CREATE UNIQUE INDEX adc_clinical_document_encounter_id_key ON public.adc_clinical_document USING btree (encounter_id)`。
+- `adc_clinical_document_pkey`：`CREATE UNIQUE INDEX adc_clinical_document_pkey ON public.adc_clinical_document USING btree (id)`。
+- `adc_clinical_document_responsible_id_7ea038f2`：`CREATE INDEX adc_clinical_document_responsible_id_7ea038f2 ON public.adc_clinical_document USING btree (responsible_id)`。
+- `document_owner_due_idx`：`CREATE INDEX document_owner_due_idx ON public.adc_clinical_document USING btree (responsible_id, due_at)`。
+
+跨表及历史触发器：
+
+- `document_identity_retained`：`CREATE TRIGGER document_identity_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_document FOR EACH ROW EXECUTE FUNCTION adc_document_identity_guard()`。
+
+## adc_clinical_document_draft
+
+模型：`clinical.ClinicalDocumentDraft`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| document_id | bigint | UK / FK | 否 | `adc_clinical_document.id` |
+| base_version_id | bigint | FK | 是 | `adc_clinical_document_version.id` |
+| payload | jsonb | — | 否 | — |
+| saved_by_id | bigint | FK | 否 | `adc_user.id` |
+| saved_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_documen_base_version_id_07a5b37c_fk_adc_clini`：`FOREIGN KEY (base_version_id) REFERENCES adc_clinical_document_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_document_id_f2e53c89_fk_adc_clini`：`FOREIGN KEY (document_id) REFERENCES adc_clinical_document(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_document_draft_document_id_key`：`UNIQUE (document_id)`。
+- `adc_clinical_document_draft_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_document_draft_saved_by_id_5303d097_fk_adc_user_id`：`FOREIGN KEY (saved_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_document_draft_base_version_id_07a5b37c`：`CREATE INDEX adc_clinical_document_draft_base_version_id_07a5b37c ON public.adc_clinical_document_draft USING btree (base_version_id)`。
+- `adc_clinical_document_draft_document_id_key`：`CREATE UNIQUE INDEX adc_clinical_document_draft_document_id_key ON public.adc_clinical_document_draft USING btree (document_id)`。
+- `adc_clinical_document_draft_pkey`：`CREATE UNIQUE INDEX adc_clinical_document_draft_pkey ON public.adc_clinical_document_draft USING btree (id)`。
+- `adc_clinical_document_draft_saved_by_id_5303d097`：`CREATE INDEX adc_clinical_document_draft_saved_by_id_5303d097 ON public.adc_clinical_document_draft USING btree (saved_by_id)`。
+
+跨表及历史触发器：
+
+- `document_draft_identity_retained`：`CREATE TRIGGER document_draft_identity_retained BEFORE INSERT OR UPDATE ON public.adc_clinical_document_draft FOR EACH ROW EXECUTE FUNCTION adc_document_draft_guard()`。
+
+## adc_clinical_document_event
+
+模型：`clinical.ClinicalDocumentEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| document_id | bigint | FK | 否 | `adc_clinical_document.id` |
+| version_id | bigint | FK | 是 | `adc_clinical_document_version.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| note | character varying(1000) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_documen_document_id_fb0043a9_fk_adc_clini`：`FOREIGN KEY (document_id) REFERENCES adc_clinical_document(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_version_id_0e56fd51_fk_adc_clini`：`FOREIGN KEY (version_id) REFERENCES adc_clinical_document_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_document_event_actor_id_74d46b39_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_document_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_clinical_document_event_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_document_event_actor_id_74d46b39`：`CREATE INDEX adc_clinical_document_event_actor_id_74d46b39 ON public.adc_clinical_document_event USING btree (actor_id)`。
+- `adc_clinical_document_event_document_id_fb0043a9`：`CREATE INDEX adc_clinical_document_event_document_id_fb0043a9 ON public.adc_clinical_document_event USING btree (document_id)`。
+- `adc_clinical_document_event_operation_id_key`：`CREATE UNIQUE INDEX adc_clinical_document_event_operation_id_key ON public.adc_clinical_document_event USING btree (operation_id)`。
+- `adc_clinical_document_event_pkey`：`CREATE UNIQUE INDEX adc_clinical_document_event_pkey ON public.adc_clinical_document_event USING btree (id)`。
+- `adc_clinical_document_event_version_id_0e56fd51`：`CREATE INDEX adc_clinical_document_event_version_id_0e56fd51 ON public.adc_clinical_document_event USING btree (version_id)`。
+
+跨表及历史触发器：
+
+- `document_event_retained`：`CREATE TRIGGER document_event_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_document_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_clinical_document_version
+
+模型：`clinical.ClinicalDocumentVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| document_id | bigint | FK | 否 | `adc_clinical_document.id` |
+| revision | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_clinical_document_version.id` |
+| prior_visit_version_id | bigint | FK | 是 | `adc_clinical_document_version.id` |
+| source_record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
+| care_record_id | bigint | FK | 是 | `adc_visit_record_version.id` |
+| kind | character varying(12) | — | 否 | — |
+| content | jsonb | — | 否 | — |
+| source_snapshot | jsonb | — | 否 | — |
+| source_cursor | character varying(64) | — | 否 | — |
+| content_digest | character varying(64) | — | 否 | — |
+| confirmed_by_id | bigint | FK | 否 | `adc_user.id` |
+| confirmed_at | timestamp with time zone | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+| evidence_kind | character varying(24) | — | 否 | — |
+| evidence_reference | character varying(500) | — | 否 | — |
+| amendment_reason | character varying(500) | — | 否 | — |
+| late_reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_documen_care_record_id_3ad14f9e_fk_adc_visit`：`FOREIGN KEY (care_record_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_confirmed_by_id_ea7af2f6_fk_adc_user_`：`FOREIGN KEY (confirmed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_document_id_334ead6e_fk_adc_clini`：`FOREIGN KEY (document_id) REFERENCES adc_clinical_document(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_previous_id_c218445c_fk_adc_clini`：`FOREIGN KEY (previous_id) REFERENCES adc_clinical_document_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_prior_visit_version__e8dc0604_fk_adc_clini`：`FOREIGN KEY (prior_visit_version_id) REFERENCES adc_clinical_document_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_documen_source_record_id_94fb6fcd_fk_adc_clini`：`FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_document_version_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_document_version_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_clinical_document_version_revision_check`：`CHECK ((revision >= 0))`。
+- `document_amendment_reason`：`CHECK (((previous_id IS NULL) OR (NOT ((amendment_reason)::text = ''::text))))`。
+- `document_confirmation_time_valid`：`CHECK ((confirmed_at <= recorded_at))`。
+- `document_evidence_valid`：`CHECK (((((evidence_kind)::text = 'ACCOUNT_CONFIRMATION'::text) AND ((evidence_reference)::text = ''::text)) OR (((evidence_kind)::text = 'PAPER_REFERENCE'::text) AND (NOT ((evidence_reference)::text = ''::text)))))`。
+- `document_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['INITIAL'::character varying, 'FOLLOWUP'::character varying])::text[])))`。
+- `document_not_previous_self`：`CHECK ((NOT ((previous_id = id) AND (previous_id IS NOT NULL))))`。
+- `document_not_prior_self`：`CHECK ((NOT ((prior_visit_version_id = id) AND (prior_visit_version_id IS NOT NULL))))`。
+- `document_previous_required`：`CHECK ((((previous_id IS NULL) AND (revision = 1)) OR ((previous_id IS NOT NULL) AND (revision > 1))))`。
+- `document_version_unique`：`UNIQUE (document_id, revision)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_document_version_care_record_id_3ad14f9e`：`CREATE INDEX adc_clinical_document_version_care_record_id_3ad14f9e ON public.adc_clinical_document_version USING btree (care_record_id)`。
+- `adc_clinical_document_version_confirmed_by_id_ea7af2f6`：`CREATE INDEX adc_clinical_document_version_confirmed_by_id_ea7af2f6 ON public.adc_clinical_document_version USING btree (confirmed_by_id)`。
+- `adc_clinical_document_version_document_id_334ead6e`：`CREATE INDEX adc_clinical_document_version_document_id_334ead6e ON public.adc_clinical_document_version USING btree (document_id)`。
+- `adc_clinical_document_version_pkey`：`CREATE UNIQUE INDEX adc_clinical_document_version_pkey ON public.adc_clinical_document_version USING btree (id)`。
+- `adc_clinical_document_version_previous_id_key`：`CREATE UNIQUE INDEX adc_clinical_document_version_previous_id_key ON public.adc_clinical_document_version USING btree (previous_id)`。
+- `adc_clinical_document_version_prior_visit_version_id_e8dc0604`：`CREATE INDEX adc_clinical_document_version_prior_visit_version_id_e8dc0604 ON public.adc_clinical_document_version USING btree (prior_visit_version_id)`。
+- `adc_clinical_document_version_source_record_id_94fb6fcd`：`CREATE INDEX adc_clinical_document_version_source_record_id_94fb6fcd ON public.adc_clinical_document_version USING btree (source_record_id)`。
+- `document_version_unique`：`CREATE UNIQUE INDEX document_version_unique ON public.adc_clinical_document_version USING btree (document_id, revision)`。
+
+跨表及历史触发器：
+
+- `document_version_retained`：`CREATE TRIGGER document_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_clinical_document_version FOR EACH ROW EXECUTE FUNCTION adc_document_version_guard()`。
 
 ## adc_clinical_draft
 

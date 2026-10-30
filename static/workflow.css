@@ -53,3 +53,5 @@
 }
 
 .worklist-filters > .form-error-summary { grid-column: 1 / -1; }
+
+.document-body dd,.document-body p{overflow-wrap:anywhere}.document-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.document-comparison pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}.document-body dt{font-weight:650;margin-top:.75rem}.document-body dd{margin-left:0}.document-print .mono{overflow-wrap:anywhere}@media(max-width:640px){.document-comparison{grid-template-columns:1fr}}@media print{header,footer,nav,.no-print{display:none!important}.document-print .panel{box-shadow:none;border:0;padding:0}.document-print{max-width:none}}

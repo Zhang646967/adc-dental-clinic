@@ -3,8 +3,15 @@ from clinical import views
 from clinical import encounter_views as encounters
 from clinical import plan_views as plans
 from clinical import continuity_views as continuity
+from clinical import document_views as documents
 
 urlpatterns=[
+    path('clinical/documents/',documents.worklist,name='clinical_documents'),
+    path('clinical/documents/confirm/',documents.confirm,name='clinical_document_confirm'),
+    path('clinical/encounters/<int:pk>/document/',documents.workspace,name='clinical_document'),
+    path('clinical/encounters/<int:pk>/document/preview/',documents.preview,name='clinical_document_preview'),
+    path('clinical/encounters/<int:pk>/document/compare/',documents.compare,name='clinical_document_compare'),
+    path('clinical/encounters/<int:pk>/document/print/',documents.printable,name='clinical_document_print'),
     path('clinical/recalls/',continuity.recalls,name='clinical_recalls'),
     path('clinical/recalls/instructions/<int:pk>/claim/',continuity.recall_claim,name='clinical_recall_claim'),
     path('clinical/recalls/<int:pk>/',continuity.recall_detail,name='clinical_recall_detail'),

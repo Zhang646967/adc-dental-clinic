@@ -21,6 +21,8 @@ PUBLIC.update({'patient_wechat_qr_start','patient_wechat_qr_status','patient_wec
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'clinical_documents':{'DENTIST'},'clinical_document':{'DENTIST'},'clinical_document_preview':{'DENTIST'},
+ 'clinical_document_confirm':{'DENTIST'},'clinical_document_compare':{'DENTIST'},'clinical_document_print':{'DENTIST'},
  'fund_transfers':{'FINANCE'},'fund_transfer_new':{'FINANCE'},'fund_transfer_detail':{'FINANCE'},'fund_transfer_review':{'FINANCE'},
  'insurance_settlements':{'FRONT_DESK','FINANCE'},'insurance_settlement_new':{'FRONT_DESK'},
  'insurance_settlement_detail':{'FRONT_DESK','FINANCE'},'insurance_settlement_query':{'FRONT_DESK','FINANCE'},

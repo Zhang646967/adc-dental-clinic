@@ -1,3 +1,5 @@
+C3.1本地验证候选：[初复诊病历文书、医师确认、更正与待办](docs/C31_CLINICAL_DOCUMENT_CONTRACT.md) · [本批证据](docs/evidence_c31/README.md) · [WorkBuddy小程序跟进](docs/WORKBUDDY_C31_TASK.md)。尚待准确提交CI、恢复和保护更新；运行系统仍见下方WX1交付。
+
 # ADC 牙科连锁运营管理系统
 
 当前本机已接通真实微信登录与网站小程序确认（一个真实账号，官方开发者工具）；模拟短信关闭。手机、第二账号、教师体验及固定云端分别待验收。[后端就绪与WorkBuddy交接](docs/WX1_BACKEND_READY.md)。

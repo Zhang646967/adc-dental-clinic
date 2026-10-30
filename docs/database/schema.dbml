@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 141 ORM tables; django_migrations is a framework migration journal.
+// All 145 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -259,6 +259,63 @@ Table adc_clinical_authority_policy {
   activated_by_id "bigint" [not null]
   activated_at "timestamp with time zone" [not null]
   reference "character varying(160)" [not null]
+}
+
+Table adc_clinical_document {
+  id "bigint" [pk, not null]
+  encounter_id "bigint" [unique, not null]
+  responsible_id "bigint" [not null]
+  due_at "timestamp with time zone" [not null]
+  next_action_at "timestamp with time zone" [null]
+  review_due_at "timestamp with time zone" [null]
+  revision "integer" [not null]
+  opened_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_document_draft {
+  id "bigint" [pk, not null]
+  document_id "bigint" [unique, not null]
+  base_version_id "bigint" [null]
+  payload "jsonb" [not null]
+  saved_by_id "bigint" [not null]
+  saved_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_document_event {
+  id "bigint" [pk, not null]
+  document_id "bigint" [not null]
+  version_id "bigint" [null]
+  actor_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  note "character varying(1000)" [not null]
+  snapshot "jsonb" [not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_clinical_document_version {
+  id "bigint" [pk, not null]
+  document_id "bigint" [not null]
+  revision "integer" [not null]
+  previous_id "bigint" [unique, null]
+  prior_visit_version_id "bigint" [null]
+  source_record_id "bigint" [not null]
+  care_record_id "bigint" [null]
+  kind "character varying(12)" [not null]
+  content "jsonb" [not null]
+  source_snapshot "jsonb" [not null]
+  source_cursor "character varying(64)" [not null]
+  content_digest "character varying(64)" [not null]
+  confirmed_by_id "bigint" [not null]
+  confirmed_at "timestamp with time zone" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  evidence_kind "character varying(24)" [not null]
+  evidence_reference "character varying(500)" [not null]
+  amendment_reason "character varying(500)" [not null]
+  late_reason "character varying(500)" [not null]
+  indexes {
+    (document_id, revision) [unique, name: 'document_version_unique']
+  }
 }
 
 Table adc_clinical_draft {
@@ -1999,6 +2056,20 @@ Ref: adc_clinical_authority_event.reviewer_id > adc_clinical_reviewer.id
 Ref: adc_clinical_authority_event.actor_id > adc_user.id
 Ref: adc_clinical_authority_policy.activated_by_id > adc_user.id
 Ref: adc_clinical_authority_policy.clinic_id - adc_clinic.id
+Ref: adc_clinical_document.encounter_id - adc_clinical_encounter.id
+Ref: adc_clinical_document.responsible_id > adc_user.id
+Ref: adc_clinical_document_draft.base_version_id > adc_clinical_document_version.id
+Ref: adc_clinical_document_draft.document_id - adc_clinical_document.id
+Ref: adc_clinical_document_draft.saved_by_id > adc_user.id
+Ref: adc_clinical_document_event.document_id > adc_clinical_document.id
+Ref: adc_clinical_document_event.version_id > adc_clinical_document_version.id
+Ref: adc_clinical_document_event.actor_id > adc_user.id
+Ref: adc_clinical_document_version.care_record_id > adc_visit_record_version.id
+Ref: adc_clinical_document_version.confirmed_by_id > adc_user.id
+Ref: adc_clinical_document_version.document_id > adc_clinical_document.id
+Ref: adc_clinical_document_version.previous_id - adc_clinical_document_version.id
+Ref: adc_clinical_document_version.prior_visit_version_id > adc_clinical_document_version.id
+Ref: adc_clinical_document_version.source_record_id > adc_clinical_record_version.id
 Ref: adc_clinical_draft.base_record_id > adc_clinical_record_version.id
 Ref: adc_clinical_draft.encounter_id - adc_clinical_encounter.id
 Ref: adc_clinical_draft.saved_by_id > adc_user.id

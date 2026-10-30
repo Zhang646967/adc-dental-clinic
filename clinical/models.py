@@ -150,3 +150,4 @@ from clinical.encounter_models import (ClinicalHistoryVersion,ClinicalEncounter,
 # C2.2 owned treatment-continuity facts.
 from clinical.plan_models import (TreatmentPlan,PlanDraft,PlanVersion,TreatmentStep,PlanStepVersion,PlanDecision,PerformedProcedure,NextVisitInstruction,PlanAppointment,PlanEvent)
 from clinical.continuity_models import (RecallEpisode,RecallEvent,LabCase,LabReview,LabEvent)
+from clinical.document_models import (ClinicalDocument, ClinicalDocumentDraft, ClinicalDocumentVersion, ClinicalDocumentEvent)
