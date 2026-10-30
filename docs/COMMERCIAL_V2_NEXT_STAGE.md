@@ -159,3 +159,8 @@ C1.1, C1.2 and C2.1 have local delivery records. C2.2–C2.3 complete the plan/a
 No server purchase or AppID is needed to design and verify this local synthetic slice. Actual WeChat experience release and cloud operation require those inputs later. Before real clinical replacement, obtain the first clinic/service matrix, authorized professional reviewers, local integration/retention requirements and funded operating responsibilities. Record each dependency with its owner and evidence; do not invent approvals or dates.
 
 The next release should be judged by whether its complete patient journey works and its histories reconcile. Menu count, test count and table count support review but do not establish commercial maturity.
+
+
+## C3 follow-on planning
+
+The next system-body increment is [C3 clinical records, informed consent and archival workflows](C3_RECORD_CONSENT_ARCHIVE_PLAN.md). This is PLANNED, based on the current64-migration/142-table implementation and inspected clinical contracts. It does not establish new clinical permissions, signed-document validity or implemented archive functionality. Mini-program deployment remains WorkBuddy's responsibility; the main maintainer owns business rules, APIs and data.
