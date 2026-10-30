@@ -174,7 +174,8 @@
         "ADC_SMS_LIVE_TEST_LIMIT": "${RC_SMS_LIVE_TEST_LIMIT:-10}"
       },
       "networks": [
-        "private"
+        "private",
+        "auth-egress"
       ],
       "depends_on": {
         "schema": {
@@ -438,6 +439,9 @@
       "driver_opts": {
         "com.docker.network.bridge.host_binding_ipv4": "127.0.0.1"
       }
+    },
+    "auth-egress": {
+      "driver": "bridge"
     }
   }
 }

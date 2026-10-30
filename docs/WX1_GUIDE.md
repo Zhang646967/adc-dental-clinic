@@ -12,6 +12,12 @@ python3 scripts/wx1_platform.py status --private-config '/Users/zhang/Downloads/
 
 此命令仅检查配置存在性，不调用微信或短信、不读取余额、不证明平台验收。原本机安装可显式使用`apply-rc --project-root /Users/zhang/Projects/adc-dental-clinic`应用配置；会保留私有环境备份，检查后通过原部署流程重建Web/worker。它不会自行重启或修改账号和数据库。
 
+小程序测试号的凭据在[微信官方测试号管理页](https://mp.weixin.qq.com/wxamp/sandbox?doc=1)由本人扫码查看；核对AppID与工程一致，再将AppSecret填写到`ADC_WECHAT_MINI_APP_SECRET=`右侧。CloudBase环境编号是短信配置，不是微信密钥。格式检查只确认输入存在；官方接口返回、真实换码和最终账号映射必须另行验证。
+
+本机模拟器可以先连接`http://127.0.0.1:18000`完成真实微信换码，不以云服务器或固定域名为前提。RC配置校验接受微信及CloudBase配置，live模式拒绝演示短信和本地身份替身。仅Web服务接入额外的`auth-egress`出站网络；数据库、迁移、通知和监测仍在内部网络，Web不发布端口。独立G4模板原有Web出站网络保持不变。
+
+应用前保留加密数据库与配置备份；使用已通过验证的相同应用镜像重建Web和运行处理服务，再重建网关以刷新Web地址。核对`/api/mini/v1/session/`中的`auth_mode=live`、`wechat_mini=true`、`sms_demo=false`。能力字段只证明配置已加载；还需实际执行`wx.login → code2Session → ADC会话`。未开通真实短信时使用`ADC_SMS_PROVIDER=disabled`，不显示或发送测试验证码。
+
 真实真机联调使用独立合成教师HTTPS环境。由操作者把已核验的ADC认证配置应用到该环境的`private/runtime.env`与`private/maintenance.env`，保留原数据库owner/runtime分离、临床合成及教师环境标记；设置`ADC_PATIENT_AUTH_MODE=live`、`ADC_PATIENT_IDENTITY_PROVIDER=disabled`，短信未具备免费条件时设置`ADC_SMS_PROVIDER=disabled`。按原G4流程更新私有plan文件摘要、重新渲染并校验Compose后重建Web/worker。原18000数据库不通过隧道公开，原教师环境从空合成库建立的来源保持不变。
 
 ## 微信开发者工具

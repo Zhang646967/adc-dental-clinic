@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import json,unittest
 from scripts.rc_config import prepare,validate
+from scripts.wx1_platform import apply_rc
 R=Path(__file__).resolve().parents[1]
 class ReleaseContractTests(unittest.TestCase):
  def test_fresh_private_configuration(self):
@@ -27,6 +28,19 @@ class ReleaseContractTests(unittest.TestCase):
   with TemporaryDirectory() as d:
    prepare(d);p=Path(d)/'.rc/compose.env';p.write_text(p.read_text()+'RC_SMS_PROVIDER=demo\n')
    with self.assertRaises(ValueError):validate(d)
+ def test_live_wechat_configuration_can_be_applied_and_started_without_resetting_secrets(self):
+  with TemporaryDirectory() as d:
+   name=prepare(d);p=Path(d)/'.rc/compose.env';before=p.read_text()
+   result=apply_rc({'ADC_PATIENT_AUTH_MODE':'live','ADC_PATIENT_IDENTITY_PROVIDER':'disabled',
+       'ADC_WECHAT_MINI_APP_ID':'wx'+'1'*16,'ADC_WECHAT_MINI_APP_SECRET':'fixture-secret'},d)
+   self.assertEqual(validate(d),name);self.assertTrue(p.read_text().startswith(before))
+   self.assertIn('RC_SMS_PROVIDER=disabled',p.read_text());self.assertFalse(result['accounts_and_database_modified'])
+   self.assertEqual(Path(result['backup_file']).read_text(),before)
+ def test_live_configuration_rejects_demo_sms_and_local_identity(self):
+  for extra in ('RC_SMS_PROVIDER=demo\nRC_TEACHER_TEST_MODE=1\n','RC_PATIENT_IDENTITY_PROVIDER=local\n'):
+   with TemporaryDirectory() as d:
+    prepare(d);p=Path(d)/'.rc/compose.env';p.write_text(p.read_text()+'RC_PATIENT_AUTH_MODE=live\n'+extra)
+    with self.assertRaises(ValueError):validate(d)
  def test_reject_bad_port(self):
   for port in (0,80,65536):
    with TemporaryDirectory() as d,self.assertRaises(ValueError):prepare(d,port)
@@ -46,10 +60,14 @@ class ReleaseContractTests(unittest.TestCase):
  def test_no_external_volumes(self):
   self.assertTrue(all(not x.get('external') for x in self.config()['volumes'].values()))
  def test_internal_network(self):self.assertTrue(self.config()['networks']['private']['internal'])
- def test_only_gateway_has_host_facing_network(self):
+ def test_only_web_has_authentication_egress_and_database_stays_private(self):
   services=self.config()['services']
   self.assertIn('loopback',services['gateway']['networks'])
-  for name in ('db','schema','web','notification-worker'):
+  self.assertEqual(services['web']['networks'],['private','auth-egress'])
+  self.assertNotIn('ports',services['web'])
+  self.assertFalse(self.config()['networks']['auth-egress'].get('internal',False))
+  self.assertFalse(self.config()['networks']['auth-egress'].get('external',False))
+  for name in ('db','schema','bootstrap','notification-worker','operations'):
    self.assertEqual(services[name]['networks'],['private'])
  def test_host_facing_network_defaults_to_loopback(self):
   opts=self.config()['networks']['loopback']['driver_opts']

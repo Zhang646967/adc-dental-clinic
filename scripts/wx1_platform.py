@@ -42,6 +42,7 @@ def apply_rc(values,root):
     source=path.read_text();updates={'RC_'+key:values.get('ADC_'+key,'') for key in KEYS}
     updates.update(RC_SMS_PROVIDER='cloudbase' if facts['sms_configuration_ready'] else 'disabled',RC_TEACHER_TEST_MODE='0')
     updates['RC_SMS_LIVE_TEST_LIMIT']=str(min(10,max(0,int(values.get('ADC_SMS_LIVE_TEST_LIMIT','10')))))
+    updates['RC_WECHAT_QR_ENV_VERSION']=values.get('ADC_WECHAT_QR_ENV_VERSION','develop')
     updates['RC_CLOUDBASE_REGION']=values.get('ADC_CLOUDBASE_REGION','ap-shanghai')
     lines=[];seen=set()
     for line in source.splitlines():

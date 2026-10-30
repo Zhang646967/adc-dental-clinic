@@ -29,8 +29,15 @@ def validate(root):
     for line in (root/'.rc/compose.env').read_text().splitlines():
         k,v=line.split('=',1);env[k]=v
     required={'RC_PROJECT','RC_APP_SECRET','RC_DB_PASSWORD','RC_WEB_PORT','RC_READ_ONLY'}
-    if not required<=set(env) or set(env)-required-{'RC_SMS_PROVIDER','RC_TEACHER_TEST_MODE'}:raise ValueError('Unexpected configuration keys.')
-    if env.get('RC_SMS_PROVIDER','disabled') not in ('disabled','demo') or env.get('RC_TEACHER_TEST_MODE','0') not in ('0','1'):raise ValueError('Invalid local authentication configuration.')
+    authentication={'RC_SMS_PROVIDER','RC_TEACHER_TEST_MODE','RC_PATIENT_AUTH_MODE','RC_PATIENT_IDENTITY_PROVIDER',
+        'RC_WECHAT_MINI_APP_ID','RC_WECHAT_MINI_APP_SECRET','RC_WECHAT_QR_ENV_VERSION','RC_CLOUDBASE_ENV_ID',
+        'RC_CLOUDBASE_REGION','RC_CLOUDBASE_PUBLISHABLE_KEY','RC_SMS_FREE_QUOTA_CONFIRMED',
+        'RC_SMS_ALLOWED_TEST_PHONES','RC_SMS_LIVE_TEST_LIMIT'}
+    if not required<=set(env) or set(env)-required-authentication:raise ValueError('Unexpected configuration keys.')
+    if env.get('RC_SMS_PROVIDER','disabled') not in ('disabled','demo','cloudbase') or env.get('RC_TEACHER_TEST_MODE','0') not in ('0','1'):raise ValueError('Invalid local authentication configuration.')
+    if env.get('RC_PATIENT_AUTH_MODE','demo') not in ('demo','live') or env.get('RC_PATIENT_IDENTITY_PROVIDER','disabled') not in ('disabled','local'):raise ValueError('Invalid patient authentication mode.')
+    if env.get('RC_PATIENT_AUTH_MODE')=='live' and (env.get('RC_SMS_PROVIDER')=='demo' or env.get('RC_PATIENT_IDENTITY_PROVIDER')=='local'):raise ValueError('Live authentication cannot use demonstration credentials.')
+    if env.get('RC_WECHAT_QR_ENV_VERSION','develop') not in ('develop','trial','release'):raise ValueError('Invalid WeChat code environment.')
     if env.get('RC_SMS_PROVIDER')=='demo' and env.get('RC_TEACHER_TEST_MODE')!='1':raise ValueError('Test SMS requires the explicit synthetic teacher flag.')
     if env['RC_PROJECT']!=project or len(env['RC_APP_SECRET'])<50 or len(env['RC_DB_PASSWORD'])<30:raise ValueError('Incomplete private configuration.')
     if env['RC_READ_ONLY'] not in ('0','1'):raise ValueError('Invalid read-only switch.')
