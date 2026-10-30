@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "layouts": [
+    {
+      "width": 375,
+      "font_percent": 100,
+      "passed": true
+    },
+    {
+      "width": 375,
+      "font_percent": 200,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "font_percent": 100,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "font_percent": 200,
+      "passed": true
+    },
+    {
+      "width": 430,
+      "font_percent": 100,
+      "passed": true
+    },
+    {
+      "width": 430,
+      "font_percent": 200,
+      "passed": true
+    }
+  ],
+  "keyboard_reaches_qr_refresh": true,
+  "sms_inputs_absent": true,
+  "staff_entry_absent": true,
+  "scope": "Real Chrome against installed gateway; physical phone separate"
+}

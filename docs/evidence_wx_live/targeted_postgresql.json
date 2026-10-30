@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "isolated_postgresql": true,
+  "existing_database_accessed": false,
+  "fixture_provider_responses": true,
+  "scope": "QR image formats, retained bytes, MIME delivery and existing ticket permissions/concurrency; not real provider acceptance",
+  "test_cases": 23,
+  "source_rules": 1158,
+  "unchanged_migration_files": 64
+}

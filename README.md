@@ -1,18 +1,20 @@
 # ADC 牙科连锁运营管理系统
 
+当前本机已接通真实微信登录与网站小程序确认（一个真实账号，官方开发者工具）；模拟短信关闭。手机、第二账号、教师体验及固定云端分别待验收。[后端就绪与WorkBuddy交接](docs/WX1_BACKEND_READY.md)。
+
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
 
 📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
 
-**当前D1：独立上线准备已验证。** 二十店空库初始化、同卷升级回退、加密独立恢复及原系统／教师保护更新完成；准确提交通过1,156项规则和2,096项PostgreSQL回归。报告228页，113项业务用例和31幅实际ER。服务器尚未购买，云端与真实微信／短信／手机分别待验收。[部署操作](docs/D1_CLOUD_RELEASE.md) · [执行证据与当前状态](docs/evidence_d1/README.md)。
+**D1历史交付：独立上线准备已验证。** 二十店空库初始化、同卷升级回退、加密独立恢复及原系统／教师保护更新完成；准确提交通过1,156项规则和2,096项PostgreSQL回归。报告228页，113项业务用例和31幅实际ER。该期服务器尚未购买，云端与真实微信／短信／手机分别待验收；当前本地微信结果见顶部。[部署操作](docs/D1_CLOUD_RELEASE.md) · [执行证据与当前状态](docs/evidence_d1/README.md)。
 
 患者主要入口为小程序：24页、主页／预约／就诊／我的，网站保留同等业务；二十店四类基础服务和60名医师画像已对齐。[患者指南](docs/P15_MINIPROGRAM_GUIDE.md)。教师账号私下交付，员工使用独立入口。
 
-教师查阅：课程报告 → [演示路线](docs/DEMO_ROUTES_RC1.md) → [当前证据](docs/evidence_d1/README.md)。以下保留各期历史交付及当时范围；旧临时域名不能当作当前固定地址。
+教师查阅：课程报告 → [演示路线](docs/DEMO_ROUTES_RC1.md) → [当前证据](docs/evidence_wx_live/README.md)。以下保留各期历史交付及当时范围；旧临时域名不能当作当前固定地址。
 
 **P1历史交付：医师与门店画像、二十店选诊和月度经营核算。** 八城二十店、60名新增医师、版本审核及轮诊、网站／小程序选医预约、独立成本复核与工时分摊均可试用；排班继续由前台负责。准确CI通过1,127项规则／2,071项PG，两轮30分钟容量及142表加密独立恢复通过。原本机与[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新，原业务与密码保留。[试用路线](docs/P1_TRIAL_GUIDE.md) · [业务设计](docs/P1_PROFILE_MANAGEMENT.md) · [完整证据](docs/evidence_p1/README.md)。该次报告224页；当前报告已更新至228页、113项业务用例和31幅实际ER，文件名不变。真实微信／短信与独立云端继续单独待验收。
 
-**WX1历史本地交付：** 小程序微信换码、网站小程序扫码确认、CloudBase短信与账号关联已实现并通过隔离验证；准确CI为1,122项规则／2,005项PG。原本机及[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新。**真实微信、真机扫码与实际短信仍待AppSecret及免费平台条件补齐。** [使用与联调](docs/WX1_GUIDE.md) · [分项交付证据](docs/evidence_wx1/README.md)。课程报告已更新为202页、101项业务用例和27幅实际ER；文件名不变。
+**WX1历史本地交付：** 小程序微信换码、网站小程序扫码确认、CloudBase短信与账号关联已实现并通过隔离验证；准确CI为1,122项规则／2,005项PG。原本机及[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新。**该期真实微信、真机扫码与实际短信尚待AppSecret及免费平台条件。** [使用与联调](docs/WX1_GUIDE.md) · [分项交付证据](docs/evidence_wx1/README.md)。课程报告已更新为202页、101项业务用例和27幅实际ER；文件名不变。
 
 **C6.1B/C 已在本机交付：原账单模拟结算、基金到账分配、差异跟进和撤销。** 准确CI、1,935项PostgreSQL回归、359项浏览器检查、五店二十账号三十分钟容量及129表加密恢复通过，原数据和70份配置保留。[完整证据](docs/evidence_c61bc/README.md)。[办理指南](docs/C61BC_LOCAL_GUIDE.md) · [业务合同](docs/C61BC_SETTLEMENT_CONTRACT.md)。
 
@@ -48,7 +50,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **新增患者服务中心与小程序候补衔接。** [页面与业务说明](docs/B153_PATIENT_SERVICE_CENTRE.md) · [执行证据](docs/evidence_b153/README.md)。
 
-**课程交付：原生微信小程序与教师云端演示。** [小程序工程与本地导入](clients/wechat/README.md)支持课程患者登录、预约、普通／邀约改期、候补登记、邀约处置、取消及历史，复用网站预约数据。[交付安排](docs/COURSE_TEACHER_DELIVERY.md)区分本地联调、微信体验版与云端验收：小程序账号尚未注册，服务器尚未购买，暂不宣称微信或云端已上线。
+**B1.5时点课程交付规划：原生微信小程序与教师云端演示。** [小程序工程与本地导入](clients/wechat/README.md)支持课程患者登录、预约、普通／邀约改期、候补登记、邀约处置、取消及历史，复用网站预约数据。[交付安排](docs/COURSE_TEACHER_DELIVERY.md)区分本地联调、微信体验版与云端验收：该时点小程序账号尚未注册、服务器尚未购买；当前已具备测试号并完成一个真实微信账号的本地联调，固定云端与教师体验仍待验收。
 
 **B1.4已实现：患者自助改期及候补替换。** 本人核对原新安排后明确确认，失败保留原约，重复提交返回唯一结果；与前台排班、资源、候补及真正取消的原因跟进衔接。[业务说明](docs/B14_PATIENT_RESCHEDULING.md) · [执行证据](docs/evidence_b14/README.md)。[数据库ER与完整目录](docs/database/README.md)同步129表、352条外键、103项触发器，二十六幅ER纳入课程报告；前台继续负责日常排班。
 
@@ -65,7 +67,7 @@ production patient care. Historical engineering and academic materials follow.
 
 **B1.2＋B1.3 已实现：电话接待与统一诊疗资源协同。** 前台办理咨询、建档、联系待办、患者同意与唯一成约；电话、网站、改期和候补共同核对服务时长、科室、医师、椅位及必要设备。维修保留原约，支持明确的兼容替换和到诊资源复核。[业务说明](docs/B12_B13_RECEPTION_RESOURCES.md) · [验收记录](docs/evidence_b12_b13/README.md) · [后续开发](docs/APPOINTMENT_BUSINESS_PLAN.md)。
 
-B1.4时点的历史报告共193页，包含96项业务用例及1项共享核验、115张表和59幅图；当前正式报告以顶部P1入口为准。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
+B1.4时点的历史报告共193页，包含96项业务用例及1项共享核验、115张表和59幅图；当前正式报告以顶部课程报告入口为准。小程序的32项真实接口／并发、五店客户端联调及网站结果核对见[早期证据](docs/evidence_b15/README.md)。B1.4历史验收包含1046项规则、1345项PostgreSQL／HTTP／并发，以及五店20患者连续30分钟9000请求、p95 0.453秒；其[容量与恢复范围](docs/evidence_b14/README.md)独立保留，不等同于小程序平台、公网或商业化认证。
 
 A Systems Analysis and Design（系统分析与设计）course project, covering dental
 clinic operations from appointments through care records, invoicing, operating

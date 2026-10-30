@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "checks": [
+    "Official mini-program JPEG/PNG is retained and displayed by the real website",
+    "A different browser cannot inspect or claim the original browser ticket",
+    "Fresh wx.login proof approves a ticket and the original website logs into the same ADC account",
+    "Website confirmation grants no automatic chart or clinical access",
+    "Repeated consumption is rejected after the successful login",
+    "Explicit mini-program rejection leaves the website anonymous"
+  ],
+  "real_official_qr": true,
+  "real_wechat_approval": true,
+  "accounts_tested": 1,
+  "physical_scan": "NOT_RUN",
+  "native_interaction": "Existing native page handlers in actual developer tools",
+  "request_ids": [
+    "e53bb9d811e147018121ffbbcb24bd7f",
+    "ada368f208eb408a991385668b955440"
+  ],
+  "clinical_financial_writes": 0,
+  "secrets_logged": false
+}

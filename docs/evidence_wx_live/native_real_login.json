@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "Native wx.login and official code2Session create an ADC session without a phone or password",
+    "Logout and new official WeChat code return the same ADC account and retained identity",
+    "Real authentication mode offers no simulated mobile login, OTP or binding",
+    "WeChat login grants no automatic patient chart or clinical authority"
+  ],
+  "accounts_tested": 1,
+  "real_provider_exchange": true,
+  "official_developer_tool": true,
+  "physical_phone": "NOT_RUN",
+  "second_real_wechat_account": "NOT_RUN",
+  "sms_sent": 0,
+  "booking_clinical_financial_writes": 0,
+  "secrets_logged": false,
+  "interaction_scope": "Existing native page handlers executed in the official developer tool with real platform and real installed backend; not physical device gestures."
+}

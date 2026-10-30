@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "tables": 142,
+  "foreign_keys": 388,
+  "enabled_triggers": 110,
+  "real_wechat_bindings": 1,
+  "automatically_created_patient_access": 0,
+  "automatically_granted_roles": 0
+}

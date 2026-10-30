@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "source_commit": "379286ecedafe334ae821886c53fc2e51bbe2c2b",
+  "empty_independent_database": true,
+  "same_version_migration_built_schema": true,
+  "encrypted_backup_decrypted": true,
+  "all_retained_business_and_authentication_rows_match": true,
+  "images_and_credential_references_preserved": true,
+  "real_wechat_jpeg_images_restored": 4,
+  "compared_model_groups": 139,
+  "tables": 142,
+  "foreign_keys": 388,
+  "enabled_triggers": 110,
+  "pending_authentication_invalidated_after_fact_comparison": true,
+  "elapsed_seconds": 16.373,
+  "source_database_unchanged": true,
+  "general_equivalent_ddl_comparison_limit_retained": true
+}

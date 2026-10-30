@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "host_configuration_commit": "379286ecedafe334ae821886c53fc2e51bbe2c2b",
+  "application_commit": "379286ecedafe334ae821886c53fc2e51bbe2c2b",
+  "application_image": "sha256:17e868bae12944d6ad5dc13af964d615b8ca8dd2836c59cb6c7208c3cdd390ec",
+  "request_id": "8677c83458714954ab24839e2110fd01",
+  "capabilities": {
+    "wechat_mini": true,
+    "wechat_phone": false,
+    "wechat_web": false,
+    "wechat_mp": false,
+    "wechat_qr": true,
+    "sms_captcha": false,
+    "sms_enabled": false,
+    "sms_demo": false,
+    "auth_mode": "live"
+  },
+  "official_credential_preflight": "PASS",
+  "original_business_groups_preserved": 139,
+  "database_container_and_volume_preserved": true,
+  "old_passwords_and_rows_preserved": true,
+  "only_authentication_configuration_changed": true,
+  "web_only_egress": true,
+  "migrations_changed": false,
+  "rc_tag_preserved": true,
+  "real_user_code_exchange": "RECORDED_SEPARATELY",
+  "authentication_row_deltas": {
+    "accounts.ExternalIdentity": 1,
+    "accounts.AccountIdentityEvent": 7,
+    "accounts.WebLoginTicket": 6,
+    "accounts.UserAccount": 1,
+    "care.AuditEvent": 7,
+    "clinical.SensitiveReadEvent": 8
+  },
+  "real_sms_sent": 0,
+  "teacher_instance_changed": false,
+  "full_host_fix_ci": "PASS",
+  "secrets_printed": false
+}
