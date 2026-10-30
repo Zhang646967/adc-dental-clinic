@@ -4,7 +4,7 @@ D1已只读核对原系统、教师、新初始化和恢复库：142表、388外
 
 # 当前数据库设计与ER图
 
-## P1 关系结构（继续沿用）
+## 历史 P1 关系结构（原视图继续沿用）
 
 64份追加式应用迁移形成142张SQL表、388条外键及110项业务触发器；原62份迁移保持原字节。当前31幅实际ER在正式报告中可查，四个P1视图为[身份任职](er_profile_affiliation.svg)、[公开画像](er_public_profiles.svg)、[预约资源](er_profile_booking.svg)及[月度经营核算](er_monthly_management.svg)。[字段与约束](FIELD_CATALOG.md)、[外键目录](RELATIONSHIPS.md)、[DBML](schema.dbml)与结构快照同步。JSON来源快照是逻辑追踪，不伪造SQL关系。执行与安装范围见[P1证据](../evidence_p1/README.md)。
 

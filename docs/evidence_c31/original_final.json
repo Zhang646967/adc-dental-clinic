@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "application_commit": "90ddb5c7ca5f6dfbc4357ef958f37715a8867719",
+  "application_image": "sha256:3b17edf500e0f90b7e0ac71470179227d0f8579227b3d7729d32de75bd8a9d43",
+  "original_model_groups": 139,
+  "all_original_rows_and_password_hashes_preserved": true,
+  "allowed_metadata_and_access_audit_additions": {
+    "auth.Permission": 16,
+    "contenttypes.ContentType": 4,
+    "accounts.WebLoginTicket": 1,
+    "clinical.SensitiveReadEvent": 15
+  },
+  "new_clinical_document_rows_added_to_original": 0,
+  "original_configuration_unchanged": true,
+  "old_migration_bytes_preserved": 64,
+  "django_check": true,
+  "no_unmade_migrations": true,
+  "services": 5,
+  "no_oom": true,
+  "after_backup_encrypted": true,
+  "after_backup_decryption_inventory_verified": true,
+  "one_unapproved_login_page_qr_ticket": true,
+  "independent_populated_restore": "populated-recovery.json",
+  "independent_original_upgrade": "original-upgrade-recovery.json",
+  "teacher_instance_unchanged": true
+}

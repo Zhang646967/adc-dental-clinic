@@ -1,10 +1,10 @@
-C3.1本地验证候选：[初复诊病历文书、医师确认、更正与待办](docs/C31_CLINICAL_DOCUMENT_CONTRACT.md) · [本批证据](docs/evidence_c31/README.md) · [WorkBuddy小程序跟进](docs/WORKBUDDY_C31_TASK.md)。尚待准确提交CI、恢复和保护更新；运行系统仍见下方WX1交付。
+C3.1已交付：[初复诊文书、医师确认、历史比较、更正与待办](docs/C31_CLINICAL_DOCUMENT_CONTRACT.md) · [验证与交付](docs/evidence_c31/README.md) · [WorkBuddy小程序任务](docs/WORKBUDDY_C31_TASK.md)。本机已更新，正式报告240页／120业务用例／33幅实际ER。
 
 # ADC 牙科连锁运营管理系统
 
 当前本机已接通真实微信登录与网站小程序确认（一个真实账号，官方开发者工具）；模拟短信关闭。手机、第二账号、教师体验及固定云端分别待验收。[后端就绪与WorkBuddy交接](docs/WX1_BACKEND_READY.md)。
 
-下一阶段：[C3病历、知情同意与归档规划](docs/C3_RECORD_CONSENT_ARCHIVE_PLAN.md)，按病历文书、医疗同意、受控归档分批实施；当前为规划，未变更运行版本或权限。
+下一阶段：[C3病历、知情同意与归档规划](docs/C3_RECORD_CONSENT_ARCHIVE_PLAN.md)，按病历文书、医疗同意、受控归档分批实施；C3.1已交付，下一批细化C3.2告知、适格签署人及明确决定。
 
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
 
@@ -14,7 +14,7 @@ C3.1本地验证候选：[初复诊病历文书、医师确认、更正与待办
 
 患者主要入口为小程序：24页、主页／预约／就诊／我的，网站保留同等业务；二十店四类基础服务和60名医师画像已对齐。[患者指南](docs/P15_MINIPROGRAM_GUIDE.md)。教师账号私下交付，员工使用独立入口。
 
-教师查阅：课程报告 → [演示路线](docs/DEMO_ROUTES_RC1.md) → [当前证据](docs/evidence_wx_live/README.md)。以下保留各期历史交付及当时范围；旧临时域名不能当作当前固定地址。
+教师查阅：课程报告 → [演示路线](docs/DEMO_ROUTES_RC1.md) → [当前证据](docs/evidence_c31/README.md)。以下保留各期历史交付及当时范围；旧临时域名不能当作当前固定地址。
 
 **P1历史交付：医师与门店画像、二十店选诊和月度经营核算。** 八城二十店、60名新增医师、版本审核及轮诊、网站／小程序选医预约、独立成本复核与工时分摊均可试用；排班继续由前台负责。准确CI通过1,127项规则／2,071项PG，两轮30分钟容量及142表加密独立恢复通过。原本机与[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新，原业务与密码保留。[试用路线](docs/P1_TRIAL_GUIDE.md) · [业务设计](docs/P1_PROFILE_MANAGEMENT.md) · [完整证据](docs/evidence_p1/README.md)。该次报告224页；当前报告已更新至228页、113项业务用例和31幅实际ER，文件名不变。真实微信／短信与独立云端继续单独待验收。
 

@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "application_commit": "90ddb5c7ca5f6dfbc4357ef958f37715a8867719",
+  "application_image": "sha256:3b17edf500e0f90b7e0ac71470179227d0f8579227b3d7729d32de75bd8a9d43",
+  "host_configuration_commit": "90ddb5c7ca5f6dfbc4357ef958f37715a8867719",
+  "exact_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41015873261",
+  "original_business_groups_preserved": 139,
+  "all_original_rows_and_password_hashes_preserved": true,
+  "database_container_and_volume_preserved": true,
+  "private_runtime_configuration_unchanged": true,
+  "rc_tag_preserved": true,
+  "prior_observation_history_encrypted_and_retained": true,
+  "fresh_six_conditions": "HEALTHY",
+  "application_migrations": 65,
+  "old_migration_bytes_preserved": 64,
+  "full_actual_schema_matches": true,
+  "framework_metadata_added_without_grants": {
+    "auth.Permission": 16,
+    "contenttypes.ContentType": 4
+  },
+  "new_document_tables_empty": true,
+  "auth_mode": "live",
+  "wechat_mini_ready": true,
+  "sms_enabled": false,
+  "sms_demo": false,
+  "teacher_instance_changed": false,
+  "physical_phone": "NOT_RUN_THIS_BATCH",
+  "real_sms_sent": 0
+}

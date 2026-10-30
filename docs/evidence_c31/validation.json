@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_VALIDATED_RELEASE_PENDING",
+  "status": "LOCAL_DELIVERED_SYNTHETIC",
   "local_rules": 1158,
   "local_full_postgresql": 2132,
   "final_c31_postgresql_http": 34,
@@ -8,10 +8,10 @@
   "tables": 146,
   "foreign_keys": 402,
   "triggers": 114,
-  "exact_ci": "PENDING",
-  "same_image_browser": "PENDING",
-  "encrypted_independent_restore": "PENDING",
-  "original_update": "PENDING",
+  "exact_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41015873261",
+  "same_image_browser": "35_PASS",
+  "encrypted_independent_restore": "PASS_143_GROUPS",
+  "original_update": "PASS_139_ORIGINAL_GROUPS_PRESERVED",
   "clinical_data": "SYNTHETIC_ONLY",
   "clinical_consent": "C3.2_NOT_IMPLEMENTED",
   "reliable_electronic_signature": "NOT_IMPLEMENTED",
@@ -20,5 +20,7 @@
   "new_capacity": "C3.4_NOT_RUN",
   "historical_windows_recovery": "UNRESOLVED",
   "historical_observation": "RETAINED",
-  "general_ddl_comparator_limit": "RETAINED"
+  "general_ddl_comparator_limit": "RETAINED",
+  "original_copy_upgrade": "PASS",
+  "installed_browser": "21_PASS"
 }

@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "origin": "http://127.0.0.1:18000",
+  "checks": [
+    {
+      "name": "PATIENT original account login",
+      "passed": true
+    },
+    {
+      "name": "PATIENT clinical worklist rejected",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK original account login",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK clinical worklist rejected",
+      "passed": true
+    },
+    {
+      "name": "DENTIST original account login",
+      "passed": true
+    },
+    {
+      "name": "installed doctor navigation",
+      "passed": true
+    },
+    {
+      "name": "installed queue pending",
+      "passed": true
+    },
+    {
+      "name": "installed queue overdue",
+      "passed": true
+    },
+    {
+      "name": "installed queue confirmed",
+      "passed": true
+    },
+    {
+      "name": "installed queue all",
+      "passed": true
+    },
+    {
+      "name": "installed worklist width 375",
+      "passed": true
+    },
+    {
+      "name": "installed worklist width 390",
+      "passed": true
+    },
+    {
+      "name": "installed worklist width 430",
+      "passed": true
+    },
+    {
+      "name": "MANAGER original account login",
+      "passed": true
+    },
+    {
+      "name": "MANAGER clinical worklist rejected",
+      "passed": true
+    },
+    {
+      "name": "HQ original account login",
+      "passed": true
+    },
+    {
+      "name": "HQ clinical worklist rejected",
+      "passed": true
+    },
+    {
+      "name": "FINANCE original account login",
+      "passed": true
+    },
+    {
+      "name": "FINANCE clinical worklist rejected",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN original account login",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN clinical worklist rejected",
+      "passed": true
+    }
+  ],
+  "js_errors": 0,
+  "scope": "Original installed accounts and empty C3.1 worklist; no clinical fixtures or cash writes added"
+}

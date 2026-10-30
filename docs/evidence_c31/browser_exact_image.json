@@ -1,0 +1,147 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "doctor task entry",
+      "passed": true
+    },
+    {
+      "name": "initial confirmed exact document",
+      "passed": true
+    },
+    {
+      "name": "historical before and after",
+      "passed": true
+    },
+    {
+      "name": "retained printable original",
+      "passed": true
+    },
+    {
+      "name": "followup editable draft",
+      "passed": true
+    },
+    {
+      "name": "followup exact doctor confirmation",
+      "passed": true
+    },
+    {
+      "name": "append-only amendment draft",
+      "passed": true
+    },
+    {
+      "name": "document layout 375 100",
+      "passed": true
+    },
+    {
+      "name": "document layout 375 200",
+      "passed": true
+    },
+    {
+      "name": "document layout 390 100",
+      "passed": true
+    },
+    {
+      "name": "document layout 390 200",
+      "passed": true
+    },
+    {
+      "name": "document layout 430 100",
+      "passed": true
+    },
+    {
+      "name": "document layout 430 200",
+      "passed": true
+    },
+    {
+      "name": "keyboard field sequence",
+      "passed": true
+    },
+    {
+      "name": "comparison layout 375",
+      "passed": true
+    },
+    {
+      "name": "comparison layout 390",
+      "passed": true
+    },
+    {
+      "name": "comparison layout 430",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK denied /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK denied /clinical/encounters/1/document/",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK denied /clinical/encounters/1/document/print/",
+      "passed": true
+    },
+    {
+      "name": "MANAGER denied /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "MANAGER denied /clinical/encounters/1/document/",
+      "passed": true
+    },
+    {
+      "name": "MANAGER denied /clinical/encounters/1/document/print/",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN denied /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN denied /clinical/encounters/1/document/",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN denied /clinical/encounters/1/document/print/",
+      "passed": true
+    },
+    {
+      "name": "PATIENT denied /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "PATIENT denied /clinical/encounters/1/document/",
+      "passed": true
+    },
+    {
+      "name": "PATIENT denied /clinical/encounters/1/document/print/",
+      "passed": true
+    },
+    {
+      "name": "FINANCE denied /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "FINANCE denied /clinical/encounters/1/document/",
+      "passed": true
+    },
+    {
+      "name": "FINANCE denied /clinical/encounters/1/document/print/",
+      "passed": true
+    },
+    {
+      "name": "HQ denied /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "HQ denied /clinical/encounters/1/document/",
+      "passed": true
+    },
+    {
+      "name": "HQ denied /clinical/encounters/1/document/print/",
+      "passed": true
+    }
+  ],
+  "js_errors": 0,
+  "scope": "exact-image real Chrome and Django/PostgreSQL; physical mini-program deployment separate"
+}

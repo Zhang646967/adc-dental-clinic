@@ -39971,6 +39971,6 @@
     }
   ],
   "observed_on": "2026-10-29",
-  "observed_scope": "Read-only independent PostgreSQL17 C3.1 candidate after65 application migrations; no business rows or private configuration exported.",
-  "application_commit": "C31_WORKING_TREE_CANDIDATE"
+  "observed_scope": "Read-only independent PostgreSQL17 with exact C3.1 application image after65 application migrations; no business rows or private configuration exported.",
+  "application_commit": "90ddb5c7ca5f6dfbc4357ef958f37715a8867719"
 }
