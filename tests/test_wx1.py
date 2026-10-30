@@ -1,6 +1,7 @@
 """Real PostgreSQL contracts; mocked provider responses do not prove platform access."""
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from io import BytesIO
 from threading import Barrier
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -128,6 +129,23 @@ class WebLoginTests(FixtureMixin,TransactionTestCase):
     def test_mini_without_account_login_cannot_see_destination(self):
         _,row=self.start();client=Client();response=client.get('/api/mini/v1/account/web-login/',{'ticket':row.pk.hex})
         self.assertEqual(response.status_code,401);self.assertNotIn(row.origin,response.content.decode())
+    def test_official_jpeg_and_existing_png_codes_survive_storage_and_http_delivery(self):
+        for raw,mime in ((b'\xff\xd8\xfffixture-jpeg','image/jpeg'),(b'\x89PNG\r\n\x1a\nfixture-png','image/png')):
+            with self.subTest(mime=mime):
+                client=Client();client.get('/portal/login/')
+                opener=SimpleNamespace(open=lambda request,**kwargs:BytesIO(raw))
+                with patch.object(providers,'mini_access_token',return_value='fixture-token'),patch.object(providers,'build_opener',return_value=opener):
+                    response=client.post('/portal/auth/wechat/qr/start/')
+                self.assertEqual(response.status_code,200)
+                data=response.json()['data'];row=WebLoginTicket.objects.get(pk=data['ticket'])
+                self.assertEqual(bytes(row.image),raw)
+                image=client.get(data['image']);self.assertEqual(image.status_code,200)
+                self.assertEqual(image['Content-Type'],mime);self.assertEqual(image['Cache-Control'],'no-store');self.assertEqual(image.content,raw)
+                self.assertEqual(Client().get(data['image']).status_code,403)
+    def test_qr_provider_errors_and_oversized_images_are_not_accepted_as_codes(self):
+        for raw in (b'{"errcode":40001,"errmsg":"fixture"}',b'\xff\xd8\xff'+b'x'*1048576):
+            with self.subTest(bytes=len(raw)),patch.object(providers,'mini_access_token',return_value='fixture-token'),patch.object(providers,'build_opener',return_value=SimpleNamespace(open=lambda request,**kwargs:BytesIO(raw))):
+                with self.assertRaises(RuleError):providers.mini_login_image('a'*32)
     @override_settings(ADC_READ_ONLY=True)
     def test_readonly_refuses_ticket_writes(self):
         with self.assertRaises(PermissionDenied):self.start()

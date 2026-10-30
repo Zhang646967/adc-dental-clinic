@@ -23,7 +23,8 @@ def status(request):return result(request,web_login.describe(web_login.browser_t
 def image(request):
     row=web_login.browser_ticket(request,request.GET.get('ticket'))
     if web_login.describe(row)['state']!='PENDING':raise RuleError('二维码已办理或过期，请重新生成。')
-    response=HttpResponse(bytes(row.image),content_type='image/png');response['Cache-Control']='no-store'
+    raw=bytes(row.image)
+    response=HttpResponse(raw,content_type=auth_providers.mini_image_content_type(raw));response['Cache-Control']='no-store'
     return response
 
 

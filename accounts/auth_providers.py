@@ -71,10 +71,17 @@ def mini_login_image(scene):
     req=Request('https://api.weixin.qq.com/wxa/getwxacodeunlimit?'+urlencode({'access_token':token}),data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
     try:
         with build_opener(NoRedirect).open(req,timeout=10) as response:raw=response.read(1048577)
-        if len(raw)>1048576 or not raw.startswith(b'\x89PNG\r\n\x1a\n'):raise ValueError
+        if len(raw)>1048576:raise ValueError
+        mini_image_content_type(raw)
         return raw
     except (HTTPError,URLError,TimeoutError,OSError,ValueError):
         raise RuleError('暂未取得微信小程序码，请刷新重试或使用其他登录方式。') from None
+
+
+def mini_image_content_type(raw):
+    if raw.startswith(b'\x89PNG\r\n\x1a\n'):return 'image/png'
+    if raw.startswith(b'\xff\xd8\xff'):return 'image/jpeg'
+    raise RuleError('暂未取得微信小程序码，请刷新重试或使用其他登录方式。')
 
 
 @sensitive_variables()
