@@ -1,7 +1,8 @@
 const navigation=require('../../utils/navigation');
 const api = require('../../utils/api');
-const {showError} = require('../../utils/format');
+const {showError: presentError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
+function showError(page,error){presentError(page,error,{stayOnLogin:true});}
 Page({
   data: {smsMode:false,realSmsAvailable:false,captchaKey:'',captchaImage:'',passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
   async onLoad() {
@@ -10,7 +11,7 @@ Page({
   },
   field(e) { this.setData({[e.currentTarget.dataset.field]: e.detail.value}); },
   toggleSms(){this.setData({smsMode:!this.data.smsMode});},
-  async captcha(){try{const result=await api.request('auth/sms/captcha/','POST',{});this.setData({captchaImage:result.image,captchaKey:''});}catch(e){showError(this,e);}},
+  async captcha(){try{await api.bootstrap();const result=await api.request('auth/sms/captcha/','POST',{});this.setData({captchaImage:result.image,captchaKey:''});}catch(e){showError(this,e);}},
   togglePassword(){this.setData({passwordMode:!this.data.passwordMode,password:'',error:''});},
   consent(e){this.setData({localConfirmed:e.detail.value.includes('agree')});},
   authConsent(e){this.setData({authConfirmed:e.detail.value.includes('agree')});},
@@ -19,6 +20,7 @@ Page({
     if(!this.data.authConfirmed){this.setData({error:'请先同意使用微信身份登录本人患者账号。'});return;}
     this.setData({busy:true,error:''});
     try{
+      await api.bootstrap();
       const credential=await new Promise((resolve,reject)=>wx.login({success:resolve,fail:()=>reject(new Error('微信登录未完成，请重新点击授权。'))}));
       const session=await api.request('auth/wechat/','POST',{code:credential.code,confirmed:'on',username:this.data.username.trim(),password:this.data.password});
       navigation.reLaunch({url:intent.destination(getApp(),session)});
@@ -30,6 +32,7 @@ Page({
     if(!this.data.authConfirmed){this.setData({error:'请先同意接收验证码并办理本人账号。'});return;}
     this.setData({busy:true,error:''});
     try{
+      await api.bootstrap();
       const sent=await api.request('auth/sms/send/','POST',{phone:this.data.phone,confirmed:'on',captcha_key:this.data.captchaKey});
       if(sent.demo)throw new Error('短信服务配置已变化，请重新进入登录页。');
       this.setData({smsChallenge:sent.challenge,smsCode:'',smsNotice:'验证码已提交发送，'+Math.ceil((sent.expires_seconds||300)/60)+'分钟内有效；60秒后可重发。'});
@@ -41,6 +44,7 @@ Page({
     if(!this.data.authConfirmed||!this.data.smsChallenge||!this.data.smsCode){this.setData({error:'请获取并填写验证码，确认同意后继续。'});return;}
     this.setData({busy:true,error:''});
     try{
+      await api.bootstrap();
       const session=await api.request('auth/sms/confirm/','POST',{phone:this.data.phone,challenge:this.data.smsChallenge,code:this.data.smsCode,confirmed:'on'});
       navigation.reLaunch({url:intent.destination(getApp(),session)});
     }catch(e){showError(this,e);}finally{this.setData({busy:false,smsCode:'',smsNotice:''});}

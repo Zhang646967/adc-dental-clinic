@@ -8,9 +8,9 @@ function waitEntry(v) {
   return Object.assign({}, v, {startLabel:dateTime(v.earliest), endLabel:dateTime(v.latest),
     offers:v.offers.map(o=>Object.assign(arrangement(o), {expiresLabel:dateTime(o.expires)}))});
 }
-function showError(page, error) {
+function showError(page, error, {stayOnLogin = false} = {}) {
   page.setData({error: error.message, busy: false});
   if(error.code==='SUBJECT_REQUIRED'){wx.reLaunch({url:'/pages/patients/index'});return;}
-  if (error.status === 401) wx.reLaunch({url:'/pages/login/index'});
+  if (error.status === 401 && !stayOnLogin) wx.reLaunch({url:'/pages/login/index'});
 }
 module.exports = {dateTime, arrangement, waitEntry, showError};

@@ -4,19 +4,34 @@ const root=path.resolve(__dirname,'../clients/wechat/miniprogram'),intent=requir
 const plain=x=>JSON.parse(JSON.stringify(x)),pending={authenticated:false,account_authenticated:true,account_name:'synthetic-account',workspace_id:'account-a',subject_revision:0,read_only:false,identity_provider:'local'};
 const profile={account_name:'synthetic-account',enrollment_required:true,password_ready:false,phone:null,identities:[{id:5,revision:1,provider:'LOCAL'}],cases:[]};
 function page(name,options={}){
- let definition;const calls=[],navigation=[],session={...pending,...options.session},state={globalData:{review:null,bookingIntent:null}};
+ let definition,bootstraps=0;const calls=[],navigation=[],session={...pending,...options.session},state={globalData:{review:null,bookingIntent:null}};
  const wx={...Object.fromEntries(['navigateTo','reLaunch','redirectTo'].map(m=>[m,o=>navigation.push({method:m,...o})])),showModal:o=>o.success({confirm:options.consent!==false}),login:o=>options.wechatError?o.fail():o.success({code:'provider-one-use-code'})};
- const api={bootstrap:async()=>session,sessionInfo:()=>session,signOut:async()=>{},localSignIn:async(code,username,password,confirmed)=>{
+ const api={bootstrap:async()=>{bootstraps++;return session;},sessionInfo:()=>session,signOut:async()=>{},signIn:async(username,password)=>{
+  calls.push({route:'login/',data:{username,password}});if(options.loginError)throw options.loginError;return session;
+ },localSignIn:async(code,username,password,confirmed)=>{
   calls.push({route:'account/local-login/',data:{code,username,password,confirmed}});if(options.loginError)throw options.loginError;return session;
  },request:async(route,method='GET',data)=>{calls.push({route,method,data});if(options.request)return options.request(route,method,data);if(route==='account/')return plain(profile);if(route==='discovery/')return {clinics:[{id:1,name:'合成长沙一店'},{id:2,name:'合成长沙二店'}]};throw Error('Unexpected '+route);}};
  const format={exports:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
  vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,require:n=>n.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:n.endsWith('/api')?api:n.endsWith('/format')?format.exports:intent});
  const p={...definition,data:plain(definition.data),setData:v=>Object.assign(p.data,v)};
- return {p,session,calls,navigation,state};
+ return {p,session,calls,navigation,state,get bootstraps(){return bootstraps;}};
 }
 const input=(field,value)=>({currentTarget:{dataset:{field}},detail:{value}});
 async function verify(){
  const details=[];const test=async(n,f)=>{await f();details.push(n);};
+ await test('Failed WeChat account association stays on login with its error and can retry with fresh context',async()=>{
+  let attempts=0;const denied=Object.assign(new Error('账号或密码核对未通过（查询编号 trial-request）'),{status:401});
+  const d=page('login',{session:{account_authenticated:false},request:async()=>{if(++attempts===1)throw denied;return {...pending,authenticated:true};}});
+  intent.remember(d.state,22,2);d.p.setData({authConfirmed:true,passwordMode:true,username:'old-patient',password:'wrong-password'});
+  await d.p.wechatLogin();assert.equal(d.p.data.error,denied.message);assert.equal(d.p.data.password,'');assert.equal(d.p.data.username,'old-patient');assert.equal(d.p.data.passwordMode,true);assert.equal(d.p.data.authConfirmed,true);assert.equal(d.p.data.busy,false);assert.equal(d.navigation.length,0);assert.equal(d.bootstraps,1);assert.equal(d.state.globalData.bookingIntent.service,22);
+  d.p.setData({password:'correct-password'});await d.p.wechatLogin();assert.equal(d.bootstraps,2);assert.equal(d.calls.length,2);assert.equal(d.p.data.error,'');assert.equal(d.p.data.password,'');assert.equal(d.navigation.length,1);assert(d.navigation[0].url.includes('/pages/booking/index?service=22&clinic=2'));assert.equal(d.state.globalData.bookingIntent,null);
+ });
+ await test('Wrong original password remains visible without resetting the login form',async()=>{
+  const denied=Object.assign(new Error('账号或密码核对未通过'),{status:401});const d=page('login',{session:{account_authenticated:false},loginError:denied});d.p.setData({username:'original-patient',password:'wrong-password',passwordMode:true});await d.p.login();assert.equal(d.p.data.error,denied.message);assert.equal(d.p.data.username,'original-patient');assert.equal(d.p.data.password,'');assert.equal(d.p.data.passwordMode,true);assert.equal(d.p.data.busy,false);assert.equal(d.navigation.length,0);
+ });
+ await test('Expired protected-page sessions still return to login and subject selection remains enforced',async()=>{
+  const d=page('account',{request:async()=>{throw Object.assign(new Error('请先登录'),{status:401});}});await d.p.onShow();assert.equal(d.navigation[0].url,'/pages/login/index');assert.equal(d.p.data.profile,null);
+ });
  await test('pending login preserves service intent while opening enrollment account',async()=>{
   const d=page('login');intent.remember(d.state,22,2);await d.p.onLoad();assert.equal(d.navigation[0].url,'/pages/account/index');assert.equal(d.state.globalData.bookingIntent.service,22);
  });
