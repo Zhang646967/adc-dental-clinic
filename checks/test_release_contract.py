@@ -60,13 +60,13 @@ class ReleaseContractTests(unittest.TestCase):
  def test_no_external_volumes(self):
   self.assertTrue(all(not x.get('external') for x in self.config()['volumes'].values()))
  def test_internal_network(self):self.assertTrue(self.config()['networks']['private']['internal'])
- def test_only_web_has_authentication_egress_and_database_stays_private(self):
+ def test_web_uses_existing_gateway_network_for_authentication_and_database_stays_private(self):
   services=self.config()['services']
   self.assertIn('loopback',services['gateway']['networks'])
-  self.assertEqual(services['web']['networks'],['private','auth-egress'])
+  self.assertEqual(services['web']['networks'],['private','loopback'])
   self.assertNotIn('ports',services['web'])
-  self.assertFalse(self.config()['networks']['auth-egress'].get('internal',False))
-  self.assertFalse(self.config()['networks']['auth-egress'].get('external',False))
+  self.assertFalse(self.config()['networks']['loopback'].get('internal',False))
+  self.assertFalse(self.config()['networks']['loopback'].get('external',False))
   for name in ('db','schema','bootstrap','notification-worker','operations'):
    self.assertEqual(services[name]['networks'],['private'])
  def test_host_facing_network_defaults_to_loopback(self):

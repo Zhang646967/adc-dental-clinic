@@ -14,7 +14,7 @@ python3 scripts/wx1_platform.py status --private-config '/Users/zhang/Downloads/
 
 小程序测试号的凭据在[微信官方测试号管理页](https://mp.weixin.qq.com/wxamp/sandbox?doc=1)由本人扫码查看；核对AppID与工程一致，再将AppSecret填写到`ADC_WECHAT_MINI_APP_SECRET=`右侧。CloudBase环境编号是短信配置，不是微信密钥。格式检查只确认输入存在；官方接口返回、真实换码和最终账号映射必须另行验证。
 
-本机模拟器可以先连接`http://127.0.0.1:18000`完成真实微信换码，不以云服务器或固定域名为前提。RC配置校验接受微信及CloudBase配置，live模式拒绝演示短信和本地身份替身。仅Web服务接入额外的`auth-egress`出站网络；数据库、迁移、通知和监测仍在内部网络，Web不发布端口。独立G4模板原有Web出站网络保持不变。
+本机模拟器可以先连接`http://127.0.0.1:18000`完成真实微信换码，不以云服务器或固定域名为前提。RC配置校验接受微信及CloudBase配置，live模式拒绝演示短信和本地身份替身。Web复用网关现有的`loopback`网络提供出站连接，无需新建网络；数据库、迁移、通知和监测仍在内部网络，Web不发布端口。独立G4模板原有Web出站网络保持不变。
 
 应用前保留加密数据库与配置备份；使用已通过验证的相同应用镜像重建Web和运行处理服务，再重建网关以刷新Web地址。核对`/api/mini/v1/session/`中的`auth_mode=live`、`wechat_mini=true`、`sms_demo=false`。能力字段只证明配置已加载；还需实际执行`wx.login → code2Session → ADC会话`。未开通真实短信时使用`ADC_SMS_PROVIDER=disabled`，不显示或发送测试验证码。
 
