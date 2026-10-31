@@ -1,0 +1,9 @@
+{
+  "build_method": "Frozen source with unchanged requirements and retained accepted dependency image; clean pip rebuild failed provider availability",
+  "base_image": "sha256:e3bf3805ef6c8fa00a7e7da95f09483de86c49d1a49e77500e8a022145c749ae",
+  "requirements_identical": true,
+  "clean_local_pip_rebuild": "FAILED_DEPENDENCY_PROVIDER_AVAILABILITY_NO_VERSION_CHANGED",
+  "hosted_exact_ci": "PASS",
+  "local_frozen_image": "PASS",
+  "target_cloud_build": "PENDING_TARGET_ENVIRONMENT"
+}

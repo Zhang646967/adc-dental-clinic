@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "scope": "Real Chrome and actual native API HTTP against frozen isolated image; not WeChat IDE or physical phone",
+  "origin": "http://127.0.0.1:18342",
+  "checks": [
+    {
+      "name": "Own website reads eight exact-version medical explanation fields",
+      "passed": true
+    },
+    {
+      "name": "Real patient question becomes pending and agreement is unavailable",
+      "passed": true
+    },
+    {
+      "name": "Physician website queue and answer resolve concern without signing for patient",
+      "passed": true
+    },
+    {
+      "name": "Real patient website agreement is visible through unchanged native HTTP transport",
+      "passed": true
+    },
+    {
+      "name": "Withdrawal preserves original agreement and its source",
+      "passed": true
+    },
+    {
+      "name": "New explanation is pending and does not inherit old agreement",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 375px 100% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 375px 200% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 390px 100% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 390px 200% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 430px 100% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 430px 200% text",
+      "passed": true
+    },
+    {
+      "name": "Website keyboard focus reaches actionable controls",
+      "passed": true
+    },
+    {
+      "name": "Other patient cannot read medical consent",
+      "passed": true
+    },
+    {
+      "name": "Appointment guardian gains no clinical access",
+      "passed": true
+    },
+    {
+      "name": "front_a medical consent denied",
+      "passed": true
+    },
+    {
+      "name": "manager_a medical consent denied",
+      "passed": true
+    },
+    {
+      "name": "hq_demo medical consent denied",
+      "passed": true
+    },
+    {
+      "name": "finance_demo medical consent denied",
+      "passed": true
+    },
+    {
+      "name": "tech_demo medical consent denied",
+      "passed": true
+    }
+  ],
+  "visit": 13,
+  "plan": 3,
+  "step": 7,
+  "post_browser_current_version": 8,
+  "js_errors": 0
+}

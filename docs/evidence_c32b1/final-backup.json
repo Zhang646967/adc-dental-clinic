@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+  "image": "sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a",
+  "original_model_groups_preserved": 143,
+  "all_old_rows_and_password_hashes_preserved": true,
+  "ordinary_read_and_login_audit_additions": {
+    "auth.Permission": 12,
+    "contenttypes.ContentType": 3,
+    "accounts.WebLoginTicket": 1,
+    "clinical.SensitiveReadEvent": 16
+  },
+  "no_new_clinical_or_financial_facts": true,
+  "all_65_migration_bytes_preserved": true,
+  "configuration_archive_includes_file_secret": true,
+  "encrypted_configuration_roundtrip_verified": true,
+  "restored_file_readable_by_uid10001": true,
+  "secret_not_exported_to_environment": true,
+  "django_check": true,
+  "no_unmade_migrations": true,
+  "post_update_database_encrypted": true,
+  "post_update_independent_restore": "PASSED",
+  "all_66_migration_bytes_checked": true,
+  "legacy_all65_field_note": "Retained subset label; actual assertion checked66 files"
+}

@@ -183,6 +183,20 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
+      "table": "adc_consent_event",
+      "name": "consent_event_retained",
+      "definition": "CREATE TRIGGER consent_event_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_consent_event FOR EACH ROW EXECUTE FUNCTION adc_consent_event_guard()",
+      "function": "adc_consent_event_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_event_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE pid bigint;\nBEGIN\n IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Medical decisions and communication are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_consent_version WHERE id=NEW.version_id AND consent_id=NEW.consent_id) THEN\n  RAISE EXCEPTION 'Medical event must belong to its explanation';\n END IF;\n SELECT (patient_snapshot->>'id')::bigint INTO pid FROM adc_consent_version WHERE id=NEW.version_id;\n IF NEW.source='SELF_ACCOUNT' AND (NEW.action NOT IN ('QUESTION','AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NOT EXISTS(SELECT 1 FROM adc_patient_access WHERE id=NEW.self_access_id AND user_id=NEW.actor_id AND patient_id=pid)) THEN\n  RAISE EXCEPTION 'Self medical decision must reference its own patient authority';\n END IF;\n IF (NEW.action IN ('PUBLISHED','ANSWER') AND NEW.source<>'DOCTOR_ACCOUNT') OR\n (NEW.source='DOCTOR_ACCOUNT' AND NEW.action NOT IN ('PUBLISHED','ANSWER')) OR\n (NEW.action='ANSWER') IS DISTINCT FROM (NEW.reply_to_id IS NOT NULL) THEN\n  RAISE EXCEPTION 'Medical replies require an explicit question and clinician source';\n END IF;\n IF NEW.reply_to_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_event\n WHERE id=NEW.reply_to_id AND consent_id=NEW.consent_id AND action='QUESTION') THEN\n  RAISE EXCEPTION 'Medical reply must reference a question in the same case';\n END IF;\n IF NEW.source='PAPER_REFERENCE' AND (NEW.reference='' OR NEW.action NOT IN ('AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NEW.occurred_at<(SELECT recorded_at FROM adc_consent_version WHERE id=NEW.version_id)) THEN\n  RAISE EXCEPTION 'Paper decisions require an original reference and honest occurrence time';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "consent_version_retained",
+      "definition": "CREATE TRIGGER consent_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_consent_version FOR EACH ROW EXECUTE FUNCTION adc_consent_version_guard()",
+      "function": "adc_consent_version_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_version_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE sid bigint; pid bigint; cid bigint;\nBEGIN\n IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Medical explanation versions are retained'; END IF;\n SELECT c.step_id,v.patient_id,v.clinic_id INTO sid,pid,cid FROM adc_medical_consent c\n JOIN adc_treatment_step s ON s.id=c.step_id JOIN adc_treatment_plan p ON p.id=s.plan_id\n JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id JOIN adc_visit v ON v.id=e.visit_id WHERE c.id=NEW.consent_id;\n IF NOT EXISTS(SELECT 1 FROM adc_plan_step_version s JOIN adc_plan_version p ON p.id=s.version_id\n WHERE s.id=NEW.step_version_id AND s.step_id=sid AND p.source_record_id=NEW.source_record_id)\n OR NOT EXISTS(SELECT 1 FROM adc_clinical_record_version r JOIN adc_clinical_encounter e ON e.id=r.encounter_id\n JOIN adc_visit v ON v.id=e.visit_id JOIN adc_user u ON u.dentist_id=v.dentist_id\n WHERE r.id=NEW.source_record_id AND v.patient_id=pid AND v.clinic_id=cid AND u.id=NEW.prepared_by_id)\n OR (NEW.patient_snapshot->>'id')::bigint IS DISTINCT FROM pid THEN\n  RAISE EXCEPTION 'Medical explanation must retain its exact step, patient, clinic and clinician source';\n END IF;\n IF (NEW.previous_id IS NULL AND NEW.revision <> 1) OR\n (NEW.previous_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_version\n WHERE id=NEW.previous_id AND consent_id=NEW.consent_id AND revision=NEW.revision-1)) THEN\n  RAISE EXCEPTION 'Medical explanation must follow its own preceding version';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_coordination_task",
       "name": "coordination_task_history_guard",
       "definition": "CREATE TRIGGER coordination_task_history_guard BEFORE DELETE OR UPDATE ON public.adc_coordination_task FOR EACH ROW EXECUTE FUNCTION adc_protect_coord_task()",
@@ -496,6 +510,13 @@
       "definition": "CREATE TRIGGER management_report_history BEFORE DELETE OR UPDATE ON public.adc_management_report FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()",
       "function": "adc_protect_audit",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "consent_identity_retained",
+      "definition": "CREATE TRIGGER consent_identity_retained BEFORE DELETE OR UPDATE ON public.adc_medical_consent FOR EACH ROW EXECUTE FUNCTION adc_consent_identity_guard()",
+      "function": "adc_consent_identity_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR (to_jsonb(OLD)-'revision') IS DISTINCT FROM (to_jsonb(NEW)-'revision') THEN\n  RAISE EXCEPTION 'Medical consent identity is retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_monthly_cost",
@@ -5479,6 +5500,362 @@
         {
           "name": "appointed_at",
           "column": "appointed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_consent_event",
+      "model": "clinical.ConsentEvent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "consent",
+          "column": "consent_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_medical_consent",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "version",
+          "column": "version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_consent_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "self_access",
+          "column": "self_access_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_patient_access",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source",
+          "column": "source",
+          "type": "CharField",
+          "db_type": "varchar(20)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 20,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "text",
+          "column": "text",
+          "type": "CharField",
+          "db_type": "varchar(2000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 2000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "occurred_at",
+          "column": "occurred_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reply_to",
+          "column": "reply_to_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_consent_event",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_consent_version",
+      "model": "clinical.ConsentVersion",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "consent",
+          "column": "consent_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_medical_consent",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "previous",
+          "column": "previous_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_consent_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step_version",
+          "column": "step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "identity_reference",
+          "column": "identity_reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient_snapshot",
+          "column": "patient_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "scope_digest",
+          "column": "scope_digest",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "amendment_reason",
+          "column": "amendment_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
           "type": "DateTimeField",
           "db_type": "timestamp with time zone",
           "pk": false,
@@ -12011,6 +12388,80 @@
         {
           "name": "confirmed_at",
           "column": "confirmed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_medical_consent",
+      "model": "clinical.MedicalConsent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "step",
+          "column": "step_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_step",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "opened_by",
+          "column": "opened_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "opened_at",
+          "column": "opened_at",
           "type": "DateTimeField",
           "db_type": "timestamp with time zone",
           "pk": false,
@@ -20787,6 +21238,8 @@
     "adc_clinical_referral",
     "adc_clinical_referral_event",
     "adc_clinical_reviewer",
+    "adc_consent_event",
+    "adc_consent_version",
     "adc_coordination_task",
     "adc_correction_request",
     "adc_cost_allocation",
@@ -20831,6 +21284,7 @@
     "adc_maintenance_order",
     "adc_management_action",
     "adc_management_report",
+    "adc_medical_consent",
     "adc_monthly_cost",
     "adc_next_visit_instruction",
     "adc_notification_outbox",
@@ -22376,6 +22830,150 @@
       "name": "clinical_reviewer_interval",
       "kind": "c",
       "definition": "CHECK ((valid_until > valid_from))"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_actor_id_e4390185_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_consent_id_ac81da84_fk_adc_medical_consent_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (consent_id) REFERENCES adc_medical_consent(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_reply_to_id_b9795cda_fk_adc_consent_event_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reply_to_id) REFERENCES adc_consent_event(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_reply_to_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (reply_to_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_self_access_id_2f918175_fk_adc_patie",
+      "kind": "f",
+      "definition": "FOREIGN KEY (self_access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_version_id_927fdde9_fk_adc_consent_version_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "consent_event_action",
+      "kind": "c",
+      "definition": "CHECK (((action)::text = ANY ((ARRAY['PUBLISHED'::character varying, 'QUESTION'::character varying, 'ANSWER'::character varying, 'AGREED'::character varying, 'DECLINED'::character varying, 'DEFERRED'::character varying, 'WITHDRAWN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "consent_event_positive",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 1))"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "consent_event_sequence",
+      "kind": "u",
+      "definition": "UNIQUE (consent_id, sequence)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "consent_event_source",
+      "kind": "c",
+      "definition": "CHECK (((source)::text = ANY ((ARRAY['DOCTOR_ACCOUNT'::character varying, 'SELF_ACCOUNT'::character varying, 'PAPER_REFERENCE'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "consent_self_basis",
+      "kind": "c",
+      "definition": "CHECK ((((self_access_id IS NOT NULL) AND ((source)::text = 'SELF_ACCOUNT'::text)) OR ((NOT ((source)::text = 'SELF_ACCOUNT'::text)) AND (self_access_id IS NULL))))"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_consent_id_4c53ea83_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (consent_id) REFERENCES adc_medical_consent(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_prepared_by_id_55a5972f_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_previous_id_d552a0f5_fk_adc_conse",
+      "kind": "f",
+      "definition": "FOREIGN KEY (previous_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_previous_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (previous_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_source_record_id_9e9c6c72_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_step_version_id_169724bd_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "consent_version_number",
+      "kind": "u",
+      "definition": "UNIQUE (consent_id, revision)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "consent_version_positive",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 1))"
     },
     {
       "table": "adc_coordination_task",
@@ -24524,6 +25122,36 @@
       "name": "management_report_sequence",
       "kind": "u",
       "definition": "UNIQUE (period_id, sequence)"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_opened_by_id_75beec21_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_step_id_2f07ac1f_fk_adc_treatment_step_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_id) REFERENCES adc_treatment_step(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_step_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (step_id)"
     },
     {
       "table": "adc_monthly_cost",
@@ -28154,6 +28782,81 @@
       "definition": "CREATE UNIQUE INDEX clinical_reviewer_clinic_unique ON public.adc_clinical_reviewer USING btree (user_id, clinic_id)"
     },
     {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_actor_id_e4390185",
+      "definition": "CREATE INDEX adc_consent_event_actor_id_e4390185 ON public.adc_consent_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_consent_id_ac81da84",
+      "definition": "CREATE INDEX adc_consent_event_consent_id_ac81da84 ON public.adc_consent_event USING btree (consent_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_consent_event_operation_id_key ON public.adc_consent_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_consent_event_pkey ON public.adc_consent_event USING btree (id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_reply_to_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_consent_event_reply_to_id_key ON public.adc_consent_event USING btree (reply_to_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_self_access_id_2f918175",
+      "definition": "CREATE INDEX adc_consent_event_self_access_id_2f918175 ON public.adc_consent_event USING btree (self_access_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "adc_consent_event_version_id_927fdde9",
+      "definition": "CREATE INDEX adc_consent_event_version_id_927fdde9 ON public.adc_consent_event USING btree (version_id)"
+    },
+    {
+      "table": "adc_consent_event",
+      "name": "consent_event_sequence",
+      "definition": "CREATE UNIQUE INDEX consent_event_sequence ON public.adc_consent_event USING btree (consent_id, sequence)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_consent_id_4c53ea83",
+      "definition": "CREATE INDEX adc_consent_version_consent_id_4c53ea83 ON public.adc_consent_version USING btree (consent_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_consent_version_pkey ON public.adc_consent_version USING btree (id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_prepared_by_id_55a5972f",
+      "definition": "CREATE INDEX adc_consent_version_prepared_by_id_55a5972f ON public.adc_consent_version USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_previous_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_consent_version_previous_id_key ON public.adc_consent_version USING btree (previous_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_source_record_id_9e9c6c72",
+      "definition": "CREATE INDEX adc_consent_version_source_record_id_9e9c6c72 ON public.adc_consent_version USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_step_version_id_169724bd",
+      "definition": "CREATE INDEX adc_consent_version_step_version_id_169724bd ON public.adc_consent_version USING btree (step_version_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "consent_version_number",
+      "definition": "CREATE UNIQUE INDEX consent_version_number ON public.adc_consent_version USING btree (consent_id, revision)"
+    },
+    {
       "table": "adc_coordination_task",
       "name": "adc_coordination_task_assignee_id_b1e859b2",
       "definition": "CREATE INDEX adc_coordination_task_assignee_id_b1e859b2 ON public.adc_coordination_task USING btree (assignee_id)"
@@ -29372,6 +30075,21 @@
       "table": "adc_management_report",
       "name": "management_report_sequence",
       "definition": "CREATE UNIQUE INDEX management_report_sequence ON public.adc_management_report USING btree (period_id, sequence)"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_opened_by_id_75beec21",
+      "definition": "CREATE INDEX adc_medical_consent_opened_by_id_75beec21 ON public.adc_medical_consent USING btree (opened_by_id)"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_medical_consent_pkey ON public.adc_medical_consent USING btree (id)"
+    },
+    {
+      "table": "adc_medical_consent",
+      "name": "adc_medical_consent_step_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_medical_consent_step_id_key ON public.adc_medical_consent USING btree (step_id)"
     },
     {
       "table": "adc_monthly_cost",
@@ -33073,6 +33791,162 @@
       "null": false
     },
     {
+      "table": "adc_consent_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "action",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "source",
+      "db_type": "character varying(20)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "text",
+      "db_type": "character varying(2000)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "occurred_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "reply_to_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "self_access_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_event",
+      "column": "consent_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "identity_reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "patient_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "scope_digest",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "amendment_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "previous_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "step_version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "consent_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_coordination_task",
       "column": "id",
       "db_type": "bigint",
@@ -35901,6 +36775,36 @@
     {
       "table": "adc_management_report",
       "column": "period_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_consent",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_consent",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_medical_consent",
+      "column": "opened_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_medical_consent",
+      "column": "opened_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_consent",
+      "column": "step_id",
       "db_type": "bigint",
       "null": false
     },
@@ -39785,6 +40689,10 @@
       "name": "0008_plan_disclosures"
     },
     {
+      "app": "clinical",
+      "name": "0009_medical_consent"
+    },
+    {
       "app": "contenttypes",
       "name": "0001_initial"
     },
@@ -39993,7 +40901,7 @@
       "name": "0003_workspacecontext_login_channel_and_more"
     }
   ],
-  "observed_on": "2026-10-30",
-  "observed_scope": "Read-only independent PostgreSQL17 with exact C3.2A frozen application image after66 application migrations; no business rows or private configuration exported.",
-  "application_commit": "08ba78183aba364865df57800c3df28684f7004b"
+  "observed_on": "2026-10-31",
+  "observed_scope": "Read-only independent PostgreSQL17 with exact C3.2B1 frozen application image after67 application migrations; no business rows or private configuration exported.",
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392"
 }

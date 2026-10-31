@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+  "projects": {
+    "微信小程序-医疗决定18342": {
+      "client_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+      "backend_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+      "backend_image": "sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a",
+      "observed_at": "2026-10-31T07:56:20.002961+00:00",
+      "backend": "http://127.0.0.1:18342",
+      "mode": "local",
+      "urlCheck": false,
+      "files": 82,
+      "official_tool": "PENDING_WORKBUDDY",
+      "phone": "PENDING_SEPARATE_ACCEPTANCE"
+    },
+    "微信小程序-登录18000": {
+      "client_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+      "backend_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+      "backend_image": "sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a",
+      "observed_at": "2026-10-31T07:56:20.074773+00:00",
+      "backend": "http://127.0.0.1:18000",
+      "mode": "local",
+      "urlCheck": false,
+      "files": 82,
+      "official_tool": "PENDING_WORKBUDDY",
+      "phone": "PENDING_SEPARATE_ACCEPTANCE"
+    }
+  },
+  "zip_sha256": "459994bb298fbaf4f64f515a981026472607cb6696a2441aaaeaad5045b1a4f6",
+  "contains_server_credentials": false,
+  "existing_workbuddy_deployment_copies_unchanged": true
+}

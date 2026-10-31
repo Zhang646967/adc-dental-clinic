@@ -1,0 +1,27 @@
+digraph Consent {
+ graph [rankdir=TB, bgcolor="white", pad="0.35", nodesep="0.55", ranksep="0.8"];
+ node [shape=box, style="rounded,filled", fillcolor="#edf4f0", color="#345e56", fontname="Noto Sans CJK SC", fontsize=16, width=3.2, margin="0.18,0.13"];
+ edge [color="#345e56", fontname="Noto Sans CJK SC", fontsize=13, arrowsize=0.7];
+ disclosed [label="医师确认具体告知\n核对本人身份与条件\n核对检查与方案步骤"];
+ pending [label="本版本待决定"];
+ question [label="存在未答复疑问\n进入医师待办"];
+ agreed [label="本人同意\n账号确认或纸件登记"];
+ declined [label="本人拒绝"];
+ deferred [label="本人暂缓"];
+ withdrawn [label="本人撤回未实施部分\n原同意继续保留"];
+ next [label="重新告知产生新版本\n原决定不自动沿用",fillcolor="#f6f5f1"];
+ disclosed -> pending [label="发布准确告知版本"];
+ pending -> question [label="本人提出问题"];
+ question -> pending [label="医师答复\n答复不代替决定"];
+ pending -> agreed [label="本人明确同意\n无未答复疑问且范围有效"];
+ pending -> declined [label="本人明确拒绝"];
+ pending -> deferred [label="本人明确暂缓"];
+ agreed -> withdrawn [label="本人明确撤回"];
+ agreed -> next [style=dashed,label="重新告知"];
+ declined -> next [style=dashed];
+ deferred -> next [style=dashed];
+ withdrawn -> next [style=dashed];
+ next -> pending [style=dashed,label="新版本独立决定\n原疑问及历史保留"];
+ {rank=same;question;agreed;declined;}
+ declined -> deferred [style=invis];
+}

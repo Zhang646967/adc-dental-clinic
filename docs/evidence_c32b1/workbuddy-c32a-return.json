@@ -1,0 +1,11 @@
+{
+  "source": "USER_RELAYED_WORKBUDDY_2026-10-30",
+  "treatment_explanations_v1_v2_and_own_delegation_isolation": "PASS",
+  "pages_compiled": 24,
+  "width390": "PASS",
+  "width375_430_font_scale": "BLOCKED_TOOL_CAPABILITY",
+  "old18000_login_backend": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
+  "ci41169142568_at_start": "in_progress",
+  "ci41169142568_at_end": "success",
+  "new_c32b1_tool": "NOT_IMPLIED"
+}

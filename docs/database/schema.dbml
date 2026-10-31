@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 145 ORM tables; django_migrations is a framework migration journal.
+// All 148 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -459,6 +459,44 @@ Table adc_clinical_reviewer {
   appointed_at "timestamp with time zone" [not null]
   indexes {
     (user_id, clinic_id) [unique, name: 'clinical_reviewer_clinic_unique']
+  }
+}
+
+Table adc_consent_event {
+  id "bigint" [pk, not null]
+  consent_id "bigint" [not null]
+  version_id "bigint" [not null]
+  sequence "integer" [not null]
+  operation_id "uuid" [unique, not null]
+  actor_id "bigint" [not null]
+  self_access_id "bigint" [null]
+  action "character varying(12)" [not null]
+  source "character varying(20)" [not null]
+  text "character varying(2000)" [not null]
+  reference "character varying(500)" [not null]
+  occurred_at "timestamp with time zone" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  reply_to_id "bigint" [unique, null]
+  indexes {
+    (consent_id, sequence) [unique, name: 'consent_event_sequence']
+  }
+}
+
+Table adc_consent_version {
+  id "bigint" [pk, not null]
+  consent_id "bigint" [not null]
+  revision "integer" [not null]
+  previous_id "bigint" [unique, null]
+  step_version_id "bigint" [not null]
+  source_record_id "bigint" [not null]
+  prepared_by_id "bigint" [not null]
+  identity_reference "character varying(500)" [not null]
+  patient_snapshot "jsonb" [not null]
+  scope_digest "character varying(64)" [not null]
+  amendment_reason "character varying(500)" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  indexes {
+    (consent_id, revision) [unique, name: 'consent_version_number']
   }
 }
 
@@ -1123,6 +1161,14 @@ Table adc_management_report {
   indexes {
     (period_id, sequence) [unique, name: 'management_report_sequence']
   }
+}
+
+Table adc_medical_consent {
+  id "bigint" [pk, not null]
+  step_id "bigint" [unique, not null]
+  revision "integer" [not null]
+  opened_by_id "bigint" [not null]
+  opened_at "timestamp with time zone" [not null]
 }
 
 Table adc_monthly_cost {
@@ -2110,6 +2156,16 @@ Ref: adc_clinical_referral_event.actor_id > adc_user.id
 Ref: adc_clinical_reviewer.appointed_by_id > adc_user.id
 Ref: adc_clinical_reviewer.clinic_id > adc_clinic.id
 Ref: adc_clinical_reviewer.user_id > adc_user.id
+Ref: adc_consent_event.actor_id > adc_user.id
+Ref: adc_consent_event.consent_id > adc_medical_consent.id
+Ref: adc_consent_event.reply_to_id - adc_consent_event.id
+Ref: adc_consent_event.self_access_id > adc_patient_access.id
+Ref: adc_consent_event.version_id > adc_consent_version.id
+Ref: adc_consent_version.consent_id > adc_medical_consent.id
+Ref: adc_consent_version.prepared_by_id > adc_user.id
+Ref: adc_consent_version.previous_id - adc_consent_version.id
+Ref: adc_consent_version.source_record_id > adc_clinical_record_version.id
+Ref: adc_consent_version.step_version_id > adc_plan_step_version.id
 Ref: adc_coordination_task.slot_id > adc_availability_slot.id
 Ref: adc_coordination_task.assignee_id > adc_user.id
 Ref: adc_coordination_task.closed_by_id > adc_user.id
@@ -2234,6 +2290,8 @@ Ref: adc_management_action.cost_id > adc_monthly_cost.id
 Ref: adc_management_action.period_id > adc_cost_month.id
 Ref: adc_management_report.confirmed_by_id > adc_user.id
 Ref: adc_management_report.period_id > adc_cost_month.id
+Ref: adc_medical_consent.opened_by_id > adc_user.id
+Ref: adc_medical_consent.step_id - adc_treatment_step.id
 Ref: adc_monthly_cost.dentist_id > adc_dentist.id
 Ref: adc_monthly_cost.equipment_event_id > adc_equipment_event.id
 Ref: adc_monthly_cost.period_id > adc_cost_month.id

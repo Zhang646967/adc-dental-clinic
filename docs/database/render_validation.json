@@ -1,4 +1,18 @@
 {
+  "er_consent_versions": {
+    "nodes": 7,
+    "edges": 10,
+    "width": 593,
+    "height": 745,
+    "minPrintedFontPt": 10.707521079258012
+  },
+  "er_consent_events": {
+    "nodes": 6,
+    "edges": 8,
+    "width": 513,
+    "height": 607,
+    "minPrintedFontPt": 12.377309941520469
+  },
   "er_clinical_documents": {
     "nodes": 7,
     "edges": 11,

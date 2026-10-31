@@ -1,3 +1,5 @@
+当前系统本体：[C3.2B1本人医疗决定](C32B1_MEDICAL_DECISIONS.md) · [实际验收与保护交付](evidence_c32b1/README.md) · [WorkBuddy冻结包任务](WORKBUDDY_C32B1_TASK.md)。67份迁移、149表、35实际ER；报告250页、125业务＋SF01。下方为前批交付记录。
+
 当前系统本体：[C3.2A治疗说明](C32_TREATMENT_EXPLANATIONS.md) · [验收](evidence_c32a/README.md) · [WorkBuddy新任务](WORKBUDDY_C32A_TASK.md) · [下一批规格](C32_NEXT_INCREMENT.md)。
 
 当前反馈收口：[候补发布与密钥文件化](evidence_wb_p4/README.md) · [WorkBuddy确切入口与复测](WORKBUDDY_P4_PUBLISHING.md) · [C3.2下一阶段任务](NEXT_STAGE_C32_TASKS.md)。65份迁移／146表／33实际ER保持，课程报告固定文件名。

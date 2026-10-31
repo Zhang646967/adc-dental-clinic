@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "build_method": "Frozen source with unchanged requirements and retained accepted dependency image; clean pip rebuild failed provider availability",
+  "dependency_image": "sha256:e3bf3805ef6c8fa00a7e7da95f09483de86c49d1a49e77500e8a022145c749ae",
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+  "image": "sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a",
+  "architecture": "arm64",
+  "frozen_git_archive": true,
+  "backend": "http://127.0.0.1:18342",
+  "database": "adc_c32b1_frozen",
+  "migration_built_empty_restore": true,
+  "all146_business_groups_equal": true,
+  "source_working_copy_retained": true,
+  "source_bind_removed": true,
+  "source_environment_entries": 1,
+  "original18000_18315_18332_unchanged": true
+}

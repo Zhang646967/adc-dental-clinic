@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "scope": "Website only; mini device matrix pending",
+  "checks": [
+    {
+      "name": "Website physician and patient 375px 100% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 375px 200% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 390px 100% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 390px 200% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 430px 100% text",
+      "passed": true
+    },
+    {
+      "name": "Website physician and patient 430px 200% text",
+      "passed": true
+    },
+    {
+      "name": "Website keyboard focus reaches actionable controls",
+      "passed": true
+    }
+  ]
+}

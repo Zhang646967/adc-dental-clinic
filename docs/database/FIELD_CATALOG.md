@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-30。本目录列出145张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-31。本目录列出148张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -1324,6 +1324,105 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `clinical_reviewer_retained`：`CREATE TRIGGER clinical_reviewer_retained BEFORE DELETE ON public.adc_clinical_reviewer FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_consent_event
+
+模型：`clinical.ConsentEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| consent_id | bigint | FK | 否 | `adc_medical_consent.id` |
+| version_id | bigint | FK | 否 | `adc_consent_version.id` |
+| sequence | integer | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| self_access_id | bigint | FK | 是 | `adc_patient_access.id` |
+| action | character varying(12) | — | 否 | — |
+| source | character varying(20) | — | 否 | — |
+| text | character varying(2000) | — | 否 | — |
+| reference | character varying(500) | — | 否 | — |
+| occurred_at | timestamp with time zone | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+| reply_to_id | bigint | UK / FK | 是 | `adc_consent_event.id` |
+
+数据库约束：
+
+- `adc_consent_event_actor_id_e4390185_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_event_consent_id_ac81da84_fk_adc_medical_consent_id`：`FOREIGN KEY (consent_id) REFERENCES adc_medical_consent(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_consent_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_consent_event_reply_to_id_b9795cda_fk_adc_consent_event_id`：`FOREIGN KEY (reply_to_id) REFERENCES adc_consent_event(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_event_reply_to_id_key`：`UNIQUE (reply_to_id)`。
+- `adc_consent_event_self_access_id_2f918175_fk_adc_patie`：`FOREIGN KEY (self_access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_event_sequence_check`：`CHECK ((sequence >= 0))`。
+- `adc_consent_event_version_id_927fdde9_fk_adc_consent_version_id`：`FOREIGN KEY (version_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `consent_event_action`：`CHECK (((action)::text = ANY ((ARRAY['PUBLISHED'::character varying, 'QUESTION'::character varying, 'ANSWER'::character varying, 'AGREED'::character varying, 'DECLINED'::character varying, 'DEFERRED'::character varying, 'WITHDRAWN'::character varying])::text[])))`。
+- `consent_event_positive`：`CHECK ((sequence >= 1))`。
+- `consent_event_sequence`：`UNIQUE (consent_id, sequence)`。
+- `consent_event_source`：`CHECK (((source)::text = ANY ((ARRAY['DOCTOR_ACCOUNT'::character varying, 'SELF_ACCOUNT'::character varying, 'PAPER_REFERENCE'::character varying])::text[])))`。
+- `consent_self_basis`：`CHECK ((((self_access_id IS NOT NULL) AND ((source)::text = 'SELF_ACCOUNT'::text)) OR ((NOT ((source)::text = 'SELF_ACCOUNT'::text)) AND (self_access_id IS NULL))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_consent_event_actor_id_e4390185`：`CREATE INDEX adc_consent_event_actor_id_e4390185 ON public.adc_consent_event USING btree (actor_id)`。
+- `adc_consent_event_consent_id_ac81da84`：`CREATE INDEX adc_consent_event_consent_id_ac81da84 ON public.adc_consent_event USING btree (consent_id)`。
+- `adc_consent_event_operation_id_key`：`CREATE UNIQUE INDEX adc_consent_event_operation_id_key ON public.adc_consent_event USING btree (operation_id)`。
+- `adc_consent_event_pkey`：`CREATE UNIQUE INDEX adc_consent_event_pkey ON public.adc_consent_event USING btree (id)`。
+- `adc_consent_event_reply_to_id_key`：`CREATE UNIQUE INDEX adc_consent_event_reply_to_id_key ON public.adc_consent_event USING btree (reply_to_id)`。
+- `adc_consent_event_self_access_id_2f918175`：`CREATE INDEX adc_consent_event_self_access_id_2f918175 ON public.adc_consent_event USING btree (self_access_id)`。
+- `adc_consent_event_version_id_927fdde9`：`CREATE INDEX adc_consent_event_version_id_927fdde9 ON public.adc_consent_event USING btree (version_id)`。
+- `consent_event_sequence`：`CREATE UNIQUE INDEX consent_event_sequence ON public.adc_consent_event USING btree (consent_id, sequence)`。
+
+跨表及历史触发器：
+
+- `consent_event_retained`：`CREATE TRIGGER consent_event_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_consent_event FOR EACH ROW EXECUTE FUNCTION adc_consent_event_guard()`。
+
+## adc_consent_version
+
+模型：`clinical.ConsentVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| consent_id | bigint | FK | 否 | `adc_medical_consent.id` |
+| revision | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_consent_version.id` |
+| step_version_id | bigint | FK | 否 | `adc_plan_step_version.id` |
+| source_record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| identity_reference | character varying(500) | — | 否 | — |
+| patient_snapshot | jsonb | — | 否 | — |
+| scope_digest | character varying(64) | — | 否 | — |
+| amendment_reason | character varying(500) | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_consent_version_consent_id_4c53ea83_fk_adc_medic`：`FOREIGN KEY (consent_id) REFERENCES adc_medical_consent(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_version_pkey`：`PRIMARY KEY (id)`。
+- `adc_consent_version_prepared_by_id_55a5972f_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_version_previous_id_d552a0f5_fk_adc_conse`：`FOREIGN KEY (previous_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_version_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_consent_version_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_consent_version_source_record_id_9e9c6c72_fk_adc_clini`：`FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_consent_version_step_version_id_169724bd_fk_adc_plan_`：`FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `consent_version_number`：`UNIQUE (consent_id, revision)`。
+- `consent_version_positive`：`CHECK ((revision >= 1))`。
+
+索引（含条件唯一索引）：
+
+- `adc_consent_version_consent_id_4c53ea83`：`CREATE INDEX adc_consent_version_consent_id_4c53ea83 ON public.adc_consent_version USING btree (consent_id)`。
+- `adc_consent_version_pkey`：`CREATE UNIQUE INDEX adc_consent_version_pkey ON public.adc_consent_version USING btree (id)`。
+- `adc_consent_version_prepared_by_id_55a5972f`：`CREATE INDEX adc_consent_version_prepared_by_id_55a5972f ON public.adc_consent_version USING btree (prepared_by_id)`。
+- `adc_consent_version_previous_id_key`：`CREATE UNIQUE INDEX adc_consent_version_previous_id_key ON public.adc_consent_version USING btree (previous_id)`。
+- `adc_consent_version_source_record_id_9e9c6c72`：`CREATE INDEX adc_consent_version_source_record_id_9e9c6c72 ON public.adc_consent_version USING btree (source_record_id)`。
+- `adc_consent_version_step_version_id_169724bd`：`CREATE INDEX adc_consent_version_step_version_id_169724bd ON public.adc_consent_version USING btree (step_version_id)`。
+- `consent_version_number`：`CREATE UNIQUE INDEX consent_version_number ON public.adc_consent_version USING btree (consent_id, revision)`。
+
+跨表及历史触发器：
+
+- `consent_version_retained`：`CREATE TRIGGER consent_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_consent_version FOR EACH ROW EXECUTE FUNCTION adc_consent_version_guard()`。
 
 ## adc_coordination_task
 
@@ -3147,6 +3246,36 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `management_report_history`：`CREATE TRIGGER management_report_history BEFORE DELETE OR UPDATE ON public.adc_management_report FOR EACH ROW EXECUTE FUNCTION adc_protect_audit()`。
+
+## adc_medical_consent
+
+模型：`clinical.MedicalConsent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| step_id | bigint | UK / FK | 否 | `adc_treatment_step.id` |
+| revision | integer | — | 否 | — |
+| opened_by_id | bigint | FK | 否 | `adc_user.id` |
+| opened_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_medical_consent_opened_by_id_75beec21_fk_adc_user_id`：`FOREIGN KEY (opened_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_consent_pkey`：`PRIMARY KEY (id)`。
+- `adc_medical_consent_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_medical_consent_step_id_2f07ac1f_fk_adc_treatment_step_id`：`FOREIGN KEY (step_id) REFERENCES adc_treatment_step(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_consent_step_id_key`：`UNIQUE (step_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_medical_consent_opened_by_id_75beec21`：`CREATE INDEX adc_medical_consent_opened_by_id_75beec21 ON public.adc_medical_consent USING btree (opened_by_id)`。
+- `adc_medical_consent_pkey`：`CREATE UNIQUE INDEX adc_medical_consent_pkey ON public.adc_medical_consent USING btree (id)`。
+- `adc_medical_consent_step_id_key`：`CREATE UNIQUE INDEX adc_medical_consent_step_id_key ON public.adc_medical_consent USING btree (step_id)`。
+
+跨表及历史触发器：
+
+- `consent_identity_retained`：`CREATE TRIGGER consent_identity_retained BEFORE DELETE OR UPDATE ON public.adc_medical_consent FOR EACH ROW EXECUTE FUNCTION adc_consent_identity_guard()`。
 
 ## adc_monthly_cost
 

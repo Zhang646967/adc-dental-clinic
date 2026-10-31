@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "old143_business_groups_all_original_rows_preserved": true,
+  "all_financial_actual_and_image_groups_unchanged": true,
+  "normal_owned_commands_only": true,
+  "facts": {
+    "old_visit11": "CHECKED_IN",
+    "old_plan1_versions": [
+      1,
+      2
+    ],
+    "old_plan1_decisions": 0,
+    "old_visit11_actual": 0,
+    "old_visit11_invoices": 0,
+    "consents": 6,
+    "versions": 8,
+    "events": 15
+  },
+  "main_original_new_clinical_fixtures": 0,
+  "workbuddy18315_and_c32a18332_business_writes_by_codex": 0
+}

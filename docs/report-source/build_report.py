@@ -310,10 +310,10 @@ def build(folder,repo,output=None):
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例清单与业务完整性');p('系统共定义96项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—96。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义125项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—125。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
  p('表3-4 用例分组及业务目标',10.5,False,True)
  table(['业务范围','编号','使用者目标'],[
- ['身份与资料','SU-01—03、21—23、25—28、64—67、83—86','账号、患者资料、基础目录、专业审核与限定转诊。'],
+ ['身份与资料','SU-01—03、21—23、25—28、64—67、83—86、97—101','账号、患者资料、基础目录、专业审核与限定转诊。'],
  ['医保结算与基金清算','SU-91—96','原费用分担、银行分配、差额跟进和撤销分别核对。'],
  ['连续诊疗','SU-68—80','自述检查、方案决定、实际执行、复诊与加工件验收。'],
  ['医保资料','SU-87—90','来源目录、门店安排、收费适配及患者待遇分别核对。'],
@@ -321,7 +321,9 @@ def build(folder,repo,output=None):
  ['候补与协作','SU-13—17、24、31、34—38','候补、邀约、任务办理、独立复核及消息。'],
  ['经营与引导','SU-11—12、18、20、41、55—56、81—82','成本利润、取消分析和操作协助。'],
  ['资金与对账','SU-42—49、53','渠道、收退款、凭据、流水、对账及日结。'],
- ['设备维护','SU-50—52','资产、维修责任和独立验收。']
+ ['设备维护','SU-50—52','资产、维修责任和独立验收。'],
+ ['画像与经营核算','SU-102—110','任职、资料审核、选诊、月度成本及利润核对。'],
+ ['病历与医疗决定','SU-111—125','文书确认、更正与历史；本人告知、问答、决定和撤回。']
  ],[3.1,5.8,7.1])
  p('分组交叉列出的协作用例只计一次。每项规约说明触发、前置、交互、替代路径、成功结果、最低保证和验收目标；待实现设计在规约和第5章明确标注。')
  heading('3.7 业务规则与非功能性需求');append_nodes(frozen(100,110),{},True)
@@ -382,6 +384,12 @@ def build(folder,repo,output=None):
     page();heading('4.13.'+str(number)+' '+manifest[name]['title'],3,False)
     figure(repo/'docs/database'/(name+'.png'),'图4-'+str(number+21)+' '+manifest[name]['title']+'数据库ER图',16,max_height=18)
     p(manifest[name]['note'],10.5)
+  if item['heading'].startswith('4.30 '):
+   for name in ['er_consent_versions','er_consent_events']:
+    page();figure(repo/'docs/database'/(name+'.png'),'图4-58 '+json.loads((repo/'docs/database/view_manifest.json').read_text())[name]['title'],16,max_height=18)
+    p(json.loads((repo/'docs/database/view_manifest.json').read_text())[name]['note'],10.5)
+   page();figure(repo/'docs/diagrams/medical_consent_state.png','图4-58 单份医疗告知的决定与换版状态',16,max_height=17)
+   p('状态由告知版本和追加事件推导。拒绝、暂缓或撤回不删除原预约与已发生治疗；重新告知建立独立新版本。疑问可在决定前后继续提出，医师答复不代签；正常开治前核对在后续功能中另行办理。',10.5)
   if item['heading'].startswith('4.29 '):
    for name,title in [('er_clinical_documents','初复诊文书版本与准确来源'),('er_document_responsibility','文书责任期限与办理凭据')]:
     page();figure(repo/'docs/database'/(name+'.png'),'图4-55 '+title+'数据库ER图',16,max_height=18)
@@ -439,7 +447,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 扩展业务用例规约',1)
- p('本附录补充SU-39—101，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作、连续诊疗及微信账号协同。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
+ p('本附录补充SU-39—125，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作、连续诊疗及微信账号协同。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

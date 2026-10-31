@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-402条实际SQL外键，其中401条对应ORM单列关系，1条为账单同次就诊复合外键。
+414条实际SQL外键，其中413条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -102,6 +102,16 @@
 | adc_clinical_reviewer | appointed_by_id | adc_user | id |
 | adc_clinical_reviewer | clinic_id | adc_clinic | id |
 | adc_clinical_reviewer | user_id | adc_user | id |
+| adc_consent_event | actor_id | adc_user | id |
+| adc_consent_event | consent_id | adc_medical_consent | id |
+| adc_consent_event | reply_to_id | adc_consent_event | id |
+| adc_consent_event | self_access_id | adc_patient_access | id |
+| adc_consent_event | version_id | adc_consent_version | id |
+| adc_consent_version | consent_id | adc_medical_consent | id |
+| adc_consent_version | prepared_by_id | adc_user | id |
+| adc_consent_version | previous_id | adc_consent_version | id |
+| adc_consent_version | source_record_id | adc_clinical_record_version | id |
+| adc_consent_version | step_version_id | adc_plan_step_version | id |
 | adc_coordination_task | slot_id | adc_availability_slot | id |
 | adc_coordination_task | assignee_id | adc_user | id |
 | adc_coordination_task | closed_by_id | adc_user | id |
@@ -226,6 +236,8 @@
 | adc_management_action | period_id | adc_cost_month | id |
 | adc_management_report | confirmed_by_id | adc_user | id |
 | adc_management_report | period_id | adc_cost_month | id |
+| adc_medical_consent | opened_by_id | adc_user | id |
+| adc_medical_consent | step_id | adc_treatment_step | id |
 | adc_monthly_cost | dentist_id | adc_dentist | id |
 | adc_monthly_cost | equipment_event_id | adc_equipment_event | id |
 | adc_monthly_cost | period_id | adc_cost_month | id |

@@ -2566,5 +2566,155 @@
       "C31-A01—A08：初复诊、准确来源、并发重试、版本与撤权。",
       "C31-A19—A21：正常周转和原资金事实保持；具体证据见对应验证记录。"
     ]
+  },
+  {
+    "id": "SU-121",
+    "name": "医师确认具体医疗告知",
+    "actor": "负责医师",
+    "status": "已实现，课程合成业务规则验证；微信工具及真机结果单列",
+    "precondition": "当前工作身份有效；本人有当前访问权，医师具本病例及服务的专业操作范围。",
+    "inputs": "当前负责病例、准确检查与已认可方案步骤、身份核对依据及完整治疗说明。",
+    "flow": [
+      "核对本人身份及理解表达条件，不按微信或年龄自动认定。",
+      "核对具体步骤、牙位、检查和八项说明，预览后确认告知版本。",
+      "重新告知说明原因，保留原说明和决定。"
+    ],
+    "alternatives": [
+      "检查、方案或依据已变化：先复核说明。",
+      "未成年或需要代理：转适格代理核验，不能借预约授权。"
+    ],
+    "result": "形成可追溯的准确版本告知、沟通或决定，既有业务事实保留。",
+    "minimum_guarantee": "预览不写入；失败不留下部分决定，原预约、治疗和资金不受自动改写。",
+    "rules": "认可方案与医疗同意分离；账号、纸质原件与可靠电子签名分别核验。新增医疗代理与完整开治控制不由本用例推定。",
+    "acceptance": [
+      "AT-MC-121：tests/test_medical_consent.py核对准确版本、权限、历史及并发；软件测试不替代专业验收。"
+    ],
+    "source": [
+      "clinical/consents.py",
+      "clinical/consent_models.py",
+      "clinical/consent_views.py",
+      "portal/mini_consents.py",
+      "tests/test_medical_consent.py"
+    ]
+  },
+  {
+    "id": "SU-122",
+    "name": "患者提问与医师答复",
+    "actor": "患者本人及负责医师",
+    "status": "已实现，课程合成业务规则验证；微信工具及真机结果单列",
+    "precondition": "当前工作身份有效；本人有当前访问权，医师具本病例及服务的专业操作范围。",
+    "inputs": "准确告知版本、具体问题和医师答复。",
+    "flow": [
+      "患者针对具体告知版本提出问题，进入负责医师待办。",
+      "医师核对原问题后明确答复，保留问题与答复关联。",
+      "患者阅读后重新决定，答复本身不代表本人同意。"
+    ],
+    "alternatives": [
+      "尚有未答复问题：阻止新增同意。",
+      "换版不删除未回答问题，问题不能被重复覆盖。"
+    ],
+    "result": "形成可追溯的准确版本告知、沟通或决定，既有业务事实保留。",
+    "minimum_guarantee": "预览不写入；失败不留下部分决定，原预约、治疗和资金不受自动改写。",
+    "rules": "认可方案与医疗同意分离；账号、纸质原件与可靠电子签名分别核验。新增医疗代理与完整开治控制不由本用例推定。",
+    "acceptance": [
+      "AT-MC-122：tests/test_medical_consent.py核对准确版本、权限、历史及并发；软件测试不替代专业验收。"
+    ],
+    "source": [
+      "clinical/consents.py",
+      "clinical/consent_models.py",
+      "clinical/consent_views.py",
+      "portal/mini_consents.py",
+      "tests/test_medical_consent.py"
+    ]
+  },
+  {
+    "id": "SU-123",
+    "name": "本人明确医疗决定",
+    "actor": "患者本人",
+    "status": "已实现，课程合成业务规则验证；微信工具及真机结果单列",
+    "precondition": "当前工作身份有效；本人有当前访问权，医师具本病例及服务的专业操作范围。",
+    "inputs": "已告知准确版本、本人的同意／拒绝／暂缓及原因。",
+    "flow": [
+      "阅读具体治疗说明，核对版本、患者与具体步骤。",
+      "选择同意、拒绝或暂缓，预览并明确确认。",
+      "保存准确版本决定及本人账号来源，两端显示相同历史。"
+    ],
+    "alternatives": [
+      "同意前检查、方案、本人资料或专业范围变化：重新核对。",
+      "撤权、跨患者、代约或旧预览：拒绝写入，保留已有事实。"
+    ],
+    "result": "形成可追溯的准确版本告知、沟通或决定，既有业务事实保留。",
+    "minimum_guarantee": "预览不写入；失败不留下部分决定，原预约、治疗和资金不受自动改写。",
+    "rules": "认可方案与医疗同意分离；账号、纸质原件与可靠电子签名分别核验。新增医疗代理与完整开治控制不由本用例推定。",
+    "acceptance": [
+      "AT-MC-123：tests/test_medical_consent.py核对准确版本、权限、历史及并发；软件测试不替代专业验收。"
+    ],
+    "source": [
+      "clinical/consents.py",
+      "clinical/consent_models.py",
+      "clinical/consent_views.py",
+      "portal/mini_consents.py",
+      "tests/test_medical_consent.py"
+    ]
+  },
+  {
+    "id": "SU-124",
+    "name": "登记本人纸质原件决定",
+    "actor": "负责医师",
+    "status": "已实现，课程合成业务规则验证；微信工具及真机结果单列",
+    "precondition": "当前工作身份有效；本人有当前访问权，医师具本病例及服务的专业操作范围。",
+    "inputs": "本人纸质原件、准确告知版本、原件编号及实际时间。",
+    "flow": [
+      "核对本人原件与本份告知一致，不将登记人当作签署人。",
+      "录入原件参考、实际时间和决定，预览后确认。",
+      "分别保留纸质来源、登记账号、实际时间及服务器登记时间。"
+    ],
+    "alternatives": [
+      "缺原件编号、实际时间在未来或早于该份告知：拒绝当前登记并核对原始材料。",
+      "医师不能以普通账号操作伪装成患者本人点击。"
+    ],
+    "result": "形成可追溯的准确版本告知、沟通或决定，既有业务事实保留。",
+    "minimum_guarantee": "预览不写入；失败不留下部分决定，原预约、治疗和资金不受自动改写。",
+    "rules": "认可方案与医疗同意分离；账号、纸质原件与可靠电子签名分别核验。新增医疗代理与完整开治控制不由本用例推定。",
+    "acceptance": [
+      "AT-MC-124：tests/test_medical_consent.py核对准确版本、权限、历史及并发；软件测试不替代专业验收。"
+    ],
+    "source": [
+      "clinical/consents.py",
+      "clinical/consent_models.py",
+      "clinical/consent_views.py",
+      "portal/mini_consents.py",
+      "tests/test_medical_consent.py"
+    ]
+  },
+  {
+    "id": "SU-125",
+    "name": "撤回同意与重新告知",
+    "actor": "患者本人及负责医师",
+    "status": "已实现，课程合成业务规则验证；微信工具及真机结果单列",
+    "precondition": "当前工作身份有效；本人有当前访问权，医师具本病例及服务的专业操作范围。",
+    "inputs": "原准确同意版本、撤回原因或重新告知依据。",
+    "flow": [
+      "本人明确撤回原告知版本未实施部分的同意。",
+      "保留原同意和撤回事件，已发生治疗与资金不被回滚。",
+      "医师重新告知时建立新版本，原决定不自动适用于新版。"
+    ],
+    "alternatives": [
+      "无原同意不能撤回；仅有预约代办不能代签。",
+      "拒绝或暂缓后改变决定：经重新告知再作新决定，不能覆盖原版。"
+    ],
+    "result": "形成可追溯的准确版本告知、沟通或决定，既有业务事实保留。",
+    "minimum_guarantee": "预览不写入；失败不留下部分决定，原预约、治疗和资金不受自动改写。",
+    "rules": "认可方案与医疗同意分离；账号、纸质原件与可靠电子签名分别核验。新增医疗代理与完整开治控制不由本用例推定。",
+    "acceptance": [
+      "AT-MC-125：tests/test_medical_consent.py核对准确版本、权限、历史及并发；软件测试不替代专业验收。"
+    ],
+    "source": [
+      "clinical/consents.py",
+      "clinical/consent_models.py",
+      "clinical/consent_views.py",
+      "portal/mini_consents.py",
+      "tests/test_medical_consent.py"
+    ]
   }
 ]
