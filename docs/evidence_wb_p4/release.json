@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_PROTECTED_DELIVERY;WORKBUDDY_P4_TOOL_REACCEPTANCE_PENDING",
+  "status": "P4_LOCAL_TOOL_ACCEPTED;P3_CODEX_LOCAL_ACCEPTED;EXTERNAL_PLATFORM_PENDING",
   "application_commit": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
   "image": "sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393",
   "exact_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41156516935",
@@ -37,5 +37,8 @@
   "next_stage": "C3.2_TASKS_PLANNED;NOT_IMPLEMENTED",
   "historical_windows_recovery": "UNRESOLVED",
   "historical_unknown_and_undetermined": "RETAINED",
-  "general_equivalent_ddl_comparator_limit": "RETAINED"
+  "general_equivalent_ddl_comparator_limit": "RETAINED",
+  "p4_official_tool": "PASS_USER_RELAYED_WORKBUDDY_2026_10_30",
+  "p3_workbuddy_scope": "NOT_PARTICIPATING_IN_SECRET_VERIFICATION",
+  "historical_p4_blocked": "SUPERSEDED_BY_workbuddy_p4_return.json"
 }

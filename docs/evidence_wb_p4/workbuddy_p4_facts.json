@@ -1,0 +1,81 @@
+{
+  "passed": true,
+  "waits": [
+    {
+      "id": 7,
+      "state": "WITHDRAWN",
+      "revision": 3
+    },
+    {
+      "id": 8,
+      "state": "BOOKED",
+      "revision": 2
+    },
+    {
+      "id": 9,
+      "state": "WITHDRAWN",
+      "revision": 3
+    },
+    {
+      "id": 10,
+      "state": "WITHDRAWN",
+      "revision": 1
+    }
+  ],
+  "offers": [
+    {
+      "id": 5,
+      "request_id": 7,
+      "plan_id": 5,
+      "state": "EXPIRED",
+      "visit_id": null,
+      "expires_at": "2026-10-31 02:48:20.686816+00:00"
+    },
+    {
+      "id": 6,
+      "request_id": 8,
+      "plan_id": 6,
+      "state": "ACCEPTED",
+      "visit_id": 10,
+      "expires_at": "2026-10-31 03:14:26.146498+00:00"
+    },
+    {
+      "id": 7,
+      "request_id": 9,
+      "plan_id": 7,
+      "state": "DECLINED",
+      "visit_id": null,
+      "expires_at": "2026-10-31 03:22:08.910031+00:00"
+    }
+  ],
+  "visits": [
+    {
+      "id": 9,
+      "status": "CANCELLED",
+      "lock_version": 1
+    },
+    {
+      "id": 10,
+      "status": "SCHEDULED",
+      "lock_version": 0
+    }
+  ],
+  "plans": [
+    {
+      "id": 5,
+      "state": "PUBLISHED"
+    },
+    {
+      "id": 6,
+      "state": "PUBLISHED"
+    },
+    {
+      "id": 7,
+      "state": "PUBLISHED"
+    },
+    {
+      "id": 8,
+      "state": "DRAFT"
+    }
+  ]
+}

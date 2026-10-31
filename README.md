@@ -4,7 +4,7 @@
 
 📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
 
-WorkBuddy本轮反馈已处理：[前台候补发布／微信密钥文件化与验证](docs/evidence_wb_p4/README.md) · [可转交的确切入口与复测单](docs/WORKBUDDY_P4_PUBLISHING.md) · [下一阶段C3.2任务](docs/NEXT_STAGE_C32_TASKS.md)。报告已修正前台职责，固定文件名保持。
+WorkBuddy P4接受／拒绝／到期工具复测已PASS，阻塞解除；P3本机文件注入已复核。最新交付：[前台候补发布／微信密钥文件化与验证](docs/evidence_wb_p4/README.md) · [可转交的确切入口与复测单](docs/WORKBUDDY_P4_PUBLISHING.md) · [下一阶段C3.2任务](docs/NEXT_STAGE_C32_TASKS.md)。报告已修正前台职责，固定文件名保持。
 
 C3.1已交付：[初复诊文书、医师确认、历史比较、更正与待办](docs/C31_CLINICAL_DOCUMENT_CONTRACT.md) · [验证与交付](docs/evidence_c31/README.md) · [WorkBuddy小程序任务](docs/WORKBUDDY_C31_TASK.md)。本机已更新，正式报告240页／120业务用例／33幅实际ER。
 

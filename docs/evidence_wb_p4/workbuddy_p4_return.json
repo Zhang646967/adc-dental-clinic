@@ -1,0 +1,37 @@
+{
+  "source": "USER_RELAYED_WORKBUDDY_2026_10_30_P4_RETEST",
+  "client_commit": "f4020475",
+  "official_tool": "PASS",
+  "accept": {
+    "wait": 8,
+    "plan": 6,
+    "offer": 6,
+    "unique_visit": 10
+  },
+  "decline": {
+    "wait": 9,
+    "plan": 7,
+    "offer": 7,
+    "no_visit": true
+  },
+  "expiry": {
+    "wait": 7,
+    "plan": 5,
+    "offer": 5,
+    "real_time_wait": true,
+    "http409_business_conflict": true,
+    "no_clock_or_expiry_mutation": true
+  },
+  "front200_manager403": true,
+  "extra_wait10": "WITHDRAWN_REV1",
+  "unpublished_plan8": "DRAFT_NO_HOLD",
+  "missing_workspace_header": "TEST_HARNESS_CORRECTED_NOT_PRODUCT_DEFECT",
+  "physical_phone": false,
+  "platform_upload": false,
+  "previous_p4_blocked": "SUPERSEDED_BY_THIS_RETURN_NOT_DELETED",
+  "p3_workbuddy": "NOT_PARTICIPATING;NO_SECRET_ACCESS",
+  "p3_codex_local": "PASS_RECHECKED_FILE_MODE",
+  "second_identity": "NOT_PROVIDED_ID4_UNCHANGED",
+  "fixed_https": "NOT_PROVIDED",
+  "platform_experience": "PENDING"
+}

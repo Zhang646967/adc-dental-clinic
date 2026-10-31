@@ -1,3 +1,5 @@
+最新回传（2026-10-30）：**P4官方开发者工具接受／拒绝／真实到期三项PASS，旧BLOCKED已解除。** [WorkBuddy回传](workbuddy_p4_return.json)与[只读账本核对](workbuddy_p4_facts.json)对应；旧记录保留为历史时点。P3本机整改由Codex执行并[复核](p3_recheck.json)，WorkBuddy未参与密钥验证，不将其写为本机未完成。下文保留上轮实施与交付证据。
+
 # WorkBuddy反馈审核、候补发布与密钥文件化交付
 
 岗位回传 → 直接发布入口 → 原职责与真实业务 → 密钥文件及恢复 → 保护更新 → C3.2任务。

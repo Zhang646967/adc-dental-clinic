@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "application_commit": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
+  "image": "sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393",
+  "nonempty_appsecret_environment": false,
+  "read_only_web_file": true,
+  "workbuddy_scope": "NOT_PARTICIPATING_IN_SECRET_VERIFICATION",
+  "cloud_target": "NOT_CONFIGURED"
+}
