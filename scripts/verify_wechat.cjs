@@ -67,10 +67,11 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   }
   const services=await require('./verify_native_services.cjs').verify();
   const plans=await require('./verify_native_plans.cjs').verify();
+  const consents=await require('./verify_native_consents.cjs').verify();
   const discovery=await require('./verify_native_discovery.cjs').verify();
   const accounts=await require('./verify_native_accounts.cjs').verify();
   const wechat=await require('./verify_native_wechat.cjs').verify();
   const profiles=await require('./verify_native_profiles.cjs').verify();
   const alignment=await require('./verify_native_alignment.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,plans,discovery,accounts,wechat,profiles,alignment,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  console.log(JSON.stringify({passed:true,checks,services,plans,consents,discovery,accounts,wechat,profiles,alignment,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

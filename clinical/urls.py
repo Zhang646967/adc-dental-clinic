@@ -4,8 +4,12 @@ from clinical import encounter_views as encounters
 from clinical import plan_views as plans
 from clinical import continuity_views as continuity
 from clinical import document_views as documents
+from clinical import consent_views as consents
 
 urlpatterns=[
+    path('clinical/consents/',consents.worklist,name='clinical_consents'),
+    path('clinical/encounters/<int:pk>/steps/<int:step_id>/consent/',consents.workspace,name='clinical_consent'),
+    path('portal/steps/<int:step_id>/consent/',consents.workspace,name='portal_consent'),
     path('clinical/documents/',documents.worklist,name='clinical_documents'),
     path('clinical/documents/confirm/',documents.confirm,name='clinical_document_confirm'),
     path('clinical/encounters/<int:pk>/document/',documents.workspace,name='clinical_document'),

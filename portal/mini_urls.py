@@ -4,6 +4,7 @@ from portal import mini_waitlist as wait
 from portal import mini_referrals as referral
 from portal import mini_history as history
 from portal import mini_plans as plans
+from portal import mini_consents as consents
 from portal import mini_discovery as discovery
 from portal import mini_account as account
 from portal import mini_invoices as invoices
@@ -11,6 +12,9 @@ from portal import auth_views as auth
 from portal import web_login_views as qr
 
 urlpatterns = [
+    path('steps/<int:step_id>/consent/',consents.detail,name='mini_consent'),
+    path('steps/<int:step_id>/consent/preview/',consents.preview,name='mini_consent_preview'),
+    path('steps/<int:step_id>/consent/confirm/',consents.confirm,name='mini_consent_confirm'),
     path('account/web-login/',qr.mini,name='mini_web_login'),
     path('auth/sms/captcha/',qr.captcha,name='mini_sms_captcha'),
     path('auth/wechat/',auth.mini_wechat_login,name='mini_wechat_login'),

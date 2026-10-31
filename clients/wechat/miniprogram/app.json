@@ -23,7 +23,8 @@
     "pages/history/index",
     "pages/plans/index",
     "pages/plan/index",
-    "pages/invoice/index"
+    "pages/invoice/index",
+    "pages/consent/index"
   ],
   "window": {
     "navigationBarTitleText": "ADC口腔",

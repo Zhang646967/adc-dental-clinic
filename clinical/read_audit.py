@@ -8,6 +8,9 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'clinical_consents':('CONSENT_LIST','CARE'),'clinical_consent':('PLAN_STEP','CARE','step_id'),
+    'portal_consent':('PLAN_STEP','SELF_PLAN','step_id'),'mini_consent':('PLAN_STEP','SELF_PLAN','step_id'),
+    'mini_consent_preview':('PLAN_STEP','SELF_PLAN','step_id'),'mini_consent_confirm':('PLAN_STEP','SELF_PLAN','step_id'),
     'clinical_documents':('DOCUMENT_LIST','CARE'),'clinical_document':('CARE','DOCUMENT'),
     'clinical_document_preview':('CARE','DOCUMENT'),'clinical_document_confirm':('CARE','DOCUMENT'),
     'clinical_document_compare':('CARE','DOCUMENT'),'clinical_document_print':('CARE','DOCUMENT'),

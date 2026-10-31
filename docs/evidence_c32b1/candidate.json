@@ -1,0 +1,15 @@
+{
+  "status": "SOURCE_CANDIDATE_NOT_INSTALLED",
+  "source_checks": 1164,
+  "targeted_postgresql": 66,
+  "new_postgresql_cases": 26,
+  "native_source_checks": 278,
+  "new_native_handler_cases": 6,
+  "prior_migrations_byte_preserved": 66,
+  "application_migrations": 67,
+  "new_tables": 3,
+  "medical_proxy_and_start_gate_and_archive": "LATER_BATCHES",
+  "official_tool": "PENDING_WORKBUDDY",
+  "phone": "PENDING",
+  "original_data": "UNCHANGED"
+}

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "backend": "18332",
+  "backend_commit": "08ba78183aba364865df57800c3df28684f7004b",
+  "backend_image": "sha256:e3bf3805ef6c8fa00a7e7da95f09483de86c49d1a49e77500e8a022145c749ae",
+  "source_environment_entries": 1,
+  "all_business_groups_equal": true,
+  "database_container_unchanged": true,
+  "original18000_and18315_untouched": true,
+  "observed_at": "2026-10-31T06:38:49.970588+00:00"
+}
