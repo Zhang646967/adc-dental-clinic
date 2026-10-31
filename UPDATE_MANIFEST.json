@@ -2245,7 +2245,6 @@
     "equipment/services.py": "359efe97bb78540315d57db3bdc176521ed7772a4996002f0dcb3573520b1ee5",
     "equipment/urls.py": "f2eedba2dd1567bd50387ad6510488f13f4ffff5cabfa0849501701f86e71474",
     "equipment/views.py": "5a6daa57c993a8999a32e901f997d0c4d441ba3e2d69e4534dcfcca6b89a91f8",
-    "evidence/verification/host-20261008T133156Z.json": "0e0631dfa0497da20586abae1b49651708d8ca601fe79bb6692409c5876d57cd",
     "evidence_v09a4/alpha4_node.log": "c7a708942bea1362b3a2859e75d5a825bcb9a1ae221dc8c5e907d7ab0b11a9cd",
     "evidence_v09a4/alpha4_unit.log": "739c8385366796f94a99c845fba5cbd8e02d48e074cb80f94ba0fb7e2fb643eb",
     "evidence_v09a4/baseline_a3.log": "50bffc37c9c03c2ecc3185f67ea04e41be845009092634b778f6e833b9502bfe",
@@ -3103,5 +3102,9 @@
     "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41156516935",
     "scope": "Final sanitized evidence, report, direct handoff and next-stage tasks; application bytes unchanged."
   },
-  "p4_latest_tool_return": "PASS_USER_RELAYED;READ_ONLY_FACTS_MATCH;PREVIOUS_BLOCKED_SUPERSEDED"
+  "p4_latest_tool_return": "PASS_USER_RELAYED;READ_ONLY_FACTS_MATCH;PREVIOUS_BLOCKED_SUPERSEDED",
+  "retained_host_only_evidence": {
+    "path": "evidence/verification/host-20261008T133156Z.json",
+    "scope": "Retained in complete source archive checksums; intentionally excluded from runtime validation payload as in the prior baseline."
+  }
 }
