@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-29。本目录列出145张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-10-30。本目录列出145张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -3911,6 +3911,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | recorded_at | timestamp with time zone | — | 否 | — |
 | summary | character varying(3000) | — | 否 | — |
 | discussion_note | character varying(2000) | — | 否 | — |
+| disclosures | jsonb | — | 否 | — |
 | amendment_reason | character varying(500) | — | 否 | — |
 
 数据库约束：

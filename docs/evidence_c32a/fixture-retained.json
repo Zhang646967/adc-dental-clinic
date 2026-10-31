@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "scope": "READ_ONLY_UNCHANGED_VERIFICATION;NO_UPGRADE",
+  "backend": "http://127.0.0.1:18315",
+  "retained_application": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
+  "retained_image": "sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393",
+  "retained_application_migrations": 65,
+  "all143_group_facts_unchanged": true,
+  "visit10_and_all_old_records_retained": true,
+  "upgrade_status": "SKIPPED_AFTER_AUTOMATIC_APPROVAL_REJECTION",
+  "reason": "Avoid affecting the existing WorkBuddy service and test data",
+  "new_case_backend": "http://127.0.0.1:18332",
+  "new_case_backend_is_independent": true
+}

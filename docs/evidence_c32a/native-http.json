@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Actual native plan Page reads exact v2 explanation through live HTTP",
+      "passed": true
+    },
+    {
+      "name": "Native retained v1 reads the original explanation and forbids a new decision",
+      "passed": true
+    },
+    {
+      "name": "Actual Page clears previous clinical content on appointment-delegate selection",
+      "passed": true
+    }
+  ],
+  "scope": "Real native Page handler and transport to exact-image Django/PostgreSQL; not official WeChat runtime or phone"
+}

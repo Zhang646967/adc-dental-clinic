@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "application_commit": "08ba78183aba364865df57800c3df28684f7004b",
+  "image": "sha256:e3bf3805ef6c8fa00a7e7da95f09483de86c49d1a49e77500e8a022145c749ae",
+  "application_migrations": 66,
+  "prior65_migration_bytes_preserved": true,
+  "tables": 146,
+  "foreign_keys": 402,
+  "enabled_triggers": 114,
+  "er_views": 33,
+  "orm_tables": 145,
+  "model_groups_compared": 143,
+  "new_sql_column": "adc_plan_version.disclosures",
+  "new_tables": 0,
+  "new_foreign_keys": 0,
+  "all_selected_er_columns_validated": true,
+  "json_step_reference_is_not_sql_fk": true
+}

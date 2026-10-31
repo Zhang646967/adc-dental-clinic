@@ -1402,6 +1402,7 @@ Table adc_plan_version {
   recorded_at "timestamp with time zone" [not null]
   summary "character varying(3000)" [not null]
   discussion_note "character varying(2000)" [not null]
+  disclosures "jsonb" [not null]
   amendment_reason "character varying(500)" [not null]
   indexes {
     (plan_id, revision) [unique, name: 'plan_version_revision_unique']

@@ -1012,22 +1012,25 @@
     "actor": "负责医师",
     "status": "已实现；以明确标注的合成资料核对软件流程。",
     "precondition": "本次有确认检查及本店本服务记录范围。",
-    "inputs": "方案摘要、步骤、位置、估算、互斥组、计费时点与加工依赖。",
+    "inputs": "方案摘要、步骤、位置、估算、互斥组、计费时点与加工依赖。具体步骤的目的、风险、选择、麻醉、材料、费用、后续注意及沟通说明。",
     "flow": [
       "基于当前检查建立工作草稿。",
       "讨论目标及可选步骤，未知费用保持空缺。",
+      "按具体步骤保存治疗说明，未完成可暂存；勾选准备完成时核对前七项及当前依据。",
       "预览后明确确认具体方案版本。",
       "后续改变另建版本，保留原步骤沿革及发布时目录定义。"
     ],
     "alternatives": [
       "目录或检查在预览后变化：重新核对。",
-      "双页冲突、撤权或跨店：拒绝覆盖并提供返回入口。"
+      "双页冲突、撤权或跨店：拒绝覆盖并提供返回入口。",
+      "步骤、摘要、检查或目录变化：重新复核说明；未完成文字不对患者公开。"
     ],
     "result": "可按确切版本查阅的方案与工作历史。",
     "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
-    "rules": "方案估算不产生治疗或账单；旧本人决定不自动适用新版。",
+    "rules": "方案估算不产生治疗或账单；旧本人决定不自动适用新版。具体说明随发布版本冻结，修订保留原版；准备说明不代表患者已经同意。",
     "acceptance": [
-      "AT-CONTINUITY-72：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+      "AT-CONTINUITY-72：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。",
+      "AT-DISCLOSURE-72：草稿隐藏、准确来源、步骤变更、双页并发、旧预览及版本恢复。"
     ],
     "source": [
       "clinical/plans.py",
@@ -1037,7 +1040,9 @@
       "clinical/laboratory.py",
       "tests/test_treatment_continuity.py",
       "tests/test_recall_laboratory.py",
-      "tests/test_recall_laboratory_http.py"
+      "tests/test_recall_laboratory_http.py",
+      "clinical/disclosures.py",
+      "tests/test_treatment_disclosures.py"
     ]
   },
   {
@@ -1049,19 +1054,22 @@
     "inputs": "认可、暂缓或不选择，具体步骤版本与讨论说明。",
     "flow": [
       "读取本人已经发布的方案。",
+      "查阅医师已准备的对应步骤说明，可切换历史；缺失时明确尚未提供。",
       "选择具体版本步骤及本人表态。",
       "核对预览并明确提交。",
       "刷新当前进度，保留所有旧决定。"
     ],
     "alternatives": [
       "互斥步骤同时认可：拒绝第二个选择。",
-      "患者切换或响应丢失：清除旧主体资料，原提交可同次核实。"
+      "患者切换或响应丢失：清除旧主体资料，原提交可同次核实。",
+      "当前说明尚未准备：显示待完善，不展示部分草稿，不补造已告知或本人同意。"
     ],
     "result": "可追溯来源、账号及版本的本人决定。",
     "minimum_guarantee": "失败不留下部分业务效果，已保存草稿及原患者、预约、诊疗和财务历史保留。",
-    "rules": "代约权限不含临床决定；讨论决定不等于治疗完成或合格知情同意签署。",
+    "rules": "代约权限不含临床决定；讨论决定不等于治疗完成或合格知情同意签署。查看说明不新增决定；预约代办不能查看本人临床说明。",
     "acceptance": [
-      "AT-CONTINUITY-73：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。"
+      "AT-CONTINUITY-73：具体版本、责任、准备、实际完成、重试、并发、撤权及历史核对。",
+      "AT-DISCLOSURE-73：网站与小程序准确版本一致，原版保留，其他患者及代约人被拒绝。"
     ],
     "source": [
       "clinical/plans.py",
@@ -1071,7 +1079,9 @@
       "clinical/laboratory.py",
       "tests/test_treatment_continuity.py",
       "tests/test_recall_laboratory.py",
-      "tests/test_recall_laboratory_http.py"
+      "tests/test_recall_laboratory_http.py",
+      "clinical/disclosures.py",
+      "tests/test_treatment_disclosures.py"
     ]
   },
   {

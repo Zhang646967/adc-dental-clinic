@@ -14910,6 +14910,19 @@
           "on_delete": null
         },
         {
+          "name": "disclosures",
+          "column": "disclosures",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
           "name": "amendment_reason",
           "column": "amendment_reason",
           "type": "CharField",
@@ -37152,6 +37165,12 @@
       "null": false
     },
     {
+      "table": "adc_plan_version",
+      "column": "disclosures",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
       "table": "adc_portal_booking_receipt",
       "column": "id",
       "db_type": "bigint",
@@ -39762,6 +39781,10 @@
       "name": "0007_outpatient_documents"
     },
     {
+      "app": "clinical",
+      "name": "0008_plan_disclosures"
+    },
+    {
       "app": "contenttypes",
       "name": "0001_initial"
     },
@@ -39970,7 +39993,7 @@
       "name": "0003_workspacecontext_login_channel_and_more"
     }
   ],
-  "observed_on": "2026-10-29",
-  "observed_scope": "Read-only independent PostgreSQL17 with exact C3.1 application image after65 application migrations; no business rows or private configuration exported.",
-  "application_commit": "90ddb5c7ca5f6dfbc4357ef958f37715a8867719"
+  "observed_on": "2026-10-30",
+  "observed_scope": "Read-only independent PostgreSQL17 with exact C3.2A frozen application image after66 application migrations; no business rows or private configuration exported.",
+  "application_commit": "08ba78183aba364865df57800c3df28684f7004b"
 }

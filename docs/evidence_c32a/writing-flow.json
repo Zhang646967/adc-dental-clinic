@@ -1,0 +1,35 @@
+{
+  "checks": [
+    {
+      "name": "Invalid prepared disclosure retains physician input on the real page",
+      "passed": true
+    },
+    {
+      "name": "Saved ready draft remains unavailable to patient before explicit plan confirmation",
+      "passed": true
+    },
+    {
+      "name": "Real stale confirmation rejects without losing the newly saved explanation",
+      "passed": true
+    },
+    {
+      "name": "Published version1 is readable through actual native HTTP transport without creating a consent decision",
+      "passed": true
+    },
+    {
+      "name": "New amendment draft does not replace the patient-visible version",
+      "passed": true
+    },
+    {
+      "name": "Version2 and original version1 preserve different exact explanation snapshots",
+      "passed": true
+    }
+  ],
+  "run_status": "SIX_CHECKS_PASSED;THEN_HARNESS_LOGIN_EXPANDER_CLOSED_OPEN_PASSWORD_FORM",
+  "browser_read_resume": "browser-read.json",
+  "scope": "Normal browser writes on first frozen-equivalent clinical implementation; later exact-image reads separately retained",
+  "first_application": "1e8726080844b01e2d47f6e08b102cc814e094e9",
+  "first_image": "sha256:a2da9c3b9ad46f96ebcd013ea7d2db49c9978f875cb10026dccab80f5d80667e",
+  "current_clinical_code_identical": true,
+  "original_and_workbuddy_source_no_case_writes": true
+}

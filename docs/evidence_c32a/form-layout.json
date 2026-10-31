@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "scope": "Real Chrome editable form on isolated exact-image backend; not phone keyboard acceptance",
+  "checks": [
+    {
+      "name": "eight editable fields 375px 100%",
+      "passed": true
+    },
+    {
+      "name": "eight editable fields 375px 200%",
+      "passed": true
+    },
+    {
+      "name": "eight editable fields 390px 100%",
+      "passed": true
+    },
+    {
+      "name": "eight editable fields 390px 200%",
+      "passed": true
+    },
+    {
+      "name": "eight editable fields 430px 100%",
+      "passed": true
+    },
+    {
+      "name": "eight editable fields 430px 200%",
+      "passed": true
+    },
+    {
+      "name": "keyboard follows purpose to risks",
+      "passed": true
+    },
+    {
+      "name": "keyboard checkbox to explicit save",
+      "passed": true
+    },
+    {
+      "name": "layout-only draft explicitly discarded, no extra version or money",
+      "passed": true
+    }
+  ]
+}

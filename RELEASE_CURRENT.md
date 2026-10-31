@@ -1,3 +1,11 @@
+# 当前 C3.2A：具体治疗说明与版本查阅
+
+准确应用`08ba78183aba364865df57800c3df28684f7004b`通过[完整CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41169142568)，1164规则／2154PG。18000及新独立18332已更新，旧18315保留原版，65份旧迁移追加到66，旧账号、绑定、配置与143组旧业务保留；加密独立恢复通过。正式报告240页，扩展原SU72／73，实际ER与JSONB字段一致。
+
+[完整证据](docs/evidence_c32a/README.md) · [WorkBuddy新页工具回归](docs/WORKBUDDY_C32A_TASK.md) · [下一批规格](docs/C32_NEXT_INCREMENT.md)。P4工具已收口，P3本机由Codex验证；新方案页工具、第二真实微信、手机、固定HTTPS及平台体验分别待验收。医疗同意、医疗代理、开治与归档未实现。
+
+以下保留前版本交付时点。
+
 # 当前：WorkBuddy反馈收口与系统本体接续
 
 应用`64ddf8100933ef8c9439e91bdccdd30f61d6ebcd`通过[准确完整CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41156516935)，1,164规则／2,139PG；同提交arm64镜像`sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393`完成本地验证，已保护更新18000和独立18315。前台发布入口、接受／拒绝／真实十五分钟到期、七角色、密钥文件及加密独立恢复通过。原143组业务、密码、绑定、数据库卷和65份迁移字节保留。原生客户端f402047不变；P1官方工具反馈已按用户回传归档。

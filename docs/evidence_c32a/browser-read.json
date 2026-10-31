@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "scope": "Real Chrome and native HTTP transport against exact frozen image; no source mount; not official WeChat tool or phone",
+  "origin": "http://127.0.0.1:18332",
+  "checks": [
+    {
+      "name": "Own patient website agrees with native current and historical version reads",
+      "passed": true
+    },
+    {
+      "name": "Physician and patient layouts 375px 100%",
+      "passed": true
+    },
+    {
+      "name": "Physician and patient layouts 375px 200%",
+      "passed": true
+    },
+    {
+      "name": "Physician and patient layouts 390px 100%",
+      "passed": true
+    },
+    {
+      "name": "Physician and patient layouts 390px 200%",
+      "passed": true
+    },
+    {
+      "name": "Physician and patient layouts 430px 100%",
+      "passed": true
+    },
+    {
+      "name": "Physician and patient layouts 430px 200%",
+      "passed": true
+    },
+    {
+      "name": "Other own patient cannot read disclosure",
+      "passed": true
+    },
+    {
+      "name": "Verified appointment delegate gains no clinical explanation access",
+      "passed": true
+    },
+    {
+      "name": "front_a clinical explanation access rejected",
+      "passed": true
+    },
+    {
+      "name": "manager_a clinical explanation access rejected",
+      "passed": true
+    },
+    {
+      "name": "hq_demo clinical explanation access rejected",
+      "passed": true
+    },
+    {
+      "name": "finance_demo clinical explanation access rejected",
+      "passed": true
+    },
+    {
+      "name": "tech_demo clinical explanation access rejected",
+      "passed": true
+    },
+    {
+      "name": "Retained physician history is read-only",
+      "passed": true
+    }
+  ],
+  "visit": 11,
+  "plan": 1,
+  "versions": 2,
+  "js_errors": 0,
+  "application_commit": "08ba78183aba364865df57800c3df28684f7004b",
+  "image": "sha256:e3bf3805ef6c8fa00a7e7da95f09483de86c49d1a49e77500e8a022145c749ae"
+}

@@ -1,3 +1,5 @@
+当前C3.2A：实际PostgreSQL核对66份应用迁移、146表、402SQL外键、114启用触发器及33幅ER。保留原65份迁移，治疗方案版本仅增加`disclosures`JSONB说明快照；JSON步骤编号不绘为SQL外键，也不表示医疗同意已完成。[字段目录](FIELD_CATALOG.md)／[具体合同](../C32_TREATMENT_EXPLANATIONS.md)。下文保留各历史时点结构。
+
 C3.1当前结构：65份应用迁移、146张SQL表、402条外键、114项业务触发器，33幅实际ER。新增[完整文书来源](er_clinical_documents.svg)和[责任办理](er_document_responsibility.svg)；[字段目录](FIELD_CATALOG.md)与[实际结构快照](schema_snapshot.json)同步。原64份迁移保持原字节。下文D1／P1结果按其原时点读取。
 
 D1已只读核对原系统、教师、新初始化和恢复库：142表、388外键、110项已开启触发器，完整字段、约束与索引一致。64份迁移原字节保留，31幅ER继续适用。见[实际核对](../evidence_d1/schema_er.json)；本阶段不增加数据库表。

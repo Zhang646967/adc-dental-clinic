@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "old_groups": 143,
+  "encrypted_database_and_configuration": true,
+  "configuration_includes_read_only_wechat_key": true,
+  "configuration_roundtrip_verified": true,
+  "source_facts_stable": true,
+  "old_image": "sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393"
+}

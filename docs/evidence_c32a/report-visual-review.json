@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "pages": 240,
+  "all_changed21_pages_reviewed_at_render_resolution": [
+    4,
+    6,
+    33,
+    34,
+    35,
+    36,
+    55,
+    67,
+    85,
+    91,
+    105,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    192,
+    193
+  ],
+  "unchanged219_pages_pixel_identical_to_prior_full_review": true,
+  "final_semantic_correction_pages_reviewed": [
+    114,
+    116,
+    117,
+    119
+  ],
+  "current_render": "Private locally reviewed rendered pages;not publicly uploaded",
+  "toc_and_page_numbers_checked": true,
+  "tables_no_clipping": true,
+  "updated_er_disclosures_visible_and_json_not_sql_fk": true
+}

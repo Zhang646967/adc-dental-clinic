@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "original_migration_files": 65,
+  "unchanged_byte_for_byte": true,
+  "new_migration": "clinical/0008_plan_disclosures",
+  "current_total": 66
+}

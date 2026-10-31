@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "pdf_pages": 240,
+  "business_use_cases": 120,
+  "support_case": "SF-01",
+  "tables": 139,
+  "images": 70,
+  "er_views": 33,
+  "table_and_figure_numbering": "SEQUENTIAL",
+  "toc_entries": 96,
+  "all_page_text_bounds_checked": true,
+  "all_fonts_embedded": true,
+  "old_contract_fields_retained": 539,
+  "docx_sha256": "35c79772670614410ac7557ed4d8cbe54a5bccd47763c18d1c50a29018b7fdf3",
+  "pdf_sha256": "3763eee1e594f382d6993d6d9cbdf7da6b931ccef26a5598b9cb0515adc17a46",
+  "actual_schema": {
+    "tables": 146,
+    "foreign_keys": 402,
+    "triggers": 114
+  },
+  "platform_acceptance": "C32A_LOCAL_SYNTHETIC_EXPLANATION_PREPARATION;MEDICAL_CONSENT_AND_ARCHIVE_LATER;PHYSICAL_DEVICE_DEFERRED",
+  "extended_existing_cases": [
+    "SU-72",
+    "SU-73"
+  ],
+  "all_other118_case_definitions_unchanged": true
+}

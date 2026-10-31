@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "all143_preexisting_groups_original_rows_preserved": true,
+  "all_preexisting_financial_and_actual_facts_unchanged": true,
+  "rehearsal_case": {
+    "visit": 11,
+    "status": "CHECKED_IN",
+    "plans": [
+      1,
+      2
+    ],
+    "drafts": 0,
+    "decisions": 0,
+    "actual": 0,
+    "invoices": 0,
+    "copied_visit10": "SCHEDULED"
+  },
+  "workbuddy18315_source_unchanged": true,
+  "normal_owned_business_commands_only": true,
+  "case_scope": "Explicit course synthetic clock; no actual patient care, medical consent or money",
+  "original18000_case_fixtures_added": 0
+}

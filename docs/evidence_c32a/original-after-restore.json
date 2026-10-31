@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "phase": "original-after",
+  "application_commit": "08ba78183aba364865df57800c3df28684f7004b",
+  "image": "sha256:e3bf3805ef6c8fa00a7e7da95f09483de86c49d1a49e77500e8a022145c749ae",
+  "encrypted_backup_sha256": "7fb7f04a24521b2964238610c7273c30f31e4e95d17022668d6a750245ac9989",
+  "empty_database_same_version_migration_restore": true,
+  "all143_groups_exactly_restored_before_auth_invalidation": true,
+  "all_binary_images_history_versions_money_and_permissions_preserved": true,
+  "full_observed_schema_equal": true,
+  "append65_to66_test": false,
+  "old_versions_not_fabricated": "NOT_APPLICABLE_THIS_RESTORE_PATH",
+  "encrypted_file_mode_config_restore": true,
+  "application_migrations": 66,
+  "tables": 146,
+  "foreign_keys": 402,
+  "triggers": 114,
+  "elapsed_seconds": 25.4,
+  "general_equivalent_ddl_comparator_limit_retained": true
+}

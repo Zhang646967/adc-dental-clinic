@@ -1,0 +1,13 @@
+{
+  "application_commit": "1e8726080844b01e2d47f6e08b102cc814e094e9",
+  "ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41168716024",
+  "conclusion": "FAILURE_BEFORE_BUSINESS_TESTS",
+  "cause": "Host-only historical evidence wrongly included in runtime validation manifest",
+  "fix": "Restore prior runtime exclusion; retain file and its checksum in complete archive",
+  "corrected_application": "08ba78183aba364865df57800c3df28684f7004b",
+  "changed_files": [
+    "CHECKSUMS.sha256",
+    "UPDATE_MANIFEST.json"
+  ],
+  "business_code_changed": false
+}

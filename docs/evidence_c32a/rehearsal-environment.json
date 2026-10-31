@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "backend": "http://127.0.0.1:18332",
+  "source": "LOCAL_SYNTHETIC18315_ENCRYPTED_COPY;NOT_ORIGINAL18000;NO_PUBLIC_EXPOSURE",
+  "original_and_workbuddy_databases_unchanged": true,
+  "old143_groups_restored_exactly": true,
+  "from_application_migrations": 65,
+  "to_application_migrations": 66,
+  "source_scope": "WORKING_TREE_BIND_NOT_FROZEN_IMAGE",
+  "new_database_credentials": true,
+  "application_credentials": "Dedicated synthetic WorkBuddy credentials retained only in local rehearsal",
+  "no_wechat_or_sms_configuration": true
+}
