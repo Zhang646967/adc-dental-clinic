@@ -1,3 +1,5 @@
+2026-10-30最新接续：后端已更新到`64ddf8100933ef8c9439e91bdccdd30f61d6ebcd`，客户端仍为f402047，P1官方工具回传PASS；P3本机文件注入及恢复通过。P4由前台在`/scheduling/plans/`发布，最新[操作单](WORKBUDDY_P4_PUBLISHING.md)及[证据](evidence_wb_p4/README.md)优先于下文原时点。第二身份／固定HTTPS／手机／体验仍待验收。以下保留旧交付历史，不回退旧包或解绑id4。
+
 2026-10-30接续：已收到上一轮回传并修复登录失败反馈；最新任务及独立业务环境见[WorkBuddy接续](WORKBUDDY_FOLLOWUP_20261030.md)和[验证记录](evidence_wb_followup/README.md)。以下保留C3.1原任务时点，客户端不再与旧c6d1e15包逐字节相同。
 
 # WorkBuddy 小程序本轮跟进任务

@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "current_invoice": "180.00",
+  "original_invoice": "200.00",
+  "posted_synthetic_receipt": "100.00",
+  "remaining": "80.00",
+  "invoice_versions": 2,
+  "patient_has_open_wait": false,
+  "scope": "Read-only actual native HTTP projections after waitlist cases; synthetic course money"
+}

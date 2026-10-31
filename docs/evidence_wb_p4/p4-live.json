@@ -1,0 +1,119 @@
+{
+  "passed": true,
+  "application_commit": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
+  "checks": [
+    {
+      "name": "Front-desk home exposes the exact publication entry",
+      "passed": true
+    },
+    {
+      "name": "Existing source slot519 links to current-clinic publication",
+      "passed": true
+    },
+    {
+      "name": "Manager sees correct ownership and cannot publish",
+      "passed": true
+    },
+    {
+      "name": "accept: explicit browser generation has no hold; publication produces one pending offer and no visit",
+      "passed": true
+    },
+    {
+      "name": "Accept and replay create exactly one linked scheduled visit",
+      "passed": true
+    },
+    {
+      "name": "Accepted trial visit is normally cancelled, with offer and history retained",
+      "passed": true
+    },
+    {
+      "name": "decline: explicit browser generation has no hold; publication produces one pending offer and no visit",
+      "passed": true
+    },
+    {
+      "name": "Decline releases the offer and returns the request to waiting without a visit",
+      "passed": true
+    },
+    {
+      "name": "natural_expiry: explicit browser generation has no hold; publication produces one pending offer and no visit",
+      "passed": true
+    },
+    {
+      "name": "Front-desk home exposes the exact publication entry",
+      "passed": true
+    },
+    {
+      "name": "Existing source slot519 links to current-clinic publication",
+      "passed": true
+    },
+    {
+      "name": "Manager sees correct ownership and cannot publish",
+      "passed": true
+    },
+    {
+      "name": "Initial near-start offer naturally expired at its appointment-start boundary and was normally recycled and withdrawn",
+      "passed": true
+    },
+    {
+      "name": "natural_expiry: explicit browser generation has no hold; publication produces one pending offer and no visit",
+      "passed": true
+    },
+    {
+      "name": "Actual fifteen-minute expiry rejects a fresh prior acceptance preview with409 and the business expiry reason",
+      "passed": true
+    },
+    {
+      "name": "Expired offer has no visit, cannot be accepted and cannot create a new preview",
+      "passed": true
+    },
+    {
+      "name": "Actual front-desk recycle records EXPIRED and returns the same request to WAITING",
+      "passed": true
+    },
+    {
+      "name": "Finished test uses normal withdrawal; offer, request and original history are retained",
+      "passed": true
+    }
+  ],
+  "records": [
+    {
+      "scenario": "accept",
+      "wait": 3,
+      "plan": 1,
+      "offer": 1,
+      "published_observed_at": "2026-10-31T01:44:20.409Z",
+      "expires": "2026-10-31T01:45:00+00:00",
+      "visit": 9
+    },
+    {
+      "scenario": "decline",
+      "wait": 4,
+      "plan": 2,
+      "offer": 2,
+      "published_observed_at": "2026-10-31T01:44:22.982Z",
+      "expires": "2026-10-31T01:45:00+00:00"
+    },
+    {
+      "scenario": "appointment_start_expiry",
+      "wait": 5,
+      "plan": 3,
+      "offer": 3,
+      "published_observed_at": "2026-10-31T01:44:24.482Z",
+      "expires": "2026-10-31T01:45:00+00:00"
+    },
+    {
+      "scenario": "natural_expiry",
+      "wait": 6,
+      "plan": 4,
+      "offer": 4,
+      "published_observed_at": "2026-10-31T01:45:23.311Z",
+      "expires": "2026-10-31T02:00:23.112902+00:00",
+      "preview_before_expiry_at": "2026-10-31T02:00:03.312Z",
+      "confirmation_failure": "邀约已失效；没有创建预约。请刷新候补页面或联系前台。（查询编号 8451d28bb3fa47069911d913f4279e4d）",
+      "rejected_at": "2026-10-31T02:00:24.442Z"
+    }
+  ],
+  "real_time_expiry": true,
+  "no_clock_or_database_mutation": true,
+  "scope": "Actual Chrome staff forms and unchanged native client HTTP transport to isolated18315/PostgreSQL; no official mini-program tool or phone acceptance"
+}

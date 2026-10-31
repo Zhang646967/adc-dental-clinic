@@ -1,0 +1,14 @@
+{
+  "source": "USER_RELAYED_WORKBUDDY_2026_10_30",
+  "scope": "OFFICIAL_DEVELOPER_TOOL_LOCAL_SIMULATOR",
+  "p1_wrong_password_error_retained": true,
+  "query_identifier_visible": true,
+  "expanded_form_and_username_retained": true,
+  "password_cleared": true,
+  "button_recovers": true,
+  "no_empty_login_relaunch": true,
+  "correct_retry_reaches_home": true,
+  "physical_phone": false,
+  "second_identity": false,
+  "known_identity4_not_unbound": true
+}

@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "tracked_files": 2977,
+  "no_private_env_keys_or_test_password_files_in_frozen_source": true,
+  "report_matches_frozen_application_package": true,
+  "native_miniprogram_unchanged": true
+}

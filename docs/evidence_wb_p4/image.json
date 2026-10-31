@@ -1,0 +1,6 @@
+{
+  "application_commit": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
+  "image": "sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393",
+  "architecture": "arm64",
+  "frozen_git_archive": true
+}

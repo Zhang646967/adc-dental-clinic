@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "source_commit": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
+  "image": "sha256:cda0c64396f7e8ac3829dc7aff69b4fa418df30335efb802d72e46ae4ed37393",
+  "encrypted_backup_decrypted": true,
+  "same_version_migration_built_empty_database": true,
+  "model_groups_compared": 143,
+  "all_business_rows_passwords_binary_images_versions_and_financial_facts_match": true,
+  "full_observed_schema_equal": true,
+  "tables": 146,
+  "foreign_keys": 402,
+  "enabled_triggers": 114,
+  "application_migrations": 65,
+  "pending_authentication_invalidated_after_fact_comparison": true,
+  "source_database_unchanged": true,
+  "elapsed_seconds": 42.025,
+  "general_equivalent_ddl_comparison_limit_retained": true
+}

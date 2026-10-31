@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "application_migration_bytes_preserved": 65,
+  "actual_tables": 146,
+  "actual_foreign_keys": 402,
+  "actual_enabled_business_triggers": 114,
+  "actual_er_views": 33,
+  "no_models_or_tables_added": true,
+  "native_client_source_unchanged": true
+}

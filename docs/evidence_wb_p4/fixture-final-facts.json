@@ -1,0 +1,86 @@
+{
+  "passed": true,
+  "workbuddy_original_records_preserved": true,
+  "new_visits": [
+    {
+      "id": 9,
+      "status": "CANCELLED",
+      "lock_version": 1,
+      "replaces_visit_id": null
+    },
+    {
+      "id": 8,
+      "status": "CANCELLED",
+      "lock_version": 1,
+      "replaces_visit_id": 7
+    },
+    {
+      "id": 7,
+      "status": "RESCHEDULED",
+      "lock_version": 1,
+      "replaces_visit_id": null
+    }
+  ],
+  "new_waits": [
+    {
+      "id": 2,
+      "state": "WITHDRAWN",
+      "revision": 1
+    },
+    {
+      "id": 3,
+      "state": "BOOKED",
+      "revision": 2
+    },
+    {
+      "id": 4,
+      "state": "WITHDRAWN",
+      "revision": 3
+    },
+    {
+      "id": 5,
+      "state": "WITHDRAWN",
+      "revision": 3
+    },
+    {
+      "id": 6,
+      "state": "WITHDRAWN",
+      "revision": 3
+    }
+  ],
+  "offers": [
+    {
+      "id": 1,
+      "request_id": 3,
+      "state": "ACCEPTED",
+      "visit_id": 9,
+      "expires_at": "2026-10-31 01:45:00+00:00"
+    },
+    {
+      "id": 2,
+      "request_id": 4,
+      "state": "DECLINED",
+      "visit_id": null,
+      "expires_at": "2026-10-31 01:45:00+00:00"
+    },
+    {
+      "id": 3,
+      "request_id": 5,
+      "state": "EXPIRED",
+      "visit_id": null,
+      "expires_at": "2026-10-31 01:45:00+00:00"
+    },
+    {
+      "id": 4,
+      "request_id": 6,
+      "state": "EXPIRED",
+      "visit_id": null,
+      "expires_at": "2026-10-31 02:00:23.112902+00:00"
+    }
+  ],
+  "only_one_offer_linked_visit": true,
+  "no_active_trial_resource_claims": true,
+  "tables": 146,
+  "foreign_keys": 402,
+  "enabled_triggers": 114
+}
