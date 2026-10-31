@@ -21,7 +21,7 @@ Page({
   this.setData({busy:true,error:''});
   try{const d=await api.request('plans/'+this.planId+'/'+(this.data.revision?'?revision='+this.data.revision:''));
    if(this._subject!==stamp()){this.clear();throw new Error('就诊人已变化，请重新核对本人方案。');}
-   const steps=d.steps.map(s=>Object.assign({},s,{actual_history:s.actual_history.map(a=>Object.assign({},a,{timeLabel:dateTime(a.observed_at)}))}));
+   const steps=d.steps.map(s=>Object.assign({},s,{disclosureTimeLabel:s.disclosure&&s.disclosure.prepared_at?dateTime(s.disclosure.prepared_at):'',actual_history:s.actual_history.map(a=>Object.assign({},a,{timeLabel:dateTime(a.observed_at)}))}));
    this.setData({plan:Object.assign({},d,{steps,timeLabel:dateTime(d.recorded_at)}),busy:false});
   }catch(e){this.failed(e);}
  },

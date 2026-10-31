@@ -62,6 +62,8 @@ def normalize_plan(raw,*,complete=False):
     result=dict(summary=text(raw.get('summary',''),3000,'计划摘要',complete),
         discussion_note=text(raw.get('discussion_note',''),2000,'沟通说明'),
         amendment_reason=text(raw.get('amendment_reason',''),500,'版本更正依据'),steps=[step_fields(r) for r in rows])
+    from clinical.disclosures import normalize
+    result['disclosures']=normalize(raw.get('disclosures',{}),result['steps'])
     keys=[r['step_key'] for r in result['steps']]
     if len(set(keys))!=len(keys):raise RuleError('同一步骤不能在一个版本中重复列入。')
     if complete and not rows:raise RuleError('请至少列出一个拟讨论的步骤，再确认方案版本。')

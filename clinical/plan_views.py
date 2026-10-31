@@ -19,14 +19,15 @@ from clinical.form_binding import patient_form_binding,check_patient_form
 from clinical.plan_models import PlanDraft,PlanStepVersion,PerformedProcedure
 from clinical.plan_selectors import clinician_plans,clinician_plan_details,patient_plan_rows,self_plan_details,actual_details
 from clinical.plan_forms import (PlanStartForm,PlanNotesForm,StepForm,PlanReasonForm,StepRemoveForm,DecisionForm,
-    ExecutionForm,InstructionForm,ConfirmPlanActionForm,PlainReasonForm,LinkAppointmentForm,PlanRefreshForm)
+    ExecutionForm,InstructionForm,ConfirmPlanActionForm,PlainReasonForm,LinkAppointmentForm,PlanRefreshForm,DisclosureForm)
 
 
 def show_preview(request,title,preview,back,*,base_template='base.html',visit=None):
     if preview.get('payload'):
+        from clinical.disclosures import projection
         definitions=preview['definitions']
         preview['display_steps']=[dict(r,catalogue_name=definitions[r['step_key']]['treatment']['name'],service_name=definitions[r['step_key']]['service']['name'],
-            duration=definitions[r['step_key']]['service']['duration']) for r in preview['payload']['steps']]
+            duration=definitions[r['step_key']]['service']['duration'],disclosure=projection(preview['payload']['disclosures'].get(r['step_key']))) for r in preview['payload']['steps']]
     form=ConfirmPlanActionForm(initial={'proposal_token':preview['proposal_token']})
     return clinical_render(request,'clinical/plan_confirm.html',dict(title=title,preview=preview,form=form,back=back,base_template=base_template,visit=visit))
 
@@ -85,6 +86,15 @@ def plan_detail(request,pk,plan_id):
     initial=lambda **values:dict(common,operation_id=uuid.uuid4(),**values)
     bound=lambda *names:post if request.method=='POST' and action in names else None
     payload=d['plan_payload'] or dict(summary='',discussion_note='',amendment_reason='',steps=[])
+    notice_sequence=post.get('sequence') if action=='DISCLOSURE' else request.GET.get('notice','1')
+    try:
+        notice_index=int(notice_sequence)-1
+        notice_step=payload['steps'][notice_index] if 0<=notice_index<len(payload['steps']) else None
+    except (TypeError,ValueError):notice_step=None
+    notice_initial={}
+    if notice_step:
+        notice_initial=dict(payload.get('disclosures',{}).get(notice_step['step_key'],{}),
+            sequence=notice_index+1,step_key=notice_step['step_key'])
     edit=request.GET.get('edit');edit_row=None
     if edit is not None:
         try:
@@ -98,14 +108,15 @@ def plan_detail(request,pk,plan_id):
         amend_form=PlanReasonForm(bound('BEGIN_AMEND'),initial=initial(),auto_id='plan_amend_%s'),
         discard_form=PlanReasonForm(bound('DISCARD'),initial=initial(),auto_id='plan_discard_%s'),
         refresh_form=PlanRefreshForm(bound('REFRESH_SOURCE'),initial=initial(),auto_id='plan_refresh_%s'))
+    forms['disclosure_form']=DisclosureForm(bound('DISCLOSURE'),initial=initial(**notice_initial),auto_id='plan_disclosure_%s')
     remove=StepRemoveForm(bound('REMOVE_STEP'),initial=initial(),auto_id='plan_remove_%s')
-    by_action=dict(NOTES=forms['notes_form'],ADD_STEP=forms['step_form'],UPDATE_STEP=forms['step_form'],BEGIN_AMEND=forms['amend_form'],DISCARD=forms['discard_form'],REMOVE_STEP=remove,REFRESH_SOURCE=forms['refresh_form'])
+    by_action=dict(NOTES=forms['notes_form'],ADD_STEP=forms['step_form'],UPDATE_STEP=forms['step_form'],BEGIN_AMEND=forms['amend_form'],DISCARD=forms['discard_form'],REMOVE_STEP=remove,REFRESH_SOURCE=forms['refresh_form'],DISCLOSURE=forms['disclosure_form'])
     status=200;rebase=False
     if request.method=='POST' and not resumed:
         if action not in by_action:raise PermissionDenied('未知治疗计划操作。')
         form=by_action[action]
         if form.is_valid():
-            data=form.fields_data() if action in ('ADD_STEP','UPDATE_STEP') else dict(form.cleaned_data)
+            data=form.fields_data() if action in ('ADD_STEP','UPDATE_STEP','DISCLOSURE') else dict(form.cleaned_data)
             expected=data.pop('expected_revision')
             op=data.pop('operation_id');data.pop('patient_binding',None);data.pop('confirmed',None)
             try:plans.change_plan(actor=request.user,visit_id=pk,plan_id=plan_id,expected_revision=expected,operation_id=op,action=action,fields=data)
@@ -113,14 +124,16 @@ def plan_detail(request,pk,plan_id):
                 add_error(form,exc);status=409;d=clinician_plan_details(request.user,pk,plan_id)
                 rebase=action in ('NOTES','ADD_STEP','UPDATE_STEP') and d['draft'] is not None and expected!=d['plan'].revision
             else:
-                messages.success(request,'方案草稿已保存；已确认的旧方案与患者决定继续保留。')
+                messages.success(request,'本步骤治疗说明已保存；确认方案版本后才提供给患者核对，未记录医疗同意。' if action=='DISCLOSURE' else '方案草稿已保存；已确认的旧方案与患者决定继续保留。')
+                if action=='DISCLOSURE':
+                    return redirect(reverse('clinical_plan_detail',kwargs=dict(pk=pk,plan_id=plan_id))+'?notice='+str(form.cleaned_data['sequence'])+'#plan-disclosure')
                 return redirect('clinical_plan_detail',pk=pk,plan_id=plan_id)
         else:status=400
     draft_rows=[]
     for number,row in enumerate((d['draft'].payload['steps'] if d['draft'] else []),1):
         rf=remove if request.method=='POST' and action=='REMOVE_STEP' and str(number)==request.POST.get('sequence') else StepRemoveForm(initial=initial(sequence=number),auto_id='remove_'+str(number)+'_%s')
         draft_rows.append(dict(row,sequence=number,remove_form=rf))
-    return clinical_render(request,'clinical/plan_detail.html',dict(d,**forms,draft_rows=draft_rows,action=action,rebase_available=rebase,editing=bool(edit_row) or action=='UPDATE_STEP'),status=status)
+    return clinical_render(request,'clinical/plan_detail.html',dict(d,**forms,draft_rows=draft_rows,action=action,rebase_available=rebase,notice_step=notice_step,notice_sequence=notice_sequence,editing=bool(edit_row) or action=='UPDATE_STEP'),status=status)
 
 
 @login_required

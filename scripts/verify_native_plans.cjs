@@ -25,6 +25,12 @@ async function verify(){
   const {p}=page('plan',{session,request:async()=>plain(plan)});p.onLoad({id:'8'});await p.onShow();assert.equal(p.data.plan.steps[0].estimate_amount,null);
   assert.equal(p.data.plan.steps[0].completed,false);assert.equal(p.data.plan.steps[0].actual_history[0].mode_label,'本阶段不另计费');
  });
+ await test('exact-version treatment explanation remains read-only and old versions can be revisited',async()=>{
+  const value=plain(plan);value.steps[0].disclosure={available:true,state:'PREPARED',label:'治疗说明已准备，待沟通核对',prepared_at:'2026-10-24T08:00:00Z',prepared_by_name:'课程医师',fields:[{key:'risks',label:'主要风险',value:'PRIVATE_VERSION_ONE_RISK'}]};
+  const {p,calls}=page('plan',{session,request:async(route)=>route.includes('?revision=1')?{...plain(value),is_current:false}:plain(value)});
+  p.onLoad({id:'8'});await p.onShow();assert.equal(p.data.plan.steps[0].disclosure.fields[0].value,'PRIVATE_VERSION_ONE_RISK');assert(p.data.plan.steps[0].disclosureTimeLabel);
+  await p.version({currentTarget:{dataset:{revision:'1'}}});assert.equal(p.data.plan.is_current,false);assert.equal(p.data.plan.steps[0].disclosure.fields[0].value,'PRIVATE_VERSION_ONE_RISK');assert(calls.every(c=>!c.method||c.method==='GET'));
+ });
  await test('decision preview binds exact plan step and edited values clear confirmation',async()=>{
   const {p,calls}=page('plan',{session,request:async(route,method,data)=>route.startsWith('plans/8/steps/')?{proposal_token:'signed-1',plan:8,step:16,version:1,description:'合成步骤',values:data}:plain(plan)});
   p.onLoad({id:'8'});await p.onShow();p.choose(click(16));p.pick({detail:{value:'1'}});p.input({detail:{value:'稍后继续讨论'}});await p.preview();

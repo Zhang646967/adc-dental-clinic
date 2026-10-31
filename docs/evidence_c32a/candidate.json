@@ -1,0 +1,13 @@
+{
+  "status": "SOURCE_CANDIDATE;NOT_INSTALLED",
+  "source_rules": 1164,
+  "working_tree_targeted_postgresql": 66,
+  "additional_real_postgresql_concurrency": 1,
+  "official_tool": "NOT_RUN_NEW_NATIVE_PAGE",
+  "physical_phone": "DEFERRED_BY_USER",
+  "clinical_scope": "Concrete explanation preparation and exact-version own-patient reads only",
+  "medical_consent_and_archive": "LATER_BATCHES_NOT_IMPLEMENTED",
+  "original_and_workbuddy_source_facts": "PRESERVED;REHEARSAL_IN_SEPARATE_COPY",
+  "prior_migration_bytes_preserved": 65,
+  "new_application_migrations": 66
+}

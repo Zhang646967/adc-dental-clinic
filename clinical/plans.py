@@ -48,7 +48,8 @@ def version_payload(version):
             description=row.description,goal=row.goal,tooth=row.tooth,surface=row.surface,
             estimated_quantity=str(row.estimated_quantity),estimated_unit_price=str(row.estimated_unit_price) if row.estimated_unit_price is not None else None,
             estimate_note=row.estimate_note,alternative_group=row.alternative_group,charge_basis=row.charge_basis,requires_lab=row.requires_lab))
-    return dict(summary=version.summary,discussion_note=version.discussion_note,amendment_reason='',steps=rows)
+    from clinical.disclosures import retained
+    return dict(summary=version.summary,discussion_note=version.discussion_note,amendment_reason='',steps=rows,disclosures=retained(version))
 
 
 @business_errors
@@ -70,7 +71,7 @@ def start_plan(*,actor,visit_id,operation_id):
 @transaction.atomic
 @sensitive_variables()
 def change_plan(*,actor,visit_id,plan_id,expected_revision,operation_id,action,fields=None):
-    if action not in ('NOTES','ADD_STEP','UPDATE_STEP','REMOVE_STEP','BEGIN_AMEND','DISCARD','REFRESH_SOURCE'):raise RuleError('未知治疗计划操作。')
+    if action not in ('NOTES','ADD_STEP','UPDATE_STEP','REMOVE_STEP','BEGIN_AMEND','DISCARD','REFRESH_SOURCE','DISCLOSURE'):raise RuleError('未知治疗计划操作。')
     visit,patient,head,record,plan=lock_plan_visit(actor,visit_id,plan_id)
     require_plan_scope(actor,visit,plan,'RECORD',lock=True)
     op=operation(operation_id);fields=fields or {};intent=draft_digest({'action':action,'fields':fields})
@@ -102,8 +103,22 @@ def change_plan(*,actor,visit_id,plan_id,expected_revision,operation_id,action,f
             try:index=int(fields.get('sequence'))-1
             except (ValueError,TypeError):raise RuleError('请选择当前草稿中的步骤。')
             if not 0<=index<len(payload['steps']):raise RuleError('步骤已变化，请重新核对。')
-            if action=='REMOVE_STEP':payload['steps'].pop(index)
+            if action=='REMOVE_STEP':
+                removed=payload['steps'].pop(index);payload['disclosures'].pop(removed['step_key'],None)
             else:payload['steps'][index]=step_fields(dict(fields,step_key=payload['steps'][index]['step_key']))
+        elif action=='DISCLOSURE':
+            from clinical.disclosures import content,scope_digest
+            try:index=int(fields.get('sequence'))-1
+            except (ValueError,TypeError):raise RuleError('请从当前草稿的具体步骤准备治疗说明。')
+            if not 0<=index<len(payload['steps']) or str(fields.get('step_key',''))!=payload['steps'][index]['step_key']:
+                raise RuleError('治疗说明对应步骤已变化，请返回当前步骤核对；本页填写未保存。')
+            row=payload['steps'][index];notice=content(fields)
+            if notice['prepared'] and not payload['summary']:raise RuleError('请先保存方案摘要，再完成本步骤的治疗说明。')
+            validate_steps(actor,visit,plan,[row],lock=True)
+            definition=definition_bundle([row],lock=True)[row['step_key']]
+            notice.update(scope_digest=scope_digest(row,summary=payload['summary'],source_record=draft.source_record_id,definition=definition),
+                prepared_by=actor.pk,prepared_by_name=actor.dentist.name,prepared_at=timezone.now().isoformat())
+            payload['disclosures'][row['step_key']]=notice
         elif action=='REFRESH_SOURCE':draft.source_record=record
     if draft is not None:
         payload=normalize_plan(payload)
@@ -153,6 +168,8 @@ def prepare_plan(*,actor,visit_id,plan_id):
     draft=PlanDraft.objects.get(plan=plan);payload=normalize_plan(draft.payload,complete=True)
     validate_steps(actor,visit,plan,payload['steps'])
     definitions=definition_bundle(payload['steps'])
+    from clinical.disclosures import validate_prepared
+    validate_prepared(payload,source_record=draft.source_record_id,definitions=definitions)
     data=dict(visit=visit.pk,plan=plan.pk,revision=plan.revision,source_record=draft.source_record_id,base_version=draft.base_version_id,digest=draft_digest(payload),definition_digest=draft_digest(definitions))
     return dict(proposal_token=proposal(actor,PLAN_CONTRACT,('DENTIST',),data),payload=payload,definitions=definitions)
 
@@ -180,8 +197,10 @@ def confirm_plan(*,actor,proposal_token,confirmed):
     if latest and not 4<=len(payload['amendment_reason'])<=500:raise RuleError('新方案版本必须保留明确依据。')
     validate_steps(actor,visit,plan,payload['steps'],lock=True)
     definitions=definition_bundle(payload['steps'],lock=True)
+    from clinical.disclosures import validate_prepared
+    validate_prepared(payload,source_record=draft.source_record_id,definitions=definitions)
     if draft_digest(definitions)!=data.get('definition_digest'):raise RuleError('服务名称、时长或目录定义已变化，请重新预览后再确认。')
-    version=PlanVersion.objects.create(plan=plan,revision=latest.revision+1 if latest else 1,previous=latest,source_record=record,recorded_by=actor,summary=payload['summary'],discussion_note=payload['discussion_note'],amendment_reason=payload['amendment_reason'] if latest else '')
+    version=PlanVersion.objects.create(plan=plan,revision=latest.revision+1 if latest else 1,previous=latest,source_record=record,recorded_by=actor,summary=payload['summary'],discussion_note=payload['discussion_note'],disclosures=payload['disclosures'],amendment_reason=payload['amendment_reason'] if latest else '')
     for index,row in enumerate(payload['steps'],1):
         row=dict(row);key=row.pop('step_key');stable=TreatmentStep.objects.filter(step_key=key).first()
         if stable is None:stable=TreatmentStep.objects.create(plan=plan,step_key=key,created_by=actor)

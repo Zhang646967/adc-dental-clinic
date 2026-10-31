@@ -26,6 +26,8 @@ def plan_steps(version):
     stable_ids=[r.step_id for r in rows]
     prior=list(PerformedProcedure.objects.filter(step_version__step_id__in=stable_ids).select_related('encounter__visit','step_version').order_by('pk'))
     for row in rows:
+        from clinical.disclosures import projection
+        row.disclosure=projection(version.disclosures.get(str(row.step.step_key)))
         definition=row.definition_snapshot
         row.definition_retained=definition is not None
         row.saved_catalogue_name=definition['treatment']['name'] if definition else row.treatment_type.name

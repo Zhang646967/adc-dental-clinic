@@ -1,0 +1,6 @@
+<section class="panel" aria-label="本步骤治疗说明">
+<h3>本步骤治疗说明</h3><p>{{ disclosure.label }}</p>
+{% if disclosure.available %}<p class="soft">准备医师：{{ disclosure.prepared_by_name }} · 准备时间 {{ disclosure.prepared_time_label }}（北京时间）</p>
+{% for field in disclosure.fields %}<h4>{{ field.label }}</h4><p class="care-notes">{{ field.value }}</p>{% endfor %}{% endif %}
+<p class="soft">这份说明随本方案版本保留，供你与医师沟通。查看说明或认可方案步骤不代表已经完成治疗知情同意。</p>
+</section>

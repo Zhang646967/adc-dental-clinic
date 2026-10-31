@@ -31,6 +31,7 @@ class PlanVersion(models.Model):
     recorded_at=models.DateTimeField(auto_now_add=True)
     summary=models.CharField(max_length=3000)
     discussion_note=models.CharField(max_length=2000,blank=True)
+    disclosures=models.JSONField(default=dict,db_default={})
     amendment_reason=models.CharField(max_length=500,blank=True)
     class Meta:
         db_table='adc_plan_version'

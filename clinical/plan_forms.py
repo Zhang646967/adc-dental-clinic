@@ -36,6 +36,31 @@ class PlanNotesForm(RevisionForm):
     amendment_reason=forms.CharField(label='新版本依据',max_length=500,required=False,widget=forms.Textarea(attrs={'rows':2}))
 
 
+class DisclosureForm(RevisionForm):
+    sequence=forms.IntegerField(min_value=1,max_value=30,widget=forms.HiddenInput)
+    step_key=forms.UUIDField(widget=forms.HiddenInput)
+    prepared=forms.BooleanField(required=False,label='本步骤说明已准备，随确认方案提供给患者核对')
+    def __init__(self,*args,**kwargs):
+        from clinical.disclosures import FIELDS
+        super().__init__(*args,**kwargs)
+        # Keep the action checkbox after its actual clinical content.
+        prepared=self.fields.pop('prepared')
+        for key,label,limit in FIELDS:
+            self.fields[key]=forms.CharField(label=label,max_length=limit,required=False,
+                widget=forms.Textarea(attrs={'rows':3 if key in ('risks','alternatives','aftercare') else 2}))
+        self.fields['prepared']=prepared
+    def clean(self):
+        values=super().clean()
+        if not self.errors:
+            from clinical.disclosures import content
+            from adc_core.rules import RuleError
+            try:content(values)
+            except RuleError as exc:raise forms.ValidationError(str(exc)) from exc
+        return values
+    def fields_data(self):
+        data=dict(self.cleaned_data);data['step_key']=str(data['step_key']);return data
+
+
 class StepForm(RevisionForm):
     sequence=forms.IntegerField(required=False,min_value=1,max_value=30,widget=forms.HiddenInput)
     treatment_type=forms.ModelChoiceField(label='拟实施治疗目录',queryset=TreatmentType.objects.none())
