@@ -173,6 +173,7 @@ def build(folder,repo,output=None):
   if sn is None:sn=OxmlElement('w:pgNumType');section._sectPr.append(sn)
   sn.set(qn('w:start'),'1');sn.set(qn('w:fmt'),'upperRoman' if front else 'decimal')
  def fix_legacy(text):
+  text=text.replace('主管发布后形成有期限的保留','本店前台核对并发布后形成有期限的保留')
   text=text.replace('第3.7节','第3.5.5节')
   text=re.sub(r'图2-(\d+)',lambda m:'图3-'+str({3:4,4:3}.get(int(m[1]),int(m[1]))),text)
   if text.startswith('系统边界为ADC软件。'):return '系统边界为ADC软件。患者、前台、牙医和财务等作为执行者分别达成目标，每次工作上下文只激活一个身份。实线箭头表示功能交互，include表示共享核验，不表示业务的时间先后。'

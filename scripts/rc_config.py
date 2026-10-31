@@ -12,6 +12,7 @@ def prepare(root,port=18000):
     if target.exists():raise ValueError('.rc already exists; never overwrite existing secrets/state.')
     project='adc_rc1_'+secrets.token_hex(6)
     target.mkdir(mode=0o700);(target/'private').mkdir(mode=0o700)
+    (target/'private/wechat').mkdir(mode=0o755)
     env={'RC_PROJECT':project,'RC_APP_SECRET':secrets.token_urlsafe(64),'RC_DB_PASSWORD':secrets.token_urlsafe(32),
          'RC_WEB_PORT':str(port),'RC_READ_ONLY':'0'}
     with (target/'compose.env').open('x',encoding='ascii') as f:f.write(''.join(k+'='+v+'\n' for k,v in env.items()))
@@ -30,7 +31,7 @@ def validate(root):
         k,v=line.split('=',1);env[k]=v
     required={'RC_PROJECT','RC_APP_SECRET','RC_DB_PASSWORD','RC_WEB_PORT','RC_READ_ONLY'}
     authentication={'RC_SMS_PROVIDER','RC_TEACHER_TEST_MODE','RC_PATIENT_AUTH_MODE','RC_PATIENT_IDENTITY_PROVIDER',
-        'RC_WECHAT_MINI_APP_ID','RC_WECHAT_MINI_APP_SECRET','RC_WECHAT_QR_ENV_VERSION','RC_CLOUDBASE_ENV_ID',
+        'RC_WECHAT_MINI_APP_ID','RC_WECHAT_MINI_APP_SECRET','RC_WECHAT_MINI_APP_SECRET_FILE','RC_WECHAT_QR_ENV_VERSION','RC_CLOUDBASE_ENV_ID',
         'RC_CLOUDBASE_REGION','RC_CLOUDBASE_PUBLISHABLE_KEY','RC_SMS_FREE_QUOTA_CONFIRMED',
         'RC_SMS_ALLOWED_TEST_PHONES','RC_SMS_LIVE_TEST_LIMIT'}
     if not required<=set(env) or set(env)-required-authentication:raise ValueError('Unexpected configuration keys.')
@@ -38,6 +39,12 @@ def validate(root):
     if env.get('RC_PATIENT_AUTH_MODE','demo') not in ('demo','live') or env.get('RC_PATIENT_IDENTITY_PROVIDER','disabled') not in ('disabled','local'):raise ValueError('Invalid patient authentication mode.')
     if env.get('RC_PATIENT_AUTH_MODE')=='live' and (env.get('RC_SMS_PROVIDER')=='demo' or env.get('RC_PATIENT_IDENTITY_PROVIDER')=='local'):raise ValueError('Live authentication cannot use demonstration credentials.')
     if env.get('RC_WECHAT_QR_ENV_VERSION','develop') not in ('develop','trial','release'):raise ValueError('Invalid WeChat code environment.')
+    if env.get('RC_WECHAT_MINI_APP_SECRET_FILE'):
+        if env['RC_WECHAT_MINI_APP_SECRET_FILE']!='/run/adc-wechat/mini-app-secret' or env.get('RC_WECHAT_MINI_APP_SECRET'):
+            raise ValueError('Use the private mounted WeChat secret without a plaintext environment value.')
+        private=root/'.rc/private'
+        if private.is_symlink() or private.stat().st_mode & 0o077 or not (private/'wechat/mini-app-secret').is_file():
+            raise ValueError('Private WeChat secret directory/file is missing or not protected.')
     if env.get('RC_SMS_PROVIDER')=='demo' and env.get('RC_TEACHER_TEST_MODE')!='1':raise ValueError('Test SMS requires the explicit synthetic teacher flag.')
     if env['RC_PROJECT']!=project or len(env['RC_APP_SECRET'])<50 or len(env['RC_DB_PASSWORD'])<30:raise ValueError('Incomplete private configuration.')
     if env['RC_READ_ONLY'] not in ('0','1'):raise ValueError('Invalid read-only switch.')

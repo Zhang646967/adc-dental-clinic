@@ -1,0 +1,13 @@
+{
+  "pages": 240,
+  "changed_pages": [
+    "page-1.png",
+    "page-16.png"
+  ],
+  "pixel_identical_to_previously_reviewed_pages": 238,
+  "baseline": "C3.1 final240page rendered and reviewed report",
+  "passed": true,
+  "changed_pages_visually_reviewed": true,
+  "previously_reviewed_identical_pages_reused": 238,
+  "layout_defects": 0
+}

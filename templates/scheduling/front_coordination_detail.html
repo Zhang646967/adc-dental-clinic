@@ -1,5 +1,6 @@
 {% extends 'base.html' %}{% block title %}出诊 #{{ slot.id }} 关联核对 · ADC{% endblock %}{% block content %}
 <div class="coordination-desk"><a href="{% url 'front_coordination_list' %}">返回本店出诊协调</a>
+<nav class="actions" aria-label="候补办理"><a class="button secondary" href="{% url 'schedule_plans' %}">发布本店候补邀约</a></nav><p class="soft">候补排程核对当前店的可用出诊和资源，不限于本条出诊；原预约和原承诺保持。发布前须再次明确确认。</p>
 <p class="eyebrow">前台 · {{ slot.clinic }} · 不代患者作决定</p><h1>核对出诊 #{{ slot.id }}</h1>
 <section class="panel"><h2>{{ slot.dentist }} · {{ slot.employee_no }}</h2><p>{{ slot.start }} — {{ slot.end }}（北京时间）</p>
 <p>{% if slot.active %}原出诊仍可用{% else %}原出诊已停用{% endif %} · 本页读取时点：{{ observed_at }}</p>

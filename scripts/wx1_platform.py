@@ -40,6 +40,22 @@ def apply_rc(values,root):
     if values.get('ADC_WECHAT_QR_ENV_VERSION','develop') not in ('develop','trial','release'):raise ValueError('Invalid QR environment version.')
     path=Path(root).expanduser()/'.rc/compose.env';read_private(path)
     source=path.read_text();updates={'RC_'+key:values.get('ADC_'+key,'') for key in KEYS}
+    private=path.parent/'private';private.mkdir(mode=0o700,exist_ok=True)
+    if private.is_symlink() or stat.S_IMODE(private.stat().st_mode)&0o077:
+        raise ValueError('Protect .rc/private with mode700 before applying the WeChat secret.')
+    directory=private/'wechat'
+    if directory.is_symlink():raise ValueError('Use a regular private WeChat directory.')
+    directory.mkdir(mode=0o755,exist_ok=True);directory.chmod(0o755)
+    secret_file=directory/'mini-app-secret'
+    if secret_file.is_symlink():raise ValueError('Use a regular private WeChat secret file.')
+    # The host parent is0700. Only this dedicated0755 directory is mounted into
+    # Web, read-only, so its unprivileged uid can read the0444 file. Compose
+    # file-backed secrets cannot remap host uid/gid on every supported platform.
+    if secret_file.exists():secret_file.chmod(0o600)
+    with secret_file.open('w') as out:os.chmod(secret_file,0o600);out.write(values['ADC_WECHAT_MINI_APP_SECRET']+'\n')
+    secret_file.chmod(0o444)
+    updates['RC_WECHAT_MINI_APP_SECRET']=''
+    updates['RC_WECHAT_MINI_APP_SECRET_FILE']='/run/adc-wechat/mini-app-secret'
     updates.update(RC_SMS_PROVIDER='cloudbase' if facts['sms_configuration_ready'] else 'disabled',RC_TEACHER_TEST_MODE='0')
     updates['RC_SMS_LIVE_TEST_LIMIT']=str(min(10,max(0,int(values.get('ADC_SMS_LIVE_TEST_LIMIT','10')))))
     updates['RC_WECHAT_QR_ENV_VERSION']=values.get('ADC_WECHAT_QR_ENV_VERSION','develop')
@@ -53,7 +69,7 @@ def apply_rc(values,root):
     backup=path.with_name('wx1-before-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.env')
     with backup.open('x') as out:os.chmod(backup,0o600);out.write(source)
     with path.open('w') as out:os.chmod(path,0o600);out.write('\n'.join(lines)+'\n')
-    return dict(**facts,configuration_applied=True,restart_required=True,backup_file=str(backup),accounts_and_database_modified=False)
+    return dict(**facts,configuration_applied=True,restart_required=True,backup_file=str(backup),secret_storage='WEB_READ_ONLY_FILE',accounts_and_database_modified=False)
 
 
 def main():

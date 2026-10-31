@@ -171,7 +171,8 @@
         "ADC_CLOUDBASE_PUBLISHABLE_KEY": "${RC_CLOUDBASE_PUBLISHABLE_KEY:-}",
         "ADC_SMS_FREE_QUOTA_CONFIRMED": "${RC_SMS_FREE_QUOTA_CONFIRMED:-0}",
         "ADC_SMS_ALLOWED_TEST_PHONES": "${RC_SMS_ALLOWED_TEST_PHONES:-}",
-        "ADC_SMS_LIVE_TEST_LIMIT": "${RC_SMS_LIVE_TEST_LIMIT:-10}"
+        "ADC_SMS_LIVE_TEST_LIMIT": "${RC_SMS_LIVE_TEST_LIMIT:-10}",
+        "ADC_WECHAT_MINI_APP_SECRET_FILE": "${RC_WECHAT_MINI_APP_SECRET_FILE:-}"
       },
       "networks": [
         "private",
@@ -198,7 +199,16 @@
         }
       },
       "volumes": [
-        "rc_monitor_observation:/app/operations/monitor:ro"
+        "rc_monitor_observation:/app/operations/monitor:ro",
+        {
+          "type": "bind",
+          "source": "./.rc/private/wechat",
+          "target": "/run/adc-wechat",
+          "read_only": true,
+          "bind": {
+            "create_host_path": true
+          }
+        }
       ]
     },
     "notification-worker": {

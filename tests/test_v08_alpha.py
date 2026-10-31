@@ -100,7 +100,7 @@ class WaitlistUXTests(V07Fixture,TransactionTestCase):
     def setUp(self):self.setup07()
     def test_frontdesk_has_navigation_cta(self):
         self.join();self.login(self.front,'FRONT_DESK',self.a);r=self.c.get(reverse('waitlist'))
-        self.assertContains(r,'前往排程建议');self.assertContains(r,reverse('schedule_plans'))
+        self.assertContains(r,'安排并发布候补邀约');self.assertContains(r,reverse('schedule_plans'))
     def test_patient_has_no_manager_cta(self):
         self.join();self.login(self.pa,'PATIENT');self.assertNotContains(self.c.get(reverse('waitlist')),reverse('schedule_plans'))
     def test_manager_no_scheduling_cta(self):

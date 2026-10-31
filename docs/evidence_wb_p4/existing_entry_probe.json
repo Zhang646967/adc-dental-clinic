@@ -1,0 +1,36 @@
+{
+  "results": [
+    {
+      "username": "front_a",
+      "waitlist_status": 200,
+      "actual_waitlist_url": "http://127.0.0.1:18315/waitlist/",
+      "heading": [
+        "本店候补协调"
+      ],
+      "planning_links": 2,
+      "may_plan_text": true,
+      "plan_status": 200,
+      "actual_plan_url": "http://127.0.0.1:18315/scheduling/plans/",
+      "plan_headings": [
+        "候补排程建议"
+      ],
+      "forms": 2
+    },
+    {
+      "username": "manager_a",
+      "waitlist_status": 200,
+      "actual_waitlist_url": "http://127.0.0.1:18315/waitlist/",
+      "heading": [
+        "本店候补协调"
+      ],
+      "planning_links": 0,
+      "may_plan_text": false,
+      "plan_status": 403,
+      "actual_plan_url": "http://127.0.0.1:18315/scheduling/plans/",
+      "plan_headings": [
+        "本次操作未执行"
+      ],
+      "forms": 1
+    }
+  ]
+}

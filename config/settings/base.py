@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
-from config.env import load_env
+from config.env import load_env, read_secret
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_env(BASE_DIR / ".env")
@@ -71,7 +71,10 @@ ADC_SMS_TEMPLATE_ID = os.environ.get('ADC_SMS_TEMPLATE_ID', '')
 ADC_SMS_REGION = os.environ.get('ADC_SMS_REGION', 'ap-guangzhou')
 ADC_SMS_GLOBAL_DAILY_LIMIT = int(os.environ.get('ADC_SMS_GLOBAL_DAILY_LIMIT', '200'))
 ADC_WECHAT_MINI_APP_ID = os.environ.get('ADC_WECHAT_MINI_APP_ID', '')
-ADC_WECHAT_MINI_APP_SECRET = os.environ.get('ADC_WECHAT_MINI_APP_SECRET', '')
+try:
+    ADC_WECHAT_MINI_APP_SECRET = read_secret('ADC_WECHAT_MINI_APP_SECRET')
+except ValueError as error:
+    raise ImproperlyConfigured(str(error)) from None
 ADC_WECHAT_WEB_APP_ID = os.environ.get('ADC_WECHAT_WEB_APP_ID', '')
 ADC_WECHAT_WEB_APP_SECRET = os.environ.get('ADC_WECHAT_WEB_APP_SECRET', '')
 ADC_WECHAT_MP_APP_ID = os.environ.get('ADC_WECHAT_MP_APP_ID', '')

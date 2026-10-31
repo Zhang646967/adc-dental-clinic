@@ -2,6 +2,23 @@
 import os
 from pathlib import Path
 
+
+def read_secret(name):
+    """Read one server-only secret without copying its value into os.environ."""
+    source = os.environ.get(name + '_FILE', '')
+    if not source:
+        return os.environ.get(name, '')
+    try:
+        path = Path(source)
+        if path.stat().st_size > 4096:
+            raise ValueError
+        value = path.read_text(encoding='utf-8').strip()
+        if not value or '\n' in value or '\r' in value:
+            raise ValueError
+    except (OSError, UnicodeError, ValueError):
+        raise ValueError(name + '_FILE must contain one readable secret value.') from None
+    return value
+
 def load_env(path: Path) -> None:
     if not path.exists():
         return

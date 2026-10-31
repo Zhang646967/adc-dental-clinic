@@ -1,0 +1,23 @@
+{
+  "visits": [
+    {
+      "id": 8,
+      "status": "CANCELLED",
+      "lock_version": 1,
+      "replaces_visit_id": 7
+    },
+    {
+      "id": 7,
+      "status": "RESCHEDULED",
+      "lock_version": 1,
+      "replaces_visit_id": null
+    }
+  ],
+  "wait": [
+    {
+      "id": 2,
+      "state": "WITHDRAWN",
+      "revision": 1
+    }
+  ]
+}
