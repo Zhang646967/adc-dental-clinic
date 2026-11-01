@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_SOFTWARE_DELIVERED_OFFICIAL_MINI_TOOL_PENDING",
+  "status": "LOCAL_SOFTWARE_DELIVERED_REPORTED_TOOL_DEPLOYMENT_PASS_PATIENT_BUSINESS_BLOCKED",
   "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
   "application_image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
   "architecture": "arm64",
@@ -66,7 +66,7 @@
   "encrypted_empty_restore": "PASSED_ORIGINAL67_TO75_POPULATED75_AND_ORIGINAL_AFTER",
   "restore_general_equivalent_ddl_limit": "RETAINED_SAME_VERSION_MIGRATION_PATH",
   "workbuddy_scope": "Only import/deploy official-tool patient regression; frozen26pages,18352; Codex handles clinician/frontend/backend/database",
-  "official_tool_this_client": "PENDING_WORKBUDDY",
+  "official_tool_this_client": "USER_RELAYED_26PAGE_COMPILE_DEPLOYMENT_PASS",
   "physical_device": "NOT_RUN",
   "mini375_430_and_font_scale": "PENDING_SEPARATE_MATRIX",
   "website375_390_430_and_200percent": "PASSED",
@@ -81,5 +81,10 @@
   "previous_working_full_run": {
     "tests": 2221,
     "known_error": "Missing PermissionDenied import; fixed before frozen commit; frozen failing-case regression and exact full CI supersede; prior run not relabeled PASS"
-  }
+  },
+  "official_tool_patient_business": "BLOCKED_CREDENTIAL_SENSITIVE_APPROVAL_TIMED_OUT_NOT_RUN",
+  "official_tool_return": "workbuddy-return-20261101-part1.json",
+  "official_tool_compiled_pages": 26,
+  "official_tool_compiled_bytes": 216113,
+  "credential_access_does_not_require_password_reset": true
 }

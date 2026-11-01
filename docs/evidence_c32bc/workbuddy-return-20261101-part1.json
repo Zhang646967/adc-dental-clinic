@@ -1,0 +1,48 @@
+{
+  "return_date": "2026-11-01",
+  "source": "USER_RELAYED_WORKBUDDY_RETURN",
+  "scope": "Official tool deployment/version/compile only; all six patient business scenarios not executed",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "backend_image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "package_checksums": {
+    "passed": 88,
+    "total": 88
+  },
+  "project_digest_prefix": "3eec12b5",
+  "project_files": 86,
+  "project_copy_equal_to_frozen_package": "REPORTED_PASS",
+  "compiled_bytes": 216113,
+  "compiled_pages": 26,
+  "official_tool_deployment": "REPORTED_PASS",
+  "new_page": "pages/medical-authorizations/index",
+  "new_page_guest_guard": "REPORTED_PASS",
+  "source_env_count": "REPORTED1_CODEX_CURRENT1",
+  "credential_access": {
+    "state": "BLOCKED",
+    "code": "SENSITIVE_APPROVAL_TIMED_OUT",
+    "file_basename": "WorkBuddy_C3.2B2C_私有账号指南.txt",
+    "alternate_read_or_password_reconstruction": "NOT_PERFORMED",
+    "owner_action": "User forwards scoped authorization; WorkBuddy requests normal sensitive read approval for original file"
+  },
+  "patient_business_scenarios": {
+    "authorization11": "NOT_RUN",
+    "retained_step11_history": "NOT_RUN",
+    "new_step12_question": "NOT_RUN",
+    "guardian12_scheme_and_medical_decisions": "NOT_RUN",
+    "authority13_switch_and_revocation": "NOT_RUN",
+    "self_invoice_and_isolation": "NOT_RUN"
+  },
+  "new_business_event_ids": [],
+  "new_business_request_ids": [],
+  "device_matrix_375_430_and_font_scale": "BLOCKED_TOOL_CAPABILITY",
+  "phone": "PENDING_SEPARATE_ACCEPTANCE",
+  "same_source_no_rebuild_needed": true,
+  "reported_boundaries": {
+    "no_source_backend_db_migration_server_edits": true,
+    "no_real_key_read": true,
+    "no_id4_unlink": true,
+    "no_platform_upload": true,
+    "no_old_port_business_writes": true,
+    "no_repeated_c32b1": true
+  }
+}

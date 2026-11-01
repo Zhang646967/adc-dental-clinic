@@ -1,0 +1,99 @@
+{
+  "passed": true,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "source_env_count": 1,
+  "image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "running": true,
+  "capabilities": {
+    "wechat_mini": false,
+    "sms_enabled": false,
+    "sms_demo": false
+  },
+  "current_scenario_business": {
+    "proxy_states": [
+      {
+        "id": 11,
+        "state": "ACTIVE"
+      },
+      {
+        "id": 12,
+        "state": "ACTIVE"
+      },
+      {
+        "id": 13,
+        "state": "ACTIVE"
+      }
+    ],
+    "events": [
+      {
+        "id": 11,
+        "consent__step_id": 11,
+        "action": "PUBLISHED",
+        "source": "DOCTOR_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 12,
+        "consent__step_id": 12,
+        "action": "PUBLISHED",
+        "source": "DOCTOR_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 13,
+        "consent__step_id": 14,
+        "action": "PUBLISHED",
+        "source": "DOCTOR_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 14,
+        "consent__step_id": 15,
+        "action": "PUBLISHED",
+        "source": "DOCTOR_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 18,
+        "consent__step_id": 11,
+        "action": "QUESTION",
+        "source": "PROXY_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 19,
+        "consent__step_id": 11,
+        "action": "ANSWER",
+        "source": "DOCTOR_ACCOUNT",
+        "reply_to_id": 18
+      },
+      {
+        "id": 20,
+        "consent__step_id": 11,
+        "action": "AGREED",
+        "source": "PROXY_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 242,
+        "consent__step_id": 13,
+        "action": "PUBLISHED",
+        "source": "DOCTOR_ACCOUNT",
+        "reply_to_id": null
+      },
+      {
+        "id": 243,
+        "consent__step_id": 13,
+        "action": "AGREED",
+        "source": "PAPER_REFERENCE",
+        "reply_to_id": null
+      }
+    ],
+    "actuals": 2,
+    "invoices": 1,
+    "cash_entries": 2
+  },
+  "scope": "Read-only current18352facts; source of tool compilation is user-relayed WorkBuddy return, not independently reproduced",
+  "current_scenario_business_unchanged": true,
+  "checked_at": "2026-11-01T16:29:02.609771+00:00"
+}
