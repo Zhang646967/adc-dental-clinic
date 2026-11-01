@@ -4,7 +4,7 @@
 
 📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
 
-C3.2B1已交付：[本人医疗告知、问答、同意／拒绝／暂缓、撤回与纸质原件登记](docs/C32B1_MEDICAL_DECISIONS.md) · [准确CI与保护交付](docs/evidence_c32b1/README.md) · [WorkBuddy本轮任务](docs/WORKBUDDY_C32B1_TASK.md)。本机已更新；完整CI为1,164源检查／2,180PG。正式报告250页、125业务＋SF01、35实际ER；适格代理、完整开治与归档继续分批建设。小程序新批工具／真机验收单列。
+C3.2B1已交付：[本人医疗告知、问答、同意／拒绝／暂缓、撤回与纸质原件登记](docs/C32B1_MEDICAL_DECISIONS.md) · [准确CI与保护交付](docs/evidence_c32b1/README.md) · [WorkBuddy单项收尾](docs/WORKBUDDY_C32B1_CLOSING.md)。本机已更新；完整CI为1,164源检查／2,180PG。正式报告250页、125业务＋SF01、35实际ER；适格代理、完整开治与归档继续分批建设。已收到小程序业务及当前微信重登PASS，问题20已由医师答复22，仅待步骤6继续；工具回传与真机验收单列。
 
 上一批C3.2A已交付：[具体治疗说明与版本查阅](docs/C32_TREATMENT_EXPLANATIONS.md) · [实际验收与保护更新](docs/evidence_c32a/README.md) · [WorkBuddy本轮小程序任务](docs/WORKBUDDY_C32A_TASK.md) · [下一批本人决定与医疗代理](docs/C32_NEXT_INCREMENT.md)。正式报告240页／120业务＋SF01／33实际ER；医疗同意决定和归档仍为后续范围。
 

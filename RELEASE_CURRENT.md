@@ -1,8 +1,10 @@
 # 当前交付 本人医疗决定
 
+2026-10-31工具回传接续：已报告版本、当前微信重登、医疗决定与隔离PASS；Codex已在18342答复步骤6问题20，新增答复22，仅待[同一记录答复后继续](docs/WORKBUDDY_C32B1_CLOSING.md)。[来源与后端核对](docs/evidence_c32b1/README.md)分别保留；文档收尾不改应用、数据库结构或报告文件。非认证更新不重复要求真实微信重登。
+
 应用`c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392`通过[准确完整CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41177999254)，1,164源检查／2,180PG。本机18000与独立18342均为冻结镜像`sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a`；保护更新及更新后加密独立恢复通过。旧66迁移、原143组业务、账号密码、微信绑定、配置和数据库卷保留；新增3表在原库为空，不向原库造新临床案例。
 
-[业务合同](docs/C32B1_MEDICAL_DECISIONS.md) · [执行证据](docs/evidence_c32b1/README.md) · [WorkBuddy交接](docs/WORKBUDDY_C32B1_TASK.md)。报告250页／125业务＋SF01／35ER，与实际149表／414SQL外键／117触发器一致。患者医疗代理、完整开治核对、归档、可靠电子签名、官方工具新包、设备矩阵、手机和目标云端仍各自待验收。
+[业务合同](docs/C32B1_MEDICAL_DECISIONS.md) · [执行证据](docs/evidence_c32b1/README.md) · [WorkBuddy交接](docs/WORKBUDDY_C32B1_TASK.md)。报告250页／125业务＋SF01／35ER，与实际149表／414SQL外键／117触发器一致。患者医疗代理、完整开治核对、归档、可靠电子签名、设备矩阵、手机和目标云端仍各自待验收；官方工具本批状态见顶部接续。
 
 以下记录保留其交付时点和原范围。
 

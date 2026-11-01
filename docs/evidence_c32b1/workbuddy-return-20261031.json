@@ -1,0 +1,66 @@
+{
+  "reported_on": "2026-10-31",
+  "source": "USER_RELAYED_WORKBUDDY_FEEDBACK",
+  "independently_rerun_in_official_tool_by_codex": false,
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+  "reported_pass": [
+    "version_receipt",
+    "18000_existing_real_wechat_relogin_same_identity",
+    "six_reported_medical_decision_scenarios",
+    "self_and_appointment_delegate_isolation",
+    "no_actual_treatment_or_invoice_effect"
+  ],
+  "reported_pending": "step6_question20_answer_then_continue",
+  "codex_database_projection_matches_reported_actions": true,
+  "operations": [
+    {
+      "step": 3,
+      "action": "AGREED",
+      "event": 16,
+      "request_id": "fda8311f4a4d4ec0a552d41a2b9d1904",
+      "time": "2026-11-01T09:16:24+08:00"
+    },
+    {
+      "step": 3,
+      "action": "WITHDRAWN",
+      "event": 17,
+      "request_id": "fa2ccd20140c4810bbbba6e05ff2bc02",
+      "time": "2026-11-01T09:17:07+08:00"
+    },
+    {
+      "step": 4,
+      "action": "DECLINED",
+      "event": 18,
+      "request_id": "ff269ee7a37943d1bb00fbb609a496dd",
+      "time": "2026-11-01T09:17:46+08:00"
+    },
+    {
+      "step": 5,
+      "action": "DEFERRED",
+      "event": 19,
+      "request_id": "13ff9924d1874895bd2ee0375e94e2f5",
+      "time": "2026-11-01T09:18:25+08:00"
+    },
+    {
+      "step": 6,
+      "action": "QUESTION",
+      "event": 20,
+      "request_id": "2d6d710648044869a8cc82bb48b8e6ac",
+      "time": "2026-11-01T09:19:07+08:00"
+    },
+    {
+      "step": 7,
+      "action": "AGREED",
+      "event": 21,
+      "request_id": "6de8c3479caa4bf1bae57b4dc24e246f",
+      "time": "2026-11-01T09:20:53+08:00"
+    }
+  ],
+  "all_25_page_compile": "NOT_SEPARATELY_ITEMIZED_IN_THIS_RETURN",
+  "mini375_430_and_font_scale": "PENDING",
+  "physical_phone": "PENDING",
+  "second_real_wechat_identity": "PENDING_NO_UNBINDING",
+  "real_sms_sent": 0,
+  "no_new_platform_upload": true,
+  "real_wechat_retest_policy": "Authentication-related code/configuration/secret/session/gateway changes or actual auth regression only; no automatic relogin for unrelated business or documentation changes."
+}

@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "scope": "Actual physician website preview and explicit confirmation; actual native patient read only; official-mini-tool closing confirmation still pending",
+  "origin": "http://127.0.0.1:18342",
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+  "visit": 13,
+  "plan": 3,
+  "step": 6,
+  "consent": 4,
+  "consent_version_id": 4,
+  "consent_display_revision": 1,
+  "question": 20,
+  "answer": 22,
+  "reply_to": 20,
+  "source": "DOCTOR_ACCOUNT",
+  "occurred_at": "2026-11-01T01:34:32.741395+00:00",
+  "recorded_at": "2026-11-01T01:34:32.741535+00:00",
+  "before_can_agree": false,
+  "after_can_agree": true,
+  "after_can_withdraw": false,
+  "after_status": "待本人决定",
+  "all_old_event_content_preserved": true,
+  "other_five_step_projections_unchanged": true,
+  "no_patient_decision_submitted_by_codex": true,
+  "verification_note": "Initial post-submit text assertion used LF; normal HTML form stored CRLF. Compared normalized new answer and read persisted result; no repeat submission.",
+  "database_comparison": {
+    "passed": true,
+    "all146_model_groups_compared": true,
+    "all_old_rows_present": true,
+    "changed_existing_rows": {
+      "clinical.MedicalConsent": [
+        "4"
+      ]
+    },
+    "added_rows": {
+      "care.AuditEvent": 1,
+      "clinical.SensitiveReadEvent": 12,
+      "clinical.ConsentEvent": 1
+    },
+    "new_consent_events": [
+      22
+    ],
+    "unchanged_other_clinical_and_financial_groups": true,
+    "no_treatment_invoice_cash_or_patient_decision_created": true,
+    "all_old_21_consent_events_unchanged": true,
+    "question_or_answer_text_absent_from_runtime_logs": true,
+    "post_request_metadata": []
+  },
+  "response_sources": {
+    "scope": "Synthetic workflow answer, not a qualified individualized treatment recommendation",
+    "medical_references": [
+      "https://www.nhs.uk/symptoms/toothache/",
+      "https://www.nhs.uk/conditions/dental-abscess/"
+    ],
+    "business_hours_source": "Actual public clinic2 projection in isolated18342, daily08:00–20:00 Asia/Shanghai",
+    "no_specific_procedure_or_fixed_postoperative_days_invented": true
+  },
+  "actual_clinic_hours_verified": "08:00–20:00 Asia/Shanghai",
+  "medical_treatment_procedure_not_invented": true
+}
