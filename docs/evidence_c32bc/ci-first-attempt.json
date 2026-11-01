@@ -1,0 +1,8 @@
+{
+  "status": "CANCELLED_AT_45_MINUTES",
+  "run_id": 41300889353,
+  "tested_source": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "observed_test_failures_before_cancellation": 0,
+  "last_completed_test": "tests.test_worker_process.WorkerProcessTests.test_restart_consumes_new_pending_event_without_replaying_old_delivery",
+  "next_action": "Keep all tests; increase execution window to60minutes and dispatch pinned original application source with new workflow configuration"
+}

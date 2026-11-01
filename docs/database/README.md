@@ -1,3 +1,15 @@
+# 当前数据库设计与ER图
+
+身份与代理依据 → 准确告知与决定 → 开治及实际执行 → 补记缺口与独立复核。
+
+本版从冻结18352的PostgreSQL17读取：75份应用迁移，158SQL表（157ORM表＋迁移日志），450普通外键＋1账单复合外键，128业务触发器，38ER视图。原67份迁移字节不变；8份追加迁移新增9张业务表。完整列、可空性、唯一约束、索引及触发器见[实际快照](schema_snapshot.json)与[字段目录](FIELD_CATALOG.md)。
+
+新增[医疗代理材料与限定范围](er_medical_proxy.svg)、[规则与准确开治依据](er_treatment_preflight.svg)、[真实补记与独立复核](er_procedure_gap.svg)。既有告知版本与事件视图同步代理来源；箭头只绘真实SQL关系，JSON编号不冒充外键。权限、临床适用性、时间及状态条件由图后合同说明，不能只靠关联线推定。
+
+应用提交`7cd2de16c0632897dcee6e2774e289f012441f65`，完整观察结构与冻结镜像逐项一致；[验证和安装范围](../evidence_c32bc/README.md)分别记录。通用等价DDL自动比较限制保持，恢复使用同版本迁移建库路径。
+
+以下保留历史批次与其原时点结构；旧“当前”不替代上述本版事实。
+
 当前C3.2A：实际PostgreSQL核对66份应用迁移、146表、402SQL外键、114启用触发器及33幅ER。保留原65份迁移，治疗方案版本仅增加`disclosures`JSONB说明快照；JSON步骤编号不绘为SQL外键，也不表示医疗同意已完成。[字段目录](FIELD_CATALOG.md)／[具体合同](../C32_TREATMENT_EXPLANATIONS.md)。下文保留各历史时点结构。
 
 C3.1当前结构：65份应用迁移、146张SQL表、402条外键、114项业务触发器，33幅实际ER。新增[完整文书来源](er_clinical_documents.svg)和[责任办理](er_document_responsibility.svg)；[字段目录](FIELD_CATALOG.md)与[实际结构快照](schema_snapshot.json)同步。原64份迁移保持原字节。下文D1／P1结果按其原时点读取。

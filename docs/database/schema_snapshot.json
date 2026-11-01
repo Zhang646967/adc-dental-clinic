@@ -43461,6 +43461,6 @@
     }
   ],
   "observed_on": "2026-11-01",
-  "observed_scope": "Read-only independent18352PostgreSQL17; candidate working source; no business rows or configuration values exported.",
-  "application_commit": "WORKING_SOURCE_NOT_FROZEN"
+  "observed_scope": "Read-only frozen18352PostgreSQL17; full structure equals exact-image schema; no business rows or configuration values exported.",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65"
 }
