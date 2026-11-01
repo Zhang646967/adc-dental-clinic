@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "scope": "Real Chrome + actual mini API transport against18352; working source; official tool and phone separate",
+  "origin": "http://127.0.0.1:18352",
+  "checks": [
+    {
+      "name": "Front desk with explicit duty opens current-clinic material queue",
+      "passed": true
+    },
+    {
+      "name": "Medical-only patient receives two authorized steps, not third step or whole chart",
+      "passed": true
+    },
+    {
+      "name": "Adult proxy question blocks medical agreement without changing scheme acceptance",
+      "passed": true
+    },
+    {
+      "name": "Doctor answer and explicit proxy agreement retain distinct actors and exact basis",
+      "passed": true
+    },
+    {
+      "name": "Own agreement → saved preflight → actual execution uses ordinary unique charging source",
+      "passed": true
+    },
+    {
+      "name": "Retrospective browser entry retains real occurrence and independent-review gap without fake preflight",
+      "passed": true
+    },
+    {
+      "name": "Independent reviewer closes gap task while historical pre-treatment deficiency remains readable",
+      "passed": true
+    },
+    {
+      "name": "Four clinical web views fit375/390/430px with100/200% text",
+      "passed": true
+    },
+    {
+      "name": "Front desk material projection excludes medical question and clinician answer text",
+      "passed": true
+    },
+    {
+      "name": "manager_a cannot approve clinical consent or preflight",
+      "passed": true
+    },
+    {
+      "name": "hq_demo cannot approve clinical consent or preflight",
+      "passed": true
+    },
+    {
+      "name": "finance_demo cannot approve clinical consent or preflight",
+      "passed": true
+    },
+    {
+      "name": "tech_demo cannot approve clinical consent or preflight",
+      "passed": true
+    },
+    {
+      "name": "Medical proxy obtains no appointment history, self-health history or invoice permission",
+      "passed": true
+    },
+    {
+      "name": "Keyboard focus reaches ordinary controls",
+      "passed": true
+    }
+  ],
+  "js_errors": 0,
+  "question": 18
+}

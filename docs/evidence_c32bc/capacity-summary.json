@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "duration_seconds": 1800.05822775,
+  "sample_count": 32,
+  "sampling_scope": "Periodic Docker process stats, maximum observed not kernel high-water mark",
+  "processes": {
+    "adc_c32bc_verify_web": {
+      "maximum_observed_memory_mib": 91.17,
+      "maximum_observed_cpu_percent": 62.85
+    },
+    "adc_c32bc_verify_db": {
+      "maximum_observed_memory_mib": 73.78,
+      "maximum_observed_cpu_percent": 26.69
+    },
+    "adc_c32bc_verify_notifications": {
+      "maximum_observed_memory_mib": 63.77,
+      "maximum_observed_cpu_percent": 1.9
+    }
+  },
+  "host_matlab_maximum_observed_cpu_percent": 1296.0,
+  "all_processes_running": true,
+  "unexpected_restarts": 0,
+  "oom_events": 0,
+  "host_scope": "Local Mac Docker; no target-cloud availability claim",
+  "normal_request_p95_ms": 357.70954199996777,
+  "unexpected_http_failures": 0
+}

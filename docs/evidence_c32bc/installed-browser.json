@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "PATIENT preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "PATIENT cannot perform medical review",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "FRONT_DESK cannot perform medical review",
+      "passed": true
+    },
+    {
+      "name": "new frontdesk medical-material duty remains default off in original clinic",
+      "passed": true
+    },
+    {
+      "name": "DENTIST preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "doctor /clinical/documents/",
+      "passed": true
+    },
+    {
+      "name": "doctor /clinical/medical-authorizations/",
+      "passed": true
+    },
+    {
+      "name": "doctor /clinical/treatment-gaps/",
+      "passed": true
+    },
+    {
+      "name": "MANAGER preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "MANAGER cannot perform medical review",
+      "passed": true
+    },
+    {
+      "name": "HQ preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "HQ cannot perform medical review",
+      "passed": true
+    },
+    {
+      "name": "FINANCE preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "FINANCE cannot perform medical review",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN preserved original password and workspace",
+      "passed": true
+    },
+    {
+      "name": "SYSADMIN cannot perform medical review",
+      "passed": true
+    }
+  ],
+  "js_errors": 0,
+  "origin": "http://127.0.0.1:18000",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "scope": "Installed18000 original seven roles and read-only business pages; no clinical fixtures or WeChat provider sign-in created"
+}

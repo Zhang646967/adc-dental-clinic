@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "Frozen image Chrome frontdesk material submission and verification plus distinct responsible dentist approval",
+  "proxy": 13,
+  "version": 13,
+  "patient_clinic": 11,
+  "stable_steps": [
+    13
+  ],
+  "independent_appointment_grant_created": false,
+  "no_care_or_money_created": true
+}

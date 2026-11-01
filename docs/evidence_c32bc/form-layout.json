@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "widths": [
+    375,
+    390,
+    430
+  ],
+  "text_scaling": [
+    100,
+    200
+  ],
+  "clinical_views": 4,
+  "keyboard_navigation": true,
+  "browser_js_errors": 0,
+  "scope": "Actual Chrome web layout and keyboard; not WeChat device acceptance"
+}

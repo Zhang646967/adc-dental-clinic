@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "original_model_groups_preserved": 146,
+  "all_old_rows_and_password_hashes_preserved": true,
+  "ordinary_read_and_login_audit_additions": {
+    "auth.Permission": 36,
+    "contenttypes.ContentType": 9,
+    "accounts.WebLoginTicket": 1,
+    "clinical.SensitiveReadEvent": 14
+  },
+  "no_new_clinical_or_financial_facts": true,
+  "all_67_migration_bytes_preserved": true,
+  "configuration_archive_includes_file_secret": true,
+  "encrypted_configuration_roundtrip_verified": true,
+  "restored_file_readable_by_uid10001": true,
+  "secret_not_exported_to_environment": true,
+  "django_check": true,
+  "no_unmade_migrations": true,
+  "post_update_database_encrypted": true,
+  "post_update_independent_restore": "PASSED",
+  "post_update_restore_seconds": 44.871
+}

@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "projects": {
+    "微信小程序-医疗代理18352": {
+      "client_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+      "backend_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+      "backend_image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+      "backend": "http://127.0.0.1:18352",
+      "observed_at": "2026-11-01T13:12:22.312863+00:00",
+      "mode": "local",
+      "urlCheck": false,
+      "files": 86,
+      "pages": 26,
+      "official_tool": "PENDING_WORKBUDDY",
+      "phone": "NOT_RUN"
+    }
+  },
+  "zip_sha256": "4c44422f76281a0dc6103ca2b7ca699c1963141fe50297c0efaf7d18884da597",
+  "checked_files": 88,
+  "contains_server_credentials": false,
+  "credentials_guide_separate": true,
+  "old_deployment_copies_unchanged": true
+}

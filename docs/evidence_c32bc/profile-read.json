@@ -1,0 +1,1 @@
+{"scope": "Same populated frozen service selector, no write; not a replacement capacity result", "samples": [{"duration_ms": 116.0, "queries": 51, "sql_seconds": 0.072, "events": 85}, {"duration_ms": 69.9, "queries": 51, "sql_seconds": 0.034, "events": 85}, {"duration_ms": 55.3, "queries": 51, "sql_seconds": 0.018, "events": 85}]}

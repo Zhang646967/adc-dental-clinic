@@ -4,5 +4,9 @@
   "tested_source": "7cd2de16c0632897dcee6e2774e289f012441f65",
   "observed_test_failures_before_cancellation": 0,
   "last_completed_test": "tests.test_worker_process.WorkerProcessTests.test_restart_consumes_new_pending_event_without_replaying_old_delivery",
-  "next_action": "Keep all tests; increase execution window to60minutes and dispatch pinned original application source with new workflow configuration"
+  "next_action": "Keep all tests; increase execution window to60minutes and dispatch pinned original application source with new workflow configuration",
+  "observed_distinct_django_test_starts": 2184,
+  "completion_not_claimed": true,
+  "official_reason": "The job has exceeded the maximum execution time of 45m0s",
+  "official_reason_verified": true
 }

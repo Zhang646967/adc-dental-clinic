@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "scope": "Isolated18352course synthetic;20active users with staggered4s pace per user, all20clinics read,10medical-proxy/doctor pairs write. Not target-cloud or phone acceptance.",
+  "started_at": "2026-11-01T11:52:03.555Z",
+  "observed_seconds": 1800.05822775,
+  "users": 20,
+  "clinics_read": 20,
+  "clinics_with_medical_writes": 10,
+  "requests": 9000,
+  "reads": 7200,
+  "writes": 1800,
+  "write_requests_are": "900 signed previews +900 explicit confirmations,450 questions and450 answers; login/context setup excluded from measured window",
+  "warmup_requests": 80,
+  "p50_ms": 73.0880420000758,
+  "p95_ms": 357.70954199996777,
+  "p99_ms": 501.8092080000788,
+  "max_ms": 1134.002667000008,
+  "max_in_flight_requests": 4,
+  "unexpected_failures": 0,
+  "errors": []
+}

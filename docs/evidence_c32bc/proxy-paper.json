@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "medical_proxy": 13,
+  "proxy_version": 13,
+  "patient_visit": 11,
+  "plan": 11,
+  "step": 13,
+  "scheme": 18,
+  "scheme_source": "MANUAL_PROXY",
+  "published_event": 242,
+  "paper_event": 243,
+  "medical_source": "PAPER_REFERENCE",
+  "actual_recording_actor": "RESPONSIBLE_DOCTOR",
+  "signer": "VERIFIED_PROXY",
+  "clinical_or_money_effects": 0,
+  "scope": "Frozen image owned commands; synthetic paper reference, not qualified eSign or physical-original verification"
+}

@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "checks": 10,
+  "details": [
+    {
+      "name": "Only medical authority admits native patient selector without a booking grant",
+      "passed": true
+    },
+    {
+      "name": "Medical authorization list/detail Page handlers use real frozen Django HTTP",
+      "passed": true
+    },
+    {
+      "name": "Adult medical proxy plan contains only its two permitted steps",
+      "passed": true
+    },
+    {
+      "name": "Proxy consent shows retained separate question/answer/explicit decision source",
+      "passed": true
+    },
+    {
+      "name": "Unscoped consent denial clears clinical page cache",
+      "passed": true
+    },
+    {
+      "name": "Medical-only authority cannot read a patient invoice or complete chart",
+      "passed": true
+    },
+    {
+      "name": "Guardian authority renders exactly its own specified child steps",
+      "passed": true
+    },
+    {
+      "name": "One proxy account switches to independently verified adult authority without carrying child data",
+      "passed": true
+    },
+    {
+      "name": "Synthetic original-paper source retains actual signer and physician recorder",
+      "passed": true
+    },
+    {
+      "name": "Different patient medical authority cannot read the adult two other steps",
+      "passed": true
+    }
+  ],
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "http_requests": 32,
+  "business_mutations": 0,
+  "scope": "Actual frozen native Page handlers and transport against real isolated18352 Django/PostgreSQL; not official WeChat runtime or phone evidence"
+}

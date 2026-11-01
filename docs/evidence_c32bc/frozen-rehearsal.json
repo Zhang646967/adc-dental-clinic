@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "architecture": "arm64",
+  "base_image": "sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a",
+  "frozen_git_archive": true,
+  "requirements_byte_equal_to_accepted_base": true,
+  "source_commit_env_count": 1,
+  "scope": "Local immutable dependency-base build; not a fresh dependency download or cloudamd64 acceptance",
+  "backend": "http://127.0.0.1:18352",
+  "source_bind_removed": true,
+  "business_groups_preserved": 155,
+  "encrypted_pre_freeze_backup": true,
+  "original18000_18315_18332_18342_unchanged": true
+}

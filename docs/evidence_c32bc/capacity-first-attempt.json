@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "recorded_requests": 8484,
+  "first_timeouts": 11,
+  "secondary_context_disposed": 18,
+  "scope": "First 30-minute attempt stopped at tail; no passing capacity claim",
+  "observation": "MATLAB parallel processes started 2026-11-01T11:44:42Z while all routes, including public clinic reads, slowed. Host contention is suspected; no functional500, OOM or container restart was seen. Prior business effects retained."
+}

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "visit": 13,
+  "invoice": 1,
+  "actuals": 2,
+  "normal_preflight_actuals": 1,
+  "honest_retrospective_actuals": 1,
+  "retained_gap_reviews": 1,
+  "independent_actual_amount": "400.00",
+  "invoice_total": "400.00",
+  "receipt": "200.00",
+  "refund": "40.00",
+  "net_received": "160.00",
+  "outstanding": "240.00",
+  "cash_entry_ids": [
+    1,
+    2
+  ],
+  "no_extra_charge_from_preflight_or_review": true,
+  "synthetic_only": true
+}

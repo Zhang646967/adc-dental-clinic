@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "pdf_pages": 266,
+  "business_use_cases": 133,
+  "support_case": "SF-01",
+  "tables": 152,
+  "images": 78,
+  "er_views": 38,
+  "toc_entries": 104,
+  "all_previous_case_definitions_retained": 87,
+  "old_word_contract_fields_exactly_retained": 1329,
+  "fonts_embedded": true,
+  "text_bounds_all_pages_checked": true,
+  "numbering_and_toc_checked": true,
+  "actual_sql_tables": 158,
+  "actual_sql_foreign_keys": 451,
+  "triggers": 128,
+  "docx_sha256": "88768dbe134ba19b7efc8fdb33d1b96c1ec9b4181623b485e3bf8fa5bb8416c1",
+  "pdf_sha256": "1665b43076b1867b0348c37849d1b606ae6aab3916b39af1e5433153795e50fe",
+  "wechat_tool_and_phone": "PENDING_SEPARATE_ACCEPTANCE"
+}

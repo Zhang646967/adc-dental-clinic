@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "phase": "original-upgrade",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "encrypted_backup_sha256": "8d45fa9f038de8453235e4bec4534e3b9f636fc879516b58637b6fcb6637cbff",
+  "empty_database_same_version_migration_restore": true,
+  "all_business_groups_exactly_restored_before_auth_invalidation": 146,
+  "all_binary_images_history_versions_money_and_permissions_preserved": true,
+  "full_observed_schema_equal": true,
+  "append67_to75_test": true,
+  "old_versions_not_fabricated": true,
+  "encrypted_file_mode_config_restore": true,
+  "application_migrations": 75,
+  "tables": 158,
+  "foreign_keys": 451,
+  "triggers": 128,
+  "elapsed_seconds": 28.827,
+  "general_equivalent_ddl_comparator_limit_retained": true
+}

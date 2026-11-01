@@ -1,0 +1,19 @@
+{
+  "head_sha": "d7a5dec8e354fa18b3ab0f4a643bb2ea5fb8da27",
+  "workflow_head_sha": "d7a5dec8e354fa18b3ab0f4a643bb2ea5fb8da27",
+  "tested_source_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "validated_source_log_verified": true,
+  "conclusion": "success",
+  "status": "completed",
+  "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41306611538",
+  "run_id": 41306611538,
+  "job_id": 124848190869,
+  "proof": [
+    "ADC_TESTED_SOURCE=7cd2de16c0632897dcee6e2774e289f012441f65",
+    "Ran 1164 tests in 12.467s",
+    "Ran 2223 tests in 1479.137s"
+  ],
+  "source_checks": 1164,
+  "postgresql_tests": 2223,
+  "source_and_workflow_revisions_separate": true
+}
