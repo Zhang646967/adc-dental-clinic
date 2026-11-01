@@ -71,3 +71,5 @@ class PatientRelationshipEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'adc_patient_relationship_event'
+
+from portal.medical_models import MedicalProxy, MedicalProxyVersion, MedicalProxyScope, MedicalProxyEvent

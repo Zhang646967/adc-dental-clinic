@@ -81,7 +81,8 @@ def review_allergies(*,actor,visit_id,expected_version,patient_version,status,al
 def add_treatment(*,actor,visit_id,expected_version,treatment_id,quantity,price_reason="",_structured_source=False):
     v=_lock_care(actor,visit_id);_assert_current(v,expected_version)
     from clinical.models import ClinicalEncounter
-    if ClinicalEncounter.objects.filter(visit=v).exists() and not _structured_source:
+    from clinical.preflight import enabled as treatment_controls
+    if (ClinicalEncounter.objects.filter(visit=v).exists() or treatment_controls(v.clinic_id)) and not _structured_source:
         raise RuleError("本次已有结构化检查，请从实际执行入口确认项目，保留唯一的诊疗收费来源。")
     draft=_draft(actor,v)
     treatment=TreatmentType.objects.select_for_update().get(pk=treatment_id,is_active=True)

@@ -5,8 +5,20 @@ from clinical import plan_views as plans
 from clinical import continuity_views as continuity
 from clinical import document_views as documents
 from clinical import consent_views as consents
+from clinical import preflight_views as preflight
+from portal import medical_views as medical
 
 urlpatterns=[
+    path('clinical/medical-authorizations/',medical.listing,name='medical_proxies'),
+    path('clinical/medical-authorizations/new/',medical.create,name='medical_proxy_new'),
+    path('clinical/medical-authorizations/<int:pk>/',medical.detail,name='medical_proxy_detail'),
+    path('portal/medical-authorizations/',medical.patient_listing,name='portal_medical_authorizations'),
+    path('portal/medical-authorizations/<int:pk>/',medical.detail,{'patient_view':True},name='portal_medical_proxy'),
+    path('clinical/treatment-controls/',preflight.rules,name='clinical_control_rules'),
+    path('clinical/treatment-gaps/',preflight.gaps,name='clinical_gaps'),
+    path('clinical/treatment-gaps/<int:pk>/',preflight.gaps,name='clinical_gap_detail'),
+    path('clinical/encounters/<int:pk>/preflight/',preflight.workspace,name='clinical_preflight'),
+    path('clinical/encounters/<int:pk>/retrospective/',preflight.workspace,{'retrospective':True},name='clinical_retrospective'),
     path('clinical/consents/',consents.worklist,name='clinical_consents'),
     path('clinical/encounters/<int:pk>/steps/<int:step_id>/consent/',consents.workspace,name='clinical_consent'),
     path('portal/steps/<int:step_id>/consent/',consents.workspace,name='portal_consent'),

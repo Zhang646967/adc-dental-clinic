@@ -89,6 +89,7 @@ def home(request):
         data['continuity']=coordination_counts(request.user)
         from accounts.policies import bindings
         data['can_verify_identity']=bindings(request.user).filter(can_verify_patient_relationships=True).exists()
+        data['can_verify_medical_proxy']=bindings(request.user).filter(can_verify_medical_proxy_identity=True).exists()
         if data['can_verify_identity']:
             from portal.enrollment_models import PatientEnrollment
             data['enrollment_pending_count']=PatientEnrollment.objects.filter(clinic_id=ctx.clinic_id,state='PENDING').count()

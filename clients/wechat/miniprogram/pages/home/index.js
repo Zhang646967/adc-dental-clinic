@@ -7,6 +7,7 @@ Page({
     try {
       const session = await api.bootstrap();api.showSubject(this);
       if(!session.authenticated||session.subject_required){this.setData({guest:!session.account_authenticated,needsSubject:!!session.subject_required,needsEnrollment:session.account_authenticated&&!session.authenticated,busy:false});return;}
+      if(session.medical&&!session.can_book){navigation.redirectTo({url:'/pages/medical-authorizations/index'});return;}
       this.setData({guest:false,needsSubject:false,needsEnrollment:false});
       this.setData({patient:session.patient_name, readOnly:session.read_only,environmentLabel:session.environment_label||''}); await this.load();
     } catch (e) { showError(this, e); }

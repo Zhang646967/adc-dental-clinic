@@ -152,3 +152,5 @@ from clinical.plan_models import (TreatmentPlan,PlanDraft,PlanVersion,TreatmentS
 from clinical.continuity_models import (RecallEpisode,RecallEvent,LabCase,LabReview,LabEvent)
 from clinical.document_models import (ClinicalDocument, ClinicalDocumentDraft, ClinicalDocumentVersion, ClinicalDocumentEvent)
 from clinical.consent_models import MedicalConsent, ConsentVersion, ConsentEvent
+
+from clinical.preflight_models import TreatmentControlPolicy, ClinicalConsentRule, TreatmentPreflight, ProcedureGap, ProcedureGapReview

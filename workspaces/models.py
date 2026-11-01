@@ -11,11 +11,14 @@ class WorkspaceContext(models.Model):
         choices=[('', '内部上下文'), ('PATIENT', '患者通道'), ('STAFF', '员工通道')])
     clinic = models.ForeignKey('registry.Clinic', null=True, blank=True, on_delete=models.PROTECT)
     patient_grant = models.ForeignKey('portal.PatientAppointmentGrant', null=True, blank=True, on_delete=models.PROTECT)
+    medical_proxy = models.ForeignKey('portal.MedicalProxy', null=True, blank=True, on_delete=models.PROTECT)
+    medical_proxy_revision = models.PositiveIntegerField(default=0)
     revision = models.PositiveIntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = 'adc_workspace_context'
         constraints = [models.CheckConstraint(condition=Q(clinic__isnull=True) | Q(role__in=['MANAGER','FRONT_DESK']), name='workspace_clinic_role'),
+            models.CheckConstraint(condition=Q(medical_proxy__isnull=True) | Q(role='PATIENT'), name='workspace_medical_subject'),
             models.CheckConstraint(condition=Q(patient_grant__isnull=True) | Q(role='PATIENT'), name='workspace_patient_subject'),
             models.CheckConstraint(condition=Q(login_channel='') | Q(login_channel='PATIENT', role__in=['','PATIENT']) |
                 (Q(login_channel='STAFF') & ~Q(role='PATIENT')), name='workspace_login_channel')]

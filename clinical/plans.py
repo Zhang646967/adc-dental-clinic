@@ -224,9 +224,13 @@ def prepare_decision(*,actor,step_id,fields,visit_id=None):
     values=decision_fields(fields);ctx=actor._adc_workspace
     if ctx.role=='PATIENT':
         from portal.policies import patient_access
-        access=patient_access(actor,self_only=True)
-        step=PlanStepVersion.objects.select_related('version__plan__origin_encounter__visit').get(pk=step_id,version__plan__origin_encounter__visit__patient_id=access.patient_id)
-        plan=step.version.plan;source='SELF';visit_id=None
+        from clinical.medical_access import patient_step
+        from portal.medical_authority import is_proxy_context
+        step,patient=patient_step(actor,step_id)
+        plan=step.version.plan;source='PROXY' if is_proxy_context(actor) else 'SELF';visit_id=None
+        if source=='PROXY':
+            previous=latest_decision(step)
+            if previous and previous.source in ('SELF','MANUAL') and previous.decision=='DECLINED':raise RuleError('本人已有明确拒绝，请由医师先核对当前签署人和方案，代理不能直接覆盖。')
     else:
         from clinical.encounter_selectors import encounter_details
         if visit_id is None:raise RuleError('请从当前负责就诊记录本人表态。')
@@ -239,8 +243,19 @@ def prepare_decision(*,actor,step_id,fields,visit_id=None):
         professional_scope(actor.pk,v.clinic_id,step.service_id,'RECORD')
         if not values['reference']:raise RuleError('请注明患者本人表态的依据或沟通记录编号。')
         source='MANUAL'
+        if fields.get('proxy_version'):
+            from portal.medical_models import MedicalProxyVersion
+            from portal.medical_authority import verify_version
+            verify_version(MedicalProxyVersion.objects.get(pk=fields['proxy_version']),step=step)
+            source='MANUAL_PROXY'
     if current_version(plan).pk!=step.version_id:raise RuleError('患者讨论的方案已有新版本，请核对当前步骤。')
-    data=dict(plan=plan.pk,step=step.pk,version=step.version_id,revision=plan.revision,source=source,visit=visit_id,values=values)
+    proxy_id=None;proxy_revision=None
+    if source=='PROXY':
+        from portal.medical_authority import selected_proxy
+        basis=selected_proxy(actor,step=step);proxy_id=basis.pk;proxy_revision=basis.proxy.revision
+    elif source=='MANUAL_PROXY':
+        basis=MedicalProxyVersion.objects.get(pk=fields['proxy_version']);proxy_id=basis.pk;proxy_revision=basis.proxy.revision
+    data=dict(plan=plan.pk,step=step.pk,version=step.version_id,revision=plan.revision,source=source,visit=visit_id,values=values,proxy_version=proxy_id,proxy_revision=proxy_revision)
     return dict(proposal_token=proposal(actor,DECISION_CONTRACT,('PATIENT','DENTIST'),data),step=step,values=values)
 
 
@@ -250,7 +265,14 @@ def prepare_decision(*,actor,step_id,fields,visit_id=None):
 def confirm_decision(*,actor,proposal_token,confirmed):
     if confirmed is not True:raise RuleError('请核对具体方案版本及步骤后明确确认。')
     p=read_proposal(actor,DECISION_CONTRACT,('PATIENT','DENTIST'),proposal_token);data=p['data']
-    if data['source']=='SELF':
+    from clinical.authority_services import lock_people
+    from portal.medical_models import MedicalProxyVersion
+    basis=MedicalProxyVersion.objects.select_related('proxy').get(pk=data['proxy_version']) if data.get('proxy_version') else None
+    lock_people(actor,*([basis.proxy.delegate_id] if basis else []))
+    if data['source']=='PROXY':
+        from clinical.medical_access import lock_proxy_plan
+        basis,patient,plan=lock_proxy_plan(actor,data['plan'],data['step']);access=None;head=None;visit=None
+    elif data['source']=='SELF':
         access,patient,plan=lock_self_plan(actor,data['plan']);head=None;visit=None
     else:
         visit,patient,head,record,plan=lock_plan_visit(actor,data['visit'],data['plan']);access=None
@@ -258,7 +280,13 @@ def confirm_decision(*,actor,proposal_token,confirmed):
     previous=event_replay(actor,op,'PLAN_DECIDED',plan=plan)
     if previous:return previous.decision,True
     step=PlanStepVersion.objects.select_related('version','step').get(pk=data['step'],version__plan=plan)
-    if data['source']=='MANUAL':
+    if basis:
+        from portal.medical_authority import verify_version
+        case=verify_version(basis,step=step,lock=True)
+        if case.revision!=data['proxy_revision']:raise RuleError('医疗代理依据已变化，请重新核对。')
+        previous_choice=latest_decision(step)
+        if previous_choice and previous_choice.source in ('SELF','MANUAL') and previous_choice.decision=='DECLINED':raise RuleError('本人已明确拒绝，不能由代理直接覆盖。')
+    if data['source'] in ('MANUAL','MANUAL_PROXY'):
         from clinical.authority import professional_scope
         professional_scope(actor.pk,visit.clinic_id,step.service_id,'RECORD',lock=True)
     if plan.revision!=data['revision'] or current_version(plan).pk!=data['version'] or step.version_id!=data['version']:
@@ -268,6 +296,6 @@ def confirm_decision(*,actor,proposal_token,confirmed):
         for other in step.version.steps.filter(alternative_group=step.alternative_group).exclude(pk=step.pk):
             decision=latest_decision(other)
             if decision and decision.decision=='ACCEPTED':raise RuleError('同一互斥组选项已有认可步骤，请先明确暂缓或不选择原选项。')
-    row=PlanDecision.objects.create(step_version=step,actor=actor,source=data['source'],self_access=access,source_visit=visit,operation_id=op,**values)
+    row=PlanDecision.objects.create(step_version=step,actor=actor,source=data['source'],self_access=access,source_visit=visit,operation_id=op,proxy_version=basis,**values)
     bump(plan);append_event(actor,op,'PLAN_DECIDED',plan=plan,encounter=head,decision=row,snapshot={'version':step.version_id,'step':step.pk,'decision':row.decision,'source':row.source,'revision':plan.revision})
     return row,False

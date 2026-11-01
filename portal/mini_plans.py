@@ -10,7 +10,9 @@ from portal.mini_api import endpoint,result,validated
 
 
 def decision_data(row):
-    return dict(id=row.pk,decision=row.decision,label=row.get_decision_display(),source_label=row.get_source_display(),note=row.note,recorded_at=row.recorded_at.isoformat()) if row else None
+    return dict(id=row.pk,decision=row.decision,label=row.get_decision_display(),source_label=row.get_source_display(),
+        signer_name=row.proxy_version.delegate_name if row.proxy_version_id else None,proxy_version=row.proxy_version_id,
+        note=row.note,recorded_at=row.recorded_at.isoformat()) if row else None
 
 
 def plan_data(details):
@@ -25,28 +27,30 @@ def plan_data(details):
             lab_requirement=s.requires_lab,readiness=dict(ready=s.readiness['ready'],label=s.readiness['reason']) if details['is_current'] else None,
             disclosure=s.disclosure,decision=decision_data(s.current_decision),decision_history=[decision_data(d) for d in s.decision_history],completed=s.is_completed,
             actual_history=[dict(id=a.pk,observed_at=a.observed_at.isoformat(),progress_label=a.get_progress_display(),mode_label=a.get_charge_mode_display(),state=a.state,state_label=a.get_state_display()) for a in s.actual_history]))
-    return dict(id=p.pk,clinic=p.origin_encounter.visit.clinic.name,version=v.revision,is_current=details['is_current'],summary=v.summary,
-        discussion_note=v.discussion_note,recorded_at=v.recorded_at.isoformat(),versions=[r.revision for r in details['versions']],estimate=details['estimate'],steps=rows,
+    return dict(id=p.pk,clinic=p.origin_encounter.visit.clinic.name,version=v.revision,is_current=details['is_current'],summary='独立医疗授权范围内的方案步骤' if details.get('medical_proxy') else v.summary,
+        discussion_note='' if details.get('medical_proxy') else v.discussion_note,recorded_at=v.recorded_at.isoformat(),versions=[r.revision for r in details['versions']],estimate=details['estimate'],steps=rows,
         instructions=[dict(id=r.pk,service_id=r.service_id,service=r.service.name,earliest_on=r.earliest_on.isoformat(),latest_on=r.latest_on.isoformat(),purpose=r.clinical_purpose,
             completion_label=r.get_completion_rule_display(),followup_state=r.recall.get_state_display() if hasattr(r,'recall') else '前台待接续联系') for r in details['instructions']])
 
 
-@endpoint()
+@endpoint(subject_optional=True)
 def listing(request):
+    from portal.medical_authority import is_proxy_context
+    proxy=is_proxy_context(request.user)
     rows=patient_plan_rows(request.user);page=Paginator(rows,20).get_page(request.GET.get('page'));data=[]
     for p in page:
         v=plans.current_version(p)
-        data.append(dict(id=p.pk,clinic=p.origin_encounter.visit.clinic.name,version=v.revision,summary=v.summary,recorded_at=v.recorded_at.isoformat()))
+        data.append(dict(id=p.pk,clinic=p.origin_encounter.visit.clinic.name,version=v.revision,summary='独立医疗授权范围内的方案步骤' if proxy else v.summary,recorded_at=v.recorded_at.isoformat()))
     return result(request,dict(rows=data,page=page.number,pages=page.paginator.num_pages))
 
 
-@endpoint()
+@endpoint(subject_optional=True)
 def detail(request,pk):
     return result(request,plan_data(self_plan_details(request.user,pk,revision=request.GET.get('revision'))))
 
 
 @sensitive_post_parameters()
-@endpoint(('POST',))
+@endpoint(('POST',),subject_optional=True)
 def decision_preview(request,pk,step_id):
     d=self_plan_details(request.user,pk)
     if not any(s.pk==step_id for s in d['steps']):raise PermissionDenied('请从本人当前方案的具体步骤核对。')
@@ -56,10 +60,10 @@ def decision_preview(request,pk,step_id):
 
 
 @sensitive_post_parameters()
-@endpoint(('POST',))
+@endpoint(('POST',),subject_optional=True)
 def decision_confirm(request,pk,step_id):
     values=validated(ConfirmPlanActionForm(request.POST))
     data=read_proposal(request.user,plans.DECISION_CONTRACT,('PATIENT',),values['proposal_token'])['data']
-    if (data['plan'],data['step'],data['source'])!=(pk,step_id,'SELF'):raise PermissionDenied('请在原本人方案步骤核对本次决定。')
+    if (data['plan'],data['step'])!=(pk,step_id) or data['source'] not in ('SELF','PROXY'):raise PermissionDenied('请在原本人方案步骤核对本次决定。')
     row,replay=plans.confirm_decision(actor=request.user,**values)
     return result(request,dict(decision=decision_data(row),replayed=replay,plan=pk))

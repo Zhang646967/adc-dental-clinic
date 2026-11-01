@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-10-31。本目录列出148张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-01。本目录列出157张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -742,6 +742,50 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `clinical_activation_history`：`CREATE TRIGGER clinical_activation_history BEFORE DELETE OR UPDATE ON public.adc_clinical_authority_policy FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
+## adc_clinical_consent_rule
+
+模型：`clinical.ClinicalConsentRule`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| treatment_type_id | bigint | FK | 否 | `adc_treatment_type.id` |
+| number | integer | — | 否 | — |
+| mode | character varying(16) | — | 否 | — |
+| reference | character varying(500) | — | 否 | — |
+| explanation | character varying(1000) | — | 否 | — |
+| published_by_id | bigint | FK | 否 | `adc_user.id` |
+| reviewer_id | bigint | FK | 否 | `adc_clinical_reviewer.id` |
+| published_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_consent_published_by_id_1dde92de_fk_adc_user_`：`FOREIGN KEY (published_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_consent_reviewer_id_e6ef7dbf_fk_adc_clini`：`FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_consent_rule_clinic_id_2485af30_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_consent_rule_number_check`：`CHECK ((number >= 0))`。
+- `adc_clinical_consent_rule_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_clinical_consent_rule_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_consent_treatment_type_id_8c76717a_fk_adc_treat`：`FOREIGN KEY (treatment_type_id) REFERENCES adc_treatment_type(id) DEFERRABLE INITIALLY DEFERRED`。
+- `clinical_rule_mode`：`CHECK (((mode)::text = ANY ((ARRAY['CONSENT'::character varying, 'COMMUNICATION'::character varying, 'REVIEW'::character varying])::text[])))`。
+- `clinical_rule_number`：`UNIQUE (clinic_id, treatment_type_id, number)`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_consent_rule_clinic_id_2485af30`：`CREATE INDEX adc_clinical_consent_rule_clinic_id_2485af30 ON public.adc_clinical_consent_rule USING btree (clinic_id)`。
+- `adc_clinical_consent_rule_operation_id_key`：`CREATE UNIQUE INDEX adc_clinical_consent_rule_operation_id_key ON public.adc_clinical_consent_rule USING btree (operation_id)`。
+- `adc_clinical_consent_rule_pkey`：`CREATE UNIQUE INDEX adc_clinical_consent_rule_pkey ON public.adc_clinical_consent_rule USING btree (id)`。
+- `adc_clinical_consent_rule_published_by_id_1dde92de`：`CREATE INDEX adc_clinical_consent_rule_published_by_id_1dde92de ON public.adc_clinical_consent_rule USING btree (published_by_id)`。
+- `adc_clinical_consent_rule_reviewer_id_e6ef7dbf`：`CREATE INDEX adc_clinical_consent_rule_reviewer_id_e6ef7dbf ON public.adc_clinical_consent_rule USING btree (reviewer_id)`。
+- `adc_clinical_consent_rule_treatment_type_id_8c76717a`：`CREATE INDEX adc_clinical_consent_rule_treatment_type_id_8c76717a ON public.adc_clinical_consent_rule USING btree (treatment_type_id)`。
+- `clinical_rule_number`：`CREATE UNIQUE INDEX clinical_rule_number ON public.adc_clinical_consent_rule USING btree (clinic_id, treatment_type_id, number)`。
+
+跨表及历史触发器：
+
+- `clinical_rule_retained`：`CREATE TRIGGER clinical_rule_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_consent_rule FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
 ## adc_clinical_document
 
 模型：`clinical.ClinicalDocument`。
@@ -1338,6 +1382,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | operation_id | uuid | UK | 否 | — |
 | actor_id | bigint | FK | 否 | `adc_user.id` |
 | self_access_id | bigint | FK | 是 | `adc_patient_access.id` |
+| proxy_version_id | bigint | FK | 是 | `adc_medical_proxy_version.id` |
 | action | character varying(12) | — | 否 | — |
 | source | character varying(20) | — | 否 | — |
 | text | character varying(2000) | — | 否 | — |
@@ -1352,6 +1397,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_consent_event_consent_id_ac81da84_fk_adc_medical_consent_id`：`FOREIGN KEY (consent_id) REFERENCES adc_medical_consent(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_event_operation_id_key`：`UNIQUE (operation_id)`。
 - `adc_consent_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_consent_event_proxy_version_id_281aacbf_fk_adc_medic`：`FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_event_reply_to_id_b9795cda_fk_adc_consent_event_id`：`FOREIGN KEY (reply_to_id) REFERENCES adc_consent_event(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_event_reply_to_id_key`：`UNIQUE (reply_to_id)`。
 - `adc_consent_event_self_access_id_2f918175_fk_adc_patie`：`FOREIGN KEY (self_access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED`。
@@ -1360,7 +1406,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `consent_event_action`：`CHECK (((action)::text = ANY ((ARRAY['PUBLISHED'::character varying, 'QUESTION'::character varying, 'ANSWER'::character varying, 'AGREED'::character varying, 'DECLINED'::character varying, 'DEFERRED'::character varying, 'WITHDRAWN'::character varying])::text[])))`。
 - `consent_event_positive`：`CHECK ((sequence >= 1))`。
 - `consent_event_sequence`：`UNIQUE (consent_id, sequence)`。
-- `consent_event_source`：`CHECK (((source)::text = ANY ((ARRAY['DOCTOR_ACCOUNT'::character varying, 'SELF_ACCOUNT'::character varying, 'PAPER_REFERENCE'::character varying])::text[])))`。
+- `consent_event_source`：`CHECK (((source)::text = ANY ((ARRAY['DOCTOR_ACCOUNT'::character varying, 'SELF_ACCOUNT'::character varying, 'PROXY_ACCOUNT'::character varying, 'PAPER_REFERENCE'::character varying])::text[])))`。
 - `consent_self_basis`：`CHECK ((((self_access_id IS NOT NULL) AND ((source)::text = 'SELF_ACCOUNT'::text)) OR ((NOT ((source)::text = 'SELF_ACCOUNT'::text)) AND (self_access_id IS NULL))))`。
 
 索引（含条件唯一索引）：
@@ -1369,6 +1415,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_consent_event_consent_id_ac81da84`：`CREATE INDEX adc_consent_event_consent_id_ac81da84 ON public.adc_consent_event USING btree (consent_id)`。
 - `adc_consent_event_operation_id_key`：`CREATE UNIQUE INDEX adc_consent_event_operation_id_key ON public.adc_consent_event USING btree (operation_id)`。
 - `adc_consent_event_pkey`：`CREATE UNIQUE INDEX adc_consent_event_pkey ON public.adc_consent_event USING btree (id)`。
+- `adc_consent_event_proxy_version_id_281aacbf`：`CREATE INDEX adc_consent_event_proxy_version_id_281aacbf ON public.adc_consent_event USING btree (proxy_version_id)`。
 - `adc_consent_event_reply_to_id_key`：`CREATE UNIQUE INDEX adc_consent_event_reply_to_id_key ON public.adc_consent_event USING btree (reply_to_id)`。
 - `adc_consent_event_self_access_id_2f918175`：`CREATE INDEX adc_consent_event_self_access_id_2f918175 ON public.adc_consent_event USING btree (self_access_id)`。
 - `adc_consent_event_version_id_927fdde9`：`CREATE INDEX adc_consent_event_version_id_927fdde9 ON public.adc_consent_event USING btree (version_id)`。
@@ -1385,6 +1432,8 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
 |---|---|---|---|---|
 | id | bigint | PK | 否 | — |
+| signer_kind | character varying(8) | — | 否 | — |
+| proxy_version_id | bigint | FK | 是 | `adc_medical_proxy_version.id` |
 | consent_id | bigint | FK | 否 | `adc_medical_consent.id` |
 | revision | integer | — | 否 | — |
 | previous_id | bigint | UK / FK | 是 | `adc_consent_version.id` |
@@ -1404,9 +1453,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_consent_version_prepared_by_id_55a5972f_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_version_previous_id_d552a0f5_fk_adc_conse`：`FOREIGN KEY (previous_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_version_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_consent_version_proxy_version_id_19a6ea7f_fk_adc_medic`：`FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_version_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_consent_version_source_record_id_9e9c6c72_fk_adc_clini`：`FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_consent_version_step_version_id_169724bd_fk_adc_plan_`：`FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `consent_signer_basis`：`CHECK ((((proxy_version_id IS NULL) AND ((signer_kind)::text = 'SELF'::text)) OR ((proxy_version_id IS NOT NULL) AND ((signer_kind)::text = 'PROXY'::text))))`。
 - `consent_version_number`：`UNIQUE (consent_id, revision)`。
 - `consent_version_positive`：`CHECK ((revision >= 1))`。
 
@@ -1416,6 +1467,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_consent_version_pkey`：`CREATE UNIQUE INDEX adc_consent_version_pkey ON public.adc_consent_version USING btree (id)`。
 - `adc_consent_version_prepared_by_id_55a5972f`：`CREATE INDEX adc_consent_version_prepared_by_id_55a5972f ON public.adc_consent_version USING btree (prepared_by_id)`。
 - `adc_consent_version_previous_id_key`：`CREATE UNIQUE INDEX adc_consent_version_previous_id_key ON public.adc_consent_version USING btree (previous_id)`。
+- `adc_consent_version_proxy_version_id_19a6ea7f`：`CREATE INDEX adc_consent_version_proxy_version_id_19a6ea7f ON public.adc_consent_version USING btree (proxy_version_id)`。
 - `adc_consent_version_source_record_id_9e9c6c72`：`CREATE INDEX adc_consent_version_source_record_id_9e9c6c72 ON public.adc_consent_version USING btree (source_record_id)`。
 - `adc_consent_version_step_version_id_169724bd`：`CREATE INDEX adc_consent_version_step_version_id_169724bd ON public.adc_consent_version USING btree (step_version_id)`。
 - `consent_version_number`：`CREATE UNIQUE INDEX consent_version_number ON public.adc_consent_version USING btree (consent_id, revision)`。
@@ -3277,6 +3329,159 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `consent_identity_retained`：`CREATE TRIGGER consent_identity_retained BEFORE DELETE OR UPDATE ON public.adc_medical_consent FOR EACH ROW EXECUTE FUNCTION adc_consent_identity_guard()`。
 
+## adc_medical_proxy
+
+模型：`portal.MedicalProxy`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| patient_id | bigint | FK | 否 | `adc_patient.id` |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| delegate_id | bigint | FK | 否 | `adc_user.id` |
+| kind | character varying(16) | — | 否 | — |
+| state | character varying(16) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| created_by_id | bigint | FK | 否 | `adc_user.id` |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_medical_proxy_clinic_id_26da2f99_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_created_by_id_d0bc8665_fk_adc_user_id`：`FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_delegate_id_af481a42_fk_adc_user_id`：`FOREIGN KEY (delegate_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_patient_id_87d421fc_fk_adc_patient_id`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_pkey`：`PRIMARY KEY (id)`。
+- `adc_medical_proxy_revision_check`：`CHECK ((revision >= 0))`。
+- `medical_proxy_kind`：`CHECK (((kind)::text = ANY ((ARRAY['GUARDIAN'::character varying, 'WRITTEN'::character varying])::text[])))`。
+- `medical_proxy_state`：`CHECK (((state)::text = ANY ((ARRAY['MATERIALS'::character varying, 'DOCTOR'::character varying, 'REVIEW'::character varying, 'ACTIVE'::character varying, 'RETURNED'::character varying, 'REJECTED'::character varying, 'SUSPENDED'::character varying, 'REVOKED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_medical_proxy_clinic_id_26da2f99`：`CREATE INDEX adc_medical_proxy_clinic_id_26da2f99 ON public.adc_medical_proxy USING btree (clinic_id)`。
+- `adc_medical_proxy_created_by_id_d0bc8665`：`CREATE INDEX adc_medical_proxy_created_by_id_d0bc8665 ON public.adc_medical_proxy USING btree (created_by_id)`。
+- `adc_medical_proxy_delegate_id_af481a42`：`CREATE INDEX adc_medical_proxy_delegate_id_af481a42 ON public.adc_medical_proxy USING btree (delegate_id)`。
+- `adc_medical_proxy_patient_id_87d421fc`：`CREATE INDEX adc_medical_proxy_patient_id_87d421fc ON public.adc_medical_proxy USING btree (patient_id)`。
+- `adc_medical_proxy_pkey`：`CREATE UNIQUE INDEX adc_medical_proxy_pkey ON public.adc_medical_proxy USING btree (id)`。
+- `medical_proxy_queue`：`CREATE INDEX medical_proxy_queue ON public.adc_medical_proxy USING btree (clinic_id, state)`。
+
+跨表及历史触发器：
+
+- `medical_proxy_head_retained`：`CREATE TRIGGER medical_proxy_head_retained BEFORE DELETE OR UPDATE ON public.adc_medical_proxy FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_head_guard()`。
+
+## adc_medical_proxy_event
+
+模型：`portal.MedicalProxyEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| proxy_id | bigint | FK | 否 | `adc_medical_proxy.id` |
+| version_id | bigint | FK | 否 | `adc_medical_proxy_version.id` |
+| sequence | integer | — | 否 | — |
+| action | character varying(20) | — | 否 | — |
+| resulting_state | character varying(16) | — | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| reviewer_id | bigint | FK | 是 | `adc_clinical_reviewer.id` |
+| note | character varying(1000) | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_medical_proxy_ev_proxy_id_77226393_fk_adc_medic`：`FOREIGN KEY (proxy_id) REFERENCES adc_medical_proxy(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_ev_reviewer_id_47139c6c_fk_adc_clini`：`FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_ev_version_id_a838a8d1_fk_adc_medic`：`FOREIGN KEY (version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_event_actor_id_56a6dbbc_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_medical_proxy_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_medical_proxy_event_sequence_check`：`CHECK ((sequence >= 0))`。
+- `medical_proxy_event_order`：`UNIQUE (proxy_id, sequence)`。
+
+索引（含条件唯一索引）：
+
+- `adc_medical_proxy_event_actor_id_56a6dbbc`：`CREATE INDEX adc_medical_proxy_event_actor_id_56a6dbbc ON public.adc_medical_proxy_event USING btree (actor_id)`。
+- `adc_medical_proxy_event_operation_id_key`：`CREATE UNIQUE INDEX adc_medical_proxy_event_operation_id_key ON public.adc_medical_proxy_event USING btree (operation_id)`。
+- `adc_medical_proxy_event_pkey`：`CREATE UNIQUE INDEX adc_medical_proxy_event_pkey ON public.adc_medical_proxy_event USING btree (id)`。
+- `adc_medical_proxy_event_proxy_id_77226393`：`CREATE INDEX adc_medical_proxy_event_proxy_id_77226393 ON public.adc_medical_proxy_event USING btree (proxy_id)`。
+- `adc_medical_proxy_event_reviewer_id_47139c6c`：`CREATE INDEX adc_medical_proxy_event_reviewer_id_47139c6c ON public.adc_medical_proxy_event USING btree (reviewer_id)`。
+- `adc_medical_proxy_event_version_id_a838a8d1`：`CREATE INDEX adc_medical_proxy_event_version_id_a838a8d1 ON public.adc_medical_proxy_event USING btree (version_id)`。
+- `medical_proxy_event_order`：`CREATE UNIQUE INDEX medical_proxy_event_order ON public.adc_medical_proxy_event USING btree (proxy_id, sequence)`。
+
+跨表及历史触发器：
+
+- `medical_proxy_event_retained`：`CREATE TRIGGER medical_proxy_event_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medical_proxy_event FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_event_guard()`。
+
+## adc_medical_proxy_scope
+
+模型：`portal.MedicalProxyScope`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| version_id | bigint | FK | 否 | `adc_medical_proxy_version.id` |
+| step_id | bigint | FK | 否 | `adc_treatment_step.id` |
+
+数据库约束：
+
+- `adc_medical_proxy_sc_step_id_d4de7115_fk_adc_treat`：`FOREIGN KEY (step_id) REFERENCES adc_treatment_step(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_sc_version_id_5ad5158a_fk_adc_medic`：`FOREIGN KEY (version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_scope_pkey`：`PRIMARY KEY (id)`。
+- `medical_proxy_step_scope`：`UNIQUE (version_id, step_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_medical_proxy_scope_pkey`：`CREATE UNIQUE INDEX adc_medical_proxy_scope_pkey ON public.adc_medical_proxy_scope USING btree (id)`。
+- `adc_medical_proxy_scope_step_id_d4de7115`：`CREATE INDEX adc_medical_proxy_scope_step_id_d4de7115 ON public.adc_medical_proxy_scope USING btree (step_id)`。
+- `adc_medical_proxy_scope_version_id_5ad5158a`：`CREATE INDEX adc_medical_proxy_scope_version_id_5ad5158a ON public.adc_medical_proxy_scope USING btree (version_id)`。
+- `medical_proxy_step_scope`：`CREATE UNIQUE INDEX medical_proxy_step_scope ON public.adc_medical_proxy_scope USING btree (version_id, step_id)`。
+
+跨表及历史触发器：
+
+- `medical_proxy_scope_retained`：`CREATE TRIGGER medical_proxy_scope_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medical_proxy_scope FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_scope_guard()`。
+
+## adc_medical_proxy_version
+
+模型：`portal.MedicalProxyVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| patient_snapshot | jsonb | — | 否 | — |
+| delegate_name | character varying(100) | — | 否 | — |
+| proxy_id | bigint | FK | 否 | `adc_medical_proxy.id` |
+| number | integer | — | 否 | — |
+| plan_id | bigint | FK | 否 | `adc_treatment_plan.id` |
+| identity_reference | character varying(500) | — | 否 | — |
+| authority_reference | character varying(500) | — | 否 | — |
+| applicability | character varying(1000) | — | 否 | — |
+| valid_from | timestamp with time zone | — | 否 | — |
+| valid_until | timestamp with time zone | — | 否 | — |
+| submitted_by_id | bigint | FK | 否 | `adc_user.id` |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_medical_proxy_ve_plan_id_ce2212d6_fk_adc_treat`：`FOREIGN KEY (plan_id) REFERENCES adc_treatment_plan(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_ve_proxy_id_37dc6124_fk_adc_medic`：`FOREIGN KEY (proxy_id) REFERENCES adc_medical_proxy(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_ve_submitted_by_id_c720623a_fk_adc_user_`：`FOREIGN KEY (submitted_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_medical_proxy_version_number_check`：`CHECK ((number >= 0))`。
+- `adc_medical_proxy_version_pkey`：`PRIMARY KEY (id)`。
+- `medical_proxy_interval`：`CHECK ((valid_until > valid_from))`。
+- `medical_proxy_version_number`：`UNIQUE (proxy_id, number)`。
+
+索引（含条件唯一索引）：
+
+- `adc_medical_proxy_version_pkey`：`CREATE UNIQUE INDEX adc_medical_proxy_version_pkey ON public.adc_medical_proxy_version USING btree (id)`。
+- `adc_medical_proxy_version_plan_id_ce2212d6`：`CREATE INDEX adc_medical_proxy_version_plan_id_ce2212d6 ON public.adc_medical_proxy_version USING btree (plan_id)`。
+- `adc_medical_proxy_version_proxy_id_37dc6124`：`CREATE INDEX adc_medical_proxy_version_proxy_id_37dc6124 ON public.adc_medical_proxy_version USING btree (proxy_id)`。
+- `adc_medical_proxy_version_submitted_by_id_c720623a`：`CREATE INDEX adc_medical_proxy_version_submitted_by_id_c720623a ON public.adc_medical_proxy_version USING btree (submitted_by_id)`。
+- `medical_proxy_version_number`：`CREATE UNIQUE INDEX medical_proxy_version_number ON public.adc_medical_proxy_version USING btree (proxy_id, number)`。
+
+跨表及历史触发器：
+
+- `medical_proxy_version_retained`：`CREATE TRIGGER medical_proxy_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medical_proxy_version FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_version_guard()`。
+
 ## adc_monthly_cost
 
 模型：`finance.MonthlyCost`。
@@ -3756,6 +3961,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
 |---|---|---|---|---|
 | id | bigint | PK | 否 | — |
+| preflight_id | bigint | UK / FK | 是 | `adc_treatment_preflight.id` |
 | encounter_id | bigint | FK | 否 | `adc_clinical_encounter.id` |
 | source_record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
 | step_version_id | bigint | FK | 是 | `adc_plan_step_version.id` |
@@ -3777,14 +3983,17 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 数据库约束：
 
+- `actual_preflight_or_gap`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_proced_charge_line_id_5b1f15b5_fk_adc_treat`：`FOREIGN KEY (charge_line_id) REFERENCES adc_treatment_record(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_proced_encounter_id_2ff61633_fk_adc_clini`：`FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_performed_proced_preflight_id_cc0ebf64_fk_adc_treat`：`FOREIGN KEY (preflight_id) REFERENCES adc_treatment_preflight(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_proced_source_record_id_799b593f_fk_adc_clini`：`FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_proced_step_version_id_8eb9ab3d_fk_adc_plan_`：`FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_proced_treatment_type_id_8b8e35ad_fk_adc_treat`：`FOREIGN KEY (treatment_type_id) REFERENCES adc_treatment_type(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_procedure_charge_line_id_key`：`UNIQUE (charge_line_id)`。
 - `adc_performed_procedure_operation_id_key`：`UNIQUE (operation_id)`。
 - `adc_performed_procedure_pkey`：`PRIMARY KEY (id)`。
+- `adc_performed_procedure_preflight_id_key`：`UNIQUE (preflight_id)`。
 - `adc_performed_procedure_recorded_by_id_d24e64ff_fk_adc_user_id`：`FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_performed_procedure_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_performed_procedure_tooth_check`：`CHECK ((tooth >= 0))`。
@@ -3802,6 +4011,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_performed_procedure_encounter_id_2ff61633`：`CREATE INDEX adc_performed_procedure_encounter_id_2ff61633 ON public.adc_performed_procedure USING btree (encounter_id)`。
 - `adc_performed_procedure_operation_id_key`：`CREATE UNIQUE INDEX adc_performed_procedure_operation_id_key ON public.adc_performed_procedure USING btree (operation_id)`。
 - `adc_performed_procedure_pkey`：`CREATE UNIQUE INDEX adc_performed_procedure_pkey ON public.adc_performed_procedure USING btree (id)`。
+- `adc_performed_procedure_preflight_id_key`：`CREATE UNIQUE INDEX adc_performed_procedure_preflight_id_key ON public.adc_performed_procedure USING btree (preflight_id)`。
 - `adc_performed_procedure_recorded_by_id_d24e64ff`：`CREATE INDEX adc_performed_procedure_recorded_by_id_d24e64ff ON public.adc_performed_procedure USING btree (recorded_by_id)`。
 - `adc_performed_procedure_source_record_id_799b593f`：`CREATE INDEX adc_performed_procedure_source_record_id_799b593f ON public.adc_performed_procedure USING btree (source_record_id)`。
 - `adc_performed_procedure_step_version_id_8eb9ab3d`：`CREATE INDEX adc_performed_procedure_step_version_id_8eb9ab3d ON public.adc_performed_procedure USING btree (step_version_id)`。
@@ -3810,6 +4020,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+- `actual_preflight_or_gap`：`CREATE CONSTRAINT TRIGGER actual_preflight_or_gap AFTER INSERT ON public.adc_performed_procedure DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_actual_preflight_guard()`。
 - `performed_procedure_retained`：`CREATE TRIGGER performed_procedure_retained BEFORE DELETE OR UPDATE ON public.adc_performed_procedure FOR EACH ROW EXECUTE FUNCTION adc_performed_procedure_guard()`。
 - `performed_visit_final_consistency`：`CREATE CONSTRAINT TRIGGER performed_visit_final_consistency AFTER INSERT OR UPDATE ON public.adc_performed_procedure DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_performed_final()`。
 
@@ -3859,6 +4070,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | actor_id | bigint | FK | 否 | `adc_user.id` |
 | decision | character varying(16) | — | 否 | — |
 | source | character varying(16) | — | 否 | — |
+| proxy_version_id | bigint | FK | 是 | `adc_medical_proxy_version.id` |
 | self_access_id | bigint | FK | 是 | `adc_patient_access.id` |
 | source_visit_id | bigint | FK | 是 | `adc_visit.id` |
 | reference | character varying(500) | — | 否 | — |
@@ -3871,10 +4083,11 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_plan_decision_actor_id_204e3b5c_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_plan_decision_operation_id_key`：`UNIQUE (operation_id)`。
 - `adc_plan_decision_pkey`：`PRIMARY KEY (id)`。
+- `adc_plan_decision_proxy_version_id_cb80d74d_fk_adc_medic`：`FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_plan_decision_self_access_id_2d009bc5_fk_adc_patie`：`FOREIGN KEY (self_access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_plan_decision_source_visit_id_954ca73b_fk_adc_visit_id`：`FOREIGN KEY (source_visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_plan_decision_step_version_id_7f9a72aa_fk_adc_plan_`：`FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED`。
-- `plan_decision_source_valid`：`CHECK ((((self_access_id IS NOT NULL) AND ((source)::text = 'SELF'::text) AND (source_visit_id IS NULL)) OR ((self_access_id IS NULL) AND ((source)::text = 'MANUAL'::text) AND (source_visit_id IS NOT NULL))))`。
+- `plan_decision_source_valid`：`CHECK ((((proxy_version_id IS NULL) AND (self_access_id IS NOT NULL) AND ((source)::text = 'SELF'::text) AND (source_visit_id IS NULL)) OR ((proxy_version_id IS NULL) AND (self_access_id IS NULL) AND ((source)::text = 'MANUAL'::text) AND (source_visit_id IS NOT NULL)) OR ((proxy_version_id IS NOT NULL) AND (self_access_id IS NULL) AND ((source)::text = 'PROXY'::text) AND (source_visit_id IS NULL)) OR ((proxy_version_id IS NOT NULL) AND (self_access_id IS NULL) AND ((source)::text = 'MANUAL_PROXY'::text) AND (source_visit_id IS NOT NULL))))`。
 - `plan_decision_valid`：`CHECK (((decision)::text = ANY ((ARRAY['ACCEPTED'::character varying, 'DEFERRED'::character varying, 'DECLINED'::character varying])::text[])))`。
 
 索引（含条件唯一索引）：
@@ -3882,6 +4095,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_plan_decision_actor_id_204e3b5c`：`CREATE INDEX adc_plan_decision_actor_id_204e3b5c ON public.adc_plan_decision USING btree (actor_id)`。
 - `adc_plan_decision_operation_id_key`：`CREATE UNIQUE INDEX adc_plan_decision_operation_id_key ON public.adc_plan_decision USING btree (operation_id)`。
 - `adc_plan_decision_pkey`：`CREATE UNIQUE INDEX adc_plan_decision_pkey ON public.adc_plan_decision USING btree (id)`。
+- `adc_plan_decision_proxy_version_id_cb80d74d`：`CREATE INDEX adc_plan_decision_proxy_version_id_cb80d74d ON public.adc_plan_decision USING btree (proxy_version_id)`。
 - `adc_plan_decision_self_access_id_2d009bc5`：`CREATE INDEX adc_plan_decision_self_access_id_2d009bc5 ON public.adc_plan_decision USING btree (self_access_id)`。
 - `adc_plan_decision_source_visit_id_954ca73b`：`CREATE INDEX adc_plan_decision_source_visit_id_954ca73b ON public.adc_plan_decision USING btree (source_visit_id)`。
 - `adc_plan_decision_step_version_id_7f9a72aa`：`CREATE INDEX adc_plan_decision_step_version_id_7f9a72aa ON public.adc_plan_decision USING btree (step_version_id)`。
@@ -3889,6 +4103,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `plan_decision_retained`：`CREATE TRIGGER plan_decision_retained BEFORE DELETE OR UPDATE ON public.adc_plan_decision FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+- `proxy_plan_choice_scope`：`CREATE TRIGGER proxy_plan_choice_scope BEFORE INSERT ON public.adc_plan_decision FOR EACH ROW EXECUTE FUNCTION adc_proxy_plan_decision_guard()`。
 
 ## adc_plan_draft
 
@@ -4103,6 +4318,73 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+
+## adc_procedure_gap
+
+模型：`clinical.ProcedureGap`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| performed_id | bigint | UK / FK | 否 | `adc_performed_procedure.id` |
+| reason | character varying(1000) | — | 否 | — |
+| missing | jsonb | — | 否 | — |
+| recorded_by_id | bigint | FK | 否 | `adc_user.id` |
+| recorded_at | timestamp with time zone | — | 否 | — |
+| state | character varying(16) | — | 否 | — |
+
+数据库约束：
+
+- `adc_procedure_gap_performed_id_06be4f00_fk_adc_perfo`：`FOREIGN KEY (performed_id) REFERENCES adc_performed_procedure(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_procedure_gap_performed_id_key`：`UNIQUE (performed_id)`。
+- `adc_procedure_gap_pkey`：`PRIMARY KEY (id)`。
+- `adc_procedure_gap_recorded_by_id_0f04cc33_fk_adc_user_id`：`FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `procedure_gap_state`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'REVIEWED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_procedure_gap_performed_id_key`：`CREATE UNIQUE INDEX adc_procedure_gap_performed_id_key ON public.adc_procedure_gap USING btree (performed_id)`。
+- `adc_procedure_gap_pkey`：`CREATE UNIQUE INDEX adc_procedure_gap_pkey ON public.adc_procedure_gap USING btree (id)`。
+- `adc_procedure_gap_recorded_by_id_0f04cc33`：`CREATE INDEX adc_procedure_gap_recorded_by_id_0f04cc33 ON public.adc_procedure_gap USING btree (recorded_by_id)`。
+
+跨表及历史触发器：
+
+- `procedure_gap_retained`：`CREATE TRIGGER procedure_gap_retained BEFORE DELETE OR UPDATE ON public.adc_procedure_gap FOR EACH ROW EXECUTE FUNCTION adc_procedure_gap_guard()`。
+
+## adc_procedure_gap_review
+
+模型：`clinical.ProcedureGapReview`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| gap_id | bigint | UK / FK | 否 | `adc_procedure_gap.id` |
+| reviewer_id | bigint | FK | 否 | `adc_clinical_reviewer.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| note | character varying(1000) | — | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+
+数据库约束：
+
+- `adc_procedure_gap_re_gap_id_a8139eff_fk_adc_proce`：`FOREIGN KEY (gap_id) REFERENCES adc_procedure_gap(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_procedure_gap_re_reviewer_id_b1cb1b00_fk_adc_clini`：`FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_procedure_gap_review_actor_id_3cf08d36_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_procedure_gap_review_gap_id_key`：`UNIQUE (gap_id)`。
+- `adc_procedure_gap_review_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_procedure_gap_review_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_procedure_gap_review_actor_id_3cf08d36`：`CREATE INDEX adc_procedure_gap_review_actor_id_3cf08d36 ON public.adc_procedure_gap_review USING btree (actor_id)`。
+- `adc_procedure_gap_review_gap_id_key`：`CREATE UNIQUE INDEX adc_procedure_gap_review_gap_id_key ON public.adc_procedure_gap_review USING btree (gap_id)`。
+- `adc_procedure_gap_review_operation_id_key`：`CREATE UNIQUE INDEX adc_procedure_gap_review_operation_id_key ON public.adc_procedure_gap_review USING btree (operation_id)`。
+- `adc_procedure_gap_review_pkey`：`CREATE UNIQUE INDEX adc_procedure_gap_review_pkey ON public.adc_procedure_gap_review USING btree (id)`。
+- `adc_procedure_gap_review_reviewer_id_b1cb1b00`：`CREATE INDEX adc_procedure_gap_review_reviewer_id_b1cb1b00 ON public.adc_procedure_gap_review USING btree (reviewer_id)`。
+
+跨表及历史触发器：
+
+- `gap_review_retained`：`CREATE TRIGGER gap_review_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_procedure_gap_review FOR EACH ROW EXECUTE FUNCTION adc_gap_review_guard()`。
 
 ## adc_professional_authorization
 
@@ -4777,6 +5059,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | clinic_id | bigint | FK | 是 | `adc_clinic.id` |
 | is_active | boolean | — | 否 | — |
 | can_verify_patient_relationships | boolean | — | 否 | — |
+| can_verify_medical_proxy_identity | boolean | — | 否 | — |
 
 数据库约束：
 
@@ -4784,6 +5067,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_role_assignment_pkey`：`PRIMARY KEY (id)`。
 - `adc_role_assignment_user_id_49685fe0_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `identity_reviewer_frontdesk`：`CHECK (((NOT can_verify_patient_relationships) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
+- `medical_proxy_frontdesk_duty`：`CHECK (((NOT can_verify_medical_proxy_identity) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `role_scope_valid`：`CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))`。
 
 索引（含条件唯一索引）：
@@ -5120,6 +5404,35 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `clinical_tooth_finding_retained`：`CREATE TRIGGER clinical_tooth_finding_retained BEFORE DELETE OR UPDATE ON public.adc_tooth_finding FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
+## adc_treatment_control_policy
+
+模型：`clinical.TreatmentControlPolicy`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | UK / FK | 否 | `adc_clinic.id` |
+| activated_by_id | bigint | FK | 否 | `adc_user.id` |
+| reference | character varying(500) | — | 否 | — |
+| activated_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_treatment_contro_activated_by_id_8dec4188_fk_adc_user_`：`FOREIGN KEY (activated_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_contro_clinic_id_5a13ee83_fk_adc_clini`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_control_policy_clinic_id_key`：`UNIQUE (clinic_id)`。
+- `adc_treatment_control_policy_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_treatment_control_policy_activated_by_id_8dec4188`：`CREATE INDEX adc_treatment_control_policy_activated_by_id_8dec4188 ON public.adc_treatment_control_policy USING btree (activated_by_id)`。
+- `adc_treatment_control_policy_clinic_id_key`：`CREATE UNIQUE INDEX adc_treatment_control_policy_clinic_id_key ON public.adc_treatment_control_policy USING btree (clinic_id)`。
+- `adc_treatment_control_policy_pkey`：`CREATE UNIQUE INDEX adc_treatment_control_policy_pkey ON public.adc_treatment_control_policy USING btree (id)`。
+
+跨表及历史触发器：
+
+- `treatment_control_retained`：`CREATE TRIGGER treatment_control_retained BEFORE DELETE OR UPDATE ON public.adc_treatment_control_policy FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
 ## adc_treatment_plan
 
 模型：`clinical.TreatmentPlan`。
@@ -5148,6 +5461,56 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `treatment_plan_identity_retained`：`CREATE TRIGGER treatment_plan_identity_retained BEFORE DELETE OR UPDATE ON public.adc_treatment_plan FOR EACH ROW EXECUTE FUNCTION adc_treatment_plan_identity_guard()`。
+
+## adc_treatment_preflight
+
+模型：`clinical.TreatmentPreflight`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| visit_id | bigint | FK | 否 | `adc_visit.id` |
+| source_record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
+| step_version_id | bigint | FK | 是 | `adc_plan_step_version.id` |
+| rule_id | bigint | FK | 否 | `adc_clinical_consent_rule.id` |
+| consent_version_id | bigint | FK | 是 | `adc_consent_version.id` |
+| consent_decision_id | bigint | FK | 是 | `adc_consent_event.id` |
+| proxy_version_id | bigint | FK | 是 | `adc_medical_proxy_version.id` |
+| snapshot | jsonb | — | 否 | — |
+| communication | character varying(1000) | — | 否 | — |
+| checked_by_id | bigint | FK | 否 | `adc_user.id` |
+| checked_at | timestamp with time zone | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+
+数据库约束：
+
+- `adc_treatment_prefli_consent_decision_id_deea2327_fk_adc_conse`：`FOREIGN KEY (consent_decision_id) REFERENCES adc_consent_event(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_prefli_consent_version_id_8ff1c6bc_fk_adc_conse`：`FOREIGN KEY (consent_version_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_prefli_proxy_version_id_e8310600_fk_adc_medic`：`FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_prefli_rule_id_84f82f04_fk_adc_clini`：`FOREIGN KEY (rule_id) REFERENCES adc_clinical_consent_rule(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_prefli_source_record_id_fe154aa5_fk_adc_clini`：`FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_prefli_step_version_id_76b5e525_fk_adc_plan_`：`FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_preflight_checked_by_id_7ff84783_fk_adc_user_id`：`FOREIGN KEY (checked_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_treatment_preflight_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_treatment_preflight_pkey`：`PRIMARY KEY (id)`。
+- `adc_treatment_preflight_visit_id_2eb927a0_fk_adc_visit_id`：`FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_treatment_preflight_checked_by_id_7ff84783`：`CREATE INDEX adc_treatment_preflight_checked_by_id_7ff84783 ON public.adc_treatment_preflight USING btree (checked_by_id)`。
+- `adc_treatment_preflight_consent_decision_id_deea2327`：`CREATE INDEX adc_treatment_preflight_consent_decision_id_deea2327 ON public.adc_treatment_preflight USING btree (consent_decision_id)`。
+- `adc_treatment_preflight_consent_version_id_8ff1c6bc`：`CREATE INDEX adc_treatment_preflight_consent_version_id_8ff1c6bc ON public.adc_treatment_preflight USING btree (consent_version_id)`。
+- `adc_treatment_preflight_operation_id_key`：`CREATE UNIQUE INDEX adc_treatment_preflight_operation_id_key ON public.adc_treatment_preflight USING btree (operation_id)`。
+- `adc_treatment_preflight_pkey`：`CREATE UNIQUE INDEX adc_treatment_preflight_pkey ON public.adc_treatment_preflight USING btree (id)`。
+- `adc_treatment_preflight_proxy_version_id_e8310600`：`CREATE INDEX adc_treatment_preflight_proxy_version_id_e8310600 ON public.adc_treatment_preflight USING btree (proxy_version_id)`。
+- `adc_treatment_preflight_rule_id_84f82f04`：`CREATE INDEX adc_treatment_preflight_rule_id_84f82f04 ON public.adc_treatment_preflight USING btree (rule_id)`。
+- `adc_treatment_preflight_source_record_id_fe154aa5`：`CREATE INDEX adc_treatment_preflight_source_record_id_fe154aa5 ON public.adc_treatment_preflight USING btree (source_record_id)`。
+- `adc_treatment_preflight_step_version_id_76b5e525`：`CREATE INDEX adc_treatment_preflight_step_version_id_76b5e525 ON public.adc_treatment_preflight USING btree (step_version_id)`。
+- `adc_treatment_preflight_visit_id_2eb927a0`：`CREATE INDEX adc_treatment_preflight_visit_id_2eb927a0 ON public.adc_treatment_preflight USING btree (visit_id)`。
+
+跨表及历史触发器：
+
+- `treatment_preflight_retained`：`CREATE TRIGGER treatment_preflight_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_treatment_preflight FOR EACH ROW EXECUTE FUNCTION adc_preflight_guard()`。
 
 ## adc_treatment_record
 
@@ -5668,23 +6031,29 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | login_channel | character varying(8) | — | 否 | — |
 | clinic_id | bigint | FK | 是 | `adc_clinic.id` |
 | patient_grant_id | bigint | FK | 是 | `adc_patient_appointment_grant.id` |
+| medical_proxy_id | bigint | FK | 是 | `adc_medical_proxy.id` |
+| medical_proxy_revision | integer | — | 否 | — |
 | revision | integer | — | 否 | — |
 | updated_at | timestamp with time zone | — | 否 | — |
 
 数据库约束：
 
+- `adc_workspace_contex_medical_proxy_id_18701586_fk_adc_medic`：`FOREIGN KEY (medical_proxy_id) REFERENCES adc_medical_proxy(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_workspace_contex_patient_grant_id_d1d100c8_fk_adc_patie`：`FOREIGN KEY (patient_grant_id) REFERENCES adc_patient_appointment_grant(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_workspace_context_clinic_id_0ce9581c_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_workspace_context_medical_proxy_revision_check`：`CHECK ((medical_proxy_revision >= 0))`。
 - `adc_workspace_context_pkey`：`PRIMARY KEY (id)`。
 - `adc_workspace_context_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_workspace_context_user_id_88d56c99_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `workspace_clinic_role`：`CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying])::text[]))))`。
 - `workspace_login_channel`：`CHECK ((((login_channel)::text = ''::text) OR (((login_channel)::text = 'PATIENT'::text) AND ((role)::text = ANY ((ARRAY[''::character varying, 'PATIENT'::character varying])::text[]))) OR (((login_channel)::text = 'STAFF'::text) AND (NOT ((role)::text = 'PATIENT'::text)))))`。
+- `workspace_medical_subject`：`CHECK (((medical_proxy_id IS NULL) OR ((role)::text = 'PATIENT'::text)))`。
 - `workspace_patient_subject`：`CHECK (((patient_grant_id IS NULL) OR ((role)::text = 'PATIENT'::text)))`。
 
 索引（含条件唯一索引）：
 
 - `adc_workspace_context_clinic_id_0ce9581c`：`CREATE INDEX adc_workspace_context_clinic_id_0ce9581c ON public.adc_workspace_context USING btree (clinic_id)`。
+- `adc_workspace_context_medical_proxy_id_18701586`：`CREATE INDEX adc_workspace_context_medical_proxy_id_18701586 ON public.adc_workspace_context USING btree (medical_proxy_id)`。
 - `adc_workspace_context_patient_grant_id_d1d100c8`：`CREATE INDEX adc_workspace_context_patient_grant_id_d1d100c8 ON public.adc_workspace_context USING btree (patient_grant_id)`。
 - `adc_workspace_context_pkey`：`CREATE UNIQUE INDEX adc_workspace_context_pkey ON public.adc_workspace_context USING btree (id)`。
 - `adc_workspace_context_user_id_88d56c99`：`CREATE INDEX adc_workspace_context_user_id_88d56c99 ON public.adc_workspace_context USING btree (user_id)`。

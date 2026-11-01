@@ -153,6 +153,19 @@ def select_subject(*,actor,key):
     require_writable(actor);require_active(actor,('PATIENT',))
     ctx=getattr(actor,'_adc_workspace',None)
     if ctx is None:raise PermissionDenied('请先进入患者服务。')
+    if key.startswith('medical:'):
+        from portal.medical_authority import selected_proxy, verify_version, latest_version, active_proxies
+        from workspaces.models import WorkspaceContext
+        try: pk=int(key.split(':',1)[1])
+        except ValueError: raise RuleError('请选择清单中的医疗授权。')
+        from portal.medical_models import MedicalProxy
+        case=MedicalProxy.objects.select_for_update().get(pk=pk,delegate=actor)
+        version=latest_version(case);verify_version(version,actor=actor,lock=True)
+        selected=active_grants(actor).filter(relationship__patient_id=case.patient_id,relationship__clinic_id=case.clinic_id).order_by('pk').first()
+        ctx.medical_proxy=case;ctx.medical_proxy_revision=case.revision;ctx.patient_grant=selected;ctx.revision+=1
+        ctx.save(update_fields=['medical_proxy','medical_proxy_revision','patient_grant','revision','updated_at'])
+        emit(actor,'PATIENT_SUBJECT_SELECTED',ctx,summary={'capacity':'MEDICAL_PROXY'})
+        return ctx
     if key=='self':
         if not PatientAccess.objects.filter(user=actor,is_active=True,patient__is_active=True).exists():raise PermissionDenied('没有有效本人入口。')
         selected=None
@@ -167,7 +180,8 @@ def select_subject(*,actor,key):
         PatientRelationship.objects.select_for_update().filter(pk=case_id).first()
         selected=active_grants(actor).select_for_update(of=('self',)).filter(pk=pk).first()
         if selected is None:raise PermissionDenied('这项代约授权已失效，请刷新清单。')
+    ctx.medical_proxy=None;ctx.medical_proxy_revision=0
     ctx.patient_grant=selected;ctx.revision+=1
-    ctx.save(update_fields=['patient_grant','revision','updated_at'])
+    ctx.save(update_fields=['medical_proxy','medical_proxy_revision','patient_grant','revision','updated_at'])
     emit(actor,'PATIENT_SUBJECT_SELECTED',ctx,summary={'capacity':'DELEGATE' if selected else 'SELF'})
     return ctx

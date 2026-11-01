@@ -61,7 +61,7 @@ def workspace(request, step_id, pk=None):
             except EXPECTED_ERRORS as exc:add_error(form, exc)
             else:messages.success(request, '医疗沟通／决定已保留。' + ('已核对原提交结果。' if replay else ''));return redirect(back)
         return clinical_render(request, 'clinical/consent_preview.html', dict(context, confirm_form=form, preview=data if form.is_valid() else None), status=409)
-    form = ConsentActionForm(request.POST or None, doctor=doctor, initial=dict(version=d['version'].pk if d['version'] else None))
+    form = ConsentActionForm(request.POST or None, doctor=doctor, proxy=bool(d['version'] and d['version'].signer_kind=='PROXY'), initial=dict(version=d['version'].pk if d['version'] else None))
     if request.method == 'POST':
         if doctor:check_patient_form(request.user, visit, request.POST.get('patient_binding', ''))
         if form.is_valid():

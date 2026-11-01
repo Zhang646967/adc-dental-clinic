@@ -2716,5 +2716,237 @@
       "portal/mini_consents.py",
       "tests/test_medical_consent.py"
     ]
+  },
+  {
+    "id": "SU-126",
+    "name": "核对医疗代理资料",
+    "actor": "本店专项核验前台",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "患者与代理账号、材料及原件编号、适用情形、方案步骤、期限。",
+    "flow": [
+      "受理独立医疗代理办理单，不沿用预约授权。",
+      "按原件核对身份材料并提交负责医师。",
+      "保留核验责任与办理历史，待医师明确确认。"
+    ],
+    "alternatives": [
+      "无专项职责或跨店：拒绝办理。",
+      "材料不足：退回后追加新版本，不覆盖原件依据。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-126：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "portal/medical_proxies.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-127",
+    "name": "确认医疗代理适用性",
+    "actor": "负责医师及独立专业审核医师",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "已核对材料、本方案及步骤、具体适用原因与期限。",
+    "flow": [
+      "核对本次代理适用性、具体步骤与有效期限。",
+      "疑难或冲突转另一名具有既有职责的审核医师。",
+      "明确生效、退回或不通过，保留责任来源。"
+    ],
+    "alternatives": [
+      "代理人、材料整理人与核验人不能自审。",
+      "多个有效代理重叠或本人意见变化：进入明确核对，不按最后提交覆盖。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-127：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "portal/medical_proxies.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-128",
+    "name": "代理核对方案选择",
+    "actor": "已核验医疗代理",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "明确患者、授权版本、当前方案与指定步骤。",
+    "flow": [
+      "选择具有医疗权限的就诊人。",
+      "阅读指定步骤并认可、拒绝或暂缓方案选择。",
+      "确认真实代理来源，医疗同意仍另行办理。"
+    ],
+    "alternatives": [
+      "只有代约权限不能读取临床方案。",
+      "本人已有明确拒绝或授权失效：停止代理办理并交医师核对。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-128：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "clinical/plans.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-129",
+    "name": "代理医疗问答与明确决定",
+    "actor": "医疗代理及负责医师",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "准确告知版本、代理依据及本步骤问题或决定。",
+    "flow": [
+      "医师核对当前医疗代理并发布准确版本告知。",
+      "代理提问，医师答复后再由代理明确决定。",
+      "保存患者、实际决定人及准确代理依据。"
+    ],
+    "alternatives": [
+      "未答疑问阻止新增同意；答复不代替决定。",
+      "换版、跨患者、撤权或过期：拒绝不适用办理，原历史保留。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-129：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "clinical/consents.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-130",
+    "name": "修订暂停或撤销医疗授权",
+    "actor": "前台、医师及本人相关账号",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "原办理单、原因、需要核对的新材料或明确撤销意见。",
+    "flow": [
+      "明确暂停或撤销并停止新增临床访问及办理。",
+      "退回或暂停后追加新材料版本。",
+      "分别核对原决定与新授权，保留历史并提示重新选择就诊人。"
+    ],
+    "alternatives": [
+      "旧预览或重复确认不产生第二次业务效果。",
+      "到期在读取时识别，不倒写授权历史或回滚实际治疗。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-130：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "portal/medical_authority.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-131",
+    "name": "发布临床规则与启用控制",
+    "actor": "本店专业审核医师",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "实际项目、具体同意或沟通要求、机构依据及版本。",
+    "flow": [
+      "逐项核对在用项目要求并发布规则。",
+      "未知项目明确为需进一步专业判断。",
+      "完成目录核对后明确启用，旧规则保持可读。"
+    ],
+    "alternatives": [
+      "未具既有职责不能发布。",
+      "旧规则预览遇新版本须重新核对，不按收费名称或金额推定。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-131：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "clinical/preflight.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-132",
+    "name": "治疗前核对与实际执行",
+    "actor": "负责医师",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "患者、项目牙位、检查方案、告知决定、代理、疑问、专业与资源依据。",
+    "flow": [
+      "核对当前事实并明确保存独立开治依据。",
+      "真实实施后登记实际项目，确认时再核验准确依据。",
+      "实际事实与原收费来源各保存一次，不通过核对生成收费。"
+    ],
+    "alternatives": [
+      "撤回、未答疑问、资料或资源变化：给出原因并重新核对。",
+      "已启用店的直接旧入口不能绕过；其他未变化步骤不机械重签。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-132：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "clinical/preflight.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
+  },
+  {
+    "id": "SU-133",
+    "name": "已发生治疗补记与独立复核",
+    "actor": "负责医师及另一名专业审核医师",
+    "status": "已实现，课程合成软件业务规则验证；专业及平台验收单列",
+    "precondition": "当前账号及岗位有效；办理对象属于核验诊所、患者及具体服务范围。",
+    "inputs": "真实发生时间、实际项目、缺失事前依据及补记原因。",
+    "flow": [
+      "如实保存已发生治疗及资料缺口，不引用虚构开治记录。",
+      "另一名具职责与读取范围医师核对实际事实和后续安排。",
+      "保留独立复核结论、原缺口及唯一收费来源。"
+    ],
+    "alternatives": [
+      "本人不能复核自己的补记。",
+      "补记不倒签，复核不能把历史缺口改成事前已通过。"
+    ],
+    "result": "形成独立、准确、可追溯的办理事实，原预约、治疗及资金保持原有事实。",
+    "minimum_guarantee": "预览不写入业务事实；失败不留下部分结果，旧版本和已保存事实继续保留。",
+    "rules": "材料核验、临床适用性、方案选择、医疗决定和实际执行分别承担责任；账号确认和可靠电子签名分别验收。",
+    "acceptance": [
+      "AT-MP-133：tests/test_medical_proxy_preflight.py验证权限、历史、并发及实际接口；官方工具与手机结果另列。"
+    ],
+    "source": [
+      "clinical/executions.py",
+      "portal/medical_models.py",
+      "clinical/preflight_models.py",
+      "tests/test_medical_proxy_preflight.py"
+    ]
   }
 ]

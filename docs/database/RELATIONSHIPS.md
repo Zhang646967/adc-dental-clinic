@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-414条实际SQL外键，其中413条对应ORM单列关系，1条为账单同次就诊复合外键。
+451条实际SQL外键，其中450条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -49,6 +49,10 @@
 | adc_clinical_authority_event | actor_id | adc_user | id |
 | adc_clinical_authority_policy | activated_by_id | adc_user | id |
 | adc_clinical_authority_policy | clinic_id | adc_clinic | id |
+| adc_clinical_consent_rule | published_by_id | adc_user | id |
+| adc_clinical_consent_rule | reviewer_id | adc_clinical_reviewer | id |
+| adc_clinical_consent_rule | clinic_id | adc_clinic | id |
+| adc_clinical_consent_rule | treatment_type_id | adc_treatment_type | id |
 | adc_clinical_document | encounter_id | adc_clinical_encounter | id |
 | adc_clinical_document | responsible_id | adc_user | id |
 | adc_clinical_document_draft | base_version_id | adc_clinical_document_version | id |
@@ -104,12 +108,14 @@
 | adc_clinical_reviewer | user_id | adc_user | id |
 | adc_consent_event | actor_id | adc_user | id |
 | adc_consent_event | consent_id | adc_medical_consent | id |
+| adc_consent_event | proxy_version_id | adc_medical_proxy_version | id |
 | adc_consent_event | reply_to_id | adc_consent_event | id |
 | adc_consent_event | self_access_id | adc_patient_access | id |
 | adc_consent_event | version_id | adc_consent_version | id |
 | adc_consent_version | consent_id | adc_medical_consent | id |
 | adc_consent_version | prepared_by_id | adc_user | id |
 | adc_consent_version | previous_id | adc_consent_version | id |
+| adc_consent_version | proxy_version_id | adc_medical_proxy_version | id |
 | adc_consent_version | source_record_id | adc_clinical_record_version | id |
 | adc_consent_version | step_version_id | adc_plan_step_version | id |
 | adc_coordination_task | slot_id | adc_availability_slot | id |
@@ -238,6 +244,19 @@
 | adc_management_report | period_id | adc_cost_month | id |
 | adc_medical_consent | opened_by_id | adc_user | id |
 | adc_medical_consent | step_id | adc_treatment_step | id |
+| adc_medical_proxy | clinic_id | adc_clinic | id |
+| adc_medical_proxy | created_by_id | adc_user | id |
+| adc_medical_proxy | delegate_id | adc_user | id |
+| adc_medical_proxy | patient_id | adc_patient | id |
+| adc_medical_proxy_event | proxy_id | adc_medical_proxy | id |
+| adc_medical_proxy_event | reviewer_id | adc_clinical_reviewer | id |
+| adc_medical_proxy_event | version_id | adc_medical_proxy_version | id |
+| adc_medical_proxy_event | actor_id | adc_user | id |
+| adc_medical_proxy_scope | step_id | adc_treatment_step | id |
+| adc_medical_proxy_scope | version_id | adc_medical_proxy_version | id |
+| adc_medical_proxy_version | plan_id | adc_treatment_plan | id |
+| adc_medical_proxy_version | proxy_id | adc_medical_proxy | id |
+| adc_medical_proxy_version | submitted_by_id | adc_user | id |
 | adc_monthly_cost | dentist_id | adc_dentist | id |
 | adc_monthly_cost | equipment_event_id | adc_equipment_event | id |
 | adc_monthly_cost | period_id | adc_cost_month | id |
@@ -273,6 +292,7 @@
 | adc_payment_account | created_by_id | adc_user | id |
 | adc_performed_procedure | charge_line_id | adc_treatment_record | id |
 | adc_performed_procedure | encounter_id | adc_clinical_encounter | id |
+| adc_performed_procedure | preflight_id | adc_treatment_preflight | id |
 | adc_performed_procedure | source_record_id | adc_clinical_record_version | id |
 | adc_performed_procedure | step_version_id | adc_plan_step_version | id |
 | adc_performed_procedure | treatment_type_id | adc_treatment_type | id |
@@ -281,6 +301,7 @@
 | adc_plan_appointment | linked_by_id | adc_user | id |
 | adc_plan_appointment | visit_id | adc_visit | id |
 | adc_plan_decision | actor_id | adc_user | id |
+| adc_plan_decision | proxy_version_id | adc_medical_proxy_version | id |
 | adc_plan_decision | self_access_id | adc_patient_access | id |
 | adc_plan_decision | source_visit_id | adc_visit | id |
 | adc_plan_decision | step_version_id | adc_plan_step_version | id |
@@ -305,6 +326,11 @@
 | adc_portal_booking_receipt | access_id | adc_patient_access | id |
 | adc_portal_booking_receipt | appointment_grant_id | adc_patient_appointment_grant | id |
 | adc_portal_booking_receipt | visit_id | adc_visit | id |
+| adc_procedure_gap | performed_id | adc_performed_procedure | id |
+| adc_procedure_gap | recorded_by_id | adc_user | id |
+| adc_procedure_gap_review | gap_id | adc_procedure_gap | id |
+| adc_procedure_gap_review | reviewer_id | adc_clinical_reviewer | id |
+| adc_procedure_gap_review | actor_id | adc_user | id |
 | adc_professional_authorization | clinic_id | adc_clinic | id |
 | adc_professional_authorization | created_by_id | adc_user | id |
 | adc_professional_authorization | service_id | adc_booking_service | id |
@@ -375,8 +401,18 @@
 | adc_statement_use | fund_transfer_id | adc_fund_transfer | id |
 | adc_statement_use | line_id | adc_statement_line | id |
 | adc_tooth_finding | record_id | adc_clinical_record_version | id |
+| adc_treatment_control_policy | activated_by_id | adc_user | id |
+| adc_treatment_control_policy | clinic_id | adc_clinic | id |
 | adc_treatment_plan | opened_by_id | adc_user | id |
 | adc_treatment_plan | origin_encounter_id | adc_clinical_encounter | id |
+| adc_treatment_preflight | consent_decision_id | adc_consent_event | id |
+| adc_treatment_preflight | consent_version_id | adc_consent_version | id |
+| adc_treatment_preflight | proxy_version_id | adc_medical_proxy_version | id |
+| adc_treatment_preflight | rule_id | adc_clinical_consent_rule | id |
+| adc_treatment_preflight | source_record_id | adc_clinical_record_version | id |
+| adc_treatment_preflight | step_version_id | adc_plan_step_version | id |
+| adc_treatment_preflight | checked_by_id | adc_user | id |
+| adc_treatment_preflight | visit_id | adc_visit | id |
 | adc_treatment_record | confirmed_by_id | adc_user | id |
 | adc_treatment_record | record_version_id | adc_visit_record_version | id |
 | adc_treatment_record | treatment_type_id | adc_treatment_type | id |
@@ -412,6 +448,7 @@
 | adc_web_login_ticket | identity_id | adc_external_identity | id |
 | adc_web_login_ticket | user_id | adc_user | id |
 | adc_web_login_ticket | workspace_id | adc_workspace_context | id |
+| adc_workspace_context | medical_proxy_id | adc_medical_proxy | id |
 | adc_workspace_context | patient_grant_id | adc_patient_appointment_grant | id |
 | adc_workspace_context | clinic_id | adc_clinic | id |
 | adc_workspace_context | user_id | adc_user | id |

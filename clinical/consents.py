@@ -48,10 +48,8 @@ def adult_self(patient):
 def step_for(actor, step_id, visit_id=None):
     require_active(actor, ('PATIENT', 'DENTIST'))
     if actor._adc_workspace.role == 'PATIENT':
-        access = patient_access(actor, self_only=True)
-        step = PlanStepVersion.objects.select_related('version__plan__origin_encounter__visit__patient', 'step').get(
-            pk=step_id, version__plan__origin_encounter__visit__patient_id=access.patient_id)
-        patient = access.patient
+        from clinical.medical_access import patient_step
+        step,patient=patient_step(actor,step_id)
     else:
         from clinical.encounter_selectors import _encounter_details
         visit = _encounter_details(actor, visit_id)['visit']
@@ -63,7 +61,7 @@ def step_for(actor, step_id, visit_id=None):
     return step, patient
 
 
-def current_scope(step, patient, version=None, *, lock=False):
+def current_scope(step, patient, version=None, *, lock=False, proxy_version=None):
     plan = step.version.plan
     if current_version(plan).pk != step.version_id:
         raise RuleError('方案已有新版本，请与医师重新核对本步骤说明。')
@@ -77,16 +75,25 @@ def current_scope(step, patient, version=None, *, lock=False):
     chosen = latest_decision(step)
     if not chosen or chosen.decision != 'ACCEPTED':
         raise RuleError('请先核对本版本的方案选择；认可方案与医疗同意分别办理。')
-    adult_self(patient)
+    proxy_version = version.proxy_version if version and version.signer_kind=='PROXY' else proxy_version
+    if proxy_version:
+        from portal.medical_authority import verify_version
+        verify_version(proxy_version,step=step,lock=lock)
+        if chosen.proxy_version_id!=proxy_version.pk:
+            raise RuleError('请先由本次经核验医疗代理核对准确方案选择，不能沿用本人或其他代理的表态。')
+    else: adult_self(patient)
 
 
 def normalized(action, fields):
     values = dict(text=text(fields.get('text', ''), '沟通内容／原因', 2000, action in ('QUESTION', 'ANSWER', 'DECLINED', 'DEFERRED', 'WITHDRAWN')),
                   reference=text(fields.get('reference', ''), '原件参考编号', 500))
     if action == 'PUBLISH':
+        try: values['proxy_version']=int(fields['proxy_version']) if fields.get('proxy_version') else None
+        except (ValueError,TypeError): raise RuleError('请核对独立医疗代理依据编号。')
+        values['proxy_verified']=fields.get('proxy_verified') is True
         values.update(identity_reference=text(fields.get('identity_reference', ''), '本人身份及理解表达核对依据', 500, True),
                       amendment_reason=text(fields.get('amendment_reason', ''), '重新告知原因', 500))
-        if fields.get('self_qualified') is not True:
+        if (not values['proxy_version'] and fields.get('self_qualified') is not True) or (values['proxy_version'] and not values['proxy_verified']):
             raise RuleError('医师须明确核对本人身份与理解表达条件，不能由微信或年龄自动判定。')
     if action == 'ANSWER':
         try:values['reply_to'] = int(fields.get('reply_to'))
@@ -113,13 +120,23 @@ def check_action(actor, action, values, step, patient, consent, version, *, lock
     elif action not in ('QUESTION',) + DECISIONS or values['paper']:
         raise PermissionDenied('本人账号只能办理本人提问与决定。')
     if action == 'PUBLISH':
-        current_scope(step, patient)
+        from portal.medical_models import MedicalProxyVersion
+        basis=MedicalProxyVersion.objects.get(pk=values['proxy_version']) if values.get('proxy_version') else None
+        current_scope(step,patient,proxy_version=basis,lock=lock)
         notice = projection(step.version.disclosures.get(str(step.step.step_key)))
         if not notice['available']:raise RuleError('请先在当前方案中完善并确认本步骤治疗说明。')
         if version and not values['amendment_reason']:raise RuleError('重新告知须说明原因，保留原版本与决定。')
         return
     if version is None:raise RuleError('医师尚未确认本步骤告知，请联系负责医师。')
     if version.step_version_id != step.pk:raise RuleError('请使用这份告知对应的准确方案步骤。')
+    if not doctor:
+        from portal.medical_authority import is_proxy_context, selected_proxy
+        if is_proxy_context(actor):
+            basis=selected_proxy(actor,step=step,lock=lock)
+            if version.signer_kind!='PROXY' or version.proxy_version_id!=basis.pk:
+                raise PermissionDenied('本份告知未指定当前医疗代理，请由负责医师核对签署人。')
+        elif version.signer_kind!='SELF':
+            raise RuleError('本份告知指定了医疗代理；本人需要独立决定时，请医师重新核对并告知，不覆盖原记录。')
     if action in ('QUESTION', 'AGREED'):
         if latest(consent).pk != version.pk:raise RuleError('已有新的医疗告知，请重新查看。')
         current_scope(step, patient, version, lock=lock)
@@ -167,11 +184,21 @@ def prepare(*, actor, action, step_id, fields, visit_id=None, version_id=None):
 def confirm(*, actor, proposal_token, confirmed):
     if confirmed is not True:raise RuleError('请核对准确版本、记录来源及决定后明确确认。')
     p = read_proposal(actor, CONTRACT, ('DENTIST', 'PATIENT'), proposal_token);data = p['data']
-    lock_people(actor, data['publisher'])
+    from portal.medical_models import MedicalProxyVersion
+    basis_id=data['values'].get('proxy_version')
+    old_version=ConsentVersion.objects.filter(pk=data['version']).first() if data['version'] else None
+    if not basis_id and old_version:basis_id=old_version.proxy_version_id
+    basis=MedicalProxyVersion.objects.select_related('proxy').filter(pk=basis_id).first() if basis_id else None
+    lock_people(actor, data['publisher'], *([basis.proxy.delegate_id] if basis else []))
     if actor._adc_workspace.role == 'DENTIST':
         visit, patient, head, record, plan = lock_plan_visit(actor, data['visit'], data['plan']);access = None
     else:
-        access, patient, plan = lock_self_plan(actor, data['plan']);record = None
+        from portal.medical_authority import is_proxy_context
+        if is_proxy_context(actor):
+            from clinical.medical_access import lock_proxy_plan
+            proxy_access,patient,plan=lock_proxy_plan(actor,data['plan'],data['step']);access=None
+        else:access,patient,plan=lock_self_plan(actor,data['plan'])
+        record=None
     read_proposal(actor, CONTRACT, ('DENTIST', 'PATIENT'), proposal_token)
     step = PlanStepVersion.objects.select_related('version__plan__origin_encounter__visit', 'step').get(pk=data['step'], version__plan=plan)
     consent = MedicalConsent.objects.select_for_update().filter(step=step.step).first()
@@ -191,12 +218,13 @@ def confirm(*, actor, proposal_token, confirmed):
         version = ConsentVersion.objects.create(consent=consent, revision=(latest_version.revision + 1 if latest_version else 1),
             previous=latest_version, step_version=step, source_record=record, prepared_by=actor,
             identity_reference=values['identity_reference'], patient_snapshot=data['patient'],
+            signer_kind='PROXY' if values.get('proxy_version') else 'SELF',proxy_version_id=values.get('proxy_version'),
             amendment_reason=values['amendment_reason'], scope_digest=draft_digest(dict(step=step.pk, record=record.pk,
                 patient=data['patient'], disclosure=step.version.disclosures.get(str(step.step.step_key)))))
     consent.revision += 1;consent.save(update_fields=['revision'])
     event = ConsentEvent.objects.create(consent=consent, version=version, sequence=consent.revision,
         operation_id=p['operation'], actor=actor, self_access=access, action='PUBLISHED' if action == 'PUBLISH' else action,
-        source='PAPER_REFERENCE' if values['paper'] else 'DOCTOR_ACCOUNT' if actor._adc_workspace.role == 'DENTIST' else 'SELF_ACCOUNT',
+        source='PAPER_REFERENCE' if values['paper'] else 'DOCTOR_ACCOUNT' if actor._adc_workspace.role == 'DENTIST' else 'PROXY_ACCOUNT' if version.signer_kind=='PROXY' else 'SELF_ACCOUNT',proxy_version_id=version.proxy_version_id,
         text=values['text'], reference=values['reference'], reply_to_id=values.get('reply_to'),
         occurred_at=datetime.fromisoformat(values['occurred_at']) if values['paper'] else timezone.now())
     emit(actor, 'MEDICAL_CONSENT_' + event.action, event, summary=dict(consent=consent.pk, version=version.pk,

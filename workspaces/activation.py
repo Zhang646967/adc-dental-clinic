@@ -15,8 +15,10 @@ def apply_role(request, ctx, role):
     ctx.role = role
     ctx.clinic = None
     ctx.patient_grant = None
+    ctx.medical_proxy = None
+    ctx.medical_proxy_revision = 0
     ctx.revision += 1
-    ctx.save(update_fields=['role', 'clinic', 'patient_grant', 'revision', 'updated_at'])
+    ctx.save(update_fields=['role','clinic','patient_grant','medical_proxy','medical_proxy_revision','revision','updated_at'])
     request.session.pop('adc_guide', None)
     attach(request, ctx)
     return ROLES[role][1]

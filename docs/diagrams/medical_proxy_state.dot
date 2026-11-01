@@ -1,0 +1,29 @@
+digraph State {
+ graph [rankdir=TB,bgcolor="white",pad="0.4",nodesep="0.6",ranksep="0.9"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4f0",color="#345e56",fontname="Noto Sans CJK SC",fontsize=16,margin="0.18,0.13"];
+ edge [color="#345e56",fontname="Noto Sans CJK SC",fontsize=13,arrowsize=0.7];
+
+ materials [label="待资料核对\n前台专项职责"];
+ doctor [label="待医师确认\n负责医师核对本次适用性"];
+ independent [label="待独立医务确认\n另一名有职责的审核医师"];
+ active [label="生效\n限定患者、诊所、方案步骤与期限"];
+ returned [label="退回补充\n追加材料新版本"];
+ rejected [label="不通过\n保留依据与办理历史",fillcolor="#f6f5f1"];
+ suspended [label="已暂停\n停止新增读取与办理"];
+ revoked [label="已撤销\n旧决定与历史保留",fillcolor="#f6f5f1"];
+ expired [label="期限届满\n读取时判定不可办理\n不回写伪造状态",style="rounded,dashed"];
+ materials -> doctor [label="核对材料与身份"];
+ doctor -> active [label="明确确认适用\n核验人、代理人均不得自审"];
+ doctor -> independent [label="疑难或冲突"];
+ independent -> active [label="独立专业确认"];
+ doctor -> returned [label="资料待补"];
+ independent -> returned [label="退回核实"];
+ returned -> materials [label="追加新版本"];
+ doctor -> rejected [label="不适用"];
+ independent -> rejected [label="不通过"];
+ active -> suspended [label="范围或本人意见需重核"];
+ suspended -> materials [label="补充资料新版本"];
+ active -> revoked [label="明确撤销"];
+ suspended -> revoked [label="明确撤销"];
+ active -> expired [label="到期判定",style=dashed];
+}

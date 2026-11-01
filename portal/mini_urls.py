@@ -5,6 +5,7 @@ from portal import mini_referrals as referral
 from portal import mini_history as history
 from portal import mini_plans as plans
 from portal import mini_consents as consents
+from portal import mini_medical as medical
 from portal import mini_discovery as discovery
 from portal import mini_account as account
 from portal import mini_invoices as invoices
@@ -12,6 +13,10 @@ from portal import auth_views as auth
 from portal import web_login_views as qr
 
 urlpatterns = [
+    path('medical-authorizations/',medical.listing,name='mini_medical_authorizations'),
+    path('medical-authorizations/<int:pk>/',medical.detail,name='mini_medical_authorization'),
+    path('medical-authorizations/<int:pk>/preview/',medical.preview,name='mini_medical_authorization_preview'),
+    path('medical-authorizations/<int:pk>/confirm/',medical.confirm,name='mini_medical_authorization_confirm'),
     path('steps/<int:step_id>/consent/',consents.detail,name='mini_consent'),
     path('steps/<int:step_id>/consent/preview/',consents.preview,name='mini_consent_preview'),
     path('steps/<int:step_id>/consent/confirm/',consents.confirm,name='mini_consent_confirm'),

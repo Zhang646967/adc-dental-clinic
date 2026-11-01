@@ -149,7 +149,7 @@ class MedicalConsentTests(PlanFixture, TransactionTestCase):
     def test_doctor_question_queue_tracks_unanswered_without_fabricating_consent(self):
         self.publish();question=self.do('QUESTION',text='需要负责医师核对的具体问题')
         client=WorkspaceClient();client.force_login(self.doc)
-        self.assertContains(client.get(reverse('clinical_consent',args=[self.v.pk,self.step.pk])),'医疗告知与本人决定')
+        self.assertContains(client.get(reverse('clinical_consent',args=[self.v.pk,self.step.pk])),'医疗告知与明确决定')
         self.assertContains(client.get(reverse('clinical_consents')),'有未答复疑问')
         self.do('ANSWER',actor=self.doc,reply_to=question.pk,text='已向患者说明具体安排')
         self.assertContains(client.get(reverse('clinical_consents')),'当前没有待办理事项')

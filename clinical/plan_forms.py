@@ -102,6 +102,7 @@ class PlanRefreshForm(RevisionForm):
 
 
 class DecisionForm(forms.Form):
+    proxy_version=forms.IntegerField(label='已核验医疗代理依据版本（本人表态留空）',required=False,min_value=1)
     patient_binding=forms.CharField(widget=forms.HiddenInput,max_length=4096,required=False)
     decision=forms.ChoiceField(label='本人对这个版本步骤的决定',choices=[('ACCEPTED','认可此步骤'),('DEFERRED','暂缓决定'),('DECLINED','不选择此步骤')])
     reference=forms.CharField(label='患者本人表态的依据／沟通记录编号',max_length=500,required=False)
@@ -109,10 +110,11 @@ class DecisionForm(forms.Form):
     def __init__(self,*args,manual=False,**kwargs):
         super().__init__(*args,**kwargs)
         if manual:self.fields['reference'].required=True;self.fields['patient_binding'].required=True
-        else:self.fields.pop('reference');self.fields.pop('patient_binding')
+        else:self.fields.pop('reference');self.fields.pop('patient_binding');self.fields.pop('proxy_version')
 
 
 class ExecutionForm(forms.Form):
+    preflight=forms.IntegerField(label='本次已完成的开治核对编号',required=False,min_value=1)
     patient_binding=forms.CharField(widget=forms.HiddenInput,max_length=4096)
     step_version=forms.ModelChoiceField(label='关联已讨论方案步骤（计划外可不选）',queryset=PlanStepVersion.objects.none(),required=False)
     treatment_type=forms.ModelChoiceField(label='实际已提供的项目',queryset=TreatmentType.objects.none())

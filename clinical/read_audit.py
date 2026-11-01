@@ -8,6 +8,12 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'medical_proxies':('MEDICAL_AUTH_LIST','IDENTITY'),'medical_proxy_new':('MEDICAL_AUTH_LIST','IDENTITY'),'medical_proxy_detail':('MEDICAL_AUTH','IDENTITY'),
+    'portal_medical_authorizations':('MEDICAL_AUTH_LIST','MEDICAL_AUTH'),
+    'portal_medical_proxy':('MEDICAL_AUTH','MEDICAL_AUTH'),'mini_medical_authorizations':('MEDICAL_AUTH_LIST','MEDICAL_AUTH'),
+    'mini_medical_authorization':('MEDICAL_AUTH','MEDICAL_AUTH'),'mini_medical_authorization_preview':('MEDICAL_AUTH','MEDICAL_AUTH'),'mini_medical_authorization_confirm':('MEDICAL_AUTH','MEDICAL_AUTH'),
+    'clinical_preflight':('CARE','TREATMENT_CHECK'),'clinical_retrospective':('CARE','TREATMENT_GAP'),
+    'clinical_control_rules':('CLINICAL_RULE','POLICY'),'clinical_gaps':('TREATMENT_GAP_LIST','CARE'),'clinical_gap_detail':('TREATMENT_GAP','CARE'),
     'clinical_consents':('CONSENT_LIST','CARE'),'clinical_consent':('PLAN_STEP','CARE','step_id'),
     'portal_consent':('PLAN_STEP','SELF_PLAN','step_id'),'mini_consent':('PLAN_STEP','SELF_PLAN','step_id'),
     'mini_consent_preview':('PLAN_STEP','SELF_PLAN','step_id'),'mini_consent_confirm':('PLAN_STEP','SELF_PLAN','step_id'),

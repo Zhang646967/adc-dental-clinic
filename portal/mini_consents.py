@@ -9,13 +9,13 @@ from clinical.plan_forms import ConfirmPlanActionForm
 from portal.mini_api import endpoint, result, validated
 
 
-@endpoint()
+@endpoint(subject_optional=True)
 def detail(request, step_id):
     return result(request, details(request.user, step_id, revision=request.GET.get('revision'))['data'])
 
 
 @sensitive_post_parameters()
-@endpoint(('POST',))
+@endpoint(('POST',),subject_optional=True)
 def preview(request, step_id):
     form = ConsentActionForm(request.POST);validated(form);action, version, fields = form.values()
     p = consents.prepare(actor=request.user, action=action, step_id=step_id, version_id=version, fields=fields)
@@ -23,7 +23,7 @@ def preview(request, step_id):
 
 
 @sensitive_post_parameters()
-@endpoint(('POST',))
+@endpoint(('POST',),subject_optional=True)
 def confirm(request, step_id):
     values = validated(ConfirmPlanActionForm(request.POST))
     data = read_proposal(request.user, consents.CONTRACT, ('PATIENT',), values['proposal_token'])['data']

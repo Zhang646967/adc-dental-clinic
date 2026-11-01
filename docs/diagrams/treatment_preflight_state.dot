@@ -1,0 +1,26 @@
+digraph State {
+ graph [rankdir=TB,bgcolor="white",pad="0.4",nodesep="0.6",ranksep="0.9"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4f0",color="#345e56",fontname="Noto Sans CJK SC",fontsize=16,margin="0.18,0.13"];
+ edge [color="#345e56",fontname="Noto Sans CJK SC",fontsize=13,arrowsize=0.7];
+
+ rules [label="已发布临床规则\n具体同意／沟通记录／待专业判断"];
+ ready [label="待治疗前核对\n患者、项目牙位、检查与方案版本\n告知决定、代理、疑问及资源"];
+ blocked [label="缺项或争议\n明确责任与继续办理入口",fillcolor="#fff3e6"];
+ checked [label="保存本次开治依据\n不产生治疗或收费"];
+ changed [label="依据变化后须重新核对\n旧核对继续保留",fillcolor="#f6f5f1"];
+ actual [label="真实实际执行\n引用准确开治依据\n同一实际事实唯一收费来源"];
+ late [label="已发生治疗的真实补记\n实际时间与缺失原因\n无事前核对引用"];
+ pending [label="待独立医务复核\n真实治疗与缺口同时保留"];
+ reviewed [label="已复核历史缺口\n不补造事前通过"];
+ rules -> ready [label="要求明确"];
+ rules -> blocked [label="需进一步专业判断"];
+ ready -> blocked [label="缺项、撤回或未答疑问"];
+ blocked -> ready [label="按责任处理后重新核对"];
+ ready -> checked [label="负责医师明确确认"];
+ checked -> changed [label="撤回、授权失效、重要事实变化"];
+ changed -> ready [label="形成新依据"];
+ checked -> actual [label="实际确认时再次核验"];
+ late -> pending [label="如实补记并记录缺口"];
+ pending -> reviewed [label="另一名有职责医师复核"];
+ actual -> actual [label="分次或其他步骤分别记录\n不机械重签未变化事项",style=dashed];
+}

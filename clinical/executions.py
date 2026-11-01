@@ -21,7 +21,8 @@ from registry.models import TreatmentType
 from care.models import VisitRecordVersion
 from care.audit import emit
 
-ACTUAL_CONTRACT='adc.actual-procedure.c22.v1'
+ACTUAL_CONTRACT='adc.actual-procedure.c32c.v2'
+RETRO_CONTRACT='adc.actual-procedure-retrospective.c32c.v1'
 VOID_CONTRACT='adc.actual-procedure-void.c22.v1'
 
 
@@ -43,14 +44,15 @@ def execution_fields(raw):
         except ValueError:raise RuleError('请核对实际执行时间。')
     if not isinstance(observed,datetime) or timezone.is_naive(observed) or observed>timezone.now():raise RuleError('实际执行时间必须明确且不晚于当前时间。')
     row['observed_at']=observed.isoformat()
+    raw_check=raw.get('preflight');row['preflight']=identity(raw_check,'开治核对编号') if raw_check not in (None,'') else None
     if (row['step_version'] is None or mode=='NO_CHARGE') and not row['reason']:raise RuleError('计划外实际处置或本次不另计费时，请说明具体依据。')
     return row
 
 
-def actual_ready(visit):
+def actual_ready(visit,*,include_gaps=True):
     if visit.status!='CHECKED_IN' or not visit.attended_at or visit.attended_at>timezone.now():raise RuleError('请先核对实际到诊，已关闭接诊不能新增执行。')
     if visit_service_id(visit) is None:raise RuleError('本次尚未明确预约服务，请由前台先核对原承诺及资源服务，不能以旧无服务范围代替。')
-    blocked=completion_blockers(visit)
+    blocked=completion_blockers(visit,include_gaps=include_gaps)
     if blocked:raise RuleError(blocked[0])
 
 
@@ -102,8 +104,10 @@ def prepare_execution(*,actor,visit_id,fields):
     plan=step.version.plan if step else None
     from clinical.lab_readiness import execution_readiness
     readiness=execution_readiness(visit,row,step)
+    from clinical.preflight import execution_check
+    with transaction.atomic():check=execution_check(visit,d['current_record'],row,step,row['preflight'])
     data=dict(visit=visit.pk,visit_revision=visit.lock_version,source_record=d['current_record'].pk,plan=plan.pk if plan else None,
-        plan_revision=plan.revision if plan else None,values=row,quote=q,readiness=readiness)
+        plan_revision=plan.revision if plan else None,values=row,quote=q,readiness=readiness,preflight=check.pk if check else None)
     return dict(proposal_token=proposal(actor,ACTUAL_CONTRACT,('DENTIST',),data),values=row,quote=q,step=step,readiness=readiness)
 
 
@@ -113,6 +117,9 @@ def prepare_execution(*,actor,visit_id,fields):
 def confirm_execution(*,actor,proposal_token,confirmed):
     if confirmed is not True:raise RuleError('请明确核对实际已提供项目、位置、数量及本次计费。')
     p=read_proposal(actor,ACTUAL_CONTRACT,('DENTIST',),proposal_token);data=p['data']
+    from clinical.authority_services import lock_people
+    from clinical.preflight import dependencies
+    lock_people(actor,*dependencies(data['visit'],data['values'].get('step_version')))
     visit,patient,head,record,plan=lock_plan_visit(actor,data['visit'],data['plan']);op=operation(p['operation'])
     read_proposal(actor,ACTUAL_CONTRACT,('DENTIST',),proposal_token)
     previous=event_replay(actor,op,'PROCEDURE_RECORDED',plan=plan,encounter=head)
@@ -126,21 +133,81 @@ def confirm_execution(*,actor,proposal_token,confirmed):
     if q!=data['quote']:raise RuleError('目录价格或估算差异已变化，请重新预览本次实际开单。')
     observed=datetime.fromisoformat(row['observed_at'])
     if observed<visit.attended_at:raise RuleError('执行发生时间不能早于实际到诊。')
+    from clinical.preflight import execution_check
+    check=execution_check(visit,record,row,step,data.get('preflight'),lock=True)
+    return save_actual(actor,visit,head,record,plan,row,step,q,readiness,op,check=check),False
+
+
+def save_actual(actor,visit,head,record,plan,row,step,q,readiness,op,*,check=None,gap_reason=None):
+    observed=datetime.fromisoformat(row['observed_at'])
     line=None
     if row['charge_mode']=='CHARGE':
         from care.services import add_treatment
         line=add_treatment(actor=actor,visit_id=visit.pk,expected_version=visit.lock_version,treatment_id=row['treatment_type'],quantity=Decimal(row['quantity']),price_reason=row['reason'],_structured_source=True)
         assert line.line_amount==Decimal(q['line_amount'])
-    snapshot=dict(q,original_line=line.pk if line else None,readiness=readiness)
+    snapshot=dict(q,original_line=line.pk if line else None,readiness=readiness,preflight=check.pk if check else None,retrospective=bool(gap_reason))
     actual=PerformedProcedure.objects.create(encounter=head,source_record=record,step_version=step,treatment_type_id=row['treatment_type'],quantity=row['quantity'],tooth=row['tooth'],surface=row['surface'],
-        progress=row['progress'],charge_mode=row['charge_mode'],reason=row['reason'],charge_line=line,charge_snapshot=snapshot,recorded_by=actor,observed_at=observed,operation_id=op)
+        progress=row['progress'],charge_mode=row['charge_mode'],reason=row['reason'],charge_line=line,charge_snapshot=snapshot,recorded_by=actor,observed_at=observed,operation_id=op,preflight=check)
+    if gap_reason:
+        from clinical.preflight_models import ProcedureGap
+        ProcedureGap.objects.create(performed=actual,reason=gap_reason,missing={'prior_check':'NOT_RECONSTRUCTED','declared_retrospective':True},recorded_by=actor)
     if line is None:
         from care.services import record_no_charge_effect
         record_no_charge_effect(actor=actor,visit_id=visit.pk,expected_version=visit.lock_version,performed_id=actual.pk)
     if plan:bump(plan)
     PlanEvent.objects.create(actor=actor,operation_id=op,action='PROCEDURE_RECORDED',plan=plan,encounter=head,performed=actual,snapshot={'source_record':record.pk,'step':step.pk if step else None,'charge_line':line.pk if line else None,'mode':row['charge_mode']})
     emit(actor,'PROCEDURE_RECORDED',actual,visit=visit,summary={'performed':actual.pk,'step':step.pk if step else None,'mode':actual.charge_mode})
-    return actual,False
+    return actual
+
+
+def prepare_retrospective(*,actor,visit_id,fields,gap_reason):
+    from clinical.encounter_selectors import encounter_details
+    from clinical.preflight import note
+    d=encounter_details(actor,visit_id);visit=d['visit']
+    if not d['can_record']:raise PermissionDenied('当前没有登记本次真实执行的专业范围。')
+    row=execution_fields(fields);actual_ready(visit,include_gaps=False)
+    if row['preflight']:raise RuleError('补记不引用或补造事前核对，请明确保留缺口。')
+    step=retrospective_step(actor,visit,row)
+    if datetime.fromisoformat(row['observed_at'])<visit.attended_at:raise RuleError('实际发生时间不能早于本次实际到诊。')
+    q=quote(visit,row,step)
+    data=dict(visit=visit.pk,visit_revision=visit.lock_version,source_record=d['current_record'].pk,
+        plan=step.version.plan_id if step else None,values=row,quote=q,gap_reason=note(gap_reason,'缺失事前资料及补记依据'),
+        patient_name=visit.patient.name,clinic_name=visit.clinic.name,item_name=q['name'])
+    return dict(proposal_token=proposal(actor,RETRO_CONTRACT,('DENTIST',),data),data=data)
+
+
+def retrospective_step(actor,visit,row):
+    if row['step_version'] is None:return None
+    step=PlanStepVersion.objects.select_related('version__plan__origin_encounter__visit','step').get(pk=row['step_version'])
+    source=step.version.plan.origin_encounter.visit
+    if (source.patient_id,source.clinic_id)!=(visit.patient_id,visit.clinic_id):raise PermissionDenied('补记步骤不属于本店本患者。')
+    if (step.treatment_type_id,step.tooth,step.surface)!=(row['treatment_type'],row['tooth'],row['surface']):raise RuleError('请引用实际发生的准确项目及位置，不改写原步骤。')
+    from clinical.authority import professional_scope
+    professional_scope(actor.pk,visit.clinic_id,step.service_id,'RECORD')
+    if PerformedProcedure.objects.filter(step_version__step=step.step,state='ACTIVE').filter(progress='COMPLETE').exists():
+        raise RuleError('该步骤已有完成事实，请核对原执行，不重复补记。')
+    return step
+
+
+@business_errors
+@transaction.atomic
+@sensitive_variables()
+def confirm_retrospective(*,actor,proposal_token,confirmed):
+    if confirmed is not True:raise RuleError('请明确确认真实发生的治疗及资料缺口；不构成倒签或事前通过。')
+    p=read_proposal(actor,RETRO_CONTRACT,('DENTIST',),proposal_token);d=p['data']
+    from clinical.authority_services import lock_people
+    lock_people(actor)
+    visit,patient,head,record,plan=lock_plan_visit(actor,d['visit'],d['plan'])
+    read_proposal(actor,RETRO_CONTRACT,('DENTIST',),proposal_token);op=operation(p['operation'])
+    prior=event_replay(actor,op,'PROCEDURE_RECORDED',plan=plan,encounter=head)
+    if prior:return prior.performed,True
+    actual_ready(visit,include_gaps=False)
+    if visit.lock_version!=d['visit_revision'] or record.pk!=d['source_record']:raise RuleError('就诊或检查依据已变化，请核对原事实后重新预览补记。')
+    row=execution_fields(d['values']);step=retrospective_step(actor,visit,row);q=quote(visit,row,step,lock=True)
+    if q!=d['quote']:raise RuleError('计费目录或估算差异已变化，请重新预览实际事实。')
+    if datetime.fromisoformat(row['observed_at'])<visit.attended_at:raise RuleError('补记实际时间不能早于到诊。')
+    result=save_actual(actor,visit,head,record,plan,row,step,q,{'retrospective':'PRIOR_READINESS_NOT_ASSERTED'},op,gap_reason=d['gap_reason'])
+    return result,False
 
 
 def prepare_void(*,actor,visit_id,performed_id,reason):

@@ -97,10 +97,15 @@ def session_data(request):
             data.update(authenticated=True,workspace_token=token_for(ctx),workspace_id=str(ctx.pk),subject_revision=ctx.revision,
                 subject_required=False,patient_name='',subject_key=None,acting_capacity='',delegated=False,guardian=False)
             try:
+                if ctx.medical_proxy_id:
+                    from portal.medical_authority import selected_proxy
+                    version=selected_proxy(request.user)
+                    data.update(patient_name=version.proxy.patient.name,subject_key=f'medical:{version.proxy_id}',delegated=True,guardian=version.proxy.kind=='GUARDIAN',acting_capacity=version.proxy.get_kind_display()+' · 医疗事项',medical=True,can_book=bool(ctx.patient_grant_id))
+                    return data
                 access = patient_access(request.user)
                 data.update(patient_name=access.patient.name,subject_key=access.pk if access.delegated else 'self',
                     delegated=access.delegated,guardian=access.guardian,acting_capacity=(access.source.relationship.get_kind_display()+' · '+access.source.relationship.clinic.public_contact['name']) if access.delegated else '本人')
-            except SubjectRequired:data['subject_required']=True
+            except (SubjectRequired,PermissionDenied,RuleError):data['subject_required']=True
     return data
 
 

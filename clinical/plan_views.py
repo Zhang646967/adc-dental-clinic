@@ -202,7 +202,7 @@ def actual(request,pk):
     if request.method=='POST' and request.POST.get('phase')=='confirm':
         row,response=confirmation(request,contract=executions.ACTUAL_CONTRACT,roles=('DENTIST',),expected=dict(visit=pk),handler=executions.confirm_execution,title=title,back=back,visit=visit)
         return response or redirect(back)
-    initial=dict(patient_binding=patient_form_binding(request.user,visit),quantity='1',progress='COMPLETE',charge_mode='CHARGE')
+    initial=dict(patient_binding=patient_form_binding(request.user,visit),quantity='1',progress='COMPLETE',charge_mode='CHARGE',preflight=request.GET.get('preflight'))
     if request.GET.get('step'):
         from clinical.plan_forms import current_steps
         step=get_object_or_404(current_steps(visit,request.user),pk=request.GET['step'])
@@ -316,8 +316,9 @@ def link_appointment(request,pk):
 @never_cache
 @require_GET
 def self_list(request):
+    from portal.medical_authority import is_proxy_context
     rows=patient_plan_rows(request.user);page=Paginator(rows,20).get_page(request.GET.get('page'))
-    return clinical_render(request,'portal/plans.html',dict(page=page,rows=[dict(plan=p,version=plans.current_version(p)) for p in page]))
+    return clinical_render(request,'portal/plans.html',dict(page=page,rows=[dict(plan=p,version=plans.current_version(p)) for p in page],medical_proxy=is_proxy_context(request.user)))
 
 
 @login_required(login_url='portal_login')

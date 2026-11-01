@@ -18,7 +18,13 @@ def workspace_binding(actor, roles):
     binding=dict(user=actor.pk, workspace=str(ctx.pk), role=ctx.role, clinic=ctx.clinic_id, revision=ctx.revision)
     if ctx.role=='PATIENT':
         from portal.policies import patient_access
-        binding['patient_authority']=patient_access(actor).stamp
+        if ctx.medical_proxy_id:
+            from portal.medical_authority import selected_proxy
+            basis=selected_proxy(actor)
+            binding['medical_authority']=dict(proxy=basis.proxy_id,version=basis.pk,revision=basis.proxy.revision,
+                patient=basis.proxy.patient_id,clinic=basis.proxy.clinic_id)
+            binding['patient_authority']=patient_access(actor).stamp if ctx.patient_grant_id else dict(kind='MEDICAL_ONLY',**binding['medical_authority'])
+        else:binding['patient_authority']=patient_access(actor).stamp
     return binding
 
 @sensitive_variables()

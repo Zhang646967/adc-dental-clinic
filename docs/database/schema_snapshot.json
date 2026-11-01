@@ -78,6 +78,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
+      "table": "adc_clinical_consent_rule",
+      "name": "clinical_rule_retained",
+      "definition": "CREATE TRIGGER clinical_rule_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_consent_rule FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_clinical_document",
       "name": "document_identity_retained",
       "definition": "CREATE TRIGGER document_identity_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_document FOR EACH ROW EXECUTE FUNCTION adc_document_identity_guard()",
@@ -187,14 +194,14 @@
       "name": "consent_event_retained",
       "definition": "CREATE TRIGGER consent_event_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_consent_event FOR EACH ROW EXECUTE FUNCTION adc_consent_event_guard()",
       "function": "adc_consent_event_guard",
-      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_event_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE pid bigint;\nBEGIN\n IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Medical decisions and communication are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_consent_version WHERE id=NEW.version_id AND consent_id=NEW.consent_id) THEN\n  RAISE EXCEPTION 'Medical event must belong to its explanation';\n END IF;\n SELECT (patient_snapshot->>'id')::bigint INTO pid FROM adc_consent_version WHERE id=NEW.version_id;\n IF NEW.source='SELF_ACCOUNT' AND (NEW.action NOT IN ('QUESTION','AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NOT EXISTS(SELECT 1 FROM adc_patient_access WHERE id=NEW.self_access_id AND user_id=NEW.actor_id AND patient_id=pid)) THEN\n  RAISE EXCEPTION 'Self medical decision must reference its own patient authority';\n END IF;\n IF (NEW.action IN ('PUBLISHED','ANSWER') AND NEW.source<>'DOCTOR_ACCOUNT') OR\n (NEW.source='DOCTOR_ACCOUNT' AND NEW.action NOT IN ('PUBLISHED','ANSWER')) OR\n (NEW.action='ANSWER') IS DISTINCT FROM (NEW.reply_to_id IS NOT NULL) THEN\n  RAISE EXCEPTION 'Medical replies require an explicit question and clinician source';\n END IF;\n IF NEW.reply_to_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_event\n WHERE id=NEW.reply_to_id AND consent_id=NEW.consent_id AND action='QUESTION') THEN\n  RAISE EXCEPTION 'Medical reply must reference a question in the same case';\n END IF;\n IF NEW.source='PAPER_REFERENCE' AND (NEW.reference='' OR NEW.action NOT IN ('AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NEW.occurred_at<(SELECT recorded_at FROM adc_consent_version WHERE id=NEW.version_id)) THEN\n  RAISE EXCEPTION 'Paper decisions require an original reference and honest occurrence time';\n END IF;\n RETURN NEW;\nEND $function$\n"
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_event_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE pid bigint;\nBEGIN\n IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Medical decisions and communication are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_consent_version WHERE id=NEW.version_id AND consent_id=NEW.consent_id) THEN\n  RAISE EXCEPTION 'Medical event must belong to its explanation';\n END IF;\n SELECT (patient_snapshot->>'id')::bigint INTO pid FROM adc_consent_version WHERE id=NEW.version_id;\n IF NEW.source='SELF_ACCOUNT' AND (NEW.action NOT IN ('QUESTION','AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NOT EXISTS(SELECT 1 FROM adc_patient_access WHERE id=NEW.self_access_id AND user_id=NEW.actor_id AND patient_id=pid)) THEN\n  RAISE EXCEPTION 'Self medical decision must reference its own patient authority';\n END IF;\n IF (NEW.action IN ('PUBLISHED','ANSWER') AND NEW.source<>'DOCTOR_ACCOUNT') OR\n (NEW.source='DOCTOR_ACCOUNT' AND NEW.action NOT IN ('PUBLISHED','ANSWER')) OR\n (NEW.action='ANSWER') IS DISTINCT FROM (NEW.reply_to_id IS NOT NULL) THEN\n  RAISE EXCEPTION 'Medical replies require an explicit question and clinician source';\n END IF;\n IF NEW.reply_to_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_event\n WHERE id=NEW.reply_to_id AND consent_id=NEW.consent_id AND action='QUESTION') THEN\n  RAISE EXCEPTION 'Medical reply must reference a question in the same case';\n END IF;\n IF NEW.source='PAPER_REFERENCE' AND (NEW.reference='' OR NEW.action NOT IN ('AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NEW.occurred_at<(SELECT recorded_at FROM adc_consent_version WHERE id=NEW.version_id)) THEN\n  RAISE EXCEPTION 'Paper decisions require an original reference and honest occurrence time';\n END IF;\n\n IF NEW.proxy_version_id IS DISTINCT FROM (SELECT proxy_version_id FROM adc_consent_version WHERE id=NEW.version_id) THEN\n RAISE EXCEPTION 'Medical event must retain explanation signer basis'; END IF;\n IF NEW.source='PROXY_ACCOUNT' AND (NEW.action NOT IN ('QUESTION','AGREED','DECLINED','DEFERRED','WITHDRAWN') OR\n NOT EXISTS(SELECT 1 FROM adc_medical_proxy_version mv JOIN adc_medical_proxy mp ON mp.id=mv.proxy_id\n WHERE mv.id=NEW.proxy_version_id AND mp.delegate_id=NEW.actor_id AND mp.patient_id=pid)) THEN\n RAISE EXCEPTION 'Proxy medical decision requires its exact verified signer'; END IF;\n IF NEW.source='SELF_ACCOUNT' AND (SELECT signer_kind FROM adc_consent_version WHERE id=NEW.version_id)<>'SELF' THEN\n RAISE EXCEPTION 'Self account cannot answer as a proxy signer'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_consent_version",
       "name": "consent_version_retained",
       "definition": "CREATE TRIGGER consent_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_consent_version FOR EACH ROW EXECUTE FUNCTION adc_consent_version_guard()",
       "function": "adc_consent_version_guard",
-      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_version_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE sid bigint; pid bigint; cid bigint;\nBEGIN\n IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Medical explanation versions are retained'; END IF;\n SELECT c.step_id,v.patient_id,v.clinic_id INTO sid,pid,cid FROM adc_medical_consent c\n JOIN adc_treatment_step s ON s.id=c.step_id JOIN adc_treatment_plan p ON p.id=s.plan_id\n JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id JOIN adc_visit v ON v.id=e.visit_id WHERE c.id=NEW.consent_id;\n IF NOT EXISTS(SELECT 1 FROM adc_plan_step_version s JOIN adc_plan_version p ON p.id=s.version_id\n WHERE s.id=NEW.step_version_id AND s.step_id=sid AND p.source_record_id=NEW.source_record_id)\n OR NOT EXISTS(SELECT 1 FROM adc_clinical_record_version r JOIN adc_clinical_encounter e ON e.id=r.encounter_id\n JOIN adc_visit v ON v.id=e.visit_id JOIN adc_user u ON u.dentist_id=v.dentist_id\n WHERE r.id=NEW.source_record_id AND v.patient_id=pid AND v.clinic_id=cid AND u.id=NEW.prepared_by_id)\n OR (NEW.patient_snapshot->>'id')::bigint IS DISTINCT FROM pid THEN\n  RAISE EXCEPTION 'Medical explanation must retain its exact step, patient, clinic and clinician source';\n END IF;\n IF (NEW.previous_id IS NULL AND NEW.revision <> 1) OR\n (NEW.previous_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_version\n WHERE id=NEW.previous_id AND consent_id=NEW.consent_id AND revision=NEW.revision-1)) THEN\n  RAISE EXCEPTION 'Medical explanation must follow its own preceding version';\n END IF;\n RETURN NEW;\nEND $function$\n"
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_version_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE sid bigint; pid bigint; cid bigint;\nBEGIN\n IF TG_OP <> 'INSERT' THEN RAISE EXCEPTION 'Medical explanation versions are retained'; END IF;\n SELECT c.step_id,v.patient_id,v.clinic_id INTO sid,pid,cid FROM adc_medical_consent c\n JOIN adc_treatment_step s ON s.id=c.step_id JOIN adc_treatment_plan p ON p.id=s.plan_id\n JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id JOIN adc_visit v ON v.id=e.visit_id WHERE c.id=NEW.consent_id;\n IF NOT EXISTS(SELECT 1 FROM adc_plan_step_version s JOIN adc_plan_version p ON p.id=s.version_id\n WHERE s.id=NEW.step_version_id AND s.step_id=sid AND p.source_record_id=NEW.source_record_id)\n OR NOT EXISTS(SELECT 1 FROM adc_clinical_record_version r JOIN adc_clinical_encounter e ON e.id=r.encounter_id\n JOIN adc_visit v ON v.id=e.visit_id JOIN adc_user u ON u.dentist_id=v.dentist_id\n WHERE r.id=NEW.source_record_id AND v.patient_id=pid AND v.clinic_id=cid AND u.id=NEW.prepared_by_id)\n OR (NEW.patient_snapshot->>'id')::bigint IS DISTINCT FROM pid THEN\n  RAISE EXCEPTION 'Medical explanation must retain its exact step, patient, clinic and clinician source';\n END IF;\n IF (NEW.previous_id IS NULL AND NEW.revision <> 1) OR\n (NEW.previous_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_version\n WHERE id=NEW.previous_id AND consent_id=NEW.consent_id AND revision=NEW.revision-1)) THEN\n  RAISE EXCEPTION 'Medical explanation must follow its own preceding version';\n END IF;\n\n IF NEW.signer_kind='PROXY' AND NOT EXISTS(\n SELECT 1 FROM adc_medical_proxy_version mv JOIN adc_medical_proxy mp ON mp.id=mv.proxy_id\n JOIN adc_medical_proxy_scope ms ON ms.version_id=mv.id JOIN adc_plan_step_version ps ON ps.step_id=ms.step_id\n WHERE mv.id=NEW.proxy_version_id AND mp.patient_id=pid AND mp.clinic_id=cid AND ps.id=NEW.step_version_id) THEN\n RAISE EXCEPTION 'Medical explanation proxy must cover its exact patient clinic and stable step'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_coordination_task",
@@ -519,6 +526,34 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_consent_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR (to_jsonb(OLD)-'revision') IS DISTINCT FROM (to_jsonb(NEW)-'revision') THEN\n  RAISE EXCEPTION 'Medical consent identity is retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_medical_proxy",
+      "name": "medical_proxy_head_retained",
+      "definition": "CREATE TRIGGER medical_proxy_head_retained BEFORE DELETE OR UPDATE ON public.adc_medical_proxy FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_head_guard()",
+      "function": "adc_medical_proxy_head_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_medical_proxy_head_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR (to_jsonb(OLD)-'state'-'revision') IS DISTINCT FROM (to_jsonb(NEW)-'state'-'revision') OR NEW.revision<>OLD.revision+1 THEN\n RAISE EXCEPTION 'Medical proxy identity and event cursor are retained'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "medical_proxy_event_retained",
+      "definition": "CREATE TRIGGER medical_proxy_event_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medical_proxy_event FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_event_guard()",
+      "function": "adc_medical_proxy_event_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_medical_proxy_event_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Medical proxy decisions and material history are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_medical_proxy_version v JOIN adc_medical_proxy m ON m.id=v.proxy_id\n WHERE v.id=NEW.version_id AND m.id=NEW.proxy_id AND m.revision=NEW.sequence AND m.state=NEW.resulting_state) THEN\n RAISE EXCEPTION 'Medical proxy event must match its evidence and current cursor'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "medical_proxy_scope_retained",
+      "definition": "CREATE TRIGGER medical_proxy_scope_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medical_proxy_scope FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_scope_guard()",
+      "function": "adc_medical_proxy_scope_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_medical_proxy_scope_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Medical proxy step scopes are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_medical_proxy_version v JOIN adc_treatment_step s ON s.plan_id=v.plan_id\n WHERE v.id=NEW.version_id AND s.id=NEW.step_id) OR EXISTS(SELECT 1 FROM adc_medical_proxy_event WHERE version_id=NEW.version_id) THEN\n RAISE EXCEPTION 'Submitted proxy scopes cannot be expanded or cross a plan'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "medical_proxy_version_retained",
+      "definition": "CREATE TRIGGER medical_proxy_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medical_proxy_version FOR EACH ROW EXECUTE FUNCTION adc_medical_proxy_version_guard()",
+      "function": "adc_medical_proxy_version_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_medical_proxy_version_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Medical proxy evidence versions are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_medical_proxy m JOIN adc_treatment_plan p ON p.id=NEW.plan_id\n JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id JOIN adc_visit v ON v.id=e.visit_id\n WHERE m.id=NEW.proxy_id AND (m.patient_id,m.clinic_id)=(v.patient_id,v.clinic_id)) OR\n NEW.number<>COALESCE((SELECT MAX(number)+1 FROM adc_medical_proxy_version WHERE proxy_id=NEW.proxy_id),1) THEN\n RAISE EXCEPTION 'Proxy evidence must retain its own patient clinic plan and next version'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_monthly_cost",
       "name": "monthly_cost_history",
       "definition": "CREATE TRIGGER monthly_cost_history BEFORE DELETE OR UPDATE ON public.adc_monthly_cost FOR EACH ROW EXECUTE FUNCTION adc_monthly_cost_history()",
@@ -562,6 +597,13 @@
     },
     {
       "table": "adc_performed_procedure",
+      "name": "actual_preflight_or_gap",
+      "definition": "CREATE CONSTRAINT TRIGGER actual_preflight_or_gap AFTER INSERT ON public.adc_performed_procedure DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_actual_preflight_guard()",
+      "function": "adc_actual_preflight_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_actual_preflight_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF NEW.preflight_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_treatment_preflight c JOIN adc_clinical_encounter e ON e.visit_id=c.visit_id\n WHERE c.id=NEW.preflight_id AND e.id=NEW.encounter_id AND c.checked_at<=NEW.observed_at\n AND c.step_version_id IS NOT DISTINCT FROM NEW.step_version_id) THEN\n RAISE EXCEPTION 'Actual treatment cannot precede or borrow another preflight'; END IF;\n IF EXISTS(SELECT 1 FROM adc_clinical_encounter e JOIN adc_visit v ON v.id=e.visit_id\n JOIN adc_treatment_control_policy p ON p.clinic_id=v.clinic_id WHERE e.id=NEW.encounter_id AND NEW.recorded_at>=p.activated_at)\n AND NEW.preflight_id IS NULL AND NOT EXISTS(SELECT 1 FROM adc_procedure_gap WHERE performed_id=NEW.id) THEN\n RAISE EXCEPTION 'Controlled treatment needs retained preflight or an honest historical-gap record'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_performed_procedure",
       "name": "performed_procedure_retained",
       "definition": "CREATE TRIGGER performed_procedure_retained BEFORE DELETE OR UPDATE ON public.adc_performed_procedure FOR EACH ROW EXECUTE FUNCTION adc_performed_procedure_guard()",
       "function": "adc_performed_procedure_guard",
@@ -587,6 +629,13 @@
       "definition": "CREATE TRIGGER plan_decision_retained BEFORE DELETE OR UPDATE ON public.adc_plan_decision FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
       "function": "adc_clinical_history_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "proxy_plan_choice_scope",
+      "definition": "CREATE TRIGGER proxy_plan_choice_scope BEFORE INSERT ON public.adc_plan_decision FOR EACH ROW EXECUTE FUNCTION adc_proxy_plan_decision_guard()",
+      "function": "adc_proxy_plan_decision_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_proxy_plan_decision_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF NEW.proxy_version_id IS NOT NULL AND NOT EXISTS(\n SELECT 1 FROM adc_medical_proxy_version mv JOIN adc_medical_proxy mp ON mp.id=mv.proxy_id\n JOIN adc_medical_proxy_scope ms ON ms.version_id=mv.id JOIN adc_plan_step_version s ON s.step_id=ms.step_id\n JOIN adc_plan_version pv ON pv.id=s.version_id JOIN adc_treatment_plan p ON p.id=pv.plan_id\n JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id JOIN adc_visit v ON v.id=e.visit_id\n WHERE mv.id=NEW.proxy_version_id AND s.id=NEW.step_version_id AND mv.plan_id=p.id AND\n (mp.patient_id,mp.clinic_id)=(v.patient_id,v.clinic_id) AND (NEW.source='MANUAL_PROXY' OR mp.delegate_id=NEW.actor_id)) THEN\n RAISE EXCEPTION 'Proxy scheme choice must retain its actual account and exact authorized step'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_plan_draft",
@@ -615,6 +664,20 @@
       "definition": "CREATE TRIGGER plan_version_retained BEFORE DELETE OR UPDATE ON public.adc_plan_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
       "function": "adc_clinical_history_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "procedure_gap_retained",
+      "definition": "CREATE TRIGGER procedure_gap_retained BEFORE DELETE OR UPDATE ON public.adc_procedure_gap FOR EACH ROW EXECUTE FUNCTION adc_procedure_gap_guard()",
+      "function": "adc_procedure_gap_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_procedure_gap_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR (to_jsonb(OLD)-'state') IS DISTINCT FROM (to_jsonb(NEW)-'state') OR OLD.state<>'PENDING' OR NEW.state<>'REVIEWED'\n OR NOT EXISTS(SELECT 1 FROM adc_procedure_gap_review WHERE gap_id=OLD.id) THEN\n RAISE EXCEPTION 'Historical procedure gaps remain visible after independent review'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "gap_review_retained",
+      "definition": "CREATE TRIGGER gap_review_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_procedure_gap_review FOR EACH ROW EXECUTE FUNCTION adc_gap_review_guard()",
+      "function": "adc_gap_review_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_gap_review_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Gap review is retained and is not prior consent'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_procedure_gap g JOIN adc_performed_procedure p ON p.id=g.performed_id\n JOIN adc_clinical_encounter e ON e.id=p.encounter_id JOIN adc_visit v ON v.id=e.visit_id\n JOIN adc_clinical_reviewer r ON r.clinic_id=v.clinic_id WHERE g.id=NEW.gap_id AND r.id=NEW.reviewer_id\n AND r.user_id=NEW.actor_id AND g.recorded_by_id<>NEW.actor_id) THEN\n RAISE EXCEPTION 'Gap review requires a different clinic-appointed reviewer'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_professional_authorization",
@@ -764,11 +827,25 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
+      "table": "adc_treatment_control_policy",
+      "name": "treatment_control_retained",
+      "definition": "CREATE TRIGGER treatment_control_retained BEFORE DELETE OR UPDATE ON public.adc_treatment_control_policy FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_treatment_plan",
       "name": "treatment_plan_identity_retained",
       "definition": "CREATE TRIGGER treatment_plan_identity_retained BEFORE DELETE OR UPDATE ON public.adc_treatment_plan FOR EACH ROW EXECUTE FUNCTION adc_treatment_plan_identity_guard()",
       "function": "adc_treatment_plan_identity_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_treatment_plan_identity_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' OR (to_jsonb(OLD)-'revision') IS DISTINCT FROM (to_jsonb(NEW)-'revision') THEN\n  RAISE EXCEPTION 'Treatment plan identity is retained';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "treatment_preflight_retained",
+      "definition": "CREATE TRIGGER treatment_preflight_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_treatment_preflight FOR EACH ROW EXECUTE FUNCTION adc_preflight_guard()",
+      "function": "adc_preflight_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_preflight_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Treatment preflight evidence is retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_visit v JOIN adc_clinical_encounter e ON e.visit_id=v.id\n JOIN adc_clinical_record_version r ON r.encounter_id=e.id JOIN adc_clinical_consent_rule cr ON cr.clinic_id=v.clinic_id\n JOIN adc_user u ON u.dentist_id=v.dentist_id\n WHERE v.id=NEW.visit_id AND r.id=NEW.source_record_id AND cr.id=NEW.rule_id AND u.id=NEW.checked_by_id) THEN\n RAISE EXCEPTION 'Preflight requires its exact visit clinician record and clinic rule'; END IF;\n IF NEW.step_version_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_plan_step_version s JOIN adc_plan_version pv ON pv.id=s.version_id\n JOIN adc_treatment_plan p ON p.id=pv.plan_id JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id\n JOIN adc_visit origin ON origin.id=e.visit_id JOIN adc_visit target ON target.id=NEW.visit_id\n WHERE s.id=NEW.step_version_id AND (origin.patient_id,origin.clinic_id)=(target.patient_id,target.clinic_id)) THEN\n RAISE EXCEPTION 'Preflight step must belong to its own patient and clinic'; END IF;\n IF NEW.consent_version_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_consent_version cv JOIN adc_consent_event ce ON ce.version_id=cv.id\n WHERE cv.id=NEW.consent_version_id AND cv.step_version_id=NEW.step_version_id AND ce.id=NEW.consent_decision_id AND ce.action='AGREED'\n AND cv.proxy_version_id IS NOT DISTINCT FROM NEW.proxy_version_id) THEN\n RAISE EXCEPTION 'Preflight must retain exact medical agreement and signer basis'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_treatment_record",
@@ -3438,6 +3515,158 @@
       "unique_together": []
     },
     {
+      "table": "adc_clinical_consent_rule",
+      "model": "clinical.ClinicalConsentRule",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "treatment_type",
+          "column": "treatment_type_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_type",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "number",
+          "column": "number",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "mode",
+          "column": "mode",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "explanation",
+          "column": "explanation",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "published_by",
+          "column": "published_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewer",
+          "column": "reviewer_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_reviewer",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "published_at",
+          "column": "published_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_clinical_document",
       "model": "clinical.ClinicalDocument",
       "app": "clinical",
@@ -5611,6 +5840,19 @@
           "on_delete": "PROTECT"
         },
         {
+          "name": "proxy_version",
+          "column": "proxy_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_medical_proxy_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
           "name": "action",
           "column": "action",
           "type": "CharField",
@@ -5722,6 +5964,32 @@
           "target_table": null,
           "target_column": null,
           "on_delete": null
+        },
+        {
+          "name": "signer_kind",
+          "column": "signer_kind",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "proxy_version",
+          "column": "proxy_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_medical_proxy_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
         },
         {
           "name": "consent",
@@ -12476,6 +12744,510 @@
       "unique_together": []
     },
     {
+      "table": "adc_medical_proxy",
+      "model": "portal.MedicalProxy",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient",
+          "column": "patient_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_patient",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "delegate",
+          "column": "delegate_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_by",
+          "column": "created_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "model": "portal.MedicalProxyEvent",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "proxy",
+          "column": "proxy_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_medical_proxy",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "version",
+          "column": "version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_medical_proxy_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sequence",
+          "column": "sequence",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(20)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 20,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "resulting_state",
+          "column": "resulting_state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewer",
+          "column": "reviewer_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinical_reviewer",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "model": "portal.MedicalProxyScope",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "version",
+          "column": "version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_medical_proxy_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step",
+          "column": "step_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_step",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "model": "portal.MedicalProxyVersion",
+      "app": "portal",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient_snapshot",
+          "column": "patient_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "delegate_name",
+          "column": "delegate_name",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "proxy",
+          "column": "proxy_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_medical_proxy",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "number",
+          "column": "number",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "plan",
+          "column": "plan_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_treatment_plan",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "identity_reference",
+          "column": "identity_reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "authority_reference",
+          "column": "authority_reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "applicability",
+          "column": "applicability",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_from",
+          "column": "valid_from",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_until",
+          "column": "valid_until",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "submitted_by",
+          "column": "submitted_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_monthly_cost",
       "model": "finance.MonthlyCost",
       "app": "finance",
@@ -14267,6 +15039,19 @@
           "on_delete": null
         },
         {
+          "name": "preflight",
+          "column": "preflight_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_treatment_preflight",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
           "name": "encounter",
           "column": "encounter_id",
           "type": "ForeignKey",
@@ -14660,6 +15445,19 @@
           "target_table": null,
           "target_column": null,
           "on_delete": null
+        },
+        {
+          "name": "proxy_version",
+          "column": "proxy_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_medical_proxy_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
         },
         {
           "name": "self_access",
@@ -15469,6 +16267,206 @@
           "unique": false,
           "null": false,
           "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_procedure_gap",
+      "model": "clinical.ProcedureGap",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "performed",
+          "column": "performed_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_performed_procedure",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "missing",
+          "column": "missing",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_by",
+          "column": "recorded_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "model": "clinical.ProcedureGapReview",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "gap",
+          "column": "gap_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_procedure_gap",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewer",
+          "column": "reviewer_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_reviewer",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "note",
+          "column": "note",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -17844,6 +18842,19 @@
           "target_table": null,
           "target_column": null,
           "on_delete": null
+        },
+        {
+          "name": "can_verify_medical_proxy_identity",
+          "column": "can_verify_medical_proxy_identity",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
         }
       ],
       "unique_together": []
@@ -19048,6 +20059,80 @@
       "unique_together": []
     },
     {
+      "table": "adc_treatment_control_policy",
+      "model": "clinical.TreatmentControlPolicy",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "activated_by",
+          "column": "activated_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "activated_at",
+          "column": "activated_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_treatment_plan",
       "model": "clinical.TreatmentPlan",
       "app": "clinical",
@@ -19114,6 +20199,184 @@
           "unique": false,
           "null": false,
           "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "model": "clinical.TreatmentPreflight",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "visit",
+          "column": "visit_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "step_version",
+          "column": "step_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_plan_step_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "rule",
+          "column": "rule_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_consent_rule",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "consent_version",
+          "column": "consent_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_consent_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "consent_decision",
+          "column": "consent_decision_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_consent_event",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "proxy_version",
+          "column": "proxy_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_medical_proxy_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "communication",
+          "column": "communication",
+          "type": "CharField",
+          "db_type": "varchar(1000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 1000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "checked_by",
+          "column": "checked_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "checked_at",
+          "column": "checked_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -20919,6 +22182,32 @@
           "on_delete": "PROTECT"
         },
         {
+          "name": "medical_proxy",
+          "column": "medical_proxy_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_medical_proxy",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "medical_proxy_revision",
+          "column": "medical_proxy_revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
           "name": "revision",
           "column": "revision",
           "type": "PositiveIntegerField",
@@ -21224,6 +22513,7 @@
     "adc_clinic_profile_policy",
     "adc_clinical_authority_event",
     "adc_clinical_authority_policy",
+    "adc_clinical_consent_rule",
     "adc_clinical_document",
     "adc_clinical_document_draft",
     "adc_clinical_document_event",
@@ -21285,6 +22575,10 @@
     "adc_management_action",
     "adc_management_report",
     "adc_medical_consent",
+    "adc_medical_proxy",
+    "adc_medical_proxy_event",
+    "adc_medical_proxy_scope",
+    "adc_medical_proxy_version",
     "adc_monthly_cost",
     "adc_next_visit_instruction",
     "adc_notification_outbox",
@@ -21305,6 +22599,8 @@
     "adc_plan_step_version",
     "adc_plan_version",
     "adc_portal_booking_receipt",
+    "adc_procedure_gap",
+    "adc_procedure_gap_review",
     "adc_professional_authorization",
     "adc_profile_action",
     "adc_profile_media",
@@ -21332,7 +22628,9 @@
     "adc_statement_line",
     "adc_statement_use",
     "adc_tooth_finding",
+    "adc_treatment_control_policy",
     "adc_treatment_plan",
+    "adc_treatment_preflight",
     "adc_treatment_record",
     "adc_treatment_room",
     "adc_treatment_step",
@@ -22124,6 +23422,60 @@
       "definition": "PRIMARY KEY (id)"
     },
     {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_published_by_id_1dde92de_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (published_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_reviewer_id_e6ef7dbf_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_clinic_id_2485af30_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_number_check",
+      "kind": "c",
+      "definition": "CHECK ((number >= 0))"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_treatment_type_id_8c76717a_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (treatment_type_id) REFERENCES adc_treatment_type(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "clinical_rule_mode",
+      "kind": "c",
+      "definition": "CHECK (((mode)::text = ANY ((ARRAY['CONSENT'::character varying, 'COMMUNICATION'::character varying, 'REVIEW'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "clinical_rule_number",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id, treatment_type_id, number)"
+    },
+    {
       "table": "adc_clinical_document",
       "name": "adc_clinical_documen_encounter_id_2d7af03a_fk_adc_clini",
       "kind": "f",
@@ -22857,6 +24209,12 @@
     },
     {
       "table": "adc_consent_event",
+      "name": "adc_consent_event_proxy_version_id_281aacbf_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_event",
       "name": "adc_consent_event_reply_to_id_b9795cda_fk_adc_consent_event_id",
       "kind": "f",
       "definition": "FOREIGN KEY (reply_to_id) REFERENCES adc_consent_event(id) DEFERRABLE INITIALLY DEFERRED"
@@ -22907,7 +24265,7 @@
       "table": "adc_consent_event",
       "name": "consent_event_source",
       "kind": "c",
-      "definition": "CHECK (((source)::text = ANY ((ARRAY['DOCTOR_ACCOUNT'::character varying, 'SELF_ACCOUNT'::character varying, 'PAPER_REFERENCE'::character varying])::text[])))"
+      "definition": "CHECK (((source)::text = ANY ((ARRAY['DOCTOR_ACCOUNT'::character varying, 'SELF_ACCOUNT'::character varying, 'PROXY_ACCOUNT'::character varying, 'PAPER_REFERENCE'::character varying])::text[])))"
     },
     {
       "table": "adc_consent_event",
@@ -22947,6 +24305,12 @@
     },
     {
       "table": "adc_consent_version",
+      "name": "adc_consent_version_proxy_version_id_19a6ea7f_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
       "name": "adc_consent_version_revision_check",
       "kind": "c",
       "definition": "CHECK ((revision >= 0))"
@@ -22962,6 +24326,12 @@
       "name": "adc_consent_version_step_version_id_169724bd_fk_adc_plan_",
       "kind": "f",
       "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "consent_signer_basis",
+      "kind": "c",
+      "definition": "CHECK ((((proxy_version_id IS NULL) AND ((signer_kind)::text = 'SELF'::text)) OR ((proxy_version_id IS NOT NULL) AND ((signer_kind)::text = 'PROXY'::text))))"
     },
     {
       "table": "adc_consent_version",
@@ -25154,6 +26524,168 @@
       "definition": "UNIQUE (step_id)"
     },
     {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_clinic_id_26da2f99_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_created_by_id_d0bc8665_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_delegate_id_af481a42_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (delegate_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_patient_id_87d421fc_fk_adc_patient_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "medical_proxy_kind",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['GUARDIAN'::character varying, 'WRITTEN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "medical_proxy_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['MATERIALS'::character varying, 'DOCTOR'::character varying, 'REVIEW'::character varying, 'ACTIVE'::character varying, 'RETURNED'::character varying, 'REJECTED'::character varying, 'SUSPENDED'::character varying, 'REVOKED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_ev_proxy_id_77226393_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (proxy_id) REFERENCES adc_medical_proxy(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_ev_reviewer_id_47139c6c_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_ev_version_id_a838a8d1_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_actor_id_56a6dbbc_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_sequence_check",
+      "kind": "c",
+      "definition": "CHECK ((sequence >= 0))"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "medical_proxy_event_order",
+      "kind": "u",
+      "definition": "UNIQUE (proxy_id, sequence)"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "adc_medical_proxy_sc_step_id_d4de7115_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_id) REFERENCES adc_treatment_step(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "adc_medical_proxy_sc_version_id_5ad5158a_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "adc_medical_proxy_scope_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "medical_proxy_step_scope",
+      "kind": "u",
+      "definition": "UNIQUE (version_id, step_id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_ve_plan_id_ce2212d6_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (plan_id) REFERENCES adc_treatment_plan(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_ve_proxy_id_37dc6124_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (proxy_id) REFERENCES adc_medical_proxy(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_ve_submitted_by_id_c720623a_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (submitted_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_version_number_check",
+      "kind": "c",
+      "definition": "CHECK ((number >= 0))"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_version_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "medical_proxy_interval",
+      "kind": "c",
+      "definition": "CHECK ((valid_until > valid_from))"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "medical_proxy_version_number",
+      "kind": "u",
+      "definition": "UNIQUE (proxy_id, number)"
+    },
+    {
       "table": "adc_monthly_cost",
       "name": "adc_monthly_cost_dentist_id_5d7c80c0_fk_adc_dentist_id",
       "kind": "f",
@@ -25671,6 +27203,12 @@
     },
     {
       "table": "adc_performed_procedure",
+      "name": "actual_preflight_or_gap",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
       "name": "adc_performed_proced_charge_line_id_5b1f15b5_fk_adc_treat",
       "kind": "f",
       "definition": "FOREIGN KEY (charge_line_id) REFERENCES adc_treatment_record(id) DEFERRABLE INITIALLY DEFERRED"
@@ -25680,6 +27218,12 @@
       "name": "adc_performed_proced_encounter_id_2ff61633_fk_adc_clini",
       "kind": "f",
       "definition": "FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_proced_preflight_id_cc0ebf64_fk_adc_treat",
+      "kind": "f",
+      "definition": "FOREIGN KEY (preflight_id) REFERENCES adc_treatment_preflight(id) DEFERRABLE INITIALLY DEFERRED"
     },
     {
       "table": "adc_performed_procedure",
@@ -25716,6 +27260,12 @@
       "name": "adc_performed_procedure_pkey",
       "kind": "p",
       "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_preflight_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (preflight_id)"
     },
     {
       "table": "adc_performed_procedure",
@@ -25833,6 +27383,12 @@
     },
     {
       "table": "adc_plan_decision",
+      "name": "adc_plan_decision_proxy_version_id_cb80d74d_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_plan_decision",
       "name": "adc_plan_decision_self_access_id_2d009bc5_fk_adc_patie",
       "kind": "f",
       "definition": "FOREIGN KEY (self_access_id) REFERENCES adc_patient_access(id) DEFERRABLE INITIALLY DEFERRED"
@@ -25853,7 +27409,7 @@
       "table": "adc_plan_decision",
       "name": "plan_decision_source_valid",
       "kind": "c",
-      "definition": "CHECK ((((self_access_id IS NOT NULL) AND ((source)::text = 'SELF'::text) AND (source_visit_id IS NULL)) OR ((self_access_id IS NULL) AND ((source)::text = 'MANUAL'::text) AND (source_visit_id IS NOT NULL))))"
+      "definition": "CHECK ((((proxy_version_id IS NULL) AND (self_access_id IS NOT NULL) AND ((source)::text = 'SELF'::text) AND (source_visit_id IS NULL)) OR ((proxy_version_id IS NULL) AND (self_access_id IS NULL) AND ((source)::text = 'MANUAL'::text) AND (source_visit_id IS NOT NULL)) OR ((proxy_version_id IS NOT NULL) AND (self_access_id IS NULL) AND ((source)::text = 'PROXY'::text) AND (source_visit_id IS NULL)) OR ((proxy_version_id IS NOT NULL) AND (self_access_id IS NULL) AND ((source)::text = 'MANUAL_PROXY'::text) AND (source_visit_id IS NOT NULL))))"
     },
     {
       "table": "adc_plan_decision",
@@ -26136,6 +27692,72 @@
       "name": "booking_receipt_one_authority",
       "kind": "c",
       "definition": "CHECK ((((access_id IS NOT NULL) AND (appointment_grant_id IS NULL)) OR ((access_id IS NULL) AND (appointment_grant_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_performed_id_06be4f00_fk_adc_perfo",
+      "kind": "f",
+      "definition": "FOREIGN KEY (performed_id) REFERENCES adc_performed_procedure(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_performed_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (performed_id)"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_recorded_by_id_0f04cc33_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (recorded_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "procedure_gap_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'REVIEWED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_re_gap_id_a8139eff_fk_adc_proce",
+      "kind": "f",
+      "definition": "FOREIGN KEY (gap_id) REFERENCES adc_procedure_gap(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_re_reviewer_id_b1cb1b00_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_actor_id_3cf08d36_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_gap_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (gap_id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
     },
     {
       "table": "adc_professional_authorization",
@@ -26877,6 +28499,12 @@
     },
     {
       "table": "adc_role_assignment",
+      "name": "medical_proxy_frontdesk_duty",
+      "kind": "c",
+      "definition": "CHECK (((NOT can_verify_medical_proxy_identity) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))"
+    },
+    {
+      "table": "adc_role_assignment",
       "name": "role_scope_valid",
       "kind": "c",
       "definition": "CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))"
@@ -27206,6 +28834,30 @@
       "definition": "CHECK (((NOT ((kind)::text = 'MISSING'::text)) OR ((surface)::text = ''::text)))"
     },
     {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_contro_activated_by_id_8dec4188_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (activated_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_contro_clinic_id_5a13ee83_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_control_policy_clinic_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id)"
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_control_policy_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
       "table": "adc_treatment_plan",
       "name": "adc_treatment_plan_opened_by_id_39853e91_fk_adc_user_id",
       "kind": "f",
@@ -27228,6 +28880,66 @@
       "name": "adc_treatment_plan_revision_check",
       "kind": "c",
       "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_prefli_consent_decision_id_deea2327_fk_adc_conse",
+      "kind": "f",
+      "definition": "FOREIGN KEY (consent_decision_id) REFERENCES adc_consent_event(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_prefli_consent_version_id_8ff1c6bc_fk_adc_conse",
+      "kind": "f",
+      "definition": "FOREIGN KEY (consent_version_id) REFERENCES adc_consent_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_prefli_proxy_version_id_e8310600_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (proxy_version_id) REFERENCES adc_medical_proxy_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_prefli_rule_id_84f82f04_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (rule_id) REFERENCES adc_clinical_consent_rule(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_prefli_source_record_id_fe154aa5_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_prefli_step_version_id_76b5e525_fk_adc_plan_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (step_version_id) REFERENCES adc_plan_step_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_checked_by_id_7ff84783_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (checked_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_visit_id_2eb927a0_fk_adc_visit_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED"
     },
     {
       "table": "adc_treatment_record",
@@ -27825,6 +29537,12 @@
     },
     {
       "table": "adc_workspace_context",
+      "name": "adc_workspace_contex_medical_proxy_id_18701586_fk_adc_medic",
+      "kind": "f",
+      "definition": "FOREIGN KEY (medical_proxy_id) REFERENCES adc_medical_proxy(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_workspace_context",
       "name": "adc_workspace_contex_patient_grant_id_d1d100c8_fk_adc_patie",
       "kind": "f",
       "definition": "FOREIGN KEY (patient_grant_id) REFERENCES adc_patient_appointment_grant(id) DEFERRABLE INITIALLY DEFERRED"
@@ -27834,6 +29552,12 @@
       "name": "adc_workspace_context_clinic_id_0ce9581c_fk_adc_clinic_id",
       "kind": "f",
       "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_workspace_context",
+      "name": "adc_workspace_context_medical_proxy_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((medical_proxy_revision >= 0))"
     },
     {
       "table": "adc_workspace_context",
@@ -27864,6 +29588,12 @@
       "name": "workspace_login_channel",
       "kind": "c",
       "definition": "CHECK ((((login_channel)::text = ''::text) OR (((login_channel)::text = 'PATIENT'::text) AND ((role)::text = ANY ((ARRAY[''::character varying, 'PATIENT'::character varying])::text[]))) OR (((login_channel)::text = 'STAFF'::text) AND (NOT ((role)::text = 'PATIENT'::text)))))"
+    },
+    {
+      "table": "adc_workspace_context",
+      "name": "workspace_medical_subject",
+      "kind": "c",
+      "definition": "CHECK (((medical_proxy_id IS NULL) OR ((role)::text = 'PATIENT'::text)))"
     },
     {
       "table": "adc_workspace_context",
@@ -28402,6 +30132,41 @@
       "definition": "CREATE UNIQUE INDEX adc_clinical_authority_policy_pkey ON public.adc_clinical_authority_policy USING btree (id)"
     },
     {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_clinic_id_2485af30",
+      "definition": "CREATE INDEX adc_clinical_consent_rule_clinic_id_2485af30 ON public.adc_clinical_consent_rule USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_clinical_consent_rule_operation_id_key ON public.adc_clinical_consent_rule USING btree (operation_id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_clinical_consent_rule_pkey ON public.adc_clinical_consent_rule USING btree (id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_published_by_id_1dde92de",
+      "definition": "CREATE INDEX adc_clinical_consent_rule_published_by_id_1dde92de ON public.adc_clinical_consent_rule USING btree (published_by_id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_reviewer_id_e6ef7dbf",
+      "definition": "CREATE INDEX adc_clinical_consent_rule_reviewer_id_e6ef7dbf ON public.adc_clinical_consent_rule USING btree (reviewer_id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "adc_clinical_consent_rule_treatment_type_id_8c76717a",
+      "definition": "CREATE INDEX adc_clinical_consent_rule_treatment_type_id_8c76717a ON public.adc_clinical_consent_rule USING btree (treatment_type_id)"
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "name": "clinical_rule_number",
+      "definition": "CREATE UNIQUE INDEX clinical_rule_number ON public.adc_clinical_consent_rule USING btree (clinic_id, treatment_type_id, number)"
+    },
+    {
       "table": "adc_clinical_document",
       "name": "adc_clinical_document_encounter_id_key",
       "definition": "CREATE UNIQUE INDEX adc_clinical_document_encounter_id_key ON public.adc_clinical_document USING btree (encounter_id)"
@@ -28803,6 +30568,11 @@
     },
     {
       "table": "adc_consent_event",
+      "name": "adc_consent_event_proxy_version_id_281aacbf",
+      "definition": "CREATE INDEX adc_consent_event_proxy_version_id_281aacbf ON public.adc_consent_event USING btree (proxy_version_id)"
+    },
+    {
+      "table": "adc_consent_event",
       "name": "adc_consent_event_reply_to_id_key",
       "definition": "CREATE UNIQUE INDEX adc_consent_event_reply_to_id_key ON public.adc_consent_event USING btree (reply_to_id)"
     },
@@ -28840,6 +30610,11 @@
       "table": "adc_consent_version",
       "name": "adc_consent_version_previous_id_key",
       "definition": "CREATE UNIQUE INDEX adc_consent_version_previous_id_key ON public.adc_consent_version USING btree (previous_id)"
+    },
+    {
+      "table": "adc_consent_version",
+      "name": "adc_consent_version_proxy_version_id_19a6ea7f",
+      "definition": "CREATE INDEX adc_consent_version_proxy_version_id_19a6ea7f ON public.adc_consent_version USING btree (proxy_version_id)"
     },
     {
       "table": "adc_consent_version",
@@ -30092,6 +31867,116 @@
       "definition": "CREATE UNIQUE INDEX adc_medical_consent_step_id_key ON public.adc_medical_consent USING btree (step_id)"
     },
     {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_clinic_id_26da2f99",
+      "definition": "CREATE INDEX adc_medical_proxy_clinic_id_26da2f99 ON public.adc_medical_proxy USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_created_by_id_d0bc8665",
+      "definition": "CREATE INDEX adc_medical_proxy_created_by_id_d0bc8665 ON public.adc_medical_proxy USING btree (created_by_id)"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_delegate_id_af481a42",
+      "definition": "CREATE INDEX adc_medical_proxy_delegate_id_af481a42 ON public.adc_medical_proxy USING btree (delegate_id)"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_patient_id_87d421fc",
+      "definition": "CREATE INDEX adc_medical_proxy_patient_id_87d421fc ON public.adc_medical_proxy USING btree (patient_id)"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "adc_medical_proxy_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_medical_proxy_pkey ON public.adc_medical_proxy USING btree (id)"
+    },
+    {
+      "table": "adc_medical_proxy",
+      "name": "medical_proxy_queue",
+      "definition": "CREATE INDEX medical_proxy_queue ON public.adc_medical_proxy USING btree (clinic_id, state)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_actor_id_56a6dbbc",
+      "definition": "CREATE INDEX adc_medical_proxy_event_actor_id_56a6dbbc ON public.adc_medical_proxy_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_medical_proxy_event_operation_id_key ON public.adc_medical_proxy_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_medical_proxy_event_pkey ON public.adc_medical_proxy_event USING btree (id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_proxy_id_77226393",
+      "definition": "CREATE INDEX adc_medical_proxy_event_proxy_id_77226393 ON public.adc_medical_proxy_event USING btree (proxy_id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_reviewer_id_47139c6c",
+      "definition": "CREATE INDEX adc_medical_proxy_event_reviewer_id_47139c6c ON public.adc_medical_proxy_event USING btree (reviewer_id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "adc_medical_proxy_event_version_id_a838a8d1",
+      "definition": "CREATE INDEX adc_medical_proxy_event_version_id_a838a8d1 ON public.adc_medical_proxy_event USING btree (version_id)"
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "name": "medical_proxy_event_order",
+      "definition": "CREATE UNIQUE INDEX medical_proxy_event_order ON public.adc_medical_proxy_event USING btree (proxy_id, sequence)"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "adc_medical_proxy_scope_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_medical_proxy_scope_pkey ON public.adc_medical_proxy_scope USING btree (id)"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "adc_medical_proxy_scope_step_id_d4de7115",
+      "definition": "CREATE INDEX adc_medical_proxy_scope_step_id_d4de7115 ON public.adc_medical_proxy_scope USING btree (step_id)"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "adc_medical_proxy_scope_version_id_5ad5158a",
+      "definition": "CREATE INDEX adc_medical_proxy_scope_version_id_5ad5158a ON public.adc_medical_proxy_scope USING btree (version_id)"
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "name": "medical_proxy_step_scope",
+      "definition": "CREATE UNIQUE INDEX medical_proxy_step_scope ON public.adc_medical_proxy_scope USING btree (version_id, step_id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_version_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_medical_proxy_version_pkey ON public.adc_medical_proxy_version USING btree (id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_version_plan_id_ce2212d6",
+      "definition": "CREATE INDEX adc_medical_proxy_version_plan_id_ce2212d6 ON public.adc_medical_proxy_version USING btree (plan_id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_version_proxy_id_37dc6124",
+      "definition": "CREATE INDEX adc_medical_proxy_version_proxy_id_37dc6124 ON public.adc_medical_proxy_version USING btree (proxy_id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "adc_medical_proxy_version_submitted_by_id_c720623a",
+      "definition": "CREATE INDEX adc_medical_proxy_version_submitted_by_id_c720623a ON public.adc_medical_proxy_version USING btree (submitted_by_id)"
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "name": "medical_proxy_version_number",
+      "definition": "CREATE UNIQUE INDEX medical_proxy_version_number ON public.adc_medical_proxy_version USING btree (proxy_id, number)"
+    },
+    {
       "table": "adc_monthly_cost",
       "name": "adc_monthly_cost_dentist_id_5d7c80c0",
       "definition": "CREATE INDEX adc_monthly_cost_dentist_id_5d7c80c0 ON public.adc_monthly_cost USING btree (dentist_id)"
@@ -30413,6 +32298,11 @@
     },
     {
       "table": "adc_performed_procedure",
+      "name": "adc_performed_procedure_preflight_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_performed_procedure_preflight_id_key ON public.adc_performed_procedure USING btree (preflight_id)"
+    },
+    {
+      "table": "adc_performed_procedure",
       "name": "adc_performed_procedure_recorded_by_id_d24e64ff",
       "definition": "CREATE INDEX adc_performed_procedure_recorded_by_id_d24e64ff ON public.adc_performed_procedure USING btree (recorded_by_id)"
     },
@@ -30480,6 +32370,11 @@
       "table": "adc_plan_decision",
       "name": "adc_plan_decision_pkey",
       "definition": "CREATE UNIQUE INDEX adc_plan_decision_pkey ON public.adc_plan_decision USING btree (id)"
+    },
+    {
+      "table": "adc_plan_decision",
+      "name": "adc_plan_decision_proxy_version_id_cb80d74d",
+      "definition": "CREATE INDEX adc_plan_decision_proxy_version_id_cb80d74d ON public.adc_plan_decision USING btree (proxy_version_id)"
     },
     {
       "table": "adc_plan_decision",
@@ -30650,6 +32545,46 @@
       "table": "adc_portal_booking_receipt",
       "name": "adc_portal_booking_receipt_visit_id_key",
       "definition": "CREATE UNIQUE INDEX adc_portal_booking_receipt_visit_id_key ON public.adc_portal_booking_receipt USING btree (visit_id)"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_performed_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_procedure_gap_performed_id_key ON public.adc_procedure_gap USING btree (performed_id)"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_procedure_gap_pkey ON public.adc_procedure_gap USING btree (id)"
+    },
+    {
+      "table": "adc_procedure_gap",
+      "name": "adc_procedure_gap_recorded_by_id_0f04cc33",
+      "definition": "CREATE INDEX adc_procedure_gap_recorded_by_id_0f04cc33 ON public.adc_procedure_gap USING btree (recorded_by_id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_actor_id_3cf08d36",
+      "definition": "CREATE INDEX adc_procedure_gap_review_actor_id_3cf08d36 ON public.adc_procedure_gap_review USING btree (actor_id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_gap_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_procedure_gap_review_gap_id_key ON public.adc_procedure_gap_review USING btree (gap_id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_procedure_gap_review_operation_id_key ON public.adc_procedure_gap_review USING btree (operation_id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_procedure_gap_review_pkey ON public.adc_procedure_gap_review USING btree (id)"
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "name": "adc_procedure_gap_review_reviewer_id_b1cb1b00",
+      "definition": "CREATE INDEX adc_procedure_gap_review_reviewer_id_b1cb1b00 ON public.adc_procedure_gap_review USING btree (reviewer_id)"
     },
     {
       "table": "adc_professional_authorization",
@@ -31297,6 +33232,21 @@
       "definition": "CREATE UNIQUE INDEX clinical_finding_location_unique ON public.adc_tooth_finding USING btree (record_id, tooth, surface, kind)"
     },
     {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_control_policy_activated_by_id_8dec4188",
+      "definition": "CREATE INDEX adc_treatment_control_policy_activated_by_id_8dec4188 ON public.adc_treatment_control_policy USING btree (activated_by_id)"
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_control_policy_clinic_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_control_policy_clinic_id_key ON public.adc_treatment_control_policy USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "name": "adc_treatment_control_policy_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_control_policy_pkey ON public.adc_treatment_control_policy USING btree (id)"
+    },
+    {
       "table": "adc_treatment_plan",
       "name": "adc_treatment_plan_opened_by_id_39853e91",
       "definition": "CREATE INDEX adc_treatment_plan_opened_by_id_39853e91 ON public.adc_treatment_plan USING btree (opened_by_id)"
@@ -31310,6 +33260,56 @@
       "table": "adc_treatment_plan",
       "name": "adc_treatment_plan_pkey",
       "definition": "CREATE UNIQUE INDEX adc_treatment_plan_pkey ON public.adc_treatment_plan USING btree (id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_checked_by_id_7ff84783",
+      "definition": "CREATE INDEX adc_treatment_preflight_checked_by_id_7ff84783 ON public.adc_treatment_preflight USING btree (checked_by_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_consent_decision_id_deea2327",
+      "definition": "CREATE INDEX adc_treatment_preflight_consent_decision_id_deea2327 ON public.adc_treatment_preflight USING btree (consent_decision_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_consent_version_id_8ff1c6bc",
+      "definition": "CREATE INDEX adc_treatment_preflight_consent_version_id_8ff1c6bc ON public.adc_treatment_preflight USING btree (consent_version_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_preflight_operation_id_key ON public.adc_treatment_preflight USING btree (operation_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_treatment_preflight_pkey ON public.adc_treatment_preflight USING btree (id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_proxy_version_id_e8310600",
+      "definition": "CREATE INDEX adc_treatment_preflight_proxy_version_id_e8310600 ON public.adc_treatment_preflight USING btree (proxy_version_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_rule_id_84f82f04",
+      "definition": "CREATE INDEX adc_treatment_preflight_rule_id_84f82f04 ON public.adc_treatment_preflight USING btree (rule_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_source_record_id_fe154aa5",
+      "definition": "CREATE INDEX adc_treatment_preflight_source_record_id_fe154aa5 ON public.adc_treatment_preflight USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_step_version_id_76b5e525",
+      "definition": "CREATE INDEX adc_treatment_preflight_step_version_id_76b5e525 ON public.adc_treatment_preflight USING btree (step_version_id)"
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "name": "adc_treatment_preflight_visit_id_2eb927a0",
+      "definition": "CREATE INDEX adc_treatment_preflight_visit_id_2eb927a0 ON public.adc_treatment_preflight USING btree (visit_id)"
     },
     {
       "table": "adc_treatment_record",
@@ -31670,6 +33670,11 @@
       "table": "adc_workspace_context",
       "name": "adc_workspace_context_clinic_id_0ce9581c",
       "definition": "CREATE INDEX adc_workspace_context_clinic_id_0ce9581c ON public.adc_workspace_context USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_workspace_context",
+      "name": "adc_workspace_context_medical_proxy_id_18701586",
+      "definition": "CREATE INDEX adc_workspace_context_medical_proxy_id_18701586 ON public.adc_workspace_context USING btree (medical_proxy_id)"
     },
     {
       "table": "adc_workspace_context",
@@ -32891,6 +34896,72 @@
       "null": false
     },
     {
+      "table": "adc_clinical_consent_rule",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "number",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "mode",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "explanation",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "published_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "published_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "reviewer_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_consent_rule",
+      "column": "treatment_type_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_clinical_document",
       "column": "id",
       "db_type": "bigint",
@@ -33875,6 +35946,12 @@
       "null": false
     },
     {
+      "table": "adc_consent_event",
+      "column": "proxy_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_consent_version",
       "column": "id",
       "db_type": "bigint",
@@ -33944,6 +36021,18 @@
       "table": "adc_consent_version",
       "column": "consent_id",
       "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "proxy_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_consent_version",
+      "column": "signer_kind",
+      "db_type": "character varying(8)",
       "null": false
     },
     {
@@ -36809,6 +38898,222 @@
       "null": false
     },
     {
+      "table": "adc_medical_proxy",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "kind",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "delegate_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy",
+      "column": "patient_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "sequence",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "action",
+      "db_type": "character varying(20)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "resulting_state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "note",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "proxy_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "reviewer_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_medical_proxy_event",
+      "column": "version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "column": "step_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_scope",
+      "column": "version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "number",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "identity_reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "authority_reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "applicability",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "valid_from",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "valid_until",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "plan_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "proxy_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "submitted_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "patient_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_medical_proxy_version",
+      "column": "delegate_name",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
       "table": "adc_monthly_cost",
       "column": "id",
       "db_type": "bigint",
@@ -37691,6 +39996,12 @@
       "null": true
     },
     {
+      "table": "adc_performed_procedure",
+      "column": "preflight_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_plan_appointment",
       "column": "id",
       "db_type": "bigint",
@@ -37791,6 +40102,12 @@
       "column": "step_version_id",
       "db_type": "bigint",
       "null": false
+    },
+    {
+      "table": "adc_plan_decision",
+      "column": "proxy_version_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_plan_draft",
@@ -38109,6 +40426,90 @@
       "column": "appointment_grant_id",
       "db_type": "bigint",
       "null": true
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "reason",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "missing",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "state",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "performed_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap",
+      "column": "recorded_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "note",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "gap_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_procedure_gap_review",
+      "column": "reviewer_id",
+      "db_type": "bigint",
+      "null": false
     },
     {
       "table": "adc_professional_authorization",
@@ -39131,6 +41532,12 @@
       "null": false
     },
     {
+      "table": "adc_role_assignment",
+      "column": "can_verify_medical_proxy_identity",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
       "table": "adc_schedule_plan",
       "column": "id",
       "db_type": "bigint",
@@ -39647,6 +42054,36 @@
       "null": false
     },
     {
+      "table": "adc_treatment_control_policy",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "column": "reference",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "column": "activated_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "column": "activated_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_control_policy",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_treatment_plan",
       "column": "id",
       "db_type": "bigint",
@@ -39673,6 +42110,84 @@
     {
       "table": "adc_treatment_plan",
       "column": "origin_encounter_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "communication",
+      "db_type": "character varying(1000)",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "checked_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "checked_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "consent_decision_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "consent_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "proxy_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "rule_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "step_version_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_treatment_preflight",
+      "column": "visit_id",
       "db_type": "bigint",
       "null": false
     },
@@ -40457,6 +42972,18 @@
       "null": false
     },
     {
+      "table": "adc_workspace_context",
+      "column": "medical_proxy_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_workspace_context",
+      "column": "medical_proxy_revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
       "table": "auth_group",
       "column": "id",
       "db_type": "integer",
@@ -40593,6 +43120,10 @@
       "name": "0005_wx1_web_login_and_cloudbase"
     },
     {
+      "app": "accounts",
+      "name": "0006_roleassignment_can_verify_medical_proxy_identity_and_more"
+    },
+    {
       "app": "assistants",
       "name": "0001_initial"
     },
@@ -40691,6 +43222,18 @@
     {
       "app": "clinical",
       "name": "0009_medical_consent"
+    },
+    {
+      "app": "clinical",
+      "name": "0010_clinicalconsentrule_proceduregap_proceduregapreview_and_more"
+    },
+    {
+      "app": "clinical",
+      "name": "0011_consentevent_proxy_version_and_more"
+    },
+    {
+      "app": "clinical",
+      "name": "0012_medical_proxy_preflight_guards"
     },
     {
       "app": "contenttypes",
@@ -40833,6 +43376,18 @@
       "name": "0003_patientenrollment_patientenrollmentevent_and_more"
     },
     {
+      "app": "portal",
+      "name": "0004_medicalproxy_medicalproxyversion_medicalproxyscope_and_more"
+    },
+    {
+      "app": "portal",
+      "name": "0005_medicalproxyversion_patient_snapshot"
+    },
+    {
+      "app": "portal",
+      "name": "0006_medicalproxyversion_delegate_name"
+    },
+    {
       "app": "reception",
       "name": "0001_initial"
     },
@@ -40899,9 +43454,13 @@
     {
       "app": "workspaces",
       "name": "0003_workspacecontext_login_channel_and_more"
+    },
+    {
+      "app": "workspaces",
+      "name": "0004_workspacecontext_medical_proxy_and_more"
     }
   ],
-  "observed_on": "2026-10-31",
-  "observed_scope": "Read-only independent PostgreSQL17 with exact C3.2B1 frozen application image after67 application migrations; no business rows or private configuration exported.",
-  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392"
+  "observed_on": "2026-11-01",
+  "observed_scope": "Read-only independent18352PostgreSQL17; candidate working source; no business rows or configuration values exported.",
+  "application_commit": "WORKING_SOURCE_NOT_FROZEN"
 }

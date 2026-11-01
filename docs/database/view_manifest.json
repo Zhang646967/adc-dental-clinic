@@ -1,9 +1,9 @@
 {
   "er_consent_versions": {
-    "title": "本人医疗告知与准确步骤版本",
-    "tables": 7,
-    "relationships": 10,
-    "note": "稳定步骤至多一个医疗告知入口；版本引用准确方案步骤和检查，previous为同入口的一对一追加链。原方案JSON保留当时八项说明，新表保留身份核对依据、患者快照与范围摘要。方案选择、告知和医疗决定分别办理；图中只绘制实际SQL外键，不把JSON内的编号画成数据库约束。",
+    "title": "医疗告知与准确步骤版本",
+    "tables": 8,
+    "relationships": 11,
+    "note": "稳定步骤至多一个医疗告知入口；版本引用准确方案步骤和检查，previous为同入口的一对一追加链。原方案JSON保留当时八项说明，新表保留身份核对依据、患者快照与范围摘要。方案选择、告知和医疗决定分别办理；图中只绘制实际SQL外键，不把JSON内的编号画成数据库约束。 指定决定人分为本人和已核验医疗代理，代理告知引用准确代理版本；两者均保留原版本，不因身份切换转移决定。",
     "columns": {
       "adc_user": [
         "id",
@@ -45,15 +45,22 @@
         "source_record_id",
         "prepared_by_id",
         "revision",
-        "scope_digest"
+        "scope_digest",
+        "signer_kind",
+        "proxy_version_id"
+      ],
+      "adc_medical_proxy_version": [
+        "id",
+        "proxy_id",
+        "number"
       ]
     }
   },
   "er_consent_events": {
-    "title": "本人医疗问答与决定来源",
-    "tables": 6,
-    "relationships": 8,
-    "note": "每个事件只能属于一份准确告知；本人来源引用自己的PatientAccess，纸质原件登记不冒充本人点击。reply_to为可空一对一答复关系，同一问题不能被重复覆盖，触发器核对同入口问题。历史事件不可改写；撤回另记事件，未答复问题和新版本待决定由事件推导。预约代办授权不作为临床读取或医疗代签依据。",
+    "title": "医疗问答与决定来源",
+    "tables": 7,
+    "relationships": 9,
+    "note": "每个事件只能属于一份准确告知；本人来源引用自己的PatientAccess，纸质原件登记不冒充本人点击。reply_to为可空一对一答复关系，同一问题不能被重复覆盖，触发器核对同入口问题。历史事件不可改写；撤回另记事件，未答复问题和新版本待决定由事件推导。预约代办授权不作为临床读取或医疗代签依据。 PROXY_ACCOUNT保留独立医疗代理版本与实际提交账号，纸件仍由负责医师登记；任一来源均不证明已验收可靠电子签名。",
     "columns": {
       "adc_patient": [
         "id",
@@ -89,7 +96,13 @@
         "action",
         "source",
         "occurred_at",
-        "recorded_at"
+        "recorded_at",
+        "proxy_version_id"
+      ],
+      "adc_medical_proxy_version": [
+        "id",
+        "proxy_id",
+        "number"
       ]
     }
   },
@@ -1608,11 +1621,145 @@
       ]
     }
   },
+  "er_medical_proxy": {
+    "title": "医疗代理材料版本与限定步骤",
+    "tables": 7,
+    "relationships": 8,
+    "note": "代理身份、诊所、依据类型保持不变；材料修订追加版本，范围指向稳定步骤。前台专项核验与医师适用性确认分开，疑难事项转另一审核医师。有效期和患者身份在读取与提交时重检，预约授权不能转换为医疗授权。图仅绘实际SQL外键，计划及临床审核关系详见全字段目录。",
+    "columns": {
+      "adc_patient": [
+        "id",
+        "patient_no"
+      ],
+      "adc_user": [
+        "id"
+      ],
+      "adc_medical_proxy": [
+        "id",
+        "patient_id",
+        "clinic_id",
+        "delegate_id",
+        "kind",
+        "state",
+        "revision"
+      ],
+      "adc_medical_proxy_version": [
+        "id",
+        "proxy_id",
+        "number",
+        "plan_id",
+        "valid_from",
+        "valid_until"
+      ],
+      "adc_medical_proxy_scope": [
+        "id",
+        "version_id",
+        "step_id"
+      ],
+      "adc_treatment_step": [
+        "id",
+        "plan_id"
+      ],
+      "adc_medical_proxy_event": [
+        "id",
+        "proxy_id",
+        "version_id",
+        "actor_id",
+        "sequence",
+        "resulting_state"
+      ]
+    }
+  },
+  "er_treatment_preflight": {
+    "title": "准确同意与治疗前核对执行",
+    "tables": 7,
+    "relationships": 10,
+    "note": "核对保存独立依据，实际执行以可空的一对一preflight引用准确核对；每份核对至多支撑一次实际执行，撤回原执行也不能复用。具体医疗同意引用准确事件，代理版本和临床规则分别保留。JSON快照存本次资源与来源编号，图不将其虚构成SQL外键；实际确认重新核验，核对本身不产生收费。",
+    "columns": {
+      "adc_plan_step_version": [
+        "id",
+        "step_id"
+      ],
+      "adc_consent_version": [
+        "id",
+        "step_version_id",
+        "proxy_version_id"
+      ],
+      "adc_consent_event": [
+        "id",
+        "version_id",
+        "action",
+        "source"
+      ],
+      "adc_medical_proxy_version": [
+        "id"
+      ],
+      "adc_clinical_consent_rule": [
+        "id",
+        "clinic_id",
+        "treatment_type_id",
+        "number",
+        "mode"
+      ],
+      "adc_treatment_preflight": [
+        "id",
+        "visit_id",
+        "source_record_id",
+        "step_version_id",
+        "rule_id",
+        "consent_version_id",
+        "consent_decision_id",
+        "proxy_version_id"
+      ],
+      "adc_performed_procedure": [
+        "id",
+        "step_version_id",
+        "preflight_id",
+        "charge_line_id",
+        "state"
+      ]
+    }
+  },
+  "er_procedure_gap": {
+    "title": "已发生治疗补记与独立缺口复核",
+    "tables": 5,
+    "relationships": 6,
+    "note": "真实补记仍使用原实际执行与唯一收费来源，preflight保持为空；一份实际事实至多一项缺口及一份独立复核。缺失依据和原因不可覆盖，复核账号须具本店职责与具体服务读取范围，不能复核本人补记。复核改变待办状态，原缺口继续保留，并不补造事前通过。",
+    "columns": {
+      "adc_user": [
+        "id"
+      ],
+      "adc_performed_procedure": [
+        "id",
+        "preflight_id",
+        "charge_line_id"
+      ],
+      "adc_procedure_gap": [
+        "id",
+        "performed_id",
+        "recorded_by_id",
+        "recorded_at",
+        "state"
+      ],
+      "adc_procedure_gap_review": [
+        "id",
+        "gap_id",
+        "reviewer_id",
+        "actor_id",
+        "recorded_at"
+      ],
+      "adc_clinical_reviewer": [
+        "id",
+        "user_id",
+        "clinic_id"
+      ]
+    }
+  },
   "validation": {
     "passed": true,
-    "tables": 149,
-    "orm_tables": 148,
-    "columns_types_and_nullability_checked": 1463,
+    "tables": 158,
+    "orm_tables": 157,
+    "columns_types_and_nullability_checked": 1550,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -1621,10 +1768,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 413,
-    "sql_foreign_keys": 414,
+    "orm_foreign_keys": 450,
+    "sql_foreign_keys": 451,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "5f7701f594df7096a7eda49d74b42560700828c59649ad416ee519450745532f",
+    "snapshot_sha256": "687591a45246d7a3e23246dcc50624b2a4533f200ab52ad762ee6577b2f35ed3",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

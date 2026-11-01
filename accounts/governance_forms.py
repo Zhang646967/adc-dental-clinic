@@ -37,10 +37,10 @@ class AccountActionForm(AuthorityForm):
         elif action=='revoke':
             self.fields['grant']=forms.ModelChoiceField(label='撤回的授权',queryset=RoleAssignment.objects.filter(user=target,is_active=True).exclude(role='SYSADMIN'))
             self.fields['grant'].label_from_instance=lambda o:f'{ROLES[o.role][0]} · {o.clinic.name if o.clinic_id else o.scope_kind}'
-        elif action=='identity_reviewer':
+        elif action in ('identity_reviewer','medical_proxy_reviewer'):
             self.fields['grant']=forms.ModelChoiceField(label='本店前台授权',queryset=RoleAssignment.objects.filter(user=target,role='FRONT_DESK',is_active=True,clinic__is_active=True))
             self.fields['grant'].label_from_instance=lambda o:o.clinic.name+' · 前台'
-            self.fields['reviewer_enabled']=forms.BooleanField(label='授予患者关系核验职责（取消勾选则撤回）',required=False)
+            self.fields['reviewer_enabled']=forms.BooleanField(label=('授予独立医疗代理资料核验职责' if action=='medical_proxy_reviewer' else '授予患者关系核验职责')+'（取消勾选则撤回）',required=False)
         elif action=='bind_patient':
             self.fields['patient_no']=forms.CharField(label='已核对的演示患者业务编号',max_length=40,help_text='由获授权技术人员核对后绑定；这不构成真实患者身份认证。')
         elif action=='clinical_reviewer':

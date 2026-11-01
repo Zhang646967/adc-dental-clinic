@@ -1,5 +1,6 @@
 """HTTP workspace boundary: role, scope, stale tabs and typed route allowlists."""
 from django.db import transaction
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import resolve, Resolver404
@@ -11,6 +12,9 @@ from workspaces.rules import CLINIC_ROLES
 PUBLIC={'system_entry','public_home','public_services','public_service_detail','public_service_guide','public_clinics',
         'login','portal_login','logout','health','mini_session','mini_login','mini_logout','mini_public_discovery','mini_public_service'}
 ROLE_FREE={'select_role','activate_role','own_password_change'}
+# These account-bound views check their own channel and related-account scope.
+# Unsafe requests still pass workspace-token and command authorization below.
+ROLE_FREE.update({'portal_medical_authorizations','portal_medical_proxy','mini_medical_authorizations','mini_medical_authorization'})
 PUBLIC.update({'patient_local_login','patient_account','patient_account_activate','patient_enrollment_new','patient_enrollment_edit',
     'patient_enrollment_submit_confirm','patient_enrollment_withdraw','mini_account_local_login','mini_account_profile','mini_account_phone',
     'mini_account_unlink','mini_account_password','mini_account_activate','mini_enrollment_preview','mini_enrollment_confirm','mini_enrollment_withdraw'})
@@ -19,8 +23,16 @@ PUBLIC.update({'patient_sms_login','patient_sms_bind','patient_wechat_start','pa
 PUBLIC.update({'patient_wechat_qr_start','patient_wechat_qr_status','patient_wechat_qr_image','patient_wechat_qr_complete',
     'mini_web_login','patient_sms_captcha','mini_sms_captcha'})
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
+# These views own exact medical-step authorization. Appointment authority is a
+# different contract; role/workspace/CSRF checks still run below.
+MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_medical_proxy',
+    'mini_medical_authorizations','mini_medical_authorization','mini_medical_authorization_preview','mini_medical_authorization_confirm',
+    'portal_plans','portal_plan','portal_plan_decision','mini_plans','mini_plan','mini_plan_decision_preview','mini_plan_decision_confirm',
+    'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'medical_proxies':{'FRONT_DESK','DENTIST'},'medical_proxy_new':{'FRONT_DESK'},'medical_proxy_detail':{'FRONT_DESK','DENTIST'},
+ 'clinical_preflight':{'DENTIST'},'clinical_retrospective':{'DENTIST'},'clinical_control_rules':{'DENTIST'},'clinical_gaps':{'DENTIST'},'clinical_gap_detail':{'DENTIST'},
  'clinical_consents':{'DENTIST'},'clinical_consent':{'DENTIST'},
  'clinical_documents':{'DENTIST'},'clinical_document':{'DENTIST'},'clinical_document_preview':{'DENTIST'},
  'clinical_document_confirm':{'DENTIST'},'clinical_document_compare':{'DENTIST'},'clinical_document_print':{'DENTIST'},
@@ -179,7 +191,7 @@ class WorkspaceMiddleware:
             if ctx.role in CLINIC_ROLES and ctx.clinic_id is None and name not in ROLE_HOME and name not in {'dashboard','guide_index','guide_task'}:
                 if unsafe:return self.error(request,'尚未选择诊所；本次操作未执行。',409)
                 return redirect('manager_home' if ctx.role=='MANAGER' else 'frontdesk_home')
-        if ctx.role=='PATIENT' and name not in ROLE_FREE | {'portal_subjects','mini_subjects','mini_subject_select'}:
+        if ctx.role=='PATIENT' and name not in ROLE_FREE | MEDICAL_SUBJECT_ROUTES | {'portal_subjects','mini_subjects','mini_subject_select'}:
             from portal.policies import patient_access,SubjectRequired
             try:patient_access(request.user)
             except SubjectRequired as exc:
@@ -188,6 +200,8 @@ class WorkspaceMiddleware:
                     return result(request,status=409,code='SUBJECT_REQUIRED',message=str(exc))
                 if unsafe:return self.error(request,str(exc),409)
                 return redirect('portal_subjects')
+            except PermissionDenied:
+                return self.error(request,'当前就诊权限不包含此项业务，请选择具有相应权限的就诊人。')
         if unsafe:
             token=request.headers.get('X-ADC-Workspace','') if name=='assistant_api' or (name and name.startswith('mini_')) else request.POST.get('workspace_token','')
             if not check_token(ctx,token):

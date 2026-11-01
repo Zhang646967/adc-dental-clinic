@@ -15,15 +15,17 @@ def active_grants(user):
         relationship__clinic__is_active=True)
 
 def has_patient_access(user):
-    return user.is_authenticated and user.is_active and (PatientAccess.objects.filter(user_id=user.pk,
+    from portal.medical_authority import active_proxies
+    return user.is_authenticated and user.is_active and (active_proxies(user).exists() or PatientAccess.objects.filter(user_id=user.pk,
         is_active=True, patient__is_active=True).exists() or active_grants(user).exists())
 
 
 def has_patient_account(user):
     """Account authentication survives suspended subject rights; no PATIENT grant."""
     from accounts.external_models import AccountIdentityEvent
+    from portal.medical_models import MedicalProxy
     return bool(user.is_authenticated and user.is_active and (
-        PatientAccess.objects.filter(user_id=user.pk).exists() or active_grants(user).exists() or
+        PatientAccess.objects.filter(user_id=user.pk).exists() or active_grants(user).exists() or MedicalProxy.objects.filter(delegate=user).exists() or
         AccountIdentityEvent.objects.filter(user_id=user.pk,action='BIND').exists()))
 
 @dataclass(frozen=True)
@@ -63,6 +65,13 @@ def patient_access(user, *, lock=False, self_only=False):
     if not user.is_authenticated:
         raise PermissionDenied('请先登录患者端。')
     ctx = getattr(user, '_adc_workspace', None)
+    if getattr(ctx, 'medical_proxy_id', None):
+        from portal.medical_authority import selected_proxy
+        version = selected_proxy(user,lock=lock)
+        if self_only or not getattr(ctx,'patient_grant_id',None):
+            raise PermissionDenied('医疗授权不包含预约、完整病历或账单，请选择对应本人或独立代约权限。')
+        if ctx.patient_grant.relationship.patient_id!=version.proxy.patient_id or ctx.patient_grant.relationship.clinic_id!=version.proxy.clinic_id:
+            raise PermissionDenied('就诊人与独立代约权限不一致。')
     grant_id = getattr(ctx, 'patient_grant_id', None)
     if grant_id:
         if self_only:
@@ -100,6 +109,14 @@ def subject_choices(user):
         r=grant.relationship
         rows.append(dict(key=f'grant:{grant.pk}', name=r.patient.name, capacity=r.get_kind_display()+' · 预约代办',
             clinic=r.clinic.name, expires=grant.valid_until.isoformat()))
+    from portal.medical_authority import active_proxies, latest_version, verify_version
+    for proxy in active_proxies(user).select_related('patient','clinic').order_by('pk'):
+        version=latest_version(proxy)
+        try: verify_version(version,actor=user)
+        except PermissionDenied: continue
+        appointment=active_grants(user).filter(relationship__patient_id=proxy.patient_id,relationship__clinic_id=proxy.clinic_id).first()
+        if appointment: rows=[r for r in rows if r['key']!=f'grant:{appointment.pk}']
+        rows.append(dict(key=f'medical:{proxy.pk}',name=proxy.patient.name,capacity=proxy.get_kind_display()+' · 医疗事项'+('＋代约' if appointment else ''),clinic=proxy.clinic.name,expires=version.valid_until.isoformat(),medical=True,can_book=bool(appointment)))
     return rows
 
 

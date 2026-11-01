@@ -32,6 +32,7 @@ def destination_after_activation(request):
     profile=pending_profile(request)
     if not profile:
         request.session.pop(INTENT_KEY,None);return None
+    if ctx.medical_proxy_id and not ctx.patient_grant_id:return reverse('portal_medical_authorizations')
     try:access=patient_access(request.user)
     except SubjectRequired:return reverse('portal_subjects')
     if profile.category=='CHILDREN' and not access.guardian:return reverse('portal_subjects')

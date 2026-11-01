@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_SOFTWARE_DELIVERED_REPORTED_TOOL_PASS_STEP6_CLOSING_PENDING",
+  "status": "LOCAL_SOFTWARE_DELIVERED_REPORTED_TOOL_BUSINESS_SCENARIOS_PASSED",
   "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
   "application_image": "sha256:90ecd8c5ae558957639dee279f239d9c25c5cb1c0a8492d5d815d76baa8d825a",
   "exact_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41177999254",
@@ -30,7 +30,7 @@
   "unchanged18332_backend": "08ba78183aba364865df57800c3df28684f7004b",
   "unchanged18315_backend": "64ddf8100933ef8c9439e91bdccdd30f61d6ebcd",
   "workbuddy_scope": "Deploy/import and official mini-tool regression only;25pages; own clinical operations only18342 cases; no doctor/backend/database/key edits",
-  "official_tool_this_client": "USER_RELAYED_PASS_REPORTED_SCENARIOS_STEP6_ANSWER_THEN_DECISION_PENDING",
+  "official_tool_this_client": "USER_RELAYED_PASS_REPORTED_SCENARIOS_INCLUDING_STEP6_CLOSURE",
   "physical_device": "NOT_RUN",
   "mini375_430_and_font_scale": "PENDING_SEPARATE_MATRIX",
   "website375_390_430_and_200percent": "PASSED",
@@ -47,8 +47,10 @@
   "official_tool_return": "workbuddy-return-20261031.json",
   "physician_reply": "physician-answer-20261031.json",
   "physician_answer_event": 22,
-  "patient_step6_decision_after_answer": "PENDING_WORKBUDDY",
+  "patient_step6_decision_after_answer": "PASSED_EVENT23",
   "all_25_page_compile_this_return": "NOT_SEPARATELY_ITEMIZED",
   "frozen_delivery_original_three_tables_empty_at_installation": true,
-  "new_original_clinical_tables_empty": true
+  "new_original_clinical_tables_empty": true,
+  "previous_followup_status": "LOCAL_SOFTWARE_DELIVERED_REPORTED_TOOL_PASS_STEP6_CLOSING_PENDING",
+  "workbuddy_closure": "workbuddy-closure-20261101.json"
 }

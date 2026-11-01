@@ -1,17 +1,17 @@
 {
   "er_consent_versions": {
-    "nodes": 7,
-    "edges": 10,
-    "width": 593,
-    "height": 745,
-    "minPrintedFontPt": 10.707521079258012
+    "nodes": 8,
+    "edges": 11,
+    "width": 795,
+    "height": 795,
+    "minPrintedFontPt": 7.986867924528302
   },
   "er_consent_events": {
-    "nodes": 6,
-    "edges": 8,
-    "width": 513,
-    "height": 607,
-    "minPrintedFontPt": 12.377309941520469
+    "nodes": 7,
+    "edges": 9,
+    "width": 714,
+    "height": 632,
+    "minPrintedFontPt": 8.89294117647059
   },
   "er_clinical_documents": {
     "nodes": 7,
@@ -243,5 +243,26 @@
     "width": 548,
     "height": 894,
     "minPrintedFontPt": 11.586788321167884
+  },
+  "er_medical_proxy": {
+    "nodes": 7,
+    "edges": 8,
+    "width": 542,
+    "height": 770,
+    "minPrintedFontPt": 11.715055350553506
+  },
+  "er_treatment_preflight": {
+    "nodes": 7,
+    "edges": 10,
+    "width": 631,
+    "height": 883,
+    "minPrintedFontPt": 10.0626941362916
+  },
+  "er_procedure_gap": {
+    "nodes": 5,
+    "edges": 6,
+    "width": 464,
+    "height": 508,
+    "minPrintedFontPt": 13.684396551724138
   }
 }

@@ -15,14 +15,19 @@ from workspaces.context import require_active
 
 
 def patient_plan_rows(actor):
-    require_active(actor,('PATIENT',));access=patient_access(actor,self_only=True)
+    require_active(actor,('PATIENT',))
+    from portal.medical_authority import is_proxy_context,selected_proxy
+    if is_proxy_context(actor):
+        basis=selected_proxy(actor)
+        return TreatmentPlan.objects.filter(pk=basis.plan_id).select_related('origin_encounter__visit__clinic')
+    access=patient_access(actor,self_only=True)
     return TreatmentPlan.objects.filter(origin_encounter__visit__patient_id=access.patient_id).annotate(
         has_version=Exists(PlanVersion.objects.filter(plan_id=OuterRef('pk')))).filter(has_version=True).select_related('origin_encounter__visit__clinic').order_by('-pk')
 
 
 def plan_steps(version):
     if version is None:return []
-    rows=list(version.steps.select_related('treatment_type','service','step').prefetch_related('decisions','executions').order_by('sequence'))
+    rows=list(version.steps.select_related('treatment_type','service','step').prefetch_related('decisions__proxy_version','executions').order_by('sequence'))
     stable_ids=[r.step_id for r in rows]
     prior=list(PerformedProcedure.objects.filter(step_version__step_id__in=stable_ids).select_related('encounter__visit','step_version').order_by('pk'))
     for row in rows:
@@ -56,6 +61,12 @@ def selected_version(plan,revision):
 def self_plan_details(actor,plan_id,*,revision=None):
     with reporting_snapshot():
         plan=get_object_or_404(patient_plan_rows(actor),pk=plan_id);version=selected_version(plan,revision)
+        from portal.medical_authority import is_proxy_context,selected_proxy
+        if is_proxy_context(actor):
+            basis=selected_proxy(actor);allowed=set(basis.scopes.values_list('step_id',flat=True))
+            rows=[r for r in plan_steps(version) if r.step_id in allowed]
+            for row in rows:row.actual_history=[]
+            return dict(plan=plan,version=version,steps=rows,versions=list(plan.versions.order_by('-revision')),is_current=version.pk==current_version(plan).pk,estimate={'total':None,'choice_required':False},instructions=[],medical_proxy=True)
         return dict(plan=plan,version=version,steps=plan_steps(version),versions=list(plan.versions.order_by('-revision')),
             is_current=version.pk==current_version(plan).pk,estimate=estimate_totals(version_payload(version)['steps']),
             instructions=list(NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=plan.origin_encounter.visit.patient_id,

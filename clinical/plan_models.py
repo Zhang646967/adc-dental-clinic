@@ -82,7 +82,8 @@ class PlanDecision(models.Model):
     step_version=models.ForeignKey(PlanStepVersion,on_delete=models.PROTECT,related_name='decisions')
     actor=models.ForeignKey('accounts.UserAccount',on_delete=models.PROTECT)
     decision=models.CharField(max_length=16,choices=[('ACCEPTED','认可此步骤'),('DEFERRED','暂缓'),('DECLINED','不选择')])
-    source=models.CharField(max_length=16,choices=[('SELF','本人提交'),('MANUAL','医师记录本人表态')])
+    source=models.CharField(max_length=16,choices=[('SELF','本人提交'),('MANUAL','医师记录本人表态'),('PROXY','医疗代理提交'),('MANUAL_PROXY','医师记录医疗代理原件')])
+    proxy_version=models.ForeignKey('portal.MedicalProxyVersion',null=True,blank=True,on_delete=models.PROTECT)
     self_access=models.ForeignKey('portal.PatientAccess',null=True,blank=True,on_delete=models.PROTECT)
     source_visit=models.ForeignKey('scheduling.Visit',null=True,blank=True,on_delete=models.PROTECT)
     reference=models.CharField(max_length=500,blank=True)
@@ -92,10 +93,11 @@ class PlanDecision(models.Model):
     class Meta:
         db_table='adc_plan_decision'
         constraints=[models.CheckConstraint(condition=Q(decision__in=['ACCEPTED','DEFERRED','DECLINED']),name='plan_decision_valid'),
-            models.CheckConstraint(condition=Q(source='SELF',self_access__isnull=False,source_visit__isnull=True)|Q(source='MANUAL',self_access__isnull=True,source_visit__isnull=False),name='plan_decision_source_valid')]
+            models.CheckConstraint(condition=Q(source='SELF',self_access__isnull=False,source_visit__isnull=True,proxy_version__isnull=True)|Q(source='MANUAL',self_access__isnull=True,source_visit__isnull=False,proxy_version__isnull=True)|Q(source='PROXY',self_access__isnull=True,source_visit__isnull=True,proxy_version__isnull=False)|Q(source='MANUAL_PROXY',self_access__isnull=True,source_visit__isnull=False,proxy_version__isnull=False),name='plan_decision_source_valid')]
 
 
 class PerformedProcedure(models.Model):
+    preflight=models.OneToOneField('clinical.TreatmentPreflight',null=True,blank=True,on_delete=models.PROTECT)
     encounter=models.ForeignKey('clinical.ClinicalEncounter',on_delete=models.PROTECT,related_name='performed_procedures')
     source_record=models.ForeignKey('clinical.ClinicalRecordVersion',on_delete=models.PROTECT)
     step_version=models.ForeignKey(PlanStepVersion,null=True,blank=True,on_delete=models.PROTECT,related_name='executions')

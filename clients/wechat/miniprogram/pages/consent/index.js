@@ -12,7 +12,7 @@ Page({
   try{const s=await api.bootstrap();api.showSubject(this);
    if(!s.authenticated){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/login/index'});return;}
    if(s.subject_required){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/patients/index'});return;}
-   if(s.delegated){this.clear();this.setData({busy:false,error:'预约代办不包含医疗告知查阅或代签，请切换至本人。'});return;}
+   if(s.delegated&&!s.medical){this.clear();this.setData({busy:false,error:'预约代办不包含医疗告知查阅或代签，请切换至本人。'});return;}
    if(this._subject!==stamp())this.clear();this._subject=stamp();this.setData({readOnly:s.read_only});await this.load();
   }catch(e){this.failed(e);}
  },
@@ -30,7 +30,7 @@ Page({
  checked(e){if(!this.data.busy&&!this.data.uncertain)this.setData({checked:e.detail.value.includes('yes')});},
  async preview(){
   if(this.data.busy||this.data.uncertain||this.data.readOnly||!this.data.medical)return;
-  if(this._subject!==stamp()||api.sessionInfo().delegated){this.clear();this.setData({error:'本人身份已变化，请重新打开。'});return;}
+  if(this._subject!==stamp()||(api.sessionInfo().delegated&&!api.sessionInfo().medical)){this.clear();this.setData({error:'本人身份已变化，请重新打开。'});return;}
   this.setData({busy:true,error:''});
   try{const action=actions[this.data.actionIndex];const d=await api.request('steps/'+this.stepId+'/consent/preview/','POST',{action:action.code,text:this.data.text,version:this.data.medical.version});
    if(this._subject!==stamp()){this.clear();throw new Error('就诊人已变化，请重新核对。');}
@@ -39,7 +39,7 @@ Page({
  },
  async confirm(){
   if(this.data.busy||this.data.readOnly||!this.data.preview)return;
-  if(this._subject!==stamp()||api.sessionInfo().delegated){this.clear();this.setData({error:'本人身份已变化，原确认不能继续。'});return;}
+  if(this._subject!==stamp()||(api.sessionInfo().delegated&&!api.sessionInfo().medical)){this.clear();this.setData({error:'本人身份已变化，原确认不能继续。'});return;}
   if(!this.data.uncertain&&!this.data.checked){this.setData({error:'请先核对具体内容、版本及本人表达。'});return;}
   if(!this._pending)this._pending={step:this.stepId,data:{proposal_token:this.data.preview.proposal_token,confirmed:'on'}};
   this.setData({busy:true,error:''});

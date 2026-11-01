@@ -21,6 +21,7 @@ NAV['DENTIST'].insert(0,('clinical_documents','病历文书与待办'))
 NAV['DENTIST'].insert(1,('clinical_doctor_lab_queue','加工验收工作台'))
 NAV['PATIENT'].append(('portal_history','我的健康自述'))
 NAV['PATIENT'].append(('portal_plans','我的治疗计划'))
+NAV['PATIENT'].append(('portal_medical_authorizations','医疗授权与代理事项'))
 NAV['FRONT_DESK'].insert(5,('clinical_next_list','后续就诊安排'))
 NAV['MANAGER'].append(('branch_directory_maintain','门店公开资料'))
 NAV['FRONT_DESK'].insert(6,('clinical_recalls','复诊随访与责任'))
@@ -61,6 +62,18 @@ def navigation(request):
     if role=='PATIENT':
         from portal.policies import patient_access
         from django.core.exceptions import PermissionDenied
+        if ctx.medical_proxy_id:
+            from portal.medical_authority import selected_proxy
+            from adc_core.rules import RuleError
+            try:
+                basis=selected_proxy(user)
+                data.update(patient_subject=basis.proxy.patient.name,patient_delegated=True,patient_medical=True,
+                    patient_capacity=basis.proxy.get_kind_display()+' · '+basis.proxy.clinic.name,workspace_scope='独立医疗授权')
+                routes=[('portal_medical_authorizations','医疗事项'),('portal_subjects','选择就诊人'),('portal_plans','授权步骤')]
+                if ctx.patient_grant_id:routes.extend([('portal_appointments','当前患者预约'),('waitlist','当前患者候补')])
+                data['workspace_nav']=[dict(url=reverse(n),label=label,active=False) for n,label in routes]
+                return data
+            except (PermissionDenied,RuleError):return data
         try:
             access=patient_access(user)
             data.update(patient_subject=access.patient.name,patient_delegated=access.delegated,

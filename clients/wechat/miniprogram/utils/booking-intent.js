@@ -11,6 +11,7 @@ function destination(app,session){
   if(session.account_authenticated&&app.globalData.webLoginTicket)return '/pages/web-login/index?ticket='+app.globalData.webLoginTicket;
   if(session.account_authenticated&&!session.authenticated)return '/pages/account/index';
   if(session.subject_required)return '/pages/patients/index';
+  if(session.medical&&!session.can_book)return '/pages/medical-authorizations/index';
   const intent=app.globalData.bookingIntent;
   if(intent&&intent.expires>Date.now()&&intent.requiresGuardian&&!session.guardian)return '/pages/patients/index';
   app.globalData.bookingIntent=null;

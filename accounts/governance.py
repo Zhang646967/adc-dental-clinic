@@ -27,7 +27,7 @@ from workspaces.models import WorkspaceContext
 
 SALT = 'adc.account-management.v08a1'
 MANAGED_ROLES = {'DENTIST':'SELF_DENTIST','FRONT_DESK':'CLINIC','MANAGER':'CLINIC','HQ':'CHAIN','FINANCE':'CHAIN'}
-ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer','clinical_reviewer'))
+ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer','medical_proxy_reviewer','clinical_reviewer'))
 
 
 def require_technical(actor):
@@ -37,7 +37,7 @@ def require_technical(actor):
 
 
 def state_digest(target):
-    grant_rows=list(RoleAssignment.objects.filter(user=target).order_by('id').values_list('id','role','scope_kind','clinic_id','is_active','can_verify_patient_relationships'))
+    grant_rows=list(RoleAssignment.objects.filter(user=target).order_by('id').values_list('id','role','scope_kind','clinic_id','is_active','can_verify_patient_relationships','can_verify_medical_proxy_identity'))
     access=list(PatientAccess.objects.filter(user=target).values_list('id','patient_id','is_active'))
     from clinical.models import ClinicalReviewerAppointment
     reviewers=list(ClinicalReviewerAppointment.objects.filter(user=target).order_by('id').values_list('id','revision','is_active'))
@@ -84,7 +84,7 @@ def check_reason(reason):
 
 
 def invalidate_contexts(target):
-    WorkspaceContext.objects.filter(user=target).update(role='',clinic=None,patient_grant=None,revision=F('revision')+1,updated_at=timezone.now())
+    WorkspaceContext.objects.filter(user=target).update(role='',clinic=None,patient_grant=None,medical_proxy=None,medical_proxy_revision=0,revision=F('revision')+1,updated_at=timezone.now())
 
 
 def protected_target(actor, target):
@@ -156,8 +156,13 @@ def change_account(*, actor, target_id, token, action, operator_password, reason
         obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target)
         if obj.role not in MANAGED_ROLES:raise PermissionDenied('不能在此撤回技术管理身份。')
         if obj.role=='DENTIST' and pending_work(target):raise RuleError('仍有未闭合业务，请先安排交接；没有撤回牙医身份。')
-        obj.is_active=False;obj.can_verify_patient_relationships=False
-        obj.save(update_fields=['is_active','can_verify_patient_relationships']);summary['grant_id']=obj.pk
+        obj.is_active=False;obj.can_verify_patient_relationships=False;obj.can_verify_medical_proxy_identity=False
+        obj.save(update_fields=['is_active','can_verify_patient_relationships','can_verify_medical_proxy_identity']);summary['grant_id']=obj.pk
+    elif action == 'medical_proxy_reviewer':
+        obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target,role='FRONT_DESK',scope_kind='CLINIC',is_active=True,clinic__is_active=True)
+        obj.can_verify_medical_proxy_identity=bool(reviewer_enabled)
+        obj.save(update_fields=['can_verify_medical_proxy_identity'])
+        summary.update(grant_id=obj.pk,medical_proxy_identity_reviewer=obj.can_verify_medical_proxy_identity)
     elif action == 'identity_reviewer':
         obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target,role='FRONT_DESK',scope_kind='CLINIC',is_active=True,clinic__is_active=True)
         obj.can_verify_patient_relationships=bool(reviewer_enabled)

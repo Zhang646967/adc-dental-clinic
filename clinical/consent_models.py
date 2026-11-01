@@ -15,6 +15,8 @@ class MedicalConsent(models.Model):
 
 
 class ConsentVersion(models.Model):
+    signer_kind = models.CharField(max_length=8, choices=[('SELF','本人'),('PROXY','经核验医疗代理')], default='SELF', db_default='SELF')
+    proxy_version = models.ForeignKey('portal.MedicalProxyVersion', null=True, blank=True, on_delete=models.PROTECT)
     consent = models.ForeignKey(MedicalConsent, on_delete=models.PROTECT, related_name='versions')
     revision = models.PositiveIntegerField()
     previous = models.OneToOneField('self', null=True, blank=True, on_delete=models.PROTECT, related_name='next_version')
@@ -29,14 +31,15 @@ class ConsentVersion(models.Model):
 
     class Meta:
         db_table = 'adc_consent_version'
-        constraints = [models.UniqueConstraint(fields=['consent', 'revision'], name='consent_version_number'),
+        constraints = [models.CheckConstraint(condition=Q(signer_kind='SELF',proxy_version__isnull=True)|Q(signer_kind='PROXY',proxy_version__isnull=False),name='consent_signer_basis'),
+                       models.UniqueConstraint(fields=['consent', 'revision'], name='consent_version_number'),
                        models.CheckConstraint(condition=Q(revision__gte=1), name='consent_version_positive')]
 
 
 class ConsentEvent(models.Model):
     ACTIONS = [('PUBLISHED', '医师告知确认'), ('QUESTION', '本人提问'), ('ANSWER', '医师答复'),
                ('AGREED', '本人同意'), ('DECLINED', '本人拒绝'), ('DEFERRED', '本人暂缓'), ('WITHDRAWN', '撤回同意')]
-    SOURCES = [('DOCTOR_ACCOUNT', '医师账号记录'), ('SELF_ACCOUNT', '患者本人账号确认'),
+    SOURCES = [('PROXY_ACCOUNT', '经核验医疗代理账号确认'), ('DOCTOR_ACCOUNT', '医师账号记录'), ('SELF_ACCOUNT', '患者本人账号确认'),
                ('PAPER_REFERENCE', '纸质原件决定登记')]
     consent = models.ForeignKey(MedicalConsent, on_delete=models.PROTECT, related_name='events')
     version = models.ForeignKey(ConsentVersion, on_delete=models.PROTECT, related_name='events')
@@ -44,6 +47,7 @@ class ConsentEvent(models.Model):
     operation_id = models.UUIDField(unique=True)
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     self_access = models.ForeignKey('portal.PatientAccess', null=True, blank=True, on_delete=models.PROTECT)
+    proxy_version = models.ForeignKey('portal.MedicalProxyVersion', null=True, blank=True, on_delete=models.PROTECT)
     action = models.CharField(max_length=12, choices=ACTIONS)
     source = models.CharField(max_length=20, choices=SOURCES)
     text = models.CharField(max_length=2000, blank=True)
@@ -57,5 +61,5 @@ class ConsentEvent(models.Model):
         constraints = [models.UniqueConstraint(fields=['consent', 'sequence'], name='consent_event_sequence'),
             models.CheckConstraint(condition=Q(sequence__gte=1), name='consent_event_positive'),
             models.CheckConstraint(condition=Q(action__in=['PUBLISHED', 'QUESTION', 'ANSWER', 'AGREED', 'DECLINED', 'DEFERRED', 'WITHDRAWN']), name='consent_event_action'),
-            models.CheckConstraint(condition=Q(source__in=['DOCTOR_ACCOUNT', 'SELF_ACCOUNT', 'PAPER_REFERENCE']), name='consent_event_source'),
+            models.CheckConstraint(condition=Q(source__in=['DOCTOR_ACCOUNT', 'SELF_ACCOUNT', 'PROXY_ACCOUNT', 'PAPER_REFERENCE']), name='consent_event_source'),
             models.CheckConstraint(condition=Q(source='SELF_ACCOUNT', self_access__isnull=False) | (~Q(source='SELF_ACCOUNT') & Q(self_access__isnull=True)), name='consent_self_basis')]

@@ -1,0 +1,63 @@
+{
+  "source": "USER_RELAYED_WORKBUDDY_STEP6_CLOSING_RETURN",
+  "reported_date": "2026-11-01",
+  "application_commit": "c40c2dd84a9ab0142c7a6e5dfc4ea8e30f9e4392",
+  "result": "PASS",
+  "visit": 13,
+  "plan": 3,
+  "step": 6,
+  "consent": 4,
+  "display_revision": 1,
+  "version_id": 4,
+  "question": 20,
+  "answer": 22,
+  "decision": 23,
+  "decision_action": "AGREED",
+  "decision_source": "SELF_ACCOUNT",
+  "recorded_at": "2026-11-01T01:47:39.763333+00:00",
+  "request_id": "ce9b121ab5f94bbcb8a074808482b02b",
+  "reported_duration_ms": 61,
+  "status": 200,
+  "event_order": [
+    4,
+    20,
+    22,
+    23
+  ],
+  "codex_independent_read_only_database_match": true,
+  "actual_history": 0,
+  "no_repackage_compile_or_wechat_relogin": true,
+  "tool_closing_pending": false,
+  "physical_phone_and_device_matrix": "PENDING_SEPARATE",
+  "other_step_events": {
+    "3": [
+      1,
+      16,
+      17
+    ],
+    "4": [
+      2,
+      18
+    ],
+    "5": [
+      3,
+      19
+    ],
+    "7": [
+      5,
+      6,
+      7,
+      11,
+      12,
+      13,
+      14,
+      15,
+      21
+    ],
+    "8": [
+      8,
+      9,
+      10
+    ]
+  }
+}

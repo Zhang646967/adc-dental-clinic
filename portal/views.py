@@ -82,8 +82,12 @@ class PortalLoginView(LoginView):
 @login_required(login_url="portal_login")
 @require_GET
 def home(request):
+    ctx=getattr(request.user,'_adc_workspace',None)
+    if ctx and ctx.medical_proxy_id and not ctx.patient_grant_id:return redirect('portal_medical_authorizations')
     from portal.patient_dashboard import dashboard
-    overview=dashboard(request.user)
+    from portal.policies import SubjectRequired
+    try:overview=dashboard(request.user)
+    except SubjectRequired:return redirect('portal_subjects')
     from workspaces.worklists import workspace_worklist
     return render(request,"portal/home.html",dict(overview, worklist=workspace_worklist(request.user)))
 

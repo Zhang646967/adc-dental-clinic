@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect,get_object_or_404
 from django.views.decorators.http import require_http_methods,require_GET
 from django.views.decorators.debug import sensitive_post_parameters
@@ -102,11 +103,14 @@ def subjects(request):
             request.session.pop('adc_guide',None)
             destination=destination_after_activation(request)
             messages.success(request,'已切换就诊人，请按页面上的姓名和授权范围重新办理。')
+            if request.workspace.medical_proxy_id and not destination:
+                from portal.medical_authority import selected_proxy
+                return redirect('portal_plan',pk=selected_proxy(request.user).plan_id)
             return redirect(destination or 'portal_home')
     current=None
     try:
         access=patient_access(request.user);current=access.pk if access.delegated else 'self'
-    except SubjectRequired:pass
+    except (SubjectRequired,PermissionDenied):pass
     rows=subject_choices(request.user)
     from datetime import datetime
     from django.utils import timezone

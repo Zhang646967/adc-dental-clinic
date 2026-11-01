@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 148 ORM tables; django_migrations is a framework migration journal.
+// All 157 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -261,6 +261,23 @@ Table adc_clinical_authority_policy {
   reference "character varying(160)" [not null]
 }
 
+Table adc_clinical_consent_rule {
+  id "bigint" [pk, not null]
+  operation_id "uuid" [unique, not null]
+  clinic_id "bigint" [not null]
+  treatment_type_id "bigint" [not null]
+  number "integer" [not null]
+  mode "character varying(16)" [not null]
+  reference "character varying(500)" [not null]
+  explanation "character varying(1000)" [not null]
+  published_by_id "bigint" [not null]
+  reviewer_id "bigint" [not null]
+  published_at "timestamp with time zone" [not null]
+  indexes {
+    (clinic_id, treatment_type_id, number) [unique, name: 'clinical_rule_number']
+  }
+}
+
 Table adc_clinical_document {
   id "bigint" [pk, not null]
   encounter_id "bigint" [unique, not null]
@@ -470,6 +487,7 @@ Table adc_consent_event {
   operation_id "uuid" [unique, not null]
   actor_id "bigint" [not null]
   self_access_id "bigint" [null]
+  proxy_version_id "bigint" [null]
   action "character varying(12)" [not null]
   source "character varying(20)" [not null]
   text "character varying(2000)" [not null]
@@ -484,6 +502,8 @@ Table adc_consent_event {
 
 Table adc_consent_version {
   id "bigint" [pk, not null]
+  signer_kind "character varying(8)" [not null]
+  proxy_version_id "bigint" [null]
   consent_id "bigint" [not null]
   revision "integer" [not null]
   previous_id "bigint" [unique, null]
@@ -1171,6 +1191,63 @@ Table adc_medical_consent {
   opened_at "timestamp with time zone" [not null]
 }
 
+Table adc_medical_proxy {
+  id "bigint" [pk, not null]
+  patient_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  delegate_id "bigint" [not null]
+  kind "character varying(16)" [not null]
+  state "character varying(16)" [not null]
+  revision "integer" [not null]
+  created_by_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_medical_proxy_event {
+  id "bigint" [pk, not null]
+  proxy_id "bigint" [not null]
+  version_id "bigint" [not null]
+  sequence "integer" [not null]
+  action "character varying(20)" [not null]
+  resulting_state "character varying(16)" [not null]
+  actor_id "bigint" [not null]
+  reviewer_id "bigint" [null]
+  note "character varying(1000)" [not null]
+  operation_id "uuid" [unique, not null]
+  recorded_at "timestamp with time zone" [not null]
+  indexes {
+    (proxy_id, sequence) [unique, name: 'medical_proxy_event_order']
+  }
+}
+
+Table adc_medical_proxy_scope {
+  id "bigint" [pk, not null]
+  version_id "bigint" [not null]
+  step_id "bigint" [not null]
+  indexes {
+    (version_id, step_id) [unique, name: 'medical_proxy_step_scope']
+  }
+}
+
+Table adc_medical_proxy_version {
+  id "bigint" [pk, not null]
+  patient_snapshot "jsonb" [not null]
+  delegate_name "character varying(100)" [not null]
+  proxy_id "bigint" [not null]
+  number "integer" [not null]
+  plan_id "bigint" [not null]
+  identity_reference "character varying(500)" [not null]
+  authority_reference "character varying(500)" [not null]
+  applicability "character varying(1000)" [not null]
+  valid_from "timestamp with time zone" [not null]
+  valid_until "timestamp with time zone" [not null]
+  submitted_by_id "bigint" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  indexes {
+    (proxy_id, number) [unique, name: 'medical_proxy_version_number']
+  }
+}
+
 Table adc_monthly_cost {
   id "bigint" [pk, not null]
   period_id "bigint" [not null]
@@ -1343,6 +1420,7 @@ Table adc_payment_account {
 
 Table adc_performed_procedure {
   id "bigint" [pk, not null]
+  preflight_id "bigint" [unique, null]
   encounter_id "bigint" [not null]
   source_record_id "bigint" [not null]
   step_version_id "bigint" [null]
@@ -1381,6 +1459,7 @@ Table adc_plan_decision {
   actor_id "bigint" [not null]
   decision "character varying(16)" [not null]
   source "character varying(16)" [not null]
+  proxy_version_id "bigint" [null]
   self_access_id "bigint" [null]
   source_visit_id "bigint" [null]
   reference "character varying(500)" [not null]
@@ -1462,6 +1541,26 @@ Table adc_portal_booking_receipt {
   appointment_grant_id "bigint" [null]
   visit_id "bigint" [unique, not null]
   created_at "timestamp with time zone" [not null]
+}
+
+Table adc_procedure_gap {
+  id "bigint" [pk, not null]
+  performed_id "bigint" [unique, not null]
+  reason "character varying(1000)" [not null]
+  missing "jsonb" [not null]
+  recorded_by_id "bigint" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  state "character varying(16)" [not null]
+}
+
+Table adc_procedure_gap_review {
+  id "bigint" [pk, not null]
+  gap_id "bigint" [unique, not null]
+  reviewer_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  note "character varying(1000)" [not null]
+  recorded_at "timestamp with time zone" [not null]
+  operation_id "uuid" [unique, not null]
 }
 
 Table adc_professional_authorization {
@@ -1698,6 +1797,7 @@ Table adc_role_assignment {
   clinic_id "bigint" [null]
   is_active "boolean" [not null]
   can_verify_patient_relationships "boolean" [not null]
+  can_verify_medical_proxy_identity "boolean" [not null]
 }
 
 Table adc_schedule_plan {
@@ -1823,12 +1923,36 @@ Table adc_tooth_finding {
   }
 }
 
+Table adc_treatment_control_policy {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [unique, not null]
+  activated_by_id "bigint" [not null]
+  reference "character varying(500)" [not null]
+  activated_at "timestamp with time zone" [not null]
+}
+
 Table adc_treatment_plan {
   id "bigint" [pk, not null]
   origin_encounter_id "bigint" [not null]
   opened_by_id "bigint" [not null]
   opened_at "timestamp with time zone" [not null]
   revision "integer" [not null]
+}
+
+Table adc_treatment_preflight {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [not null]
+  source_record_id "bigint" [not null]
+  step_version_id "bigint" [null]
+  rule_id "bigint" [not null]
+  consent_version_id "bigint" [null]
+  consent_decision_id "bigint" [null]
+  proxy_version_id "bigint" [null]
+  snapshot "jsonb" [not null]
+  communication "character varying(1000)" [not null]
+  checked_by_id "bigint" [not null]
+  checked_at "timestamp with time zone" [not null]
+  operation_id "uuid" [unique, not null]
 }
 
 Table adc_treatment_record {
@@ -2015,6 +2139,8 @@ Table adc_workspace_context {
   login_channel "character varying(8)" [not null]
   clinic_id "bigint" [null]
   patient_grant_id "bigint" [null]
+  medical_proxy_id "bigint" [null]
+  medical_proxy_revision "integer" [not null]
   revision "integer" [not null]
   updated_at "timestamp with time zone" [not null]
 }
@@ -2103,6 +2229,10 @@ Ref: adc_clinical_authority_event.reviewer_id > adc_clinical_reviewer.id
 Ref: adc_clinical_authority_event.actor_id > adc_user.id
 Ref: adc_clinical_authority_policy.activated_by_id > adc_user.id
 Ref: adc_clinical_authority_policy.clinic_id - adc_clinic.id
+Ref: adc_clinical_consent_rule.published_by_id > adc_user.id
+Ref: adc_clinical_consent_rule.reviewer_id > adc_clinical_reviewer.id
+Ref: adc_clinical_consent_rule.clinic_id > adc_clinic.id
+Ref: adc_clinical_consent_rule.treatment_type_id > adc_treatment_type.id
 Ref: adc_clinical_document.encounter_id - adc_clinical_encounter.id
 Ref: adc_clinical_document.responsible_id > adc_user.id
 Ref: adc_clinical_document_draft.base_version_id > adc_clinical_document_version.id
@@ -2158,12 +2288,14 @@ Ref: adc_clinical_reviewer.clinic_id > adc_clinic.id
 Ref: adc_clinical_reviewer.user_id > adc_user.id
 Ref: adc_consent_event.actor_id > adc_user.id
 Ref: adc_consent_event.consent_id > adc_medical_consent.id
+Ref: adc_consent_event.proxy_version_id > adc_medical_proxy_version.id
 Ref: adc_consent_event.reply_to_id - adc_consent_event.id
 Ref: adc_consent_event.self_access_id > adc_patient_access.id
 Ref: adc_consent_event.version_id > adc_consent_version.id
 Ref: adc_consent_version.consent_id > adc_medical_consent.id
 Ref: adc_consent_version.prepared_by_id > adc_user.id
 Ref: adc_consent_version.previous_id - adc_consent_version.id
+Ref: adc_consent_version.proxy_version_id > adc_medical_proxy_version.id
 Ref: adc_consent_version.source_record_id > adc_clinical_record_version.id
 Ref: adc_consent_version.step_version_id > adc_plan_step_version.id
 Ref: adc_coordination_task.slot_id > adc_availability_slot.id
@@ -2292,6 +2424,19 @@ Ref: adc_management_report.confirmed_by_id > adc_user.id
 Ref: adc_management_report.period_id > adc_cost_month.id
 Ref: adc_medical_consent.opened_by_id > adc_user.id
 Ref: adc_medical_consent.step_id - adc_treatment_step.id
+Ref: adc_medical_proxy.clinic_id > adc_clinic.id
+Ref: adc_medical_proxy.created_by_id > adc_user.id
+Ref: adc_medical_proxy.delegate_id > adc_user.id
+Ref: adc_medical_proxy.patient_id > adc_patient.id
+Ref: adc_medical_proxy_event.proxy_id > adc_medical_proxy.id
+Ref: adc_medical_proxy_event.reviewer_id > adc_clinical_reviewer.id
+Ref: adc_medical_proxy_event.version_id > adc_medical_proxy_version.id
+Ref: adc_medical_proxy_event.actor_id > adc_user.id
+Ref: adc_medical_proxy_scope.step_id > adc_treatment_step.id
+Ref: adc_medical_proxy_scope.version_id > adc_medical_proxy_version.id
+Ref: adc_medical_proxy_version.plan_id > adc_treatment_plan.id
+Ref: adc_medical_proxy_version.proxy_id > adc_medical_proxy.id
+Ref: adc_medical_proxy_version.submitted_by_id > adc_user.id
 Ref: adc_monthly_cost.dentist_id > adc_dentist.id
 Ref: adc_monthly_cost.equipment_event_id > adc_equipment_event.id
 Ref: adc_monthly_cost.period_id > adc_cost_month.id
@@ -2327,6 +2472,7 @@ Ref: adc_payment_account.clinic_id > adc_clinic.id
 Ref: adc_payment_account.created_by_id > adc_user.id
 Ref: adc_performed_procedure.charge_line_id - adc_treatment_record.id
 Ref: adc_performed_procedure.encounter_id > adc_clinical_encounter.id
+Ref: adc_performed_procedure.preflight_id - adc_treatment_preflight.id
 Ref: adc_performed_procedure.source_record_id > adc_clinical_record_version.id
 Ref: adc_performed_procedure.step_version_id > adc_plan_step_version.id
 Ref: adc_performed_procedure.treatment_type_id > adc_treatment_type.id
@@ -2335,6 +2481,7 @@ Ref: adc_plan_appointment.instruction_id > adc_next_visit_instruction.id
 Ref: adc_plan_appointment.linked_by_id > adc_user.id
 Ref: adc_plan_appointment.visit_id > adc_visit.id
 Ref: adc_plan_decision.actor_id > adc_user.id
+Ref: adc_plan_decision.proxy_version_id > adc_medical_proxy_version.id
 Ref: adc_plan_decision.self_access_id > adc_patient_access.id
 Ref: adc_plan_decision.source_visit_id > adc_visit.id
 Ref: adc_plan_decision.step_version_id > adc_plan_step_version.id
@@ -2359,6 +2506,11 @@ Ref: adc_plan_version.source_record_id > adc_clinical_record_version.id
 Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
 Ref: adc_portal_booking_receipt.appointment_grant_id > adc_patient_appointment_grant.id
 Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
+Ref: adc_procedure_gap.performed_id - adc_performed_procedure.id
+Ref: adc_procedure_gap.recorded_by_id > adc_user.id
+Ref: adc_procedure_gap_review.gap_id - adc_procedure_gap.id
+Ref: adc_procedure_gap_review.reviewer_id > adc_clinical_reviewer.id
+Ref: adc_procedure_gap_review.actor_id > adc_user.id
 Ref: adc_professional_authorization.clinic_id > adc_clinic.id
 Ref: adc_professional_authorization.created_by_id > adc_user.id
 Ref: adc_professional_authorization.service_id > adc_booking_service.id
@@ -2429,8 +2581,18 @@ Ref: adc_statement_use.cash_match_id - adc_reconciliation_match.id
 Ref: adc_statement_use.fund_transfer_id - adc_fund_transfer.id
 Ref: adc_statement_use.line_id > adc_statement_line.id
 Ref: adc_tooth_finding.record_id > adc_clinical_record_version.id
+Ref: adc_treatment_control_policy.activated_by_id > adc_user.id
+Ref: adc_treatment_control_policy.clinic_id - adc_clinic.id
 Ref: adc_treatment_plan.opened_by_id > adc_user.id
 Ref: adc_treatment_plan.origin_encounter_id > adc_clinical_encounter.id
+Ref: adc_treatment_preflight.consent_decision_id > adc_consent_event.id
+Ref: adc_treatment_preflight.consent_version_id > adc_consent_version.id
+Ref: adc_treatment_preflight.proxy_version_id > adc_medical_proxy_version.id
+Ref: adc_treatment_preflight.rule_id > adc_clinical_consent_rule.id
+Ref: adc_treatment_preflight.source_record_id > adc_clinical_record_version.id
+Ref: adc_treatment_preflight.step_version_id > adc_plan_step_version.id
+Ref: adc_treatment_preflight.checked_by_id > adc_user.id
+Ref: adc_treatment_preflight.visit_id > adc_visit.id
 Ref: adc_treatment_record.confirmed_by_id > adc_user.id
 Ref: adc_treatment_record.record_version_id > adc_visit_record_version.id
 Ref: adc_treatment_record.treatment_type_id > adc_treatment_type.id
@@ -2466,6 +2628,7 @@ Ref: adc_wait_request.service_id > adc_booking_service.id
 Ref: adc_web_login_ticket.identity_id > adc_external_identity.id
 Ref: adc_web_login_ticket.user_id > adc_user.id
 Ref: adc_web_login_ticket.workspace_id > adc_workspace_context.id
+Ref: adc_workspace_context.medical_proxy_id > adc_medical_proxy.id
 Ref: adc_workspace_context.patient_grant_id > adc_patient_appointment_grant.id
 Ref: adc_workspace_context.clinic_id > adc_clinic.id
 Ref: adc_workspace_context.user_id > adc_user.id
