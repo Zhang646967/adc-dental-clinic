@@ -236,7 +236,7 @@
     "clients/wechat/miniprogram/pages/plan/index.wxml": "7ace4a4634cf189179cb00ff25baf43f7c4d69a4bf8b3ab28e2624d3a12048b5",
     "clients/wechat/miniprogram/pages/plans/index.js": "cc62af9712aa8fd6aa2eb17b43783d0ab40e84550bd6293022fa6ebedd9e78f0",
     "clients/wechat/miniprogram/pages/plans/index.wxml": "31349d411b665cb9e7c390ae60adfcc4a4a50022fd623f01f42f8cc3211faa98",
-    "clients/wechat/miniprogram/pages/record-copies/index.js": "7794acc6fe97b901699f6a5e71e380381e79a2d5fb66a51c87b68856dc5cf29b",
+    "clients/wechat/miniprogram/pages/record-copies/index.js": "13fd50bff18bd3909aca7c3edbdf886f507a4381a34bcf322f9546a37c98c685",
     "clients/wechat/miniprogram/pages/record-copies/index.json": "557fe3c8a87cec95375d90affeb19e7655f1ca66a2033f7d98d242f3925050d4",
     "clients/wechat/miniprogram/pages/record-copies/index.wxml": "28fdbd2ca5d0d87087f5d683151b57e14b02c967e88c29501c97128cba411b64",
     "clients/wechat/miniprogram/pages/record-copies/index.wxss": "54da532cbdb827d7d4b8429eb14d5feb802971c11621ce7f366294a8a358f083",
@@ -1467,7 +1467,7 @@
     "scripts/verify_native_medical.cjs": "020212e205f78ea5df75069804eb985995d40cd7c4975c47d1e3a06c2da2d5d9",
     "scripts/verify_native_plans.cjs": "cdabeca395bfafc753a99c6cd5f196375afd4c5802db7179fa79683bc2973e13",
     "scripts/verify_native_profiles.cjs": "218fae2c7a0ccc23433bb2043d994ee762a8df1473205ba52eb1821b00a43bb6",
-    "scripts/verify_native_record_copies.cjs": "2a69bec70bbef54c8a375fb4fb1f1f6a160862f13e1dba55df831eb5d6cf8164",
+    "scripts/verify_native_record_copies.cjs": "3bd9636554aeed18518db8a400913e8ad1c6f84adb630a4ca3c6aa62ea0be88a",
     "scripts/verify_native_services.cjs": "4f18ffcd5baa1ab7d23456b6ebda82afb25f1b4c57deb3f3c89c978deda02fd0",
     "scripts/verify_native_wechat.cjs": "2414bafa23530ac20bd36f97556024ee548b59146d1bde0a70d4de42ead2a1be",
     "scripts/verify_patient_cash_wechat.cjs": "5e59ee7bb0a7918b8eb90d735a8ab1f362b06df8a582bfe2f5b1f6b9333e0f6f",
@@ -1964,11 +1964,13 @@
     }
   },
   "native_client_followup": {
-    "source_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "status": "C33B_NORMAL_NEW_APPLICATION_FIX_LOCAL_VERIFIED",
+    "change": "Rename Page method options to loadOptions; lifecycle fixture models native data aliases. Backend API, business commands, schema and authentication unchanged.",
     "backend_application": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
-    "status": "C33B_FROZEN_27_PAGES_OFFICIAL_TOOL_PENDING",
-    "authentication_configuration_changed": false,
-    "scope": "New copy page and existing-session private PDF download; no unrelated real-WeChat relogin."
+    "backend_image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
+    "source_checks": 315,
+    "copy_page_handler_cases": 9,
+    "official_normal_entry_retest": "PENDING_WORKBUDDY"
   },
   "historical_metadata_pre_wb_p4": {
     "target": "C3.1 accepted backend retained; native login feedback fix and isolated WorkBuddy business handoff delivered",

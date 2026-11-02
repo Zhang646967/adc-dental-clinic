@@ -13,14 +13,14 @@ Page({
    const contextKey=[session.account_name,session.workspace_id,session.subject_revision].join('|');
    if(this.contextKey!==contextKey)this.setData({purpose:'',message:'',visitIds:[],sectionIds:[],preview:null,confirmed:false});
    this.contextKey=contextKey;this.setData({readOnly:!!session.read_only});
-   if(this.newApplication){await this.options();}
+   if(this.newApplication){await this.loadOptions();}
    else if(this.id){const d=await api.request(`record-copies/${this.id}/`);d.pickupLabel=d.pickup_until?dateTime(d.pickup_until):'';d.history=d.history.map(e=>({...e,atLabel:dateTime(e.at)}));this.setData({detail:d});}
    else{const list=await api.request('record-copies/','GET',{page:this.page});this.setData({rows:list.rows,pagination:list});}
    this.setData({busy:false});
   }catch(e){showError(this,e);}
  },
- async options(clinic){const o=await api.request('record-copies/options/','GET',clinic?{clinic}:{});o.sections=o.sections.map(s=>({...s,checked:true}));this.setData({options:o,clinicIndex:Math.max(0,o.clinics.findIndex(c=>String(c.id)===String(o.clinic))),packageIndex:0,visitIds:[],sectionIds:o.sections.map(s=>s.id)});},
- async clinic(e){if(this.data.busy)return;this.setData({busy:true,error:''});try{await this.options(this.data.options.clinics[Number(e.detail.value)].id);this.setData({busy:false});}catch(e){showError(this,e);}},
+ async loadOptions(clinic){const o=await api.request('record-copies/options/','GET',clinic?{clinic}:{});o.sections=o.sections.map(s=>({...s,checked:true}));this.setData({options:o,clinicIndex:Math.max(0,o.clinics.findIndex(c=>String(c.id)===String(o.clinic))),packageIndex:0,visitIds:[],sectionIds:o.sections.map(s=>s.id)});},
+ async clinic(e){if(this.data.busy)return;this.setData({busy:true,error:''});try{await this.loadOptions(this.data.options.clinics[Number(e.detail.value)].id);this.setData({busy:false});}catch(e){showError(this,e);}},
  package(e){this.setData({packageIndex:Number(e.detail.value)});},
  visits(e){const ids=e.detail.value;this.setData({visitIds:ids,'options.visits':this.data.options.visits.map(v=>({...v,checked:ids.includes(v.id)}))});},
  sections(e){const ids=e.detail.value;this.setData({sectionIds:ids,'options.sections':this.data.options.sections.map(v=>({...v,checked:ids.includes(v.id)}))});},

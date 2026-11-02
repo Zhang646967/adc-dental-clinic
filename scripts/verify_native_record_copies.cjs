@@ -14,12 +14,19 @@ function fixture(query={}){
  }};
  const source=fs.readFileSync(path.resolve(__dirname,'../clients/wechat/miniprogram/pages/record-copies/index.js'),'utf8');
  vm.runInNewContext(source,{Page:p=>definition=p,wx,require:n=>n.endsWith('/api')?api:n.endsWith('/booking-intent')?{positive:v=>Number(v)>0&&Number.isSafeInteger(Number(v))}:{dateTime:x=>x,showError:(p,e)=>p.setData({busy:false,error:e.message})}});
- const page={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(values){for(const [key,value] of Object.entries(values)){const parts=key.split('.');let target=this.data;for(const p of parts.slice(0,-1))target=target[p];target[parts.at(-1)]=value;}}};page.onLoad(query);
+ // The native runtime may expose data fields on the Page instance. Model
+ // that behavior so a same-named data field cannot silently leave a method
+ // callable in this fixture while hiding it in the official tool.
+ const page={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(values){for(const [key,value] of Object.entries(values)){const parts=key.split('.');let target=this.data;for(const p of parts.slice(0,-1))target=target[p];target[parts.at(-1)]=value;}}};
+ for(const key of Object.keys(page.data))Object.defineProperty(page,key,{get(){return this.data[key];},configurable:true});
+ page.onLoad(query);
  return {page,calls,state,controls};
 }
 const action=value=>({currentTarget:{dataset:{action:value}}});
 async function verify(){
  const details=[],test=async(name,fn)=>{await fn();details.push(name);};
+ await test('new application opens through normal lifecycle without a data-method collision',async()=>{const d=fixture({new:'1'});await d.page.onShow();assert.equal(d.page.data.error,'');assert.equal(d.page.data.busy,false);assert(d.page.data.options);assert.equal(d.calls.filter(c=>c.route==='record-copies/options/').length,1);});
+ await test('clinic change reloads copy options through the normal page handler',async()=>{const d=fixture({new:'1'});await d.page.onShow();await d.page.clinic({detail:{value:1}});assert.equal(d.page.data.error,'');assert.deepEqual(d.calls.filter(c=>c.route==='record-copies/options/').at(-1).data,{clinic:2});});
  await test('guest sees no private copy request',async()=>{const d=fixture();d.state.account_authenticated=false;await d.page.onShow();assert.equal(d.calls.filter(c=>c.route).length,0);assert(d.calls[0].navigation.includes('login'));});
  await test('account change clears private application fields and previous rows',async()=>{const d=fixture();await d.page.onShow();d.page.setData({purpose:'PRIVATE_OLD',message:'PRIVATE_OLD'});d.state.account_name='account-b';d.controls.fail=true;await d.page.load();assert.equal(d.page.data.purpose,'');assert.equal(d.page.data.message,'');assert.equal(d.page.data.rows.length,0);});
  await test('application previews explicit visit and section choices',async()=>{const d=fixture({new:'1'});await d.page.onShow();d.page.visits({detail:{value:['11']}});d.page.setData({purpose:'个人复诊资料留存'});await d.page.prepare(action('SUBMIT'));const call=d.calls.find(c=>c.route==='record-copies/preview/');assert.equal(call.data.visits,'11');assert.equal(call.data.sections,'DOCUMENT');assert.equal(d.page.data.options.visits[0].checked,true);assert(d.page.data.preview);});
