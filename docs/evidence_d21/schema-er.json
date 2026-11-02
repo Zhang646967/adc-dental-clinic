@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "application_commit": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+  "observed_structure_matches_existing_er_snapshot": true,
+  "sql_tables": 167,
+  "orm_tables": 166,
+  "sql_foreign_keys": 489,
+  "business_triggers": 139,
+  "er_views": 44,
+  "report_pdf_updated": false,
+  "scope": "Read-only complete models/columns/constraints/indexes/triggers/applied-name comparison; existing C3.3B ER and PDF remain applicable."
+}

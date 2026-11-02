@@ -22,11 +22,11 @@
 
 ## 当前状态与开发
 
-C3.3B正常病历副本申请入口的官方工具专项复测已通过；原生picker、设备矩阵、手机与平台资格仍按各自结果验收。当前业务验证使用合成资料，服务器独立部署尚未完成。
+D2.1最新版统一部署包已完成准确CI、二十店空库安装、重复执行、浏览器及加密独立恢复。本机原业务环境与已通过的小程序场景保留；服务器独立部署尚未完成。
 
-[当前验收与边界](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
+[部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
 
-下一步先固化最新版上线包、追加迁移升级和独立运行能力，同时细化处方与药事业务。既有Mac开发、空库演练和恢复流程继续保留，部署准备与实际云端验收分别记录。
+下一步完成D2.2追加迁移升级和D2.3独立运行验证，再在实际服务器公布固定访问地址。处方与药事继续按业务职责细化；部署准备与实际云端、手机及平台验收分别记录。
 
 <details>
 <summary>历史版本、工程记录与本地开发说明</summary>

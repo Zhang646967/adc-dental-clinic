@@ -2,25 +2,183 @@
   "phase": "D2.1",
   "product": "ADC",
   "release_edition": "UNIFIED",
-  "status": "SOURCE_CANDIDATE_VALIDATION_PENDING",
+  "status": "EXACT_CI_AND_ISOLATED_LATEST_DEPLOYMENT_PASS",
+  "observed_at_utc": "2026-11-02T17:08:14.290174+00:00",
+  "application_commit": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+  "image": "sha256:fd11250c6080922387c3e26aad871067acfda6c9c07df1dceb5f2186e0223ba1",
+  "architecture": "linux/amd64",
+  "execution_host": "Apple Silicon Docker emulation; not target-server capacity",
+  "ci": {
+    "run_id": 41479742467,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+    "tested_source_commit": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+    "source_checks": 1165,
+    "postgresql_tests": 2306,
+    "native_source_checks": 315,
+    "native_copy_handler_cases": 9,
+    "source_log_verified": true,
+    "log_sha256": "de7d40662b1a7c6921f8c2a967e37d307d2bb85c548c7f61fec01464361c49c2",
+    "observed_at_utc": "2026-11-02T17:08:01.396498+00:00",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41479742467"
+  },
   "application_migrations": 80,
   "new_migrations": 0,
   "native_pages": 27,
-  "public_cloud_acceptance": "NOT_RUN_AWAITING_SERVER",
-  "physical_phone": "SEPARATE_PENDING",
+  "native_source_unchanged_from": "4225691bc7366a5e9496b7cae36fba52040dead2",
   "workbuddy_repeated_deployment_required": false,
-  "existing_instances_data_passwords_and_configurations": "MUST_PRESERVE",
-  "general_equivalent_ddl_comparator_limit": "RETAINED",
+  "exact_build": {
+    "source_sha256": "e901f1ed91d4f764259c405445ad8630cfa483bc38f5e70a4e6b7abf948f05cf",
+    "image_archive_sha256": "fe827e19d3fac5f5234a9e495ef83be820c1bb285c11f2fe9c054c865724e926",
+    "release_inventory": {
+      "format": 1,
+      "product": "ADC",
+      "release_edition": "UNIFIED",
+      "application_migrations": 80,
+      "migration_sha256": "f2b2c9f77a4821e6a1a2d94efd4b59aa95f61a15d63b83a5f8303f0289924e8e",
+      "requirements_sha256": {
+        "requirements-dev.txt": "69075054c6d3bf5e0104bbc5d72895f380f050216a76ee8978dc4fbfd62f95e8",
+        "requirements-operations.txt": "4ca06d78e5e2087919dbce9518b6ba2908323302effede198fd156594fe0b6d2",
+        "requirements-production.txt": "d72302014be01f884f0ea5c28bbb43c7bdb3c3fde6c9d53626b79e16c07a1d7f",
+        "requirements.txt": "193602ae97a0482beb09288858cb6479626911096ae0f695c9b4bd93429c08c8"
+      },
+      "native_client": {
+        "source_files": 90,
+        "pages": 27,
+        "source_tree_sha256": "271c78b34c2d21f3706532464ba919552f62834f2d0dbe529c69979cc705fc13",
+        "compiled_or_platform_verified": false
+      },
+      "access_paths": {
+        "public": "/",
+        "patient": "/portal/login/",
+        "staff": "/accounts/login/"
+      },
+      "scope": "Archived source inventory; not installed dependencies or cloud/device acceptance."
+    }
+  },
+  "installed_dependencies": {
+    "pip_check": "PASS",
+    "actual_versions": "dependencies.json",
+    "runtime_uid": 10001,
+    "source_environment_key_count": 1,
+    "vulnerability_attestation": "NOT_CLAIMED"
+  },
+  "empty_install": {
+    "passed": true,
+    "schema_matches_exact_names": true,
+    "clinics": 20,
+    "base_service_matrix_cells": 80,
+    "published_doctors": 60,
+    "image_rows": 200,
+    "published_services": 110,
+    "future_scheduled_days_per_clinic_minimum": 14,
+    "chairs_per_clinic_minimum": 2,
+    "lightweight_index_bytes": 59724,
+    "initial_visit_treatment_invoice_cash_archive_copy_rows": 0,
+    "clinical_and_financial_history_imported": false
+  },
+  "repeat_initialization": {
+    "passed": true,
+    "source_commit": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+    "database_application_migrations": 80,
+    "repeated_initializations": 2,
+    "repeated_deployment": true,
+    "model_groups_equal": 164,
+    "password_rows_and_all_other_rows_unchanged": true,
+    "private_credentials_file_unchanged": true,
+    "new_business_effects": 0,
+    "scope": "Repeated initializer and deployment on the identified selected image; no password reset or reseed."
+  },
+  "browser": {
+    "passed": true,
+    "checks": 33,
+    "browser_version": "156.0.8078.75",
+    "roles": 7,
+    "tested_accounts": 9,
+    "frontend_execution_errors": 0,
+    "actual_patient_registrations": 1,
+    "treatment_invoice_cash_or_copy_effects": 0,
+    "width_checked": 390,
+    "scope": "Normal local HTTPS browser roles/login/scoping/save smoke, not all business routes or physical mini-program."
+  },
+  "same_schema_upgrade": {
+    "passed": true,
+    "from_source": "541d421e90825bd4cdca791adc8630839919fc8b",
+    "to_source": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+    "schema_unchanged": true,
+    "migration_files": 80,
+    "same_database_volume": true,
+    "all_model_groups_equal": 164,
+    "private_password_file_unchanged": true,
+    "pre_upgrade_browser_write_retained": true,
+    "database_restored": false,
+    "scope": "Same-schema image update only; not D2.2 additive-migration upgrade acceptance."
+  },
+  "independent_encrypted_restore": {
+    "passed": true,
+    "schema_mode": "migration-built",
+    "independent_empty_database": true,
+    "sql_tables": 167,
+    "rows": 9913,
+    "model_groups_equal": 164,
+    "elapsed_ms": 212571,
+    "profile_images_and_passwords_equal": true,
+    "source_observations_replayed": false,
+    "source_database_preserved": true
+  },
+  "schema_and_er": {
+    "passed": true,
+    "application_commit": "6c26235b4ff6174a2528793e7a2a3906e3379660",
+    "observed_structure_matches_existing_er_snapshot": true,
+    "sql_tables": 167,
+    "orm_tables": 166,
+    "sql_foreign_keys": 489,
+    "business_triggers": 139,
+    "er_views": 44,
+    "report_pdf_updated": false,
+    "scope": "Read-only complete models/columns/constraints/indexes/triggers/applied-name comparison; existing C3.3B ER and PDF remain applicable."
+  },
+  "origin_status": "ORIGIN_READY",
+  "operational_observation": "HEALTHY",
+  "local_environment_deviations": {
+    "default_docker_network_pool_exhausted": true,
+    "private_local_ipam_overrides_only": true,
+    "old_networks_or_volumes_deleted": false,
+    "foundation_registry_pulls": "FAILED_RETAINED_PINNED_AMD64_IMAGES_USED",
+    "actual_application_build": "SUCCESS",
+    "production_network_template_changed": false,
+    "certificate": "Local self-signed certificate explicitly pinned for rehearsal only"
+  },
+  "existing_business_instances": {
+    "backend_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
+    "redeployment": false,
+    "data_passwords_bindings_and_configuration": "PRESERVED",
+    "host_update_scope": "Source, deployment tools and documentation; existing business runtime retained"
+  },
+  "report": {
+    "pdf_only": true,
+    "pages": 293,
+    "changed": false,
+    "er_views": 44,
+    "reason": "No clinical workflow or database structure change; deployment evidence belongs in operations documentation."
+  },
+  "pending": {
+    "additive_migration_upgrade": "D2.2",
+    "actual_cloud": "NOT_RUN_AWAITING_SERVER",
+    "new_thirty_minute_capacity": "NOT_RUN_THIS_BATCH",
+    "real_object_storage": "NOT_CONFIGURED",
+    "actual_cloud_restart_tls_renewal_offline_and_24h": "NOT_RUN",
+    "physical_phone_device_matrix_and_platform": "SEPARATELY_PENDING",
+    "clinical_commercial_qualification": "NOT_GRANTED"
+  },
   "historical_windows_recovery": "UNRESOLVED",
-  "source_checks": 1165,
-  "targeted_postgresql_checks": 8,
-  "native_source_checks": 315,
-  "native_copy_handler_cases": 9,
-  "preflight": {
-    "source_commit": "541d421e90825bd4cdca791adc8630839919fc8b",
-    "architecture": "amd64",
-    "empty_schema_migrated": 80,
-    "published_clinics": 20,
-    "scope": "Pre-change current baseline; not final D2.1 candidate image evidence."
+  "general_equivalent_ddl_comparator_limit": "RETAINED",
+  "earlier_candidate": {
+    "source_commit": "9237467d2692fedd03d9841bc8347ef57140e07b",
+    "ci_run": 41477000677,
+    "status": "CANCELLED_AS_SUPERSEDED",
+    "reason": "Browser helper needed to preserve an already-expanded patient password form; use final exact CI instead."
   }
 }
