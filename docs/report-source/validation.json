@@ -8,7 +8,7 @@
   "images": 87,
   "er_views": 44,
   "toc_entries": 110,
-  "pdf_sha256": "05f463a76b0d26a54f295573566c1f0743391320b2c14cd559f0922ae0ffea79",
+  "pdf_sha256": "cee0aea59f3734a0fd82ab9b08c2bbc43d9f840bda9609de2f5c5820847ac27c",
   "revision": {
     "passed": true,
     "pdf_only": true,
@@ -31,15 +31,15 @@
     ],
     "body_bottom_from_top": 749.0,
     "baseline_sha256": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9",
-    "pdf_sha256": "05f463a76b0d26a54f295573566c1f0743391320b2c14cd559f0922ae0ffea79",
-    "official_normal_entry_retest": "PENDING_WORKBUDDY",
+    "pdf_sha256": "cee0aea59f3734a0fd82ab9b08c2bbc43d9f840bda9609de2f5c5820847ac27c",
+    "official_normal_entry_retest": "PASS_WITH_NATIVE_PICKER_SEPARATE_PENDING",
     "revised_page_fonts_embedded": true,
     "font_count": 3,
     "revised_page_text_bounds_checked": true,
     "revised_page_visually_reviewed": true,
+    "visual_review": "Final Poppler render inspected; no clipping or overlapping body, headings, mind map or footer.",
     "unchanged_word_sha256": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f",
-    "er_assets_unchanged": true,
-    "visual_review": "Final Poppler rendering inspected: headings, body, mind map and footer readable; no overlap or clipping."
+    "er_assets_unchanged": true
   },
   "word": {
     "status": "HISTORICAL_NOT_UPDATED",

@@ -6,7 +6,7 @@
   "real_http_checks": 4,
   "confirmation_writes": 0,
   "source_fixture_models_data_aliases": true,
-  "official_tool": false,
+  "official_tool": true,
   "physical_phone": false,
   "client_ci_observed": {
     "run_id": 41421548856,
@@ -32,5 +32,51 @@
     "backend_deployment_changed": false,
     "official_tool_normal_entry": "PENDING_WORKBUDDY",
     "physical_phone": "SEPARATE_PENDING"
+  },
+  "historical_local_fixture_official_tool": false,
+  "official_tool_scope": "NORMAL_NAVIGATION_SCOPE_PREVIEW_REOPEN;NATIVE_PICKER_SEPARATELY_PENDING",
+  "official_tool_return": {
+    "passed": true,
+    "source": "WORKBUDDY_ORIGINAL_RETURN_AND_SIX_PRIVATE_SCREENSHOTS",
+    "client_commit": "4225691bc7366a5e9496b7cae36fba52040dead2",
+    "backend_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "backend_image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
+    "backend_restart_during_tool_test": false,
+    "bundle_checksums_verified": 92,
+    "project_files_verified": 90,
+    "project_tree_sha256": "e9ac2f1ec2b66b660448ecd55ca6027b76d48a4675f42258d062559e899e2230",
+    "client_diff_files": [
+      "miniprogram/pages/record-copies/index.js"
+    ],
+    "exact_client_source_bytes_verified": true,
+    "source_return_sha256": "e2a1f412db81f5834473b341284f777773becb2532941a83dde8a7d3d63530b2",
+    "screenshots_retained_privately": 6,
+    "screenshots_visually_reviewed": true,
+    "reported_request_ids_found_in_application_logs": 18,
+    "official_tool_normal_navigation": "PASS",
+    "source_compiler": "PASS_REPORTED",
+    "scope_and_preview": "PASS",
+    "reopen_without_stale_fields": "PASS",
+    "native_picker_gesture": "PENDING_SEPARATE",
+    "clinical_and_financial_effects": 0,
+    "copy_requests_added": 0,
+    "copy_events_added": 0,
+    "copy_files_added": 0,
+    "compared_model_groups": 164,
+    "unchanged_business_row_hashes": true,
+    "permitted_audit_appends": {
+      "clinical.SensitiveReadEvent": 2
+    },
+    "screen_width": 390,
+    "base_library": "3.17.5",
+    "mini_bytes_reported": 196892,
+    "mini_pages": 27,
+    "device_matrix": "375_430_FONT_PENDING",
+    "physical_phone": "PENDING_SEPARATE",
+    "second_real_wechat": "PENDING_SEPARATE",
+    "platform_and_cloud": "PENDING_SEPARATE",
+    "pdf_actual_reading": "NOT_EXERCISED_THIS_RETEST",
+    "authentication_retest_required": false,
+    "scope": "OFFICIAL_TOOL_NORMAL_NAVIGATION_SCOPE_PREVIEW_REOPEN;NATIVE_PICKER_SEPARATELY_PENDING"
   }
 }

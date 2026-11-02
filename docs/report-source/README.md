@@ -8,7 +8,7 @@
 - [本次PDF修订范围](pdf_revision.json)：确定基线、物理第144页／正文第138页、第5.23及5.24节。
 - [内容及版式核对](validation.json)：PDF与历史Word分别标识，不混用哈希。
 - [真实数据库ER与字段目录](../database/README.md)：80份迁移、167SQL表、489外键、139触发器；本次无变化。
-- [回传审核](../WORKBUDDY_C33B_REVIEW.md)及[分项执行证据](../evidence_c33b/README.md)：官方工具回传、正常入口待复测和设备缺项分别记录。
+- [回传审核](../WORKBUDDY_C33B_REVIEW.md)及[分项执行证据](../evidence_c33b/README.md)：正常入口官方工具通过，原生picker、设备和手机缺项分别记录。
 
 ## 本次修订复现
 

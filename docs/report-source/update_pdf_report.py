@@ -112,7 +112,7 @@ def main():
                reader.pages[i].get_contents().get_data() for i in unchanged)
     actual_text = current.pages[page_index].extract_text()
     assert all(t in actual_text for t in spec['headings'])
-    assert '正常新增入口仍须在官方工具复测' in actual_text.replace('\n', '')
+    assert spec['required_acceptance_text'] in actual_text.replace('\n', '')
     args.proof.write_text(json.dumps(dict(
         passed=True, pdf_only=True, word_written=False, pages=len(current.pages),
         revised_physical_pages=[page_index+1], unchanged_page_content_streams=len(unchanged),
@@ -120,7 +120,7 @@ def main():
         body_bottom_from_top=round(height-top, 2),
         baseline_sha256=spec['baseline_sha256'],
         pdf_sha256=hashlib.sha256(args.output.read_bytes()).hexdigest(),
-        official_normal_entry_retest='PENDING_WORKBUDDY',
+        official_normal_entry_retest=spec['official_normal_entry_status'],
     ), ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(dict(passed=True, pdf_only=True, unchanged_pages=len(unchanged),
                           bottom=round(height-top, 2))))
