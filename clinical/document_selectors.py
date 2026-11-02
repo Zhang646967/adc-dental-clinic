@@ -48,7 +48,11 @@ def document_details(actor, visit_id, *, revision=None):
                 source, cursor, _, _ = source_projection(actor, visit, head.encounter)
             except RuleError as exc:
                 source_error = str(exc)
+        from clinical.archive_models import ArchivePackage
+        archived_packages=list(ArchivePackage.objects.filter(submission__document_version=displayed,
+            submission__kind='ARCHIVE').values('id','number')) if displayed else []
         return dict(visit=visit, document=head, document_version=displayed, current_version=current, draft=draft,
+                    archived_packages=archived_packages,
                     payload=payload, source=source, source_error=source_error,
                     source_changed=bool(current and cursor != current.source_cursor),
                     can_edit=can_record and visit.patient.is_active and revision is None and visit.status in ('CHECKED_IN', 'COMPLETED', 'CLOSED_NO_TREATMENT'),

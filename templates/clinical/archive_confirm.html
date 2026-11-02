@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% load workspace_tags archive_documents %}{% block content %}<div class="clinical-flow"><h1>核对本次归档办理</h1>
+{% if visit %}<p>{{ visit.patient.name }} · {{ visit.clinic.name }} · {{ visit.visit_no }}</p>{% endif %}
+{% if prepared.kind_label %}<h2>{{ prepared.kind_label }}</h2>{% endif %}
+{% if prepared.action_label %}<h2>{{ prepared.action_label }}</h2>{% endif %}
+{% if prepared.reason %}<p class="care-notes">本次依据：{{ prepared.reason }}</p>{% endif %}
+{% if prepared.decision %}<h2>审核结论：{% if prepared.decision == 'APPROVE' %}通过准确内容{% elif prepared.decision == 'RETURN' %}退回完善{% else %}不通过{% endif %}</h2><p class="care-notes">{{ prepared.note }}</p>{% endif %}
+{% if prepared.selected_reviewer %}<p>指定独立审核医师 {{ prepared.selected_reviewer.user.dentist.name }}（{{ prepared.selected_reviewer.user.username }}）。</p>{% endif %}
+{% if prepared.snapshot %}{% include 'clinical/archive_snapshot.html' with snapshot=prepared.snapshot %}{% endif %}
+{% if prepared.candidate %}<section class="panel"><h2>本次补正差异</h2>{% for row in prepared.candidate|archive_changes %}<article><h3>{{ row.label }}</h3><p>原记录</p><p class="care-notes">{{ row.before }}</p><p>拟追加记录</p><p class="care-notes">{{ row.after }}</p></article>{% empty %}<p>未发现内容差异，请核对是否需要补正。</p>{% endfor %}<details><summary>拟追加的完整内容</summary><dl class="detail-grid">{% for key,value in prepared.candidate.payload|archive_fields %}<dt>{{ key }}</dt><dd class="care-notes">{{ value }}</dd>{% endfor %}</dl></details></section>{% endif %}
+{% if prepared.submission %}<p>申请{{ prepared.submission.number }} · {{ prepared.submission.get_kind_display }} · {{ prepared.submission.get_state_display }}</p>{% endif %}
+{% if prepared.amendment %}<p>{{ prepared.amendment.get_target_display }} · {{ prepared.amendment.get_state_display }}</p>{% endif %}
+<form method="post" action="{% url 'clinical_archive_confirm' action %}">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit">明确确认本次办理</button></form>
+<p><a href="{% url 'clinical_archives' %}">返回归档与审核待办</a>{% if visit %} · <a href="{% url 'clinical_archive' visit.pk %}">返回本次归档进度</a>{% endif %}</p></div>{% endblock %}

@@ -1,4 +1,5 @@
 import uuid
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -104,7 +105,9 @@ def preview(request, pk):
     try:
         prepared = cmd.prepare_document(actor=request.user, visit_id=pk)
     except EXPECTED_ERRORS as exc:
-        form = DocumentConfirmForm(); add_error(form, exc)
+        # A blocked preview has no confirmation fields. Bind an empty error form
+        # so Django can retain the business explanation without a 500 response.
+        form = forms.Form(data={}); add_error(form, exc)
         return clinical_render(request, 'clinical/document_confirm.html', dict(details, form=form, blocked=True), status=409)
     return clinical_render(request, 'clinical/document_confirm.html', dict(details,
         form=DocumentConfirmForm(initial={'proposal_token': prepared['proposal_token']}),

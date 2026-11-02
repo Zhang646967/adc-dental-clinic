@@ -1,0 +1,26 @@
+digraph State {
+ graph [rankdir=TB,bgcolor="white",pad="0.4",nodesep="0.6",ranksep="0.8"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4f0",color="#345e56",fontname="Noto Sans CJK SC",fontsize=16,margin="0.18,0.13"];
+ edge [color="#345e56",fontname="Noto Sans CJK SC",fontsize=13,arrowsize=0.7];
+
+ ready [label="文书完成与准确清单\n归档与费用结清分别办理"];
+ missing [label="必要材料缺项\n责任岗位与继续入口",fillcolor="#fff3e6"];
+ pending [label="待指定独立医务审核\n完整归档／缺项资料保全"];
+ returned [label="退回完善／未通过\n原清单和意见保留",fillcolor="#fff3e6"];
+ approved [label="已审核，待后台生成\n不表示固定文件已经生成"];
+ failed [label="文件生成失败\n原任务与安全错误分类保留",fillcolor="#fff3e6"];
+ stale [label="已撤回或来源／职责变化\n重新核对并提交新清单",fillcolor="#fff3e6"];
+ published [label="固定PDF与清单原子发布\n完整归档或仅资料保全分别标识"];
+ ready -> missing [label="缺确认、疑问未答或历史缺口"];
+ ready -> pending [label="负责医师确认准确清单"];
+ missing -> pending [label="明确仅保全现有资料"];
+ pending -> approved [label="另一名获委任医师通过"];
+ pending -> returned [label="退回或不通过"];
+ returned -> ready [label="追加完善后重新核对"];
+ approved -> published [label="来源、职责及完整文件再次核对"];
+ approved -> failed [label="生成异常，无部分文件"];
+ failed -> approved [label="负责医师明确重试且来源未变"];
+ pending -> stale [label="负责医师明确撤回"];
+ approved -> stale [label="撤回或最终重检不适用"];
+ failed -> stale [label="明确撤回后另办"];
+}

@@ -264,5 +264,26 @@
     "width": 464,
     "height": 508,
     "minPrintedFontPt": 13.684396551724138
+  },
+  "er_archive_submission": {
+    "nodes": 6,
+    "edges": 9,
+    "width": 760,
+    "height": 632,
+    "minPrintedFontPt": 8.354684210526317
+  },
+  "er_archive_files": {
+    "nodes": 6,
+    "edges": 11,
+    "width": 595,
+    "height": 819,
+    "minPrintedFontPt": 10.671529411764707
+  },
+  "er_archive_amendment": {
+    "nodes": 7,
+    "edges": 11,
+    "width": 1046,
+    "height": 582,
+    "minPrintedFontPt": 6.0703250478011475
   }
 }

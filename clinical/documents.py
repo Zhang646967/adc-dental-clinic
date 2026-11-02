@@ -87,7 +87,7 @@ def check_prior(actor, visit, payload):
     return previous
 
 
-def source_projection(actor, visit, encounter):
+def source_projection(actor, visit, encounter, *, check_plan_authority=True):
     record = current_record(encounter)
     if record is None:
         raise RuleError('请先确认本次检查记录，再整理完整病历文书。')
@@ -102,7 +102,8 @@ def source_projection(actor, visit, encounter):
     for plan in TreatmentPlan.objects.filter(origin_encounter=encounter).order_by('pk'):
         version = PlanVersion.objects.filter(plan=plan).order_by('-revision').first()
         if version:
-            require_plan_scope(actor, visit, plan, 'READ', version=version, include_draft=False)
+            if check_plan_authority:
+                require_plan_scope(actor, visit, plan, 'READ', version=version, include_draft=False)
             plans.append(dict(id=plan.pk, version=version.pk, revision=version.revision, summary=version.summary))
     history = record.history
     snapshot = dict(
@@ -207,7 +208,7 @@ def save_document(*, actor, visit_id, expected_revision, operation_id, fields, a
     return head, False
 
 
-def prepare_document(*, actor, visit_id):
+def prepare_document(*, actor, visit_id, archive_check=True):
     visit = Visit.objects.select_related('patient', 'clinic', 'dentist').get(pk=visit_id)
     require_visit_authority(actor, visit, 'RECORD', always=True)
     head = ClinicalDocument.objects.get(encounter__visit=visit)
@@ -226,6 +227,9 @@ def prepare_document(*, actor, visit_id):
     data = dict(visit=visit.pk, document=head.pk, revision=head.revision,
                 base=draft.base_version_id, digest=draft_digest(payload), source_cursor=cursor,
                 snapshot_digest=draft_digest(snapshot))
+    if archive_check:
+        from clinical.archive_corrections import required
+        required(actor,visit_id,'DOCUMENT')
     return dict(visit=visit, payload=payload, source=snapshot,
                 proposal_token=proposal(actor, CONTRACT, ('DENTIST',), data))
 
@@ -237,12 +241,15 @@ def confirm_document(*, actor, proposal_token, confirmed):
     if confirmed is not True:
         raise RuleError('请核对完整文书及确认凭据，再明确确认本版本。')
     p = read_proposal(actor, CONTRACT, ('DENTIST',), proposal_token); data = p['data']
+    from clinical import archive_corrections
+    archive_corrections.lock_participants(actor,data['visit'],'DOCUMENT')
     visit, encounter, head = _lock(actor, data['visit'])
     read_proposal(actor, CONTRACT, ('DENTIST',), proposal_token)
     op = operation(p['operation'])
     event = _replay(actor, head, op, 'CONFIRM')
     if event:
         return event.version, True
+    amendment=archive_corrections.required(actor,visit.pk,'DOCUMENT',lock=True)
     if head.pk != data['document'] or head.revision != data['revision']:
         raise RuleError('文书草稿或待办已变化，请重新核对预览。')
     draft = ClinicalDocumentDraft.objects.select_for_update().get(document=head)
@@ -267,6 +274,8 @@ def confirm_document(*, actor, proposal_token, confirmed):
     ClinicalDocumentEvent.objects.create(document=head, version=version, actor=actor, operation_id=op, action='CONFIRM',
         snapshot={'revision': head.revision, 'version': version.revision, 'digest': version.content_digest,
                   'evidence_kind': version.evidence_kind})
+    archive_corrections.consume(amendment,actor,version,op)
+    archive_corrections.document_confirmed(encounter,actor)
     emit(actor, 'CLINICAL_DOCUMENT_CONFIRMED', version, visit=visit,
          summary={'revision': version.revision, 'evidence_kind': version.evidence_kind})
     return version, False

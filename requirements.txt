@@ -3,3 +3,7 @@ Django==5.2.17
 psycopg[binary]==3.2.10
 tzdata>=2025.2,<2027
 Pillow==12.3.0
+
+# Local fixed clinical archive PDF rendering.
+reportlab==4.4.9
+charset-normalizer==3.5.2

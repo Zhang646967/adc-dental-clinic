@@ -5,7 +5,7 @@
  -->
 <!-- Title: schema Pages: 1 -->
 <svg role="img" aria-labelledby="er_clinical_documents-title er_clinical_documents-desc" width="558pt" height="883pt"
- viewBox="0.00 0.00 558.00 883.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="er_clinical_documents-title">初复诊文书版本与准确临床来源</title><desc id="er_clinical_documents-desc">一次实际接诊至多一个完整文书入口；草稿与确认版本分开。确认版本引用准确检查与接诊处置，previous为同文书的一对一追加链，prior_visit_version为同患者同店另一就诊的可空多对一复诊来源。正文及来源JSON冻结事实与当时身份，内容摘要不等于可靠电子签名。原金额由财务模块拥有；本视图不表示知情同意或病案归档已实施。</desc>
+ viewBox="0.00 0.00 558.00 883.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="er_clinical_documents-title">初复诊文书版本与准确临床来源</title><desc id="er_clinical_documents-desc">一次实际接诊至多一个完整文书入口；草稿与确认版本分开。确认版本引用准确检查与接诊处置，previous为同文书的一对一追加链，prior_visit_version为同患者同店另一就诊的可空多对一复诊来源。正文及来源JSON冻结事实与当时身份，内容摘要不等于可靠电子签名。原金额由财务模块拥有；具体告知、医疗决定和固定归档分别见对应视图，不因文书确认而自动完成。</desc>
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(14.4 868.8)">
 <title>schema</title>
 <polygon fill="white" stroke="none" points="-14.4,14.4 -14.4,-868.8 543.86,-868.8 543.86,14.4 -14.4,14.4"/>

@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-01。本目录列出157张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-01。本目录列出162张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -208,6 +208,223 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+
+## adc_archive_amendment
+
+模型：`clinical.ArchiveAmendment`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| archive_id | bigint | FK | 否 | `adc_clinical_archive.id` |
+| base_package_id | bigint | FK | 否 | `adc_archive_package.id` |
+| target | character varying(12) | — | 否 | — |
+| candidate | jsonb | — | 否 | — |
+| candidate_digest | character varying(64) | — | 否 | — |
+| reason | character varying(1000) | — | 否 | — |
+| requested_by_id | bigint | FK | 否 | `adc_user.id` |
+| assigned_reviewer_id | bigint | FK | 否 | `adc_clinical_reviewer.id` |
+| due_at | timestamp with time zone | — | 否 | — |
+| requested_at | timestamp with time zone | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| reviewer_id | bigint | FK | 是 | `adc_clinical_reviewer.id` |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_note | character varying(1000) | — | 否 | — |
+| approval_scope | jsonb | — | 否 | — |
+| result_document_id | bigint | UK / FK | 是 | `adc_clinical_document_version.id` |
+| result_record_id | bigint | UK / FK | 是 | `adc_clinical_record_version.id` |
+
+数据库约束：
+
+- `adc_archive_amendmen_archive_id_06bdcb47_fk_adc_clini`：`FOREIGN KEY (archive_id) REFERENCES adc_clinical_archive(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendmen_assigned_reviewer_id_60c2412d_fk_adc_clini`：`FOREIGN KEY (assigned_reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendmen_base_package_id_64971c93_fk_adc_archi`：`FOREIGN KEY (base_package_id) REFERENCES adc_archive_package(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendmen_result_document_id_8d5ee00e_fk_adc_clini`：`FOREIGN KEY (result_document_id) REFERENCES adc_clinical_document_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendmen_result_record_id_181743bc_fk_adc_clini`：`FOREIGN KEY (result_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendmen_reviewer_id_b44de829_fk_adc_clini`：`FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendment_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_archive_amendment_pkey`：`PRIMARY KEY (id)`。
+- `adc_archive_amendment_requested_by_id_ced73456_fk_adc_user_id`：`FOREIGN KEY (requested_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendment_result_document_id_key`：`UNIQUE (result_document_id)`。
+- `adc_archive_amendment_result_record_id_key`：`UNIQUE (result_record_id)`。
+- `adc_archive_amendment_reviewed_by_id_fec1fb99_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_amendment_revision_check`：`CHECK ((revision >= 0))`。
+- `archive_amendment_result`：`CHECK ((((result_document_id IS NOT NULL) AND (result_record_id IS NULL) AND ((state)::text = 'APPLIED'::text) AND ((target)::text = 'DOCUMENT'::text)) OR ((result_document_id IS NULL) AND (result_record_id IS NOT NULL) AND ((state)::text = 'APPLIED'::text) AND ((target)::text = 'RECORD'::text)) OR ((NOT ((state)::text = 'APPLIED'::text)) AND (result_document_id IS NULL) AND (result_record_id IS NULL))))`。
+- `archive_amendment_state`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'RETURNED'::character varying, 'REJECTED'::character varying, 'APPROVED'::character varying, 'APPLIED'::character varying, 'CANCELLED'::character varying])::text[])))`。
+- `archive_amendment_target`：`CHECK (((target)::text = ANY ((ARRAY['DOCUMENT'::character varying, 'RECORD'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_archive_amendment_archive_id_06bdcb47`：`CREATE INDEX adc_archive_amendment_archive_id_06bdcb47 ON public.adc_archive_amendment USING btree (archive_id)`。
+- `adc_archive_amendment_assigned_reviewer_id_60c2412d`：`CREATE INDEX adc_archive_amendment_assigned_reviewer_id_60c2412d ON public.adc_archive_amendment USING btree (assigned_reviewer_id)`。
+- `adc_archive_amendment_base_package_id_64971c93`：`CREATE INDEX adc_archive_amendment_base_package_id_64971c93 ON public.adc_archive_amendment USING btree (base_package_id)`。
+- `adc_archive_amendment_operation_id_key`：`CREATE UNIQUE INDEX adc_archive_amendment_operation_id_key ON public.adc_archive_amendment USING btree (operation_id)`。
+- `adc_archive_amendment_pkey`：`CREATE UNIQUE INDEX adc_archive_amendment_pkey ON public.adc_archive_amendment USING btree (id)`。
+- `adc_archive_amendment_requested_by_id_ced73456`：`CREATE INDEX adc_archive_amendment_requested_by_id_ced73456 ON public.adc_archive_amendment USING btree (requested_by_id)`。
+- `adc_archive_amendment_result_document_id_key`：`CREATE UNIQUE INDEX adc_archive_amendment_result_document_id_key ON public.adc_archive_amendment USING btree (result_document_id)`。
+- `adc_archive_amendment_result_record_id_key`：`CREATE UNIQUE INDEX adc_archive_amendment_result_record_id_key ON public.adc_archive_amendment USING btree (result_record_id)`。
+- `adc_archive_amendment_reviewed_by_id_fec1fb99`：`CREATE INDEX adc_archive_amendment_reviewed_by_id_fec1fb99 ON public.adc_archive_amendment USING btree (reviewed_by_id)`。
+- `adc_archive_amendment_reviewer_id_b44de829`：`CREATE INDEX adc_archive_amendment_reviewer_id_b44de829 ON public.adc_archive_amendment USING btree (reviewer_id)`。
+- `archive_one_open_amendment`：`CREATE UNIQUE INDEX archive_one_open_amendment ON public.adc_archive_amendment USING btree (archive_id, target) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying])::text[]))`。
+
+跨表及历史触发器：
+
+- `archive_amendment_retained`：`CREATE TRIGGER archive_amendment_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_archive_amendment FOR EACH ROW EXECUTE FUNCTION adc_archive_amendment_guard()`。
+
+## adc_archive_event
+
+模型：`clinical.ArchiveEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| archive_id | bigint | FK | 否 | `adc_clinical_archive.id` |
+| submission_id | bigint | FK | 是 | `adc_archive_submission.id` |
+| amendment_id | bigint | FK | 是 | `adc_archive_amendment.id` |
+| package_id | bigint | FK | 是 | `adc_archive_package.id` |
+| actor_id | bigint | FK | 是 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| note | character varying(1000) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_archive_event_actor_id_ad986d56_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_event_amendment_id_b88b2607_fk_adc_archi`：`FOREIGN KEY (amendment_id) REFERENCES adc_archive_amendment(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_event_archive_id_3155a921_fk_adc_clini`：`FOREIGN KEY (archive_id) REFERENCES adc_clinical_archive(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_archive_event_package_id_f37377bc_fk_adc_archive_package_id`：`FOREIGN KEY (package_id) REFERENCES adc_archive_package(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_event_pkey`：`PRIMARY KEY (id)`。
+- `adc_archive_event_submission_id_2363b688_fk_adc_archi`：`FOREIGN KEY (submission_id) REFERENCES adc_archive_submission(id) DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_archive_event_actor_id_ad986d56`：`CREATE INDEX adc_archive_event_actor_id_ad986d56 ON public.adc_archive_event USING btree (actor_id)`。
+- `adc_archive_event_amendment_id_b88b2607`：`CREATE INDEX adc_archive_event_amendment_id_b88b2607 ON public.adc_archive_event USING btree (amendment_id)`。
+- `adc_archive_event_archive_id_3155a921`：`CREATE INDEX adc_archive_event_archive_id_3155a921 ON public.adc_archive_event USING btree (archive_id)`。
+- `adc_archive_event_operation_id_key`：`CREATE UNIQUE INDEX adc_archive_event_operation_id_key ON public.adc_archive_event USING btree (operation_id)`。
+- `adc_archive_event_package_id_f37377bc`：`CREATE INDEX adc_archive_event_package_id_f37377bc ON public.adc_archive_event USING btree (package_id)`。
+- `adc_archive_event_pkey`：`CREATE UNIQUE INDEX adc_archive_event_pkey ON public.adc_archive_event USING btree (id)`。
+- `adc_archive_event_submission_id_2363b688`：`CREATE INDEX adc_archive_event_submission_id_2363b688 ON public.adc_archive_event USING btree (submission_id)`。
+
+跨表及历史触发器：
+
+- `archive_event_retained`：`CREATE TRIGGER archive_event_retained BEFORE DELETE OR UPDATE ON public.adc_archive_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_archive_package
+
+模型：`clinical.ArchivePackage`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| archive_id | bigint | FK | 否 | `adc_clinical_archive.id` |
+| submission_id | bigint | UK / FK | 否 | `adc_archive_submission.id` |
+| number | integer | — | 否 | — |
+| previous_id | bigint | UK / FK | 是 | `adc_archive_package.id` |
+| pdf | bytea | — | 否 | — |
+| pdf_sha256 | character varying(64) | — | 否 | — |
+| manifest | jsonb | — | 否 | — |
+| renderer | character varying(64) | — | 否 | — |
+| published_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_archive_package_archive_id_186909db_fk_adc_clini`：`FOREIGN KEY (archive_id) REFERENCES adc_clinical_archive(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_package_number_check`：`CHECK ((number >= 0))`。
+- `adc_archive_package_pkey`：`PRIMARY KEY (id)`。
+- `adc_archive_package_previous_id_47d16fe1_fk_adc_archi`：`FOREIGN KEY (previous_id) REFERENCES adc_archive_package(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_package_previous_id_key`：`UNIQUE (previous_id)`。
+- `adc_archive_package_submission_id_0c5bae56_fk_adc_archi`：`FOREIGN KEY (submission_id) REFERENCES adc_archive_submission(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_package_submission_id_key`：`UNIQUE (submission_id)`。
+- `archive_package_not_self`：`CHECK ((NOT ((previous_id = id) AND (previous_id IS NOT NULL))))`。
+- `archive_package_number`：`UNIQUE (archive_id, number)`。
+- `archive_package_previous`：`CHECK ((((number = 1) AND (previous_id IS NULL)) OR ((number > 1) AND (previous_id IS NOT NULL))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_archive_package_archive_id_186909db`：`CREATE INDEX adc_archive_package_archive_id_186909db ON public.adc_archive_package USING btree (archive_id)`。
+- `adc_archive_package_pkey`：`CREATE UNIQUE INDEX adc_archive_package_pkey ON public.adc_archive_package USING btree (id)`。
+- `adc_archive_package_previous_id_key`：`CREATE UNIQUE INDEX adc_archive_package_previous_id_key ON public.adc_archive_package USING btree (previous_id)`。
+- `adc_archive_package_submission_id_key`：`CREATE UNIQUE INDEX adc_archive_package_submission_id_key ON public.adc_archive_package USING btree (submission_id)`。
+- `archive_package_number`：`CREATE UNIQUE INDEX archive_package_number ON public.adc_archive_package USING btree (archive_id, number)`。
+
+跨表及历史触发器：
+
+- `archive_package_retained`：`CREATE TRIGGER archive_package_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_archive_package FOR EACH ROW EXECUTE FUNCTION adc_archive_package_guard()`。
+
+## adc_archive_submission
+
+模型：`clinical.ArchiveSubmission`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| archive_id | bigint | FK | 否 | `adc_clinical_archive.id` |
+| number | integer | — | 否 | — |
+| kind | character varying(12) | — | 否 | — |
+| document_version_id | bigint | FK | 是 | `adc_clinical_document_version.id` |
+| previous_package_id | bigint | FK | 是 | `adc_archive_package.id` |
+| snapshot | jsonb | — | 否 | — |
+| source_digest | character varying(64) | — | 否 | — |
+| reason | character varying(1000) | — | 否 | — |
+| submitted_by_id | bigint | FK | 否 | `adc_user.id` |
+| assigned_reviewer_id | bigint | FK | 否 | `adc_clinical_reviewer.id` |
+| due_at | timestamp with time zone | — | 否 | — |
+| submitted_at | timestamp with time zone | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| reviewer_id | bigint | FK | 是 | `adc_clinical_reviewer.id` |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_note | character varying(1000) | — | 否 | — |
+| approval_scope | jsonb | — | 否 | — |
+| attempts | integer | — | 否 | — |
+| generation_error | character varying(40) | — | 否 | — |
+
+数据库约束：
+
+- `adc_archive_submissi_archive_id_dd8c0c1f_fk_adc_clini`：`FOREIGN KEY (archive_id) REFERENCES adc_clinical_archive(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_submissi_assigned_reviewer_id_f7eb7180_fk_adc_clini`：`FOREIGN KEY (assigned_reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_submissi_document_version_id_060355b8_fk_adc_clini`：`FOREIGN KEY (document_version_id) REFERENCES adc_clinical_document_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_submissi_previous_package_id_d5f4cfc8_fk_adc_archi`：`FOREIGN KEY (previous_package_id) REFERENCES adc_archive_package(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_submissi_reviewer_id_6c5580bc_fk_adc_clini`：`FOREIGN KEY (reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_submission_attempts_check`：`CHECK ((attempts >= 0))`。
+- `adc_archive_submission_number_check`：`CHECK ((number >= 0))`。
+- `adc_archive_submission_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_archive_submission_pkey`：`PRIMARY KEY (id)`。
+- `adc_archive_submission_reviewed_by_id_8fab77dd_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_archive_submission_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_archive_submission_submitted_by_id_ad37b327_fk_adc_user_id`：`FOREIGN KEY (submitted_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `archive_requires_document`：`CHECK ((((kind)::text = 'MATERIALS'::text) OR (document_version_id IS NOT NULL)))`。
+- `archive_submission_kind`：`CHECK (((kind)::text = ANY ((ARRAY['ARCHIVE'::character varying, 'MATERIALS'::character varying])::text[])))`。
+- `archive_submission_number`：`UNIQUE (archive_id, number)`。
+- `archive_submission_state`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'RETURNED'::character varying, 'REJECTED'::character varying, 'APPROVED'::character varying, 'FAILED'::character varying, 'STALE'::character varying, 'PUBLISHED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_archive_submission_archive_id_dd8c0c1f`：`CREATE INDEX adc_archive_submission_archive_id_dd8c0c1f ON public.adc_archive_submission USING btree (archive_id)`。
+- `adc_archive_submission_assigned_reviewer_id_f7eb7180`：`CREATE INDEX adc_archive_submission_assigned_reviewer_id_f7eb7180 ON public.adc_archive_submission USING btree (assigned_reviewer_id)`。
+- `adc_archive_submission_document_version_id_060355b8`：`CREATE INDEX adc_archive_submission_document_version_id_060355b8 ON public.adc_archive_submission USING btree (document_version_id)`。
+- `adc_archive_submission_operation_id_key`：`CREATE UNIQUE INDEX adc_archive_submission_operation_id_key ON public.adc_archive_submission USING btree (operation_id)`。
+- `adc_archive_submission_pkey`：`CREATE UNIQUE INDEX adc_archive_submission_pkey ON public.adc_archive_submission USING btree (id)`。
+- `adc_archive_submission_previous_package_id_d5f4cfc8`：`CREATE INDEX adc_archive_submission_previous_package_id_d5f4cfc8 ON public.adc_archive_submission USING btree (previous_package_id)`。
+- `adc_archive_submission_reviewed_by_id_8fab77dd`：`CREATE INDEX adc_archive_submission_reviewed_by_id_8fab77dd ON public.adc_archive_submission USING btree (reviewed_by_id)`。
+- `adc_archive_submission_reviewer_id_6c5580bc`：`CREATE INDEX adc_archive_submission_reviewer_id_6c5580bc ON public.adc_archive_submission USING btree (reviewer_id)`。
+- `adc_archive_submission_submitted_by_id_ad37b327`：`CREATE INDEX adc_archive_submission_submitted_by_id_ad37b327 ON public.adc_archive_submission USING btree (submitted_by_id)`。
+- `archive_generation_queue`：`CREATE INDEX archive_generation_queue ON public.adc_archive_submission USING btree (state, submitted_at)`。
+- `archive_one_open_submission`：`CREATE UNIQUE INDEX archive_one_open_submission ON public.adc_archive_submission USING btree (archive_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'APPROVED'::character varying, 'FAILED'::character varying])::text[]))`。
+- `archive_submission_number`：`CREATE UNIQUE INDEX archive_submission_number ON public.adc_archive_submission USING btree (archive_id, number)`。
+
+跨表及历史触发器：
+
+- `archive_submission_retained`：`CREATE TRIGGER archive_submission_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_archive_submission FOR EACH ROW EXECUTE FUNCTION adc_archive_submission_guard()`。
 
 ## adc_assistant_event
 
@@ -672,6 +889,38 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 
+## adc_clinical_archive
+
+模型：`clinical.ClinicalArchive`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| encounter_id | bigint | UK / FK | 否 | `adc_clinical_encounter.id` |
+| responsible_id | bigint | FK | 否 | `adc_user.id` |
+| due_at | timestamp with time zone | — | 否 | — |
+| supplement_due_at | timestamp with time zone | — | 是 | — |
+| revision | integer | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_clinical_archive_encounter_id_d19a90d6_fk_adc_clini`：`FOREIGN KEY (encounter_id) REFERENCES adc_clinical_encounter(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_archive_encounter_id_key`：`UNIQUE (encounter_id)`。
+- `adc_clinical_archive_pkey`：`PRIMARY KEY (id)`。
+- `adc_clinical_archive_responsible_id_4f5a0b90_fk_adc_user_id`：`FOREIGN KEY (responsible_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_clinical_archive_revision_check`：`CHECK ((revision >= 0))`。
+
+索引（含条件唯一索引）：
+
+- `adc_clinical_archive_encounter_id_key`：`CREATE UNIQUE INDEX adc_clinical_archive_encounter_id_key ON public.adc_clinical_archive USING btree (encounter_id)`。
+- `adc_clinical_archive_pkey`：`CREATE UNIQUE INDEX adc_clinical_archive_pkey ON public.adc_clinical_archive USING btree (id)`。
+- `adc_clinical_archive_responsible_id_4f5a0b90`：`CREATE INDEX adc_clinical_archive_responsible_id_4f5a0b90 ON public.adc_clinical_archive USING btree (responsible_id)`。
+
+跨表及历史触发器：
+
+- `archive_head_retained`：`CREATE TRIGGER archive_head_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_archive FOR EACH ROW EXECUTE FUNCTION adc_archive_head_guard()`。
+
 ## adc_clinical_authority_event
 
 模型：`clinical.ClinicalAuthorityEvent`。
@@ -925,6 +1174,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_clinical_document_version_pkey`：`PRIMARY KEY (id)`。
 - `adc_clinical_document_version_previous_id_key`：`UNIQUE (previous_id)`。
 - `adc_clinical_document_version_revision_check`：`CHECK ((revision >= 0))`。
+- `archived_document_review`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
 - `document_amendment_reason`：`CHECK (((previous_id IS NULL) OR (NOT ((amendment_reason)::text = ''::text))))`。
 - `document_confirmation_time_valid`：`CHECK ((confirmed_at <= recorded_at))`。
 - `document_evidence_valid`：`CHECK (((((evidence_kind)::text = 'ACCOUNT_CONFIRMATION'::text) AND ((evidence_reference)::text = ''::text)) OR (((evidence_kind)::text = 'PAPER_REFERENCE'::text) AND (NOT ((evidence_reference)::text = ''::text)))))`。
@@ -947,6 +1197,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+- `archived_document_review`：`CREATE CONSTRAINT TRIGGER archived_document_review AFTER INSERT ON public.adc_clinical_document_version DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_archived_version_requires_review()`。
 - `document_version_retained`：`CREATE TRIGGER document_version_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_clinical_document_version FOR EACH ROW EXECUTE FUNCTION adc_document_version_guard()`。
 
 ## adc_clinical_draft
@@ -1214,6 +1465,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_clinical_record_version_pkey`：`PRIMARY KEY (id)`。
 - `adc_clinical_record_version_previous_id_key`：`UNIQUE (previous_id)`。
 - `adc_clinical_record_version_revision_check`：`CHECK ((revision >= 0))`。
+- `archived_record_review`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
 - `clinical_dentition_valid`：`CHECK (((dentition)::text = ANY ((ARRAY['UNASSESSED'::character varying, 'PERMANENT'::character varying, 'PRIMARY'::character varying, 'MIXED'::character varying])::text[])))`。
 - `clinical_history_review_consistent`：`CHECK ((((history_id IS NOT NULL) AND ((history_review)::text = 'REVIEWED'::text)) OR ((history_id IS NULL) AND ((history_review)::text = 'UNAVAILABLE'::text))))`。
 - `clinical_observation_not_future`：`CHECK ((observed_at <= recorded_at))`。
@@ -1234,6 +1486,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+- `archived_record_review`：`CREATE CONSTRAINT TRIGGER archived_record_review AFTER INSERT ON public.adc_clinical_record_version DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_archived_version_requires_review()`。
 - `clinical_record_version_retained`：`CREATE TRIGGER clinical_record_version_retained BEFORE DELETE OR UPDATE ON public.adc_clinical_record_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
 ## adc_clinical_referral
@@ -1343,6 +1596,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | valid_from | timestamp with time zone | — | 否 | — |
 | valid_until | timestamp with time zone | — | 否 | — |
 | is_active | boolean | — | 否 | — |
+| can_review_archives | boolean | — | 否 | — |
 | revision | integer | — | 否 | — |
 | appointed_by_id | bigint | FK | 否 | `adc_user.id` |
 | appointed_at | timestamp with time zone | — | 否 | — |

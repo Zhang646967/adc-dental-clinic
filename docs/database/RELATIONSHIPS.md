@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-451条实际SQL外键，其中450条对应ORM单列关系，1条为账单同次就诊复合外键。
+476条实际SQL外键，其中475条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -14,6 +14,29 @@
 | adc_appointment_improvement | reviewed_by_id | adc_user | id |
 | adc_appointment_improvement | submitted_by_id | adc_user | id |
 | adc_appointment_improvement | clinic_id | adc_clinic | id |
+| adc_archive_amendment | archive_id | adc_clinical_archive | id |
+| adc_archive_amendment | assigned_reviewer_id | adc_clinical_reviewer | id |
+| adc_archive_amendment | base_package_id | adc_archive_package | id |
+| adc_archive_amendment | result_document_id | adc_clinical_document_version | id |
+| adc_archive_amendment | result_record_id | adc_clinical_record_version | id |
+| adc_archive_amendment | reviewer_id | adc_clinical_reviewer | id |
+| adc_archive_amendment | requested_by_id | adc_user | id |
+| adc_archive_amendment | reviewed_by_id | adc_user | id |
+| adc_archive_event | actor_id | adc_user | id |
+| adc_archive_event | amendment_id | adc_archive_amendment | id |
+| adc_archive_event | archive_id | adc_clinical_archive | id |
+| adc_archive_event | package_id | adc_archive_package | id |
+| adc_archive_event | submission_id | adc_archive_submission | id |
+| adc_archive_package | archive_id | adc_clinical_archive | id |
+| adc_archive_package | previous_id | adc_archive_package | id |
+| adc_archive_package | submission_id | adc_archive_submission | id |
+| adc_archive_submission | archive_id | adc_clinical_archive | id |
+| adc_archive_submission | assigned_reviewer_id | adc_clinical_reviewer | id |
+| adc_archive_submission | document_version_id | adc_clinical_document_version | id |
+| adc_archive_submission | previous_package_id | adc_archive_package | id |
+| adc_archive_submission | reviewer_id | adc_clinical_reviewer | id |
+| adc_archive_submission | reviewed_by_id | adc_user | id |
+| adc_archive_submission | submitted_by_id | adc_user | id |
 | adc_assistant_event | user_id | adc_user | id |
 | adc_audit_event | actor_id | adc_user | id |
 | adc_audit_event | correction_request_id | adc_correction_request | id |
@@ -43,6 +66,8 @@
 | adc_clinic_directory_revision | directory_id | adc_clinic_directory | id |
 | adc_clinic_directory_revision | actor_id | adc_user | id |
 | adc_clinic_profile_policy | clinic_id | adc_clinic | id |
+| adc_clinical_archive | encounter_id | adc_clinical_encounter | id |
+| adc_clinical_archive | responsible_id | adc_user | id |
 | adc_clinical_authority_event | authorization_id | adc_professional_authorization | id |
 | adc_clinical_authority_event | clinic_id | adc_clinic | id |
 | adc_clinical_authority_event | reviewer_id | adc_clinical_reviewer | id |

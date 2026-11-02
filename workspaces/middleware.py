@@ -31,6 +31,10 @@ MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_me
     'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'clinical_archives':{'DENTIST'},'clinical_archive':{'DENTIST'},'clinical_archive_submission':{'DENTIST'},
+ 'clinical_archive_amendment':{'DENTIST'},'clinical_archive_confirm':{'DENTIST'},
+ 'clinical_archive_download':{'DENTIST'},'clinical_archive_manifest':{'DENTIST'},
+ 'clinical_archive_summary':{'FRONT_DESK','MANAGER','HQ'},
  'medical_proxies':{'FRONT_DESK','DENTIST'},'medical_proxy_new':{'FRONT_DESK'},'medical_proxy_detail':{'FRONT_DESK','DENTIST'},
  'clinical_preflight':{'DENTIST'},'clinical_retrospective':{'DENTIST'},'clinical_control_rules':{'DENTIST'},'clinical_gaps':{'DENTIST'},'clinical_gap_detail':{'DENTIST'},
  'clinical_consents':{'DENTIST'},'clinical_consent':{'DENTIST'},

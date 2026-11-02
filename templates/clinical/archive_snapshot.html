@@ -1,0 +1,3 @@
+{% load archive_documents %}
+{% if snapshot.document %}{% include 'clinical/document_body.html' with content=snapshot.document.content source=snapshot.document.source %}{% endif %}
+{% for section in snapshot|archive_sections %}<details class="panel"><summary>{{ section.title }}</summary><dl class="detail-grid">{% for key,value in section.rows %}<dt>{{ key }}</dt><dd class="care-notes">{{ value }}</dd>{% endfor %}</dl></details>{% endfor %}

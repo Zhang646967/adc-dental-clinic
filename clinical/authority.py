@@ -82,7 +82,8 @@ def readable_assigned_visits(actor, dentist_id, *, strict=False):
     from django.db.models import Q, OuterRef, Subquery
     from scheduling.models import Visit
     from scheduling.resource_models import ResourcePlan
-    visits=Visit.objects.filter(dentist_id=dentist_id)
+    visits=Visit.objects.all()
+    if dentist_id is not None:visits=visits.filter(dentist_id=dentist_id)
     now=timezone.now()
     scopes=ProfessionalAuthorization.objects.filter(user_id=actor.pk,user__is_active=True,
         user__dentist__is_active=True,clinic__is_active=True,state='APPROVED',can_read=True,

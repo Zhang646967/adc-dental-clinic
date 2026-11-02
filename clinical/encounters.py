@@ -202,7 +202,7 @@ def change_draft(*,actor,visit_id,expected_revision,operation_id,action,fields=N
     return head,False
 
 
-def prepare_record(*,actor,visit_id):
+def prepare_record(*,actor,visit_id,archive_check=True):
     visit=Visit.objects.select_related('patient').get(pk=visit_id)
     require_visit_authority(actor,visit,'RECORD',always=True)
     head=ClinicalEncounter.objects.get(visit=visit);draft=ClinicalDraft.objects.get(encounter=head)
@@ -212,6 +212,9 @@ def prepare_record(*,actor,visit_id):
     if draft.base_record_id and not payload['amendment_reason']:raise RuleError('更正版本必须保留明确依据。')
     data=dict(visit=visit.pk,encounter=head.pk,revision=head.revision,digest=draft_digest(payload),
         base_record=draft.base_record_id,history_cursor=history_cursor(visit.patient_id,visit.clinic_id))
+    if archive_check:
+        from clinical.archive_corrections import required
+        required(actor,visit_id,'RECORD')
     return dict(proposal_token=proposal(actor,CONTRACT,('DENTIST',),data),payload=payload,visit=visit,encounter=head)
 
 
@@ -221,10 +224,13 @@ def prepare_record(*,actor,visit_id):
 def confirm_record(*,actor,proposal_token,confirmed):
     if confirmed is not True:raise RuleError('请明确核对就诊人、检查内容和本次版本，再确认记录。')
     p=read_proposal(actor,CONTRACT,('DENTIST',),proposal_token);data=p['data']
+    from clinical import archive_corrections
+    archive_corrections.lock_participants(actor,data['visit'],'RECORD')
     visit,patient,head=lock_encounter(actor,data['visit'])
     read_proposal(actor,CONTRACT,('DENTIST',),proposal_token)
     op=operation(p['operation'])
     if same_event(actor,op,'RECORD_CONFIRMED',encounter=head):return head,True
+    amendment=archive_corrections.required(actor,visit.pk,'RECORD',lock=True)
     if head.pk!=data['encounter'] or head.revision!=data['revision']:raise RuleError('检查草稿已经变化，请核对保存的新版本后重新预览。')
     draft=ClinicalDraft.objects.select_for_update().get(encounter=head)
     payload=normalize_draft(draft.payload,complete=True);check_history(payload,visit)
@@ -248,5 +254,6 @@ def confirm_record(*,actor,proposal_token,confirmed):
     ClinicalRecordEvent.objects.create(actor=actor,operation_id=op,action='RECORD_CONFIRMED',encounter=head,record=row,
         note=payload['amendment_reason'] if latest else '',snapshot={'revision':head.revision,'record_revision':row.revision,
             'finding_count':len(payload['findings']),'payload_digest':data['digest']})
+    archive_corrections.consume(amendment,actor,row,op)
     emit(actor,'CLINICAL_RECORD_CONFIRMED',row,visit=visit,summary={'revision':row.revision,'finding_count':len(payload['findings'])})
     return head,False

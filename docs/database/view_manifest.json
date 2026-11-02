@@ -110,7 +110,7 @@
     "title": "初复诊文书版本与准确临床来源",
     "tables": 7,
     "relationships": 11,
-    "note": "一次实际接诊至多一个完整文书入口；草稿与确认版本分开。确认版本引用准确检查与接诊处置，previous为同文书的一对一追加链，prior_visit_version为同患者同店另一就诊的可空多对一复诊来源。正文及来源JSON冻结事实与当时身份，内容摘要不等于可靠电子签名。原金额由财务模块拥有；本视图不表示知情同意或病案归档已实施。",
+    "note": "一次实际接诊至多一个完整文书入口；草稿与确认版本分开。确认版本引用准确检查与接诊处置，previous为同文书的一对一追加链，prior_visit_version为同患者同店另一就诊的可空多对一复诊来源。正文及来源JSON冻结事实与当时身份，内容摘要不等于可靠电子签名。原金额由财务模块拥有；具体告知、医疗决定和固定归档分别见对应视图，不因文书确认而自动完成。",
     "columns": {
       "adc_visit": [
         "id",
@@ -1755,11 +1755,143 @@
       ]
     }
   },
+  "er_archive_submission": {
+    "title": "归档事项、准确来源与独立审核",
+    "tables": 6,
+    "relationships": 9,
+    "note": "每次接诊至多一个归档责任入口。申请引用准确文书，待审核及生成中每入口最多一个有效申请；材料保全与完整归档分开。专项审核职责默认关闭，还须当前诊所及各具体服务读取权限；申请人及负责医师不能审核自己。snapshot保留原始事实和逻辑来源，不把JSON编号虚构为SQL外键。",
+    "columns": {
+      "adc_user": [
+        "id",
+        "dentist_id"
+      ],
+      "adc_clinical_reviewer": [
+        "id",
+        "user_id",
+        "clinic_id",
+        "can_review_archives"
+      ],
+      "adc_clinical_encounter": [
+        "id",
+        "visit_id"
+      ],
+      "adc_clinical_archive": [
+        "id",
+        "encounter_id",
+        "responsible_id",
+        "due_at",
+        "supplement_due_at"
+      ],
+      "adc_clinical_document_version": [
+        "id",
+        "document_id",
+        "revision"
+      ],
+      "adc_archive_submission": [
+        "id",
+        "archive_id",
+        "document_version_id",
+        "submitted_by_id",
+        "assigned_reviewer_id",
+        "reviewed_by_id",
+        "reviewer_id",
+        "number",
+        "kind",
+        "state",
+        "source_digest"
+      ]
+    }
+  },
+  "er_archive_files": {
+    "title": "固定归档包与追加办理历史",
+    "tables": 6,
+    "relationships": 11,
+    "note": "一份获准申请至多生成一个固定PDF和清单；previous为同事项的一对一追加链。文件字节、清单、摘要和原审核不可覆盖，重复任务不重复发布。生成失败须明确重试，来源或职责变化转待重新提交。事件的申请、补正、文件引用可空，具体含义按action核对；旧包不因后续费用、姓名或授权变化而重绘。",
+    "columns": {
+      "adc_clinical_archive": [
+        "id",
+        "encounter_id"
+      ],
+      "adc_archive_submission": [
+        "id",
+        "archive_id",
+        "previous_package_id",
+        "number",
+        "kind",
+        "state"
+      ],
+      "adc_archive_package": [
+        "id",
+        "archive_id",
+        "submission_id",
+        "previous_id",
+        "number",
+        "pdf_sha256",
+        "published_at"
+      ],
+      "adc_archive_amendment": [
+        "id",
+        "archive_id"
+      ],
+      "adc_archive_event": [
+        "id",
+        "archive_id",
+        "submission_id",
+        "amendment_id",
+        "package_id",
+        "actor_id",
+        "operation_id",
+        "action"
+      ],
+      "adc_user": [
+        "id"
+      ]
+    }
+  },
+  "er_archive_amendment": {
+    "title": "准确补正批准与临床追加版本",
+    "tables": 5,
+    "relationships": 7,
+    "note": "补正针对完整文书或检查牙位的准确草稿，保留原包、差异和原因。独立批准后仍由负责医师确认；实际追加版本通过两个可空一对一结果关系恰选一个，未实施时两者为空。数据库延迟约束核对追加版本与批准内容、来源相同；批准不是直接改病历，旧批准不能套用变化后的草稿。补正后另提补充归档，原包继续可读。 审核人与委任的完整关系见归档提交视图；本图保留相关外键列，仅展开补正结果关系。",
+    "columns": {
+      "adc_clinical_archive": [
+        "id",
+        "encounter_id"
+      ],
+      "adc_archive_package": [
+        "id",
+        "archive_id"
+      ],
+      "adc_archive_amendment": [
+        "id",
+        "archive_id",
+        "base_package_id",
+        "target",
+        "candidate_digest",
+        "requested_by_id",
+        "assigned_reviewer_id",
+        "reviewed_by_id",
+        "state",
+        "result_document_id",
+        "result_record_id"
+      ],
+      "adc_clinical_document_version": [
+        "id",
+        "previous_id",
+        "revision"
+      ],
+      "adc_clinical_record_version": [
+        "id",
+        "previous_id",
+        "revision"
+      ]
+    }
+  },
   "validation": {
     "passed": true,
-    "tables": 158,
-    "orm_tables": 157,
-    "columns_types_and_nullability_checked": 1550,
+    "tables": 163,
+    "orm_tables": 162,
+    "columns_types_and_nullability_checked": 1623,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -1768,10 +1900,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 450,
-    "sql_foreign_keys": 451,
+    "orm_foreign_keys": 475,
+    "sql_foreign_keys": 476,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "687591a45246d7a3e23246dcc50624b2a4533f200ab52ad762ee6577b2f35ed3",
+    "snapshot_sha256": "57e4a4f0c68212b31c2e8872e40ac657cbd841f4f2b75fc8e8f7c94375827f5b",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

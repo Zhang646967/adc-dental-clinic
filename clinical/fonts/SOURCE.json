@@ -1,0 +1,11 @@
+{
+  "source_commit": "a85815a42757630ce188fdad368c2dfc444d4773",
+  "source_url": "https://raw.githubusercontent.com/google/fonts/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+  "source_sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+  "source_git_blob_sha1": "fb0637bafbcd804fe32152370a1225990745b4bc",
+  "license": "SIL Open Font License1.1",
+  "license_url": "https://raw.githubusercontent.com/google/fonts/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc/OFL.txt",
+  "instance_weight": 400,
+  "generation_tool": "fontTools4.60.1",
+  "generated_sha256": "8dcf2e42fc6c479ac2d7193f050b7189ebc1d521b0529c08a73cf7027b336dfe"
+}

@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 157 ORM tables; django_migrations is a framework migration journal.
+// All 162 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -68,6 +68,89 @@ Table adc_appointment_improvement {
   comparison "jsonb" [not null]
   lock_version "integer" [not null]
   created_at "timestamp with time zone" [not null]
+}
+
+Table adc_archive_amendment {
+  id "bigint" [pk, not null]
+  archive_id "bigint" [not null]
+  base_package_id "bigint" [not null]
+  target "character varying(12)" [not null]
+  candidate "jsonb" [not null]
+  candidate_digest "character varying(64)" [not null]
+  reason "character varying(1000)" [not null]
+  requested_by_id "bigint" [not null]
+  assigned_reviewer_id "bigint" [not null]
+  due_at "timestamp with time zone" [not null]
+  requested_at "timestamp with time zone" [not null]
+  operation_id "uuid" [unique, not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  reviewer_id "bigint" [null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_note "character varying(1000)" [not null]
+  approval_scope "jsonb" [not null]
+  result_document_id "bigint" [unique, null]
+  result_record_id "bigint" [unique, null]
+}
+
+Table adc_archive_event {
+  id "bigint" [pk, not null]
+  archive_id "bigint" [not null]
+  submission_id "bigint" [null]
+  amendment_id "bigint" [null]
+  package_id "bigint" [null]
+  actor_id "bigint" [null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  note "character varying(1000)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_archive_package {
+  id "bigint" [pk, not null]
+  archive_id "bigint" [not null]
+  submission_id "bigint" [unique, not null]
+  number "integer" [not null]
+  previous_id "bigint" [unique, null]
+  pdf "bytea" [not null]
+  pdf_sha256 "character varying(64)" [not null]
+  manifest "jsonb" [not null]
+  renderer "character varying(64)" [not null]
+  published_at "timestamp with time zone" [not null]
+  indexes {
+    (archive_id, number) [unique, name: 'archive_package_number']
+  }
+}
+
+Table adc_archive_submission {
+  id "bigint" [pk, not null]
+  archive_id "bigint" [not null]
+  number "integer" [not null]
+  kind "character varying(12)" [not null]
+  document_version_id "bigint" [null]
+  previous_package_id "bigint" [null]
+  snapshot "jsonb" [not null]
+  source_digest "character varying(64)" [not null]
+  reason "character varying(1000)" [not null]
+  submitted_by_id "bigint" [not null]
+  assigned_reviewer_id "bigint" [not null]
+  due_at "timestamp with time zone" [not null]
+  submitted_at "timestamp with time zone" [not null]
+  operation_id "uuid" [unique, not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  reviewer_id "bigint" [null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_note "character varying(1000)" [not null]
+  approval_scope "jsonb" [not null]
+  attempts "integer" [not null]
+  generation_error "character varying(40)" [not null]
+  indexes {
+    (archive_id, number) [unique, name: 'archive_submission_number']
+  }
 }
 
 Table adc_assistant_event {
@@ -236,6 +319,16 @@ Table adc_clinic_profile_policy {
   clinic_id "bigint" [unique, not null]
   roster_enforced "boolean" [not null]
   revision "integer" [not null]
+}
+
+Table adc_clinical_archive {
+  id "bigint" [pk, not null]
+  encounter_id "bigint" [unique, not null]
+  responsible_id "bigint" [not null]
+  due_at "timestamp with time zone" [not null]
+  supplement_due_at "timestamp with time zone" [null]
+  revision "integer" [not null]
+  created_at "timestamp with time zone" [not null]
 }
 
 Table adc_clinical_authority_event {
@@ -471,6 +564,7 @@ Table adc_clinical_reviewer {
   valid_from "timestamp with time zone" [not null]
   valid_until "timestamp with time zone" [not null]
   is_active "boolean" [not null]
+  can_review_archives "boolean" [not null]
   revision "integer" [not null]
   appointed_by_id "bigint" [not null]
   appointed_at "timestamp with time zone" [not null]
@@ -2194,6 +2288,29 @@ Ref: adc_appointment_improvement.assigned_to_id > adc_user.id
 Ref: adc_appointment_improvement.reviewed_by_id > adc_user.id
 Ref: adc_appointment_improvement.submitted_by_id > adc_user.id
 Ref: adc_appointment_improvement.clinic_id > adc_clinic.id
+Ref: adc_archive_amendment.archive_id > adc_clinical_archive.id
+Ref: adc_archive_amendment.assigned_reviewer_id > adc_clinical_reviewer.id
+Ref: adc_archive_amendment.base_package_id > adc_archive_package.id
+Ref: adc_archive_amendment.result_document_id - adc_clinical_document_version.id
+Ref: adc_archive_amendment.result_record_id - adc_clinical_record_version.id
+Ref: adc_archive_amendment.reviewer_id > adc_clinical_reviewer.id
+Ref: adc_archive_amendment.requested_by_id > adc_user.id
+Ref: adc_archive_amendment.reviewed_by_id > adc_user.id
+Ref: adc_archive_event.actor_id > adc_user.id
+Ref: adc_archive_event.amendment_id > adc_archive_amendment.id
+Ref: adc_archive_event.archive_id > adc_clinical_archive.id
+Ref: adc_archive_event.package_id > adc_archive_package.id
+Ref: adc_archive_event.submission_id > adc_archive_submission.id
+Ref: adc_archive_package.archive_id > adc_clinical_archive.id
+Ref: adc_archive_package.previous_id - adc_archive_package.id
+Ref: adc_archive_package.submission_id - adc_archive_submission.id
+Ref: adc_archive_submission.archive_id > adc_clinical_archive.id
+Ref: adc_archive_submission.assigned_reviewer_id > adc_clinical_reviewer.id
+Ref: adc_archive_submission.document_version_id > adc_clinical_document_version.id
+Ref: adc_archive_submission.previous_package_id > adc_archive_package.id
+Ref: adc_archive_submission.reviewer_id > adc_clinical_reviewer.id
+Ref: adc_archive_submission.reviewed_by_id > adc_user.id
+Ref: adc_archive_submission.submitted_by_id > adc_user.id
 Ref: adc_assistant_event.user_id > adc_user.id
 Ref: adc_audit_event.actor_id > adc_user.id
 Ref: adc_audit_event.correction_request_id > adc_correction_request.id
@@ -2223,6 +2340,8 @@ Ref: adc_clinic_directory.clinic_id - adc_clinic.id
 Ref: adc_clinic_directory_revision.directory_id > adc_clinic_directory.id
 Ref: adc_clinic_directory_revision.actor_id > adc_user.id
 Ref: adc_clinic_profile_policy.clinic_id - adc_clinic.id
+Ref: adc_clinical_archive.encounter_id - adc_clinical_encounter.id
+Ref: adc_clinical_archive.responsible_id > adc_user.id
 Ref: adc_clinical_authority_event.authorization_id > adc_professional_authorization.id
 Ref: adc_clinical_authority_event.clinic_id > adc_clinic.id
 Ref: adc_clinical_authority_event.reviewer_id > adc_clinical_reviewer.id

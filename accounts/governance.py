@@ -27,7 +27,7 @@ from workspaces.models import WorkspaceContext
 
 SALT = 'adc.account-management.v08a1'
 MANAGED_ROLES = {'DENTIST':'SELF_DENTIST','FRONT_DESK':'CLINIC','MANAGER':'CLINIC','HQ':'CHAIN','FINANCE':'CHAIN'}
-ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer','medical_proxy_reviewer','clinical_reviewer'))
+ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer','medical_proxy_reviewer','clinical_reviewer','archive_reviewer'))
 
 
 def require_technical(actor):
@@ -173,6 +173,18 @@ def change_account(*, actor, target_id, token, action, operator_password, reason
         obj=appoint_reviewer(actor=actor,target=target,clinic_id=clinic_id,enabled=reviewer_enabled,
             reference=reviewer_reference,valid_from=reviewer_from,valid_until=reviewer_until)
         summary.update(clinic_id=obj.clinic_id,clinical_reviewer=obj.is_active)
+    elif action == 'archive_reviewer':
+        from clinical.models import ClinicalReviewerAppointment,ClinicalAuthorityEvent
+        import uuid
+        obj=ClinicalReviewerAppointment.objects.select_for_update().get(user=target,clinic_id=clinic_id,is_active=True)
+        if reviewer_enabled and not obj.valid_from<=timezone.now()<obj.valid_until:
+            raise RuleError('机构专业审核职责尚未生效或已到期，请先核对原委任。')
+        obj.can_review_archives=bool(reviewer_enabled);obj.revision+=1
+        obj.save(update_fields=['can_review_archives','revision'])
+        ClinicalAuthorityEvent.objects.create(actor=actor,clinic_id=clinic_id,reviewer=obj,operation_id=uuid.uuid4(),
+            action='ARCHIVE_DUTY',resulting_state='ACTIVE' if reviewer_enabled else 'REVOKED',note=reason,
+            snapshot={'user_id':target.pk,'revision':obj.revision,'can_review_archives':obj.can_review_archives})
+        summary.update(clinic_id=clinic_id,archive_reviewer=obj.can_review_archives)
     elif action == 'reset_password':
         validate_password(new_password or '',user=target)
         target.set_password(new_password);target.save(update_fields=['password'])

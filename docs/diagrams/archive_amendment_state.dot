@@ -1,0 +1,24 @@
+digraph State {
+ graph [rankdir=TB,bgcolor="white",pad="0.4",nodesep="0.6",ranksep="0.8"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4f0",color="#345e56",fontname="Noto Sans CJK SC",fontsize=16,margin="0.18,0.13"];
+ edge [color="#345e56",fontname="Noto Sans CJK SC",fontsize=13,arrowsize=0.7];
+
+ fixed [label="已有完整归档包\n原文件和审核不改写"];
+ draft [label="负责医师保存准确更正草稿\n差异、依据和来源明确"];
+ pending [label="待独立医务审核"];
+ returned [label="退回／不通过\n旧申请保留",fillcolor="#fff3e6"];
+ approved [label="批准准确内容\n尚未形成临床追加版本"];
+ cancelled [label="明确撤回未实施申请\n临床旧记录保持",fillcolor="#fff3e6"];
+ applied [label="负责医师确认追加版本\n锁内重检来源、内容和职责"];
+ supplement [label="另提交准确补充归档包\n原文书、原包及历史保留"];
+ fixed -> draft [label="提出有依据的补正"];
+ draft -> pending [label="明确差异和独立审核人"];
+ pending -> approved [label="另一名获委任医师批准"];
+ pending -> returned [label="退回完善或不通过"];
+ returned -> draft [label="修改后另提准确申请"];
+ pending -> cancelled [label="负责医师撤回"];
+ approved -> cancelled [label="实施前撤回"];
+ approved -> draft [label="内容或适用依据变化，重新核对"];
+ approved -> applied [label="内容和来源仍与批准相同"];
+ applied -> supplement [label="不重复治疗或计费"];
+}

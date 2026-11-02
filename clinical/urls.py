@@ -7,8 +7,17 @@ from clinical import document_views as documents
 from clinical import consent_views as consents
 from clinical import preflight_views as preflight
 from portal import medical_views as medical
+from clinical import archive_views as archives
 
 urlpatterns=[
+    path('clinical/archives/',archives.listing,name='clinical_archives'),
+    path('clinical/archives/summary/',archives.summary,name='clinical_archive_summary'),
+    path('clinical/encounters/<int:pk>/archive/',archives.workspace,name='clinical_archive'),
+    path('clinical/archives/submissions/<int:pk>/',archives.request_detail,name='clinical_archive_submission'),
+    path('clinical/archives/amendments/<int:pk>/',archives.request_detail,{'amendment':True},name='clinical_archive_amendment'),
+    path('clinical/archives/confirm/<str:action>/',archives.confirm,name='clinical_archive_confirm'),
+    path('clinical/archives/packages/<int:pk>/download/',archives.download,name='clinical_archive_download'),
+    path('clinical/archives/packages/<int:pk>/manifest/',archives.download,{'manifest':True},name='clinical_archive_manifest'),
     path('clinical/medical-authorizations/',medical.listing,name='medical_proxies'),
     path('clinical/medical-authorizations/new/',medical.create,name='medical_proxy_new'),
     path('clinical/medical-authorizations/<int:pk>/',medical.detail,name='medical_proxy_detail'),

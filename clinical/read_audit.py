@@ -8,6 +8,9 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'clinical_archives':('ARCHIVE_LIST','CARE'),'clinical_archive':('ARCHIVE','CARE'),
+    'clinical_archive_submission':('ARCHIVE_SUBMISSION','CARE'),'clinical_archive_amendment':('ARCHIVE_AMENDMENT','CARE'),
+    'clinical_archive_download':('ARCHIVE_PACKAGE','CARE'),'clinical_archive_manifest':('ARCHIVE_PACKAGE','CARE'),
     'medical_proxies':('MEDICAL_AUTH_LIST','IDENTITY'),'medical_proxy_new':('MEDICAL_AUTH_LIST','IDENTITY'),'medical_proxy_detail':('MEDICAL_AUTH','IDENTITY'),
     'portal_medical_authorizations':('MEDICAL_AUTH_LIST','MEDICAL_AUTH'),
     'portal_medical_proxy':('MEDICAL_AUTH','MEDICAL_AUTH'),'mini_medical_authorizations':('MEDICAL_AUTH_LIST','MEDICAL_AUTH'),
