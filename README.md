@@ -1,5 +1,38 @@
 # ADC 牙科连锁运营管理系统
 
+面向单一牙科连锁的患者服务、前台排班、诊疗文书、财务及设备协同系统。患者以微信小程序为主要入口，员工使用独立网站入口。
+
+## 访问与登录
+
+**正式公网地址：尚未部署。** 固定HTTPS地址通过实际验收后在此公布。后续仅部署统一ADC系统，教师按普通用户方式访问，不另建“教师上线版”。历史记录中的临时隧道和本机端口不是当前正式访问地址。
+
+| 使用对象 | 入口 | 登录方式 |
+|---|---|---|
+| 访客 | 部署后的首页 `/` | 无需登录即可查看门店、医师和服务 |
+| 患者 | 微信小程序；患者网站 `/portal/login/` | 使用部署后实际启用的微信或原账号方式；小程序可用入口在平台与真机验收后公布 |
+| 员工 | 独立员工入口 `/accounts/login/` | 使用分配的岗位账号，按权限进入对应岗位及诊所 |
+
+**账号获取：** 体验账号由项目作者单独提供，老师按要查看的业务使用对应角色账号。密码、AppSecret和服务器密钥不放公开仓库。手机号短信尚未真实开通，不列为已可用登录方式。
+
+## 课程报告
+
+**[阅读课程报告PDF](课程报告/课程报告_张加良_8210241102.pdf)** · [报告说明](课程报告/README.md)
+
+张加良｜信管T2401｜8210241102。正式报告仅更新PDF；旧Word保留为历史版本。
+
+## 当前状态与开发
+
+C3.3B正常病历副本申请入口的官方工具专项复测已通过；原生picker、设备矩阵、手机与平台资格仍按各自结果验收。当前业务验证使用合成资料，服务器独立部署尚未完成。
+
+[当前验收与边界](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
+
+下一步先固化最新版上线包、追加迁移升级和独立运行能力，同时细化处方与药事业务。既有Mac开发、空库演练和恢复流程继续保留，部署准备与实际云端验收分别记录。
+
+<details>
+<summary>历史版本、工程记录与本地开发说明</summary>
+
+以下保留各期原时点和原范围；旧“教师上线版／教师专用环境”规划由当前统一部署计划替代。历史地址、旧报告页数及旧验收状态以各自记录为准。
+
 **C3.3B正常申请入口的官方工具专项复测已通过。** [验收收口](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [当前证据](docs/evidence_c33b/README.md)。普通点击、范围预览及返回重开通过；原生picker手势、设备和手机单列。已核对92项文件校验和164组记录摘要，无新增业务事实。准确完整CI通过，后端及冻结包保持；报告仅更新PDF，293页和44实际ER保持。
 
 **C3.3A已交付：病历归档、独立医务审核和追加补正。** [当前准确版本与发布进度](docs/evidence_c33a/README.md) · [使用入口](docs/C33_ARCHIVE_GUIDE.md) · [WorkBuddy本轮边界](docs/WORKBUDDY_C33A_STATUS.md)。准确完整CI通过1,164源规则／2,272项PG；原本机已保护更新，账号、原业务和配置保留。本轮无新小程序页面，不重复已通过的患者场景。
@@ -252,3 +285,6 @@ R2.1 application delivery: [protected Mac record](docs/evidence_r21/delivery.jso
 and [updated current report](docs/report-source/README.md). Application commit
 `ccdcdcd` passed exact-version CI; 48 durable fingerprints and 70 private files
 remain unchanged, with 410 Mac browser assertions.
+
+
+</details>

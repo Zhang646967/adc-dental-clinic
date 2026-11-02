@@ -1,3 +1,5 @@
+当前部署方向：[统一系统与服务器上线计划](SERVER_DEPLOYMENT_PLAN.md)。取消单独教师上线版，最终在GitHub首页公布统一系统的地址、患者／小程序与员工入口及登录步骤。开发和预发布继续隔离验证，现有实例与历史资料保留。
+
 当前C3.3B：[正常申请入口官方工具收口](WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [执行证据](evidence_c33b/README.md)。四项专项结果通过，picker原生手势单列；无新增业务记录，不要求重复编译或微信重登。报告仅更新PDF，293页及44实际ER保持。以下旧导航保留原时点。
 
 当前C3.3A：[独立归档与追加补正](evidence_c33a/README.md) · [业务指南](C33_ARCHIVE_GUIDE.md) · [WorkBuddy边界](WORKBUDDY_C33A_STATUS.md)。准确完整CI及原系统保护更新通过，版本与范围见执行清单。报告281页、140业务用例加SF01、41实际ER。以下保留旧期导航。

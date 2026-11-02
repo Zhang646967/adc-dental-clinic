@@ -1,3 +1,5 @@
+**Release direction update — 2026-11-02:** one ADC product and one intended unified server deployment. The separate teacher online edition is cancelled. Teachers use standard patient or assigned staff access, documented in GitHub after actual deployment. Development/staging isolation remains available for validation; existing history and data stay preserved. The clinical, privacy and operating qualification gates below remain applicable. See [current server plan](SERVER_DEPLOYMENT_PLAN.md).
+
 # ADC commercial dental platform upgrade plan
 
 Customer trust → complete clinical workflows → protected records and money → reliable operation → supported commercial launch.
