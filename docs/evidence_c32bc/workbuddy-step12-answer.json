@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "source": "CODEX_EXECUTED_PHYSICIAN_WEBSITE_AND_NATIVE_HTTP_READ",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "scope": "Independent synthetic18352 responsible physician preview and explicit confirmation; not official-tool or professional acceptance",
+  "new_events": 1,
+  "action": "ANSWER",
+  "source_label": "DOCTOR_ACCOUNT",
+  "correct_foreign_keys_verified_before_write": true,
+  "can_agree": true,
+  "can_withdraw": false,
+  "unanswered": false,
+  "patient_decision_submitted_by_codex": false,
+  "browser_js_errors": 0,
+  "private_identifiers_and_content": "LOCAL_PRIVATE_CONTINUATION_ONLY",
+  "pending_action": "WorkBuddy reads the answer on the same record and explicitly confirms the proxy decision"
+}

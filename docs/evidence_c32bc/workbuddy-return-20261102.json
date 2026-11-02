@@ -1,0 +1,35 @@
+{
+  "return_date": "2026-11-02",
+  "source": "USER_RELAYED_WORKBUDDY_RETURN",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "scope": "Patient official-tool results relayed by user; physician workflow and database independently verified by Codex",
+  "scenarios": {
+    "1_authorization_scope": "REPORTED_PASS",
+    "2_retained_history": "REPORTED_PASS",
+    "3_question_then_proxy_decision": "QUESTION_SUBMITTED_CODEX_ANSWERED_PENDING_PROXY_DECISION",
+    "4_guardian_scheme_and_medical_decisions": "REPORTED_PASS",
+    "5_paper_source_switch_and_revocation": "REPORTED_PASS",
+    "6_self_invoice_and_isolation": "REPORTED_PASS_NET_BALANCE_DISPLAY"
+  },
+  "association_correction": "Actual foreign keys confirmed before physician write; exact identifiers retained only in private continuation",
+  "settlement_display": {
+    "net_balance_correct": true,
+    "posted_gross_amounts_independently_verified": true,
+    "gross_receipt_and_refund_rows_displayed": false,
+    "transaction_history_displayed": false,
+    "assessment": "Current net-only display is correct; separate totals and line history are a future scoped enhancement"
+  },
+  "reported_boundaries": {
+    "no_source_backend_schema_or_server_edits": true,
+    "no_new_treatment_invoice_or_money": true,
+    "no_key_read_or_wechat_unlink": true,
+    "no_platform_upload": true,
+    "no_old_port_business_writes": true,
+    "no_unrelated_wechat_relogin": true
+  },
+  "device_375_430_and_font_scale": "BLOCKED_TOOL_CAPABILITY_NOT_SUBSTITUTED",
+  "physical_phone": "PENDING_SEPARATE_ACCEPTANCE",
+  "codex_answer_reference": "workbuddy-step12-answer.json",
+  "codex_database_reference": "workbuddy-part2-database.json",
+  "individual_clinical_content_and_record_mapping": "NOT_PUBLISHED_LOCAL_PRIVATE_HANDOFF_ONLY"
+}

@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "source": "CODEX_EXECUTED_READ_ONLY_DATABASE_COMPARISON",
+  "scope": "Synthetic18352 before/after responsible-physician answer",
+  "all_prior_medical_event_hashes_equal": true,
+  "only_one_answer_event_added": true,
+  "scheme_decisions_unchanged": true,
+  "proxy_states_unchanged": true,
+  "actual_procedures_unchanged": true,
+  "invoices_unchanged": true,
+  "cash_entries_and_amounts_unchanged": true,
+  "patient_decision_not_submitted": true,
+  "net_balance_matches_posted_receipts_minus_refunds": true,
+  "private_row_mapping": "LOCAL_ONLY"
+}
