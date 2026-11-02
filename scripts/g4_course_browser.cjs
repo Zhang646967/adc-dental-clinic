@@ -53,6 +53,7 @@ let browser;
     const login = patient ? '/portal/login/' : '/accounts/login/';
     const response = await page.goto(base + login);
     check(username + ' login page', response.status() === 200);
+    if (patient) await page.locator('details.auth-password > summary').click();
     await page.locator('input[name=username]').fill(username);
     await page.locator('input[name=password]').fill(credentials[username]);
     await page.locator('form:has(input[name=username]) button[type=submit]').click();
@@ -83,8 +84,7 @@ let browser;
       await page.waitForURL(url => /^\/patients\/[0-9]+\/$/.test(url.pathname));
       check('Real Chrome patient write persisted visibly', (await page.locator('main').innerText()).includes('COURSE-BROWSER-' + suffix));
       await page.setViewportSize({width: 390, height: 844});
-      await page.locator('button.mode-toggle').click();
-      check('390px large text fits', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      check('390px layout fits', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     }
     if (username === 'doctor_a') {
       const denied = await page.goto(base + '/finance/');

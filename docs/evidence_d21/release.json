@@ -1,0 +1,26 @@
+{
+  "phase": "D2.1",
+  "product": "ADC",
+  "release_edition": "UNIFIED",
+  "status": "SOURCE_CANDIDATE_VALIDATION_PENDING",
+  "application_migrations": 80,
+  "new_migrations": 0,
+  "native_pages": 27,
+  "public_cloud_acceptance": "NOT_RUN_AWAITING_SERVER",
+  "physical_phone": "SEPARATE_PENDING",
+  "workbuddy_repeated_deployment_required": false,
+  "existing_instances_data_passwords_and_configurations": "MUST_PRESERVE",
+  "general_equivalent_ddl_comparator_limit": "RETAINED",
+  "historical_windows_recovery": "UNRESOLVED",
+  "source_checks": 1165,
+  "targeted_postgresql_checks": 8,
+  "native_source_checks": 315,
+  "native_copy_handler_cases": 9,
+  "preflight": {
+    "source_commit": "541d421e90825bd4cdca791adc8630839919fc8b",
+    "architecture": "amd64",
+    "empty_schema_migrated": 80,
+    "published_clinics": 20,
+    "scope": "Pre-change current baseline; not final D2.1 candidate image evidence."
+  }
+}

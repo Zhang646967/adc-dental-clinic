@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.g4_prepare import inspect_bundle, read_env
 from scripts.g4_mac_demo import atomic_text
+from scripts.g4_manifest import source_inventory
 from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, validate_target, validate_restore
 from scripts.recovery_facts import compare, validate as validate_facts, canonical, fingerprint
 from scripts.recovery_snapshot import snapshot
@@ -116,6 +117,7 @@ def build(artifacts, docker, context, architecture):
     with tempfile.TemporaryDirectory(dir=artifacts) as folder:
         with tarfile.open(source) as archive:
             archive.extractall(folder, filter='data')
+        inventory = source_inventory(folder)
         image_file = artifacts / 'image.id'
         run(base + ['build', '--platform', 'linux/' + architecture,
                     '--build-arg', 'ADC_SOURCE_COMMIT=' + revision,
@@ -129,7 +131,8 @@ def build(artifacts, docker, context, architecture):
         os.fchmod(stream.fileno(), 0o600)
         run(base + ['save', image], log, output_file=stream, timeout=600)
     result = {'source_commit': revision, 'architecture': architecture, 'app_image': image,
-              'source_sha256': digest(source), 'image_archive_sha256': digest(image_archive)}
+              'source_sha256': digest(source), 'image_archive_sha256': digest(image_archive),
+              'release_inventory': inventory}
     atomic_text(artifacts / 'build.json', json.dumps(result, indent=2) + '\n')
     return result
 
@@ -257,12 +260,13 @@ class Course:
             raise ValueError('Runtime application must use UID 10001.')
         self.dc('exec', '-T', 'web', 'python', 'manage.py', 'check_runtime_role')
         atomic_text(self.bundle / 'private/COURSE_ACCESS.md',
-                    '# Course access（课程登录）\n\n'
+                    '# ADC 系统访问说明\n\n'
                     'Staff login: https://' + self.plan['host'] + '/accounts/login/\n\n'
                     'Patient login: https://' + self.plan['host'] + '/portal/login/\n\n'
                     'Assigned synthetic accounts: private demo-credentials.txt.\n'
                     'Change passwords before account handover. Roles and clinics remain separate.\n'
-                    'Operator workflow and teacher routes: docs/COURSE_ONLINE.md.\n')
+                    'Deployment and verified public access: docs/SERVER_DEPLOYMENT_PLAN.md and README.md.\n'
+                    'This private installation receipt is not a public-cloud acceptance record.\n')
 
     def status(self):
         self.render()
@@ -297,6 +301,13 @@ class Course:
             release = json.loads(self.dc('exec', '-T', 'web', 'python', 'manage.py', 'course_release_status', timeout=20))
         except (OSError, ValueError, RuntimeError):
             pass
+        # Old accepted images expose counts; current images additionally compare
+        # the exact set. Missing or mismatched database metadata is never ready.
+        database_matches = (release.get('source_commit') == self.plan['requested_source_commit']
+                            and release.get('migration_files', 0) > 0
+                            and release.get('migration_files') == release.get('applied_application_migrations')
+                            and release.get('schema_matches_source', True) is True)
+        ready = ready and database_matches
         observed = {'state': 'UNKNOWN'}
         try:
             identifier = self.dc('ps', '-q', 'web').decode().strip()
@@ -323,6 +334,7 @@ class Course:
                 'origin_trusted_https': tls, 'public_acceptance_executed': False,
                 'course_online_readiness': 'NOT_RUN', 'last_server_backup': copies[-1]['created_at'] if copies else None,
                 'observed_application': observed, 'database_release': release,
+                'database_matches_release': database_matches,
                 'operations': observation, 'offsite_backup': offsite_status(self.bundle)}
 
     def upgrade(self, artifacts, recipient_file, expected_current, age='age'):

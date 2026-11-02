@@ -81,6 +81,45 @@ class CourseSafetyTests(unittest.TestCase):
         self.assertFalse(result['public_acceptance_executed'])
         self.assertEqual(result['course_online_readiness'], 'NOT_RUN')
 
+    def test_healthy_containers_do_not_hide_unknown_or_wrong_database_release(self):
+        course = self.course()
+        course.render = Mock()
+        course.operations = Mock(return_value={'state': 'HEALTHY'})
+        source = self.plan['requested_source_commit']
+        exact = {'source_commit': source, 'migration_files': 80,
+                 'applied_application_migrations': 80, 'schema_matches_source': True}
+        connection = Mock()
+        connection.getresponse.return_value.status = 200
+        connection.getresponse.return_value.read.return_value = b'{"status":"ok"}'
+        running = [{'Service': n, 'State': 'running', 'Health': 'healthy'}
+                   for n in ('db', 'web', 'notification-worker', 'gateway')]
+        release = exact
+        def dc(*args, **kwargs):
+            if args[:2] == ('ps', '--all'):
+                return json.dumps(running).encode()
+            if args == ('ps', '-q', 'web'):
+                return b'c' * 64
+            return json.dumps(release).encode()
+        course.dc = Mock(side_effect=dc)
+        image = self.plan['images']['app']
+        def inspected(command, *args, **kwargs):
+            if 'inspect' in command and command[command.index('inspect')-1] == 'image':
+                return json.dumps([{'Id': image}]).encode()
+            return json.dumps([{'Image': image, 'Config': {'Labels': {
+                'org.opencontainers.image.revision': source}}}]).encode()
+        cases = [({}, False), (exact, True),
+                 (exact | {'source_commit': 'b'*40}, False),
+                 (exact | {'applied_application_migrations': 79}, False),
+                 (exact | {'schema_matches_source': False}, False)]
+        with patch('scripts.g4_course.OriginHTTPS', return_value=connection), patch(
+                'scripts.g4_course.run', side_effect=inspected):
+            for release, ready in cases:
+                with self.subTest(release=release):
+                    result = course.status()
+                    self.assertEqual(result['status'], 'ORIGIN_READY' if ready else 'DEGRADED')
+                    self.assertEqual(result['database_matches_release'], ready)
+                    self.assertFalse(result['public_acceptance_executed'])
+
     def private(self, name, contents=b'synthetic'):
         path = self.root / name
         path.write_bytes(contents)
