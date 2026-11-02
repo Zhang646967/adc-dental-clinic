@@ -1,9 +1,9 @@
 {
   "phase": "C3.3A",
-  "status": "PRINT_NOTICE_FIXED_AWAITING_NEW_EXACT_CI",
-  "application_commit": "8996da0677382be2680f9000de734ba0220f5373",
-  "application_image": "sha256:72452ba9fda2c6e5c6ba3a9b8b3352dc53061ce2332894e411dd9640df72dea8",
-  "exact_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41388481059",
+  "status": "FIXED_CANDIDATE_AWAITING_FULL_CI_AND_PROTECTED_INSTALL",
+  "application_commit": "37d9bb24908d9f4c03553c39c4be913c48cb50f3",
+  "application_image": "sha256:07b54f75cf5620123e6a6fe85b4ec75957a77d03499040ced346158c6a3c7729",
+  "exact_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41392528064",
   "source_rules_passed": 1164,
   "archive_postgresql_tests": 38,
   "archive_and_document_regression_passed": 63,
@@ -61,5 +61,8 @@
     "postgresql_tests_executed": 2272,
     "postgresql_tests_passed": 2271,
     "fix": "Restore explicit no-institutional-stamp notice in print view; no weakening of test."
-  }
+  },
+  "print_notice_http_and_archive_regression_passed": 47,
+  "archive_workflow_original_screens_source": "8996da0; one print-disclaimer sentence fixed in37d9bb2; no other application differences",
+  "latest_frozen_read_verified": true
 }

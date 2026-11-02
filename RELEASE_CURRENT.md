@@ -2,7 +2,7 @@
 
 准确文书 → 指定独立审核 → 固定文件 → 审批准确补正 → 临床追加与补充包。
 
-本地PostgreSQL、浏览器和加密恢复已经通过，准确应用为`8996da0677382be2680f9000de734ba0220f5373`。完整CI正在运行，原18000尚未切换。以[当前执行清单](docs/evidence_c33a/release.json)及[证据说明](docs/evidence_c33a/README.md)为准，不用在跑的结果代替通过。
+本地PostgreSQL、浏览器和加密恢复已经通过，准确应用为`37d9bb24908d9f4c03553c39c4be913c48cb50f3`。完整CI正在运行，原18000尚未切换。以[当前执行清单](docs/evidence_c33a/release.json)及[证据说明](docs/evidence_c33a/README.md)为准，不用在跑的结果代替通过。
 
 实际77迁移／163SQL表／476外键／135触发器／41ER；原75迁移字节保持。正式报告281页／140业务＋SF01，文件名不变。[业务指南](docs/C33_ARCHIVE_GUIDE.md)；WorkBuddy目前无需新的重复操作，患者受控复制下一批另交冻结工程。
 
