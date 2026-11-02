@@ -1,3 +1,5 @@
+当前C3.3B：[病历副本与受控领取](evidence_c33b/README.md) · [业务指南](C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新患者页任务](WORKBUDDY_C33B_TASK.md)。准确完整CI、本机保护更新和独立恢复通过。报告293页、147业务用例加SF01、44实际ER；官方工具和手机结果独立待验收。下方保留历史导航。
+
 当前C3.3A：[独立归档与追加补正](evidence_c33a/README.md) · [业务指南](C33_ARCHIVE_GUIDE.md) · [WorkBuddy边界](WORKBUDDY_C33A_STATUS.md)。准确完整CI及原系统保护更新通过，版本与范围见执行清单。报告281页、140业务用例加SF01、41实际ER。以下保留旧期导航。
 
 当前系统本体：[患者收退款展示](evidence_patient_cash/README.md) · [WorkBuddy新费用页回归](WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。75迁移／158SQL表／38实际ER；正式报告266页、133业务＋SF01。旧医疗及新费用数据／分页／隔离工具场景已收口；原生picker手势、设备矩阵与手机另验。[回传审核](WORKBUDDY_C32C1_REVIEW.md)。以下保留各旧期导航和原范围，以顶部当前记录为准。
@@ -68,7 +70,7 @@ WX1历史：[业务合同](WX1_IMPLEMENTATION.md) · [使用与平台联调](WX1
 ## 系统分析与设计
 
 - [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[388条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
+- [当前数据库ER与字段目录](database/README.md)、[489条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
 - [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
 - [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
 - [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。

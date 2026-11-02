@@ -46647,6 +46647,6 @@
     }
   ],
   "observed_on": "2026-11-02",
-  "observed_scope": "Read-only isolated C33B PostgreSQL17 migrated from empty database; independent18382 structure checked separately. No business rows or private configuration exported.",
-  "application_commit": "C33B_WORKING_SOURCE"
+  "observed_scope": "Read-only actual PostgreSQL metadata from frozen 0b7bf8739f25422a365eafe7e2c0b15c1e3a006f independent18382 and protected original18000; complete observed structures equal. No business rows or private configuration exported.",
+  "application_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f"
 }

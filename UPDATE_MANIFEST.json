@@ -4,7 +4,7 @@
   "supported_source": "One request owns scope, identity review, independent clinical review and authenticated pickup. Existing clinical and financial effects retained.",
   "scope": "Declared application/config/tests/docs present in the Docker build. Runtime evidence directories and logs excluded here; full archive CHECKSUMS.sha256 covers them. Hashes detect difference, not publisher authenticity.",
   "schema_change": "All77prior migration bytes retained; append3 to80;167SQL/166ORM/489FK/139triggers/44actualER.",
-  "user_release_validation": "Local candidate only:1164source,315native-source plus7copy-handler cases,32copyPG cases and real Chrome flow pass. Exact full CI/recovery/protected original update pending; WorkBuddy new27page native tool and phone separate.",
+  "user_release_validation": "Application0b7bf8739f25422a365eafe7e2c0b15c1e3a006f/imagesha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9/exactCI41403199301:1164source/2304PG;315native-source+7copy-handler cases separate. Original18000 and isolated18382 frozen;160old groups/all rows/passwords/bindings/config/volume/RCtag retained. Four new copy tables empty and duties off in original;164group populated and after-update encrypted empty-database restores pass.293page report/147business/44ER. WorkBuddy official tool/PDF viewer, phone/platform/cloud pending; no new30min capacity.",
   "removed_from_original_v07": [],
   "files": {
     ".dockerignore": "45494731fef1b0ed53133c336f718bb0bc5984552b66ab41f96cbc674dc5a121",
@@ -16,15 +16,15 @@
     ".gitignore": "ed7bd768e062178375b08bb8e79bfaf7b7093b06ebfb068f7c796992fca2551e",
     "ADC_MIGRATION_MAC.sh": "9c1392289cc2a5696a92d9f31549ce328787e7997b0fdfad1cf16b9c44d34675",
     "ADC_MIGRATION_WINDOWS.cmd": "58c64b71505dc4bb683db74e779dd687d51e2d6004e3bb50c88a4449b4cd1df6",
-    "AGENTS.md": "45991b1e806d89ff925eb102e252bc8b4a86398861cf3b78a2656a8bc630e043",
+    "AGENTS.md": "f7e96f80618b2aef1187d664a2fda770ebbcbcda65490ec3ef751e2d9bba966d",
     "AI_ENV.example": "3670d94246ca1685104cfce74e12da32fea6b935b2fc976a098cefb85e44dcb6",
     "Dockerfile": "9ceb745273173907830fa75406001ca061bbb87aaecaaba0a5739d4eec5bef5f",
     "Dockerfile.production": "cd7cca900452474a53e36278f34fe1c1a1cbda1de5e6380b35bca00cc2d39822",
     "PATIENT_AUTH_ENV.example": "d05afc6520356e9f62451999bfaa7d491eef89eb1a8c65943c313146fb24c822",
     "RC_MACOS.sh": "0050ef5d740ef8b293155df1baa45bf42dd4729a320ff8fb61052fe47f99bbdb",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "9f76f3a5fb53055f920c881364d9e0abfc97f435ea61a490b8dd319834170e72",
-    "RELEASE_CURRENT.md": "2dcfa0e30067bacdf00c5626a3dd079f8e1f798f1998a4aa1d3f293141f20de5",
+    "README.md": "15b2cdd976a65bc7654254fc8bce0880ba3f15503124b1df3405b3d5330162e9",
+    "RELEASE_CURRENT.md": "50cd127fc528861d1b667c5172f29deaaaba2bef19890de642b5d778db9a9dad",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
@@ -514,7 +514,7 @@
     "docs/RC_AB_DELIVERY.md": "8d7169507b3e7e882c21356bde2e476dfc223fe3e55cadae847471438610c612",
     "docs/RC_ACCEPTANCE_RECORD.json": "029ad143ae857de4f72bf636642008df4a781d9b757b114cce9739503425f381",
     "docs/RC_WINDOWS_ACCEPTANCE.md": "df8cf997949f92aa8b3b70b4062ef89c38e46f2d8d509ebdd4991fd0f60dc59d",
-    "docs/README.md": "7d858a847f3923191a891fb337f63628bd74838a0b370babd1bd05f2fd57291e",
+    "docs/README.md": "f4cc90d3083a0bda3ed3c37c420e5dce0b44cd66d6eb25891f2c91701dcd1e02",
     "docs/RELEASE_V09_ALPHA1.md": "afd80562658f9ea144aefb127d5872e10d19f9732dc428154576a4e0aa95ac8a",
     "docs/RELEASE_v0.7.md": "6d6eccdf061d58d7eedc10037113e3a48c75343252c24cb94521c491b0dabce2",
     "docs/RELEASE_v0.9a10.md": "b2867c805a07d2d5379016ba61f3ff7a54b730e6104751b5ce3bc7a9d6a1e2ee",
@@ -775,8 +775,8 @@
     "docs/database/render_validation.json": "97f85d0ffabf163c408898b662e247908978cd7a6432020c6f7d0c8db0bba401",
     "docs/database/render_validation_c33b.json": "3832d2e27018c2b96f764b584e846055aece32de14616747dede14b55058b0ad",
     "docs/database/schema.dbml": "e9fa9f3f0ac53bf597028b05bc974ef341d629a92d87208bad4a18b4f3111d18",
-    "docs/database/schema_snapshot.json": "e23dd6b7e27aa37cee690c3315eae881556e68a04729118b7f73dc24997a1314",
-    "docs/database/view_manifest.json": "78e7276d4b2b4d99ed3cb36157f7ddaa7ab8f9d08be4ff5a8e3cbaef33e40446",
+    "docs/database/schema_snapshot.json": "fd412c0ea10afa67d2a33b6a9773b90ec6c7539928c6d9c7d5a91492a30cbb66",
+    "docs/database/view_manifest.json": "f5432b0480199a38ef73b0cfa3f0a6ac1b607bce188bc58eadb82841f482af90",
     "docs/decisions/ADR_C33A_ARCHIVE.md": "175edc2ccfadac42778a4231c22005d3f61d749df4744b637a8dd97b7a82a7b2",
     "docs/decisions/ADR_C33B_CONTROLLED_COPY.md": "e9e018935ae59cc23c07009bcabab9996aa8b00fa6c63d16218b8b7b0d492abf",
     "docs/diagrams/README.md": "cc2e934be00c9275d0428440aad7a84af4eaef63ea443b56a770c0ab5e8fa970",
@@ -846,9 +846,9 @@
     "docs/diagrams/reception_state.dot": "d2a18085ff65b3f1bdd9db2e2021076564e14f40526c8823fc9dc719a08aa3d5",
     "docs/diagrams/reception_state.png": "1aa45290d3a1edacd1076ad921d5955c964eb0d4d1c527a818c409b867b1d033",
     "docs/diagrams/reception_state.svg": "71f16e2ef55044a82bb7aa217f8334fd3d84c607ef45b9b9bf39dd83a65a5f43",
-    "docs/diagrams/record_copy_state.dot": "b7a1243139922e3493eb900725f6792c51bb2deffa1f00bed6b7f8c9c4e39485",
-    "docs/diagrams/record_copy_state.png": "195a1400b7ab9e517d92435a2d8837f2c6e5bd9dab032dc6834a03d356169bca",
-    "docs/diagrams/record_copy_state.svg": "7e42f333bf68dea248fa759fa7c4d0209545b9f00fdecc19ddcd2e756e7a57e5",
+    "docs/diagrams/record_copy_state.dot": "e65f53d1a35aef2282e6799a1af722167732482a6d9b7a33a285fd7cb15acd3e",
+    "docs/diagrams/record_copy_state.png": "66d0b87bc81ca78d89f86a261b0b41c5f1173896fcf4b4d6e0abb8e8d62aa0d0",
+    "docs/diagrams/record_copy_state.svg": "fbbc49b4d9db010f9140b2c2e630aa9a43687219f124c457e85c7836412c876a",
     "docs/diagrams/render_validation.json": "127011a4e30a7516a8609d7923d8523e955abae875af5427a8c703c0e3d5c082",
     "docs/diagrams/resource_state.dot": "3917be7a962232d2743c9d2e6b5ebdb32b515e67184724c4dd1997fc3b50e94b",
     "docs/diagrams/resource_state.png": "0d466fe0957dccef8351bfeff55e42cd4513956aeaf0deab1c9773e5d75a0a66",
@@ -979,12 +979,12 @@
     "docs/release_report/traceability.json": "adf476b2b7f5b07ffac91cfa7960ac8664430df658a08929e968fcee7f1eec44",
     "docs/report-source/FORMAT_REFERENCE.md": "2c859a2fe45c48261aa66430179f49ac5e0fc7814f37c6dc00c81c14e7abade8",
     "docs/report-source/README.md": "423533ae1bc443bf835faf72a583f0ce1a11b99cad92600cd784550226b40869",
-    "docs/report-source/REPORT.md": "c9d6afc4e0ddd875ea0c0ffa63aafe338a266e4ba089ba18011547efcaa483a2",
+    "docs/report-source/REPORT.md": "a9a2ad273507ca266829746219d28ad53572821fb9f10358c7d570cf88755d8f",
     "docs/report-source/appointment-sequence.png": "68e4614c44b07de915aa86ccf173839f4f7e6e65c538400460b54a98771eef9b",
     "docs/report-source/appointment-sequence.svg": "6fe4d5da0d058d01cc0b6b442d0015864f832c058760257ca97786e07e89ad0c",
     "docs/report-source/baseline.json": "ba199c39aea4c9692b4503f7db698d41db637036b3f2edbacf2cf4d521d334cf",
-    "docs/report-source/build_report.py": "bba078f531a7d05f6dc45ea4cd5f718feee160fd34b366a2b2cd9a9754eb4697",
-    "docs/report-source/business_use_cases.json": "ad3971f7447887d1d21ce64150d977915538a6a8419dae623bdd019fc1511ed1",
+    "docs/report-source/build_report.py": "e4e387f3e5a854e148e15105d28a1ddeed105d296fb68a7ff72accfedeb02d4b",
+    "docs/report-source/business_use_cases.json": "368da07b92ca0e9dff080c9678f496c9e78f9b16816c5d3573447d60f234e37e",
     "docs/report-source/draw_appointment_sequence.py": "39a96022022a2f3a46a3054573c144b9b3e4d3c58af280ebed7d65b6d278247a",
     "docs/report-source/draw_operations_flow.py": "c371b28adc131c1143fda5a53320b31b6979972cf1aaa11090c0b9880d07f393",
     "docs/report-source/draw_scheduling_models.py": "796dce6a440023e18c8133d49ce5bee7100d6817fb4971f3016d9e3bc144d666",
@@ -993,7 +993,7 @@
     "docs/report-source/operations-flow.png": "f2e55fe04bead53a2a578239dfb2b8a489321c3a281baeefdc6e6126130c8227",
     "docs/report-source/render_models.cjs": "73aefde55976b8b061b0e420e8c63e651da92ddd9d8dbfb34615cd570c8ae8bf",
     "docs/report-source/render_scheduling_models.cjs": "ffd9f109e33744b488c3e94fd67910b3fe1976936a429d44b62a1f80533093e0",
-    "docs/report-source/report_source.json": "5089778d11ae24a79eb9cd2b653ff1b4ab93362a894493261dd9c14d5f613543",
+    "docs/report-source/report_source.json": "83f8fa09d0e3cd65f5689426723c1bda5e1756766c093e2a7e34349fc5117135",
     "docs/report-source/scheduling-models/B06.png": "f61c55ffe162e1a85e000e6c82de45bb5827c8d2868463d39cd4d176be96f345",
     "docs/report-source/scheduling-models/B06.svg": "c06b8814ff7fbe008bf9f13359189385a7b84fa1f84e0d2b31818fee23206441",
     "docs/report-source/scheduling-models/B07.png": "a12be0b41721073f38f56fee5f046f6a7af0f55c9d64510f53b0742f6577cf4a",
@@ -1007,8 +1007,8 @@
     "docs/report-source/scheduling-models/S05.png": "bde5553c0ca7f7011203a164632081cb2be72d8439245d3b62cbd124205453c4",
     "docs/report-source/scheduling-models/S05.svg": "9420b952966fa0812d7a74bc5cf09785c01c40a8314e1bcd1ed12e467ce64dba",
     "docs/report-source/scheduling-models/manifest.json": "091375011046661048fd2b0684b68b3b24029eefc4bae0e75659dcb9f711f022",
-    "docs/report-source/toc_entries.json": "ba40afe4363380edd8692fa91c692300385055a7adca4d949b94b5ad49b79f58",
-    "docs/report-source/toc_pages.json": "dc49a390b694489bbe1c3c005eb8a7a27a77696b2273b4d353819bcbe67807d1",
+    "docs/report-source/toc_entries.json": "a5972a6e73f6bcab7923c1a1671984aceb091d296ef02e62a2dfb1c40b4fff9c",
+    "docs/report-source/toc_pages.json": "4c11f7f61128299e8f67e614acdee7afcc87f9a8e45ada982c28649f77a17d60",
     "docs/report-source/validation.json": "d06ce9de70e9547ef04c44ef2211bb9ec56a0dddefddcc51110c7a2f25d93b05",
     "docs/report-source/workbench-login.png": "991a5c81895b55db6203e6ea997c0079bdeec70c348f4a0c367119a7b23fe036",
     "docs/research/CHINA_PATIENT_ACCESS_STUDY_20261024.md": "8ebeed1f33502b3f9896fb8bf15afc737f8780a6e5d9390a675cd681f7e4b5fc",
@@ -1895,12 +1895,12 @@
     "workspaces/urls.py": "a925becef9ec19fc1e73b91d4aef0890a1876692d536afaa3d2f537e0e667488",
     "workspaces/views.py": "91185c48f20e5c6b7a003718c135d48039d39bc8dee59a40a257ca94269114ce",
     "workspaces/worklists.py": "427add6d3980a3569289019a89deae0e142eca1b61b06557a15af6f1d603603d",
-    "课程报告/README.md": "a1e0b6ef5d4849e6fc1c613ee82b47a82bc4fdc2c7e4518141d01b39afde4dd6",
-    "课程报告/课程报告_张加良_8210241102.docx": "992f93f8e0b38fd02de5782dcdb31570a6f9d7ef41e8a3726127411e5af0e714",
-    "课程报告/课程报告_张加良_8210241102.pdf": "677584422c4216b67868430a8521ee8ad04d8430a8db4cca6fbc1399e780c247"
+    "课程报告/README.md": "440b209fd0c3e78b3a7eff2f0f5f689675f748ca00482d51762572127f161160",
+    "课程报告/课程报告_张加良_8210241102.docx": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f",
+    "课程报告/课程报告_张加良_8210241102.pdf": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9"
   },
   "host_migration": "macOS migration authorized 2026-10-12; original Windows host reset; source baseline preserved by tag v1.0.0-rc.1. No previous database backup was supplied.",
-  "documentation_update": "Formal C33B report update in progress; previous281page fixed report retained until render verification.",
+  "documentation_update": "Final293page fixed-name Word/PDF,147business+SF01,166tables,87figures,44actualER,110TOC;102old extended definitions and1494old Word fields preserved.266body-pixel-identical accepted pages and27changed final pages reviewed; fonts,bounds,numbering and TOC checked.",
   "historical_metadata_b14": {
     "schema_change": "B1.4 reuses the existing unique visit successor and portal confirmation receipts. All 39 migration files remain unchanged.",
     "user_release_validation": "Patient self-rescheduling, retained offer acceptance and cancellation follow-up; current execution evidence under docs/evidence_b14."
@@ -1964,10 +1964,11 @@
     }
   },
   "native_client_followup": {
-    "source_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
-    "backend_application": "0106de1f7c26a3ba1840865149de872943ca93f5",
-    "status": "PATIENT_CASH_READONLY_LOCAL_PASS_NEW_OFFICIAL_TOOL_PENDING",
-    "authentication_changed": false
+    "source_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "backend_application": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "status": "C33B_FROZEN_27_PAGES_OFFICIAL_TOOL_PENDING",
+    "authentication_configuration_changed": false,
+    "scope": "New copy page and existing-session private PDF download; no unrelated real-WeChat relogin."
   },
   "historical_metadata_pre_wb_p4": {
     "target": "C3.1 accepted backend retained; native login feedback fix and isolated WorkBuddy business handoff delivered",
@@ -1986,10 +1987,10 @@
     }
   },
   "documentation_only_followup": {
-    "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
-    "image": "sha256:4fe36c228fd7bd75bdbbe0cdea0dd5ca4cd40b86b0689f04a7972cb5b64ea7c1",
-    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41372429038",
-    "scope": "Sanitized official-tool return review, independent data comparison and current acceptance status only. Application,formal report Word/PDF and actualER bytes retained."
+    "application_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
+    "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41403199301",
+    "scope": "Final formal report, actual database ER, sanitized release evidence and frozen client handoff. Runtime feature bytes remain identical to accepted exact application."
   },
   "p4_latest_tool_return": "PASS_USER_RELAYED;READ_ONLY_FACTS_MATCH;PREVIOUS_BLOCKED_SUPERSEDED",
   "retained_host_only_evidence": {
@@ -2032,5 +2033,26 @@
     "schema_change": "Preserve all75original migration bytes; append2 to77, five archive tables,163SQL/162ORM/476FK/135triggers/41actualER.",
     "user_release_validation": "Application37d9bb24908d9f4c03553c39c4be913c48cb50f3/imagesha256:07b54f75cf5620123e6a6fe85b4ec75957a77d03499040ced346158c6a3c7729/exactCI41392528064 passes1164source/2272PG. Original18000 and independent18372 use frozen image; original155groups/all old rows/passwords/WeChat/config/volume/tag preserved. Three encrypted migration-built empty restores pass; new archive duty remains default-off and original archive tables empty. No new mini deployment, provider login, thirty-minute capacity or cloud claim. See docs/evidence_c33a/release.json.",
     "documentation_update": "Fixed281page report/140business+SF01/159tables/83figures/41ER/107TOC; original95JSON case definitions and1417oldWord contract fields retained."
+  },
+  "native_followup": {
+    "phase": "C3.3B",
+    "status": "FROZEN_PENDING_WORKBUDDY",
+    "pages": 27,
+    "application_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "no_unrelated_wechat_relogin": true
+  },
+  "historical_metadata_c32c1_tool_followup": {
+    "native_client_followup": {
+      "source_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+      "backend_application": "0106de1f7c26a3ba1840865149de872943ca93f5",
+      "status": "PATIENT_CASH_READONLY_LOCAL_PASS_NEW_OFFICIAL_TOOL_PENDING",
+      "authentication_changed": false
+    },
+    "documentation_only_followup": {
+      "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+      "image": "sha256:4fe36c228fd7bd75bdbbe0cdea0dd5ca4cd40b86b0689f04a7972cb5b64ea7c1",
+      "application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41372429038",
+      "scope": "Sanitized official-tool return review, independent data comparison and current acceptance status only. Application,formal report Word/PDF and actualER bytes retained."
+    }
   }
 }

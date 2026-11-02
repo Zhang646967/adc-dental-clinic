@@ -310,7 +310,7 @@ def build(folder,repo,output=None):
  heading('3.5 系统用例分析')
  mapping={'3.1　系统边界与参与者':('3.5.1 患者服务与接诊用例',3),'3.2　协同与管理需求':('3.5.2 候补 财务与运营用例',3),'3.3　身份、引导与安全管理需求':('3.5.3 身份 引导与安全用例',3),'3.6　资料与出诊维护扩展需求':('3.5.4 资料与出诊维护用例',3),'3.7　协同任务与通知需求':('3.5.5 责任协调与通知用例',3)}
  append_nodes(frozen(87,100),mapping,True);append_nodes(frozen(110,118),mapping,True)
- heading('3.6 用例清单与业务完整性');p('系统共定义140项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—140。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
+ heading('3.6 用例清单与业务完整性');p('系统共定义147项编号业务用例和1项共享核验。附录A为SU-01—25及SF-01，附录B为SU-26—38，附录C为SU-39—147。电话接待关注咨询与联系，SU-04关注正式成约；网站和原生微信小程序是预约、候补及改期的渠道路径，不按页面数量重复计数。')
  p('表3-4 用例分组及业务目标',10.5,False,True)
  table(['业务范围','编号','使用者目标'],[
  ['身份与资料','SU-01—03、21—23、25—28、64—67、83—86、97—101','账号、患者资料、基础目录、专业审核与限定转诊。'],
@@ -323,7 +323,7 @@ def build(folder,repo,output=None):
  ['资金与对账','SU-42—49、53','渠道、收退款、凭据、流水、对账及日结。'],
  ['设备维护','SU-50—52','资产、维修责任和独立验收。'],
  ['画像与经营核算','SU-102—110','任职、资料审核、选诊、月度成本及利润核对。'],
- ['病历与医疗决定','SU-111—140','文书与更正；本人及代理告知决定、开治、真实补记、归档与批准补正。']
+ ['病历与医疗决定','SU-111—147','文书与更正；本人及代理告知决定、开治、真实补记、归档与批准补正。']
  ],[3.1,5.8,7.1])
  p('分组交叉列出的协作用例只计一次。每项规约说明触发、前置、交互、替代路径、成功结果、最低保证和验收目标；待实现设计在规约和第5章明确标注。')
  heading('3.7 业务规则与非功能性需求');append_nodes(frozen(100,110),{},True)
@@ -390,6 +390,13 @@ def build(folder,repo,output=None):
    p(manifest['er_medical_proxy']['note'],10.5)
    page();figure(repo/'docs/diagrams/medical_proxy_state.png','图4-62 医疗代理材料与临床适用性状态',16,max_height=18)
    p('生效、暂停与撤销为留存办理状态。到期由期限实时推导，资料修订追加版本；旧决定和材料不被覆盖。',10.5)
+  if item['heading'].startswith('4.34 '):
+   manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
+   for name in ['er_copy_identity','er_copy_scope','er_copy_delivery']:
+    page();figure(repo/'docs/database'/(name+'.png'),'图4-71 '+manifest[name]['title'],16,max_height=18)
+    p(manifest[name]['note'],10.5)
+   page();figure(repo/'docs/diagrams/record_copy_state.png','图4-74 病历副本申请审核与领取状态',16,max_height=18)
+   p('状态说明：材料核验、独立审核、生成与文件响应分别保存。到期和权限变化在每次领取时判断，不删除原病历、固定副本或历史；交付响应不等于已经阅读。',10.5)
   if item['heading'].startswith('4.33 '):
    manifest=json.loads((repo/'docs/database/view_manifest.json').read_text())
    for name in ['er_archive_submission','er_archive_files','er_archive_amendment']:
@@ -468,7 +475,7 @@ def build(folder,repo,output=None):
    else:buffer.append(text)
   flush();table(['标题','内容（'+title.split('　')[0]+'）'],rows,[3,13])
  page();heading('附录C 扩展业务用例规约',1)
- p('本附录补充SU-39—140，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作、连续诊疗及微信账号协同。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
+ p('本附录补充SU-39—147，覆盖电话接待、统一资源、取消改进、财务设备、患者关系、专业协作、连续诊疗及微信账号协同。每项分别列明岗位、输入、正常与异常路径、最低保证及验收目标。',10.5)
  for c in json.loads((folder/'business_use_cases.json').read_text()):
   title=c['id']+'　'+c['name'];heading(title,3,False)
   rows=[['用例名称',title],['执行者／触发',c['actor']],['实现状态',c['status']],['前置条件',c['precondition']],['主要输入',c['inputs']],['基本路径','\n'.join(str(i+1)+'）'+x for i,x in enumerate(c['flow']))],['扩展路径','\n'.join(c['alternatives'])],['成功结果',c['result']],['最低保证',c['minimum_guarantee']],['业务规则',c['rules']],['验收目标','\n'.join(c['acceptance'])]]

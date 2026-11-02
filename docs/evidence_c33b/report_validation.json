@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "pdf_pages": 293,
+  "business_use_cases": 147,
+  "support_case": "SF-01",
+  "tables": 166,
+  "images": 87,
+  "er_views": 44,
+  "toc_entries": 110,
+  "all_previous_case_definitions_retained": 102,
+  "old_word_contract_fields_exactly_retained": 1494,
+  "fonts_embedded": true,
+  "text_bounds_all_pages_checked": true,
+  "numbering_and_toc_checked": true,
+  "actual_sql_tables": 167,
+  "actual_sql_foreign_keys": 489,
+  "triggers": 139,
+  "docx_sha256": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f",
+  "pdf_sha256": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9",
+  "visual_review_scope": "266unchanged accepted rendered page bodies plus27changed final pages inspected; orphan summaries and abstract fixed; all293pages structural bounds/fonts checked."
+}

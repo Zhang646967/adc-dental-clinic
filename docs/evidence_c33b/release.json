@@ -1,6 +1,6 @@
 {
   "phase": "C3.3B",
-  "status": "LOCAL_CANDIDATE_AWAITING_EXACT_CI",
+  "status": "DELIVERED_LOCAL",
   "source_tests": 1164,
   "native_source_checks": 315,
   "native_copy_handler_cases": 7,
@@ -21,5 +21,56 @@
   "new_thirty_minute_capacity": false,
   "cloud_acceptance": false,
   "windows_data_recovery": "UNRESOLVED",
-  "general_equivalent_ddl_comparator_limit_retained": true
+  "general_equivalent_ddl_comparator_limit_retained": true,
+  "application_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+  "application_image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
+  "exact_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41403199301",
+  "exact_application_ci_result": {
+    "conclusion": "success",
+    "tested_source_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "head_sha": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "validated_source_log_verified": true,
+    "run_id": 41403199301,
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41403199301",
+    "source_tests": 1164,
+    "postgresql_tests": 2304,
+    "raw_log_stored_privately": true
+  },
+  "full_postgresql_tests_passed": 2304,
+  "original18000_protected_installation": true,
+  "original_model_groups_preserved": 160,
+  "all_original_rows_passwords_wechat_binding_private_configuration_volume_and_rc_tag_preserved": true,
+  "new_copy_tables_empty_in_original": true,
+  "new_special_duties_default_off_in_original": true,
+  "framework_metadata_added_without_business_grants": {
+    "auth.Permission": 16,
+    "contenttypes.ContentType": 4
+  },
+  "installed_browser_checks": 23,
+  "browser_checks": 13,
+  "old_synthetic_clinical_finance_equipment_groups_exactly_equal": 85,
+  "encrypted_populated_restore": {
+    "passed": true,
+    "groups": 164,
+    "seconds": 25.658
+  },
+  "encrypted_original_after_update_restore": {
+    "passed": true,
+    "groups": 164,
+    "seconds": 25.278
+  },
+  "report": {
+    "pdf_pages": 293,
+    "business_use_cases": 147,
+    "tables": 166,
+    "images": 87,
+    "er_views": 44,
+    "toc_entries": 110,
+    "old_word_contract_fields_exactly_retained": 1494,
+    "docx_sha256": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f",
+    "pdf_sha256": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9"
+  },
+  "workbuddy_package_frozen": true,
+  "workbuddy_credentials_outside_package": true,
+  "other_old_environments_and_teacher_instance_preserved": true
 }

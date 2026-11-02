@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统
 
-**C3.3B发布准备：病历副本申请、身份与用途核验、独立审核及受控领取。** [执行进度](docs/evidence_c33b/README.md) · [操作指南](docs/C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新患者页任务](docs/WORKBUDDY_C33B_TASK.md)。原18000仍为上一已验收版本；本批课程报告、完整CI、恢复和保护更新完成后另行收口。
+**C3.3B已交付：病历副本申请、身份与用途核验、独立审核及受控领取。** [执行进度](docs/evidence_c33b/README.md) · [操作指南](docs/C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新患者页任务](docs/WORKBUDDY_C33B_TASK.md)。准确CI通过1,164源规则／2,304项PG；本机已保护更新，原业务和账号保持。报告293页、147业务用例与44实际ER已同步；新27页小程序工程待WorkBuddy工具回归。
 
 **C3.3A已交付：病历归档、独立医务审核和追加补正。** [当前准确版本与发布进度](docs/evidence_c33a/README.md) · [使用入口](docs/C33_ARCHIVE_GUIDE.md) · [WorkBuddy本轮边界](docs/WORKBUDDY_C33A_STATUS.md)。准确完整CI通过1,164源规则／2,272项PG；原本机已保护更新，账号、原业务和配置保留。本轮无新小程序页面，不重复已通过的患者场景。
 
@@ -25,15 +25,15 @@ C3.1已交付：[初复诊文书、医师确认、历史比较、更正与待办
 
 当前本机已接通真实微信登录与网站小程序确认（一个真实账号，官方开发者工具）；模拟短信关闭。手机、第二账号、教师体验及固定云端分别待验收。[后端就绪与WorkBuddy交接](docs/WX1_BACKEND_READY.md)。
 
-下一阶段：[C3.3B患者受控复制](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。C3.3A员工侧归档与追加补正已保护交付，准确版本见顶部；患者副本流程仍按用途核验与准确范围分批实现。
+当前[C3.3B受控复制](docs/C33B_RECORD_COPY_GUIDE.md)与C3.3A归档已在本机交付。下一业务方向为处方与执行，先细化临床职责与收费合同。
 
 
 
 **D1历史交付：独立上线准备已验证。** 二十店空库初始化、同卷升级回退、加密独立恢复及原系统／教师保护更新完成；准确提交通过1,156项规则和2,096项PostgreSQL回归。报告228页，113项业务用例和31幅实际ER。该期服务器尚未购买，云端与真实微信／短信／手机分别待验收；当前本地微信结果见顶部。[部署操作](docs/D1_CLOUD_RELEASE.md) · [执行证据与当前状态](docs/evidence_d1/README.md)。
 
-患者主要入口为小程序：26页、主页／预约／就诊／我的，网站保留同等业务；二十店四类基础服务和60名医师画像已对齐。[患者指南](docs/P15_MINIPROGRAM_GUIDE.md)。教师账号私下交付，员工使用独立入口。
+患者主要入口为小程序：27页、主页／预约／就诊／我的，网站保留同等业务；二十店四类基础服务和60名医师画像已对齐。[患者指南](docs/P15_MINIPROGRAM_GUIDE.md)。教师账号私下交付，员工使用独立入口。
 
-教师查阅：课程报告 → [演示路线](docs/DEMO_ROUTES_RC1.md) → [当前证据](docs/evidence_patient_cash/README.md)。以下保留各期历史交付及当时范围；旧临时域名不能当作当前固定地址。
+教师查阅：课程报告 → [演示路线](docs/DEMO_ROUTES_RC1.md) → [当前证据](docs/evidence_c33b/README.md)。以下保留各期历史交付及当时范围；旧临时域名不能当作当前固定地址。
 
 **P1历史交付：医师与门店画像、二十店选诊和月度经营核算。** 八城二十店、60名新增医师、版本审核及轮诊、网站／小程序选医预约、独立成本复核与工时分摊均可试用；排班继续由前台负责。准确CI通过1,127项规则／2,071项PG，两轮30分钟容量及142表加密独立恢复通过。原本机与[教师临时HTTPS](https://waves-heath-jason-chamber.trycloudflare.com)已更新，原业务与密码保留。[试用路线](docs/P1_TRIAL_GUIDE.md) · [业务设计](docs/P1_PROFILE_MANAGEMENT.md) · [完整证据](docs/evidence_p1/README.md)。该次报告224页；当前报告已更新至228页、113项业务用例和31幅实际ER，文件名不变。真实微信／短信与独立云端继续单独待验收。
 

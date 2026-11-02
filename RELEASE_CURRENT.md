@@ -1,6 +1,12 @@
-# C3.3B 病历副本与受控领取发布候选
+# C3.3B 病历副本申请与受控领取
 
-本地专项及浏览器流程通过，准确完整CI、冻结部署与原系统保护更新待完成。[当前执行清单](docs/evidence_c33b/release.json) · [操作指南](docs/C33B_RECORD_COPY_GUIDE.md)。当前正式报告仍为上一C3.3A版本，正在同步。下文保留历史交付。
+申请范围 → 身份用途核验 → 独立医务审核 → 固定电子副本 → 原账号确认领取。
+
+准确应用`0b7bf8739f25422a365eafe7e2c0b15c1e3a006f`／镜像`sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9`通过[完整CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41403199301)，1,164源规则与2,304项PostgreSQL回归。原18000与独立18382已保护更新，三套加密独立恢复及77→80追加迁移演练通过。原160组旧行、账号密码、微信绑定、配置、数据库容器和卷及RC标签保持。新职责默认关闭，原库不批量补造复制依据。
+
+[执行清单](docs/evidence_c33b/release.json) · [业务指南](docs/C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新27页工程任务](docs/WORKBUDDY_C33B_TASK.md)。正式报告293页、147业务用例加SF01、44实际ER，Word/PDF名称不变。官方工具与原生PDF查看器、设备矩阵、手机和云端各自验收；本批没有新的三十分钟容量结论。
+
+以下为各期交付时点历史，当前状态以上方为准。
 
 # C3.3A：病历归档、独立医务审核与追加补正
 
