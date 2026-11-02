@@ -1518,7 +1518,7 @@
     "templates/clinical/document_body.html": "394b9ac876fdf50cabeaf2293ed712163c2ec2e1fcc7d7550ca3ea62c2a021b0",
     "templates/clinical/document_compare.html": "de674833116cabb4592e62c8f8a24c5ce1de51040e2e4e271690f6f70616244f",
     "templates/clinical/document_confirm.html": "b42e9872a46ca45228c8029c740324e717d7d98b3ec0c1e02bbf850ecdb9ec94",
-    "templates/clinical/document_print.html": "85dfd148970b68d86e09304395fd295339fb0a1a9cbcdc4471ff7c5622825812",
+    "templates/clinical/document_print.html": "84e5ddc6ec7c33bd42a236ef26bc67aa7869f108e25ec30e2e08d7f9108dc5f6",
     "templates/clinical/document_worklist.html": "6ae795422ee716f9ff7807c9d6977776617a93653da65273492db6629665814a",
     "templates/clinical/document_workspace.html": "7c94cd6897338462faf5020a3f61ae81883355d86becef96da870a755ffe0bc6",
     "templates/clinical/encounter_worklist.html": "fdcef1279f3a899f14f5d7b07aa7fb14d97a9f929f14d90e57f111c6ce7e07df",
