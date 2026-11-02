@@ -87,7 +87,7 @@ def invoice_context(invoice,request,*,portal=False):
 
 def _invoice_context(invoice,request,*,portal=False):
     from care.invoice_queries import published_invoice
-    data=published_invoice(invoice,revision=request.GET.get('revision'))
+    data=published_invoice(invoice,revision=request.GET.get('revision'),cash_page=request.GET.get('cash_page',1))
     data.update(base_template='portal/base.html' if portal else 'base.html',patient_portal=portal,
         may_correct=not portal and invoice.visit.status=='COMPLETED' and bool(data['lines']) and bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists(),
         can_request_cash=not portal and bindings(request.user).filter(role='FRONT_DESK',scope_kind='CLINIC',clinic_id=invoice.visit.clinic_id).exists())

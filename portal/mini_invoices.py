@@ -13,5 +13,5 @@ def detail(request,pk):
     with reporting_snapshot():
         invoice=get_object_or_404(Invoice.objects.select_related('current_record_version'),pk=pk,
             visit__patient_id=access.patient_id)
-        data=published_invoice(invoice,revision=request.GET.get('revision'))
+        data=published_invoice(invoice,revision=request.GET.get('revision'),cash_page=request.GET.get('cash_page',1))
     return result(request,data)

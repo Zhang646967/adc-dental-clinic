@@ -3,10 +3,11 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from care.models import VisitRecordVersion
 from finance.cash_selectors import invoice_balance
+from finance.patient_cash import invoice_activity
 from clinical.actual_summary import actual_care_summary
 
 
-def published_invoice(invoice,*,revision=None):
+def published_invoice(invoice,*,revision=None,cash_page=1):
     """Caller authorizes the invoice and supplies a reporting snapshot."""
     record=invoice.current_record_version
     if revision is not None:
@@ -24,4 +25,4 @@ def published_invoice(invoice,*,revision=None):
         published_at=record.published_at,
         revisions=list(VisitRecordVersion.objects.filter(visit_id=invoice.visit_id,state='PUBLISHED')
             .order_by('-revision_no').values('revision_no','published_at')),
-        cash_balance=invoice_balance(invoice))
+        cash_balance=invoice_balance(invoice),cash_activity=invoice_activity(invoice,page=cash_page))
