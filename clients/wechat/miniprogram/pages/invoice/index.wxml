@@ -11,6 +11,8 @@
     </view>
     <view class="card"><view class="section-title">当前收退款与应付</view><view wx:if="{{!invoice.is_current}}" class="notice">以下余额对应当前第{{invoice.cash_balance.current_revision}}版，不是历史版本余额。</view>
       <view class="fact-row"><text>当前账单金额</text><text>¥{{invoice.cash_balance.billed}}</text></view>
+      <view class="fact-row"><text>已核对个人账户承担</text><text>¥{{invoice.cash_balance.insurance_personal_account}}</text></view>
+      <view class="fact-row"><text>基金承担（应收）</text><text>¥{{invoice.cash_balance.insurance_fund}}</text></view>
       <view class="fact-row"><text>患者应承担</text><text>¥{{invoice.cash_balance.patient_responsibility}}</text></view>
       <block wx:if="{{invoice.cash_activity}}">
         <view class="fact-row"><text>已记账收款合计</text><text>¥{{invoice.cash_activity.receipts}}</text></view>
@@ -20,6 +22,7 @@
       <view class="fact-row"><text>尚需支付</text><text>¥{{invoice.cash_balance.remaining}}</text></view>
       <view class="fact-row"><text>应退余额</text><text>¥{{invoice.cash_balance.refund_due}}</text></view>
       <view wx:if="{{invoice.cash_balance.pending}}" class="notice">有{{invoice.cash_balance.pending}}笔收退款请求待复核，尚未计入已记账总额或明细。</view>
+      <view wx:if="{{invoice.cash_balance.insurance_pending}}" class="notice">有医保原请求待处理，请联系原门店核对；非现金承担不代表资金到账。</view>
       <view class="muted line">付款或退款请联系原门店前台；本页不发起支付。医保处理中金额以原结算记录核对。</view>
     </view>
     <view wx:if="{{invoice.cash_activity}}" class="card">

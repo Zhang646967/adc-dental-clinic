@@ -1,6 +1,7 @@
 """Posted financial facts and patient-only projections against PostgreSQL."""
 from datetime import timedelta
 from decimal import Decimal as D
+from unittest.mock import patch
 from django.db import connection
 from django.test import TransactionTestCase
 from django.test.utils import CaptureQueriesContext
@@ -61,6 +62,19 @@ class PatientCashActivityTests(CFEFixture, TransactionTestCase):
         self.assertEqual((row['state'], row['status'], row['currency']), ('POSTED', '已记账', 'CNY'))
         self.assertNotContains(self.client.get(reverse('portal_invoice', args=[self.invoice.pk])), 'PRIVATE_STAFF_NOTE')
         self.assertNotIn('PRIVATE_STAFF_NOTE', self.client.get(self.url).content.decode())
+
+    def test_non_cash_responsibility_remains_visible_and_is_not_counted_as_receipts(self):
+        self.posted_fixture(1)
+        # Controlled insurance projection; no provider call or insurance settlement acceptance.
+        with patch('insurance.settlement_projection.invoice_insurance_facts',return_value=dict(
+                personal_account=D('10.00'),fund_amount=D('60.00'),unresolved=1)):
+            data=self.data()
+            web=self.client.get(reverse('portal_invoice',args=[self.invoice.pk]))
+        self.assertEqual(data['cash_activity']['receipts'],'1.00')
+        self.assertEqual(data['cash_balance']['insurance_fund'],'60.00')
+        self.assertEqual(D(data['cash_balance']['patient_responsibility']),self.invoice.current_record_version.total_amount-D('70.00'))
+        self.assertContains(web,'已核对个人账户承担');self.assertContains(web,'基金承担（应收）')
+        self.assertContains(web,'有医保原请求待处理');self.assertContains(web,'非现金承担不代表资金到账')
 
     def test_pagination_is_bounded_and_totals_cover_all_pages(self):
         self.posted_fixture(23)

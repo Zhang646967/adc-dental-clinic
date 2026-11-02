@@ -3,6 +3,8 @@
   {% if not is_current %}<p class="notice">本页收费项目为历史版本；以下收退款和余额对应当前第{{ cash_balance.current_revision }}版账单，不是历史时点余额。</p>{% endif %}
   <dl class="detail-grid">
     <dt>当前账单金额</dt><dd>¥ {{ cash_balance.billed }}</dd>
+    <dt>已核对个人账户承担</dt><dd>¥ {{ cash_balance.insurance_personal_account }}</dd>
+    <dt>基金承担（应收）</dt><dd>¥ {{ cash_balance.insurance_fund }}</dd>
     <dt>患者应承担</dt><dd>¥ {{ cash_balance.patient_responsibility }}</dd>
     <dt>已记账收款合计</dt><dd>¥ {{ cash_activity.receipts }}</dd>
     <dt>已记账退款合计</dt><dd>¥ {{ cash_activity.refunds }}</dd>
@@ -11,6 +13,7 @@
     <dt>应退余额</dt><dd>¥ {{ cash_balance.refund_due }}</dd>
   </dl>
   {% if cash_balance.pending %}<p class="notice">有{{ cash_balance.pending }}笔收退款请求待复核，尚未计入已记账总额或下方明细。</p>{% endif %}
+  {% if cash_balance.insurance_pending %}<p class="notice">有医保原请求待处理，请联系原门店核对；非现金承担不代表资金到账。</p>{% endif %}
   <h3>已记账收退款明细</h3>
   <p class="muted">共{{ cash_activity.count }}笔 · 第{{ cash_activity.page }}／{{ cash_activity.pages }}页。净收款＝已记账收款－已记账退款；仅统计本单患者收退款，医保等非现金承担另行核对。</p>
   {% for entry in cash_activity.entries %}
