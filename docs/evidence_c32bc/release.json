@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_SOFTWARE_DELIVERED_REPORTED_FIVE_TOOL_SCENARIOS_PASS_STEP12_PROXY_DECISION_PENDING",
+  "status": "LOCAL_SOFTWARE_DELIVERED_REPORTED_ALL_SIX_PATIENT_TOOL_SCENARIOS_PASS",
   "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
   "application_image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
   "architecture": "arm64",
@@ -82,8 +82,8 @@
     "tests": 2221,
     "known_error": "Missing PermissionDenied import; fixed before frozen commit; frozen failing-case regression and exact full CI supersede; prior run not relabeled PASS"
   },
-  "official_tool_patient_business": "USER_RELAYED_1_2_4_5_6_PASS_3_QUESTION_SUBMITTED_CODEX_ANSWERED_PENDING_PROXY_DECISION",
-  "official_tool_return": "workbuddy-return-20261102.json",
+  "official_tool_patient_business": "USER_RELAYED_ALL_SIX_PASS_CODEX_READ_ONLY_FACTS_VERIFIED",
+  "official_tool_return": "workbuddy-closure-20261102.json",
   "official_tool_compiled_pages": 26,
   "official_tool_compiled_bytes": 216113,
   "credential_access_does_not_require_password_reset": true,
@@ -91,14 +91,15 @@
   "official_tool_completed_scenarios": [
     1,
     2,
+    3,
     4,
     5,
     6
   ],
-  "official_tool_pending_scenarios": [
-    3
-  ],
+  "official_tool_pending_scenarios": [],
   "patient_cash_display": "CORRECT_NET_BALANCE_POSTED_GROSS_AMOUNTS_VERIFIED_PRIVATELY_SEPARATE_ROWS_NOT_IMPLEMENTED",
-  "physician_answer_follow_up": "PASSED_CURRENT_CORRECT_RECORD_EXPLICIT_PROXY_DECISION_PENDING",
-  "public_follow_up_scope": "ACCEPTANCE_SUMMARIES_ONLY_INDIVIDUAL_CLINICAL_MAPPING_AND_CONTENT_LOCAL_PRIVATE"
+  "physician_answer_follow_up": "CLOSED_EXPLICIT_PROXY_DECISION_REPORTED_AND_DATABASE_VERIFIED",
+  "public_follow_up_scope": "ACCEPTANCE_SUMMARIES_ONLY_INDIVIDUAL_CLINICAL_MAPPING_AND_CONTENT_LOCAL_PRIVATE",
+  "official_tool_final_confirmation": "ONE_PROXY_AGREEMENT_APPENDED_ALL_PRIOR_CLINICAL_FINANCIAL_FACTS_RETAINED",
+  "workbuddy_current_actions": []
 }

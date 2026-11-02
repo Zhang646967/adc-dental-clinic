@@ -1,0 +1,68 @@
+{
+  "return_date": "2026-11-02",
+  "source": "USER_RELAYED_WORKBUDDY_FINAL_TOOL_RETURN",
+  "application_commit": "7cd2de16c0632897dcee6e2774e289f012441f65",
+  "application_image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+  "application_ci_run": 41306611538,
+  "status": "REPORTED_ALL_SIX_PATIENT_TOOL_SCENARIOS_PASS_CODEX_READ_ONLY_FACTS_VERIFIED",
+  "scope": "Frozen local official-tool patient scenarios only; no phone, platform, professional or cloud acceptance",
+  "scenario_completion": {
+    "1": "USER_RELAYED_PASS",
+    "2": "USER_RELAYED_PASS",
+    "3": "USER_RELAYED_PASS",
+    "4": "USER_RELAYED_PASS",
+    "5": "USER_RELAYED_PASS",
+    "6": "USER_RELAYED_PASS"
+  },
+  "final_question_answer_decision": {
+    "reported_complete": true,
+    "doctor_answer_and_proxy_agreement_separate": true,
+    "agreement_requires_explicit_preview_confirmation": true,
+    "correct_foreign_keys_reconfirmed": true,
+    "exact_version_and_proxy_basis_match": true,
+    "new_clinical_decision_events": 1,
+    "no_unanswered_question": true,
+    "after_decision_can_agree": false,
+    "after_decision_can_withdraw": true,
+    "ui_state_source": "USER_RELAYED_OFFICIAL_TOOL_READ_DATABASE_EVENT_CHAIN_VERIFIED"
+  },
+  "codex_independent_readonly": {
+    "passed": true,
+    "all_previous_medical_event_hashes_equal": true,
+    "prior_tested_step_history_retained": true,
+    "only_one_proxy_agreement_appended": true,
+    "source": "PROXY_ACCOUNT",
+    "scheme_decisions_unchanged": true,
+    "proxy_states_unchanged": true,
+    "revoked_authority_not_recreated": true,
+    "no_actual_treatment_in_tested_proxy_steps": true,
+    "no_published_visit_record_in_tested_case": true,
+    "total_actual_treatments_unchanged": true,
+    "invoices_and_money_unchanged": true,
+    "confirmation_success_and_source_verified_from_runtime_log": true,
+    "application_images_and_commits_unchanged": true
+  },
+  "settlement_display": {
+    "net_balance_and_self_only_isolation": "PASS",
+    "gross_receipt_and_refund_rows": "NOT_IMPLEMENTED",
+    "transaction_history": "NOT_IMPLEMENTED",
+    "future_scope": "Patient-safe posted totals and transaction projection; not backfilled into this frozen release"
+  },
+  "reported_no_repeat_actions": [
+    "compile",
+    "package",
+    "platform upload",
+    "WeChat login",
+    "secret read",
+    "old completed business scenarios"
+  ],
+  "workbuddy_remaining_actions": [],
+  "device375_430_and_font_scale": "BLOCKED_TOOL_CAPABILITY_SEPARATE_ACCEPTANCE",
+  "physical_phone": "PENDING",
+  "platform_eligibility": "PENDING",
+  "second_real_wechat_identity": "PENDING_NO_UNLINK",
+  "cloud": "PENDING_SERVER_AND_DOMAIN",
+  "clinical_professional_acceptance": "NOT_RUN",
+  "reliable_electronic_signature": "NOT_QUALIFIED",
+  "individual_identifiers_clinical_text_and_money_case": "LOCAL_PRIVATE_ONLY_NOT_PUBLISHED"
+}
