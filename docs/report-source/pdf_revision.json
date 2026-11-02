@@ -1,0 +1,12 @@
+{
+  "format": "PDF_ONLY",
+  "revision_date": "2026-11-02",
+  "baseline_commit": "64bcc25efaa6a140e6ecbe6612464bb6d1f447dc",
+  "baseline_sha256": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9",
+  "pdf_path": "课程报告/课程报告_张加良_8210241102.pdf",
+  "physical_page": 144,
+  "printed_page": 138,
+  "headings": ["5.23 归档、独立审核与追加补正核对", "5.24 申请核验与副本领取验证"],
+  "word_policy": "Historical Word retained unchanged; not a current release artifact.",
+  "scope": "Only section 5.24 source changes. Recompose its shared page; preserve all other 292 page content streams, 24 bookmark entries, numbering and all business contracts."
+}

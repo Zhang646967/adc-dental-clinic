@@ -1,22 +1,54 @@
 {
   "passed": true,
-  "pdf_pages": 240,
-  "business_use_cases": 120,
+  "format": "PDF_ONLY",
+  "pdf_pages": 293,
+  "business_use_cases": 147,
   "support_case": "SF-01",
-  "tables": 139,
-  "images": 70,
-  "er_views": 33,
-  "table_and_figure_numbering": "SEQUENTIAL",
-  "toc_entries": 96,
-  "all_page_text_bounds_checked": true,
-  "all_fonts_embedded": true,
-  "old_contract_fields_retained": 510,
-  "docx_sha256": "4a98c4b8098258236bc6a6681d6fc872409fabe468fadad18e093b9540dbafff",
-  "pdf_sha256": "e30760a026abba4d8c1c18a4d63a37c2e1d5b43d99fd226e3d2133dbf0b8252c",
-  "actual_schema": {
-    "tables": 146,
-    "foreign_keys": 402,
-    "triggers": 114
+  "tables": 166,
+  "images": 87,
+  "er_views": 44,
+  "toc_entries": 110,
+  "pdf_sha256": "05f463a76b0d26a54f295573566c1f0743391320b2c14cd559f0922ae0ffea79",
+  "revision": {
+    "passed": true,
+    "pdf_only": true,
+    "word_written": false,
+    "pages": 293,
+    "revised_physical_pages": [
+      144
+    ],
+    "unchanged_page_content_streams": 292,
+    "outline_entries": 24,
+    "sections": [
+      {
+        "heading": "5.23 归档、独立审核与追加补正核对",
+        "bottom_from_top": 409.0
+      },
+      {
+        "heading": "5.24 申请核验与副本领取验证",
+        "bottom_from_top": 717.0
+      }
+    ],
+    "body_bottom_from_top": 749.0,
+    "baseline_sha256": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9",
+    "pdf_sha256": "05f463a76b0d26a54f295573566c1f0743391320b2c14cd559f0922ae0ffea79",
+    "official_normal_entry_retest": "PENDING_WORKBUDDY",
+    "revised_page_fonts_embedded": true,
+    "font_count": 3,
+    "revised_page_text_bounds_checked": true,
+    "revised_page_visually_reviewed": true,
+    "unchanged_word_sha256": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f",
+    "er_assets_unchanged": true,
+    "visual_review": "Final Poppler rendering inspected: headings, body, mind map and footer readable; no overlap or clipping."
   },
-  "platform_acceptance": "C31_LOCAL_SYNTHETIC;CONSENT_SIGNATURE_ARCHIVE_NOT_IMPLEMENTED;PHYSICAL_DEVICE_WORKBUDDY"
+  "word": {
+    "status": "HISTORICAL_NOT_UPDATED",
+    "sha256": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f"
+  },
+  "actual_schema": {
+    "tables": 167,
+    "foreign_keys": 489,
+    "triggers": 139
+  },
+  "verification_scope": "One revised page rendered and reviewed separately; 292 other content streams and all bookmark destinations retained. Existing application and schema acceptance retained."
 }

@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "source": "USER_RELAYED_WORKBUDDY_RETURN_WITH_INDEPENDENT_READ_ONLY_DATABASE_CHECK",
+  "reported_pages": 27,
+  "reported_operations_passed": 8,
+  "reported_checksum_count": 90,
+  "checksum_count_independently_verified": false,
+  "normal_entry_bypass_reported": true,
+  "normal_entry_official_retest": "PENDING_WORKBUDDY",
+  "database_model_groups_compared": 164,
+  "unchanged_model_groups": 159,
+  "copy_requests_new": 1,
+  "copy_requests_updated": 3,
+  "copy_scope_items_new": 1,
+  "copy_events_appended": 8,
+  "event_actions": {
+    "WITHDRAW": 2,
+    "RESUBMIT": 1,
+    "SUBMIT": 1,
+    "CLAIM": 2,
+    "FILE_RESPONSE": 2
+  },
+  "old_events_and_fixed_files_preserved": true,
+  "other_business_effects": 0,
+  "general_audits_appended": 8,
+  "sensitive_reads_appended": 73,
+  "screenshots": "REPORTED_UNAVAILABLE_TOOL_STORAGE_FULL",
+  "tool_dumps": "REPORTED_NOT_OBTAINED_BY_CODEX",
+  "phone": "NOT_RUN",
+  "device_matrix": "SEPARATE_PENDING",
+  "authentication_retest_required": false
+}

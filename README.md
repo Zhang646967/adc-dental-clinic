@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统
 
-**C3.3B已交付：病历副本申请、身份与用途核验、独立审核及受控领取。** [执行进度](docs/evidence_c33b/README.md) · [操作指南](docs/C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新患者页任务](docs/WORKBUDDY_C33B_TASK.md)。准确CI通过1,164源规则／2,304项PG；本机已保护更新，原业务和账号保持。报告293页、147业务用例与44实际ER已同步；新27页小程序工程待WorkBuddy工具回归。
+**C3.3B患者工具回传已审核，正常新申请入口冲突已修复。** [回传与数据库核对](docs/WORKBUDDY_C33B_REVIEW.md) · [只需补测正常入口](docs/WORKBUDDY_C33B_ENTRY_RETEST.md) · [执行进度](docs/evidence_c33b/README.md)。保留其他已通过操作；新版小程序与已验收后端分别标记。普通入口的官方工具复测仍待完成。报告293页、147业务用例及44实际ER；后续仅更新PDF。
 
 **C3.3A已交付：病历归档、独立医务审核和追加补正。** [当前准确版本与发布进度](docs/evidence_c33a/README.md) · [使用入口](docs/C33_ARCHIVE_GUIDE.md) · [WorkBuddy本轮边界](docs/WORKBUDDY_C33A_STATUS.md)。准确完整CI通过1,164源规则／2,272项PG；原本机已保护更新，账号、原业务和配置保留。本轮无新小程序页面，不重复已通过的患者场景。
 
@@ -10,7 +10,9 @@
 
 **系统分析与设计课程大作业｜张加良｜信管T2401｜8210241102**
 
-📄 **[课程报告 PDF（推荐阅读）](课程报告/课程报告_张加良_8210241102.pdf)** · **[课程报告 Word](课程报告/课程报告_张加良_8210241102.docx)** · [报告说明](课程报告/README.md)
+📄 **[课程报告 PDF](课程报告/课程报告_张加良_8210241102.pdf)** · [报告说明](课程报告/README.md)
+
+正式报告仅更新PDF；旧Word保留为历史版本。
 
 C3.2B1已交付：[本人医疗告知、问答、同意／拒绝／暂缓、撤回与纸质原件登记](docs/C32B1_MEDICAL_DECISIONS.md) · [准确CI与保护交付](docs/evidence_c32b1/README.md) · [WorkBuddy单项收尾](docs/WORKBUDDY_C32B1_CLOSING.md)。本机已更新；完整CI为1,164源检查／2,180PG。正式报告250页、125业务＋SF01、35实际ER；适格代理、完整开治与归档继续分批建设。已收到小程序业务及当前微信重登PASS，问题20已由医师答复22，仅待步骤6继续；工具回传与真机验收单列。
 

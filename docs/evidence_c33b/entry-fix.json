@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "client_commit": "4225691bc7366a5e9496b7cae36fba52040dead2",
+  "native_source_checks": 315,
+  "copy_handler_cases": 9,
+  "real_http_checks": 4,
+  "confirmation_writes": 0,
+  "source_fixture_models_data_aliases": true,
+  "official_tool": false,
+  "physical_phone": false,
+  "client_ci_observed": {
+    "run_id": 41421548856,
+    "head_sha": "4225691bc7366a5e9496b7cae36fba52040dead2",
+    "status": "in_progress",
+    "conclusion": "",
+    "native_step": "success"
+  }
+}

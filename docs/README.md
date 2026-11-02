@@ -1,4 +1,4 @@
-当前C3.3B：[病历副本与受控领取](evidence_c33b/README.md) · [业务指南](C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新患者页任务](WORKBUDDY_C33B_TASK.md)。准确完整CI、本机保护更新和独立恢复通过。报告293页、147业务用例加SF01、44实际ER；官方工具和手机结果独立待验收。下方保留历史导航。
+当前C3.3B：[回传审核与入口修复](WORKBUDDY_C33B_REVIEW.md) · [WorkBuddy正常入口专项复测](WORKBUDDY_C33B_ENTRY_RETEST.md) · [执行证据](evidence_c33b/README.md)。普通入口待官方复测，其他已通过操作保留。报告仅更新PDF，旧Word停止续写；293页、147业务用例加SF01及44实际ER。以下历史导航保留其原范围。
 
 当前C3.3A：[独立归档与追加补正](evidence_c33a/README.md) · [业务指南](C33_ARCHIVE_GUIDE.md) · [WorkBuddy边界](WORKBUDDY_C33A_STATUS.md)。准确完整CI及原系统保护更新通过，版本与范围见执行清单。报告281页、140业务用例加SF01、41实际ER。以下保留旧期导航。
 
@@ -46,7 +46,7 @@ WX1历史：[业务合同](WX1_IMPLEMENTATION.md) · [使用与平台联调](WX1
 
 前阶段研究（2026-10-23）：[Open Dental 等六类系统调研](research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 身份与连续诊疗](COMMERCIAL_V2_NEXT_STAGE.md) → [需求与验收追踪](research/NEXT_STAGE_TRACEABILITY.json)。[来源登记](research/dental_study_sources.json)区分官方手册、厂商声明、调查与法规；[规划模型](research/MODEL_NOTES.md)不替代实际数据库 ER。
 
-当前交付 → 业务与设计 → 运行与验证 → 历史来源。课程报告请从 [PDF](../课程报告/课程报告_张加良_8210241102.pdf)、[Word](../课程报告/课程报告_张加良_8210241102.docx) 或 [报告目录](../课程报告/README.md) 直接进入。
+当前交付 → 业务与设计 → 运行与验证 → 历史来源。课程报告请从 [PDF](../课程报告/课程报告_张加良_8210241102.pdf) 或 [报告目录](../课程报告/README.md) 直接进入。
 
 ## 业务流程
 

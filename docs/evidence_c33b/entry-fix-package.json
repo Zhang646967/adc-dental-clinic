@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "project": {
+    "client_commit": "4225691bc7366a5e9496b7cae36fba52040dead2",
+    "backend_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
+    "backend_image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
+    "backend": "http://127.0.0.1:18382",
+    "mode": "local",
+    "urlCheck": false,
+    "files": 90,
+    "pages": 27,
+    "project_tree_sha256": "e9ac2f1ec2b66b660448ecd55ca6027b76d48a4675f42258d062559e899e2230",
+    "changed_client_files": [
+      "miniprogram/pages/record-copies/index.js"
+    ],
+    "auth_capabilities": {
+      "wechat_mini": false,
+      "wechat_phone": false,
+      "wechat_web": false,
+      "wechat_mp": false,
+      "wechat_qr": false,
+      "sms_captcha": false,
+      "sms_enabled": false,
+      "sms_demo": false,
+      "auth_mode": "live"
+    },
+    "official_normal_entry": "PENDING_WORKBUDDY",
+    "phone": "NOT_RUN"
+  },
+  "checked_files": 92,
+  "zip_sha256": "a603203651783d1e9514c109e926e66b1f635901833f60eaedf9d8c487df44f3",
+  "credentials_included": false,
+  "old_projects_preserved": true,
+  "compiled_by_official_tool": false
+}

@@ -16,7 +16,7 @@
   "actual_er_views": 44,
   "new_mini_pages": 1,
   "mini_pages_total": 27,
-  "official_tool": "PENDING_WORKBUDDY_NEW_COPY_ONLY",
+  "official_tool": "USER_RELAYED_8_OPERATIONS;NORMAL_ENTRY_DEFECT_FIXED;NORMAL_ENTRY_RETEST_PENDING",
   "physical_phone": "SEPARATE_NOT_RUN",
   "new_thirty_minute_capacity": false,
   "cloud_acceptance": false,
@@ -68,9 +68,23 @@
     "toc_entries": 110,
     "old_word_contract_fields_exactly_retained": 1494,
     "docx_sha256": "a1c9ebed5840f2c1b3fa7852dabff99f7dbaffb3f1a55448ed7f3f468945447f",
-    "pdf_sha256": "6809e243bb7fa3f9ec4e772c17b6d4ec5f61e0e9cb8de5605c2f67bae1510fc9"
+    "pdf_sha256": "05f463a76b0d26a54f295573566c1f0743391320b2c14cd559f0922ae0ffea79",
+    "format": "PDF_ONLY",
+    "word_status": "HISTORICAL_NOT_UPDATED",
+    "pdf_revision_physical_page": 144,
+    "other_pdf_page_content_streams_preserved": 292
   },
   "workbuddy_package_frozen": true,
   "workbuddy_credentials_outside_package": true,
-  "other_old_environments_and_teacher_instance_preserved": true
+  "other_old_environments_and_teacher_instance_preserved": true,
+  "native_client_followup": {
+    "source_commit": "4225691bc7366a5e9496b7cae36fba52040dead2",
+    "native_source_checks": 315,
+    "copy_page_handler_cases": 9,
+    "real_http_checks": 4,
+    "confirmation_writes": 0,
+    "backend_unchanged": true,
+    "official_normal_entry": "PENDING_WORKBUDDY",
+    "full_ci": "SEPARATE_FROM_ACCEPTED_BACKEND_CI"
+  }
 }
