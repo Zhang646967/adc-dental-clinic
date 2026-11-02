@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统
 
-**C3.3B患者工具回传已审核，正常新申请入口冲突已修复。** [回传与数据库核对](docs/WORKBUDDY_C33B_REVIEW.md) · [只需补测正常入口](docs/WORKBUDDY_C33B_ENTRY_RETEST.md) · [执行进度](docs/evidence_c33b/README.md)。保留其他已通过操作；新版小程序与已验收后端分别标记。普通入口的官方工具复测仍待完成。报告293页、147业务用例及44实际ER；后续仅更新PDF。
+**C3.3B患者工具回传已审核，正常新申请入口冲突已修复。** [回传与数据库核对](docs/WORKBUDDY_C33B_REVIEW.md) · [只需补测正常入口](docs/WORKBUDDY_C33B_ENTRY_RETEST.md) · [执行进度](docs/evidence_c33b/README.md)。保留其他已通过操作；新版小程序与已验收后端分别标记。入口修复准确完整CI已通过；普通入口的官方工具复测仍待完成。报告293页、147业务用例及44实际ER；后续仅更新PDF。
 
 **C3.3A已交付：病历归档、独立医务审核和追加补正。** [当前准确版本与发布进度](docs/evidence_c33a/README.md) · [使用入口](docs/C33_ARCHIVE_GUIDE.md) · [WorkBuddy本轮边界](docs/WORKBUDDY_C33A_STATUS.md)。准确完整CI通过1,164源规则／2,272项PG；原本机已保护更新，账号、原业务和配置保留。本轮无新小程序页面，不重复已通过的患者场景。
 

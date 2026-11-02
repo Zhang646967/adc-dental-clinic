@@ -85,6 +85,24 @@
     "confirmation_writes": 0,
     "backend_unchanged": true,
     "official_normal_entry": "PENDING_WORKBUDDY",
-    "full_ci": "SEPARATE_FROM_ACCEPTED_BACKEND_CI"
+    "full_ci": "SUCCESS",
+    "exact_ci": {
+      "passed": true,
+      "run_id": 41421548856,
+      "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41421548856",
+      "tested_source_commit": "4225691bc7366a5e9496b7cae36fba52040dead2",
+      "head_sha": "4225691bc7366a5e9496b7cae36fba52040dead2",
+      "status": "completed",
+      "conclusion": "success",
+      "validated_source_log_verified": true,
+      "source_tests": 1164,
+      "postgresql_tests": 2304,
+      "native_source_transport_checks": 315,
+      "native_copy_handler_cases": 9,
+      "raw_log_stored_privately": true,
+      "backend_deployment_changed": false,
+      "official_tool_normal_entry": "PENDING_WORKBUDDY",
+      "physical_phone": "SEPARATE_PENDING"
+    }
   }
 }

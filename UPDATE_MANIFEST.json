@@ -23,8 +23,8 @@
     "PATIENT_AUTH_ENV.example": "d05afc6520356e9f62451999bfaa7d491eef89eb1a8c65943c313146fb24c822",
     "RC_MACOS.sh": "0050ef5d740ef8b293155df1baa45bf42dd4729a320ff8fb61052fe47f99bbdb",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "e0c33df670cd508989e2bc950bd1e3681a4a0a7d50f05aa4f83d045176d73567",
-    "RELEASE_CURRENT.md": "56c48d9224f3596e7d6aece027cd1de43fb1525df99005400f31356b4ea5e87d",
+    "README.md": "085936ba9bf1eb7ddaaa9cc4af797ec533a99ebcd0cd403b0a8208e061dc2a52",
+    "RELEASE_CURRENT.md": "71f1387e1023afc541e7baa47677b04baead91009c2b0083c3b8e8156b422bde",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
@@ -555,7 +555,7 @@
     "docs/WORKBUDDY_C32C1_TASK.md": "bb57fadf77a411d26f97447ed627636a1ba5c7a469d58c3b48f8b014b3753fe6",
     "docs/WORKBUDDY_C33A_STATUS.md": "e85345276f834ac6881a206fc6121e58354f09bdd74df8e704252d705c8433ec",
     "docs/WORKBUDDY_C33B_ENTRY_RETEST.md": "8ee9f05667381ddfffd465f09afaf947eeab5e45ffac2cb5d520f27ecd22ce53",
-    "docs/WORKBUDDY_C33B_REVIEW.md": "b47d48213a62d99dd794fd2710406d78a37c5582b828421ea00032e5344125e0",
+    "docs/WORKBUDDY_C33B_REVIEW.md": "e389556137677c0e14d50d5996e541378d905c793cdf9c4ad89e3cd879f6bf5b",
     "docs/WORKBUDDY_C33B_TASK.md": "4b0b6347d8d01155db62611e6a985a481614be0088219abb814aed779014a80e",
     "docs/WORKBUDDY_FOLLOWUP_20261030.md": "54adc48551d21961df3ebb28cbe854862ed3f9a64289ab848efe820ca24002fd",
     "docs/WORKBUDDY_MINIPROGRAM_HANDOFF.md": "5d461352e96edc384391857f9990c63ed8a749548847819dfddc8cdc7e6b258b",
@@ -1968,7 +1968,7 @@
     }
   },
   "native_client_followup": {
-    "status": "LOCAL_VERIFIED;OFFICIAL_NORMAL_ENTRY_RETEST_PENDING",
+    "status": "EXACT_FULL_CI_PASS;OFFICIAL_NORMAL_ENTRY_RETEST_PENDING",
     "change": "Rename Page method options to loadOptions; lifecycle fixture models native data aliases. Backend API, business commands, schema and authentication unchanged.",
     "backend_application": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f",
     "backend_image": "sha256:39477e47aa1e8ede6c235bffb1f5c2ce31dc3105e96c468e4483863fe07889d9",
@@ -1977,7 +1977,9 @@
     "official_normal_entry_retest": "PENDING_WORKBUDDY",
     "source_commit": "4225691bc7366a5e9496b7cae36fba52040dead2",
     "real_http_checks": 4,
-    "confirmation_writes": 0
+    "confirmation_writes": 0,
+    "exact_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41421548856",
+    "exact_ci_conclusion": "success"
   },
   "historical_metadata_pre_wb_p4": {
     "target": "C3.1 accepted backend retained; native login feedback fix and isolated WorkBuddy business handoff delivered",
