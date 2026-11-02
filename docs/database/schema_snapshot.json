@@ -45481,6 +45481,6 @@
     }
   ],
   "observed_on": "2026-11-01",
-  "observed_scope": "Read-only independent18372PostgreSQL17, candidate source; no business records or private configuration exported.",
-  "application_commit": "C33A_SOURCE_CANDIDATE"
+  "observed_scope": "Read-only PostgreSQL17 metadata from frozen37d9bb24908d9f4c03553c39c4be913c48cb50f3 independent18372 and protected original18000; full observed structures equal. No business rows or private configuration exported.",
+  "application_commit": "37d9bb24908d9f4c03553c39c4be913c48cb50f3"
 }

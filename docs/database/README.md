@@ -1,6 +1,6 @@
 # C3.3A实际数据库与归档关系
 
-从冻结应用8996da0的独立18372 PostgreSQL17读取并核对：77份应用迁移、163张SQL表（162 ORM＋迁移日志）、475条普通外键＋1条账单复合外键、135项业务触发器、41幅实际ER。全部原75份迁移字节不变，本轮追加五张归档表与默认关闭的专项职责。
+从冻结应用37d9bb2的独立18372 PostgreSQL17读取并核对：77份应用迁移、163张SQL表（162 ORM＋迁移日志）、475条普通外键＋1条账单复合外键、135项业务触发器、41幅实际ER。全部原75份迁移字节不变，本轮追加五张归档表与默认关闭的专项职责。
 
 新增[准确来源与独立审核](er_archive_submission.svg)、[固定包和办理历史](er_archive_files.svg)、[准确补正与临床追加结果](er_archive_amendment.svg)。完整字段、真实约束和SQL关系见[快照](schema_snapshot.json)、[字段目录](FIELD_CATALOG.md)和[外键目录](RELATIONSHIPS.md)。JSON逻辑来源不虚构为外键，现有通用等价DDL比较限制保持。[业务与恢复证据](../evidence_c33a/README.md)。
 

@@ -1,6 +1,6 @@
 {
   "phase": "C3.3A",
-  "status": "FIXED_CANDIDATE_AWAITING_FULL_CI_AND_PROTECTED_INSTALL",
+  "status": "DELIVERED_LOCAL",
   "application_commit": "37d9bb24908d9f4c03553c39c4be913c48cb50f3",
   "application_image": "sha256:07b54f75cf5620123e6a6fe85b4ec75957a77d03499040ced346158c6a3c7729",
   "exact_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41392528064",
@@ -30,7 +30,8 @@
   "encrypted_populated_restore": {
     "passed": true,
     "groups_equal": 160,
-    "seconds": 21.82
+    "seconds": 21.826,
+    "application_commit": "37d9bb24908d9f4c03553c39c4be913c48cb50f3"
   },
   "encrypted_original_checkpoint_restore": {
     "passed": true,
@@ -64,5 +65,34 @@
   },
   "print_notice_http_and_archive_regression_passed": 47,
   "archive_workflow_original_screens_source": "8996da0; one print-disclaimer sentence fixed in37d9bb2; no other application differences",
-  "latest_frozen_read_verified": true
+  "latest_frozen_read_verified": true,
+  "exact_application_ci_result": {
+    "conclusion": "success",
+    "tested_source_commit": "37d9bb24908d9f4c03553c39c4be913c48cb50f3",
+    "head_sha": "37d9bb24908d9f4c03553c39c4be913c48cb50f3",
+    "validated_source_log_verified": true,
+    "run_id": 41392528064,
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41392528064",
+    "source_tests": 1164,
+    "postgresql_tests": 2272,
+    "raw_log_stored_privately": true
+  },
+  "original18000_protected_installation": true,
+  "original_model_groups_preserved": 155,
+  "all_original_rows_passwords_and_wechat_binding_preserved": true,
+  "original_database_container_volume_private_config_and_rc_tag_preserved": true,
+  "original_archive_duty_default_off": true,
+  "new_tables_in_original_empty": true,
+  "framework_metadata_added_without_business_grants": {
+    "contenttypes.ContentType": 5,
+    "auth.Permission": 20
+  },
+  "installed_seven_role_browser_checks_passed": 21,
+  "encrypted_post_update_restore": {
+    "passed": true,
+    "groups_equal": 160,
+    "seconds": 23.692
+  },
+  "main_and_18372_exact_image_verified": true,
+  "full_postgresql_tests_passed": 2272
 }
