@@ -1,4 +1,4 @@
-当前系统本体：[患者收退款展示](evidence_patient_cash/README.md) · [WorkBuddy新费用页回归](WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。75迁移／158SQL表／38实际ER；正式报告266页、133业务＋SF01。旧医疗工具场景已收口，新费用工具／手机另验。以下保留各旧期导航和原范围，以顶部当前记录为准。
+当前系统本体：[患者收退款展示](evidence_patient_cash/README.md) · [WorkBuddy新费用页回归](WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。75迁移／158SQL表／38实际ER；正式报告266页、133业务＋SF01。旧医疗及新费用数据／分页／隔离工具场景已收口；原生picker手势、设备矩阵与手机另验。[回传审核](WORKBUDDY_C32C1_REVIEW.md)。以下保留各旧期导航和原范围，以顶部当前记录为准。
 
 当前系统本体：[C3.2B1本人医疗决定](C32B1_MEDICAL_DECISIONS.md) · [实际验收与保护交付](evidence_c32b1/README.md) · [WorkBuddy冻结包任务](WORKBUDDY_C32B1_TASK.md)。67份迁移、149表、35实际ER；报告250页、125业务＋SF01。下方为前批交付记录。
 

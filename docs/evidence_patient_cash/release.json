@@ -74,13 +74,17 @@
   },
   "prior_patient_medical_tool_batch": "USER_RELAYED_ALL_SIX_PASS_CLOSED_NOT_REPEATED",
   "workbuddy": {
-    "new_fee_display": "PENDING_NEW_OFFICIAL_TOOL_REGRESSION",
+    "new_fee_display": "REPORTED_DATA_PAGING_ISOLATION_390_ACCEPTED_WITH_NATIVE_PICKER_GESTURE_PENDING",
     "local_backend_port": 18362,
     "frozen_pages": 26,
     "package_sha256": "61d20f4aec84f74fc0a181195335dc871a7cd5450442781734e3b1ea8eb9ceba",
     "checked_files": 88,
     "responsibility": "Import/necessary compile and read-only patient-tool scenarios only; no backend, financial writes or platform upload",
-    "real_wechat_relogin": "NOT_REPEATED_FOR_NON_AUTH_CHANGE"
+    "real_wechat_relogin": "NOT_REPEATED_FOR_NON_AUTH_CHANGE",
+    "latest_return": "workbuddy-return-c32c1.json",
+    "codex_database_check": "workbuddy-database-check.json",
+    "native_history_picker_gesture": "NOT_COVERED_TOOL_LIMIT; DEEP_LINK_HISTORY_DATA_PASS",
+    "new_operations": "NONE_THIS_BATCH"
   },
   "report": {
     "pages": 266,
@@ -102,12 +106,23 @@
     "Fixed cloud HTTPS/host acceptance",
     "Professional clinical approval",
     "Reliable electronic signature",
-    "Real SMS"
+    "Real SMS",
+    "Native invoice-history picker gesture; deep-link data passed"
   ],
   "retained_limits": [
     "Windows-data recovery UNRESOLVED",
     "Historical UNKNOWN/UNDETERMINED",
     "General equivalent-DDL comparison limitation"
   ],
-  "public_evidence": "Summary only. Individual clinical identifiers/content, financial course cases and credentials remain in local private material."
+  "public_evidence": "Summary only. Individual clinical identifiers/content, financial course cases and credentials remain in local private material.",
+  "workbuddy_at_initial_delivery": {
+    "new_fee_display": "PENDING_NEW_OFFICIAL_TOOL_REGRESSION",
+    "local_backend_port": 18362,
+    "frozen_pages": 26,
+    "package_sha256": "61d20f4aec84f74fc0a181195335dc871a7cd5450442781734e3b1ea8eb9ceba",
+    "checked_files": 88,
+    "responsibility": "Import/necessary compile and read-only patient-tool scenarios only; no backend, financial writes or platform upload",
+    "real_wechat_relogin": "NOT_REPEATED_FOR_NON_AUTH_CHANGE"
+  },
+  "latest_workbuddy_review_at": "2026-11-02T03:08:31.983766+00:00"
 }

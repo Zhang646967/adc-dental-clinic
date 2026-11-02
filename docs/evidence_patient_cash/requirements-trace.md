@@ -15,3 +15,5 @@
 上述测试位于`tests/test_patient_cash_activity.py`；网站与原生既有账单规则位于`tests/test_patient_alignment.py`，医疗代理边界位于`tests/test_medical_proxy_preflight.py`。原生处理器另有6项受控传输场景，冻结源处理函数接真实后端的检查不冒充官方工具和真机验收。
 
 正式报告扩展SU-113，无新增业务用例编号或数据库表。准确源提交、完整CI、图片／历史／资金恢复、保护更新及WorkBuddy状态见同目录交付清单。公开证据仅含汇总；个案编号、问答、实际试用金额和账号指南留在本机私有材料。
+
+后续官方工具回传已核对：[逐项结果](workbuddy-return-c32c1.json)。历史数据及提示通过受支持的版本深链；原生picker触发与页内重置手势未覆盖。既有处理器及真实HTTP验证保留，不将其当成原生输入证据。

@@ -1,6 +1,6 @@
 # ADC 牙科连锁运营管理系统
 
-**当前本地交付：患者收退款总额、逐笔记录与历史账单核对。** [准确CI与保护交付](docs/evidence_patient_cash/README.md) · [WorkBuddy新费用页任务](docs/WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。本机已更新；新小程序费用页官方工具与手机结果分别待验收。
+**当前本地交付：患者收退款总额、逐笔记录与历史账单核对。** [准确CI与保护交付](docs/evidence_patient_cash/README.md) · [WorkBuddy新费用页任务](docs/WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。本机已更新；费用、分页与隔离工具回传已核对收口，历史版本深链通过，原生picker手势及设备／手机单独待验收。[回传审核](docs/WORKBUDDY_C32C1_REVIEW.md)。
 
 前批医疗代理及治疗前核对的六个患者官方工具场景已收口，旧记录与问答保留。下方旧期“待继续／未实现”等文字保留其原时点，以本段和当前证据为准，不重复已通过操作。
 

@@ -18,3 +18,5 @@
 [项目文档](../docs/README.md)保留操作和交付说明；[历史报告资料](../docs/release_report/README.md)及Git版本历史供对照。病历归档与受控复制已有[C3.3下一阶段规格草案](../docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)，尚未实施。
 
 思维导图：患者与授权 → 预约接诊 → 临床文书与明确决定 → 开治及真实执行 → 财务和资源 → 可追溯验证。
+
+患者费用数据、实际分页、访问隔离及390宽官方工具回传已审核收口；历史数据经深链验证，原生picker手势及设备矩阵另验。[验收附件](../docs/WORKBUDDY_C32C1_REVIEW.md)。本次为执行证据更新，正文、Word／PDF及实际ER字节保持。

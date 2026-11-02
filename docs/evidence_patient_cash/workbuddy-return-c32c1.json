@@ -1,0 +1,64 @@
+{
+  "stage": "C3.2C1 WorkBuddy official-tool return reviewed",
+  "evidence_source": "Two current local WorkBuddy reports located after the user identified their previous message as the return; individual case facts and screenshot files remain private.",
+  "reported_date": "2026-11-02 Asia/Shanghai",
+  "reviewed_at": "2026-11-02T03:08:31.983766+00:00",
+  "reviewed_date_local": "2026-11-01 America/Los_Angeles",
+  "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+  "image": "sha256:4fe36c228fd7bd75bdbbe0cdea0dd5ca4cd40b86b0689f04a7972cb5b64ea7c1",
+  "official_tool": {
+    "result": "REPORTED_DATA_AND_READONLY_SCENARIOS_PASS_WITH_EXPLICIT_PICKER_GESTURE_GAP",
+    "package_checksums": "88/88",
+    "pages": 26,
+    "compiled_bytes": 218552,
+    "tool_version": "2.02.2608080",
+    "electron": "36.6.0",
+    "base_library": "3.17.5",
+    "simulated_device": "iPhone12/13(Pro)390x844; not physical phone",
+    "reported_project_tree_sha256": "30f3568bc28dab9f0ad30096ebdd8530aed93b6cd453102dd4bdd003fbd8715e",
+    "scenarios": {
+      "package_and_versions": "PASS_REPORTED_AND_BYTES_VERIFIED",
+      "own_posted_totals": "PASS_REPORTED_AND_DATABASE_EQUAL",
+      "posted_dates_pending_rejected_and_private_fields": "PASS_REPORTED_AND_DATABASE_EQUAL",
+      "actual_next_previous_and_last_page": "PASS_REPORTED",
+      "history_data_and_current_balance_notice": "PASS_SUPPORTED_REVISION_DEEP_LINK",
+      "native_picker_event_and_in_page_reset_gesture": "NOT_COVERED_TOOL_LIMIT",
+      "medical_proxy_cross_account_invalid_link": "PASS_REPORTED_DENIAL_REQUESTS_MATCH",
+      "layout_390": "PASS_REPORTED",
+      "layout_375_430_font": "BLOCKED_TOOL_LIMIT"
+    }
+  },
+  "codex": {
+    "deployed_project_files": 86,
+    "deployed_copy_byte_equal": true,
+    "query_ids_matched": 5,
+    "matched_source_expected": true,
+    "current_backend_source_env_count": 1,
+    "model_groups_compared": 155,
+    "all_old_rows_and_password_hashes_equal": true,
+    "new_business_rows": 0,
+    "append_only_audit_additions": {
+      "care.AuditEvent": 2,
+      "clinical.SensitiveReadEvent": 46
+    },
+    "invoices_cash_treatment_authority_and_decision_history_equal": true,
+    "complete_observed_schema_equal": true,
+    "existing_page_handler_and_real_http_reset": "PREVIOUS_EXACT_SOURCE_PASS_RETAINED_NOT_RERUN; not native picker input proof"
+  },
+  "disposition": {
+    "patient_data_and_readonly_tool_cases": "ACCEPTED_WITH_STATED_GESTURE_LIMIT",
+    "native_picker_gesture": "DEFER_TO_RELIABLE_DEVICE_OR_MANUAL_NATIVE_INPUT; not a demonstrated product failure",
+    "repeat_compile_medical_decisions_or_unrelated_wechat_login": false,
+    "new_workbuddy_operations": "NONE_FOR_THIS_CLOSURE",
+    "next_backend_increment": "C3.3A_ARCHIVE_INDEPENDENT_REVIEW_AND_APPEND_ONLY_AMENDMENT; design draft only"
+  },
+  "pending": [
+    "Native history-picker gesture",
+    "Mini375/430/font matrix",
+    "Physical phone",
+    "Second real WeChat identity",
+    "Fixed cloud HTTPS and formal platform/teacher experience",
+    "Reliable electronic signature and professional clinical qualification"
+  ],
+  "public_scope": "Summaries only; no individual clinical identifiers, course-money values, private screenshots, credentials or full clinical text."
+}
