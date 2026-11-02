@@ -1,6 +1,8 @@
 # ADC 牙科连锁运营管理系统
 
-**当前本地交付：患者收退款总额、逐笔记录与历史账单核对。** [准确CI与保护交付](docs/evidence_patient_cash/README.md) · [WorkBuddy新费用页任务](docs/WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。本机已更新；费用、分页与隔离工具回传已核对收口，历史版本深链通过，原生picker手势及设备／手机单独待验收。[回传审核](docs/WORKBUDDY_C32C1_REVIEW.md)。
+**C3.3A发布准备：病历归档、独立医务审核和追加补正已完成本地验证。** [当前准确版本与发布进度](docs/evidence_c33a/README.md) · [使用入口](docs/C33_ARCHIVE_GUIDE.md) · [WorkBuddy本轮边界](docs/WORKBUDDY_C33A_STATUS.md)。完整CI与原系统保护更新尚待完成；本轮无新小程序页面，不重复已通过的患者场景。
+
+**前一版本本地交付：患者收退款总额、逐笔记录与历史账单核对。** [准确CI与保护交付](docs/evidence_patient_cash/README.md) · [WorkBuddy新费用页任务](docs/WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。本机已更新；费用、分页与隔离工具回传已核对收口，历史版本深链通过，原生picker手势及设备／手机单独待验收。[回传审核](docs/WORKBUDDY_C32C1_REVIEW.md)。
 
 前批医疗代理及治疗前核对的六个患者官方工具场景已收口，旧记录与问答保留。下方旧期“待继续／未实现”等文字保留其原时点，以本段和当前证据为准，不重复已通过操作。
 
@@ -21,7 +23,7 @@ C3.1已交付：[初复诊文书、医师确认、历史比较、更正与待办
 
 当前本机已接通真实微信登录与网站小程序确认（一个真实账号，官方开发者工具）；模拟短信关闭。手机、第二账号、教师体验及固定云端分别待验收。[后端就绪与WorkBuddy交接](docs/WX1_BACKEND_READY.md)。
 
-下一阶段：[C3.3归档与受控复制实施规格](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。病历、医疗代理、明确决定和开治已交付；归档及副本流程仍为设计草案，按独立审核与准确版本分批推进。
+下一阶段：[C3.3B患者受控复制](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。C3.3A员工侧归档与追加补正已完成本地验证，发布进度见顶部；患者副本流程仍按用途核验与准确范围分批实现。
 
 
 

@@ -2953,5 +2953,208 @@
       "clinical/preflight_models.py",
       "tests/test_medical_proxy_preflight.py"
     ]
+  },
+  {
+    "id": "SU-134",
+    "name": "提交准确归档清单",
+    "actor": "负责医师",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "本次已结束接诊、确认文书、收费版本、指定审核人及依据。",
+    "flow": [
+      "核对本次文书、真实临床来源及完整性。",
+      "选择准确收费版本和独立医务审核人。",
+      "预览服务器清单后明确提交。"
+    ],
+    "alternatives": [
+      "未付清费用不阻止合格归档。",
+      "有必要缺项或旧预览失效：给出责任与继续入口。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-134：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
+  },
+  {
+    "id": "SU-135",
+    "name": "独立医务审核归档",
+    "actor": "指定独立医务审核医师",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "冻结文书清单、资料完整性及具体审核意见。",
+    "flow": [
+      "核对本店专项职责与具体服务范围。",
+      "阅读准确文书及来源，选择通过、退回或不通过。",
+      "明确确认并保留独立账号、职责和意见。"
+    ],
+    "alternatives": [
+      "本人及本次负责医师不得自审。",
+      "主管、前台、技术或跨店职责不能替代医务审核。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-135：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
+  },
+  {
+    "id": "SU-136",
+    "name": "生成固定包与处理异常",
+    "actor": "后台处理组件及负责医师",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "已独立通过的准确来源、原包及当前职责。",
+    "flow": [
+      "从获准快照生成固定PDF和来源清单。",
+      "锁内重核来源和适用职责后原子发布。",
+      "生成失败保留原任务，负责医师核对后明确重试。"
+    ],
+    "alternatives": [
+      "来源或职责变化：旧申请不发布，重新核对提交。",
+      "重复处理不产生第二份文件或归档回执。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-136：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
+  },
+  {
+    "id": "SU-137",
+    "name": "保全缺项病历资料",
+    "actor": "负责医师及独立医务审核医师",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "实际现有资料、未确认草稿、缺失依据及处置原因。",
+    "flow": [
+      "列明缺失材料和责任。",
+      "明确选择仅资料保全并独立审核。",
+      "固定保留现有资料和缺项，不标为完整归档。"
+    ],
+    "alternatives": [
+      "医务复核不把历史缺口改成事前通过。",
+      "资料保全不阻断后续如实完善原临床资料。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-137：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
+  },
+  {
+    "id": "SU-138",
+    "name": "审批归档后准确补正",
+    "actor": "负责医师及另一名医务审核医师",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "原完整包、准确更正草稿、差异原因及实际来源。",
+    "flow": [
+      "负责医师保存准确文书或检查草稿。",
+      "比较更正前后内容并提交独立审核。",
+      "另一名医师只批准准确内容，不代改临床记录。"
+    ],
+    "alternatives": [
+      "草稿或来源变化须重新核对批准。",
+      "无完整归档包时沿用原临床更正流程。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-138：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
+  },
+  {
+    "id": "SU-139",
+    "name": "追加临床版本与补充归档",
+    "actor": "负责医师及独立医务审核医师",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "有效准确补正批准、原文书和临床来源。",
+    "flow": [
+      "负责医师通过原临床入口预览并确认追加版本。",
+      "确认时重检批准、来源和权限，引用唯一补正结果。",
+      "另行提交补充归档包，保留原包及所有审核。"
+    ],
+    "alternatives": [
+      "旧入口不能绕过已归档补正批准。",
+      "后续新就诊、费用更正和真实医疗撤回仍保留原模块事实。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-139：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
+  },
+  {
+    "id": "SU-140",
+    "name": "协调归档责任与汇总",
+    "actor": "前台、主管及总部",
+    "status": "已实现，课程合成软件业务验证；机构制度与可靠签署分别验收",
+    "precondition": "当前工作身份、诊所及具体业务范围有效；临床内容由获准医师办理。",
+    "inputs": "当前授权诊所的业务编号、状态、责任及办理期限。",
+    "flow": [
+      "前台核对本店责任与期限，联系相关责任医师。",
+      "主管和总部查看各自范围的汇总。",
+      "通过明确入口继续原医务待办。"
+    ],
+    "alternatives": [
+      "不展示临床正文、问答、资金凭据或固定文件。",
+      "调整后续办理进度不消除原责任期限。"
+    ],
+    "result": "保留准确、独立且可追溯的归档办理事实，原临床版本、治疗和资金保持。",
+    "minimum_guarantee": "预览不发布文件；失败无部分结果，原清单、原包和历史继续保留。",
+    "rules": "文书确认、独立归档批准、固定文件生成、付款结清和副本交付分别表达；资料保全不表示完整归档。",
+    "acceptance": [
+      "AT-AR-140：tests/test_medical_archives.py核对授权、准确版本、独立性、历史、失败和并发；浏览器及恢复证据另列。"
+    ],
+    "source": [
+      "clinical/archives.py",
+      "clinical/archive_corrections.py",
+      "clinical/archive_generation.py",
+      "tests/test_medical_archives.py"
+    ]
   }
 ]

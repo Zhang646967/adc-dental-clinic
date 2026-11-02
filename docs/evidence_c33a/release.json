@@ -1,0 +1,57 @@
+{
+  "phase": "C3.3A",
+  "status": "LOCAL_VERIFIED_AWAITING_FULL_CI_AND_PROTECTED_INSTALL",
+  "application_commit": "8996da0677382be2680f9000de734ba0220f5373",
+  "application_image": "sha256:72452ba9fda2c6e5c6ba3a9b8b3352dc53061ce2332894e411dd9640df72dea8",
+  "exact_application_ci": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41388481059",
+  "source_rules_passed": 1164,
+  "archive_postgresql_tests": 38,
+  "archive_and_document_regression_passed": 63,
+  "notification_operations_authority_regression_passed": 122,
+  "native_source_checks_passed": 291,
+  "browser_workflows_and_isolation_passed": true,
+  "website_widths": [
+    375,
+    390,
+    430
+  ],
+  "website_font_scaling_percent": [
+    100,
+    200
+  ],
+  "source_mounts_in_frozen_runtime": false,
+  "application_migrations": 77,
+  "previous_migration_bytes_preserved": 75,
+  "sql_tables": 163,
+  "orm_tables": 162,
+  "sql_foreign_keys": 476,
+  "business_triggers": 135,
+  "actual_er_views": 41,
+  "encrypted_populated_restore": {
+    "passed": true,
+    "groups_equal": 160,
+    "seconds": 21.82
+  },
+  "encrypted_original_checkpoint_restore": {
+    "passed": true,
+    "groups_equal": 155,
+    "seconds": 21.781
+  },
+  "report": {
+    "pdf_pages": 281,
+    "business_use_cases": 140,
+    "tables": 159,
+    "images": 83,
+    "toc_entries": 107,
+    "docx_sha256": "992f93f8e0b38fd02de5782dcdb31570a6f9d7ef41e8a3726127411e5af0e714",
+    "pdf_sha256": "677584422c4216b67868430a8521ee8ad04d8430a8db4cca6fbc1399e780c247"
+  },
+  "new_patient_mini_pages": false,
+  "workbuddy_new_operations_required": false,
+  "new_thirty_minute_capacity_claim": false,
+  "independent_cloud_acceptance": false,
+  "professional_and_reliable_signature_acceptance": false,
+  "windows_data_recovery": "UNRESOLVED",
+  "historical_unknown_and_undetermined_preserved": true,
+  "general_equivalent_ddl_comparator_limit_retained": true
+}
