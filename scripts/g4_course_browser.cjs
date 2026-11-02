@@ -53,7 +53,8 @@ let browser;
     const login = patient ? '/portal/login/' : '/accounts/login/';
     const response = await page.goto(base + login);
     check(username + ' login page', response.status() === 200);
-    if (patient) await page.locator('details.auth-password > summary').click();
+    if (patient && await page.locator('details.auth-password').getAttribute('open') === null)
+      await page.locator('details.auth-password > summary').click();
     await page.locator('input[name=username]').fill(username);
     await page.locator('input[name=password]').fill(credentials[username]);
     await page.locator('form:has(input[name=username]) button[type=submit]').click();

@@ -1430,7 +1430,7 @@
     "scripts/dependency_drill.py": "fd065513a1c829ca8fffbd0eeee8199d55ce4470cc51310fbc62e5175d936e50",
     "scripts/frontdesk_scheduling_load.py": "0573591dda5053df30f1b3cfa815ca0615e092703d7ff3b097d346f2124530f5",
     "scripts/g4_course.py": "8b23d3173c98699c041287b4e123817be34bebb5ae836e351ff133a6398197a9",
-    "scripts/g4_course_browser.cjs": "80a8a76ae55f4a0d8337eecbb8abdbef8c5eb9d991a7060f5a540e79234dd376",
+    "scripts/g4_course_browser.cjs": "d3b6c8e8a8017761373a5eebc504424e8f8e01cbef4897574db9a82da91cb94f",
     "scripts/g4_course_facts.py": "05893fba0f1346c9f9a0bdf4160aa824439bd2f9c926fb8819dac9eb6627ca73",
     "scripts/g4_course_load.py": "765a7a23ec170f8a3cbd5cb9ead3cc4cfc6bde5688d1c25425a060efe30b5d81",
     "scripts/g4_course_observe.py": "c6841f2cf6df787cc8e876565e4a864d9a0dde1757a41d3ec2c8a065cab0661d",
