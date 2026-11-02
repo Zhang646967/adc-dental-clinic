@@ -1,0 +1,6 @@
+{% extends 'portal/account_base.html' %}{% block content %}
+<p class="eyebrow">我的病历资料</p><h1>病历副本申请</h1><p class="lede">选择所需就诊与资料，用途和领取人核验通过后领取电子副本。</p>
+<p><a class="button" href="{% url 'portal_record_copy_new' %}">申请本人病历副本</a></p>
+<p>监护或书面受托复制请联系门店，前台核对本用途原件与领取账号后登记。原有代约或医疗事项授权不直接开放整份病历。</p>
+{% for row in page %}<article class="account-card"><h2>{{ row.clinic.public_contact.name }} · 申请 {{ row.pk }}</h2><p>{{ row.patient.name }} · {{ row.get_kind_display }}</p><p>{{ row.get_state_display }}</p><p>{{ row.patient_message }}</p><a href="{% url 'portal_record_copy' row.pk %}">查看范围与办理进度 →</a></article>{% empty %}<section class="account-card">尚无病历副本申请。</section>{% endfor %}
+{% include 'clinical/pagination.html' %}<p><a href="{% url 'patient_account' %}">返回我的账号</a></p>{% endblock %}

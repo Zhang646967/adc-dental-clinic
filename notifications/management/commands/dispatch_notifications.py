@@ -73,6 +73,8 @@ class Command(BaseCommand):
                         if options['watch'] and not stopping:
                             from clinical.archive_generation import generate_batch
                             generate_batch(limit=1)
+                            from clinical.copy_generation import generate_batch as generate_copies
+                            generate_copies(limit=1)
                     except (DatabaseError,PermissionDenied,RuntimeError):
                         observed('failed')
                         raise CommandError('通知处理停止：数据库或运行策略不可用；没有宣称派发成功。') from None

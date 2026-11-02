@@ -19,9 +19,11 @@ class RoleAssignment(models.Model):
     is_active = models.BooleanField(default=True)
     can_verify_patient_relationships = models.BooleanField(default=False)
     can_verify_medical_proxy_identity = models.BooleanField(default=False)
+    can_verify_record_copies = models.BooleanField(default=False)
     class Meta:
         db_table = "adc_role_assignment"
         constraints = [
+            models.CheckConstraint(condition=Q(can_verify_record_copies=False) | Q(role='FRONT_DESK',scope_kind='CLINIC',clinic__isnull=False),name='copy_frontdesk_duty'),
             models.CheckConstraint(condition=Q(can_verify_medical_proxy_identity=False) | Q(role='FRONT_DESK',scope_kind='CLINIC',clinic__isnull=False), name='medical_proxy_frontdesk_duty'),
             models.CheckConstraint(condition=Q(can_verify_patient_relationships=False) | Q(role='FRONT_DESK', scope_kind='CLINIC', clinic__isnull=False), name='identity_reviewer_frontdesk'),
             models.CheckConstraint(condition=(Q(role__in=["FRONT_DESK", "MANAGER"], scope_kind="CLINIC", clinic__isnull=False) | Q(role="DENTIST", scope_kind="SELF_DENTIST", clinic__isnull=True) | Q(role__in=["HQ", "FINANCE"], scope_kind="CHAIN", clinic__isnull=True) | Q(role="SYSADMIN", scope_kind="TECHNICAL", clinic__isnull=True)), name="role_scope_valid"),

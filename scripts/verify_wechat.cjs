@@ -53,6 +53,10 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const oldAccount=api.request('account/'),oldAccountResponse=last;
   p=api.request('account/local-login/','POST',{code:'one-use'});assert.equal(last.header['X-ADC-Account'],'account-a');success({csrf_token:'new-c',workspace_id:'pending-b',subject_revision:0,account_name:'pending-b',account_authenticated:true,authenticated:false,account_token:'account-b'});await p;
   oldAccountResponse.success({statusCode:200,data:{ok:true,data:{phone:'PRIVATE_OLD_ACCOUNT'}}});await assert.rejects(oldAccount,e=>e.code==='SUBJECT_CHANGED');checks+=2;
+  p=api.bootstrap();success({csrf_token:'c',workspace_id:'pending-b',subject_revision:0,account_name:'pending-b',account_authenticated:true,authenticated:false,account_token:'account-b'},['sessionid=copy-account-session; HttpOnly']);await p;
+  let download,discarded;wx.downloadFile=o=>{download=o;};wx.getFileSystemManager=()=>({unlink:o=>{discarded=o.filePath;}});
+  p=api.downloadRecordCopy('signed-private-ticket');assert(download.header.Cookie.includes('sessionid=copy-account-session'));assert(download.url.includes('ticket=signed-private-ticket'));download.success({statusCode:200,tempFilePath:'/private/valid.pdf'});assert.equal(await p,'/private/valid.pdf');checks+=3;
+  p=api.downloadRecordCopy('second-ticket');api.reset();download.success({statusCode:200,tempFilePath:'/private/old-account.pdf'});await assert.rejects(p,/账号或就诊人已变化/);assert.equal(discarded,'/private/old-account.pdf');checks+=2;
   let compiler={status:'not_run'};
   if(process.env.ADC_WECHAT_COMPILER_DIR){
     const os=require('node:os'),{spawnSync}=require('node:child_process');
@@ -75,5 +79,6 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const profiles=await require('./verify_native_profiles.cjs').verify();
   const alignment=await require('./verify_native_alignment.cjs').verify();
   const patient_cash=await require('./verify_patient_cash_wechat.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const record_copies=await require('./verify_native_record_copies.cjs').verify();
+  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,record_copies,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

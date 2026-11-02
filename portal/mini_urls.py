@@ -1,3 +1,4 @@
+from portal import mini_copies as copies
 from django.urls import path
 from portal import mini_api as api
 from portal import mini_waitlist as wait
@@ -13,6 +14,13 @@ from portal import auth_views as auth
 from portal import web_login_views as qr
 
 urlpatterns = [
+    path('record-copies/',copies.listing,name='mini_record_copies'),
+    path('record-copies/options/',copies.options,name='mini_record_copy_options'),
+    path('record-copies/preview/',copies.submit_preview,name='mini_record_copy_submit'),
+    path('record-copies/confirm/',copies.confirm,name='mini_record_copy_confirm'),
+    path('record-copies/download/',copies.download,name='mini_record_copy_download'),
+    path('record-copies/<int:pk>/',copies.detail,name='mini_record_copy'),
+    path('record-copies/<int:pk>/preview/',copies.action_preview,name='mini_record_copy_action'),
     path('medical-authorizations/',medical.listing,name='mini_medical_authorizations'),
     path('medical-authorizations/<int:pk>/',medical.detail,name='mini_medical_authorization'),
     path('medical-authorizations/<int:pk>/preview/',medical.preview,name='mini_medical_authorization_preview'),

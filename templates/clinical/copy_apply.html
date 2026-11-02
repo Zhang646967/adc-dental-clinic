@@ -1,0 +1,5 @@
+{% extends copy_base %}{% block content %}<h1>{% if front %}登记本用途代理复制{% else %}申请本人病历副本{% endif %}</h1>
+<p>未付清费用不影响申请。尚无固定材料时，申请保留并由门店协调负责医师。</p>
+{% if front %}<form method="get"><label>患者业务编号 <input name="patient_no" value="{{ form.patient_no.value|default:'' }}" required></label><button type="submit">核对患者并显示就诊</button></form>{% else %}<form method="get"><label>选择门店 <select name="clinic">{% for c in form.fields.clinic.queryset %}<option value="{{ c.pk }}"{% if c.pk == form.fields.clinic.initial %} selected{% endif %}>{{ c.public_contact.name }}</option>{% endfor %}</select></label><button type="submit">查看该店就诊</button></form>{% endif %}
+<form method="post">{% csrf_token %}{% if patient_channel %}<input type="hidden" name="account_token" value="{{ account_token }}">{% else %}{% load workspace_tags %}{% workspace_token %}{% endif %}{{ form.as_p }}<button class="button" type="submit">预览申请范围 →</button></form>
+<p><a href="{% if patient_channel %}{% url 'portal_record_copies' %}{% else %}{% url 'record_copies' %}{% endif %}">返回申请清单</a></p>{% endblock %}

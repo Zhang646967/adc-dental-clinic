@@ -20,3 +20,5 @@
   <navigator class="card" wx:if="{{!patientDelegated}}" url="/pages/history/index"><view class="section-title">我的健康自述</view><view>补充本人健康、用药与自述过敏情况，由医师在接诊时核对。</view></navigator>
   <navigator wx:if="{{!patientDelegated}}" class="card" url="/pages/plans/index"><view class="section-title">我的治疗计划 →</view><view>核对方案版本、本人决定与实际执行进展。</view></navigator><navigator open-type="switchTab" class="link" url="/pages/account/index">账号、联络与本人档案办理 →</navigator><button bindtap="logout">退出账号</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 <view class="card"><view class="section-title">本人的健康与诊疗</view><view wx:if="{{patientDelegated}}" class="muted">当前为代约身份，可管理授权预约；临床与结算资料由患者本人查看。</view><view wx:else class="task-links"><navigator url="/pages/history/index">健康自述与过敏复核 →</navigator><navigator url="/pages/plans/index">治疗方案与本人决定 →</navigator><navigator url="/pages/referrals/index">跨店转诊与披露范围 →</navigator><view class="muted">结算单从对应就诊详情进入，保留已发布版本。</view></view></view></block></view>
+
+<view class="card"><navigator class="link" url="/pages/record-copies/index">病历副本申请与领取 →</navigator></view>

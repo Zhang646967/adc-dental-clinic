@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-01。本目录列出162张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-02。本目录列出166张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -1597,6 +1597,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | valid_until | timestamp with time zone | — | 否 | — |
 | is_active | boolean | — | 否 | — |
 | can_review_archives | boolean | — | 否 | — |
+| can_review_copies | boolean | — | 否 | — |
 | revision | integer | — | 否 | — |
 | appointed_by_id | bigint | FK | 否 | `adc_user.id` |
 | appointed_at | timestamp with time zone | — | 否 | — |
@@ -5048,6 +5049,160 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `cash_match_statement_use`：`CREATE TRIGGER cash_match_statement_use AFTER INSERT OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_sync_statement_use()`。
 - `reconciliation_history`：`CREATE TRIGGER reconciliation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_reconciliation_match FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
 
+## adc_record_copy_event
+
+模型：`clinical.RecordCopyEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | FK | 否 | `adc_record_copy_request.id` |
+| actor_id | bigint | FK | 是 | `adc_user.id` |
+| operation_id | uuid | UK | 否 | — |
+| action | character varying(24) | — | 否 | — |
+| snapshot | jsonb | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_record_copy_even_request_id_3f5203a0_fk_adc_recor`：`FOREIGN KEY (request_id) REFERENCES adc_record_copy_request(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_event_actor_id_abc60b69_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_record_copy_event_pkey`：`PRIMARY KEY (id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_record_copy_event_actor_id_abc60b69`：`CREATE INDEX adc_record_copy_event_actor_id_abc60b69 ON public.adc_record_copy_event USING btree (actor_id)`。
+- `adc_record_copy_event_operation_id_key`：`CREATE UNIQUE INDEX adc_record_copy_event_operation_id_key ON public.adc_record_copy_event USING btree (operation_id)`。
+- `adc_record_copy_event_pkey`：`CREATE UNIQUE INDEX adc_record_copy_event_pkey ON public.adc_record_copy_event USING btree (id)`。
+- `adc_record_copy_event_request_id_3f5203a0`：`CREATE INDEX adc_record_copy_event_request_id_3f5203a0 ON public.adc_record_copy_event USING btree (request_id)`。
+
+跨表及历史触发器：
+
+- `copy_event_retained`：`CREATE TRIGGER copy_event_retained BEFORE DELETE OR UPDATE ON public.adc_record_copy_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_record_copy_file
+
+模型：`clinical.RecordCopyFile`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | UK / FK | 否 | `adc_record_copy_request.id` |
+| pdf | bytea | — | 否 | — |
+| sha256 | character varying(64) | — | 否 | — |
+| manifest | jsonb | — | 否 | — |
+| renderer | character varying(80) | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_record_copy_file_pkey`：`PRIMARY KEY (id)`。
+- `adc_record_copy_file_request_id_41a3c580_fk_adc_recor`：`FOREIGN KEY (request_id) REFERENCES adc_record_copy_request(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_file_request_id_key`：`UNIQUE (request_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_record_copy_file_pkey`：`CREATE UNIQUE INDEX adc_record_copy_file_pkey ON public.adc_record_copy_file USING btree (id)`。
+- `adc_record_copy_file_request_id_key`：`CREATE UNIQUE INDEX adc_record_copy_file_request_id_key ON public.adc_record_copy_file USING btree (request_id)`。
+
+跨表及历史触发器：
+
+- `copy_file_retained`：`CREATE TRIGGER copy_file_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_record_copy_file FOR EACH ROW EXECUTE FUNCTION adc_copy_file_guard()`。
+
+## adc_record_copy_item
+
+模型：`clinical.RecordCopyItem`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| request_id | bigint | FK | 否 | `adc_record_copy_request.id` |
+| visit_id | bigint | FK | 否 | `adc_visit.id` |
+| package_id | bigint | FK | 是 | `adc_archive_package.id` |
+| sections | jsonb | — | 否 | — |
+
+数据库约束：
+
+- `adc_record_copy_item_package_id_b3bf7c85_fk_adc_archi`：`FOREIGN KEY (package_id) REFERENCES adc_archive_package(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_item_pkey`：`PRIMARY KEY (id)`。
+- `adc_record_copy_item_request_id_75187bc2_fk_adc_recor`：`FOREIGN KEY (request_id) REFERENCES adc_record_copy_request(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_item_visit_id_ae6d8eb9_fk_adc_visit_id`：`FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
+- `copy_one_visit_scope`：`UNIQUE (request_id, visit_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_record_copy_item_package_id_b3bf7c85`：`CREATE INDEX adc_record_copy_item_package_id_b3bf7c85 ON public.adc_record_copy_item USING btree (package_id)`。
+- `adc_record_copy_item_pkey`：`CREATE UNIQUE INDEX adc_record_copy_item_pkey ON public.adc_record_copy_item USING btree (id)`。
+- `adc_record_copy_item_request_id_75187bc2`：`CREATE INDEX adc_record_copy_item_request_id_75187bc2 ON public.adc_record_copy_item USING btree (request_id)`。
+- `adc_record_copy_item_visit_id_ae6d8eb9`：`CREATE INDEX adc_record_copy_item_visit_id_ae6d8eb9 ON public.adc_record_copy_item USING btree (visit_id)`。
+- `copy_one_visit_scope`：`CREATE UNIQUE INDEX copy_one_visit_scope ON public.adc_record_copy_item USING btree (request_id, visit_id)`。
+
+跨表及历史触发器：
+
+- `copy_scope_retained`：`CREATE TRIGGER copy_scope_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_record_copy_item FOR EACH ROW EXECUTE FUNCTION adc_copy_scope_guard()`。
+
+## adc_record_copy_request
+
+模型：`clinical.RecordCopyRequest`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| patient_id | bigint | FK | 否 | `adc_patient.id` |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| recipient_id | bigint | FK | 否 | `adc_user.id` |
+| created_by_id | bigint | FK | 否 | `adc_user.id` |
+| kind | character varying(12) | — | 否 | — |
+| purpose | character varying(500) | — | 否 | — |
+| recipient_name | character varying(80) | — | 否 | — |
+| created_at | timestamp with time zone | — | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| revision | integer | — | 否 | — |
+| verified_by_id | bigint | FK | 是 | `adc_user.id` |
+| verified_at | timestamp with time zone | — | 是 | — |
+| verification | jsonb | — | 否 | — |
+| identity_snapshot | jsonb | — | 否 | — |
+| assigned_reviewer_id | bigint | FK | 是 | `adc_clinical_reviewer.id` |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| approval | jsonb | — | 否 | — |
+| pickup_until | timestamp with time zone | — | 是 | — |
+| patient_message | character varying(500) | — | 否 | — |
+| generation_error | character varying(40) | — | 否 | — |
+| attempts | integer | — | 否 | — |
+
+数据库约束：
+
+- `adc_record_copy_requ_assigned_reviewer_id_981a3eff_fk_adc_clini`：`FOREIGN KEY (assigned_reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_request_attempts_check`：`CHECK ((attempts >= 0))`。
+- `adc_record_copy_request_clinic_id_73bf9a9e_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_request_created_by_id_81da2763_fk_adc_user_id`：`FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_request_patient_id_88bc863a_fk_adc_patient_id`：`FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_request_pkey`：`PRIMARY KEY (id)`。
+- `adc_record_copy_request_recipient_id_ce1b6463_fk_adc_user_id`：`FOREIGN KEY (recipient_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_request_reviewed_by_id_57316395_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_record_copy_request_revision_check`：`CHECK ((revision >= 0))`。
+- `adc_record_copy_request_verified_by_id_7588369b_fk_adc_user_id`：`FOREIGN KEY (verified_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `copy_applicant_kind`：`CHECK (((kind)::text = ANY ((ARRAY['SELF'::character varying, 'GUARDIAN'::character varying, 'WRITTEN'::character varying])::text[])))`。
+- `copy_request_state`：`CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'NEED_INFO'::character varying, 'REVIEW'::character varying, 'APPROVED'::character varying, 'FAILED'::character varying, 'READY'::character varying, 'DELIVERED'::character varying, 'REJECTED'::character varying, 'WITHDRAWN'::character varying, 'REVOKED'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_record_copy_request_assigned_reviewer_id_981a3eff`：`CREATE INDEX adc_record_copy_request_assigned_reviewer_id_981a3eff ON public.adc_record_copy_request USING btree (assigned_reviewer_id)`。
+- `adc_record_copy_request_clinic_id_73bf9a9e`：`CREATE INDEX adc_record_copy_request_clinic_id_73bf9a9e ON public.adc_record_copy_request USING btree (clinic_id)`。
+- `adc_record_copy_request_created_by_id_81da2763`：`CREATE INDEX adc_record_copy_request_created_by_id_81da2763 ON public.adc_record_copy_request USING btree (created_by_id)`。
+- `adc_record_copy_request_patient_id_88bc863a`：`CREATE INDEX adc_record_copy_request_patient_id_88bc863a ON public.adc_record_copy_request USING btree (patient_id)`。
+- `adc_record_copy_request_pkey`：`CREATE UNIQUE INDEX adc_record_copy_request_pkey ON public.adc_record_copy_request USING btree (id)`。
+- `adc_record_copy_request_recipient_id_ce1b6463`：`CREATE INDEX adc_record_copy_request_recipient_id_ce1b6463 ON public.adc_record_copy_request USING btree (recipient_id)`。
+- `adc_record_copy_request_reviewed_by_id_57316395`：`CREATE INDEX adc_record_copy_request_reviewed_by_id_57316395 ON public.adc_record_copy_request USING btree (reviewed_by_id)`。
+- `adc_record_copy_request_verified_by_id_7588369b`：`CREATE INDEX adc_record_copy_request_verified_by_id_7588369b ON public.adc_record_copy_request USING btree (verified_by_id)`。
+- `copy_clinic_queue`：`CREATE INDEX copy_clinic_queue ON public.adc_record_copy_request USING btree (clinic_id, state, created_at)`。
+
+跨表及历史触发器：
+
+- `copy_request_retained`：`CREATE TRIGGER copy_request_retained BEFORE DELETE OR UPDATE ON public.adc_record_copy_request FOR EACH ROW EXECUTE FUNCTION adc_copy_request_guard()`。
+
 ## adc_resource_action
 
 模型：`scheduling.ResourceAction`。
@@ -5314,12 +5469,14 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | is_active | boolean | — | 否 | — |
 | can_verify_patient_relationships | boolean | — | 否 | — |
 | can_verify_medical_proxy_identity | boolean | — | 否 | — |
+| can_verify_record_copies | boolean | — | 否 | — |
 
 数据库约束：
 
 - `adc_role_assignment_clinic_id_06c108de_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_role_assignment_pkey`：`PRIMARY KEY (id)`。
 - `adc_role_assignment_user_id_49685fe0_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `copy_frontdesk_duty`：`CHECK (((NOT can_verify_record_copies) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `identity_reviewer_frontdesk`：`CHECK (((NOT can_verify_patient_relationships) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `medical_proxy_frontdesk_duty`：`CHECK (((NOT can_verify_medical_proxy_identity) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `role_scope_valid`：`CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))`。

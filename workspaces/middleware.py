@@ -22,6 +22,9 @@ PUBLIC.update({'patient_sms_login','patient_sms_bind','patient_wechat_start','pa
     'mini_wechat_login','mini_wechat_bind','mini_sms_send','mini_sms_confirm','mini_wechat_phone','mini_sms_bind_send','mini_sms_bind_confirm'})
 PUBLIC.update({'patient_wechat_qr_start','patient_wechat_qr_status','patient_wechat_qr_image','patient_wechat_qr_complete',
     'mini_web_login','patient_sms_captcha','mini_sms_captcha'})
+# Copy-account routes apply their own channel, account token and per-application scope.
+PUBLIC.update({'portal_record_copies','portal_record_copy_new','portal_record_copy','portal_record_copy_confirm','portal_record_copy_download',
+    'mini_record_copies','mini_record_copy_options','mini_record_copy_submit','mini_record_copy_confirm','mini_record_copy_download','mini_record_copy','mini_record_copy_action'})
 ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
 # These views own exact medical-step authorization. Appointment authority is a
 # different contract; role/workspace/CSRF checks still run below.
@@ -31,6 +34,7 @@ MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_me
     'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
 ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
 ROUTES={
+ 'record_copies':{'FRONT_DESK','DENTIST'},'record_copy_new':{'FRONT_DESK'},'record_copy_detail':{'FRONT_DESK','DENTIST'},'record_copy_confirm':{'FRONT_DESK','DENTIST'},
  'clinical_archives':{'DENTIST'},'clinical_archive':{'DENTIST'},'clinical_archive_submission':{'DENTIST'},
  'clinical_archive_amendment':{'DENTIST'},'clinical_archive_confirm':{'DENTIST'},
  'clinical_archive_download':{'DENTIST'},'clinical_archive_manifest':{'DENTIST'},

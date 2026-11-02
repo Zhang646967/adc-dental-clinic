@@ -17,7 +17,7 @@ from care.audit import emit
 from workspaces.context import available_roles
 from workspaces.rules import ROLES
 
-ACTION_LABELS={'medical_proxy_reviewer':'配置医疗代理资料核验职责','grant':'授予身份','revoke':'撤回身份','reset_password':'重置密码','disable':'停用账号',
+ACTION_LABELS={'copy_verifier':'登记病历副本材料核验职责','copy_reviewer':'登记独立病历副本审核职责','medical_proxy_reviewer':'配置医疗代理资料核验职责','grant':'授予身份','revoke':'撤回身份','reset_password':'重置密码','disable':'停用账号',
                'security_suspend':'紧急安全封禁','enable':'启用账号','bind_patient':'绑定演示患者','disable_patient_access':'停用患者入口','identity_reviewer':'配置患者关系核验职责','clinical_reviewer':'登记机构专业审核职责','archive_reviewer':'登记独立医务归档审核职责'}
 
 @login_required

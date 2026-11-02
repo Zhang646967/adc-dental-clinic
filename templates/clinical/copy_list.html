@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block content %}<p class="eyebrow">病历资料服务</p><h1>{% if front %}身份与用途核验{% else %}病历副本独立审核{% endif %}</h1>
+{% if front %}<a class="button" href="{% url 'record_copy_new' %}">登记监护／书面委托复制申请</a>{% endif %}
+{% for row in page %}<article class="card"><h2>{{ row.patient.name }} · 申请 {{ row.pk }}</h2><p>{{ row.clinic.name }} · {{ row.get_kind_display }} · {{ row.get_state_display }}</p><p>用途：{{ row.purpose }}</p><a href="{% url 'record_copy_detail' row.pk %}">核对本申请 →</a></article>{% empty %}<p>当前没有可办理的申请。</p>{% endfor %}{% include 'clinical/pagination.html' %}{% endblock %}

@@ -785,6 +785,34 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_financial_evidence_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE e adc_cash_entry%ROWTYPE; a adc_payment_account%ROWTYPE;\n        p adc_cash_evidence%ROWTYPE; b adc_statement_batch%ROWTYPE;\n        l adc_statement_line%ROWTYPE; latest_id bigint;\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'financial evidence history cannot be deleted' USING ERRCODE='23514'; END IF;\n IF TG_TABLE_NAME='adc_payment_account' THEN\n   IF NEW.code !~ '^[A-Z0-9][A-Z0-9_-]{1,39}$' THEN RAISE EXCEPTION 'invalid payment account code' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     IF NOT NEW.is_active OR NEW.lock_version<>0 OR NEW.last_operation_id<>NEW.operation_id THEN\n       RAISE EXCEPTION 'account starts active at version zero' USING ERRCODE='23514'; END IF;\n   ELSIF (to_jsonb(NEW)-ARRAY['is_active','lock_version','last_operation_id']) IS DISTINCT FROM\n         (to_jsonb(OLD)-ARRAY['is_active','lock_version','last_operation_id']) OR\n         NEW.is_active=OLD.is_active OR NEW.lock_version<>OLD.lock_version+1 OR NEW.last_operation_id=OLD.last_operation_id THEN\n     RAISE EXCEPTION 'account identity is immutable and state changes are versioned' USING ERRCODE='23514';\n   END IF;\n ELSIF TG_TABLE_NAME='adc_cash_evidence' THEN\n   SELECT * INTO e FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n   SELECT * INTO a FROM adc_payment_account WHERE id=NEW.account_id;\n   IF a.clinic_id IS DISTINCT FROM e.clinic_id OR btrim(NEW.reference)='' OR NEW.reference<>btrim(NEW.reference) OR btrim(NEW.reason)='' THEN\n     RAISE EXCEPTION 'evidence needs its own clinic account and reference' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     SELECT * INTO p FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id ORDER BY version DESC LIMIT 1;\n     IF NEW.state<>'PENDING' OR (p.id IS NULL AND (NEW.version<>1 OR NEW.previous_id IS NOT NULL)) OR\n        (p.id IS NOT NULL AND (NEW.previous_id IS DISTINCT FROM p.id OR NEW.version<>p.version+1 OR p.state='PENDING')) OR\n        (NEW.initial AND (NEW.version<>1 OR e.state<>'PENDING' OR NEW.prepared_by_id<>e.prepared_by_id)) OR\n        (NOT NEW.initial AND e.state<>'POSTED') THEN\n       RAISE EXCEPTION 'evidence version lineage is invalid' USING ERRCODE='23514'; END IF;\n   ELSE\n     IF OLD.state<>'PENDING' OR NEW.state NOT IN ('APPROVED','REJECTED') OR\n       (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) IS DISTINCT FROM\n       (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason']) OR NEW.reviewed_at<NEW.prepared_at OR\n       (NEW.initial AND ((NEW.state='APPROVED' AND e.state<>'POSTED') OR (NEW.state='REJECTED' AND e.state<>'REJECTED'))) OR\n       (NOT NEW.initial AND e.state<>'POSTED') THEN\n       RAISE EXCEPTION 'evidence facts and terminal decisions are immutable' USING ERRCODE='23514'; END IF;\n   END IF;\n ELSIF TG_TABLE_NAME='adc_statement_batch' THEN\n   IF octet_length(NEW.source_bytes) NOT BETWEEN 1 AND 2097152 OR NEW.parser_version<>'csv-v1' OR\n      jsonb_typeof(NEW.normalized_rows)<>'array' OR jsonb_array_length(NEW.normalized_rows) NOT BETWEEN 1 AND 1000 OR\n      NEW.digest<>encode(sha256(NEW.source_bytes),'hex') THEN\n     RAISE EXCEPTION 'invalid bounded statement evidence' USING ERRCODE='23514'; END IF;\n   IF TG_OP='INSERT' THEN\n     IF NEW.state<>'DRAFT' THEN RAISE EXCEPTION 'statement starts as a private draft' USING ERRCODE='23514'; END IF;\n   ELSIF OLD.state<>'DRAFT' OR NEW.state<>'IMPORTED' OR NEW.new_count+NEW.skipped_count<>jsonb_array_length(NEW.normalized_rows) OR\n      NEW.imported_at<NEW.created_at OR\n      (to_jsonb(NEW)-ARRAY['state','operation_id','imported_at','new_count','skipped_count']) IS DISTINCT FROM\n      (to_jsonb(OLD)-ARRAY['state','operation_id','imported_at','new_count','skipped_count']) THEN\n     RAISE EXCEPTION 'statement source and accepted batches are immutable' USING ERRCODE='23514';\n   END IF;\n ELSIF TG_TABLE_NAME='adc_statement_line' THEN\n   IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'accepted statement rows are immutable' USING ERRCODE='23514'; END IF;\n   SELECT * INTO b FROM adc_statement_batch WHERE id=NEW.batch_id;\n   IF b.account_id IS DISTINCT FROM NEW.account_id OR b.state<>'DRAFT' OR\n      NOT (b.normalized_rows @> jsonb_build_array(jsonb_build_object('transaction_id',NEW.transaction_id,\n        'booked_on',to_char(NEW.booked_on,'YYYY-MM-DD'),'direction',NEW.direction,'amount',NEW.amount::text,\n        'currency',NEW.currency,'reference',NEW.reference))) THEN\n     RAISE EXCEPTION 'statement line does not belong to its retained import' USING ERRCODE='23514'; END IF;\n ELSIF TG_TABLE_NAME='adc_reconciliation_match' THEN\n   SELECT * INTO e FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n   SELECT * INTO p FROM adc_cash_evidence WHERE id=NEW.evidence_id;\n   SELECT * INTO l FROM adc_statement_line WHERE id=NEW.line_id;\n   SELECT * INTO a FROM adc_payment_account WHERE id=l.account_id;\n   SELECT id INTO latest_id FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id AND state='APPROVED' ORDER BY version DESC LIMIT 1;\n   IF TG_OP='INSERT' THEN\n     IF NEW.state<>'PENDING' THEN RAISE EXCEPTION 'matching starts pending independent review' USING ERRCODE='23514'; END IF;\n   ELSE\n     IF (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','invalidated_by_id','invalidated_at']) IS DISTINCT FROM\n        (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','invalidated_by_id','invalidated_at']) THEN\n       RAISE EXCEPTION 'matching source identity is immutable' USING ERRCODE='23514'; END IF;\n     IF NEW.state='STALE' THEN\n       IF OLD.state NOT IN ('PENDING','CONFIRMED') OR latest_id IS NULL OR latest_id=NEW.evidence_id OR\n          (NEW.reviewed_by_id,NEW.reviewed_at,NEW.review_reason) IS DISTINCT FROM (OLD.reviewed_by_id,OLD.reviewed_at,OLD.review_reason) OR\n          NEW.invalidated_at<NEW.prepared_at THEN\n         RAISE EXCEPTION 'only new approved evidence invalidates an active match' USING ERRCODE='23514'; END IF;\n     ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('CONFIRMED','REJECTED') OR NEW.reviewed_at<NEW.prepared_at THEN\n       RAISE EXCEPTION 'matching decisions are retained' USING ERRCODE='23514';\n     END IF;\n   END IF;\n   IF NEW.state IN ('PENDING','CONFIRMED') AND\n      (e.state<>'POSTED' OR p.state<>'APPROVED' OR p.cash_entry_id<>e.id OR p.id IS DISTINCT FROM latest_id OR\n       p.account_id<>l.account_id OR e.clinic_id<>a.clinic_id OR e.amount<>l.amount OR l.currency<>'CNY' OR p.reference<>l.reference OR\n       l.direction<>CASE WHEN e.kind IN ('RECEIPT','EXPENSE_REVERSAL') THEN 'IN' ELSE 'OUT' END OR\n       NOT EXISTS(SELECT 1 FROM adc_statement_batch WHERE id=l.batch_id AND state='IMPORTED')) THEN\n     RAISE EXCEPTION 'matching requires exact current approved evidence and posted cash' USING ERRCODE='23514'; END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_record_copy_event",
+      "name": "copy_event_retained",
+      "definition": "CREATE TRIGGER copy_event_retained BEFORE DELETE OR UPDATE ON public.adc_record_copy_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_record_copy_file",
+      "name": "copy_file_retained",
+      "definition": "CREATE TRIGGER copy_file_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_record_copy_file FOR EACH ROW EXECUTE FUNCTION adc_copy_file_guard()",
+      "function": "adc_copy_file_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_copy_file_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Issued copy bytes and manifests are immutable'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_record_copy_request WHERE id=NEW.request_id AND state='APPROVED')\n OR NEW.sha256<>encode(sha256(NEW.pdf),'hex') OR substring(NEW.pdf from 1 for 5)<>convert_to('%PDF-','UTF8')\n OR (NEW.manifest->>'request')::bigint<>NEW.request_id THEN RAISE EXCEPTION 'Copy requires its approved scope and exact file digest'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "copy_scope_retained",
+      "definition": "CREATE TRIGGER copy_scope_retained BEFORE INSERT OR DELETE OR UPDATE ON public.adc_record_copy_item FOR EACH ROW EXECUTE FUNCTION adc_copy_scope_guard()",
+      "function": "adc_copy_scope_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_copy_scope_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Copy scope is retained'; END IF;\n IF TG_OP='UPDATE' AND ((NEW.request_id,NEW.visit_id,NEW.sections) IS DISTINCT FROM (OLD.request_id,OLD.visit_id,OLD.sections)\n OR OLD.package_id IS NOT NULL OR NOT EXISTS(SELECT 1 FROM adc_record_copy_request WHERE id=NEW.request_id AND state='PENDING'))\n THEN RAISE EXCEPTION 'Only missing fixed sources may be resolved during material verification'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_visit v JOIN adc_record_copy_request r ON r.id=NEW.request_id\n WHERE v.id=NEW.visit_id AND v.patient_id=r.patient_id AND v.clinic_id=r.clinic_id)\n OR (NEW.package_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM adc_archive_package p\n JOIN adc_clinical_archive a ON a.id=p.archive_id JOIN adc_clinical_encounter e ON e.id=a.encounter_id\n WHERE p.id=NEW.package_id AND e.visit_id=NEW.visit_id))\n THEN RAISE EXCEPTION 'Copy sources must belong to the requested patient, clinic and visit'; END IF;\n IF jsonb_typeof(NEW.sections)<>'array' OR jsonb_array_length(NEW.sections)=0\n OR EXISTS(SELECT 1 FROM jsonb_array_elements_text(NEW.sections) x WHERE x NOT IN ('DOCUMENT','TREATMENT','CONSENT','FEES'))\n THEN RAISE EXCEPTION 'Copy sections must be explicitly selected'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "copy_request_retained",
+      "definition": "CREATE TRIGGER copy_request_retained BEFORE DELETE OR UPDATE ON public.adc_record_copy_request FOR EACH ROW EXECUTE FUNCTION adc_copy_request_guard()",
+      "function": "adc_copy_request_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_copy_request_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Copy applications and identity history are retained'; END IF;\n IF (NEW.patient_id,NEW.clinic_id,NEW.recipient_id,NEW.created_by_id,NEW.kind,NEW.purpose,NEW.recipient_name,NEW.created_at)\n IS DISTINCT FROM (OLD.patient_id,OLD.clinic_id,OLD.recipient_id,OLD.created_by_id,OLD.kind,OLD.purpose,OLD.recipient_name,OLD.created_at)\n THEN RAISE EXCEPTION 'Original applicant, purpose, patient and recipient cannot be replaced'; END IF;\n IF NEW.state IN ('APPROVED','FAILED','READY','DELIVERED') AND\n (NEW.verified_by_id IS NULL OR NEW.reviewed_by_id IS NULL OR NEW.reviewed_at IS NULL\n OR NEW.reviewed_by_id IN (NEW.verified_by_id,NEW.created_by_id,NEW.recipient_id)\n OR NOT EXISTS(SELECT 1 FROM adc_clinical_reviewer r WHERE r.id=NEW.assigned_reviewer_id AND r.user_id=NEW.reviewed_by_id AND r.clinic_id=NEW.clinic_id))\n THEN RAISE EXCEPTION 'Copy publication requires independent reviewed identity and scope'; END IF;\n IF NEW.state IN ('READY','DELIVERED') AND NOT EXISTS(SELECT 1 FROM adc_record_copy_file WHERE request_id=NEW.id)\n THEN RAISE EXCEPTION 'Ready copies require their immutable file'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_resource_action",
       "name": "resource_action_history",
       "definition": "CREATE TRIGGER resource_action_history BEFORE DELETE OR UPDATE ON public.adc_resource_action FOR EACH ROW EXECUTE FUNCTION adc_resource_action_guard()",
@@ -6733,6 +6761,19 @@
         {
           "name": "can_review_archives",
           "column": "can_review_archives",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "can_review_copies",
+          "column": "can_review_copies",
           "type": "BooleanField",
           "db_type": "boolean",
           "pk": false,
@@ -18960,6 +19001,588 @@
       "unique_together": []
     },
     {
+      "table": "adc_record_copy_event",
+      "model": "clinical.RecordCopyEvent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_record_copy_request",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(24)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "snapshot",
+          "column": "snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_record_copy_file",
+      "model": "clinical.RecordCopyFile",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_record_copy_request",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "pdf",
+          "column": "pdf",
+          "type": "BinaryField",
+          "db_type": "bytea",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "sha256",
+          "column": "sha256",
+          "type": "CharField",
+          "db_type": "varchar(64)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 64,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "manifest",
+          "column": "manifest",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "renderer",
+          "column": "renderer",
+          "type": "CharField",
+          "db_type": "varchar(80)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 80,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_record_copy_item",
+      "model": "clinical.RecordCopyItem",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "request",
+          "column": "request_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_record_copy_request",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "visit",
+          "column": "visit_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "package",
+          "column": "package_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_archive_package",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sections",
+          "column": "sections",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_record_copy_request",
+      "model": "clinical.RecordCopyRequest",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient",
+          "column": "patient_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_patient",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "recipient",
+          "column": "recipient_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_by",
+          "column": "created_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "purpose",
+          "column": "purpose",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recipient_name",
+          "column": "recipient_name",
+          "type": "CharField",
+          "db_type": "varchar(80)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 80,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "verified_by",
+          "column": "verified_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "verified_at",
+          "column": "verified_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "verification",
+          "column": "verification",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "identity_snapshot",
+          "column": "identity_snapshot",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "assigned_reviewer",
+          "column": "assigned_reviewer_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_clinical_reviewer",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "approval",
+          "column": "approval",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "pickup_until",
+          "column": "pickup_until",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "patient_message",
+          "column": "patient_message",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "generation_error",
+          "column": "generation_error",
+          "type": "CharField",
+          "db_type": "varchar(40)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 40,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "attempts",
+          "column": "attempts",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_resource_action",
       "model": "scheduling.ResourceAction",
       "app": "scheduling",
@@ -19889,6 +20512,19 @@
         {
           "name": "can_verify_medical_proxy_identity",
           "column": "can_verify_medical_proxy_identity",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "can_verify_record_copies",
+          "column": "can_verify_record_copies",
           "type": "BooleanField",
           "db_type": "boolean",
           "pk": false,
@@ -23659,6 +24295,10 @@
     "adc_reception_case",
     "adc_reception_communication",
     "adc_reconciliation_match",
+    "adc_record_copy_event",
+    "adc_record_copy_file",
+    "adc_record_copy_item",
+    "adc_record_copy_request",
     "adc_resource_action",
     "adc_resource_binding",
     "adc_resource_block",
@@ -29618,6 +30258,150 @@
       "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying, 'REJECTED'::character varying, 'STALE'::character varying])::text[])))"
     },
     {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_even_request_id_3f5203a0_fk_adc_recor",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_record_copy_request(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_actor_id_abc60b69_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_record_copy_file",
+      "name": "adc_record_copy_file_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_record_copy_file",
+      "name": "adc_record_copy_file_request_id_41a3c580_fk_adc_recor",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_record_copy_request(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_file",
+      "name": "adc_record_copy_file_request_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (request_id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_package_id_b3bf7c85_fk_adc_archi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (package_id) REFERENCES adc_archive_package(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_request_id_75187bc2_fk_adc_recor",
+      "kind": "f",
+      "definition": "FOREIGN KEY (request_id) REFERENCES adc_record_copy_request(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_visit_id_ae6d8eb9_fk_adc_visit_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "copy_one_visit_scope",
+      "kind": "u",
+      "definition": "UNIQUE (request_id, visit_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_requ_assigned_reviewer_id_981a3eff_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (assigned_reviewer_id) REFERENCES adc_clinical_reviewer(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_attempts_check",
+      "kind": "c",
+      "definition": "CHECK ((attempts >= 0))"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_clinic_id_73bf9a9e_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_created_by_id_81da2763_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (created_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_patient_id_88bc863a_fk_adc_patient_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_recipient_id_ce1b6463_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (recipient_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_reviewed_by_id_57316395_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_verified_by_id_7588369b_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (verified_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "copy_applicant_kind",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['SELF'::character varying, 'GUARDIAN'::character varying, 'WRITTEN'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "copy_request_state",
+      "kind": "c",
+      "definition": "CHECK (((state)::text = ANY ((ARRAY['PENDING'::character varying, 'NEED_INFO'::character varying, 'REVIEW'::character varying, 'APPROVED'::character varying, 'FAILED'::character varying, 'READY'::character varying, 'DELIVERED'::character varying, 'REJECTED'::character varying, 'WITHDRAWN'::character varying, 'REVOKED'::character varying])::text[])))"
+    },
+    {
       "table": "adc_resource_action",
       "name": "adc_resource_action_actor_id_4236a5c5_fk_adc_user_id",
       "kind": "f",
@@ -29874,6 +30658,12 @@
       "name": "adc_role_assignment_user_id_49685fe0_fk_adc_user_id",
       "kind": "f",
       "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_role_assignment",
+      "name": "copy_frontdesk_duty",
+      "kind": "c",
+      "definition": "CHECK (((NOT can_verify_record_copies) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))"
     },
     {
       "table": "adc_role_assignment",
@@ -34446,6 +35236,106 @@
       "definition": "CREATE UNIQUE INDEX reconciliation_line_active ON public.adc_reconciliation_match USING btree (line_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'CONFIRMED'::character varying])::text[]))"
     },
     {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_actor_id_abc60b69",
+      "definition": "CREATE INDEX adc_record_copy_event_actor_id_abc60b69 ON public.adc_record_copy_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_record_copy_event_operation_id_key ON public.adc_record_copy_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_record_copy_event_pkey ON public.adc_record_copy_event USING btree (id)"
+    },
+    {
+      "table": "adc_record_copy_event",
+      "name": "adc_record_copy_event_request_id_3f5203a0",
+      "definition": "CREATE INDEX adc_record_copy_event_request_id_3f5203a0 ON public.adc_record_copy_event USING btree (request_id)"
+    },
+    {
+      "table": "adc_record_copy_file",
+      "name": "adc_record_copy_file_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_record_copy_file_pkey ON public.adc_record_copy_file USING btree (id)"
+    },
+    {
+      "table": "adc_record_copy_file",
+      "name": "adc_record_copy_file_request_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_record_copy_file_request_id_key ON public.adc_record_copy_file USING btree (request_id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_package_id_b3bf7c85",
+      "definition": "CREATE INDEX adc_record_copy_item_package_id_b3bf7c85 ON public.adc_record_copy_item USING btree (package_id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_record_copy_item_pkey ON public.adc_record_copy_item USING btree (id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_request_id_75187bc2",
+      "definition": "CREATE INDEX adc_record_copy_item_request_id_75187bc2 ON public.adc_record_copy_item USING btree (request_id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "adc_record_copy_item_visit_id_ae6d8eb9",
+      "definition": "CREATE INDEX adc_record_copy_item_visit_id_ae6d8eb9 ON public.adc_record_copy_item USING btree (visit_id)"
+    },
+    {
+      "table": "adc_record_copy_item",
+      "name": "copy_one_visit_scope",
+      "definition": "CREATE UNIQUE INDEX copy_one_visit_scope ON public.adc_record_copy_item USING btree (request_id, visit_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_assigned_reviewer_id_981a3eff",
+      "definition": "CREATE INDEX adc_record_copy_request_assigned_reviewer_id_981a3eff ON public.adc_record_copy_request USING btree (assigned_reviewer_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_clinic_id_73bf9a9e",
+      "definition": "CREATE INDEX adc_record_copy_request_clinic_id_73bf9a9e ON public.adc_record_copy_request USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_created_by_id_81da2763",
+      "definition": "CREATE INDEX adc_record_copy_request_created_by_id_81da2763 ON public.adc_record_copy_request USING btree (created_by_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_patient_id_88bc863a",
+      "definition": "CREATE INDEX adc_record_copy_request_patient_id_88bc863a ON public.adc_record_copy_request USING btree (patient_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_record_copy_request_pkey ON public.adc_record_copy_request USING btree (id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_recipient_id_ce1b6463",
+      "definition": "CREATE INDEX adc_record_copy_request_recipient_id_ce1b6463 ON public.adc_record_copy_request USING btree (recipient_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_reviewed_by_id_57316395",
+      "definition": "CREATE INDEX adc_record_copy_request_reviewed_by_id_57316395 ON public.adc_record_copy_request USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "adc_record_copy_request_verified_by_id_7588369b",
+      "definition": "CREATE INDEX adc_record_copy_request_verified_by_id_7588369b ON public.adc_record_copy_request USING btree (verified_by_id)"
+    },
+    {
+      "table": "adc_record_copy_request",
+      "name": "copy_clinic_queue",
+      "definition": "CREATE INDEX copy_clinic_queue ON public.adc_record_copy_request USING btree (clinic_id, state, created_at)"
+    },
+    {
       "table": "adc_resource_action",
       "name": "adc_resource_action_actor_id_4236a5c5",
       "definition": "CREATE INDEX adc_resource_action_actor_id_4236a5c5 ON public.adc_resource_action USING btree (actor_id)"
@@ -37870,6 +38760,12 @@
     {
       "table": "adc_clinical_reviewer",
       "column": "can_review_archives",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_clinical_reviewer",
+      "column": "can_review_copies",
       "db_type": "boolean",
       "null": false
     },
@@ -43148,6 +44044,258 @@
       "null": false
     },
     {
+      "table": "adc_record_copy_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_event",
+      "column": "action",
+      "db_type": "character varying(24)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_event",
+      "column": "snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_event",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_event",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "pdf",
+      "db_type": "bytea",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "sha256",
+      "db_type": "character varying(64)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "manifest",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "renderer",
+      "db_type": "character varying(80)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_file",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_item",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_item",
+      "column": "sections",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_item",
+      "column": "package_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_item",
+      "column": "visit_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_item",
+      "column": "request_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "kind",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "purpose",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "recipient_name",
+      "db_type": "character varying(80)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "state",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "verified_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "verification",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "identity_snapshot",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "approval",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "pickup_until",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "patient_message",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "generation_error",
+      "db_type": "character varying(40)",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "attempts",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "assigned_reviewer_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "created_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "patient_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "recipient_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_record_copy_request",
+      "column": "verified_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
       "table": "adc_resource_action",
       "column": "id",
       "db_type": "bigint",
@@ -43546,6 +44694,12 @@
     {
       "table": "adc_role_assignment",
       "column": "can_verify_medical_proxy_identity",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_role_assignment",
+      "column": "can_verify_record_copies",
       "db_type": "boolean",
       "null": false
     },
@@ -45136,6 +46290,10 @@
       "name": "0006_roleassignment_can_verify_medical_proxy_identity_and_more"
     },
     {
+      "app": "accounts",
+      "name": "0007_roleassignment_can_verify_record_copies_and_more"
+    },
+    {
       "app": "assistants",
       "name": "0001_initial"
     },
@@ -45254,6 +46412,14 @@
     {
       "app": "clinical",
       "name": "0014_archive_guards"
+    },
+    {
+      "app": "clinical",
+      "name": "0015_clinicalreviewerappointment_can_review_copies_and_more"
+    },
+    {
+      "app": "clinical",
+      "name": "0016_record_copy_guards"
     },
     {
       "app": "contenttypes",
@@ -45480,7 +46646,7 @@
       "name": "0004_workspacecontext_medical_proxy_and_more"
     }
   ],
-  "observed_on": "2026-11-01",
-  "observed_scope": "Read-only PostgreSQL17 metadata from frozen37d9bb24908d9f4c03553c39c4be913c48cb50f3 independent18372 and protected original18000; full observed structures equal. No business rows or private configuration exported.",
-  "application_commit": "37d9bb24908d9f4c03553c39c4be913c48cb50f3"
+  "observed_on": "2026-11-02",
+  "observed_scope": "Read-only isolated C33B PostgreSQL17 migrated from empty database; independent18382 structure checked separately. No business rows or private configuration exported.",
+  "application_commit": "C33B_WORKING_SOURCE"
 }

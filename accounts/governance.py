@@ -27,7 +27,7 @@ from workspaces.models import WorkspaceContext
 
 SALT = 'adc.account-management.v08a1'
 MANAGED_ROLES = {'DENTIST':'SELF_DENTIST','FRONT_DESK':'CLINIC','MANAGER':'CLINIC','HQ':'CHAIN','FINANCE':'CHAIN'}
-ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer','medical_proxy_reviewer','clinical_reviewer','archive_reviewer'))
+ACTIONS = frozenset(('grant','revoke','reset_password','disable','enable','bind_patient','disable_patient_access','security_suspend','identity_reviewer','medical_proxy_reviewer','clinical_reviewer','archive_reviewer','copy_verifier','copy_reviewer'))
 
 
 def require_technical(actor):
@@ -37,7 +37,7 @@ def require_technical(actor):
 
 
 def state_digest(target):
-    grant_rows=list(RoleAssignment.objects.filter(user=target).order_by('id').values_list('id','role','scope_kind','clinic_id','is_active','can_verify_patient_relationships','can_verify_medical_proxy_identity'))
+    grant_rows=list(RoleAssignment.objects.filter(user=target).order_by('id').values_list('id','role','scope_kind','clinic_id','is_active','can_verify_patient_relationships','can_verify_medical_proxy_identity','can_verify_record_copies'))
     access=list(PatientAccess.objects.filter(user=target).values_list('id','patient_id','is_active'))
     from clinical.models import ClinicalReviewerAppointment
     reviewers=list(ClinicalReviewerAppointment.objects.filter(user=target).order_by('id').values_list('id','revision','is_active'))
@@ -156,8 +156,13 @@ def change_account(*, actor, target_id, token, action, operator_password, reason
         obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target)
         if obj.role not in MANAGED_ROLES:raise PermissionDenied('不能在此撤回技术管理身份。')
         if obj.role=='DENTIST' and pending_work(target):raise RuleError('仍有未闭合业务，请先安排交接；没有撤回牙医身份。')
-        obj.is_active=False;obj.can_verify_patient_relationships=False;obj.can_verify_medical_proxy_identity=False
-        obj.save(update_fields=['is_active','can_verify_patient_relationships','can_verify_medical_proxy_identity']);summary['grant_id']=obj.pk
+        obj.is_active=False;obj.can_verify_patient_relationships=False;obj.can_verify_medical_proxy_identity=False;obj.can_verify_record_copies=False
+        obj.save(update_fields=['is_active','can_verify_patient_relationships','can_verify_medical_proxy_identity','can_verify_record_copies']);summary['grant_id']=obj.pk
+    elif action == 'copy_verifier':
+        obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target,role='FRONT_DESK',scope_kind='CLINIC',is_active=True,clinic__is_active=True)
+        obj.can_verify_record_copies=bool(reviewer_enabled)
+        obj.save(update_fields=['can_verify_record_copies'])
+        summary.update(grant_id=obj.pk,copy_verifier=obj.can_verify_record_copies)
     elif action == 'medical_proxy_reviewer':
         obj=RoleAssignment.objects.select_for_update().get(pk=grant_id,user=target,role='FRONT_DESK',scope_kind='CLINIC',is_active=True,clinic__is_active=True)
         obj.can_verify_medical_proxy_identity=bool(reviewer_enabled)
@@ -173,18 +178,19 @@ def change_account(*, actor, target_id, token, action, operator_password, reason
         obj=appoint_reviewer(actor=actor,target=target,clinic_id=clinic_id,enabled=reviewer_enabled,
             reference=reviewer_reference,valid_from=reviewer_from,valid_until=reviewer_until)
         summary.update(clinic_id=obj.clinic_id,clinical_reviewer=obj.is_active)
-    elif action == 'archive_reviewer':
+    elif action in ('archive_reviewer','copy_reviewer'):
         from clinical.models import ClinicalReviewerAppointment,ClinicalAuthorityEvent
         import uuid
         obj=ClinicalReviewerAppointment.objects.select_for_update().get(user=target,clinic_id=clinic_id,is_active=True)
         if reviewer_enabled and not obj.valid_from<=timezone.now()<obj.valid_until:
             raise RuleError('机构专业审核职责尚未生效或已到期，请先核对原委任。')
-        obj.can_review_archives=bool(reviewer_enabled);obj.revision+=1
-        obj.save(update_fields=['can_review_archives','revision'])
+        field='can_review_copies' if action=='copy_reviewer' else 'can_review_archives'
+        setattr(obj,field,bool(reviewer_enabled));obj.revision+=1
+        obj.save(update_fields=[field,'revision'])
         ClinicalAuthorityEvent.objects.create(actor=actor,clinic_id=clinic_id,reviewer=obj,operation_id=uuid.uuid4(),
-            action='ARCHIVE_DUTY',resulting_state='ACTIVE' if reviewer_enabled else 'REVOKED',note=reason,
-            snapshot={'user_id':target.pk,'revision':obj.revision,'can_review_archives':obj.can_review_archives})
-        summary.update(clinic_id=clinic_id,archive_reviewer=obj.can_review_archives)
+            action='COPY_DUTY' if action=='copy_reviewer' else 'ARCHIVE_DUTY',resulting_state='ACTIVE' if reviewer_enabled else 'REVOKED',note=reason,
+            snapshot={'user_id':target.pk,'revision':obj.revision,field:getattr(obj,field)})
+        summary.update(clinic_id=clinic_id,**{action:getattr(obj,field)})
     elif action == 'reset_password':
         validate_password(new_password or '',user=target)
         target.set_password(new_password);target.save(update_fields=['password'])

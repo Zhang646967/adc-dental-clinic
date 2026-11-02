@@ -1,0 +1,23 @@
+{
+  "er_copy_identity": {
+    "nodes": 5,
+    "edges": 9,
+    "width": 554,
+    "height": 632,
+    "minPrintedFontPt": 11.461299638989171
+  },
+  "er_copy_scope": {
+    "nodes": 5,
+    "edges": 4,
+    "width": 538,
+    "height": 508,
+    "minPrintedFontPt": 11.802156133828998
+  },
+  "er_copy_delivery": {
+    "nodes": 4,
+    "edges": 4,
+    "width": 386,
+    "height": 483,
+    "minPrintedFontPt": 16.449637305699483
+  }
+}

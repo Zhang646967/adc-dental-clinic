@@ -1,5 +1,7 @@
 # ADC 牙科连锁运营管理系统
 
+**C3.3B发布准备：病历副本申请、身份与用途核验、独立审核及受控领取。** [执行进度](docs/evidence_c33b/README.md) · [操作指南](docs/C33B_RECORD_COPY_GUIDE.md) · [WorkBuddy新患者页任务](docs/WORKBUDDY_C33B_TASK.md)。原18000仍为上一已验收版本；本批课程报告、完整CI、恢复和保护更新完成后另行收口。
+
 **C3.3A已交付：病历归档、独立医务审核和追加补正。** [当前准确版本与发布进度](docs/evidence_c33a/README.md) · [使用入口](docs/C33_ARCHIVE_GUIDE.md) · [WorkBuddy本轮边界](docs/WORKBUDDY_C33A_STATUS.md)。准确完整CI通过1,164源规则／2,272项PG；原本机已保护更新，账号、原业务和配置保留。本轮无新小程序页面，不重复已通过的患者场景。
 
 **前一版本本地交付：患者收退款总额、逐笔记录与历史账单核对。** [准确CI与保护交付](docs/evidence_patient_cash/README.md) · [WorkBuddy新费用页任务](docs/WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。本机已更新；费用、分页与隔离工具回传已核对收口，历史版本深链通过，原生picker手势及设备／手机单独待验收。[回传审核](docs/WORKBUDDY_C32C1_REVIEW.md)。

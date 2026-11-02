@@ -71,6 +71,20 @@ async function signOut() {
   await request('logout/', 'POST'); reset(); getApp().globalData.review = null;getApp().globalData.bookingIntent=null;
 }
 function sessionInfo() { return session; }
+function downloadRecordCopy(ticket) {
+  const requestedEpoch=epoch;
+  const jar=Object.keys(cookies).map(k=>`${k}=${cookies[k]}`).join('; ');
+  return new Promise((resolve,reject)=>{
+    wx.downloadFile({url:`${config.apiBase}/api/mini/v1/record-copies/download/?ticket=${encodeURIComponent(ticket)}`,
+      header:{Cookie:jar},success(response){
+        if(requestedEpoch!==epoch || response.statusCode!==200){
+          if(response.tempFilePath)wx.getFileSystemManager().unlink({filePath:response.tempFilePath,fail(){}});
+          reject(new Error(requestedEpoch!==epoch?'账号或就诊人已变化，请重新核对本申请。':'暂时无法领取，请重新读取申请；若权限或期限变化，请联系门店。'));return;
+        }
+        resolve(response.tempFilePath);
+      },fail(){reject(new Error('文件传输中断，请从原申请重新领取。原办理历史保留。'));}});
+  });
+}
 function showSubject(page){
   page.setData({patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated});
 }
@@ -78,4 +92,4 @@ async function selectSubject(subject){
   const next=await request('patients/select/','POST',{subject});
   getApp().globalData.review=null;return next;
 }
-module.exports = {request, bootstrap, signIn, localSignIn, signOut, sessionInfo, reset, showSubject, selectSubject};
+module.exports = {request, bootstrap, signIn, localSignIn, signOut, sessionInfo, reset, showSubject, selectSubject, downloadRecordCopy};

@@ -25,7 +25,8 @@
     "pages/plan/index",
     "pages/invoice/index",
     "pages/consent/index",
-    "pages/medical-authorizations/index"
+    "pages/medical-authorizations/index",
+    "pages/record-copies/index"
   ],
   "window": {
     "navigationBarTitleText": "ADC口腔",

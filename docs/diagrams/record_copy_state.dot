@@ -1,0 +1,29 @@
+digraph State { graph [rankdir=TB,bgcolor="white",pad="0.35",nodesep="0.35",ranksep="0.65"];
+node [shape=box,style="rounded,filled",fillcolor="#edf4f0",color="#345e56",fontname="Noto Sans CJK SC",fontsize=15,margin="0.16,0.12"];
+edge [color="#345e56",fontname="Noto Sans CJK SC",fontsize=12,arrowsize=0.7];
+
+pending [label="待身份与用途核验\n本人申请／前台登记专项代理"];
+info [label="待补充材料\n原申请及办理历史保留",fillcolor="#fff3e6"];
+review [label="待指定独立医务审核\n核验本用途、领取人及准确来源"];
+approved [label="通过准确范围，待生成"];
+failed [label="生成失败待处置\n原任务与安全分类保留",fillcolor="#fff3e6"];
+ready [label="固定副本就绪，可领取\n不开放员工归档包"];
+delivered [label="已记录文件交付响应\n不推定已阅读"];
+terminal [label="未通过／申请人撤回／领取撤销\n原文件、意见及历史保留",fillcolor="#fff3e6"];
+expiry [shape=note,label="领取期限或权限变化时拒绝新领取\n到期为读取判断，不另造数据库状态"];
+pending -> info [label="退回补充"];
+info -> pending [label="申请人明确补充后再提交"];
+pending -> review [label="有专项职责前台核验通过"];
+review -> info [label="退回材料重新核验"];
+review -> approved [label="另一名指定医师批准"];
+approved -> ready [label="快照投影、固定文件与回执原子保存"];
+approved -> failed [label="生成异常或依据变化"];
+failed -> approved [label="依据有效，前台明确重试"];
+ready -> delivered [label="原账号确认并请求文件"];
+delivered -> delivered [label="重新核权后重复领取"];
+pending -> terminal [label="拒绝或明确撤回"];
+review -> terminal [label="独立不通过或撤回"];
+ready -> terminal [label="停止后续领取"];
+delivered -> terminal [label="撤销后续领取"];
+ready -> expiry [style=dashed,arrowhead=none];
+}

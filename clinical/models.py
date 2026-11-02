@@ -11,6 +11,7 @@ class ClinicalReviewerAppointment(models.Model):
     valid_until = models.DateTimeField()
     is_active = models.BooleanField(default=True)
     can_review_archives = models.BooleanField(default=False)
+    can_review_copies = models.BooleanField(default=False)
     revision = models.PositiveIntegerField(default=0)
     appointed_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, related_name='+')
     appointed_at = models.DateTimeField(auto_now_add=True)
@@ -156,3 +157,5 @@ from clinical.consent_models import MedicalConsent, ConsentVersion, ConsentEvent
 
 from clinical.preflight_models import TreatmentControlPolicy, ClinicalConsentRule, TreatmentPreflight, ProcedureGap, ProcedureGapReview
 from clinical.archive_models import ClinicalArchive, ArchiveSubmission, ArchivePackage, ArchiveAmendment, ArchiveEvent
+
+from clinical.copy_models import RecordCopyRequest, RecordCopyItem, RecordCopyFile, RecordCopyEvent

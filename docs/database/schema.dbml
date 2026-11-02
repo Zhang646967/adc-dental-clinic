@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 162 ORM tables; django_migrations is a framework migration journal.
+// All 166 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -565,6 +565,7 @@ Table adc_clinical_reviewer {
   valid_until "timestamp with time zone" [not null]
   is_active "boolean" [not null]
   can_review_archives "boolean" [not null]
+  can_review_copies "boolean" [not null]
   revision "integer" [not null]
   appointed_by_id "bigint" [not null]
   appointed_at "timestamp with time zone" [not null]
@@ -1800,6 +1801,63 @@ Table adc_reconciliation_match {
   invalidated_at "timestamp with time zone" [null]
 }
 
+Table adc_record_copy_event {
+  id "bigint" [pk, not null]
+  request_id "bigint" [not null]
+  actor_id "bigint" [null]
+  operation_id "uuid" [unique, not null]
+  action "character varying(24)" [not null]
+  snapshot "jsonb" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_record_copy_file {
+  id "bigint" [pk, not null]
+  request_id "bigint" [unique, not null]
+  pdf "bytea" [not null]
+  sha256 "character varying(64)" [not null]
+  manifest "jsonb" [not null]
+  renderer "character varying(80)" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_record_copy_item {
+  id "bigint" [pk, not null]
+  request_id "bigint" [not null]
+  visit_id "bigint" [not null]
+  package_id "bigint" [null]
+  sections "jsonb" [not null]
+  indexes {
+    (request_id, visit_id) [unique, name: 'copy_one_visit_scope']
+  }
+}
+
+Table adc_record_copy_request {
+  id "bigint" [pk, not null]
+  patient_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  recipient_id "bigint" [not null]
+  created_by_id "bigint" [not null]
+  kind "character varying(12)" [not null]
+  purpose "character varying(500)" [not null]
+  recipient_name "character varying(80)" [not null]
+  created_at "timestamp with time zone" [not null]
+  state "character varying(12)" [not null]
+  revision "integer" [not null]
+  verified_by_id "bigint" [null]
+  verified_at "timestamp with time zone" [null]
+  verification "jsonb" [not null]
+  identity_snapshot "jsonb" [not null]
+  assigned_reviewer_id "bigint" [null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  approval "jsonb" [not null]
+  pickup_until "timestamp with time zone" [null]
+  patient_message "character varying(500)" [not null]
+  generation_error "character varying(40)" [not null]
+  attempts "integer" [not null]
+}
+
 Table adc_resource_action {
   id "bigint" [pk, not null]
   clinic_id "bigint" [not null]
@@ -1892,6 +1950,7 @@ Table adc_role_assignment {
   is_active "boolean" [not null]
   can_verify_patient_relationships "boolean" [not null]
   can_verify_medical_proxy_identity "boolean" [not null]
+  can_verify_record_copies "boolean" [not null]
 }
 
 Table adc_schedule_plan {
@@ -2664,6 +2723,19 @@ Ref: adc_reconciliation_match.invalidated_by_id > adc_user.id
 Ref: adc_reconciliation_match.line_id > adc_statement_line.id
 Ref: adc_reconciliation_match.prepared_by_id > adc_user.id
 Ref: adc_reconciliation_match.reviewed_by_id > adc_user.id
+Ref: adc_record_copy_event.request_id > adc_record_copy_request.id
+Ref: adc_record_copy_event.actor_id > adc_user.id
+Ref: adc_record_copy_file.request_id - adc_record_copy_request.id
+Ref: adc_record_copy_item.package_id > adc_archive_package.id
+Ref: adc_record_copy_item.request_id > adc_record_copy_request.id
+Ref: adc_record_copy_item.visit_id > adc_visit.id
+Ref: adc_record_copy_request.assigned_reviewer_id > adc_clinical_reviewer.id
+Ref: adc_record_copy_request.clinic_id > adc_clinic.id
+Ref: adc_record_copy_request.created_by_id > adc_user.id
+Ref: adc_record_copy_request.patient_id > adc_patient.id
+Ref: adc_record_copy_request.recipient_id > adc_user.id
+Ref: adc_record_copy_request.reviewed_by_id > adc_user.id
+Ref: adc_record_copy_request.verified_by_id > adc_user.id
 Ref: adc_resource_action.actor_id > adc_user.id
 Ref: adc_resource_action.clinic_id > adc_clinic.id
 Ref: adc_resource_binding.asset_id - adc_equipment_asset.id

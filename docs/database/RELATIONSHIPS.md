@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-476条实际SQL外键，其中475条对应ORM单列关系，1条为账单同次就诊复合外键。
+489条实际SQL外键，其中488条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -390,6 +390,19 @@
 | adc_reconciliation_match | line_id | adc_statement_line | id |
 | adc_reconciliation_match | prepared_by_id | adc_user | id |
 | adc_reconciliation_match | reviewed_by_id | adc_user | id |
+| adc_record_copy_event | request_id | adc_record_copy_request | id |
+| adc_record_copy_event | actor_id | adc_user | id |
+| adc_record_copy_file | request_id | adc_record_copy_request | id |
+| adc_record_copy_item | package_id | adc_archive_package | id |
+| adc_record_copy_item | request_id | adc_record_copy_request | id |
+| adc_record_copy_item | visit_id | adc_visit | id |
+| adc_record_copy_request | assigned_reviewer_id | adc_clinical_reviewer | id |
+| adc_record_copy_request | clinic_id | adc_clinic | id |
+| adc_record_copy_request | created_by_id | adc_user | id |
+| adc_record_copy_request | patient_id | adc_patient | id |
+| adc_record_copy_request | recipient_id | adc_user | id |
+| adc_record_copy_request | reviewed_by_id | adc_user | id |
+| adc_record_copy_request | verified_by_id | adc_user | id |
 | adc_resource_action | actor_id | adc_user | id |
 | adc_resource_action | clinic_id | adc_clinic | id |
 | adc_resource_binding | asset_id | adc_equipment_asset | id |
