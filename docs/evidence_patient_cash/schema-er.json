@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "application_migrations": 75,
+  "all_75_prior_migration_bytes_preserved": true,
+  "sql_tables": 158,
+  "orm_models": 157,
+  "sql_foreign_keys": 451,
+  "triggers": 128,
+  "er_views": 38,
+  "full_schema_equal_to_original_and_completed_medical_environment": true,
+  "new_persistent_entities": 0,
+  "patient_invoice_cash": "READONLY_INVOICE_CASHENTRY_PROJECTION_NOT_A_NEW_TABLE"
+}

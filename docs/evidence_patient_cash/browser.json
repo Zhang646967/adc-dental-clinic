@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+  "checks": [
+    "Self-only website displays posted gross totals, current net and dates without staff/channel fields",
+    "Real website pagination20/20/4 and final-page controls",
+    "Historical invoice keeps original charge while cash clearly refers to current bill",
+    "Website375/390/430 and200percent without horizontal overflow",
+    "Website keyboard navigation and screenshot",
+    "Frozen actual native API agrees with website and excludes pending/rejected records",
+    "Medical-only proxy still cannot read invoice or cash history",
+    "Guardian medical authority still grants no invoice history",
+    "Cross-patient paginated cash read denied",
+    "Actual frozen native Page handlers plus realHTTP read, paginate and change bill version"
+  ],
+  "read_latency": {
+    "requests": 30,
+    "p95_ms": 39.898375000000215,
+    "scope": "Sequential local frozen invoice reads, not concurrent capacity acceptance"
+  },
+  "js_errors": 0,
+  "official_tool": "PENDING_WORKBUDDY",
+  "phone": "NOT_RUN"
+}

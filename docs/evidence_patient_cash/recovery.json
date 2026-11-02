@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "phase": "original",
+      "passed": true,
+      "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+      "encrypted_backup": true,
+      "empty_database_same_version_migration_restore": true,
+      "business_groups_equal_before_auth_invalidation": 155,
+      "all_images_versions_permissions_and_financial_facts_equal": true,
+      "full_observed_schema_equal": true,
+      "elapsed_seconds": 24.926,
+      "general_equivalent_ddl_comparator_limit_retained": true,
+      "configuration_file_key_check": "PASS_READ_ONLY_FILE_UID10001"
+    },
+    {
+      "phase": "populated",
+      "passed": true,
+      "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+      "encrypted_backup": true,
+      "empty_database_same_version_migration_restore": true,
+      "business_groups_equal_before_auth_invalidation": 155,
+      "all_images_versions_permissions_and_financial_facts_equal": true,
+      "full_observed_schema_equal": true,
+      "elapsed_seconds": 24.38,
+      "general_equivalent_ddl_comparator_limit_retained": true,
+      "configuration_file_key_check": "NOT_APPLICABLE_NO_WECHAT_SECRET_IN_ISOLATED_FINANCIAL_ENVIRONMENT"
+    },
+    {
+      "phase": "original-after",
+      "passed": true,
+      "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+      "encrypted_backup": true,
+      "empty_database_same_version_migration_restore": true,
+      "business_groups_equal_before_auth_invalidation": 155,
+      "all_images_versions_permissions_and_financial_facts_equal": true,
+      "full_observed_schema_equal": true,
+      "elapsed_seconds": 22.436,
+      "general_equivalent_ddl_comparator_limit_retained": true,
+      "configuration_file_key_check": "PASS_READ_ONLY_FILE_UID10001"
+    }
+  ],
+  "method": "Same-version migration-built empty PostgreSQL, raw facts and complete observed schema compared before invalidating unfinished authentication challenges.",
+  "general_equivalent_ddl_comparator_limit_retained": true
+}

@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "original_business_groups": 155,
+  "all_old_rows_password_hashes_wechat_binding_and_history_retained": true,
+  "original_database_container_and_volume_retained": true,
+  "original_private_configuration_bytes_and_rc_tag_retained": true,
+  "original_no_new_clinical_financial_proxy_or_rule_fixtures": true,
+  "isolated_previous_medical_environment_unchanged": true,
+  "isolated_new_financial_examples_created_by_normal_business_commands": true,
+  "all_75_migration_bytes_retained": true,
+  "new_tables": 0,
+  "new_grants": 0,
+  "prior_operational_observations_encrypted_and_retained": true,
+  "post_update_six_fresh_conditions": "HEALTHY",
+  "web_secret": "UNCHANGED_READ_ONLY_FILE_UID10001_NO_NONEMPTY_ENV_VALUE",
+  "worker_and_monitor_have_no_wechat_secret": true,
+  "installed_seven_roles_readonly_smoke_checks": 17,
+  "post_update_encrypted_independent_restore": "PASS",
+  "teacher_instance_and_old_verification_ports": "UNCHANGED"
+}

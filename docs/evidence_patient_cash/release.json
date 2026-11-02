@@ -1,0 +1,113 @@
+{
+  "stage": "C3.2C1 patient posted receipt/refund display",
+  "application_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+  "image": "sha256:4fe36c228fd7bd75bdbbe0cdea0dd5ca4cd40b86b0689f04a7972cb5b64ea7c1",
+  "architecture": "arm64",
+  "observed_at": "2026-11-02T02:16:38.363427+00:00",
+  "application_ci": {
+    "tested_source_commit": "0106de1f7c26a3ba1840865149de872943ca93f5",
+    "head_sha": "0106de1f7c26a3ba1840865149de872943ca93f5",
+    "conclusion": "success",
+    "status": "completed",
+    "validated_source_log_verified": true,
+    "run_id": 41372429038,
+    "job_id": 125045536362,
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41372429038",
+    "source_checks": 1164,
+    "postgresql_tests": 2234,
+    "actual_test_summaries": [
+      {
+        "tests": 1164,
+        "seconds": 20.235
+      },
+      {
+        "tests": 2234,
+        "seconds": 2583.899
+      }
+    ],
+    "log_source_line": "2026-11-02T01:25:49.5433436Z ADC_TESTED_SOURCE=0106de1f7c26a3ba1840865149de872943ca93f5",
+    "log_characters": 2132248
+  },
+  "local_immutable_dependency_base": {
+    "requirements_byte_equal": true,
+    "base_image": "sha256:a86166e912820ac02f3a5f4da1f57144c84b55b357de62d5e135c8e1f9938be6",
+    "scope": "Local build from an accepted dependency image; no claim of fresh local dependency download or cloud amd64 acceptance."
+  },
+  "implementation": {
+    "readonly_patient_projection": true,
+    "posted_receipt_and_refund_totals": true,
+    "current_balance_and_paged_transactions": true,
+    "maximum_rows_per_page": 20,
+    "bounded_queries": 3,
+    "current_cash_distinct_from_historical_bill": true,
+    "existing_insurance_personal_account_fund_and_pending_notice_retained": true,
+    "patient_self_only_permission_unchanged": true,
+    "payment_posting_approval_and_clinical_commands_unchanged": true,
+    "new_external_write_api": false,
+    "new_schema": false,
+    "authentication_chain_changed": false
+  },
+  "verification": {
+    "new_postgresql_tests": 11,
+    "prior_targeted": {
+      "tests": 72,
+      "seconds": 64.359,
+      "scope": "Earlier candidate-specific run, not a second final full suite"
+    },
+    "final_targeted": {
+      "tests": 20,
+      "seconds": 17.15
+    },
+    "native_source_checks": 291,
+    "new_actual_page_controlled_transport_cases": 6,
+    "frozen_browser_and_native_real_http_checks": 10,
+    "installed_seven_role_smoke_checks": 17,
+    "website_widths": [
+      375,
+      390,
+      430
+    ],
+    "website_text_zoom_percent": 200,
+    "website_keyboard": true,
+    "local_sequential_read_p95_ms": 39.898375000000215,
+    "capacity": "NO_NEW_30MIN_RUN_FOR_THIS_READONLY_INCREMENT; previous dated medical workload retained separately"
+  },
+  "prior_patient_medical_tool_batch": "USER_RELAYED_ALL_SIX_PASS_CLOSED_NOT_REPEATED",
+  "workbuddy": {
+    "new_fee_display": "PENDING_NEW_OFFICIAL_TOOL_REGRESSION",
+    "local_backend_port": 18362,
+    "frozen_pages": 26,
+    "package_sha256": "61d20f4aec84f74fc0a181195335dc871a7cd5450442781734e3b1ea8eb9ceba",
+    "checked_files": 88,
+    "responsibility": "Import/necessary compile and read-only patient-tool scenarios only; no backend, financial writes or platform upload",
+    "real_wechat_relogin": "NOT_REPEATED_FOR_NON_AUTH_CHANGE"
+  },
+  "report": {
+    "pages": 266,
+    "business_use_cases": 133,
+    "shared_case": "SF-01",
+    "tables": 152,
+    "figures": 78,
+    "actual_er_views": 38,
+    "toc_entries": 104,
+    "extended_case": "SU-113",
+    "filenames_unchanged": true
+  },
+  "next_stage": "C3.3_ARCHIVE_AND_CONTROLLED_COPY_DESIGN_DRAFT_NOT_IMPLEMENTED",
+  "pending": [
+    "Mini-program375/430/font matrix",
+    "Physical phone",
+    "Second real WeChat identity",
+    "Formal platform qualifications/teacher experience",
+    "Fixed cloud HTTPS/host acceptance",
+    "Professional clinical approval",
+    "Reliable electronic signature",
+    "Real SMS"
+  ],
+  "retained_limits": [
+    "Windows-data recovery UNRESOLVED",
+    "Historical UNKNOWN/UNDETERMINED",
+    "General equivalent-DDL comparison limitation"
+  ],
+  "public_evidence": "Summary only. Individual clinical identifiers/content, financial course cases and credentials remain in local private material."
+}
