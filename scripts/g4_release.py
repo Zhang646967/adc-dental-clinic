@@ -1,9 +1,11 @@
-"""Same-schema image upgrades. Persistent data is never restored or reseeded."""
+"""Release maintenance. Persistent data is never restored or reseeded."""
 from datetime import datetime, timezone
 import json
 from pathlib import Path
 import re
 import shutil
+import subprocess
+import tempfile
 import tarfile
 import time
 
@@ -123,7 +125,163 @@ def start_candidate(course):
     return result
 
 
-def change_release(course, *, recipient_file, expected_current, artifacts=None, to_source=None, age='age'):
+MIGRATE_FORWARD = """
+import sys
+import django
+from django.core.management import call_command
+from django.db import connection
+from django.db.migrations.executor import MigrationExecutor
+
+django.setup()
+executor = MigrationExecutor(connection)
+executor.loader.check_consistent_history(connection)
+plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+approved = set(sys.argv[2:])
+if any(backwards or not migration.atomic or
+       migration.app_label + '.' + migration.name not in approved
+       for migration, backwards in plan):
+    raise SystemExit('Only reviewed, atomic forward migrations are permitted.')
+if sys.argv[1] == 'apply':
+    call_command('migrate', interactive=False)
+"""
+
+
+def migration_names(files):
+    return {Path(name).parts[0] + '.' + Path(name).stem for name in files}
+
+
+def applied_migrations(course):
+    return set(course.dc('exec', '-T', 'db', 'psql', '--no-psqlrc', '-U', 'adc_g4_admin',
+        '-d', 'adc_rc_demo', '-At', '-c',
+        "SELECT app || '.' || name FROM django_migrations "
+        "WHERE app NOT IN ('auth','contenttypes','sessions','admin')").decode().splitlines())
+
+
+def check_upgrade_space(course):
+    size = int(course.dc('exec', '-T', 'db', 'psql', '--no-psqlrc', '-U', 'adc_g4_admin',
+                        '-d', 'adc_rc_demo', '-At', '-c', 'SELECT pg_database_size(current_database())'))
+    pg_kib = int(course.dc('exec', '-T', 'db', 'df', '-Pk', '/var/lib/postgresql/data')
+                 .decode().splitlines()[-1].split()[3])
+    minimum = 2 * size + 128 * 1024 * 1024
+    if min(shutil.disk_usage(course.bundle).free, pg_kib * 1024) < minimum:
+        raise ValueError('Insufficient free space for migration and the encrypted checkpoint.')
+
+
+def pending_additive(bundle):
+    path = bundle / 'private/release-operation.json'
+    if path.exists():
+        state = json.loads(private_file(path).read_text())
+        if state.get('mode') == 'ADDITIVE' and state['status'] not in ('UPGRADED', 'FAILED_IMAGE_REVERTED'):
+            return state
+    return None
+
+
+def schema_step(course, image, source, approved, *, apply=False):
+    name = course.plan['project'] + '_release_schema'
+    running = run(course.docker + ['ps', '-a', '--filter', 'name=^/' + name + '$',
+                                   '--format', '{{.Names}}'], course.log)
+    if running.strip():
+        raise ValueError('Previous migration container still exists; inspect it before resuming.')
+    # Use the existing maintenance role without switching the live configuration
+    # or booting dependencies against a partially upgraded schema.
+    with tempfile.TemporaryDirectory(dir=course.bundle / 'private') as folder:
+        override = Path(folder) / 'schema.json'
+        atomic_text(override, json.dumps({'services': {'schema': {'image': image}}}))
+        run(course.command + ['-f', str(override), '--profile', 'maintenance', 'run',
+            '--rm', '-T', '--no-deps', '--name', name, '-e', 'ADC_SOURCE_COMMIT=' + source,
+            'schema', 'python', '-c', MIGRATE_FORWARD, 'apply' if apply else 'check',
+            *sorted(approved)], course.log, timeout=600 if apply else 90)
+
+
+def retain_checkpoint(course, backup):
+    checkpoint = private_directory(course.bundle / 'private/release-checkpoints')
+    for suffix in ('', '.json'):
+        original = private_file(course.bundle / 'backups' / (backup + suffix))
+        retained = checkpoint / original.name
+        if not retained.exists():
+            shutil.copyfile(original, retained)
+            retained.chmod(0o600)
+        if digest(private_file(retained)) != digest(original):
+            raise ValueError('Existing release checkpoint differs.')
+    return digest(checkpoint / backup)
+
+
+def additive_release(course, *, source, image, old_source, old_image, current, target,
+                     expected_current, recipient_file, age, state):
+    path = course.bundle / 'private/release-operation.json'
+    def record(status):
+        state['status'] = status
+        atomic_text(path, json.dumps(state, indent=2) + '\n')
+
+    before, after = migration_names(current), migration_names(target)
+    if not before or not current.items() < target.items():
+        raise ValueError('Additive upgrade must retain every old migration byte and append new files.')
+    new = after - before
+    identity = course.database_identity()
+    applied = applied_migrations(course)
+    if state:
+        if (state['from_source'], state['to_source'], state['to_image'], state['database_identity']) != (
+                expected_current, source, image, identity):
+            raise ValueError('Resume requires the same original commit, target artifact and database.')
+        if not before <= applied <= after or (not state.get('backup_sha256') and applied != before):
+            raise ValueError('The actual migration history differs from the interrupted release.')
+        if state.get('backup_sha256'):
+            archive = course.bundle / 'private/release-checkpoints' / state['backup']
+            if digest(private_file(archive)) != state['backup_sha256']:
+                raise ValueError('The original encrypted checkpoint is missing or changed.')
+    else:
+        if applied != before or course.status()['status'] != 'ORIGIN_READY':
+            raise ValueError('The running version and exact applied migrations must match before maintenance.')
+        state = dict(mode='ADDITIVE', from_source=old_source, from_image=old_image,
+                     to_source=source, to_image=image, database_identity=identity,
+                     database_restored=False, added_migrations=sorted(new),
+                     started_at=datetime.now(timezone.utc).isoformat())
+    check_upgrade_space(course)
+    # The plan is checked before touching a healthy running service; it is
+    # rechecked immediately before execution and when resuming a partial run.
+    schema_step(course, image, source, new)
+    record('MAINTENANCE')
+    course.dc('stop', '--timeout', '30', 'gateway', timeout=45)
+    course.dc('stop', '--timeout', '30', 'web', 'notification-worker', 'operations', timeout=90)
+    try:
+        if not state.get('backup_sha256'):
+            backup = course.backup(recipient_file, age)
+            state['backup'] = backup['name']
+            state['backup_sha256'] = retain_checkpoint(course, state['backup'])
+        # Write this boundary before Django can commit any migration. Even if
+        # the client loses the reply, no earlier image is restarted thereafter.
+        state['migration_started'] = True
+        record('MIGRATING')
+        if applied_migrations(course) != after:
+            schema_step(course, image, source, new, apply=True)
+        if applied_migrations(course) != after:
+            raise RuntimeError('Candidate migration history is incomplete.')
+        record('SCHEMA_APPLIED')
+        course.plan = update_plan(course.bundle, source, image, controller=source)
+        result = start_candidate(course)
+    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError):
+        course.dc('stop', '--timeout', '30', 'gateway', 'web', 'notification-worker', 'operations', timeout=90)
+        if state.get('migration_started'):
+            record('FAILED_MAINTENANCE_REQUIRED')
+        else:
+            try:
+                # The original schema and configuration were never switched.
+                # A failed backup remains visible in operations and must not
+                # prevent the unchanged original web service from returning.
+                course.start_runtime()
+                if course.status()['status'] != 'ORIGIN_READY':
+                    raise RuntimeError('Original HTTPS service did not return.')
+                record('FAILED_IMAGE_REVERTED')
+            except (OSError, RuntimeError, ValueError, subprocess.SubprocessError):
+                course.dc('stop', '--timeout', '30', 'gateway', timeout=45)
+                record('FAILED_MAINTENANCE_REQUIRED')
+        raise
+    state['completed_at'] = datetime.now(timezone.utc).isoformat()
+    record('UPGRADED')
+    return {**state, 'release': result, 'public_acceptance_executed': False}
+
+
+def change_release(course, *, recipient_file, expected_current, artifacts=None, to_source=None, age='age', allow_additive=False):
     if bool(artifacts) == bool(to_source):
         raise ValueError('Choose an upgrade artifact or one previously accepted rollback source.')
     with exclusive(course.bundle / 'private/release.lock'):
@@ -131,6 +289,9 @@ def change_release(course, *, recipient_file, expected_current, artifacts=None, 
         course.plan = json.loads(private_file(course.bundle / 'plan.json').read_text())
         old_source, old_image = course.plan['requested_source_commit'], course.plan['images']['app']
         old_versions = versions(course.plan)
+        pending = pending_additive(course.bundle)
+        if pending and not (artifacts and allow_additive):
+            raise ValueError('An additive migration needs the original upgrade command to resume.')
         if artifacts:
             meta = inspect_artifacts(course, artifacts)
             source, image = meta['source_commit'], meta['app_image']
@@ -139,14 +300,23 @@ def change_release(course, *, recipient_file, expected_current, artifacts=None, 
             image = versions(course.plan).get(source)
             if image is None:
                 raise ValueError('Rollback source is not in this deployment history.')
-        if (source, image) == (old_source, old_image):
+        if not pending and (source, image) == (old_source, old_image):
             return {'status': 'ALREADY_ACTIVE', 'release': course.status()}
         if source in old_versions and old_versions[source] != image:
             raise ValueError('An accepted source is already pinned to a different image.')
-        if old_source != expected_current:
+        if not pending and old_source != expected_current:
             raise ValueError('Running release changed; inspect status before another upgrade.')
-        if image_migrations(course, old_image) != image_migrations(course, image):
-            raise ValueError('This release command supports identical migrations only; no automatic schema downgrade.')
+        if pending and (source, image, expected_current) != (
+                pending['to_source'], pending['to_image'], pending['from_source']):
+            raise ValueError('Resume requires the same original commit and exact target artifact.')
+        current = image_migrations(course, pending['from_image'] if pending else old_image)
+        target = image_migrations(course, image)
+        if pending or current != target:
+            if not (artifacts and allow_additive):
+                raise ValueError('Changed migrations require an explicitly approved additive upgrade; downgrade is disabled.')
+            return additive_release(course, source=source, image=image, old_source=old_source,
+                old_image=old_image, current=current, target=target, expected_current=expected_current,
+                recipient_file=recipient_file, age=age, state=pending)
         state_path = course.bundle / 'private/release-operation.json'
         state = {'from_source': old_source, 'to_source': source, 'database_restored': False,
                  'started_at': datetime.now(timezone.utc).isoformat(), 'status': 'MAINTENANCE'}

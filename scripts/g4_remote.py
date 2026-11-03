@@ -223,7 +223,7 @@ class Remote:
         if retained != recipient:
             raise ValueError('Recovery recipient differs from the server; verify the recovery key before maintenance.')
 
-    def upgrade(self, artifacts, recipient_file, expected_current, age='age'):
+    def upgrade(self, artifacts, recipient_file, expected_current, age='age', *, allow_additive=False):
         artifacts = private_directory(artifacts)
         meta = json.loads(private_file(artifacts / 'build.json').read_text())
         if meta['architecture'] != 'amd64' or not re.fullmatch('[0-9a-f]{40}', meta['source_commit']):
@@ -242,7 +242,8 @@ class Remote:
         # remains stable even when the active application source is changed.
         result = self.operation('upgrade', ['--artifacts', target, '--recipient-file',
             self.remote_bundle + '/private/backup-recipient.txt', '--expected-current-commit', expected_current,
-            '--age', age], timeout=900)
+            '--age', age] + (['--allow-additive-migrations'] if allow_additive else []),
+            timeout=1800 if allow_additive else 900)
         from scripts.g4_release import update_plan
         self.plan = update_plan(self.bundle, meta['source_commit'], meta['app_image'], controller=meta['source_commit'])
         return result
@@ -421,6 +422,8 @@ def main():
         command.add_argument('--expected-current-commit', required=True)
         command.add_argument('--age', default='age')
         command.add_argument('--artifacts' if action == 'upgrade' else '--to-source', required=True)
+        if action == 'upgrade':
+            command.add_argument('--allow-additive-migrations', action='store_true')
     offsite = sub.add_parser('install-offsite')
     offsite.add_argument('--config-file', required=True)
     for name in ('sync', 'install-mac-job'):
@@ -445,7 +448,8 @@ def main():
             result = remote.publish(args.artifacts, args.recipient_file,
                                     args.restore_backup, args.identity_file, args.age, args.offsite_config)
         elif args.action == 'upgrade':
-            result = remote.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age)
+            result = remote.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age,
+                                    allow_additive=args.allow_additive_migrations)
         elif args.action == 'rollback':
             result = remote.rollback(args.to_source, args.recipient_file, args.expected_current_commit, args.age)
         elif args.action == 'install-offsite':

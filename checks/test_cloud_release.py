@@ -159,6 +159,71 @@ class CloudReleaseTests(unittest.TestCase):
                 change_release(c, to_source=self.old, recipient_file='public', expected_current=self.old)
         c.dc.assert_not_called()
 
+    def test_additive_option_does_not_allow_changed_old_migration_bytes(self):
+        c = self.course()
+        with patch('scripts.g4_release.inspect_artifacts', return_value={
+                'source_commit': self.new, 'app_image': self.new_image}), patch(
+                'scripts.g4_release.image_migrations', side_effect=[
+                    {'accounts/migrations/0001.py': 'old'},
+                    {'accounts/migrations/0001.py': 'changed', 'clinical/migrations/0002.py': 'new'}]):
+            with self.assertRaisesRegex(ValueError, 'retain every old migration byte'):
+                change_release(c, artifacts='reviewed', recipient_file='public',
+                               expected_current=self.old, allow_additive=True)
+        c.dc.assert_not_called()
+        c.backup.assert_not_called()
+
+    def test_backup_failure_before_additive_ddl_reopens_original_release(self):
+        c = self.course()
+        c.backup.side_effect = RuntimeError('backup failure')
+        c.database_identity.return_value = {'volume': 'isolated'}
+        current = {'accounts/migrations/0001.py': 'old'}
+        target = current | {'clinical/migrations/0002.py': 'new'}
+        with patch('scripts.g4_release.inspect_artifacts', return_value={
+                'source_commit': self.new, 'app_image': self.new_image}), patch(
+                'scripts.g4_release.image_migrations', side_effect=[current, target]), patch(
+                'scripts.g4_release.applied_migrations', return_value={'accounts.0001'}), patch(
+                'scripts.g4_release.check_upgrade_space'), patch('scripts.g4_release.schema_step') as schema:
+            with self.assertRaisesRegex(RuntimeError, 'backup failure'):
+                change_release(c, artifacts='reviewed', recipient_file='public',
+                               expected_current=self.old, allow_additive=True)
+        c.start_runtime.assert_called_once()
+        self.assertEqual(c.plan['requested_source_commit'], self.old)
+        schema.assert_called_once()
+        self.assertFalse(schema.call_args.kwargs.get('apply', False))
+        state = json.loads((self.bundle / 'private/release-operation.json').read_text())
+        self.assertEqual(state['status'], 'FAILED_IMAGE_REVERTED')
+
+    def test_applied_additive_failure_closes_gateway_and_resumes_without_rebackup(self):
+        c = self.course()
+        c.database_identity.return_value = {'volume': 'isolated'}
+        c.dc.return_value = b''
+        c.status.return_value = {'status': 'ORIGIN_READY'}
+        current = {'accounts/migrations/0001.py': 'old'}
+        target = current | {'clinical/migrations/0002.py': 'new'}
+        before, after = {'accounts.0001'}, {'accounts.0001', 'clinical.0002'}
+        options = dict(artifacts='reviewed', recipient_file='public',
+                       expected_current=self.old, allow_additive=True)
+        with patch('scripts.g4_release.inspect_artifacts', return_value={
+                'source_commit': self.new, 'app_image': self.new_image}), patch(
+                'scripts.g4_release.image_migrations', side_effect=[current, target, current, target]), patch(
+                'scripts.g4_release.applied_migrations', side_effect=[before, before, after, after, after, after]), patch(
+                'scripts.g4_release.check_upgrade_space'), patch('scripts.g4_release.schema_step') as schema, patch(
+                'scripts.g4_release.start_candidate', side_effect=[RuntimeError('candidate'), {'status': 'ORIGIN_READY'}]) as start:
+            with self.assertRaisesRegex(RuntimeError, 'candidate'):
+                change_release(c, **options)
+            state = json.loads((self.bundle / 'private/release-operation.json').read_text())
+            self.assertEqual(state['status'], 'FAILED_MAINTENANCE_REQUIRED')
+            self.assertEqual(c.plan['requested_source_commit'], self.new)
+            self.assertIn('gateway', c.dc.call_args.args)
+            self.assertEqual(start.call_count, 1)
+            with self.assertRaisesRegex(ValueError, 'original upgrade command'):
+                change_release(c, to_source=self.old, recipient_file='public', expected_current=self.new)
+            result = change_release(c, **options)
+        self.assertEqual(result['status'], 'UPGRADED')
+        self.assertFalse(result['database_restored'])
+        c.backup.assert_called_once()
+        self.assertEqual(sum(call.kwargs.get('apply', False) for call in schema.call_args_list), 1)
+
     def interrupted_deploy(self):
         from scripts.g4_course import Course
         with patch('scripts.g4_course.docker_command', return_value=['docker', '--context', 'unit']):

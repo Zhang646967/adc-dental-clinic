@@ -184,7 +184,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     return plan
 
 
-def inspect_bundle(output, rendered=None):
+def inspect_bundle(output, rendered=None, *, resume_source=None):
     output = Path(output)
     plan = json.loads((output / 'plan.json').read_text())
     if not re.fullmatch('adc_g4_[0-9a-f]{12}', plan['project']):
@@ -199,7 +199,7 @@ def inspect_bundle(output, rendered=None):
     runtime = read_env(output / 'private/runtime.env')
     maintenance = read_env(output / 'private/maintenance.env')
     database = read_env(output / 'private/database.env')
-    if any(values.get('ADC_SOURCE_COMMIT', plan['requested_source_commit']) != plan['requested_source_commit']
+    if any(values.get('ADC_SOURCE_COMMIT', plan['requested_source_commit']) not in (plan['requested_source_commit'], resume_source)
            for values in (runtime, maintenance)):
         raise ValueError('Runtime and maintenance source identities must match the reviewed application.')
     if runtime.get('ADC_PUBLIC_HOST') != plan['host'] or maintenance.get('ADC_PUBLIC_HOST') != plan['host']:

@@ -149,9 +149,15 @@ class OriginHTTPS(http.client.HTTPSConnection):
 
 class Course:
     def __init__(self, bundle, docker='docker', context=None, *, rehearsal=False,
-                 architecture='amd64', ca_file=None):
+                 architecture='amd64', ca_file=None, resume_additive=False):
         self.bundle = Path(bundle).absolute()
-        inspect_bundle(self.bundle)
+        resume_source = None
+        if resume_additive:
+            from scripts.g4_release import pending_additive
+            operation = pending_additive(self.bundle)
+            if operation:
+                resume_source = operation['to_source']
+        inspect_bundle(self.bundle, resume_source=resume_source)
         self.plan = json.loads((self.bundle / 'plan.json').read_text())
         if (self.plan.get('mode') != 'direct_tls' or self.plan.get('access_mode') != 'course-writable'
                 or self.plan['read_only']):
@@ -199,6 +205,9 @@ class Course:
         self.dc('up', '-d', '--wait', '--wait-timeout', '90', 'db', timeout=120)
 
     def deploy(self):
+        from scripts.g4_release import pending_additive
+        if pending_additive(self.bundle):
+            raise ValueError('Resume the existing additive release before deploying.')
         marker = self.bundle / 'private/deployed.json'
         phase = self.bundle / 'private/deployment-phase.json'
         if marker.exists():
@@ -325,6 +334,8 @@ class Course:
             observation = self.operations()
         except (OSError, ValueError, RuntimeError):
             observation = {'state': 'UNKNOWN', 'code': 3, 'reason': 'OBSERVER_UNAVAILABLE'}
+        from scripts.g4_release import pending_additive
+        operation = pending_additive(self.bundle)
         ready = ready and observed.get('matches_plan', False)
         return {'status': 'ORIGIN_READY' if ready and tls else 'DEGRADED',
                 'project': self.plan['project'], 'source_commit': self.plan['requested_source_commit'],
@@ -335,12 +346,13 @@ class Course:
                 'course_online_readiness': 'NOT_RUN', 'last_server_backup': copies[-1]['created_at'] if copies else None,
                 'observed_application': observed, 'database_release': release,
                 'database_matches_release': database_matches,
+                'additive_operation': operation['status'] if operation else None,
                 'operations': observation, 'offsite_backup': offsite_status(self.bundle)}
 
-    def upgrade(self, artifacts, recipient_file, expected_current, age='age'):
+    def upgrade(self, artifacts, recipient_file, expected_current, age='age', *, allow_additive=False):
         from scripts.g4_release import change_release
         return change_release(self, artifacts=artifacts, recipient_file=recipient_file,
-                              expected_current=expected_current, age=age)
+                              expected_current=expected_current, age=age, allow_additive=allow_additive)
 
     def rollback(self, source, recipient_file, expected_current, age='age'):
         from scripts.g4_release import change_release
@@ -817,6 +829,7 @@ def main():
         command.add_argument('--age', default='age')
         if action == 'upgrade':
             command.add_argument('--artifacts', required=True)
+            command.add_argument('--allow-additive-migrations', action='store_true')
         else:
             command.add_argument('--to-source', required=True)
     restore = sub.add_parser('restore')
@@ -860,7 +873,8 @@ def main():
         result = build(args.artifacts, args.docker, args.context, args.architecture)
     else:
         course = Course(args.output, args.docker, args.context, rehearsal=args.rehearsal,
-                        architecture=args.architecture, ca_file=args.ca_file)
+                        architecture=args.architecture, ca_file=args.ca_file,
+                        resume_additive=getattr(args, 'allow_additive_migrations', False))
         if args.action == 'deploy':
             with exclusive(course.bundle / 'private/release.lock'):
                 result = course.deploy()
@@ -871,10 +885,14 @@ def main():
         elif args.action == 'recovery-status':
             result = course.recovery_status()
         elif args.action == 'backup':
+            from scripts.g4_release import pending_additive
             with exclusive(course.bundle / 'private/release.lock'):
+                if pending_additive(course.bundle):
+                    raise ValueError('Resume the additive release before creating a scheduled backup.')
                 result = course.backup(args.recipient_file, args.age)
         elif args.action == 'upgrade':
-            result = course.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age)
+            result = course.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age,
+                                    allow_additive=args.allow_additive_migrations)
         elif args.action == 'rollback':
             result = course.rollback(args.to_source, args.recipient_file, args.expected_current_commit, args.age)
         elif args.action == 'restore':
