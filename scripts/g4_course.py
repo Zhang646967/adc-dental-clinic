@@ -132,7 +132,7 @@ def build(artifacts, docker, context, architecture):
         run(base + ['save', image], log, output_file=stream, timeout=600)
     result = {'source_commit': revision, 'architecture': architecture, 'app_image': image,
               'source_sha256': digest(source), 'image_archive_sha256': digest(image_archive),
-              'release_inventory': inventory}
+              'release_inventory': inventory, 'wechat_mini_secret_file': True}
     atomic_text(artifacts / 'build.json', json.dumps(result, indent=2) + '\n')
     return result
 

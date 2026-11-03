@@ -25,7 +25,7 @@
 
 D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版，迁移后失败可按同一检查点继续；已核对原记录、升级后写入和加密独立恢复。服务器尚未部署。
 
-[追加迁移验收](docs/evidence_d22/README.md) · [部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
+[独立运行本机演练](docs/D23_INDEPENDENT_OPERATIONS.md) · [追加迁移验收](docs/evidence_d22/README.md) · [部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
 
 下一步完成D2.3独立运行验证，再在实际服务器公布固定访问地址。处方与药事继续按业务职责细化；部署准备与实际云端、手机及平台验收分别记录。
 

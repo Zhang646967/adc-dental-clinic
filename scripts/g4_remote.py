@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.g4_course import (BACKUP_NAME, MAX_BACKUP_BYTES, RECIPIENT, backup_inventory,
                               decrypt_backup, digest, exclusive, private_directory,
                               private_file, prune_backups, run)
-from scripts.g4_prepare import inspect_bundle
+from scripts.g4_prepare import MINI_SECRET_FILE, inspect_bundle
 from scripts.g4_mac_demo import atomic_text
 from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instant, age as recovery_age, utc_now, validate_restore, MAX_ARCHIVE
 
@@ -95,6 +95,8 @@ class Remote:
         recipient = private_file(recipient_file).read_text().strip()
         if metadata['source_commit'] != self.plan['requested_source_commit'] or metadata['architecture'] != 'amd64':
             raise ValueError('Publish requires this source commit built for amd64.')
+        if self.plan.get('wechat_mini_app_id') and metadata.get('wechat_mini_secret_file') is not True:
+            raise ValueError('Use a release package whose server controller supports the Web-only secret file.')
         if metadata['app_image'] != self.plan['images']['app'] or not RECIPIENT.fullmatch(recipient):
             raise ValueError('Reviewed application image or recipient differs.')
         for name, field in (('source.tar', 'source_sha256'), ('application.tar', 'image_archive_sha256')):
@@ -129,6 +131,8 @@ class Remote:
             tarpath = Path(folder) / 'bundle.tar'
             allowed = ['plan.json', 'compose.env', 'compose.yaml', 'nginx.conf', 'init-db.sh',
                        'private/runtime.env', 'private/maintenance.env', 'private/database.env']
+            if self.plan.get('wechat_mini_app_id'):
+                allowed.append(MINI_SECRET_FILE)
             with tarfile.open(tarpath, 'w') as archive:
                 for name in allowed:
                     path = self.bundle / name
@@ -146,6 +150,8 @@ class Remote:
                   "assert all(hashlib.file_digest((p/n).open('rb'),'sha256').hexdigest()==v for n,v in expected.items()); "
                   "[tarfile.open(p/n).extractall(p,filter='data') for n in ('source.tar','bundle.tar')]; "
                   "os.chmod(p/'.g4',0o700); os.chmod(p/'.g4/private',0o700); "
+                  "secret=p/" + repr(".g4/" + MINI_SECRET_FILE) + "; "
+                  "os.chmod(secret,0o444) if secret.is_file() else None; "
                   "[(p/'.g4'/n).mkdir(mode=0o700,exist_ok=True) for n in ('tls','backups')]; "
                   "(p/'.g4/acme/.well-known/acme-challenge').mkdir(mode=0o755,parents=True,exist_ok=True); "
                   "(p/'.g4/private/backup-recipient.txt').write_text(" + repr(recipient + '\n') + "); "

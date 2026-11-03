@@ -11,11 +11,30 @@ import os
 from pathlib import Path
 import re
 import secrets
+import stat
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from config.production_contract import validate_production_inputs
+
+MINI_SECRET_FILE = 'private/wechat-mini-app-secret'
+MINI_SECRET_TARGET = '/run/adc-wechat/mini-app-secret'
+MINI_SECRET_ENV = 'ADC_WECHAT_MINI_APP_SECRET_FILE'
+MINI_ID_ENV = 'ADC_WECHAT_MINI_APP_ID'
+
+
+def read_mini_secret(path, *, mounted=False):
+    info = path.lstat()
+    permissions = stat.S_IMODE(info.st_mode)
+    permitted = permissions == 0o444 if mounted else not (permissions & 0o077)
+    if not stat.S_ISREG(info.st_mode) or not permitted or info.st_size > 4096:
+        raise ValueError('Use a regular, private AppSecret file.')
+    value = path.read_text(encoding='utf-8').strip()
+    if not value or any(ord(c) < 33 or ord(c) > 126 for c in value):
+        raise ValueError('AppSecret file must contain one nonempty token.')
+    return value
+
 
 
 def read_env(path):
@@ -46,7 +65,8 @@ def write_env(path, values):
 
 def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
             bind_ip='127.0.0.1', http_port=80, https_port=443, mode='direct_tls',
-            access_mode='read-only', architecture='amd64', dataset='rc'):
+            access_mode='read-only', architecture='amd64', dataset='rc',
+            wechat_mini_app_id=None, wechat_mini_secret_file=None):
     output = Path(output)
     if output.name != '.g4' or output.exists() or output.is_symlink():
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
@@ -77,6 +97,13 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         raise ValueError('This first bundle uses explicit IPv4 binding; review IPv6 separately.')
     if not all(isinstance(p, int) and 1 <= p <= 65535 for p in (http_port, https_port)) or http_port == https_port:
         raise ValueError('Two distinct valid gateway ports are required.')
+    mini_secret = None
+    if wechat_mini_app_id is not None or wechat_mini_secret_file is not None:
+        if (mode != 'direct_tls' or dataset != 'course-20' or not writable
+                or not re.fullmatch(r'wx[0-9a-f]{16}', wechat_mini_app_id or '')
+                or wechat_mini_secret_file is None):
+            raise ValueError('Provide the mini-program AppID and private AppSecret for direct course HTTPS.')
+        mini_secret = read_mini_secret(Path(wechat_mini_secret_file))
     # Validate before creating any files. Secrets are generated separately from
     # the Mac configuration and are never printed.
     project = 'adc_g4_' + secrets.token_hex(6)
@@ -149,6 +176,19 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
                                     'operations': '128m', 'gateway': '128m'}.items():
                 compose = compose.replace('  ' + service + ':\n',
                                           '  ' + service + ':\n    mem_limit: ' + memory + '\n')
+        if mini_secret is not None:
+            secret_path = output / MINI_SECRET_FILE
+            write_private(secret_path, mini_secret + '\n')
+            # The Docker runtime UID can read the mounted inode. The host
+            # directory enclosing it is private and the mount is Web-only.
+            secret_path.chmod(0o444)
+            compose = compose.replace('  web:\n', '  web:\n'
+                '    environment:\n'
+                f'      {MINI_ID_ENV}: {wechat_mini_app_id}\n'
+                f'      {MINI_SECRET_ENV}: {MINI_SECRET_TARGET}\n', 1)
+            compose = compose.replace('volumes: ["monitor_observation:/app/operations/monitor:ro"]',
+                'volumes: ["monitor_observation:/app/operations/monitor:ro", '
+                f'"./{MINI_SECRET_FILE}:{MINI_SECRET_TARGET}:ro"]', 1)
         (output / 'compose.yaml').write_text(compose)
     os.chmod(output / 'init-db.sh', 0o555)
     nginx_template = 'nginx.mac-tunnel.template.conf' if mode in ('mac_tunnel','teacher_tunnel') else 'nginx.template.conf'
@@ -171,6 +211,8 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'file_sha256': {name: hashlib.sha256((output / name).read_bytes()).hexdigest()
                         for name in ('compose.yaml', 'init-db.sh', 'nginx.conf')},
     }
+    if mini_secret is not None:
+        plan['wechat_mini_app_id'] = wechat_mini_app_id
     if mode in ('mac_tunnel','teacher_tunnel'):
         plan['pending'] = ['Live free tunnel and public certificate verification',
                            'Public browser permissions/read-only/CSRF checks',
@@ -199,6 +241,17 @@ def inspect_bundle(output, rendered=None, *, resume_source=None):
     runtime = read_env(output / 'private/runtime.env')
     maintenance = read_env(output / 'private/maintenance.env')
     database = read_env(output / 'private/database.env')
+    mini_id = plan.get('wechat_mini_app_id')
+    if mini_id is not None:
+        private = output / 'private'
+        if (not re.fullmatch(r'wx[0-9a-f]{16}', mini_id) or plan.get('mode') != 'direct_tls'
+                or plan.get('dataset') != 'course-20' or private.is_symlink()
+                or private.stat().st_mode & 0o077):
+            raise ValueError('The Web-only secret requires a private direct HTTPS bundle.')
+        if any(key in values for key in (MINI_ID_ENV, MINI_SECRET_ENV, 'ADC_WECHAT_MINI_APP_SECRET')
+               for values in (runtime, maintenance, database)):
+            raise ValueError('Keep the mini-program secret configuration out of shared environments.')
+        read_mini_secret(output / MINI_SECRET_FILE, mounted=True)
     if any(values.get('ADC_SOURCE_COMMIT', plan['requested_source_commit']) not in (plan['requested_source_commit'], resume_source)
            for values in (runtime, maintenance)):
         raise ValueError('Runtime and maintenance source identities must match the reviewed application.')
@@ -247,8 +300,26 @@ def inspect_bundle(output, rendered=None, *, resume_source=None):
             if name != 'gateway' and service.get('ports'):
                 raise ValueError('Only the HTTPS gateway may publish ports.')
         for name in (('web', 'notification-worker', 'operations') if plan.get('operations_schema') == 1 else ('web', 'notification-worker')):
-            if services[name]['environment'] != runtime or services[name]['image'] != plan['images']['app']:
+            expected_env = runtime
+            if name == 'web' and mini_id is not None:
+                expected_env = runtime | {MINI_ID_ENV: mini_id, MINI_SECRET_ENV: MINI_SECRET_TARGET}
+            if services[name]['environment'] != expected_env or services[name]['image'] != plan['images']['app']:
                 raise ValueError('Runtime service configuration does not match the reviewed bundle.')
+        if mini_id is not None:
+            secret_path = (output / MINI_SECRET_FILE).resolve()
+            for name, service in services.items():
+                mounts = [mount for mount in service.get('volumes', [])
+                          if mount.get('target') == MINI_SECRET_TARGET
+                          or (mount.get('type') == 'bind' and Path(mount['source']).resolve() == secret_path)]
+                if name != 'web':
+                    if mounts:
+                        raise ValueError('Only Web may receive the mini-program secret.')
+                    continue
+                if len(mounts) != 1 or not (
+                        mounts[0].get('type') == 'bind' and mounts[0].get('read_only') is True
+                        and mounts[0].get('target') == MINI_SECRET_TARGET
+                        and Path(mounts[0]['source']).resolve() == secret_path):
+                    raise ValueError('The Web secret requires its exact read-only file mount.')
         worker = services['notification-worker']
         if writable and (worker.get('profiles') or worker.get('restart') != 'unless-stopped'):
             raise ValueError('The course writer must start automatically and recover after reboot.')
@@ -284,6 +355,8 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable'), default='read-only')
     prepare_parser.add_argument('--architecture', choices=('amd64', 'arm64'), default='amd64')
     prepare_parser.add_argument('--dataset', choices=('rc', 'course-20'), default='rc')
+    prepare_parser.add_argument('--wechat-mini-app-id')
+    prepare_parser.add_argument('--wechat-mini-secret-file', type=Path)
     inspect_parser = sub.add_parser('inspect')
     inspect_parser.add_argument('--output', default=str(ROOT / '.g4'))
     inspect_parser.add_argument('--rendered-compose')
@@ -294,7 +367,8 @@ if __name__ == '__main__':
                            app_image=args.app_image, db_image=args.db_image, nginx_image=args.nginx_image,
                            bind_ip=args.bind_ip, http_port=args.http_port, https_port=args.https_port,
                            mode=args.mode, access_mode=args.access_mode, architecture=args.architecture,
-                           dataset=args.dataset)
+                           dataset=args.dataset, wechat_mini_app_id=args.wechat_mini_app_id,
+                           wechat_mini_secret_file=args.wechat_mini_secret_file)
             result = {'status': plan['status'], 'project': plan['project'], 'host': plan['host'],
                       'credentials': 'private files only; not displayed', 'public_acceptance_executed': False}
         else:

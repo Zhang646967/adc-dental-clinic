@@ -45,6 +45,28 @@ class G4PreparationTests(unittest.TestCase):
         self.assertNotIn('on-failure:5', compose)
         self.assertFalse(plan['public_acceptance_executed'])
 
+    def test_optional_wechat_secret_requires_private_input_and_stays_out_of_shared_env(self):
+        from scripts.g4_prepare import MINI_SECRET_FILE
+
+        secret = self.folder.parent / 'private-token'
+        secret.write_text('synthetic-unit-token\n')
+        secret.chmod(0o644)
+        options = dict(access_mode='course-writable', dataset='course-20',
+                       wechat_mini_app_id='wx' + '1' * 16, wechat_mini_secret_file=secret)
+        with self.assertRaises(ValueError):
+            prepare(self.folder, **self.inputs, **options)
+        self.assertFalse(self.folder.exists())
+        secret.chmod(0o600)
+        prepare(self.folder, **self.inputs, **options)
+        inspect_bundle(self.folder)
+        for name in ('runtime.env', 'maintenance.env', 'database.env'):
+            self.assertNotIn('ADC_WECHAT_MINI_APP', (self.folder / 'private' / name).read_text())
+        self.assertEqual((self.folder / MINI_SECRET_FILE).read_bytes(), secret.read_bytes())
+        self.assertNotIn('synthetic-unit-token', (self.folder / 'compose.yaml').read_text())
+        (self.folder / MINI_SECRET_FILE).unlink()
+        with self.assertRaises(FileNotFoundError):
+            inspect_bundle(self.folder)
+
     def test_course_mode_cannot_enable_mac_tunnel_writes(self):
         with self.assertRaises(ValueError):
             prepare(self.folder, **(self.inputs | dict(
