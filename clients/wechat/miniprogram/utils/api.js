@@ -47,7 +47,7 @@ function request(path, method = 'GET', data = {}) {
           const responseHeaders = response.header || {};
           const requestId = body.request_id || responseHeaders['X-Request-ID'] || responseHeaders['x-request-id'];
           const error = new Error(message + (requestId ? `（查询编号 ${requestId}）` : ''));
-          error.status = response.statusCode;error.code=body.code;
+          error.status = response.statusCode;error.code=body.code;error.requestId=requestId;error.publicMessage=message;
           if(['SUBJECT_REQUIRED','WORKSPACE_CHANGED','ACCESS_DENIED'].includes(body.code))getApp().globalData.review=null;
           if (response.statusCode === 401) { epoch+=1;session = {}; getApp().globalData.review = null; }
           reject(error);

@@ -1,5 +1,6 @@
 const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
+const intent=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
 const actions={
   booking:['确认就诊安排','我已核对诊所、服务、医师和起止时间，同意提交预约。','确认提交预约','确认成功后产生一次预约，接诊时再确认实际治疗。'],
@@ -18,18 +19,37 @@ Page({
     if(!review){this.setData({error:'核对内容已失效，请返回我的预约重新办理。'});return;}
     const display=Object.assign({},review,{preview:Object.assign({},review.preview)});
     if(display.preview.original)display.preview.original=arrangement(display.preview.original);
+    this.kind=review.kind;
     const copy=actions[review.kind];
     this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3]});
   },
   checked(e){this.setData({checked:e.detail.value.includes('yes')});},
   async submit(){
-    if(this.data.busy||this.data.done||!this.data.checked||!this.data.review)return;
+    if(this.data.busy||this.data.uncertain||this.data.done||!this.data.checked||!this.data.review)return;
     this.setData({busy:true,error:''});
     try{const r=await api.request(this.data.review.path,'POST',{proposal_token:this.data.review.preview.proposal_token,confirmed:'on'});
       getApp().globalData.review=null;
       this.setData({done:r.kind==='waitlist'?r.wait:arrangement(r.visit||r),doneType:r.kind==='waitlist'?'waitlist':'visit',busy:false});
-    }catch(e){showError(this,e);}
+    }catch(e){
+      if(e.code==='NETWORK_UNCONFIRMED'||e.code==='SUBJECT_CHANGED'){
+        getApp().globalData.review=null;
+        this.setData({uncertain:true,review:null,checked:false});
+      }
+      showError(this,e,{separateRequestId:true});
+    }
   },
-  home(){getApp().globalData.review=null;navigation.reLaunch({url:'/pages/home/index'});},
+  subjects(){
+    if(this.data.busy)return;
+    const selection=this.data.review&&this.data.review.selection;
+    if(selection)intent.remember(getApp(),selection.service,selection.clinic,selection.dentist,selection.day,selection.category);
+    getApp().globalData.review=null;
+    navigation.reLaunch({url:'/pages/patients/index'});
+  },
+  home(){
+    getApp().globalData.review=null;
+    const waitlist=this.kind==='wait_join'||this.kind==='wait_withdraw'||this.kind==='offer_decline';
+    const visits=this.data.uncertain?'/pages/home/index?queue=all':'/pages/home/index';
+    navigation.reLaunch({url:waitlist?'/pages/waitlist/index':visits});
+  },
   result(){navigation.redirectTo({url:this.data.doneType==='waitlist'?'/pages/waitlist/index':`/pages/visit/index?id=${this.data.done.id}`});}
 });

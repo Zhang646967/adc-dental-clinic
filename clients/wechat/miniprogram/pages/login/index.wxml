@@ -1,12 +1,11 @@
 <view class="page">
   <view class="brand">ADC 口腔</view><view class="title">登录与注册</view>
-  <view class="subtitle">微信快捷登录，继续安排你和家人的就诊。</view>
+  <view class="subtitle">登录后可管理你和家人的就诊安排。</view>
   <view wx:if="{{error}}" class="error" role="alert">{{error}}</view>
   <view class="card">
-    <checkbox-group bindchange="authConsent"><label><checkbox value="agree" checked="{{authConfirmed}}" /> 同意使用所选方式登录本人账号。</label></checkbox-group>
-    <button class="wechat-login" bindtap="wechatLogin" disabled="{{busy||!auth.wechat_mini||!authConfirmed}}" loading="{{busy}}">微信一键登录</button>
+    <checkbox-group wx:if="{{auth.wechat_mini || realSmsAvailable}}" bindchange="authConsent"><label><checkbox value="agree" checked="{{authConfirmed}}" /> 同意使用所选方式登录本人账号。</label></checkbox-group>
+    <button wx:if="{{auth.wechat_mini}}" class="wechat-login" bindtap="wechatLogin" disabled="{{busy||!auth.wechat_mini||!authConfirmed}}" loading="{{busy}}">微信一键登录</button>
     <view wx:if="{{auth.wechat_mini}}" class="muted">无需用户名、密码或手机号。首次使用将创建ADC账号，病历关联由前台另行核验。</view>
-    <view wx:else class="notice">微信登录等待平台配置，当前可使用下方的已开通方式。</view>
     <block wx:if="{{realSmsAvailable}}"><button class="secondary" bindtap="toggleSms" aria-expanded="{{smsMode}}">手机号登录／注册 {{smsMode?'收起':'展开'}}</button>
     <view wx:if="{{smsMode}}">
       <block wx:if="{{auth.sms_enabled}}">
@@ -25,7 +24,7 @@
       <label class="label" for="password">密码</label><input id="password" class="input" value="{{password}}" password maxlength="128" data-field="password" bindinput="field" confirm-type="go" bindconfirm="login" aria-label="密码" />
       <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="login">登录原账号</button>
       <button wx:if="{{auth.wechat_mini}}" class="secondary" bindtap="wechatLogin" disabled="{{busy||!authConfirmed||!username||!password}}">核对原账号并关联微信</button>
-      <view class="muted">核对原账号后关联微信；已有其他归属的微信不会自动合并。</view>
+      <view wx:if="{{auth.wechat_mini}}" class="muted">核对原账号后关联微信；已有其他归属的微信不会自动合并。</view>
     </view>
   </view><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

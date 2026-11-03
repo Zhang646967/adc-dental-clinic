@@ -1,14 +1,26 @@
 const navigation=require('../../utils/navigation');
 const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
+const intent=require('../../utils/booking-intent');
 const {selectedCatalogue}=require('../../utils/service-selection');
 Page({
   data:{clinics:[], services:[], doctors:[], allServices:[], clinicIndex:0, serviceIndex:0, doctorIndex:0,
     day:'', firstDay:'', lastDay:'', rows:[], error:'', busy:false, searched:false, source:null, reason:'',patientRequest:'',selectedService:null},
-  async onLoad(query) { api.showSubject(this);
+  onLoad(query) { this.query=query;return this.load(); },
+  async load() {
+    const query=this.query;
+    if(this.data.busy)return;
+    this.setData({busy:true,error:'',requestId:'',ready:false});
+    api.showSubject(this);
     try {
       const session = await api.bootstrap();api.showSubject(this);
-      if (!session.authenticated) { navigation.reLaunch({url:'/pages/login/index'}); return; }
+      if (!session.authenticated || session.subject_required) {
+        if(!query.visit && intent.positive(query.service) && intent.positive(query.clinic))
+          intent.remember(getApp(),query.service,query.clinic,query.dentist,query.day);
+        const url=session.subject_required?'/pages/patients/index':session.account_authenticated?'/pages/account/index':'/pages/login/index';
+        navigation.reLaunch({url});return;
+      }
+      if(session.medical&&!session.can_book){navigation.reLaunch({url:'/pages/medical-authorizations/index'});return;}
       if (session.read_only) throw new Error('当前实例仅供查看，暂不办理预约变更。');
       let source = query.visit ? arrangement(await api.request(`visits/${query.visit}/`)) : null;
       if(source&&!source.reschedule_service)throw Error('本次预约暂不可自助改期，请联系原门店前台。');
@@ -20,8 +32,16 @@ Page({
         if(index<1)throw Error('所选医师接诊安排已变化，请重新核对医师。');
         this.setData({doctorIndex:index});
       }
+      this.setData({ready:true});
       if(!source)await this.refreshDay(query.day);
-    } catch(e) { showError(this,e); }
+    } catch(e) { showError(this,e,{separateRequestId:true}); }
+    finally { this.setData({busy:false}); }
+  },
+  subjects(){
+    if(this.data.busy)return;
+    const service=this.data.selectedService,doctor=this.data.doctors[this.data.doctorIndex];
+    if(!this.data.source&&service)intent.remember(getApp(),service.id,service.clinic,doctor.id,this.data.day,service.category);
+    navigation.reLaunch({url:'/pages/patients/index'});
   },
   rebuild(selectedId=null) {
     const c=this.data.clinics[this.data.clinicIndex];
@@ -43,7 +63,7 @@ Page({
       const day=selectedDay||info.default_day||'';
       if(day&&(day<this.data.firstDay||day>this.data.lastDay))throw Error('所选日期已超出预约范围，请重新选择。');
       this.setData({day,note:info.default_day?'':'近期暂无已发布出诊，可查看其他医师或登记候补。',busy:false});
-    }catch(e){this.setData({day:''});showError(this,e);}
+    }catch(e){this.setData({day:''});showError(this,e,{separateRequestId:true});}
   },
   pickClinic(e) { if(this.data.busy)return;this.setData({clinicIndex:Number(e.detail.value),error:''});this.rebuild();return this.refreshDay(); },
   pickService(e) { if(this.data.busy)return;this.setData({serviceIndex:Number(e.detail.value),error:''});this.doctors();return this.refreshDay(); },
@@ -67,8 +87,8 @@ Page({
     try {
       const path=this.data.source ? `visits/${this.data.source.id}/reschedule/candidates/` : 'candidates/';
       const data=await api.request(path,'GET',{clinic:c.id,service:s.id,dentist:d.id,day:this.data.day});
-      this.setData({rows:data.rows.map(arrangement),busy:false,searched:true,note:data.limited?'本次候选达到查询上限，可缩小日期或联系前台。':data.message||''});
-    } catch(e) { showError(this,e); }
+      this.setData({rows:data.rows.map(arrangement),busy:false,searched:true,note:data.limited?'本次候选达到查询上限，可缩小日期或联系前台。':data.message||'',availabilityTitle:data.status==='NO_SCHEDULE'?'当天暂无出诊':'当天暂无可用时段'});
+    } catch(e) { showError(this,e,{separateRequestId:true}); }
   },
   async choose(e) {
     if (this.data.busy) return;
@@ -80,8 +100,8 @@ Page({
       const path=source ? `visits/${source.id}/reschedule/preview/` : 'booking/preview/';
       const payload=source ? {action:'preview',slot_id:row.slot,start:row.start,expected_version:source.version,reason:this.data.reason} : {slot:row.slot,start:row.start,service:row.service||'',patient_request:this.data.patientRequest};
       const preview=await api.request(path,'POST',payload);
-      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
+      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
       navigation.navigateTo({url:'/pages/confirm/index'}); this.setData({busy:false});
-    } catch(e) { showError(this,e); }
+    } catch(e) { showError(this,e,{separateRequestId:true}); }
   }
 });

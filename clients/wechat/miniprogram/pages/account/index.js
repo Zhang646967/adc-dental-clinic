@@ -9,13 +9,13 @@ Page({
     try{
       const session=await api.bootstrap();
       if(!session.account_authenticated){this.setData({guest:true,busy:false});return;}
-      this.setData({guest:false});
+      this.setData({guest:false,authenticated:session.authenticated});
       if(this.ownerContext&&this.ownerContext!==session.workspace_id)this.setData({phoneCode:'',loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',smsPhone:'',smsCode:'',smsChallenge:'',smsNotice:''});
       this.ownerContext=session.workspace_id;
       const profile=await api.request('account/');profile.cases=profile.cases.map(c=>({...c,createdLabel:dateTime(c.created_at)}));
       const auth=session.auth_capabilities||{};
       this.setData({profile,auth,realSmsAvailable:!!(auth.sms_enabled&&!auth.sms_demo),readOnly:session.read_only});
-    }catch(e){showError(this,e);}finally{this.setData({busy:false});}
+    }catch(e){showError(this,e,{separateRequestId:true});}finally{this.setData({busy:false});}
   },
   login(){navigation.navigateTo({url:'/pages/login/index'});},
   onHide(){this.setData({loginCode:'',newPassword:'',repeatPassword:'',unlinkPassword:'',smsCode:''});},

@@ -33,6 +33,7 @@ Page({
       this.setData({origin:{latitude:p.latitude,longitude:p.longitude},locating:false,locationNote:'已按全部匹配门店的直线距离排序，实际路程以导航为准。'});this.filter();
     },fail:()=>this.setData({locating:false,locationNote:'定位未开启，仍可手动选择城市和区域。'})});
   },
+  stores(){wx.pageScrollTo({selector:'#store-search'});},
   clinic(e){navigation.navigateTo({url:'/pages/clinic/index?id='+e.currentTarget.dataset.id});},
   doctors(){const city=this.data.cityIndex?this.data.cities[this.data.cityIndex]:'';navigation.navigateTo({url:'/pages/dentists/index?city='+encodeURIComponent(city)});},
   services(){const city=this.data.cityIndex?this.data.cities[this.data.cityIndex]:'';navigation.navigateTo({url:'/pages/services/index?category='+this.data.categories[this.data.categoryIndex].id+'&city='+encodeURIComponent(city)});},

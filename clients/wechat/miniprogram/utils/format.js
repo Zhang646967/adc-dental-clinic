@@ -8,8 +8,10 @@ function waitEntry(v) {
   return Object.assign({}, v, {startLabel:dateTime(v.earliest), endLabel:dateTime(v.latest),
     offers:v.offers.map(o=>Object.assign(arrangement(o), {expiresLabel:dateTime(o.expires)}))});
 }
-function showError(page, error, {stayOnLogin = false} = {}) {
-  page.setData({error: error.message, busy: false});
+function showError(page, error, {stayOnLogin = false, separateRequestId = false} = {}) {
+  const display={error:error.message,busy:false};
+  if(separateRequestId){display.error=error.publicMessage||error.message;display.requestId=error.requestId||'';}
+  page.setData(display);
   if(error.code==='SUBJECT_REQUIRED'){wx.reLaunch({url:'/pages/patients/index'});return;}
   if (error.status === 401 && !stayOnLogin) wx.reLaunch({url:'/pages/login/index'});
 }

@@ -37,7 +37,7 @@ function page(name,options={}){
   vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
   vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
     Page:value=>{definition=value;},wx,getApp:()=>state,
-    require:module=>module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
+    require:module=>module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>options.tabSelection||null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};
   return {p:instance,calls,navigation,state,session:currentSession};
@@ -46,6 +46,45 @@ function page(name,options={}){
 async function verify(){
   const cases=[];
   async function test(name,run){await run();cases.push(name);}
+  await test('booking keeps only public choices when switching patients',async()=>{
+    const {p,state,navigation}=page('booking');
+    await p.onLoad({clinic:'2',service:'22',dentist:'5',day:'2026-10-24'});
+    p.setData({patientRequest:'Private note'});
+    p.subjects();
+    const saved=state.globalData.bookingIntent;
+    assert.deepEqual([saved.clinic,saved.service,saved.dentist,saved.day],[2,22,5,'2026-10-24']);
+    assert(!JSON.stringify(saved).includes('Private note'));
+    assert.equal(navigation.at(-1).url,'/pages/patients/index');
+  });
+  await test('booking distinguishes unpublished shifts from occupied resources',async()=>{
+    for(const [status,title] of [['NO_SCHEDULE','当天暂无出诊'],['NO_COMBINATION','当天暂无可用时段']]){
+      const {p}=page('booking',{request:async route=>route==='catalogue/'?catalogue:route==='candidates/'?{status,rows:[],message:'请选择其他日期'}:{default_day:'2026-10-23'}});
+      await p.onLoad({clinic:'2',service:'22'});
+      await p.search();
+      assert.equal(p.data.availabilityTitle,title);
+      assert.equal(p.data.note,'请选择其他日期');
+    }
+  });
+  await test('interrupted booking confirmation opens the results list without resubmitting',async()=>{
+    const error=Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});
+    const {p,state,calls,navigation}=page('confirm',{request:async()=>{throw error;}});
+    state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();
+    p.checked({detail:{value:['yes']}});
+    await p.submit();
+    await p.submit();
+    assert.equal(calls.length,1);
+    assert.equal(p.data.uncertain,true);
+    assert.equal(p.data.review,null);
+    p.home();
+    assert.equal(navigation.at(-1).url,'/pages/home/index?queue=all');
+  });
+  await test('checking an uncertain result includes cancelled and replaced visits',async()=>{
+    const {p,calls}=page('home',{tabSelection:{queue:'all'},request:async route=>route==='visits/'?{rows:[],page:1,pages:1}:{}});
+    p.setData({queue:'active',page:3});
+    await p.onShow();
+    assert.deepEqual(plain(calls[0].data),{queue:'all',page:1});
+  });
   await test('typed service hint selects its clinic and exact service',()=>{
     const d=selectedCatalogue(catalogue,{service:'22'});
     assert.equal(d.clinics[d.clinicIndex].id,2);assert.equal(d.selectedId,22);
