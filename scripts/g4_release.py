@@ -125,27 +125,6 @@ def start_candidate(course):
     return result
 
 
-MIGRATE_FORWARD = """
-import sys
-import django
-from django.core.management import call_command
-from django.db import connection
-from django.db.migrations.executor import MigrationExecutor
-
-django.setup()
-executor = MigrationExecutor(connection)
-executor.loader.check_consistent_history(connection)
-plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
-approved = set(sys.argv[2:])
-if any(backwards or not migration.atomic or
-       migration.app_label + '.' + migration.name not in approved
-       for migration, backwards in plan):
-    raise SystemExit('Only reviewed, atomic forward migrations are permitted.')
-if sys.argv[1] == 'apply':
-    call_command('migrate', interactive=False)
-"""
-
-
 def migration_names(files):
     return {Path(name).parts[0] + '.' + Path(name).stem for name in files}
 
@@ -189,8 +168,8 @@ def schema_step(course, image, source, approved, *, apply=False):
         atomic_text(override, json.dumps({'services': {'schema': {'image': image}}}))
         run(course.command + ['-f', str(override), '--profile', 'maintenance', 'run',
             '--rm', '-T', '--no-deps', '--name', name, '-e', 'ADC_SOURCE_COMMIT=' + source,
-            'schema', 'python', '-c', MIGRATE_FORWARD, 'apply' if apply else 'check',
-            *sorted(approved)], course.log, timeout=600 if apply else 90)
+            'schema', 'python', 'manage.py', 'forward_release_migrations', *sorted(approved),
+            *(['--apply'] if apply else [])], course.log, timeout=600 if apply else 90)
 
 
 def retain_checkpoint(course, backup):
