@@ -1,0 +1,82 @@
+{
+  "phase": "D2.2",
+  "status": "ISOLATED_ADDITIVE_UPGRADE_PASS_EXACT_CI_PENDING",
+  "application_commit": "4e135e91c372d3d5140156eaa4ec44d9a0d3d3e7",
+  "image": "sha256:ef596c5370e46313ae4b49bffcdb7123389b9c1bb046945fe3e8d58ecf66e8dd",
+  "architecture": "linux/amd64 under local emulation",
+  "predecessor": {
+    "passed": true,
+    "source": "37d9bb24908d9f4c03553c39c4be913c48cb50f3",
+    "image": "sha256:1fa0f3d095382b80fe43185a4dfae9237fc6a132b09b71ce196c01881eca0058",
+    "migrations": 77,
+    "sql_tables": 163,
+    "populated_archive": true
+  },
+  "local_source_checks": 1168,
+  "isolated_scenarios": {
+    "before-ddl-failure": {
+      "passed": true,
+      "original_gateway_returned": true,
+      "applied_migrations": 77
+    },
+    "after-ddl-failure": {
+      "passed": true,
+      "only_database_running": true,
+      "migration_count": 80,
+      "previous_image_not_restarted": true,
+      "database_restored": false,
+      "failure_injected_after_real_migrations": true
+    },
+    "resume": {
+      "passed": true,
+      "old_sql_tables": 163,
+      "target_sql_tables": 167,
+      "preserved_original_rows": 25147,
+      "added_system_rows": {
+        "django_migrations": 3,
+        "django_content_type": 4,
+        "auth_permission": 16
+      },
+      "independent_old_checkpoint_reused": true,
+      "original_columns_constraints_indexes_triggers_retained": true,
+      "same_database_volume": true,
+      "old_accounts_passwords_and_archive_rows_preserved": true,
+      "new_duties_default_off": true,
+      "new_copy_tables_empty": true,
+      "source": "4e135e91c372d3d5140156eaa4ec44d9a0d3d3e7",
+      "app_image": "sha256:ef596c5370e46313ae4b49bffcdb7123389b9c1bb046945fe3e8d58ecf66e8dd",
+      "native_or_cloud_acceptance": false
+    },
+    "post-upgrade-write": {
+      "passed": true,
+      "normal_patient_service_writes": 1,
+      "business_audit_rows": 1,
+      "repeated_upgrade_no_effect": true,
+      "old_schema_rollback_refused": true,
+      "all_post_upgrade_writes_retained": true
+    },
+    "independent-restore": {
+      "passed": true,
+      "independent_database": true,
+      "source": "37d9bb24908d9f4c03553c39c4be913c48cb50f3",
+      "sql_tables": 163,
+      "rows": 25147,
+      "restored_migrations": 77,
+      "elapsed_ms": 65417,
+      "no_restore_over_upgraded_database": true
+    }
+  },
+  "exact_ci_at_observation": {
+    "conclusion": "",
+    "databaseId": 41581164502,
+    "headSha": "4e135e91c372d3d5140156eaa4ec44d9a0d3d3e7",
+    "name": "ADC validation",
+    "status": "in_progress",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41581164502"
+  },
+  "cloud_deployed": false,
+  "clinical_production_qualification": false,
+  "existing_business_services_changed": false,
+  "native_source_changed": false,
+  "report_changed": false
+}

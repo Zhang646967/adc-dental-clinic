@@ -22,6 +22,8 @@
 
 ## 当前状态与开发
 
+**D2.2 进展：** [77→80 追加迁移的本机验收](docs/evidence_d22/README.md)已通过，修正版完整 CI 等待结束；尚未部署服务器。
+
 D2.1最新版统一部署包已完成准确CI、二十店空库安装、重复执行、浏览器及加密独立恢复。本机原业务环境与已通过的小程序场景保留；服务器独立部署尚未完成。
 
 [部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
