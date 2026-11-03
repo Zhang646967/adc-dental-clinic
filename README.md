@@ -22,13 +22,12 @@
 
 ## 当前状态与开发
 
-**D2.2 进展：** [77→80 追加迁移的本机验收](docs/evidence_d22/README.md)已通过，修正版完整 CI 等待结束；尚未部署服务器。
 
-D2.1最新版统一部署包已完成准确CI、二十店空库安装、重复执行、浏览器及加密独立恢复。本机原业务环境与已通过的小程序场景保留；服务器独立部署尚未完成。
+D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版，迁移后失败可按同一检查点继续；已核对原记录、升级后写入和加密独立恢复。服务器尚未部署。
 
-[部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
+[追加迁移验收](docs/evidence_d22/README.md) · [部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
 
-下一步完成D2.2追加迁移升级和D2.3独立运行验证，再在实际服务器公布固定访问地址。处方与药事继续按业务职责细化；部署准备与实际云端、手机及平台验收分别记录。
+下一步完成D2.3独立运行验证，再在实际服务器公布固定访问地址。处方与药事继续按业务职责细化；部署准备与实际云端、手机及平台验收分别记录。
 
 <details>
 <summary>历史版本、工程记录与本地开发说明</summary>
