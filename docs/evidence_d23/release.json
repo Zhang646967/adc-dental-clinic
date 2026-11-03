@@ -1,0 +1,108 @@
+{
+  "stage": "D2.3",
+  "status": "LOCAL_OPERATIONS_ACCEPTED_EXACT_CI_PASS",
+  "application_commit": "de8585b73995c4f8fab01a978fb260401a9eee17",
+  "image": "sha256:d468e993eb02682857f630263a075fa4934c79961a436ccd67642277f6ea807c",
+  "exact_ci": {
+    "run_id": 41586915980,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "de8585b73995c4f8fab01a978fb260401a9eee17",
+    "tested_source_commit": "de8585b73995c4f8fab01a978fb260401a9eee17",
+    "source_checks": 1169,
+    "postgresql_tests": 2306,
+    "native_source_checks": 315,
+    "native_copy_handler_cases": 9,
+    "source_log_verified": true,
+    "log_sha256": "8147ed30fd0554b9b859c5857ee35c3de840c29fde000b73412ed6f31e31c840",
+    "observed_at_utc": "2026-11-03T10:07:39.316946+00:00",
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41586915980"
+  },
+  "local_rehearsal": {
+    "stage": "D2.3",
+    "runtime": "D2.2 accepted image, local amd64 emulation",
+    "tool_changes": "D2.3 working source",
+    "reports": {
+      "first-rehearsal": {
+        "passed": true,
+        "observed_at": "2026-11-03T05:32:29.809866+00:00",
+        "application_commit": "4e135e91c372d3d5140156eaa4ec44d9a0d3d3e7",
+        "restart": {
+          "passed": true,
+          "application_commit": "4e135e91c372d3d5140156eaa4ec44d9a0d3d3e7",
+          "verified_https": true,
+          "degraded_during_service_outage": true,
+          "operations_after": "HEALTHY",
+          "same_database_volume": true,
+          "application_migrations": 80,
+          "compared_model_groups": 164
+        },
+        "backup": {
+          "passed": true,
+          "encrypted_post_upgrade_backup": true,
+          "object_transport": "In-memory SDK double",
+          "full_ciphertext_readback": true,
+          "downloaded_archive_decrypted_and_verified": true,
+          "failed_upload_kept_previous_point": true,
+          "actual_provider_acceptance": "NOT_RUN"
+        },
+        "restore": {
+          "independent_empty_database": true,
+          "tables": 167,
+          "rows": 25172,
+          "elapsed_ms": 58346
+        },
+        "actual_server_and_provider": "NOT_RUN",
+        "scope": "D2.3 first isolated run"
+      },
+      "worker-fault": {
+        "passed": true,
+        "worker_outage": "CRITICAL",
+        "observed_seconds": 1.24,
+        "worker_recovered": "HEALTHY",
+        "retained_model_groups": 164,
+        "timestamp": "2026-11-03T05:54:49.050968+00:00"
+      },
+      "tls-local": {
+        "passed": true,
+        "http01_route": true,
+        "invalid_pair_rejected": true,
+        "gateway_served_previous_certificate_after_rejection": true,
+        "new_certificate_served": true,
+        "restored_rehearsal_certificate": true,
+        "public_ca_renewal": "NOT_RUN"
+      },
+      "secret-file": {
+        "passed": true,
+        "web_uid": 10001,
+        "synthetic_secret_loaded": true,
+        "raw_secret_environment_present": false,
+        "web_only_read_only_mount": true,
+        "shared_service_config_excludes_secret": true,
+        "wechat_api_calls": 0,
+        "remote_ssh_acceptance": "NOT_RUN"
+      }
+    },
+    "target_server_acceptance": "PENDING_TARGET_SERVER"
+  },
+  "exact_image_secret": {
+    "passed": true,
+    "source_commit": "de8585b73995c4f8fab01a978fb260401a9eee17",
+    "image": "sha256:d468e993eb02682857f630263a075fa4934c79961a436ccd67642277f6ea807c",
+    "mount": "read-only Web-only",
+    "uid": 10001,
+    "provider_requests": 0
+  },
+  "package_transfer_simulation": {
+    "passed": true,
+    "route": "actual bundle archive/unpack commands on local fixture",
+    "exact_bytes": true,
+    "read_only_mode_retained": true,
+    "ssh_network": "NOT_RUN"
+  },
+  "target_ssh": "PENDING",
+  "public_ca_renewal": "PENDING",
+  "actual_object_storage": "PENDING",
+  "systemd_timer_execution": "PENDING",
+  "server_capacity_and_24h": "PENDING"
+}

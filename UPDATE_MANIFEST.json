@@ -1,10 +1,10 @@
 {
-  "target": "D2.2 forward-only additive deployment upgrade",
+  "target": "D2.3 independent operations rehearsal and Web-only mini-program secret",
   "parent": "Accepted C3.3A application37d9bb2",
   "supported_source": "One request owns scope, identity review, independent clinical review and authenticated pickup. Existing clinical and financial effects retained.",
   "scope": "Declared application/config/tests/docs present in the Docker build. Runtime evidence directories and logs excluded here; full archive CHECKSUMS.sha256 covers them. Hashes detect difference, not publisher authenticity.",
   "schema_change": "All77prior migration bytes retained; append3 to80;167SQL/166ORM/489FK/139triggers/44actualER.",
-  "user_release_validation": "Exact CI 41581164502; actual 77 to 80 upgrade, before/after failure and resume, 25147 old rows preserved and independent encrypted restore. Existing business runtime and report unchanged; no cloud deployment.",
+  "user_release_validation": "CI 41586915980 passed. Local restart, notification observation, certificate replacement, encrypted object-adapter readback and independent restore passed. Target-server acceptance pending.",
   "removed_from_original_v07": [],
   "files": {
     ".dockerignore": "45494731fef1b0ed53133c336f718bb0bc5984552b66ab41f96cbc674dc5a121",
@@ -23,8 +23,8 @@
     "PATIENT_AUTH_ENV.example": "d05afc6520356e9f62451999bfaa7d491eef89eb1a8c65943c313146fb24c822",
     "RC_MACOS.sh": "0050ef5d740ef8b293155df1baa45bf42dd4729a320ff8fb61052fe47f99bbdb",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "f80ceb50bb95d271cf83aba9cdaae50b7c1e6d1b9aaede215d7ecda9ff487b57",
-    "RELEASE_CURRENT.md": "c23c7aa158bdf61783c259e6c81c96403b21a8d896ee7dc6a7a456944e4f83bb",
+    "README.md": "59f7ca88d2ae1c03dbbe96fdb8fef1dc5169bd1297e14906ed4e931b816cdaad",
+    "RELEASE_CURRENT.md": "0feb41c6e0f30effddaa48707c41414f533cc54cb74d1154a51b92b2a45584f5",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
@@ -481,7 +481,7 @@
     "docs/D1_CLOUD_RELEASE.md": "67e4ae40298deb8cee931a332faa6cc37e51520b33a41e8153864088a33a9607",
     "docs/D21_DEPLOYMENT_PACKAGE.md": "620dc876f83ef49e8f27a993cd14ba24812a29a5b5189a67e8e8cd54b5ab4aba",
     "docs/D22_ADDITIVE_UPGRADE.md": "fed2840404393765877f0b693fc54a128dba656d05a09fbe7e649827701693c3",
-    "docs/D23_INDEPENDENT_OPERATIONS.md": "5dafc5296c94f6540e4efd0bed32a28bab5a675ca28e9d87b7dbeb009cb21f3e",
+    "docs/D23_INDEPENDENT_OPERATIONS.md": "3badd5edbc2a063bf90a3e94d1f8c7f4a5f1d42efb8918cf0948adb5d97b9dc4",
     "docs/DAILY_RECONCILIATION.md": "d589d4ef0b05bae5987f6b8a4c85bea219b30aafdef5783beb0066a2ae46f2b8",
     "docs/DEMO_ROUTES_RC1.md": "ea315bc7e5b38efc841cf0c12e88d818e5a1590e4c95b7d730e44ae9ff663d64",
     "docs/DEVELOPMENT_v09a5.md": "911f779ff4df91740bd2ae117923172a96f289e8122087d5d4571c78b9735ca4",
@@ -2146,5 +2146,28 @@
     "cloud_acceptance": "NOT_RUN",
     "business_runtime_restarted": false,
     "report_updated": false
+  },
+  "independent_operations_followup": {
+    "source_commit": "de8585b73995c4f8fab01a978fb260401a9eee17",
+    "image": "sha256:d468e993eb02682857f630263a075fa4934c79961a436ccd67642277f6ea807c",
+    "exact_ci": {
+      "run_id": 41586915980,
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "de8585b73995c4f8fab01a978fb260401a9eee17",
+      "tested_source_commit": "de8585b73995c4f8fab01a978fb260401a9eee17",
+      "source_checks": 1169,
+      "postgresql_tests": 2306,
+      "native_source_checks": 315,
+      "native_copy_handler_cases": 9,
+      "source_log_verified": true,
+      "log_sha256": "8147ed30fd0554b9b859c5857ee35c3de840c29fde000b73412ed6f31e31c840",
+      "observed_at_utc": "2026-11-03T10:07:39.316946+00:00",
+      "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41586915980"
+    },
+    "evidence": "docs/evidence_d23/release.json",
+    "native_changes": false,
+    "schema_changes": false,
+    "target_server": "PENDING"
   }
 }
