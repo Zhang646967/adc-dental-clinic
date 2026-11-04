@@ -102,7 +102,7 @@ def workspace_worklist(actor):
             visible_offers = access.scope(WaitOffer.objects.all(), patient_field='request__patient_id', clinic_field='request__clinic_id')
             offers = active_offers(visible_offers, now).select_related('slot__clinic', 'slot__dentist').order_by('expires_at', 'pk')
             groups.append(_group('offers', '候补邀约待你答复', offers,
-                lambda offer: {'title': f'{offer.slot.clinic.name} · {offer.slot.dentist.name}',
+                lambda offer: {'title': f'{offer.public_contact["name"]} · {offer.slot.dentist.name}',
                     'detail': '答复截止时间（北京时间）', 'when': offer.expires_at,
                     'url': reverse('wait_offer', args=[offer.pk]), 'action': '核对时段并答复'},
                 reverse('waitlist'), '邀约尚未形成预约；请在截止前自行决定，确认页会重新核验。'))

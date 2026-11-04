@@ -2,7 +2,7 @@
 {% block title %}患者服务中心 · ADC{% endblock %}
 {% block content %}
 <section class="service-welcome" aria-labelledby="service-title">
-  <div class="service-welcome-copy"><p class="eyebrow">ADC DENTAL CARE · 患者服务中心</p><h1 id="service-title">把每一次就诊，<br>安排清楚。</h1><p class="lede">{{ patient.name }}，欢迎回来。先了解服务内容和费用，再选择适合这次就诊的安排。</p><div class="actions"><a class="button" href="{% url 'public_services' %}">了解服务并预约 <span aria-hidden="true">→</span></a><a class="button secondary" href="{% url 'waitlist' %}">查看我的候补</a></div><p class="service-channel-note"><a href="{% url 'public_service_guide' 'CHECKUP' %}">第一次来？了解初诊会做什么 →</a></p></div>
+  <div class="service-welcome-copy"><h1 id="service-title">患者服务中心</h1>
   {% with action=primary_action %}
   <aside class="service-next" aria-labelledby="patient-next-action">
     <span class="eyebrow">就诊安排 · 下一步</span>
@@ -20,6 +20,8 @@
     {% endif %}
   </aside>
   {% endwith %}
+  </div>
+  <div class="service-welcome-copy"><h2>安排下一次就诊</h2><p>先了解服务内容和费用，再选择合适的时间。</p><div class="actions"><a class="button" href="{% url 'public_services' %}">了解服务并预约 <span aria-hidden="true">→</span></a><a class="button secondary" href="{% url 'waitlist' %}">查看我的候补</a></div><p class="service-channel-note"><a href="{% url 'public_service_guide' 'CHECKUP' %}">第一次来？了解初诊会做什么 →</a></p></div>
 </section>
 {% if offer_count and primary_action.kind != 'CONFIRM_OFFER' %}<section class="service-attention" aria-label="待确认邀约"><div><strong>有 {{ offer_count }} 条邀约等待你确认</strong><p>前台已提供限时安排。请核对截止时间，并明确选择新增就诊或替换原预约。</p></div><a class="button" href="{% url 'waitlist' %}">查看邀约 →</a></section>{% endif %}
 <section class="service-stats" aria-label="本人办理概览"><a href="{% url 'portal_appointments' %}"><strong>{{ active_count }}</strong><span>待就诊与在诊</span><span aria-hidden="true">↗</span></a><a href="{% url 'waitlist' %}"><strong>{{ waiting_count }}</strong><span>候补等待与邀约</span><span aria-hidden="true">↗</span></a><a href="{% url 'portal_appointments' %}?queue=history"><strong>{{ history_count }}</strong><span>历史与改期记录</span><span aria-hidden="true">↗</span></a></section>
