@@ -1,12 +1,13 @@
 const navigation=require('../../utils/navigation');
 const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
+const {primaryAction} = require('../../utils/primary-action');
 Page({
-  data:{guest:false,needsSubject:false,needsEnrollment:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null},
+  data:{guest:false,needsSubject:false,needsEnrollment:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
   async onShow() {
     const pending=navigation.consume('/pages/home/index');
     if(pending&&pending.queue==='all')this.setData({queue:'all',page:1});
-    this.setData({rows:[],overview:null,patient:'',error:'',busy:true,guest:false,needsSubject:false,needsEnrollment:false});
+    this.setData({rows:[],overview:null,primary:null,patient:'',error:'',busy:true,guest:false,needsSubject:false,needsEnrollment:false});
     api.showSubject(this);
     try {
       const session = await api.bootstrap();api.showSubject(this);
@@ -24,9 +25,16 @@ Page({
     try {
       const [d,overview] = await Promise.all([api.request('visits/', 'GET', {queue:this.data.queue, page:this.data.page}), api.request('overview/')]);
       if(overview.next_visit)overview.next_visit=arrangement(overview.next_visit);
-      this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, busy:false});
+      // Older backends omit primary_action; keep the existing entries then.
+      const primary=primaryAction(overview);
+      this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, primary, busy:false});
     }
     catch (e) { showError(this,e,{separateRequestId:true}); }
+  },
+  primaryTap() {
+    const primary=this.data.primary;
+    if(!primary||!primary.url)return;
+    navigation.navigateTo({url:primary.url});
   },
   changeQueue(e) { if (this.data.busy) return; this.setData({queue:e.currentTarget.dataset.queue, page:1}); this.load(); },
   turn(e) { if (this.data.busy) return; this.setData({page:this.data.page+Number(e.currentTarget.dataset.step)}); this.load(); },
