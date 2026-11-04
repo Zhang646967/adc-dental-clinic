@@ -6,7 +6,7 @@
 
 客户端 `902143a7952e90bb0855d97243e6199c8959a1c1` 通过 1,169 项源码检查、2,306 项 PostgreSQL 回归和 332 项小程序源码与传输检查。本机官方离线编译覆盖 27 页及全部 WXSS，18472 的到期邀约清单和详情通过真实 HTTP 核对。WorkBuddy 使用现有合成后端按五条路径只读复测，实际操作与设备结论单列。[完整 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41777021512) · [复测任务](docs/WORKBUDDY_PATIENT_RESULTS_TASK.md)
 
-修复提交 `d6573b8` 已通过完整 CI。WorkBuddy 工具实测通过医疗告知单入口返回和历史治疗方案切换。候补到期状态通过代码核对，登录后页面待补测。[专项回传](docs/WORKBUDDY_PATIENT_RESULTS_REVIEW.md) · [修复版 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41789365281)
+修复提交 `d6573b8` 已通过完整 CI。WorkBuddy 工具实测通过医疗告知单入口返回、历史治疗方案切换、预约成功页打开同一条预约，以及登录后的候补到期展示。后两项使用独立合成副本 18473。[专项回传](docs/WORKBUDDY_PATIENT_RESULTS_REVIEW.md) · [修复版 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41789365281)
 
 # 患者小程序四入口
 
