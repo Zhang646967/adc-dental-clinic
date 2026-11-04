@@ -3,11 +3,27 @@
 {% block content %}
 <section class="service-welcome" aria-labelledby="service-title">
   <div class="service-welcome-copy"><p class="eyebrow">ADC DENTAL CARE · 患者服务中心</p><h1 id="service-title">把每一次就诊，<br>安排清楚。</h1><p class="lede">{{ patient.name }}，欢迎回来。先了解服务内容和费用，再选择适合这次就诊的安排。</p><div class="actions"><a class="button" href="{% url 'public_services' %}">了解服务并预约 <span aria-hidden="true">→</span></a><a class="button secondary" href="{% url 'waitlist' %}">查看我的候补</a></div><p class="service-channel-note"><a href="{% url 'public_service_guide' 'CHECKUP' %}">第一次来？了解初诊会做什么 →</a></p></div>
-  <aside class="service-next" aria-label="当前就诊安排">{% if next_visit %}<span class="eyebrow">{% if next_visit.status == 'CHECKED_IN' %}正在就诊{% else %}下一次就诊{% endif %}</span><h2>{{ next_visit.scheduled_start|date:'m月d日' }} <span>{{ next_visit.scheduled_start|date:'H:i' }}</span></h2><p>{{ next_visit.public_contact.name }} · {{ next_visit.dentist.name }}</p><p class="muted">{{ next_visit.get_status_display }} · 北京时间</p><a class="button secondary" href="{% url 'portal_visit' next_visit.pk %}">查看安排与到诊提示 →</a>{% else %}<span class="eyebrow">就诊安排</span><h2>还没有待就诊预约</h2><p>先选择服务与时间。暂时没有合适安排，也可以登记候补。</p><a href="{% url 'waitlist_join' %}">登记候补偏好 →</a>{% endif %}</aside>
+  {% with action=primary_action %}
+  <aside class="service-next" aria-labelledby="patient-next-action">
+    <span class="eyebrow">就诊安排 · 下一步</span>
+    {% if action.kind == 'CONFIRM_OFFER' %}
+      <h2 id="patient-next-action">候补邀约待确认</h2><p>有 {{ offer_count }} 条邀约等待你确认。请在 {{ action.offer.expires_at|date:'m月d日 H:i:s' }}（北京时间）前查看并决定。</p>
+      <a class="button secondary" href="{% url 'wait_offer' action.offer.pk %}">查看这条邀约 →</a>
+    {% elif action.visit %}
+      <h2 id="patient-next-action">{% if action.kind == 'CHECKED_IN' %}正在就诊{% elif action.kind == 'CONTACT_CLINIC' %}请联系门店核实{% else %}下一次就诊{% endif %}</h2>
+      <p>{{ action.visit.scheduled_start|date:'m月d日 H:i' }}（北京时间）</p><p>{{ action.visit.public_contact.name }} · {{ action.visit.dentist.name }}</p>
+      {% if action.kind == 'CONTACT_CLINIC' %}<a class="button secondary" href="{% url 'portal_visit' action.visit.pk %}#frontdesk-help">查看预约与联系方式 →</a>{% else %}<a class="button secondary" href="{% url 'portal_visit' action.visit.pk %}">查看安排与到诊提示 →</a>{% endif %}
+    {% elif action.kind == 'WAITLIST' %}
+      <h2 id="patient-next-action">查看候补进度</h2><p>查看门店提供的安排和当前结果。</p><a class="button secondary" href="{% url 'waitlist' %}">查看我的候补 →</a>
+    {% else %}
+      <h2 id="patient-next-action">预约就诊</h2><p>选择适合的服务和时间。暂时没有合适安排，也可以登记候补。</p><a class="button secondary" href="{% url 'public_services' %}">查看服务与可约时间 →</a>
+    {% endif %}
+  </aside>
+  {% endwith %}
 </section>
-{% if offer_count %}<section class="service-attention" aria-label="待确认邀约"><div><strong>有 {{ offer_count }} 条邀约等待你确认</strong><p>前台已提供限时安排。请核对截止时间，并明确选择新增就诊或替换原预约。</p></div><a class="button" href="{% url 'waitlist' %}">查看邀约 →</a></section>{% endif %}
+{% if offer_count and primary_action.kind != 'CONFIRM_OFFER' %}<section class="service-attention" aria-label="待确认邀约"><div><strong>有 {{ offer_count }} 条邀约等待你确认</strong><p>前台已提供限时安排。请核对截止时间，并明确选择新增就诊或替换原预约。</p></div><a class="button" href="{% url 'waitlist' %}">查看邀约 →</a></section>{% endif %}
 <section class="service-stats" aria-label="本人办理概览"><a href="{% url 'portal_appointments' %}"><strong>{{ active_count }}</strong><span>待就诊与在诊</span><span aria-hidden="true">↗</span></a><a href="{% url 'waitlist' %}"><strong>{{ waiting_count }}</strong><span>候补等待与邀约</span><span aria-hidden="true">↗</span></a><a href="{% url 'portal_appointments' %}?queue=history"><strong>{{ history_count }}</strong><span>历史与改期记录</span><span aria-hidden="true">↗</span></a></section>
-<div class="service-section-heading"><div><p class="eyebrow">每一步都有明确去向</p><h2>今天需要办理什么？</h2></div><span class="muted">仅显示本人资料</span></div>
+<div class="service-section-heading"><div><h2>今天需要办理什么？</h2></div><span class="muted">当前就诊人 · 授权范围内</span></div>
 <section class="task-grid service-task-grid" aria-label="常用任务"><a class="task-card" href="{% url 'portal_appointments' %}"><span class="task-no" aria-hidden="true">01 / 预约管理</span><h2>核对与调整安排</h2><p>查看诊所和时间，办理未开始预约的改期或取消。</p><span>我的预约 →</span></a><a class="task-card" href="{% url 'waitlist' %}"><span class="task-no" aria-hidden="true">02 / 前台协调</span><h2>等一个合适的时段</h2><p>登记可接受范围，查看邀约和成约结果，保留原有安排。</p><span>我的候补 →</span></a><a class="task-card" href="{% url 'portal_help' %}"><span class="task-no" aria-hidden="true">03 / 到诊协助</span><h2>需要人工帮忙</h2><p>了解到诊、结算和资料核对流程，联系原诊所前台。</p><span>查看帮助 →</span></a></section>
 {% include 'workspaces/business_worklist.html' %}
 <section class="service-assistance"><div><h2>第一次使用？</h2><p>可按操作指南逐步办理，也可以向小助手询问流程。</p></div><div class="actions"><a class="button secondary" href="{% url 'guide_index' %}">逐步操作指南</a><a href="{% url 'portal_assistant' %}">问问小助手 →</a></div></section>

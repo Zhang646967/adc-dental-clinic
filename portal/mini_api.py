@@ -24,6 +24,7 @@ from care.models import Invoice
 from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
 from portal import mini_forms as forms, services, rescheduling
+from portal.patient_dashboard import needs_outcome_review
 from portal.service_catalogue import public_profiles, public_profile, require_self_service
 from portal.service_projection import service_data
 from registry.models import Clinic
@@ -142,7 +143,8 @@ def sign_out(request):
     return result(request, session_data(request))
 
 
-def visit_data(visit, *, actor=None):
+def visit_data(visit, *, actor=None, now=None):
+    now = now or timezone.now()
     plan = current_plan(visit)
     contact=(plan.snapshot.get('public_clinic') if plan else None) or dict(name=visit.clinic.name,address=visit.clinic.postal_address,phone=visit.clinic.phone)
     successor = Visit.objects.filter(replaces_visit_id=visit.pk, patient_id=visit.patient_id).values_list('pk', flat=True).first()
@@ -151,7 +153,8 @@ def visit_data(visit, *, actor=None):
         status=visit.status, status_label=visit.get_status_display(), version=visit.lock_version,
         service=(plan.snapshot.get('service', {}).get('name') or plan.service.name) if plan else '常规预约',
         service_id=plan.service_id if plan else None, predecessor=visit.replaces_visit_id, successor=successor,
-        can_change=visit.status == 'SCHEDULED' and visit.scheduled_start > timezone.now(),
+        can_change=visit.status == 'SCHEDULED' and visit.scheduled_start > now,
+        needs_outcome_review=needs_outcome_review(visit, now),
         address=contact['address'], phone=contact['phone'],
         patient_request=visit.chief_complaint if actor and not patient_access(actor).delegated else '')
 
@@ -189,10 +192,15 @@ def service_detail(request, pk):
 @endpoint()
 def overview(request):
     from portal.patient_dashboard import dashboard
-    d = dashboard(request.user)
-    return result(request, dict(next_visit=visit_data(d['next_visit'],actor=request.user) if d['next_visit'] else None,
+    now = timezone.now()
+    d = dashboard(request.user, now=now)
+    action = d['primary_action']
+    offer = action['offer']
+    primary = dict(kind=action['kind'], visit=visit_data(action['visit'], now=now) if action['visit'] else None,
+                   offer=dict(id=offer.pk, expires_at=offer.expires_at.isoformat()) if offer else None)
+    return result(request, dict(next_visit=visit_data(d['next_visit'],actor=request.user,now=now) if d['next_visit'] else None,
         active_count=d['active_count'], history_count=d['history_count'],
-        waiting_count=d['waiting_count'], offer_count=d['offer_count']))
+        waiting_count=d['waiting_count'], offer_count=d['offer_count'], primary_action=primary))
 
 
 @endpoint()

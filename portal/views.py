@@ -171,8 +171,11 @@ def visit(request,pk):
     access=patient_access(request.user)
     v=get_object_or_404(access.scope(Visit.objects.select_related("clinic","dentist")),pk=pk)
     from portal.rescheduling import related_context
+    from portal.patient_dashboard import needs_outcome_review
+    now = timezone.now()
     return render(request,"portal/visit.html",dict(related_context(request.user,v),visit=v,
-        can_cancel=v.status=="SCHEDULED" and v.scheduled_start>timezone.now()))
+        can_cancel=v.status=="SCHEDULED" and v.scheduled_start>now,
+        needs_outcome_review=needs_outcome_review(v, now)))
 
 @login_required(login_url="portal_login")
 @require_http_methods(["GET","POST"])

@@ -13,6 +13,7 @@ from scheduling.models import Visit
 from scheduling.resource_models import ResourceBinding, ResourceClaim, ServicePresentation
 from scheduling.service_content import draft_from_guide
 from tests.test_reception_resources import ResourceFixture
+from tests.workspace_client import WorkspaceClient
 from workspaces.context import SESSION_KEY
 from workspaces.models import WorkspaceContext
 
@@ -52,6 +53,78 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         response = self.post('mini_book_confirm', {'proposal_token': self.preview(), 'confirmed': 'on'})
         self.assertEqual(response.status_code, 200, response.content)
         return Visit.objects.get(pk=response.json()['data']['id'])
+
+    def test_website_booking_native_reschedule_and_frontdesk_arrival(self):
+        web = WorkspaceClient()
+        web.force_login(self.user)
+        url = reverse('portal_confirm')
+        params = dict(slot=self.slot1.pk, start=self.t.isoformat(), service=self.service.pk)
+        form = web.get(url, params).context['form']
+        confirmed = web.post(url, dict(token=form.initial['token'], confirmed='on'))
+        self.assertEqual(confirmed.status_code, 302, confirmed.content)
+        original = Visit.objects.get()
+        self.assertRedirects(confirmed, reverse('portal_visit', args=[original.pk]))
+
+        def overview():
+            return self.client.get(reverse('mini_overview')).json()['data']['primary_action']
+
+        self.assertEqual((overview()['kind'], overview()['visit']['id']), ('UPCOMING_VISIT', original.pk))
+        p = self.post('mini_reschedule_preview', dict(action='preview', expected_version=0,
+            slot_id=self.slot2.pk, start=(self.t+timedelta(hours=1)).isoformat(), reason='更换课程合成时段'), pk=original.pk)
+        self.assertEqual(p.status_code, 200, p.content)
+        confirm = dict(proposal_token=p.json()['data']['proposal_token'], confirmed='on')
+        first = self.post('mini_reschedule_confirm', confirm, pk=original.pk)
+        repeated = self.post('mini_reschedule_confirm', confirm, pk=original.pk)
+        self.assertEqual(first.status_code, 200, first.content)
+        self.assertEqual(repeated.status_code, 200, repeated.content)
+        visit = Visit.objects.get(replaces_visit=original)
+        self.assertEqual(repeated.json()['data']['visit']['id'], visit.pk)
+        self.assertContains(web.get(reverse('portal_visit', args=[original.pk])), '查看后继预约')
+        self.assertContains(web.get(reverse('portal_visit', args=[visit.pk])), '改期而来')
+        self.assertEqual(Visit.objects.count(), 2)
+
+        front = WorkspaceClient()
+        front.force_login(self.front)
+        worklist = front.get(reverse('frontdesk_home'))
+        for label in ('安排待匹配候补', '核对到期邀约', '办理今日到诊', '核实逾期预约结果', '跟进取消回访'):
+            self.assertContains(worklist, label)
+        checked = front.post(reverse('visit_detail', args=[visit.pk]), dict(action='check_in', expected_version=0))
+        self.assertEqual(checked.status_code, 302, checked.content)
+        self.assertEqual((overview()['kind'], overview()['visit']['id']), ('CHECKED_IN', visit.pk))
+        self.assertContains(web.get(reverse('portal_home')), '正在就诊')
+        other, _ = self.login(self.other)
+        self.assertEqual(other.get(reverse('mini_visit', args=[visit.pk])).status_code, 404)
+        self.assertEqual(other.get(reverse('mini_overview')).json()['data']['primary_action']['kind'], 'BOOK')
+
+    def test_overdue_appointment_prompts_review_without_inferred_no_show(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        v = self.book()
+        at_end = SimpleNamespace(now=lambda: v.scheduled_end)
+        with (patch('portal.patient_dashboard.timezone', at_end), patch('portal.mini_api.timezone', at_end),
+              patch('portal.views.timezone', at_end)):
+            primary = self.client.get(reverse('mini_overview')).json()['data']['primary_action']
+            self.assertEqual((primary['kind'], primary['visit']['id']), ('CONTACT_CLINIC', v.pk))
+            self.assertTrue(primary['visit']['needs_outcome_review'])
+            self.assertContains(self.client.get(reverse('portal_home')), '请联系门店核实')
+            self.assertContains(self.client.get(reverse('portal_visit', args=[v.pk])), '请联系门店核实')
+        v.refresh_from_db()
+        self.assertEqual((v.status, v.attended), ('SCHEDULED', False))
+
+    def test_website_cancellation_is_visible_to_native_and_frontdesk(self):
+        v = self.book()
+        web = WorkspaceClient()
+        web.force_login(self.user)
+        url = reverse('portal_cancel', args=[v.pk])
+        form = web.get(url).context['form']
+        cancelled = web.post(url, dict(expected_version=v.lock_version, confirmed='on',
+            patient_authority=form.initial['patient_authority'], reason='课程合成：无法按原时间到店'))
+        self.assertRedirects(cancelled, reverse('portal_visit', args=[v.pk]))
+        detail = self.client.get(reverse('mini_visit', args=[v.pk])).json()['data']
+        self.assertEqual((detail['status'], detail['can_change']), ('CANCELLED', False))
+        front = WorkspaceClient()
+        front.force_login(self.front)
+        self.assertContains(front.get(reverse('cancellation_followups')), v.visit_no)
 
     def test_bootstrap_is_private_and_has_csrf(self):
         response = Client().get(reverse('mini_session'))

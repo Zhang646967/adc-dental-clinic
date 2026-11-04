@@ -11,6 +11,7 @@ from care.audit import emit
 from care.models import AuditEvent
 from coordination import services
 from coordination.models import WaitRequest, WaitOffer
+from coordination.presentation import offer_status, wait_status
 from coordination.reservations import lock_resources
 from coordination.windows import validate_wait_window, WindowError
 from portal import mini_forms as forms
@@ -31,33 +32,37 @@ def owned(actor):
     return patient_access(actor).scope(WaitRequest.objects.all()).select_related('clinic', 'service', 'preferred_dentist')
 
 
-def offer_data(offer):
-    active = offer.state == 'PENDING' and offer.request.state == 'OFFERED' and offer.expires_at > timezone.now()
+def offer_data(offer, *, now=None):
+    now = now or timezone.now()
+    status_label, active = offer_status(offer, now)
     plan = ResourcePlan.objects.filter(offer=offer).order_by('-version', '-pk').first()
     label = (plan.snapshot.get('service', {}).get('name') if plan else None) or (offer.request.service.name if offer.request.service_id else '常规预约')
     contact=(plan.snapshot.get('public_clinic') if plan else None) or {'name':offer.request.clinic.name}
     return dict(id=offer.pk, slot=offer.slot_id, clinic=contact['name'], dentist=offer.slot.dentist.name,
         service=label,
         start=offer.starts_at.isoformat(), end=offer.ends_at.isoformat(), expires=offer.expires_at.isoformat(),
-        state=offer.state, status_label='已到期，待前台重新安排' if offer.state == 'PENDING' and not active else offer.get_state_display(),
-        active=active, visit=visit_data(offer.visit) if offer.visit_id else None)
+        state=offer.state, status_label=status_label,
+        active=active, visit=visit_data(offer.visit, now=now) if offer.visit_id else None)
 
 
-def wait_data(entry):
-    offers = entry.offers.select_related('request__clinic', 'request__service', 'slot__dentist', 'visit__clinic', 'visit__dentist').order_by('-pk')[:5]
+def wait_data(entry, *, now=None):
+    now = now or timezone.now()
+    offers = [offer_data(o, now=now) for o in entry.offers.select_related('request__clinic', 'request__service', 'slot__dentist', 'visit__clinic', 'visit__dentist').order_by('-pk')[:5]]
+    label = wait_status(entry, ((o['state'], o['status_label']) for o in offers))
     return dict(id=entry.pk, clinic_id=entry.clinic_id, clinic=entry.clinic.public_contact['name'], service=entry.service.name if entry.service_id else '常规预约',
         dentist=entry.preferred_dentist.name if entry.preferred_dentist_id else '不限医师',
         earliest=entry.earliest.isoformat(), latest=entry.latest.isoformat(),
-        state=entry.state, status_label=entry.get_state_display(), revision=entry.revision,
-        can_withdraw=entry.state in ('WAITING', 'OFFERED'), offers=[offer_data(o) for o in offers])
+        state=entry.state, status_label=label, revision=entry.revision,
+        can_withdraw=entry.state in ('WAITING', 'OFFERED'), offers=offers)
 
 
 @endpoint()
 def listing(request):
     d = validated(forms.PageForm(request.GET))
+    now = timezone.now()
     qs = owned(request.user).order_by('-pk')
     page = Paginator(qs, 10).get_page(d['page'] or 1)
-    return result(request, dict(rows=[wait_data(e) for e in page], page=page.number, pages=page.paginator.num_pages,
+    return result(request, dict(rows=[wait_data(e, now=now) for e in page], page=page.number, pages=page.paginator.num_pages,
         has_open=qs.filter(state__in=('WAITING', 'OFFERED')).exists()))
 
 

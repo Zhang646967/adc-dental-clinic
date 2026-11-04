@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods,require_POST
 from adc_core.http_support import EXPECTED_ERRORS,add_error
 from coordination.models import WaitRequest,WaitOffer,SchedulePlan
 from coordination.policies import entries_for,require_owner_or_front
+from coordination.presentation import offer_status, wait_status
 from coordination.forms import JoinForm,ConfirmForm
 from coordination import services
 from portal.policies import form_authority,read_form_authority
@@ -21,15 +22,15 @@ def confirmation(request):
 
 def template_for(request):return 'portal/base.html' if request.workspace.role=='PATIENT' else 'base.html'
 
-def entry_row(request,e):
+def entry_row(request,e,now):
     patient_visible=request.workspace.role in ('PATIENT','FRONT_DESK')
     offers=[]
     for o in e.offers.select_related('slot__dentist','slot__clinic').order_by('-id')[:5]:
+        label, active = offer_status(o, now)
         offers.append({'id':o.pk,'doctor':o.slot.dentist.name,'start':o.starts_at,'end':o.ends_at,
             'expires':o.expires_at,'state':o.state,'visit_id':o.visit_id,
-            'status':o.get_state_display(),'active':o.state=='PENDING' and o.expires_at>timezone.now(),
-            'may_answer':patient_visible and o.state=='PENDING' and o.expires_at>timezone.now()})
-    return {'id':e.pk,'state':e.state,'label':e.get_state_display(),'clinic':e.clinic.name,
+            'status':label,'active':active,'may_open':patient_visible})
+    return {'id':e.pk,'state':e.state,'label':wait_status(e, ((o['state'], o['status']) for o in offers)),'clinic':e.clinic.name,
         'patient':e.patient.name if patient_visible else f'候补需求 #{e.pk}',
         'earliest':e.earliest,'latest':e.latest,'offers':offers,
         'can_withdraw':patient_visible and e.state in ('WAITING','OFFERED')}
@@ -38,14 +39,15 @@ def entry_row(request,e):
 @require_http_methods(['GET'])
 def listing(request):
     qs=entries_for(request.user).select_related('patient','clinic').order_by('-created_at')
+    now=timezone.now()
     from django.core.paginator import Paginator
     page=Paginator(qs,20).get_page(request.GET.get('page'))
-    return render(request,'coordination/waitlist.html',{'rows':[entry_row(request,e) for e in page],
+    return render(request,'coordination/waitlist.html',{'rows':[entry_row(request,e,now) for e in page],
         'page':page,'may_join':request.workspace.role in ('PATIENT','FRONT_DESK'),
          'may_recycle':request.workspace.role in ('MANAGER','FRONT_DESK'),
         'may_plan':request.workspace.role == 'FRONT_DESK',
         'waiting_count':qs.filter(state='WAITING').count(),
-        'expired_count':WaitOffer.objects.filter(request__in=qs,state='PENDING',expires_at__lte=timezone.now()).count(),
+        'expired_count':WaitOffer.objects.filter(request__in=qs,state='PENDING',expires_at__lte=now).count(),
         'has_open_wait':qs.filter(state__in=('WAITING','OFFERED')).exists(),
         'base_template':template_for(request),'confirm_form':ConfirmForm()})
 
@@ -87,22 +89,27 @@ def offer(request,pk):
     if request.method=='POST' and form.is_valid():
         action=request.POST.get('action')
         if action not in ('accept','decline'):raise PermissionDenied('未知操作')
-        try:services.answer_offer(actor=request.user,offer_id=o.pk,accept=action=='accept',authority=patient_stamp(request))
+        try:answered=services.answer_offer(actor=request.user,offer_id=o.pk,accept=action=='accept',authority=patient_stamp(request))
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:
             messages.success(request,'已处理候补邀约；接受时产生正式预约，可在预约页面核对。')
+            if request.workspace.role=='PATIENT' and answered.visit_id:
+                return redirect('portal_visit', pk=answered.visit_id)
             return redirect('front_coordination_detail',pk=origin) if origin else redirect('waitlist')
+        o.refresh_from_db()
+    now = timezone.now()
+    label, active = offer_status(o, now)
     replacement_sources=[]
-    if request.workspace.role=='PATIENT':
+    if request.workspace.role=='PATIENT' and active:
         from scheduling.models import Visit
         sources=Visit.objects.filter(patient_id=o.request.patient_id,clinic_id=o.request.clinic_id,
-            status='SCHEDULED',scheduled_start__gt=timezone.now())
+            status='SCHEDULED',scheduled_start__gt=now)
         if o.request.service_id:
             sources=sources.filter(resource_plans__is_current=True,resource_plans__service_id=o.request.service_id)
         replacement_sources=list(sources.distinct().order_by('scheduled_start','pk')[:10])
     return render(request,'coordination/offer.html',{'offer':o,'form':form,'base_template':template_for(request),
         'replacement_sources':replacement_sources,
-        'active':o.state=='PENDING' and o.expires_at>timezone.now(),**return_context(origin)})
+        'offer_label':label,'active':active,**return_context(origin)})
 
 @login_required
 @require_http_methods(['GET','POST'])

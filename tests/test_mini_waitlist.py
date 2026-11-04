@@ -121,6 +121,25 @@ class MiniWaitlistTests(ResourceFixture, TransactionTestCase):
         self.assertContains(self.client.get(reverse('portal_home')), '有 1 条邀约等待你确认')
         d = self.client.get(reverse('mini_overview')).json()['data']
         self.assertEqual((d['waiting_count'],d['offer_count'],d['active_count']), (1,1,0))
+        self.assertEqual(d['primary_action'], dict(kind='CONFIRM_OFFER', visit=None,
+            offer=dict(id=o.pk, expires_at=o.expires_at.isoformat())))
+        self.assertContains(self.client.get(reverse('portal_home')), reverse('wait_offer', args=[o.pk]))
+
+    def test_native_accept_then_website_replay_opens_same_visit(self):
+        from tests.workspace_client import WorkspaceClient
+        o = self.offered()
+        web = WorkspaceClient()
+        web.force_login(self.user)
+        url = reverse('wait_offer', args=[o.pk])
+        form = web.get(url).context['form']
+        p = self.action_token(o)
+        result = self.post('mini_offer_confirm', dict(proposal_token=p, confirmed='on'), pk=o.pk)
+        self.assertEqual(result.status_code, 200, result.content)
+        visit_id = result.json()['data']['visit']['id']
+        replay = web.post(url, dict(action='accept', confirmed='on', patient_authority=form.initial['patient_authority']))
+        self.assertRedirects(replay, reverse('portal_visit', args=[visit_id]))
+        self.assertContains(web.get(url), '查看正式预约')
+        self.assertEqual(Visit.objects.count(), 1)
 
     def test_accept_preview_replay_one_booking_and_current_result(self):
         o = self.offered(); p = self.action_token(o)
@@ -161,6 +180,18 @@ class MiniWaitlistTests(ResourceFixture, TransactionTestCase):
         WaitOffer.objects.filter(pk=o.pk).update(expires_at=timezone.now()-timedelta(seconds=1))
         d=self.client.get(reverse('mini_offer',kwargs={'pk':o.pk})).json()['data']['offer']
         self.assertFalse(d['active']);self.assertIn('到期',d['status_label'])
+        row = self.client.get(reverse('mini_waitlist')).json()['data']['rows'][0]
+        self.assertEqual(row['status_label'], d['status_label'])
+        self.assertTrue(row['can_withdraw'])
+        self.assertEqual(row['state'], 'OFFERED')
+        listing = self.client.get(reverse('waitlist'))
+        self.assertContains(listing, d['status_label'])
+        self.assertContains(listing, '查看邀约结果')
+        self.assertContains(listing, '退出这条候补')
+        detail = self.client.get(reverse('wait_offer', args=[o.pk]))
+        self.assertContains(detail, d['status_label'])
+        self.assertNotContains(detail, '接受并创建预约')
+        self.assertEqual(self.client.get(reverse('mini_overview')).json()['data']['primary_action']['kind'], 'WAITLIST')
         self.assertEqual(self.post('mini_offer_confirm',dict(proposal_token=p,confirmed='on'),pk=o.pk).status_code,409)
         self.assertFalse(Visit.objects.exists())
 

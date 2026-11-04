@@ -14,6 +14,7 @@ from accounts.finance_access import require_finance_read
 from adc_core.snapshots import reporting_snapshot
 from care.models import CorrectionRequest, Invoice
 from coordination.models import CoordinationTask, WaitOffer, WaitRequest
+from coordination.presentation import active_offers
 from finance.models import Quarter
 from finance.selectors import _quarter_work_rows
 from scheduling.models import AvailabilitySlot,Visit
@@ -98,8 +99,8 @@ def workspace_worklist(actor):
             from portal.policies import patient_access
             access = patient_access(actor)
             patient_id = access.patient_id
-            offers = access.scope(WaitOffer.objects.all(),patient_field='request__patient_id',clinic_field='request__clinic_id').filter(request__state='OFFERED',
-                    state='PENDING', expires_at__gt=now).select_related('slot__clinic', 'slot__dentist').order_by('expires_at', 'pk')
+            visible_offers = access.scope(WaitOffer.objects.all(), patient_field='request__patient_id', clinic_field='request__clinic_id')
+            offers = active_offers(visible_offers, now).select_related('slot__clinic', 'slot__dentist').order_by('expires_at', 'pk')
             groups.append(_group('offers', '候补邀约待你答复', offers,
                 lambda offer: {'title': f'{offer.slot.clinic.name} · {offer.slot.dentist.name}',
                     'detail': '答复截止时间（北京时间）', 'when': offer.expires_at,
