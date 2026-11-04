@@ -11,5 +11,5 @@
     <view class="notice">{{note}}</view><view class="muted">时间均为北京时间。预约及候补操作不产生治疗或收费。</view>
     <checkbox-group bindchange="checked"><label class="check"><checkbox value="yes" checked="{{checked}}"/><text>{{consent}}</text></label></checkbox-group>
     <button class="{{review.kind==='cancel' || review.kind==='wait_withdraw' || review.kind==='offer_decline'?'danger':'primary'}}" disabled="{{!checked || busy}}" loading="{{busy}}" bindtap="submit">{{button}}</button>
-  </block><button class="secondary" bindtap="home">返回我的预约核对结果</button>
+  </block><button class="secondary" bindtap="home">查询办理结果</button>
 </view>

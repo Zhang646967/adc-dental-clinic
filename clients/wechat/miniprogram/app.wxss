@@ -22,3 +22,6 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 .support-code{display:block;margin-top:12rpx;color:#664139;font-size:.9em;overflow-wrap:anywhere}
 .patient-section{margin-top:32rpx}
 .patient-section navigator{display:block;min-height:44px;box-sizing:border-box}
+.result-success{background:#e7f2e9;color:#245c40}
+.patient-return{margin-top:36rpx;padding-top:16rpx;border-top:1rpx solid #dbe5dc}
+.patient-return navigator{display:block}

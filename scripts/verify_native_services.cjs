@@ -85,6 +85,28 @@ async function verify(){
     await p.onShow();
     assert.deepEqual(plain(calls[0].data),{queue:'all',page:1});
   });
+  await test('offer refresh removes revoked details and choices',async()=>{
+    let allowed=true;
+    const d=page('offer',{request:async()=>{
+      if(!allowed)throw Object.assign(Error('不可读取邀约'),{status:403});
+      return {offer:{...slot,id:5,expires:slot.end,active:true},sources:[]};
+    }});
+    d.p.onLoad({id:'5'});
+    await d.p.onShow();
+    assert.equal(d.p.data.offer.id,5);
+    allowed=false;
+    await d.p.load();
+    assert.equal(d.p.data.offer,null);
+    assert.equal(d.p.data.choices.length,0);
+    await d.p.decline();
+    assert(d.calls.every(c=>c.method==='GET'));
+  });
+  await test('candidate outcome after an offer-based change returns to the waitlist',()=>{
+    const d=page('confirm');
+    d.state.globalData.review={kind:'reschedule',fromWaitlist:true,preview:{}};
+    d.p.onLoad();d.p.home();
+    assert.equal(d.navigation.at(-1).url,'/pages/waitlist/index');
+  });
   await test('typed service hint selects its clinic and exact service',()=>{
     const d=selectedCatalogue(catalogue,{service:'22'});
     assert.equal(d.clinics[d.clinicIndex].id,2);assert.equal(d.selectedId,22);

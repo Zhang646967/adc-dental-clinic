@@ -3,10 +3,10 @@ const api=require('../../utils/api');
 const {dateTime,showError}=require('../../utils/format');
 const stamp=()=>{const s=api.sessionInfo();return JSON.stringify([s.workspace_id,s.subject_key,s.subject_revision]);};
 Page({
- data:{rows:[],page:1,pages:1,busy:false,error:''},
+ data:{rows:[],page:1,pages:1,busy:false,error:'',requestId:''},
  clear(){this.setData({rows:[],page:1,pages:1});},
  async onShow(){
-  this.setData({busy:true,error:''});
+  this.setData({busy:true,error:'',requestId:''});
   try{const s=await api.bootstrap();api.showSubject(this);
    if(!s.authenticated){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/login/index'});return;}
    if(s.subject_required){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/patients/index'});return;}
@@ -15,7 +15,7 @@ Page({
   }catch(e){this.failed(e);}
  },
  async load(){
-  this.setData({busy:true,error:''});
+  this.setData({busy:true,error:'',requestId:'',rows:[]});
   try{const d=await api.request('plans/?page='+this.data.page);
    if(this._subject!==stamp()){this.clear();throw new Error('就诊人已变化，请重新核对本人方案。');}
    this.setData({rows:d.rows.map(r=>Object.assign({},r,{timeLabel:dateTime(r.recorded_at)})),page:d.page,pages:d.pages,busy:false});
@@ -23,6 +23,6 @@ Page({
  },
  open(e){if(!this.data.busy)navigation.navigateTo({url:'/pages/plan/index?id='+Number(e.currentTarget.dataset.id)});},
  turn(e){if(this.data.busy)return;const page=this.data.page+Number(e.currentTarget.dataset.step);if(page<1||page>this.data.pages)return;this.setData({page});return this.load();},
- failed(e){if(['SUBJECT_CHANGED','SUBJECT_REQUIRED','WORKSPACE_CHANGED','ACCESS_DENIED'].includes(e.code)||e.status===401)this.clear();showError(this,e);},
+ failed(e){if(['SUBJECT_CHANGED','SUBJECT_REQUIRED','WORKSPACE_CHANGED','ACCESS_DENIED'].includes(e.code)||e.status===401)this.clear();showError(this,e,{separateRequestId:true});},
  onUnload(){this.clear();this._subject=null;}
 });

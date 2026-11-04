@@ -12,6 +12,16 @@ async function verify(){
   assert.equal(navigation.consume('/pages/services/index'),null);count++;
   navigation.navigateTo({url:'/pages/dentist/index?id=7'});assert.equal(routes.at(-1).method,'navigateTo');count++;
   app.globalData.tabNavigation={path:'/pages/services/index',values:{clinic:3},expires:Date.now()-1};assert.equal(navigation.consume('/pages/services/index'),null);count++;
+  global.wx.navigateBack=o=>routes.push({method:'navigateBack',...o});
+  global.getCurrentPages=()=>[{route:'pages/medical-authorizations/index',options:{id:'3'}},{route:'pages/plan/index',options:{id:'7'}}];
+  navigation.returnTo('/pages/medical-authorizations/index?id=3');
+  assert.equal(routes.at(-1).method,'navigateBack');count++;
+  navigation.returnTo('/pages/medical-authorizations/index');
+  assert.equal(routes.at(-1).method,'redirectTo');
+  assert.equal(routes.at(-1).url,'/pages/medical-authorizations/index');count++;
+  navigation.returnTo('/pages/home/index?queue=history');
+  assert.equal(routes.at(-1).method,'switchTab');
+  assert.equal(navigation.consume('/pages/home/index').queue,'history');count++;
   const intent=require(path.join(root,'utils/booking-intent'));
   intent.remember(app,11,3,7,'2026-10-29');assert.equal(intent.destination(app,{subject_required:true}),'/pages/patients/index');
   assert.equal(intent.destination(app,{authenticated:true}),'/pages/booking/index?service=11&clinic=3&dentist=7&day=2026-10-29');count++;

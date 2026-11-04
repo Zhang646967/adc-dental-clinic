@@ -5,7 +5,7 @@ Page({
   data:{visit:null,reason:'',cancelOpen:false,busy:false,error:'',readOnly:false},
   onLoad(q){ api.showSubject(this);this.id=Number(q.id);},
   async onShow(){ api.showSubject(this);this.setData({visit:null,error:''});try{this.setData({visit:arrangement(await api.request(`visits/${this.id}/`)),readOnly:api.sessionInfo().read_only,environmentLabel:api.sessionInfo().environment_label||''});}catch(e){showError(this,e);}},
-  invoice(){const id=this.data.visit&&this.data.visit.invoice_id;if(id)navigation.navigateTo({url:`/pages/invoice/index?id=${id}`});},
+  invoice(){const id=this.data.visit&&this.data.visit.invoice_id;if(id)navigation.navigateTo({url:`/pages/invoice/index?id=${id}&visit=${this.id}`});},
   reschedule(){navigation.navigateTo({url:`/pages/booking/index?visit=${this.id}`});},
   cancel(){this.setData({cancelOpen:!this.data.cancelOpen,error:''});},
   reason(e){this.setData({reason:e.detail.value});},

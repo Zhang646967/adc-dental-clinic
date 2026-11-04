@@ -20,6 +20,7 @@ Page({
     const display=Object.assign({},review,{preview:Object.assign({},review.preview)});
     if(display.preview.original)display.preview.original=arrangement(display.preview.original);
     this.kind=review.kind;
+    this.fromWaitlist=review.fromWaitlist;
     const copy=actions[review.kind];
     this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3]});
   },
@@ -47,7 +48,7 @@ Page({
   },
   home(){
     getApp().globalData.review=null;
-    const waitlist=this.kind==='wait_join'||this.kind==='wait_withdraw'||this.kind==='offer_decline';
+    const waitlist=this.fromWaitlist||this.kind==='offer_accept'||this.kind==='wait_join'||this.kind==='wait_withdraw'||this.kind==='offer_decline';
     const visits=this.data.uncertain?'/pages/home/index?queue=all':'/pages/home/index';
     navigation.reLaunch({url:waitlist?'/pages/waitlist/index':visits});
   },

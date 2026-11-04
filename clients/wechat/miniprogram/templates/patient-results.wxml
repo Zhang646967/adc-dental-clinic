@@ -1,0 +1,8 @@
+<template name="patient-results">
+  <view wx:if="{{busy}}" class="notice" role="status">正在读取或办理，请稍候。</view>
+  <view wx:if="{{error}}" class="error" role="alert">
+    <text>{{error}}</text>
+    <text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text>
+  </view>
+  <view wx:if="{{done}}" class="notice result-success" role="status">{{done}}</view>
+</template>

@@ -1,4 +1,5 @@
 function dateTime(value) {
+  if (!value) return '';
   const d = new Date(new Date(value).getTime() + 8 * 3600000);
   const pad = n => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;

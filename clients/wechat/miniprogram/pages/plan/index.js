@@ -4,21 +4,24 @@ const {dateTime,showError}=require('../../utils/format');
 const states=[{code:'ACCEPTED',label:'认可此步骤'},{code:'DEFERRED',label:'暂缓决定'},{code:'DECLINED',label:'不选择此步骤'}];
 const stamp=()=>{const s=api.sessionInfo();return JSON.stringify([s.workspace_id,s.subject_key,s.subject_revision]);};
 Page({
- data:{plan:null,states,stateIndex:0,selected:null,note:'',preview:null,checked:false,busy:false,error:'',done:'',uncertain:false,readOnly:false,revision:''},
+ data:{plan:null,states,stateIndex:0,selected:null,note:'',preview:null,checked:false,busy:false,error:'',requestId:'',done:'',uncertain:false,readOnly:false,revision:''},
  onLoad(query){this.planId=Number(query.id);if(!Number.isSafeInteger(this.planId)||this.planId<1)this.planId=null;},
  clear(){this._pending=null;this.setData({plan:null,selected:null,note:'',preview:null,checked:false,uncertain:false,done:''});},
  async onShow(){
-  this.setData({busy:true,error:''});
+  this.setData({busy:true,error:'',requestId:''});
   try{const s=await api.bootstrap();api.showSubject(this);
    if(!s.authenticated){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/login/index'});return;}
    if(s.subject_required){this.clear();this.setData({busy:false});navigation.reLaunch({url:'/pages/patients/index'});return;}
    if(s.delegated&&!s.medical){this.clear();this.setData({busy:false,error:'预约代办不包含临床方案，请切换至本人。'});return;}
    if(!this.planId){this.clear();this.setData({busy:false,error:'方案链接已失效，请从本人计划清单重新打开。'});return;}
-   if(this._subject!==stamp())this.clear();this._subject=stamp();this.setData({readOnly:s.read_only});await this.load();
+   if(this._subject!==stamp()){this.clear();this.setData({revision:''});}
+   this._subject=stamp();
+   const authorization=s.medical&&/^medical:[1-9][0-9]*$/.test(s.subject_key)?s.subject_key.slice(8):'';
+   this.setData({readOnly:s.read_only,authorization});await this.load();
   }catch(e){this.failed(e);}
  },
  async load(){
-  this.setData({busy:true,error:''});
+  this.setData({busy:true,error:'',requestId:''});
   try{const d=await api.request('plans/'+this.planId+'/'+(this.data.revision?'?revision='+this.data.revision:''));
    if(this._subject!==stamp()){this.clear();throw new Error('就诊人已变化，请重新核对本人方案。');}
    const steps=d.steps.map(s=>Object.assign({},s,{disclosureTimeLabel:s.disclosure&&s.disclosure.prepared_at?dateTime(s.disclosure.prepared_at):'',actual_history:s.actual_history.map(a=>Object.assign({},a,{timeLabel:dateTime(a.observed_at)}))}));
@@ -32,7 +35,7 @@ Page({
  async preview(){
   if(this.data.busy||this.data.uncertain||this.data.readOnly||!this.data.selected)return;
   if(this._subject!==stamp()||(api.sessionInfo().delegated&&!api.sessionInfo().medical)){this.clear();this.setData({error:'就诊人已变化，请重新打开本人方案。'});return;}
-  this.setData({busy:true,error:''});
+  this.setData({busy:true,error:'',requestId:''});
   try{const d=await api.request('plans/'+this.planId+'/steps/'+this.data.selected.id+'/decision/preview/','POST',{decision:states[this.data.stateIndex].code,note:this.data.note});
    if(this._subject!==stamp()){this.clear();throw new Error('本人身份已变化，请重新核对。');}
    this.setData({preview:Object.assign({},d,{decisionLabel:states.find(s=>s.code===d.values.decision).label}),checked:false,busy:false});
@@ -43,7 +46,7 @@ Page({
   if(this._subject!==stamp()||(api.sessionInfo().delegated&&!api.sessionInfo().medical)){this.clear();this.setData({error:'就诊人已变化，原确认不能继续。'});return;}
   if(!this.data.uncertain&&!this.data.checked){this.setData({error:'请先核对并明确确认这个版本步骤的决定。'});return;}
   if(!this._pending)this._pending={step:this.data.preview.step,data:{proposal_token:this.data.preview.proposal_token,confirmed:'on'}};
-  this.setData({busy:true,error:''});
+  this.setData({busy:true,error:'',requestId:''});
   try{await api.request('plans/'+this.planId+'/steps/'+this._pending.step+'/decision/confirm/','POST',this._pending.data);
    if(this._subject!==stamp()){this.clear();throw new Error('本人身份已变化，请重新查看当前决定。');}
    this._pending=null;this.setData({preview:null,selected:null,note:'',checked:false,uncertain:false,busy:false,done:'方案选择已保留，下面显示当前状态；未产生治疗或收费。'});await this.load();
@@ -51,6 +54,15 @@ Page({
  },
  version(e){if(this.data.busy||this.data.uncertain)return;this.setData({revision:String(e.currentTarget.dataset.revision||''),selected:null,preview:null,note:'',checked:false,done:''});return this.load();},
  cancel(){if(!this.data.busy&&!this.data.uncertain)this.setData({selected:null,preview:null,note:'',checked:false});},
- failed(e){if(['SUBJECT_CHANGED','SUBJECT_REQUIRED','WORKSPACE_CHANGED','ACCESS_DENIED'].includes(e.code)||e.status===401)this.clear();showError(this,e);},
+ openConsent(e){
+  if(this.data.busy||!this.data.plan)return;
+  const step=this.data.plan.steps.find(s=>s.id===Number(e.currentTarget.dataset.id));
+  if(step)navigation.navigateTo({url:'/pages/consent/index?step='+step.id+'&plan='+this.planId});
+ },
+ back(){
+  const id=this.data.authorization;
+  navigation.returnTo(id?'/pages/medical-authorizations/index?id='+id:'/pages/plans/index');
+ },
+ failed(e){if(['SUBJECT_CHANGED','SUBJECT_REQUIRED','WORKSPACE_CHANGED','ACCESS_DENIED'].includes(e.code)||e.status===401||e.status===403||e.status===404)this.clear();showError(this,e,{separateRequestId:true});},
  onUnload(){this.clear();this._subject=null;}
 });

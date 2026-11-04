@@ -18,5 +18,21 @@ function consume(path){
   getApp().globalData.tabNavigation=null;
   return pending.expires>Date.now()?pending.values:null;
 }
-module.exports={consume,navigateTo:options=>navigate(options,'navigateTo'),
+// Prefer the existing list or detail so its pagination and filter stay intact.
+function returnTo(url){
+  const [path,query='']=url.split('?');
+  if(tabs.has(path))return navigate({url},'reLaunch');
+  const pages=getCurrentPages();
+  const previous=pages[pages.length-2];
+  if(previous&&'/'+previous.route===path){
+    const values=previous.options||{};
+    const same=query?query.split('&').every(pair=>{
+      const [key,value]=pair.split('=');
+      return String(values[key])===value;
+    }):!values.id&&!values.new&&!values.step;
+    if(same)return wx.navigateBack({delta:1});
+  }
+  return wx.redirectTo({url});
+}
+module.exports={consume,returnTo,navigateTo:options=>navigate(options,'navigateTo'),
   redirectTo:options=>navigate(options,'redirectTo'),reLaunch:options=>navigate(options,'reLaunch')};
