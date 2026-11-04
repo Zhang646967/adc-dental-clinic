@@ -2,12 +2,13 @@ const navigation=require('../../utils/navigation');
 const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 const {primaryAction} = require('../../utils/primary-action');
+const {staleSubject} = require('../../utils/subject-state');
 Page({
-  data:{guest:false,needsSubject:false,needsEnrollment:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
+  data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
   async onShow() {
     const pending=navigation.consume('/pages/home/index');
     if(pending&&pending.queue==='all')this.setData({queue:'all',page:1});
-    this.setData({rows:[],overview:null,primary:null,patient:'',error:'',busy:true,guest:false,needsSubject:false,needsEnrollment:false});
+    this.setData({rows:[],overview:null,primary:null,patient:'',error:'',requestId:'',subjectInvalid:false,busy:true,guest:false,needsSubject:false,needsEnrollment:false});
     api.showSubject(this);
     try {
       const session = await api.bootstrap();api.showSubject(this);
@@ -33,7 +34,16 @@ Page({
       const primary=primaryAction(overview);
       this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, primary, busy:false});
     }
-    catch (e) { showError(this,e,{separateRequestId:true}); }
+    catch (e) {
+      const state=staleSubject(e,api.sessionInfo());
+      if(state.invalid){
+        // The old subject's name, delegated capacity, cards and primary action
+        // must all disappear together; keep the error text and query id.
+        this.setData({patientName:'',patientCapacity:'',patientDelegated:false,patient:'',
+          rows:[],overview:null,primary:null,subjectInvalid:state.reselect});
+      }
+      showError(this,e,{separateRequestId:true});
+    }
   },
   primaryTap() {
     const primary=this.data.primary;
