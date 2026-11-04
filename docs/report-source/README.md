@@ -23,3 +23,5 @@ python docs/report-source/update_pdf_report.py --repo . --output /tmp/课程报�
 原用例、图片、引用、历史报告及生成工具保留Git历史。正文保留note中的可测试需求、岗位交接、信息隐藏与职责分离原则，部署过程和账号资料不进入正文。
 
 思维导图：结构化源 → 准确基线 → 直接PDF修订 → 书签／内容／渲染核对 → 分项证据。
+
+第 5.18 节的单页修订由 `update_pdf_report.py --spec docs/report-source/pdf_core_ux_revision.json` 从指定基线重现。页数、书签和其他 292 页的内容流已校验。

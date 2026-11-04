@@ -1,4 +1,4 @@
-"""Revise the copy-acceptance page of the published report, without a Word output.
+"""Revise a specified acceptance page of the published PDF.
 
 The reviewed baseline supplies the other pages, bookmarks and numbering. This
 small revision reads the maintained section source and preserves their bytes.
@@ -25,10 +25,12 @@ def main():
     parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--proof', type=Path, required=True)
+    parser.add_argument('--spec', type=Path)
+    parser.add_argument('--source', type=Path)
     args = parser.parse_args()
     source_dir = args.repo / 'docs/report-source'
-    spec = json.loads((source_dir / 'pdf_revision.json').read_text())
-    source = json.loads((source_dir / 'report_source.json').read_text())
+    spec = json.loads((args.spec or source_dir / 'pdf_revision.json').read_text())
+    source = json.loads((args.source or source_dir / 'report_source.json').read_text())
     raw = subprocess.check_output(
         ['git', 'show', spec['baseline_commit'] + ':' + spec['pdf_path']], cwd=args.repo)
     assert hashlib.sha256(raw).hexdigest() == spec['baseline_sha256']
@@ -59,9 +61,15 @@ def main():
     c.line(left, height - 60, right, height - 60)
     c.setFillColorRGB(0, 0, 0)
     body = ParagraphStyle('body', fontName='ReportBody', fontSize=12,
-                          leading=22, firstLineIndent=24, alignment=TA_LEFT,
+                          leading=spec.get('leading',22), firstLineIndent=24, alignment=TA_LEFT,
                           wordWrap='CJK')
     top = height - 79
+    if spec.get('continuation'):
+        style = ParagraphStyle('continuation', parent=body, firstLineIndent=0)
+        p = Paragraph(spec['continuation'], style)
+        _, h = p.wrap(right-left, height)
+        p.drawOn(c, left, top-h)
+        top -= h + 8
     blocks = []
     for title in spec['headings']:
         section = next(s for s in source['implementation'] if s['heading'] == title)
@@ -81,15 +89,16 @@ def main():
             top -= h
         top -= 10
         blocks.append(dict(heading=title, bottom_from_top=round(height-top, 2)))
-    mind = ParagraphStyle('mind', fontName='ReportBody', fontSize=10.5,
-                          leading=16, wordWrap='CJK')
-    p = Paragraph('思维导图　' + source['mind_maps']['5'], mind)
-    _, h = p.wrap(right-left, height)
-    p.drawOn(c, left, top-h)
-    top -= h
+    if spec.get('show_mind_map', True):
+        mind = ParagraphStyle('mind', fontName='ReportBody', fontSize=10.5,
+                              leading=16, wordWrap='CJK')
+        p = Paragraph('思维导图　' + source['mind_maps']['5'], mind)
+        _, h = p.wrap(right-left, height)
+        p.drawOn(c, left, top-h)
+        top -= h
     assert top > 67, 'Section text exceeds the reviewed page body'
     c.setFont('ReportBody', 9)
-    c.drawCentredString(width/2, 35, '第 138 页')
+    c.drawCentredString(width/2, 35, f"第 {spec['printed_page']} 页")
     c.showPage()
     c.save()
     replacement = PdfReader(io.BytesIO(buffer.getvalue())).pages[0]
@@ -99,8 +108,9 @@ def main():
     # Keep the existing page object so bookmark destinations remain unchanged.
     for key in ('/Contents', '/Resources'):
         page[NameObject(key)] = replacement.raw_get(key).clone(writer)
-    writer.add_metadata({'/ModDate': 'D:20261102000000-08\'00\'',
-                         '/Subject': '病历归档与受控电子副本；患者入口与分项验收修订'})
+    revision_date = spec['revision_date'].replace('-', '')
+    writer.add_metadata({'/ModDate': f"D:{revision_date}000000-08'00'",
+                         '/Subject': spec.get('subject','病历归档与受控电子副本；患者入口与分项验收修订')})
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open('wb') as stream:
         writer.write(stream)
@@ -120,7 +130,8 @@ def main():
         body_bottom_from_top=round(height-top, 2),
         baseline_sha256=spec['baseline_sha256'],
         pdf_sha256=hashlib.sha256(args.output.read_bytes()).hexdigest(),
-        official_normal_entry_retest=spec['official_normal_entry_status'],
+        **({'official_normal_entry_retest':spec['official_normal_entry_status']}
+           if 'official_normal_entry_status' in spec else {'acceptance_status':spec['acceptance_status']}),
     ), ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(dict(passed=True, pdf_only=True, unchanged_pages=len(unchanged),
                           bottom=round(height-top, 2))))

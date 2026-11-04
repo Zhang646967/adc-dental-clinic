@@ -1,3 +1,9 @@
+# 患者小程序四入口
+
+主页找店选医 → 预约核对 → 就诊待办与历史 → 就诊人和账号管理。
+
+客户端 `f021868a750e4ed9e96f3133bd72a793f88f65d3` 完整 CI 和 390 宽官方工具业务复测通过。拒绝定位、断网、设备及平台仍按各自场景验证。课程 PDF 更新第 5.18 节。[验收收口](docs/WORKBUDDY_PATIENT_CORE_UX_CLOSURE.md) · [准确版本 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41764131794)
+
 # D2.3 独立运行本机验收
 
 服务恢复 → 证书重载 → 加密备份回读 → 独立恢复。

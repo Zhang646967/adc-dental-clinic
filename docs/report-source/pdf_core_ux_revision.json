@@ -1,0 +1,19 @@
+{
+  "format": "PDF_ONLY",
+  "revision_date": "2026-11-04",
+  "baseline_commit": "f021868a750e4ed9e96f3133bd72a793f88f65d3",
+  "baseline_sha256": "cee0aea59f3734a0fd82ab9b08c2bbc43d9f840bda9609de2f5c5820847ac27c",
+  "pdf_path": "课程报告/课程报告_张加良_8210241102.pdf",
+  "physical_page": 141,
+  "printed_page": 135,
+  "headings": [
+    "5.17 经营核算的独立业务校验",
+    "5.18 二十店能力矩阵与患者渠道验证"
+  ],
+  "continuation": "码、第二身份及真实短信仍待配套条件，不以课程身份或账号密码登录替代实际验收。",
+  "leading": 19,
+  "show_mind_map": false,
+  "required_acceptance_text": "确认被拒绝，原预约有效且未新增后继",
+  "acceptance_status": "390_TOOL_A_TO_G_PASS_LOCATION_NETWORK_DEVICE_PENDING",
+  "subject": "患者渠道与四入口操作；可预约性及资源冲突验证"
+}

@@ -27,7 +27,7 @@ D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版�
 
 [独立运行本机演练](docs/D23_INDEPENDENT_OPERATIONS.md) · [追加迁移验收](docs/evidence_d22/README.md) · [部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
 
-小程序四入口已进入本地候选验证。患者可从主页预约就诊，从「就诊」查看待办和历史，从「我的」切换就诊人。按本机已启用的患者登录方式办理，员工使用独立入口。[本轮 WorkBuddy 回归单](docs/WORKBUDDY_PATIENT_CORE_UX.md)
+小程序四入口已通过 390 宽工具业务复测和准确提交 CI。患者可从主页预约就诊，从「就诊」查看待办和历史，从「我的」切换就诊人。拒绝定位、真实断网、设备和真机另验。[四入口验收收口](docs/WORKBUDDY_PATIENT_CORE_UX_CLOSURE.md)
 
 D2.3 本机演练和完整 CI 已通过。下一步在目标服务器完成独立运行验收，再公布固定访问地址。处方与药事继续按业务职责细化；部署准备与实际云端、手机及平台验收分别记录。
 
