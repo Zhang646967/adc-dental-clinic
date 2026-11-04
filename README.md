@@ -29,7 +29,7 @@ D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版�
 
 小程序四入口已通过 390 宽工具业务复测和准确提交 CI。患者可从主页预约就诊，从「就诊」查看待办和历史，从「我的」切换就诊人。拒绝定位、真实断网、设备和真机另验。[四入口验收收口](docs/WORKBUDDY_PATIENT_CORE_UX_CLOSURE.md)
 
-小程序第二轮统一候补、治疗方案、医疗授权、结算和病历副本的状态与返回路径。准确提交 CI 已通过，微信开发者工具专项复测待回传。[复测任务](docs/WORKBUDDY_PATIENT_RESULTS_TASK.md) · [完整 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41777021512)
+小程序第二轮统一候补、治疗方案、医疗授权、结算和病历副本的状态与返回路径。390 宽工具只读回归已回传。已修正到期候补状态和医疗告知返回入口，修复提交完整 CI 通过，专项点验待回传。[回传与专项](docs/WORKBUDDY_PATIENT_RESULTS_REVIEW.md) · [修复版 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/41789365281)
 
 D2.3 本机演练和完整 CI 已通过。下一步在目标服务器完成独立运行验收，再公布固定访问地址。处方与药事继续按业务职责细化；部署准备与实际云端、手机及平台验收分别记录。
 
