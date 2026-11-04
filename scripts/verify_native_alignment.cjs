@@ -56,6 +56,15 @@ async function verify(){
   assert.equal(action('WAITLIST').url,'/pages/waitlist/index');assert.equal(action('BOOK').url,'/pages/services/index');count++;
   assert.equal(primary({next_visit:visit}),null);assert.equal(action('UNKNOWN'),null);
   assert.equal(action('UPCOMING_VISIT',{...visit,id:'12&next=elsewhere'}),null);assert.equal(action('CONFIRM_OFFER'),null);count++;
+  for(const [status,code] of [[403,'ACCESS_DENIED'],[409,'SUBJECT_REQUIRED'],[409,'SUBJECT_CHANGED'],[409,'WORKSPACE_CHANGED']]){
+    const denied=Object.assign(Error('当前就诊人或授权已变化'),{status,code});
+    d=page('home',{session:{authenticated:true},responses:[denied,denied]});
+    d.p.setData({rows:[visit],overview:{next_visit:visit},primary:action('UPCOMING_VISIT',visit)});
+    await d.p.load();
+    assert.equal(d.p.data.rows.length,0,`${code}: refresh must clear previous appointments`);
+    assert.equal(d.p.data.overview,null,`${code}: refresh must clear the previous summary`);
+    assert.equal(d.p.data.primary,null,`${code}: refresh must remove the previous primary action`);count++;
+  }
   d=page('account',{session:{account_authenticated:false}});await d.p.onShow();assert.equal(d.p.data.guest,true);assert.equal(d.p.data.profile,null);count++;
   d.p.setData({newPassword:'SECRET',repeatPassword:'SECRET',smsCode:'SECRET',unlinkPassword:'SECRET'});d.p.onHide();assert.equal(d.p.data.newPassword,'');assert.equal(d.p.data.smsCode,'');count++;
   return {passed:true,cases:count,scope:'actual tab routing and patient Page handlers with controlled transport; not IDE/device acceptance'};

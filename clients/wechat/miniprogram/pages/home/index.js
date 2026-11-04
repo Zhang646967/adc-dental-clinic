@@ -21,7 +21,11 @@ Page({
   subjects(){navigation.navigateTo({url:'/pages/patients/index'});},
   account(){navigation.navigateTo({url:'/pages/account/index'});},
   async load() {
-    this.setData({busy:true, error:''});
+    // Drop the previous subject's rows, overview and primary action before a
+    // refresh. A 403 ACCESS_DENIED or 409 SUBJECT_REQUIRED / SUBJECT_CHANGED
+    // means the old data no longer belongs to this session; leaving it on
+    // screen would show appointments the patient can no longer access.
+    this.setData({rows:[],overview:null,primary:null,error:'',requestId:'',busy:true});
     try {
       const [d,overview] = await Promise.all([api.request('visits/', 'GET', {queue:this.data.queue, page:this.data.page}), api.request('overview/')]);
       if(overview.next_visit)overview.next_visit=arrangement(overview.next_visit);
