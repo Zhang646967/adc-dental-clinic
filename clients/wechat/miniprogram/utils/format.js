@@ -6,8 +6,11 @@ function dateTime(value) {
 }
 function arrangement(v) { return Object.assign({}, v, {startLabel: dateTime(v.start), endLabel: dateTime(v.end)}); }
 function waitEntry(v) {
-  return Object.assign({}, v, {startLabel:dateTime(v.earliest), endLabel:dateTime(v.latest),
-    offers:v.offers.map(o=>Object.assign(arrangement(o), {expiresLabel:dateTime(o.expires)}))});
+  const offers=v.offers.map(o=>Object.assign(arrangement(o),{expiresLabel:dateTime(o.expires)}));
+  // The server may retain a pending offer row until the expiry job runs.
+  const expired=v.state==='OFFERED'&&offers.find(o=>o.state==='PENDING'&&o.active===false);
+  return Object.assign({},v,{startLabel:dateTime(v.earliest),endLabel:dateTime(v.latest),
+    status_label:expired?expired.status_label:v.status_label,offers});
 }
 function showError(page, error, {stayOnLogin = false, separateRequestId = false} = {}) {
   const display={error:error.message,busy:false};

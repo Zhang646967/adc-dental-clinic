@@ -57,7 +57,7 @@ Page({
  openConsent(e){
   if(this.data.busy||!this.data.plan)return;
   const step=this.data.plan.steps.find(s=>s.id===Number(e.currentTarget.dataset.id));
-  if(step)navigation.navigateTo({url:'/pages/consent/index?step='+step.id+'&plan='+this.planId});
+  if(step)navigation.navigateTo({url:'/pages/consent/index?step='+step.id});
  },
  back(){
   const id=this.data.authorization;

@@ -5,6 +5,13 @@ const session={authenticated:true,subject_key:'self',subject_revision:1,workspac
 const medical={step:16,plan:8,version:2,revision:1,recorded_at:'2026-10-30T08:00:00Z',events:[],versions:[],can_agree:true};
 async function verify(){
  const cases=[];const test=async(name,run)=>{await run();cases.push(name);};
+ await test('consent returns to the authorized plan, ignoring a forged navigation hint',async()=>{
+  const d=page('consent',{session,request:async()=>medical});
+  d.p.onLoad({step:'16',plan:'999'});
+  await d.p.onShow();
+  d.p.back();
+  assert.equal(d.navigation.at(-1).url,'/pages/plan/index?id=8');
+ });
  await test('invalid link never reads medical content',async()=>{const d=page('consent',{session});d.p.onLoad({step:'../'});await d.p.onShow();assert.equal(d.calls.length,0);assert(d.p.data.error);});
  await test('appointment delegate never loads medical consent',async()=>{const d=page('consent',{session:{...session,delegated:true}});d.p.onLoad({step:'16'});await d.p.onShow();assert.equal(d.calls.length,0);assert.equal(d.p.data.medical,null);});
  await test('self preview binds exact version and edited text clears it',async()=>{

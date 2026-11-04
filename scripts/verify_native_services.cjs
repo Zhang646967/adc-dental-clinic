@@ -37,7 +37,7 @@ function page(name,options={}){
   vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
   vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
     Page:value=>{definition=value;},wx,getApp:()=>state,
-    require:module=>module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>options.tabSelection||null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
+    require:module=>module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,returnTo:url=>navigation.push({method:'returnTo',url}),consume:()=>options.tabSelection||null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};
   return {p:instance,calls,navigation,state,session:currentSession};

@@ -19,8 +19,17 @@ for(const page of app.pages){
     assert(new RegExp('(?:async\\s+)?'+match[1]+'\\s*\\(').test(source),page+' missing '+match[1]);checks++;
   }
 }
-const {dateTime}=require(path.join(root,'utils/format'));
+const {dateTime,waitEntry}=require(path.join(root,'utils/format'));
 assert.equal(dateTime('2026-10-20T16:15:00Z'),'2026-10-21 00:15');checks++;
+const pendingOffer={state:'PENDING',status_label:'已到期，待前台重新安排',active:false};
+const wait={state:'OFFERED',status_label:'等待确认',can_withdraw:true,offers:[pendingOffer]};
+const expired=waitEntry(wait);
+assert.equal(expired.status_label,pendingOffer.status_label);
+assert.equal(expired.state,'OFFERED');
+assert.equal(expired.can_withdraw,true);
+assert.equal(waitEntry({...wait,offers:[{...pendingOffer,active:true}]}).status_label,'等待确认');
+assert.equal(waitEntry({...wait,state:'WITHDRAWN',status_label:'已退出'}).status_label,'已退出');
+checks+=5;
 let last;
 const appState={globalData:{review:{sensitive:'not persisted'}}};
 global.getApp=()=>appState;

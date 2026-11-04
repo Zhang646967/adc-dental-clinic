@@ -5,7 +5,7 @@ const actions=[{code:'QUESTION',label:'我有问题需要医师答复'},{code:'A
 const stamp=()=>{const s=api.sessionInfo();return JSON.stringify([s.workspace_id,s.subject_key,s.subject_revision]);};
 Page({
  data:{medical:null,actions,actionIndex:0,text:'',preview:null,checked:false,busy:false,error:'',requestId:'',done:'',uncertain:false,readOnly:false,revision:''},
- onLoad(q){this.planId=/^[1-9][0-9]*$/.test(q.plan)&&Number.isSafeInteger(Number(q.plan))?Number(q.plan):null;this.stepId=Number(q.step);if(!Number.isSafeInteger(this.stepId)||this.stepId<1)this.stepId=null;},
+ onLoad(q){this.stepId=Number(q.step);if(!Number.isSafeInteger(this.stepId)||this.stepId<1)this.stepId=null;},
  clear(){this._pending=null;this.setData({medical:null,text:'',preview:null,checked:false,uncertain:false,done:''});},
  async onShow(){
   this.setData({busy:true,error:'',requestId:''});
@@ -54,7 +54,7 @@ Page({
  version(e){if(this.data.busy||this.data.uncertain)return;this.stepId=Number(e.currentTarget.dataset.step);this.setData({revision:String(e.currentTarget.dataset.revision||''),text:'',preview:null,checked:false,done:''});return this.load();},
  cancel(){if(!this.data.busy&&!this.data.uncertain)this.setData({preview:null,checked:false});},
  back(){
-  const plan=this.data.medical&&this.planId;
+  const plan=this.data.medical&&this.data.medical.plan;
   const id=this.data.authorization;
   navigation.returnTo(plan?'/pages/plan/index?id='+plan:id?'/pages/medical-authorizations/index?id='+id:'/pages/plans/index');
  },
