@@ -1,10 +1,10 @@
 {
-  "target": "Patient mini-program core flows and verified PDF delivery",
+  "target": "Patient mini-program follow-up results and navigation",
   "parent": "Accepted C3.3A application37d9bb2",
   "supported_source": "One request owns scope, identity review, independent clinical review and authenticated pickup. Existing clinical and financial effects retained.",
   "scope": "Declared application/config/tests/docs present in the Docker build. Runtime evidence directories and logs excluded here; full archive CHECKSUMS.sha256 covers them. Hashes detect difference, not publisher authenticity.",
   "schema_change": "All77prior migration bytes retained; append3 to80;167SQL/166ORM/489FK/139triggers/44actualER.",
-  "user_release_validation": "Exact client f021868 passed CI 41764131794 and 390-wide tool A-G; denied location, connection interruption and device checks remain separate.",
+  "user_release_validation": "Exact client 902143a passed CI 41777021512; official tool follow-up scenarios pending WorkBuddy.",
   "removed_from_original_v07": [],
   "files": {
     ".dockerignore": "45494731fef1b0ed53133c336f718bb0bc5984552b66ab41f96cbc674dc5a121",
@@ -23,8 +23,8 @@
     "PATIENT_AUTH_ENV.example": "d05afc6520356e9f62451999bfaa7d491eef89eb1a8c65943c313146fb24c822",
     "RC_MACOS.sh": "0050ef5d740ef8b293155df1baa45bf42dd4729a320ff8fb61052fe47f99bbdb",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "998072d51f844bc08217c356e07ae4f0f5e433246260b9c1afb35fcc62b89a67",
-    "RELEASE_CURRENT.md": "60a35812a8b43ad8442c243d0abb40a909d9671c3f2b9a75201319b8b704b84e",
+    "README.md": "42f44b566e5df50ef9a12549a7a10a2534511a69a60f76bc5e4bc3f540179ae0",
+    "RELEASE_CURRENT.md": "0982a0bb2a68c5bd510c8f4503dfb8188086a5bf1edd5df840b953a7f097e5a0",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
