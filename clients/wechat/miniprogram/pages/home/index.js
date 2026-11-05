@@ -16,11 +16,21 @@ Page({
       if(session.medical&&!session.can_book){this.setData({busy:false});navigation.redirectTo({url:'/pages/medical-authorizations/index'});return;}
       this.setData({guest:false,needsSubject:false,needsEnrollment:false});
       this.setData({patient:session.patient_name, readOnly:session.read_only,environmentLabel:session.environment_label||''}); await this.load();
-    } catch (e) { showError(this,e,{separateRequestId:true}); }
+    } catch (e) { this.clearStaleSubject(e); showError(this,e,{separateRequestId:true}); }
   },
   login(){navigation.navigateTo({url:'/pages/login/index'});},
   subjects(){navigation.navigateTo({url:'/pages/patients/index'});},
   account(){navigation.navigateTo({url:'/pages/account/index'});},
+  // Both entry points (page show and in-page refresh) must drop the cached
+  // subject banner when the authority or workspace is no longer valid.
+  clearStaleSubject(e){
+    const state=staleSubject(e,api.sessionInfo());
+    if(state.invalid){
+      this.setData({patientName:'',patientCapacity:'',patientDelegated:false,patient:'',
+        rows:[],overview:null,primary:null,subjectInvalid:state.reselect});
+    }
+    return state;
+  },
   async load() {
     // Drop the previous subject's rows, overview and primary action before a
     // refresh. A 403 ACCESS_DENIED or 409 SUBJECT_REQUIRED / SUBJECT_CHANGED
@@ -35,13 +45,7 @@ Page({
       this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, primary, busy:false});
     }
     catch (e) {
-      const state=staleSubject(e,api.sessionInfo());
-      if(state.invalid){
-        // The old subject's name, delegated capacity, cards and primary action
-        // must all disappear together; keep the error text and query id.
-        this.setData({patientName:'',patientCapacity:'',patientDelegated:false,patient:'',
-          rows:[],overview:null,primary:null,subjectInvalid:state.reselect});
-      }
+      this.clearStaleSubject(e);
       showError(this,e,{separateRequestId:true});
     }
   },
