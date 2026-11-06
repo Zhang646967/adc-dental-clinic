@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "pdf_only": true,
+  "word_written": false,
+  "pages": 293,
+  "revised_physical_pages": [
+    141
+  ],
+  "unchanged_page_content_streams": 292,
+  "outline_entries": 24,
+  "sections": [
+    {
+      "heading": "5.17 经营核算的独立业务校验",
+      "bottom_from_top": 378.0
+    },
+    {
+      "heading": "5.18 二十店能力矩阵与患者渠道验证",
+      "bottom_from_top": 745.0
+    }
+  ],
+  "body_bottom_from_top": 745.0,
+  "baseline_sha256": "07b6ea37f5052d8fcf75557f25a057c6e1ca1d1031a3fe8019e48f0b917a5eac",
+  "pdf_sha256": "d3ee7201ff8b4f34931fd9643fa854230a1041ae59c8d860f9a8f376b4e6daf2",
+  "acceptance_status": "CROSS_CHANNEL_CANCEL_CONFLICT_REAL_REVOCATION_TOOL_PASS_DEVICE_PLATFORM_PENDING"
+}

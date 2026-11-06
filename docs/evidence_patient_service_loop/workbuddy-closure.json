@@ -1,0 +1,53 @@
+{
+  "client_source_commit": "5af5d20d9541f6f88c0132e19a50953364e2a296",
+  "tested_backend_commit": "722586bcbc0c0cb15bb7414954ec8b643386c196",
+  "tested_backend_image": "sha256:b37ebd4331e3223337d2873dc08e94511d83d3dad22efa10b30a9c5de20dc322",
+  "tool": {
+    "base_library": "3.17.6",
+    "viewport": "390x844",
+    "pages": 27,
+    "status": "PASS"
+  },
+  "business_acceptance": {
+    "cross_channel_reschedule_checkin": "PASS",
+    "offer_accept_once": "PASS",
+    "expired_offer_display": "PASS",
+    "cancel_and_query_same_record": "PASS",
+    "occupied_target_keeps_original": "PASS",
+    "session_expiry_cleanup": "PASS",
+    "actual_authority_revocation_and_reselection": "PASS"
+  },
+  "independent_verification": {
+    "revocation_event_and_authority_state": "PASS",
+    "matching_request_ids_and_source_stamps": "PASS",
+    "no_new_visit_or_clinical_money_facts_in_final_retest": "PASS",
+    "website_cancel_original_and_frontdesk_queue": "PASS",
+    "native_checks": 339,
+    "alignment_cases": 39,
+    "entry_refresh_failure_cases": 10
+  },
+  "preservation": {
+    "migrations": 80,
+    "new_migration_files": 0,
+    "actual_er_views": 44,
+    "schema_change": false,
+    "course_pdf_pages": 293,
+    "changed_pdf_pages": [
+      141
+    ],
+    "retained_pdf_page_streams": 292,
+    "word_updated": false
+  },
+  "pending": [
+    "375/430 mini-program viewport",
+    "system font scaling",
+    "soft keyboard",
+    "native picker gestures",
+    "real network interruption",
+    "location refusal in official tool",
+    "real phone",
+    "second real WeChat identity",
+    "HTTPS server and platform qualification"
+  ],
+  "raw_evidence": "Private local receipts and screenshots; public records contain summary only."
+}

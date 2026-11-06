@@ -1,0 +1,19 @@
+{
+  "format": "PDF_ONLY",
+  "revision_date": "2026-11-05",
+  "baseline_commit": "e6aa268c895f731cd0cdb8088bf449b3d2b3e607",
+  "baseline_sha256": "07b6ea37f5052d8fcf75557f25a057c6e1ca1d1031a3fe8019e48f0b917a5eac",
+  "pdf_path": "课程报告/课程报告_张加良_8210241102.pdf",
+  "physical_page": 141,
+  "printed_page": 135,
+  "headings": [
+    "5.17 经营核算的独立业务校验",
+    "5.18 二十店能力矩阵与患者渠道验证"
+  ],
+  "continuation": "码、第二身份及真实短信仍待配套条件，不以课程身份或账号密码登录替代实际验收。",
+  "leading": 19,
+  "show_mind_map": false,
+  "required_acceptance_text": "正式撤销授权后会话仍有效",
+  "acceptance_status": "CROSS_CHANNEL_CANCEL_CONFLICT_REAL_REVOCATION_TOOL_PASS_DEVICE_PLATFORM_PENDING",
+  "subject": "患者双端业务接续、取消结果及真实授权撤销验证"
+}
