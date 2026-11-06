@@ -1,0 +1,20 @@
+{
+  "format": "PDF_ONLY",
+  "revision_date": "2026-11-06",
+  "baseline_commit": "c1fcbf942546bbcd19f72c97d040a92f978a3df1",
+  "baseline_sha256": "d3ee7201ff8b4f34931fd9643fa854230a1041ae59c8d860f9a8f376b4e6daf2",
+  "pdf_path": "课程报告/课程报告_张加良_8210241102.pdf",
+  "physical_page": 128,
+  "printed_page": 122,
+  "chapter_heading": "第 5 章 系统实现与测试",
+  "headings": [
+    "5.1 功能范围与完成状态"
+  ],
+  "leading": 21,
+  "table_rows": 4,
+  "table_caption": "表 5-1 业务功能的实现范围",
+  "show_mind_map": false,
+  "required_acceptance_text": "处方药事仍待建设",
+  "acceptance_status": "IMPLEMENTATION_SCOPE_CORRECTED_DEVICE_AND_CLOUD_PENDING",
+  "subject": "系统实现范围一致性修订；既有患者业务与专业验收边界"
+}

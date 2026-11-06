@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "postgresql_cases": 132,
+  "scope": "Actual independent PostgreSQL profile, discovery and service-catalogue tests; Django check and unchanged migration checks",
+  "source": "mounted working source; final exact-source CI recorded separately",
+  "source_rule_cases": 1169,
+  "native_source_checks": 339,
+  "official_wechat_tool": "PENDING_WORKBUDDY",
+  "new_business_rules": false
+}

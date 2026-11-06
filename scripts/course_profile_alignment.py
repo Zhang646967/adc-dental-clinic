@@ -7,6 +7,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from adc_core.rules import RuleError
 
+CLINIC_RESOURCE_NOTE = (
+    '诊室椅位与所需设备按已发布资源安排，影像及消毒设备统一协调。'
+    '预约需同时满足服务、医师和物理资源条件；介绍和出诊公示不代表已为患者占位。'
+)
+
 
 def scene_image(index,scene):
     from PIL import Image,ImageDraw
@@ -170,7 +175,7 @@ def prepare_alignment(*,technical_actor,operator_password,manager,frontdesk):
         fields=dict(summary=f'{branch.district}的{positioning}门店，基础服务齐备，预约前可核对团队与出诊。',
             biography=f'{branch.display_name}面向{branch.city}{branch.district}的就诊需求，提供初诊检查、预防护理、牙痛评估与基础修复预约、复诊服务。'
                 f'本店重点为{positioning}，接诊团队和特色服务按页面公示核对。\n'
-                '诊室按两把椅位安排，影像及消毒设备统一协调。预约需同时满足服务、医师和物理资源条件；介绍和出诊公示不代表已为患者占位。',
+                +CLINIC_RESOURCE_NOTE,
             transport=f'先核对{branch.display_name}详情中的地址与接待入口。当前为课程合成门店，交通路线为示意；真实运营时由本店前台维护公交、地铁及入口信息。',
             parking=f'{branch.district}门店停车条件为课程待核对项，预约后可向前台确认停车点、收费及步行入口。',
             accessibility=old.get('accessibility','UNKNOWN'),accessibility_note=old.get('accessibility_note','请提前向前台说明协助需求。'),

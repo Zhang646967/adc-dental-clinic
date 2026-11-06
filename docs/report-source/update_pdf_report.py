@@ -17,7 +17,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from reportlab.platypus import Paragraph
+from reportlab.platypus import Paragraph, Table, TableStyle
 
 
 def main():
@@ -64,6 +64,10 @@ def main():
                           leading=spec.get('leading',22), firstLineIndent=24, alignment=TA_LEFT,
                           wordWrap='CJK')
     top = height - 79
+    if spec.get('chapter_heading'):
+        c.setFont('ReportHeading', 16)
+        c.drawCentredString((left+right)/2, top-16, spec['chapter_heading'])
+        top -= 45
     if spec.get('continuation'):
         style = ParagraphStyle('continuation', parent=body, firstLineIndent=0)
         p = Paragraph(spec['continuation'], style)
@@ -86,6 +90,32 @@ def main():
             p = Paragraph(text, body)
             _, h = p.wrap(right-left, height)
             p.drawOn(c, left, top-h)
+            top -= h
+        if spec.get('table_rows'):
+            table_style = ParagraphStyle('table', fontName='ReportBody', fontSize=10.5,
+                                         leading=14.5, wordWrap='CJK')
+            heading_style = ParagraphStyle('table-heading', parent=table_style,
+                                           fontName='ReportBold')
+            data = section['table']
+            caption = spec['table_caption']
+            c.setFont('ReportBody', 10.5)
+            c.drawCentredString((left+right)/2, top-15, caption)
+            top -= 22
+            rows = [[Paragraph(str(v), heading_style) for v in data['headers']]]
+            rows += [[Paragraph(str(v), table_style) for v in row]
+                     for row in data['rows'][:spec['table_rows']]]
+            table = Table(rows, colWidths=[105, 55, right-left-160])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), (.94,.94,.94)),
+                ('GRID', (0,0), (-1,-1), .4, (.75,.75,.75)),
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 5),
+                ('RIGHTPADDING', (0,0), (-1,-1), 5),
+                ('TOPPADDING', (0,0), (-1,-1), 4),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ]))
+            _, h = table.wrap(right-left, height)
+            table.drawOn(c, left, top-h)
             top -= h
         top -= 10
         blocks.append(dict(heading=title, bottom_from_top=round(height-top, 2)))

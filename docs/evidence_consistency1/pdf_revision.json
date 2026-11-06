@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "pdf_only": true,
+  "word_written": false,
+  "pages": 293,
+  "revised_physical_pages": [
+    128
+  ],
+  "unchanged_page_content_streams": 292,
+  "outline_entries": 24,
+  "sections": [
+    {
+      "heading": "5.1 功能范围与完成状态",
+      "bottom_from_top": 724.0
+    }
+  ],
+  "body_bottom_from_top": 724.0,
+  "baseline_sha256": "d3ee7201ff8b4f34931fd9643fa854230a1041ae59c8d860f9a8f376b4e6daf2",
+  "pdf_sha256": "03b78742e110559874c2ce912a865e653161e2263610a1859ce5202bf2a796b7",
+  "acceptance_status": "IMPLEMENTATION_SCOPE_CORRECTED_DEVICE_AND_CLOUD_PENDING"
+}
