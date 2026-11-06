@@ -2,6 +2,8 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'../clients/wechat/miniprogram');
 const patientAction=require(path.join(root,'utils/primary-action'));
+const subjectState=require(path.join(root,'utils/subject-state'));
+const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
   global.getApp=()=>app;global.wx={switchTab:o=>routes.push({method:'switchTab',...o}),navigateTo:o=>routes.push({method:'navigateTo',...o}),redirectTo:o=>routes.push({method:'redirectTo',...o}),reLaunch:o=>routes.push({method:'reLaunch',...o})};
@@ -28,13 +30,15 @@ async function verify(){
   assert.equal(intent.destination(app,{authenticated:true}),'/pages/booking/index?service=11&clinic=3&dentist=7&day=2026-10-29');count++;
   intent.remember(app,12,4,null,null,'CHILDREN');assert.equal(intent.destination(app,{authenticated:true,delegated:false}),'/pages/patients/index');assert(app.globalData.bookingIntent);count++;
   assert.equal(intent.destination(app,{authenticated:true,delegated:true,guardian:true}),'/pages/booking/index?service=12&clinic=4');count++;
-  function page(name,{responses=[],session={}}={}){
+  function page(name,{responses=[],session={},bootstrapError=null}={}){
     let definition;const calls=[];const state={globalData:{}};
-    const api={async bootstrap(){return session;},sessionInfo:()=>session,showSubject:()=>{},async request(...args){calls.push(args);const r=responses.shift();if(r instanceof Error)throw r;return r;}};
+    const api={async bootstrap(){if(bootstrapError)throw bootstrapError;return session;},sessionInfo:()=>session,
+      showSubject:p=>p.setData({patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated}),
+      async request(...args){calls.push(args);const r=responses.shift();if(r instanceof Error)throw r;return r;}};
     vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
       Page:d=>definition=d,getApp:()=>state,wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
-        key.endsWith('/format')?{dateTime:x=>x,showError:(p,e)=>p.setData({busy:false,error:e.message})}:null});
+        key.endsWith('/subject-state')?subjectState:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls};
   }
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
@@ -64,6 +68,26 @@ async function verify(){
     assert.equal(d.p.data.rows.length,0,`${code}: refresh must clear previous appointments`);
     assert.equal(d.p.data.overview,null,`${code}: refresh must clear the previous summary`);
     assert.equal(d.p.data.primary,null,`${code}: refresh must remove the previous primary action`);count++;
+  }
+  const priorSubject={authenticated:true,account_authenticated:true,patient_name:'OLD_SYNTHETIC_SUBJECT',acting_capacity:'预约代办',delegated:true};
+  for(const entry of ['load','onShow']){
+    for(const [status,code] of [[403,'ACCESS_DENIED'],[409,'SUBJECT_REQUIRED'],[409,'SUBJECT_CHANGED'],[409,'WORKSPACE_CHANGED'],[401,'LOGIN_REQUIRED']]){
+      const denied=Object.assign(Error('就诊范围已变化'),{status,code,requestId:'SYNTHETIC-QUERY'});
+      d=page('home',{session:priorSubject,responses:[denied,denied],bootstrapError:denied});
+      d.p.setData({patientName:priorSubject.patient_name,patientCapacity:priorSubject.acting_capacity,patientDelegated:true,
+        patient:priorSubject.patient_name,rows:[visit],overview:{next_visit:visit},primary:action('UPCOMING_VISIT',visit)});
+      await d.p[entry]();
+      assert.equal(d.p.data.patientName,'',`${entry}/${code}: old patient name remains`);
+      assert.equal(d.p.data.patientCapacity,'',`${entry}/${code}: old acting capacity remains`);
+      assert.equal(d.p.data.patientDelegated,false);
+      assert.equal(d.p.data.patient,'');assert.equal(d.p.data.rows.length,0);
+      assert.equal(d.p.data.overview,null);assert.equal(d.p.data.primary,null);
+      assert.equal(d.p.data.requestId,'SYNTHETIC-QUERY');assert.equal(d.p.data.busy,false);
+      if(status===401)assert.equal(routes.at(-1).url,'/pages/login/index');
+      else if(code==='SUBJECT_REQUIRED')assert.equal(routes.at(-1).url,'/pages/patients/index');
+      else assert.equal(d.p.data.subjectInvalid,true);
+      count++;
+    }
   }
   d=page('account',{session:{account_authenticated:false}});await d.p.onShow();assert.equal(d.p.data.guest,true);assert.equal(d.p.data.profile,null);count++;
   d.p.setData({newPassword:'SECRET',repeatPassword:'SECRET',smsCode:'SECRET',unlinkPassword:'SECRET'});d.p.onHide();assert.equal(d.p.data.newPassword,'');assert.equal(d.p.data.smsCode,'');count++;
