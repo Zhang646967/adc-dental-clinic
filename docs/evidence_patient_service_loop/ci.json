@@ -1,5 +1,16 @@
 {
-  "status": "PENDING",
-  "tested_source_commit": null,
-  "scope": "Complete ADC validation for the frozen integration commit."
+  "run_id": 42169686475,
+  "job_id": 127734337173,
+  "head_sha": "46eb6bcbd2615952ee772b4359d1f0dc0c057777",
+  "tested_source_commit": "46eb6bcbd2615952ee772b4359d1f0dc0c057777",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42169686475",
+  "validated_source_log_verified": true,
+  "all_gates_passed": true,
+  "source_tests": 1169,
+  "postgresql_tests": 2310,
+  "native_checks": 339,
+  "alignment_cases": 39,
+  "records_source": "GitHub Actions job log read after successful completion"
 }

@@ -1,0 +1,84 @@
+{
+  "status": "DELIVERED_LOCAL",
+  "application_commit": "46eb6bcbd2615952ee772b4359d1f0dc0c057777",
+  "application_image": "sha256:0228a2d801d13445f6e53a555455e2f98d4a7e7d612b963bd8acec86b8906daa",
+  "client_tool_commit": "5af5d20d9541f6f88c0132e19a50953364e2a296",
+  "client_feature_bytes_match_tested_tool_copy": 90,
+  "workbuddy_backend_commit": "722586bcbc0c0cb15bb7414954ec8b643386c196",
+  "workbuddy_backend_image": "sha256:b37ebd4331e3223337d2873dc08e94511d83d3dad22efa10b30a9c5de20dc322",
+  "full_ci": {
+    "run_id": 42169686475,
+    "job_id": 127734337173,
+    "head_sha": "46eb6bcbd2615952ee772b4359d1f0dc0c057777",
+    "tested_source_commit": "46eb6bcbd2615952ee772b4359d1f0dc0c057777",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42169686475",
+    "validated_source_log_verified": true,
+    "all_gates_passed": true,
+    "source_tests": 1169,
+    "postgresql_tests": 2310,
+    "native_checks": 339,
+    "alignment_cases": 39,
+    "records_source": "GitHub Actions job log read after successful completion"
+  },
+  "workbuddy_business_scenes": "PASS",
+  "mac18000": {
+    "protected_update": true,
+    "original_model_groups_preserved": 164,
+    "all_original_rows_and_password_hashes_preserved": true,
+    "database_container_and_volume_preserved": true,
+    "private_config_bytes_preserved": true,
+    "file_mode_wechat_key_uid": 10001,
+    "seven_role_browser_checks": 23,
+    "fresh_operational_conditions": "HEALTHY",
+    "preexisting_stopped_database_and_worker_recovered": true,
+    "prior_observation_history_encrypted_and_retained": true,
+    "rc_tag_preserved": true,
+    "real_wechat_relogin": "NOT_REPEATED_NO_AUTH_CHAIN_CHANGE"
+  },
+  "recovery": {
+    "original_before": {
+      "passed": true,
+      "groups": 164,
+      "raw_schema_equal": true
+    },
+    "original_after": {
+      "passed": true,
+      "groups": 164,
+      "raw_schema_equal": true,
+      "seconds": 20.754
+    },
+    "synthetic_business_history": {
+      "data_groups_equal": 164,
+      "raw_schema_equal": false,
+      "literal_varchar_array_cast_equivalence_reviewed": true,
+      "other_schema_fields_equal": true
+    },
+    "first_synthetic_raw_schema_comparison_failure_retained": true,
+    "general_equivalent_ddl_comparator_limit_retained": true
+  },
+  "schema": {
+    "migration_files": 80,
+    "new_migrations": 0,
+    "actual_er_views": 44,
+    "changed": false
+  },
+  "report": {
+    "format": "PDF_ONLY",
+    "pages": 293,
+    "revised_physical_pages": [
+      141
+    ],
+    "unchanged_page_content_streams": 292,
+    "word_updated": false
+  },
+  "pending": [
+    "mini-program 375/430 and system fonts",
+    "soft keyboard and native picker gestures",
+    "real network interruption and location refusal in official tool",
+    "real phone and second WeChat identity",
+    "actual server HTTPS and WeChat platform qualification",
+    "target-host capacity and sustained operation"
+  ]
+}
