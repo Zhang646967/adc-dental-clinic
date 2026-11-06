@@ -1,0 +1,14 @@
+{
+  "run_id": 42192224392,
+  "job_id": 127806762755,
+  "head_sha": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+  "tested_source_commit": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42192224392",
+  "validated_source_log_verified": true,
+  "source_tests": 1169,
+  "postgresql_tests": 2310,
+  "native_checks": 339,
+  "all_gates_passed": true
+}

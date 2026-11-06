@@ -32,7 +32,7 @@ WorkBuddy 负责本批 `clients/wechat/` 的实现及官方工具回归；Codex 
 
 ## 就绪检查与故障处置
 
-资料、账号、样本已由 Codex 实际核对，检查记录在包内。若 Docker 停止，可先启动 Docker Desktop，再只启动 `adc_consistency_18475-db`、`adc_consistency_18475-web` 既有容器；不重建、不改环境、不动数据卷。待登录页 200 后核对版本。若仍失败，记录 HTTP 状态和错误编号，继续能做的源码／编译检查后一次性回传缺项，无需询问旧环境是否可替代。
+资料、账号、样本已由 Codex 实际核对，检查记录在包内。若 Docker 停止，可先启动 Docker Desktop，再只启动 `adc_consistency_18475-db`、`adc_consistency_18475-web`、`adc_consistency_18475-gateway` 既有容器；不重建、不改环境、不动数据卷。待登录页 200 后核对版本。若仍失败，记录 HTTP 状态和错误编号，继续能做的源码／编译检查后一次性回传缺项，无需询问旧环境是否可替代。
 
 认证实现、配置、密钥与网关未改，本轮不重复真实微信重登、解绑或短信。不上平台、不设体验版、不新开隧道。
 

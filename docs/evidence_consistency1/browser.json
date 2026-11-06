@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "1440: checkbox size, label click, Space, visible focus and no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "390: checkbox size, label click, Space, visible focus and no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "clinic 1: website and native public projection use revised published introduction",
+      "passed": true
+    },
+    {
+      "name": "clinic 4: website and native public projection use revised published introduction",
+      "passed": true
+    }
+  ],
+  "js_errors": 0,
+  "origin": "http://127.0.0.1:18475",
+  "scope": "Actual Chrome checkbox controls/layout and shared public profile projection; not official WeChat or phone acceptance"
+}

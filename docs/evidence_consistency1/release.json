@@ -1,0 +1,89 @@
+{
+  "status": "LOCAL_WEB_PROFILE_PDF_DELIVERED_NATIVE_CONTACT_PENDING_WORKBUDDY",
+  "application_commit": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+  "application_image": "sha256:b743f903a9e7e6bb264fceeb7ee7093e2ddb6ca059139063f57bb03793aaca00",
+  "full_ci": {
+    "run_id": 42192224392,
+    "job_id": 127806762755,
+    "head_sha": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+    "tested_source_commit": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42192224392",
+    "validated_source_log_verified": true,
+    "source_tests": 1169,
+    "postgresql_tests": 2310,
+    "native_checks": 339,
+    "all_gates_passed": true
+  },
+  "source_rules": 1169,
+  "postgresql_cases": 2310,
+  "targeted_postgresql_cases": 132,
+  "website_actual_chrome_widths": [
+    1440,
+    390
+  ],
+  "checkbox_label_keyboard_focus_overflow": "PASS",
+  "native_source_transport_checks": 339,
+  "native_client_changes_in_main": false,
+  "profile_updates": {
+    "clinics": 20,
+    "new_published_versions": 20,
+    "new_submit_publish_actions": 40,
+    "old_versions_and_media_preserved": true,
+    "repeat_creates_new_versions": false,
+    "normal_manager_commands": true
+  },
+  "mac18000": {
+    "protected_update": true,
+    "unchanged_clinical_financial_accounts_and_old_profile_versions": true,
+    "only_approved_current_profile_fields_changed": 20,
+    "database_container_and_volume_preserved": true,
+    "private_config_preserved": true,
+    "rc_tag_preserved": true,
+    "seven_role_browser_checks": 23,
+    "fresh_conditions": "HEALTHY"
+  },
+  "recovery": {
+    "before_original_raw_schema_equal": true,
+    "after_original_raw_schema_equal": true,
+    "all_model_groups": 164,
+    "synthetic_raw_schema_equal": false,
+    "synthetic_literal_array_cast_equivalence_reviewed": true,
+    "general_equivalent_ddl_comparator_limit_retained": true
+  },
+  "schema": {
+    "migration_files": 80,
+    "new_migrations": 0,
+    "er_views": 44,
+    "changed": false
+  },
+  "report": {
+    "format": "PDF_ONLY",
+    "pages": 293,
+    "changed_physical_pages": [
+      128
+    ],
+    "printed_page": 122,
+    "unchanged_page_content_streams": 292,
+    "historical_word_unchanged": true
+  },
+  "workbuddy": {
+    "task": "WORKBUDDY_CONSISTENCY1_TASK.md",
+    "independent_port": 18475,
+    "appointments_prepared": 2,
+    "logins_checked": 2,
+    "private_guide_fixed_location": true,
+    "minimal_patch_ready": true,
+    "implementation": "PENDING",
+    "official_tool": "PENDING",
+    "real_time_coordination_required": false
+  },
+  "pending": [
+    "WorkBuddy native contact link implementation and official tool regression",
+    "mini-program device/font/keyboard/native gestures and actual phone",
+    "real network interruption and location refusal",
+    "second real WeChat identity and platform qualification",
+    "actual cloud deployment and target-host sustained operation"
+  ]
+}
