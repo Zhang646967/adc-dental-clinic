@@ -2,12 +2,13 @@ const navigation=require('../../utils/navigation');
 const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 const {primaryAction} = require('../../utils/primary-action');
+const {staleSubject} = require('../../utils/subject-state');
 Page({
-  data:{guest:false,needsSubject:false,needsEnrollment:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
+  data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
   async onShow() {
     const pending=navigation.consume('/pages/home/index');
     if(pending&&pending.queue==='all')this.setData({queue:'all',page:1});
-    this.setData({rows:[],overview:null,primary:null,patient:'',error:'',busy:true,guest:false,needsSubject:false,needsEnrollment:false});
+    this.setData({rows:[],overview:null,primary:null,patient:'',error:'',requestId:'',subjectInvalid:false,busy:true,guest:false,needsSubject:false,needsEnrollment:false});
     api.showSubject(this);
     try {
       const session = await api.bootstrap();api.showSubject(this);
@@ -15,11 +16,21 @@ Page({
       if(session.medical&&!session.can_book){this.setData({busy:false});navigation.redirectTo({url:'/pages/medical-authorizations/index'});return;}
       this.setData({guest:false,needsSubject:false,needsEnrollment:false});
       this.setData({patient:session.patient_name, readOnly:session.read_only,environmentLabel:session.environment_label||''}); await this.load();
-    } catch (e) { showError(this,e,{separateRequestId:true}); }
+    } catch (e) { this.clearStaleSubject(e); showError(this,e,{separateRequestId:true}); }
   },
   login(){navigation.navigateTo({url:'/pages/login/index'});},
   subjects(){navigation.navigateTo({url:'/pages/patients/index'});},
   account(){navigation.navigateTo({url:'/pages/account/index'});},
+  // Both entry points (page show and in-page refresh) must drop the cached
+  // subject banner when the authority or workspace is no longer valid.
+  clearStaleSubject(e){
+    const state=staleSubject(e,api.sessionInfo());
+    if(state.invalid){
+      this.setData({patientName:'',patientCapacity:'',patientDelegated:false,patient:'',
+        rows:[],overview:null,primary:null,subjectInvalid:state.reselect});
+    }
+    return state;
+  },
   async load() {
     // Drop the previous subject's rows, overview and primary action before a
     // refresh. A 403 ACCESS_DENIED or 409 SUBJECT_REQUIRED / SUBJECT_CHANGED
@@ -33,7 +44,10 @@ Page({
       const primary=primaryAction(overview);
       this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, primary, busy:false});
     }
-    catch (e) { showError(this,e,{separateRequestId:true}); }
+    catch (e) {
+      this.clearStaleSubject(e);
+      showError(this,e,{separateRequestId:true});
+    }
   },
   primaryTap() {
     const primary=this.data.primary;
