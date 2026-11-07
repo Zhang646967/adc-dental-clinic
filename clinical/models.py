@@ -159,3 +159,6 @@ from clinical.preflight_models import TreatmentControlPolicy, ClinicalConsentRul
 from clinical.archive_models import ClinicalArchive, ArchiveSubmission, ArchivePackage, ArchiveAmendment, ArchiveEvent
 
 from clinical.copy_models import RecordCopyRequest, RecordCopyItem, RecordCopyFile, RecordCopyEvent
+from clinical.prescription_models import (
+    Prescription, PrescriptionCatalogueItem, PrescriptionDecision, PrescriptionDuty, PrescriptionVersion,
+)

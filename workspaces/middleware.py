@@ -7,7 +7,7 @@ from django.urls import resolve, Resolver404
 from accounts.models import UserAccount
 from workspaces.context import (ensure_context, attach, valid_context, check_token, SESSION_KEY)
 from workspaces.models import WorkspaceContext
-from workspaces.rules import CLINIC_ROLES
+from workspaces.rules import CLINIC_ROLES, ROLES
 
 PUBLIC={'system_entry','public_home','public_services','public_service_detail','public_service_guide','public_clinics',
         'login','portal_login','logout','health','mini_session','mini_login','mini_logout','mini_public_discovery','mini_public_service'}
@@ -25,15 +25,17 @@ PUBLIC.update({'patient_wechat_qr_start','patient_wechat_qr_status','patient_wec
 # Copy-account routes apply their own channel, account token and per-application scope.
 PUBLIC.update({'portal_record_copies','portal_record_copy_new','portal_record_copy','portal_record_copy_confirm','portal_record_copy_download',
     'mini_record_copies','mini_record_copy_options','mini_record_copy_submit','mini_record_copy_confirm','mini_record_copy_download','mini_record_copy','mini_record_copy_action'})
-ROLE_HOME={'manager_home','frontdesk_home','select_clinic','activate_clinic'}
+ROLE_HOME={'manager_home','frontdesk_home','prescription_review_queue','select_clinic','activate_clinic'}
 # These views own exact medical-step authorization. Appointment authority is a
 # different contract; role/workspace/CSRF checks still run below.
 MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_medical_proxy',
     'mini_medical_authorizations','mini_medical_authorization','mini_medical_authorization_preview','mini_medical_authorization_confirm',
     'portal_plans','portal_plan','portal_plan_decision','mini_plans','mini_plan','mini_plan_decision_preview','mini_plan_decision_confirm',
     'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
-ALL={'PATIENT','FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE','SYSADMIN'}
+ALL=set(ROLES)
 ROUTES={
+ 'prescription_visit':{'DENTIST'},'prescription_review_queue':{'PHARMACIST'},
+ 'prescription_detail':{'DENTIST','PHARMACIST'},'prescription_confirm':{'DENTIST','PHARMACIST'},
  'record_copies':{'FRONT_DESK','DENTIST'},'record_copy_new':{'FRONT_DESK'},'record_copy_detail':{'FRONT_DESK','DENTIST'},'record_copy_confirm':{'FRONT_DESK','DENTIST'},
  'clinical_archives':{'DENTIST'},'clinical_archive':{'DENTIST'},'clinical_archive_submission':{'DENTIST'},
  'clinical_archive_amendment':{'DENTIST'},'clinical_archive_confirm':{'DENTIST'},
@@ -131,7 +133,7 @@ ROUTES={
  'account_manage_create':{'SYSADMIN'},'account_manage_change':{'SYSADMIN'},
  'dashboard':ALL,'doctor_home':{'DENTIST'},'frontdesk_home':{'FRONT_DESK'},
  'manager_home':{'MANAGER'},'hq_home':{'HQ'},'finance_home':{'FINANCE'},'technical_home':{'SYSADMIN'},
- 'select_clinic':{'MANAGER','FRONT_DESK'},'activate_clinic':{'MANAGER','FRONT_DESK'},
+ 'select_clinic':CLINIC_ROLES,'activate_clinic':CLINIC_ROLES,
  'patients':{'FRONT_DESK','DENTIST'},'patient_create':{'FRONT_DESK'},'patient_lookup':{'FRONT_DESK'},
  'patient_detail':{'FRONT_DESK','DENTIST'},'visits':{'FRONT_DESK','DENTIST','MANAGER','HQ'},
  'visit_detail':{'FRONT_DESK','DENTIST'},'visit_create':{'FRONT_DESK'},'visit_reschedule':{'FRONT_DESK'},
@@ -198,7 +200,7 @@ class WorkspaceMiddleware:
                 return self.error(request,'此页面不属于当前工作台。请通过“切换身份”选择已授权身份。')
             if ctx.role in CLINIC_ROLES and ctx.clinic_id is None and name not in ROLE_HOME and name not in {'dashboard','guide_index','guide_task'}:
                 if unsafe:return self.error(request,'尚未选择诊所；本次操作未执行。',409)
-                return redirect('manager_home' if ctx.role=='MANAGER' else 'frontdesk_home')
+                return redirect(ROLES[ctx.role][1])
         if ctx.role=='PATIENT' and name not in ROLE_FREE | MEDICAL_SUBJECT_ROUTES | {'portal_subjects','mini_subjects','mini_subject_select'}:
             from portal.policies import patient_access,SubjectRequired
             try:patient_access(request.user)

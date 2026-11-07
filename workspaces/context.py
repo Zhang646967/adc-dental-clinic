@@ -32,8 +32,14 @@ def authorized_clinics(user, role):
     from registry.models import Clinic
     if role not in CLINIC_ROLES:
         return Clinic.objects.none()
-    return Clinic.objects.filter(is_active=True,pk__in=raw_bindings(user).filter(
+    clinics = Clinic.objects.filter(is_active=True,pk__in=raw_bindings(user).filter(
         role=role,scope_kind='CLINIC').values('clinic_id')).order_by('clinic_code')
+    if role == 'PHARMACIST':
+        from clinical.prescription_access import rehearsal_enabled, active_duties
+        if not rehearsal_enabled():
+            return clinics.none()
+        clinics = clinics.filter(pk__in=active_duties(user.pk, 'REVIEW').values('clinic_id'))
+    return clinics
 
 def existing_context(request):
     """Read a context owned by this user; public navigation must never create one."""

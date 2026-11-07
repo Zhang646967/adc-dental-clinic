@@ -39,8 +39,8 @@ class MatchingChecks(unittest.TestCase):
  def test_partial_overlap(self):self.assertTrue(overlaps(1,3,2,4))
  def test_containment_overlap(self):self.assertTrue(overlaps(1,5,2,3))
 class WorkspaceGuideChecks(unittest.TestCase):
- def test_seven_role_types_not_clinic_variants(self):self.assertEqual(len(ROLES),7);self.assertFalse(any('店' in k for k in ROLES))
- def test_only_two_clinic_roles(self):self.assertEqual(set(CLINIC_ROLES),{'MANAGER','FRONT_DESK'})
+ def test_eight_role_types_not_clinic_variants(self):self.assertEqual(len(ROLES),8);self.assertFalse(any('店' in k for k in ROLES))
+ def test_clinic_scoped_roles(self):self.assertEqual(set(CLINIC_ROLES),{'MANAGER','FRONT_DESK','PHARMACIST'})
  def test_current_context_payload(self):self.assertTrue(matches_context({'key':'k','uid':1,'role':'MANAGER','clinic':2,'revision':3},'k',1,'MANAGER',2,3))
  def test_scope_switch_invalidates_payload(self):self.assertFalse(matches_context({'key':'k','uid':1,'role':'MANAGER','clinic':2,'revision':3},'k',1,'MANAGER',4,4))
  def test_role_switch_invalidates_payload(self):self.assertFalse(matches_context({'key':'k','uid':1,'role':'MANAGER','clinic':2,'revision':3},'k',1,'DENTIST',None,4))

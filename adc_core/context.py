@@ -12,6 +12,7 @@ NAV={
  'HQ':[('resource_summary','接待与资源汇总'),('reconciliation_home','渠道对账汇总'),('maintenance_list','维护工单与验收'),('daily_close_list','日结对账与交接'),('cash_receivables','应收汇总'),('cash_list','现金账汇总'),('equipment_expenses','设备费用汇总'),('equipment_cost_queue','费用补正查阅'),('equipment_list','设备概览'),('hq_home','总部概览'),('operations_dashboard','跨店运营'),('finance_quarters','季度财务查阅'),('catalogue_list','治疗价格目录'),('staff_assistant','操作问答')],
  'FINANCE':[('payment_accounts','渠道账户'),('reconciliation_home','渠道对账'),('maintenance_list','维护工单与验收'),('daily_close_list','日结对账与交接'),('cash_receivables','应收与退款余额'),('cash_list','现金账与独立审核'),('equipment_expenses','设备费用逐笔核对'),('equipment_cost_queue','费用补正审核'),('equipment_list','设备台账查阅'),('finance_home','财务首页'),('finance_quarters','季度成本与核对'),('catalogue_list','治疗价格目录'),('corrections','更正审核'),('staff_assistant','操作问答')],
  'SYSADMIN':[('technical_home','技术首页'),('directory_home','基础资料目录'),('account_manage_list','账号与授权')],
+ 'PHARMACIST':[('prescription_review_queue','处方审核')],
 }
 
 for _role in ('DENTIST','MANAGER'):

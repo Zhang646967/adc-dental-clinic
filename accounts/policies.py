@@ -3,6 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import connection
 from accounts.models import UserAccount, RoleAssignment
 from adc_core.rules import validate_role_scope
+from workspaces.rules import CLINIC_ROLES
 
 def bindings(user):
     from workspaces.context import raw_bindings
@@ -10,7 +11,7 @@ def bindings(user):
     ctx = getattr(user, '_adc_workspace', None)
     if ctx is not None:
         qs = qs.filter(role=ctx.role)
-        if ctx.role in ('MANAGER', 'FRONT_DESK'):
+        if ctx.role in CLINIC_ROLES:
             qs = qs.filter(clinic_id=ctx.clinic_id) if ctx.clinic_id else qs.none()
     return qs
 
