@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 处方审核工作台{% endblock %}
+{% block content %}
+<div class="workspace-heading">
+  <p class="eyebrow">{{ workspace_scope }} · 合成处方演练</p>
+  <h1>处方审核工作台</h1>
+  <p>在当前诊所核对临床依据、版本和处方条目，记录本次审核决定。</p>
+</div>
+<nav class="actions" aria-label="处方队列筛选">
+  <a class="button secondary" href="{% url 'prescription_review_queue' %}"{% if not show_history %} aria-current="page"{% endif %}>待审核</a>
+  <a class="button secondary" href="?queue=history"{% if show_history %} aria-current="page"{% endif %}>已有决定</a>
+</nav>
+<section class="panel">
+  <h2>{% if show_history %}已有决定{% else %}待审核处方{% endif %}</h2>
+  {% for version in page %}
+  <article class="clinical-history">
+    <h3><a href="{% url 'prescription_detail' version.prescription_id %}">处方 #{{ version.prescription_id }} · 第 {{ version.number }} 版</a></h3>
+    <p>患者编号 {{ version.prescription.visit.patient.patient_no }} · 开方账号 {{ version.prescription.prescriber.username }} · {{ version.state_label }}</p>
+    <p>提交时间 {{ version.submitted_at|date:'Y-m-d H:i' }}</p>
+  </article>
+  {% empty %}<p>当前诊所暂无该类处方。</p>{% endfor %}
+  {% if page.has_other_pages %}
+  <nav class="pagination" aria-label="处方队列分页">
+    {% if page.has_previous %}<a href="?queue={% if show_history %}history{% else %}pending{% endif %}&amp;page={{ page.previous_page_number }}">上一页</a>{% endif %}
+    <span>{{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a href="?queue={% if show_history %}history{% else %}pending{% endif %}&amp;page={{ page.next_page_number }}">下一页</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}

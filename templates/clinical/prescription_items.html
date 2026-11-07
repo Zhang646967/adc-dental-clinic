@@ -1,0 +1,8 @@
+<ol class="card-list">
+  {% for item in items %}
+  <li>
+    <strong>{{ item.name }}</strong> · {{ item.code }} · {{ item.strength }}
+    <p>{{ item.route_label }} · 单次 {{ item.dose }} {{ item.dose_unit }} · 每日 {{ item.frequency }} 次 · {{ item.days }} 天 · 调配 {{ item.quantity }} {{ item.quantity_unit }}</p>
+  </li>
+  {% endfor %}
+</ol>

@@ -83,6 +83,7 @@ def home(request):
     if not valid_context(request.user,ctx):return redirect('select_role')
     if ctx.role=='PATIENT':return redirect('portal_home')
     if ctx.role in CLINIC_ROLES and ctx.clinic_id is None:return select_clinic(request)
+    if ctx.role=='PHARMACIST':return redirect('prescription_review_queue')
     data={'worklist':workspace_worklist(request.user)}
     if ctx.role=='FRONT_DESK':
         from clinical.continuity_selectors import coordination_counts

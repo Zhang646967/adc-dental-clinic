@@ -1,0 +1,36 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 确认处方办理{% endblock %}
+{% block content %}
+<div class="clinical-flow">
+  <h1>核对处方办理</h1>
+  {% if blocked %}
+  <section class="panel" role="alert">
+    <h2>请核对当前结果</h2>
+    {{ form.non_field_errors }}{{ form.confirmed.errors }}{{ form.proposal_token.errors }}
+    <p>请回到原就诊或审方队列，读取最新版本后继续办理。</p>
+    {% if workspace_role == 'PHARMACIST' %}<a href="{% url 'prescription_review_queue' %}">返回处方审核队列</a>{% else %}<a href="{% url 'clinical_worklist' %}">返回检查记录工作台</a>{% endif %}
+  </section>
+  {% else %}
+  {% include 'clinical/prescription_patient.html' %}
+  <section class="panel">
+    {% if version %}
+    <h2>{{ action_label }} · 处方 #{{ version.prescription_id }} 第 {{ version.number }} 版</h2>
+    <p class="care-notes">决定依据 {{ data.reason }}</p>
+    <p class="care-notes">临床依据 {{ version.indication }}</p>
+    {% include 'clinical/prescription_items.html' with items=version.items %}
+    {% else %}
+    <h2>提交药师审核</h2>
+    <p class="care-notes">临床依据 {{ data.indication }}</p>
+    {% include 'clinical/prescription_items.html' with items=data.items %}
+    {% endif %}
+  </section>
+  <section class="panel form-panel">
+    <form method="post" action="{% url 'prescription_confirm' %}" data-rx-confirm>
+      {% csrf_token %}{% workspace_token %}{{ form.as_div }}
+      <button type="submit">确认本次办理</button>
+    </form>
+    <p><a href="{{ back }}">返回原处方页面</a></p>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

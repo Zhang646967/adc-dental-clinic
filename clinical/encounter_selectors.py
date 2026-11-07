@@ -9,6 +9,7 @@ from clinical.authority import require_visit_authority,readable_assigned_visits
 from clinical.encounters import current_record,record_payload,visible_history,history_cursor
 from clinical.clinical_payload import normalize_draft
 from clinical.models import ClinicalEncounter,ClinicalDraft,ClinicalRecordVersion
+from clinical.prescription_access import rehearsal_enabled, active_duties
 from scheduling.models import Visit
 from workspaces.context import require_active
 
@@ -49,7 +50,10 @@ def _encounter_details(actor,visit_id,*,revision=None):
     working_draft=draft if revision is None else None
     payload=normalize_draft(working_draft.payload) if working_draft else record_payload(displayed) if displayed else normalize_draft({})
     can_edit=can_record and visit.patient.is_active and head is not None and (draft is not None or (current is None and visit.status=='CHECKED_IN')) and revision is None
+    can_open_prescription = bool(rehearsal_enabled() and can_record and current and revision is None and
+                                 active_duties(actor.pk, 'PRESCRIBE').filter(clinic_id=visit.clinic_id).exists())
     return dict(visit=visit,encounter=head,draft=working_draft,clinical_record=displayed,current_record=current,payload=payload,
+        can_open_prescription=can_open_prescription,
         can_record=can_record,can_edit=can_edit,can_start=can_record and visit.patient.is_active and head is None and visit.status=='CHECKED_IN',
         can_amend=can_record and visit.patient.is_active and current is not None and draft is None and revision is None,
         history_rows=list(visible_history(visit.patient_id,visit.clinic_id).select_related('scope_clinic')[:50]),

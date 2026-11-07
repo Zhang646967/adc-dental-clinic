@@ -1,0 +1,41 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 本次就诊处方{% endblock %}
+{% block content %}
+<div class="clinical-flow">
+  <p><a href="{% url 'clinical_encounter' visit.pk %}">返回本次检查记录</a></p>
+  {% include 'clinical/prescription_patient.html' %}
+  <h1>本次就诊处方</h1>
+  {% if record %}<p>当前确认病历第 {{ record.revision }} 版</p>{% endif %}
+  {% if latest %}
+  <section class="panel">
+    <h2>当前进度</h2>
+    <p>处方 #{{ latest.prescription_id }} · 第 {{ latest.number }} 版 · {{ latest.state_label }}</p>
+    {% if latest.decision %}<p class="care-notes">{{ latest.decision.reason }}</p>{% endif %}
+    <a href="{% url 'prescription_detail' latest.prescription_id %}">查看版本及办理结果</a>
+  </section>
+  {% endif %}
+  {% if editable and has_catalogue %}
+  <section class="panel form-panel">
+    <h2>{% if latest %}起草新的处方版本{% else %}起草本次处方{% endif %}</h2>
+    <p>核对患者与当前病历后填写。选填条目可整组留空，最多填写五个目录条目。</p>
+    {% if latest %}<p>勾选条目下的「删除」可将其从新版本移除，旧版本可在处方详情查看。</p>{% endif %}
+    <form method="post" data-rx-compose>
+      {% csrf_token %}{% workspace_token %}
+      {{ form.as_div }}
+      {{ items.management_form }}
+      {{ items.non_form_errors }}
+      {% for item_form in items %}
+      <fieldset class="panel">
+        <legend>条目 {{ forloop.counter }}{% if not forloop.first %}（选填）{% endif %}</legend>
+        {{ item_form.as_div }}
+      </fieldset>
+      {% endfor %}
+      <button type="submit">预览处方</button>
+    </form>
+  </section>
+  {% elif not has_catalogue %}<p class="notice">本店尚未配置合成处方目录，请联系演练维护人员。</p>
+  {% elif not record %}<p class="notice">请返回检查记录，先确认本次病历版本。</p>
+  {% elif visit.status != 'CHECKED_IN' %}<p class="notice">开方须在本次接诊期间办理。</p>{% endif %}
+  {% if not editable %}{{ form.non_field_errors }}{% endif %}
+</div>
+{% endblock %}

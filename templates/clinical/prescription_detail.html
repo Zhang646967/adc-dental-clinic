@@ -1,0 +1,43 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 处方版本与决定{% endblock %}
+{% block content %}
+<div class="clinical-flow">
+  <p>{% if pharmacist %}<a href="{% url 'prescription_review_queue' %}">返回处方审核队列</a>{% else %}<a href="{% url 'prescription_visit' visit.pk %}">返回本次就诊处方</a>{% endif %}</p>
+  {% include 'clinical/prescription_patient.html' %}
+  <h1>处方 #{{ case.pk }} · 第 {{ version.number }} 版</h1>
+  <p><strong>{{ version.state_label }}</strong> · {% if current %}当前版本{% else %}历史版本{% endif %}</p>
+  <nav class="actions" aria-label="处方历史版本">
+    {% for row in versions %}<a class="button secondary" href="?version={{ row.number }}"{% if row.pk == version.pk %} aria-current="page"{% endif %}>第 {{ row.number }} 版</a>{% endfor %}
+  </nav>
+  <section class="panel">
+    <h2>开方内容</h2>
+    <p>开方账号 {{ case.prescriber.username }} · {{ version.submitted_at|date:'Y-m-d H:i' }} · 确认病历第 {{ version.record.revision }} 版</p>
+    <dl class="detail-grid">
+      <dt>临床依据</dt><dd class="care-notes">{{ version.indication }}</dd>
+      {% if version.record.history %}
+      <dt>引用的过敏自述</dt><dd>{{ version.record.history.get_allergy_status_display }} <span class="care-notes">{{ version.record.history.reported_allergies }}</span></dd>
+      <dt>引用的用药自述</dt><dd>{{ version.record.history.get_medication_status_display }} <span class="care-notes">{{ version.record.history.medications }}</span></dd>
+      {% else %}
+      <dt>过敏及用药自述</dt><dd>本次确认病历未引用自述，状态尚未明确。</dd>
+      {% endif %}
+    </dl>
+    {% include 'clinical/prescription_items.html' with items=version.items %}
+  </section>
+  {% if version.decision %}
+  <section class="panel">
+    <h2>决定记录</h2>
+    <p>{{ version.decision.get_action_display }} · {{ version.decision.actor.username }} · {{ version.decision.decided_at|date:'Y-m-d H:i' }}</p>
+    <p class="care-notes">{{ version.decision.reason }}</p>
+  </section>
+  {% endif %}
+  {% if can_revise and not pharmacist %}<p><a class="button" href="{% url 'prescription_visit' visit.pk %}">按意见起草新版本</a></p>{% endif %}
+  {% if editable %}
+  <section class="panel form-panel">
+    <h2>{% if pharmacist %}记录本次审核决定{% else %}撤回待审版本{% endif %}</h2>
+    <form method="post" data-rx-decision>{% csrf_token %}{% workspace_token %}{{ form.as_div }}
+      <button type="submit">预览办理决定</button>
+    </form>
+  </section>
+  {% else %}{{ form.non_field_errors }}{% endif %}
+</div>
+{% endblock %}
