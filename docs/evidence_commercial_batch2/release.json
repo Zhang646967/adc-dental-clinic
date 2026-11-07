@@ -1,0 +1,135 @@
+{
+  "status": "LOCAL_OPERATIONAL_REHEARSAL_COMPLETE",
+  "application_commit": "8bf9ecd02a58ebaa3dfe9ae004cd6602e4e8e5e0",
+  "rehearsal_image": "sha256:1aa0654d8515a0d405ab7a2e7d3842ad801f12c7a2cc7233678f458ab04c6d29",
+  "rehearsal_architecture": "arm64",
+  "application_migrations": 80,
+  "full_ci": {
+    "run_id": 42353121385,
+    "job_id": 128345312221,
+    "head_sha": "8bf9ecd02a58ebaa3dfe9ae004cd6602e4e8e5e0",
+    "tested_source_commit": "8bf9ecd02a58ebaa3dfe9ae004cd6602e4e8e5e0",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42353121385",
+    "validated_source_log_verified": true,
+    "source_tests": 1169,
+    "postgresql_tests": 2316,
+    "native_checks": 339,
+    "all_gates_passed": true
+  },
+  "network_preflight": {
+    "checks": 7,
+    "passed": true,
+    "trust": "local explicit CA"
+  },
+  "patient_write_and_isolation": {
+    "passed": true,
+    "dataset": "isolated course-20",
+    "own_and_other_account_sessions": 2,
+    "normal_appointments": 2,
+    "business_confirm_replay_kept_one_per_patient": true,
+    "cross_patient_read_denied": true,
+    "real_https_probe_steps_per_account": 8
+  },
+  "external_journey_fault_drill": {
+    "passed": true,
+    "scope": "isolated actual TLS and HTTP",
+    "actual_probe_rounds": 4,
+    "health_200_all_rounds": true,
+    "detected_real_availability_503": 2,
+    "incident_events": [
+      "OPENED",
+      "RECOVERED"
+    ],
+    "failed_window_retained": true,
+    "unknown_certificate_and_wrong_hostname_rejected_before_login": true,
+    "successful_round_ms": [
+      310,
+      294
+    ],
+    "retained_only_technical_result_fields": true
+  },
+  "isolated_restarts": {
+    "passed": true,
+    "application_commit": "8bf9ecd02a58ebaa3dfe9ae004cd6602e4e8e5e0",
+    "isolated_worker_stop_start": true,
+    "isolated_service_and_db_restart": true,
+    "same_database_identity": true,
+    "patient_journey_after_restart": true,
+    "operational_status_after": "HEALTHY"
+  },
+  "independent_recovery": {
+    "passed": true,
+    "transport": "local in-memory object SDK double",
+    "actual_ciphertext_and_full_readback": true,
+    "failed_upload_kept_verified_point": true,
+    "download_decrypted_and_verified": true,
+    "independent_empty_database": true,
+    "compared_tables": 167,
+    "compared_rows": 9927,
+    "restore_and_patient_probe_seconds": 48.064,
+    "patient_journey_in_restored_copy": true
+  },
+  "local_site": {
+    "port": 18000,
+    "runtime_commit": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+    "smoke_checks": 5,
+    "purpose": "regular local website"
+  },
+  "local_operator_update": "patient probe installed in the checked-out host source",
+  "native_offline_compiler": {
+    "status": "passed",
+    "wxml_pages": 27,
+    "wxss_files": 1,
+    "scope": "Official offline syntax only; not an IDE preview or WeChat runtime"
+  },
+  "workbuddy": {
+    "environment": {
+      "passed": true,
+      "workbuddy_loopback_port": 18476,
+      "account_guide_mode": "0600",
+      "source_commit": "8bf9ecd02a58ebaa3dfe9ae004cd6602e4e8e5e0",
+      "image": "sha256:1aa0654d8515a0d405ab7a2e7d3842ad801f12c7a2cc7233678f458ab04c6d29",
+      "account_fixture_count": 2,
+      "appointment_fixture_count": 2,
+      "real_http_with_native_client_transport": {
+        "passed": true,
+        "accounts": 2,
+        "own_result": 2,
+        "foreign_denied": 2,
+        "logout": 2,
+        "scope": "Real HTTP through actual native transport module with modeled wx.request"
+      }
+    },
+    "package": {
+      "passed": true,
+      "project_files": 93,
+      "checksums": 97,
+      "tree_sha256": "d6cdaebb7a3603a4a1b9505a49819da0e07997a96d9d13be3c1136b1106e38ed",
+      "archive_sha256": "55df7b1d3cc7b64bfc42634e6fa9aa23bb4f4d84ac8a947de196ec2475e2f5af",
+      "credentials_outside_archive": true
+    },
+    "official_normal_operation": "PENDING_WORKBUDDY",
+    "physical_device": "PENDING"
+  },
+  "report": {
+    "passed": true,
+    "pages": 293,
+    "modified_physical_page": 146,
+    "printed_page": 140,
+    "unchanged_content_streams": 292,
+    "page_labels_and_outline_equal": true,
+    "sha256": "13ff4a8dbe7530f1d9c4c1b43806aa3f62f8815beb8059804e688d1a99e42119",
+    "rendered_page_review": "PASS"
+  },
+  "target_acceptance": {
+    "public_https": "PENDING_TARGET",
+    "server_reboot_and_mac_offline": "PENDING_TARGET",
+    "actual_offsite_storage_and_recovery": "PENDING_PROVIDER",
+    "external_alert_delivery": "PENDING_TARGET",
+    "twenty_four_hour_observation": "PENDING_TARGET",
+    "target_capacity": "PENDING_TARGET",
+    "actual_phone_and_wechat_platform": "PENDING_PLATFORM"
+  }
+}

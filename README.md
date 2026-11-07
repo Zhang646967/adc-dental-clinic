@@ -22,6 +22,8 @@
 
 ## 当前状态与开发
 
+第二批商用整改增加了患者关键路径外部探测。二十店隔离环境通过查号故障识别、重启、加密备份回读和独立空库恢复。目标服务器的连续观测、实际异地存储和手机业务各自验收。 [验收门槛与操作](docs/COMMERCIAL_BATCH2.md) · [本机证据](docs/evidence_commercial_batch2/README.md)
+
 第一批一致性整改涵盖网页筛选、二十店介绍、课程 PDF 和小程序预约联系入口。预约联系页置顶本单门店，并为待核实的预约显示核实提示。WorkBuddy 已完成微信开发者工具复测。[整改与交接](docs/CONSISTENCY_BATCH1.md) · [分项验收](docs/evidence_consistency1/README.md)
 
 
