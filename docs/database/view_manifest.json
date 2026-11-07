@@ -1997,11 +1997,63 @@
       ]
     }
   },
+  "er_prescription_review": {
+    "title": "处方版本与独立审方",
+    "tables": 8,
+    "relationships": 10,
+    "note": "一次就诊至多一张处方。处方按编号追加版本，每版引用准确确认病历、开方职责和专业授权。决定与版本一对一，允许暂未决定。开方人和审核人分离，撤回由原医师办理。目录条目在 items 内固定为 JSON 快照，目录按诊所维护，快照编号不构成外键。",
+    "columns": {
+      "adc_visit": [
+        "id",
+        "clinic_id",
+        "patient_id"
+      ],
+      "adc_clinical_record_version": [
+        "id",
+        "revision"
+      ],
+      "adc_user": [
+        "id"
+      ],
+      "adc_professional_authorization": [
+        "id",
+        "revision"
+      ],
+      "adc_prescription_duty": [
+        "id",
+        "user_id",
+        "kind",
+        "valid_until",
+        "revoked_at"
+      ],
+      "adc_prescription": [
+        "id",
+        "visit_id",
+        "prescriber_id"
+      ],
+      "adc_prescription_version": [
+        "id",
+        "prescription_id",
+        "number",
+        "record_id",
+        "prescriber_duty_id",
+        "clinical_scope_id",
+        "items"
+      ],
+      "adc_prescription_decision": [
+        "id",
+        "version_id",
+        "actor_id",
+        "duty_id",
+        "action"
+      ]
+    }
+  },
   "validation": {
     "passed": true,
-    "tables": 167,
-    "orm_tables": 166,
-    "columns_types_and_nullability_checked": 1667,
+    "tables": 172,
+    "orm_tables": 171,
+    "columns_types_and_nullability_checked": 1707,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2010,10 +2062,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 488,
-    "sql_foreign_keys": 489,
+    "orm_foreign_keys": 500,
+    "sql_foreign_keys": 501,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "fd412c0ea10afa67d2a33b6a9773b90ec6c7539928c6d9c7d5a91492a30cbb66",
+    "snapshot_sha256": "03e9bd38c1f1fc07071b7929da8ba063627ec8926affc63e70c68c0125e4e4d9",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-489条实际SQL外键，其中488条对应ORM单列关系，1条为账单同次就诊复合外键。
+501条实际SQL外键，其中500条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -351,6 +351,18 @@
 | adc_portal_booking_receipt | access_id | adc_patient_access | id |
 | adc_portal_booking_receipt | appointment_grant_id | adc_patient_appointment_grant | id |
 | adc_portal_booking_receipt | visit_id | adc_visit | id |
+| adc_prescription | prescriber_id | adc_user | id |
+| adc_prescription | visit_id | adc_visit | id |
+| adc_prescription_catalogue_item | clinic_id | adc_clinic | id |
+| adc_prescription_decision | duty_id | adc_prescription_duty | id |
+| adc_prescription_decision | version_id | adc_prescription_version | id |
+| adc_prescription_decision | actor_id | adc_user | id |
+| adc_prescription_duty | clinic_id | adc_clinic | id |
+| adc_prescription_duty | user_id | adc_user | id |
+| adc_prescription_version | clinical_scope_id | adc_professional_authorization | id |
+| adc_prescription_version | prescriber_duty_id | adc_prescription_duty | id |
+| adc_prescription_version | prescription_id | adc_prescription | id |
+| adc_prescription_version | record_id | adc_clinical_record_version | id |
 | adc_procedure_gap | performed_id | adc_performed_procedure | id |
 | adc_procedure_gap | recorded_by_id | adc_user | id |
 | adc_procedure_gap_review | gap_id | adc_procedure_gap | id |

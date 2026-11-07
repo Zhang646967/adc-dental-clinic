@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-02。本目录列出166张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-07。本目录列出171张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -4574,6 +4574,183 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 
+## adc_prescription
+
+模型：`clinical.Prescription`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| visit_id | bigint | UK / FK | 否 | `adc_visit.id` |
+| prescriber_id | bigint | FK | 否 | `adc_user.id` |
+| created_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_prescription_pkey`：`PRIMARY KEY (id)`。
+- `adc_prescription_prescriber_id_3457c2af_fk_adc_user_id`：`FOREIGN KEY (prescriber_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_visit_id_9471f26c_fk_adc_visit_id`：`FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_visit_id_key`：`UNIQUE (visit_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_prescription_pkey`：`CREATE UNIQUE INDEX adc_prescription_pkey ON public.adc_prescription USING btree (id)`。
+- `adc_prescription_prescriber_id_3457c2af`：`CREATE INDEX adc_prescription_prescriber_id_3457c2af ON public.adc_prescription USING btree (prescriber_id)`。
+- `adc_prescription_visit_id_key`：`CREATE UNIQUE INDEX adc_prescription_visit_id_key ON public.adc_prescription USING btree (visit_id)`。
+
+跨表及历史触发器：
+
+- `rx_header_retained`：`CREATE TRIGGER rx_header_retained BEFORE DELETE OR UPDATE ON public.adc_prescription FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_prescription_catalogue_item
+
+模型：`clinical.PrescriptionCatalogueItem`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| code | character varying(30) | — | 否 | — |
+| name | character varying(100) | — | 否 | — |
+| strength | character varying(60) | — | 否 | — |
+| dose_unit | character varying(16) | — | 否 | — |
+| quantity_unit | character varying(16) | — | 否 | — |
+| route | character varying(12) | — | 否 | — |
+| is_active | boolean | — | 否 | — |
+
+数据库约束：
+
+- `adc_prescription_cat_clinic_id_9b010dcf_fk_adc_clini`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_catalogue_item_pkey`：`PRIMARY KEY (id)`。
+- `rx_catalogue_clinic_code`：`UNIQUE (clinic_id, code)`。
+- `rx_catalogue_route`：`CHECK (((route)::text = ANY ((ARRAY['ORAL'::character varying, 'LOCAL'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_prescription_catalogue_item_clinic_id_9b010dcf`：`CREATE INDEX adc_prescription_catalogue_item_clinic_id_9b010dcf ON public.adc_prescription_catalogue_item USING btree (clinic_id)`。
+- `adc_prescription_catalogue_item_pkey`：`CREATE UNIQUE INDEX adc_prescription_catalogue_item_pkey ON public.adc_prescription_catalogue_item USING btree (id)`。
+- `rx_catalogue_clinic_code`：`CREATE UNIQUE INDEX rx_catalogue_clinic_code ON public.adc_prescription_catalogue_item USING btree (clinic_id, code)`。
+
+跨表及历史触发器：
+
+
+## adc_prescription_decision
+
+模型：`clinical.PrescriptionDecision`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| version_id | bigint | UK / FK | 否 | `adc_prescription_version.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| duty_id | bigint | FK | 否 | `adc_prescription_duty.id` |
+| action | character varying(12) | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| decided_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_prescription_dec_duty_id_75989e14_fk_adc_presc`：`FOREIGN KEY (duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_dec_version_id_15095758_fk_adc_presc`：`FOREIGN KEY (version_id) REFERENCES adc_prescription_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_decision_actor_id_cdee30df_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_decision_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_prescription_decision_pkey`：`PRIMARY KEY (id)`。
+- `adc_prescription_decision_version_id_key`：`UNIQUE (version_id)`。
+- `rx_decision_content`：`CHECK ((((action)::text = ANY ((ARRAY['APPROVED'::character varying, 'RETURNED'::character varying, 'REJECTED'::character varying, 'WITHDRAWN'::character varying])::text[])) AND (NOT ((reason)::text = ''::text))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_prescription_decision_actor_id_cdee30df`：`CREATE INDEX adc_prescription_decision_actor_id_cdee30df ON public.adc_prescription_decision USING btree (actor_id)`。
+- `adc_prescription_decision_duty_id_75989e14`：`CREATE INDEX adc_prescription_decision_duty_id_75989e14 ON public.adc_prescription_decision USING btree (duty_id)`。
+- `adc_prescription_decision_operation_id_key`：`CREATE UNIQUE INDEX adc_prescription_decision_operation_id_key ON public.adc_prescription_decision USING btree (operation_id)`。
+- `adc_prescription_decision_pkey`：`CREATE UNIQUE INDEX adc_prescription_decision_pkey ON public.adc_prescription_decision USING btree (id)`。
+- `adc_prescription_decision_version_id_key`：`CREATE UNIQUE INDEX adc_prescription_decision_version_id_key ON public.adc_prescription_decision USING btree (version_id)`。
+
+跨表及历史触发器：
+
+- `rx_decision_retained`：`CREATE TRIGGER rx_decision_retained BEFORE DELETE OR UPDATE ON public.adc_prescription_decision FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+- `rx_decision_scope`：`CREATE TRIGGER rx_decision_scope BEFORE INSERT ON public.adc_prescription_decision FOR EACH ROW EXECUTE FUNCTION adc_prescription_decision_guard()`。
+
+## adc_prescription_duty
+
+模型：`clinical.PrescriptionDuty`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| user_id | bigint | FK | 否 | `adc_user.id` |
+| clinic_id | bigint | FK | 否 | `adc_clinic.id` |
+| kind | character varying(12) | — | 否 | — |
+| reference | character varying(120) | — | 否 | — |
+| valid_from | timestamp with time zone | — | 否 | — |
+| valid_until | timestamp with time zone | — | 否 | — |
+| revoked_at | timestamp with time zone | — | 是 | — |
+
+数据库约束：
+
+- `adc_prescription_duty_clinic_id_1de2b15c_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_duty_pkey`：`PRIMARY KEY (id)`。
+- `adc_prescription_duty_user_id_03c6835f_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `rx_duty_kind`：`CHECK (((kind)::text = ANY ((ARRAY['PRESCRIBE'::character varying, 'REVIEW'::character varying])::text[])))`。
+- `rx_duty_period`：`CHECK ((valid_until > valid_from))`。
+
+索引（含条件唯一索引）：
+
+- `adc_prescription_duty_clinic_id_1de2b15c`：`CREATE INDEX adc_prescription_duty_clinic_id_1de2b15c ON public.adc_prescription_duty USING btree (clinic_id)`。
+- `adc_prescription_duty_pkey`：`CREATE UNIQUE INDEX adc_prescription_duty_pkey ON public.adc_prescription_duty USING btree (id)`。
+- `adc_prescription_duty_user_id_03c6835f`：`CREATE INDEX adc_prescription_duty_user_id_03c6835f ON public.adc_prescription_duty USING btree (user_id)`。
+- `rx_duty_one_unrevoked`：`CREATE UNIQUE INDEX rx_duty_one_unrevoked ON public.adc_prescription_duty USING btree (user_id, clinic_id, kind) WHERE (revoked_at IS NULL)`。
+
+跨表及历史触发器：
+
+
+## adc_prescription_version
+
+模型：`clinical.PrescriptionVersion`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| prescription_id | bigint | FK | 否 | `adc_prescription.id` |
+| number | integer | — | 否 | — |
+| record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
+| prescriber_duty_id | bigint | FK | 否 | `adc_prescription_duty.id` |
+| clinical_scope_id | bigint | FK | 否 | `adc_professional_authorization.id` |
+| clinical_scope_revision | integer | — | 否 | — |
+| indication | character varying(500) | — | 否 | — |
+| items | jsonb | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+| submitted_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_prescription_ver_clinical_scope_id_6147dcd8_fk_adc_profe`：`FOREIGN KEY (clinical_scope_id) REFERENCES adc_professional_authorization(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_ver_prescriber_duty_id_9bf51d8b_fk_adc_presc`：`FOREIGN KEY (prescriber_duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_ver_prescription_id_66acd23f_fk_adc_presc`：`FOREIGN KEY (prescription_id) REFERENCES adc_prescription(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_ver_record_id_5d14abca_fk_adc_clini`：`FOREIGN KEY (record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_prescription_version_clinical_scope_revision_check`：`CHECK ((clinical_scope_revision >= 0))`。
+- `adc_prescription_version_number_check`：`CHECK ((number >= 0))`。
+- `adc_prescription_version_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_prescription_version_pkey`：`PRIMARY KEY (id)`。
+- `rx_version_content`：`CHECK (((number >= 1) AND (NOT ((indication)::text = ''::text))))`。
+- `rx_version_number_unique`：`UNIQUE (prescription_id, number)`。
+
+索引（含条件唯一索引）：
+
+- `adc_prescription_version_clinical_scope_id_6147dcd8`：`CREATE INDEX adc_prescription_version_clinical_scope_id_6147dcd8 ON public.adc_prescription_version USING btree (clinical_scope_id)`。
+- `adc_prescription_version_operation_id_key`：`CREATE UNIQUE INDEX adc_prescription_version_operation_id_key ON public.adc_prescription_version USING btree (operation_id)`。
+- `adc_prescription_version_pkey`：`CREATE UNIQUE INDEX adc_prescription_version_pkey ON public.adc_prescription_version USING btree (id)`。
+- `adc_prescription_version_prescriber_duty_id_9bf51d8b`：`CREATE INDEX adc_prescription_version_prescriber_duty_id_9bf51d8b ON public.adc_prescription_version USING btree (prescriber_duty_id)`。
+- `adc_prescription_version_prescription_id_66acd23f`：`CREATE INDEX adc_prescription_version_prescription_id_66acd23f ON public.adc_prescription_version USING btree (prescription_id)`。
+- `adc_prescription_version_record_id_5d14abca`：`CREATE INDEX adc_prescription_version_record_id_5d14abca ON public.adc_prescription_version USING btree (record_id)`。
+- `rx_version_number_unique`：`CREATE UNIQUE INDEX rx_version_number_unique ON public.adc_prescription_version USING btree (prescription_id, number)`。
+
+跨表及历史触发器：
+
+- `rx_version_retained`：`CREATE TRIGGER rx_version_retained BEFORE DELETE OR UPDATE ON public.adc_prescription_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+- `rx_version_scope`：`CREATE TRIGGER rx_version_scope BEFORE INSERT ON public.adc_prescription_version FOR EACH ROW EXECUTE FUNCTION adc_prescription_version_guard()`。
+
 ## adc_procedure_gap
 
 模型：`clinical.ProcedureGap`。
@@ -5479,7 +5656,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `copy_frontdesk_duty`：`CHECK (((NOT can_verify_record_copies) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `identity_reviewer_frontdesk`：`CHECK (((NOT can_verify_patient_relationships) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
 - `medical_proxy_frontdesk_duty`：`CHECK (((NOT can_verify_medical_proxy_identity) OR ((clinic_id IS NOT NULL) AND ((role)::text = 'FRONT_DESK'::text) AND ((scope_kind)::text = 'CLINIC'::text))))`。
-- `role_scope_valid`：`CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))`。
+- `role_scope_valid`：`CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying, 'PHARMACIST'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))`。
 
 索引（含条件唯一索引）：
 
@@ -6456,7 +6633,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_workspace_context_pkey`：`PRIMARY KEY (id)`。
 - `adc_workspace_context_revision_check`：`CHECK ((revision >= 0))`。
 - `adc_workspace_context_user_id_88d56c99_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
-- `workspace_clinic_role`：`CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying])::text[]))))`。
+- `workspace_clinic_role`：`CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying, 'PHARMACIST'::character varying])::text[]))))`。
 - `workspace_login_channel`：`CHECK ((((login_channel)::text = ''::text) OR (((login_channel)::text = 'PATIENT'::text) AND ((role)::text = ANY ((ARRAY[''::character varying, 'PATIENT'::character varying])::text[]))) OR (((login_channel)::text = 'STAFF'::text) AND (NOT ((role)::text = 'PATIENT'::text)))))`。
 - `workspace_medical_subject`：`CHECK (((medical_proxy_id IS NULL) OR ((role)::text = 'PATIENT'::text)))`。
 - `workspace_patient_subject`：`CHECK (((patient_grant_id IS NULL) OR ((role)::text = 'PATIENT'::text)))`。

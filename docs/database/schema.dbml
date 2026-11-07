@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 166 ORM tables; django_migrations is a framework migration journal.
+// All 171 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -1638,6 +1638,67 @@ Table adc_portal_booking_receipt {
   created_at "timestamp with time zone" [not null]
 }
 
+Table adc_prescription {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [unique, not null]
+  prescriber_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_prescription_catalogue_item {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  code "character varying(30)" [not null]
+  name "character varying(100)" [not null]
+  strength "character varying(60)" [not null]
+  dose_unit "character varying(16)" [not null]
+  quantity_unit "character varying(16)" [not null]
+  route "character varying(12)" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (clinic_id, code) [unique, name: 'rx_catalogue_clinic_code']
+  }
+}
+
+Table adc_prescription_decision {
+  id "bigint" [pk, not null]
+  version_id "bigint" [unique, not null]
+  actor_id "bigint" [not null]
+  duty_id "bigint" [not null]
+  action "character varying(12)" [not null]
+  reason "character varying(500)" [not null]
+  operation_id "uuid" [unique, not null]
+  decided_at "timestamp with time zone" [not null]
+}
+
+Table adc_prescription_duty {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  kind "character varying(12)" [not null]
+  reference "character varying(120)" [not null]
+  valid_from "timestamp with time zone" [not null]
+  valid_until "timestamp with time zone" [not null]
+  revoked_at "timestamp with time zone" [null]
+}
+
+Table adc_prescription_version {
+  id "bigint" [pk, not null]
+  prescription_id "bigint" [not null]
+  number "integer" [not null]
+  record_id "bigint" [not null]
+  prescriber_duty_id "bigint" [not null]
+  clinical_scope_id "bigint" [not null]
+  clinical_scope_revision "integer" [not null]
+  indication "character varying(500)" [not null]
+  items "jsonb" [not null]
+  operation_id "uuid" [unique, not null]
+  submitted_at "timestamp with time zone" [not null]
+  indexes {
+    (prescription_id, number) [unique, name: 'rx_version_number_unique']
+  }
+}
+
 Table adc_procedure_gap {
   id "bigint" [pk, not null]
   performed_id "bigint" [unique, not null]
@@ -2684,6 +2745,18 @@ Ref: adc_plan_version.source_record_id > adc_clinical_record_version.id
 Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
 Ref: adc_portal_booking_receipt.appointment_grant_id > adc_patient_appointment_grant.id
 Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
+Ref: adc_prescription.prescriber_id > adc_user.id
+Ref: adc_prescription.visit_id - adc_visit.id
+Ref: adc_prescription_catalogue_item.clinic_id > adc_clinic.id
+Ref: adc_prescription_decision.duty_id > adc_prescription_duty.id
+Ref: adc_prescription_decision.version_id - adc_prescription_version.id
+Ref: adc_prescription_decision.actor_id > adc_user.id
+Ref: adc_prescription_duty.clinic_id > adc_clinic.id
+Ref: adc_prescription_duty.user_id > adc_user.id
+Ref: adc_prescription_version.clinical_scope_id > adc_professional_authorization.id
+Ref: adc_prescription_version.prescriber_duty_id > adc_prescription_duty.id
+Ref: adc_prescription_version.prescription_id > adc_prescription.id
+Ref: adc_prescription_version.record_id > adc_clinical_record_version.id
 Ref: adc_procedure_gap.performed_id - adc_performed_procedure.id
 Ref: adc_procedure_gap.recorded_by_id > adc_user.id
 Ref: adc_procedure_gap_review.gap_id - adc_procedure_gap.id
