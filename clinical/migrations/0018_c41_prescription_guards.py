@@ -47,6 +47,27 @@ CREATE TRIGGER rx_decision_retained BEFORE UPDATE OR DELETE ON adc_prescription_
 FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard();
 """
 
+REVERSE_SQL = """
+DROP TRIGGER rx_decision_retained ON adc_prescription_decision;
+DROP TRIGGER rx_version_retained ON adc_prescription_version;
+DROP TRIGGER rx_header_retained ON adc_prescription;
+DROP TRIGGER rx_decision_scope ON adc_prescription_decision;
+DROP TRIGGER rx_version_scope ON adc_prescription_version;
+DROP FUNCTION adc_prescription_decision_guard();
+DROP FUNCTION adc_prescription_version_guard();
+"""
+
+
+def protect_prescription_history(apps, schema_editor):
+    db = schema_editor.connection.alias
+    for name in ('Prescription', 'PrescriptionVersion', 'PrescriptionDecision',
+                 'PrescriptionCatalogueItem', 'PrescriptionDuty'):
+        if apps.get_model('clinical', name).objects.using(db).exists():
+            raise RuntimeError('Prescription history or duties exist; reversing the prescription schema is refused.')
+    for app, name in (('accounts', 'RoleAssignment'), ('workspaces', 'WorkspaceContext')):
+        if apps.get_model(app, name).objects.using(db).filter(role='PHARMACIST').exists():
+            raise RuntimeError('Pharmacy roles or workspaces exist; reversing the prescription schema is refused.')
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -54,4 +75,7 @@ class Migration(migrations.Migration):
         ('accounts', '0008_c41_prescriptions'),
         ('workspaces', '0005_c41_prescriptions'),
     ]
-    operations = [migrations.RunSQL(SQL)]
+    operations = [
+        migrations.RunSQL(SQL, reverse_sql=REVERSE_SQL),
+        migrations.RunPython(migrations.RunPython.noop, protect_prescription_history),
+    ]
