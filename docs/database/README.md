@@ -1,3 +1,17 @@
+# C5 实际数据库与批次护理关系
+
+独立 PostgreSQL 17 核对 93 份应用迁移、185 张 SQL 表、184 张 ORM 表、540 条外键及 172 项业务触发器。八张表承载库存、批次、护理职责和实际执行。 [批次 ER](er_stock_trace.svg) · [护理执行 ER](er_nursing_execution.svg) · [实际快照](schema_snapshot.json)
+
+# C4.2 实际数据库与药费来源
+
+独立 PostgreSQL 17 核对 88 份应用迁移、177 张 SQL 表、176 张 ORM 表、516 条外键及 156 项业务触发器。发退药来源和准确收费版本分开保存。 [调配与费用 ER](er_dispensing_charges.svg) · [实际快照](schema_snapshot.json)
+
+# C4.1 实际数据库与处方审核关系
+
+独立 PostgreSQL 17 核对了 84 份应用迁移、172 张 SQL 表、171 张 ORM 表、501 条外键及 144 项业务触发器。新增处方、处方版本、决定、专项职责和目录 5 张表。新视图展示确认病历与处方版本、独立决定的实际关系。 [处方版本与独立审方 ER](er_prescription_review.svg) · [实际快照](schema_snapshot.json) · [验收记录](../evidence_c41/README.md)
+
+以下保留此前各批结构的观察时点。
+
 # C3.3B 实际数据库与受控副本关系
 
 实际独立PostgreSQL17结构核对：80份应用迁移、167SQL表／166ORM、488条普通外键及1条复合外键、139项业务触发器、44个实际ER。原77份迁移字节保持，新增四张副本表和两个默认关闭的专项职责。

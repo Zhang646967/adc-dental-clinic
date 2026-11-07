@@ -1,0 +1,155 @@
+{
+  "release_stage": "c5",
+  "application_commit": "6f3de628be6ca929b80537b198cf1f50d7e74523",
+  "scope": "single clinic synthetic local rehearsal",
+  "image": "sha256:da5776b17087e5bd4355506967330bf7d2c49383f1c74f581b2b201a4e2bf93c",
+  "exact_ci": {
+    "run_id": 42401919126,
+    "job_ids": [
+      128491347524,
+      128491347666
+    ],
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42401919126",
+    "tested_source_commit": "6f3de628be6ca929b80537b198cf1f50d7e74523",
+    "verified_source_log": true,
+    "test_counts": [
+      1169,
+      2344
+    ],
+    "native_checks": 339,
+    "workflow_head_sha": "53195cdcac097ca844355d6b311aedbbf45b77a5",
+    "manifest_sha256": "0d5ca785191643155cc1a5706628ce6363e16cda6859d350000b86ab75d1fe32",
+    "shards": {
+      "1": {
+        "job_id": 128491347524,
+        "manifest": {
+          "assigned": [
+            1172,
+            1172
+          ],
+          "count": 2344,
+          "sha256": "0d5ca785191643155cc1a5706628ce6363e16cda6859d350000b86ab75d1fe32",
+          "shard": 1
+        },
+        "counts": [
+          1169,
+          1172
+        ],
+        "native_checks": 339
+      },
+      "0": {
+        "job_id": 128491347666,
+        "manifest": {
+          "assigned": [
+            1172,
+            1172
+          ],
+          "count": 2344,
+          "sha256": "0d5ca785191643155cc1a5706628ce6363e16cda6859d350000b86ab75d1fe32",
+          "shard": 0
+        },
+        "counts": [
+          1169,
+          1172
+        ],
+        "native_checks": 339
+      }
+    }
+  },
+  "browser": {
+    "passed": true,
+    "browser": "156.0.8078.75",
+    "receipts": true,
+    "tracedIssue": true,
+    "nursingActuals": true,
+    "recallTrace": true,
+    "combinedInvoice": true,
+    "frontdeskDenied": true
+  },
+  "local_targeted_postgresql": 8,
+  "independent_encrypted_restore": {
+    "passed": true,
+    "source_database": "c5 isolated synthetic",
+    "postgresql_major": 17,
+    "tables": 185,
+    "rows": 1200,
+    "application_rows": 187,
+    "scheme": "AES-256-GCM; same-version migrate then independent data-only restore",
+    "encrypted_sha256": "8f1ef5aafecad9d7b9c6c4133ccf3a5dd68ca72390959df22c96a77eab24f8ba",
+    "schema_and_row_digests_equal": true,
+    "pharmacy_quotes": 1,
+    "dispensing_movements": 2,
+    "medication_lines": 1,
+    "published_invoices": 1,
+    "stock_movements": 5,
+    "nursing_executions": 4,
+    "elapsed_seconds": 1.74
+  },
+  "actual_postgresql": {
+    "tables": 185,
+    "orm_tables": 184,
+    "foreign_keys": 540,
+    "business_triggers": 172,
+    "application_migrations": 93,
+    "views": {
+      "er_dispensing_charges": {
+        "passed": true,
+        "entities": 8,
+        "edges": 9
+      },
+      "er_stock_trace": {
+        "passed": true,
+        "entities": 7,
+        "edges": 9
+      },
+      "er_nursing_execution": {
+        "passed": true,
+        "entities": 7,
+        "edges": 8
+      }
+    }
+  },
+  "course_pdf": {
+    "passed": true,
+    "physical_pages": 296,
+    "original_streams_retained": 294,
+    "new_pages": [
+      295,
+      296
+    ],
+    "sha256": "4d3e9b75e701489799384bd68ff7604e05905e4d9cebcfebdae2b9970e5dcd29"
+  },
+  "official_miniprogram_tool": "pending, WorkBuddy application exposed no interactive window",
+  "platform_and_partner_site": "pending actual platform and qualified clinic acceptance",
+  "local_integrated_postgresql": 85,
+  "native_source_and_transport": 339,
+  "protected_copy_upgrade": {
+    "passed": true,
+    "source": "restored C4.2 rehearsal copy",
+    "old_application_migrations": 88,
+    "new_application_migrations": 93,
+    "compared_original_business_tables": 171,
+    "compared_original_business_rows": 174,
+    "retained_invoice": 1,
+    "retained_medication_versions": 2,
+    "retained_cash_movements": 2,
+    "all_existing_columns_and_rows_match": true
+  },
+  "runtime_equivalence": {
+    "first_rehearsal_commit": "d38fa94e0ee251c6bcb91fe6341ae622a94a6050",
+    "final_commit": "6f3de628be6ca929b80537b198cf1f50d7e74523",
+    "identical_application_files": true,
+    "identical_observed_database_structure": true,
+    "changed_files": [
+      "CHECKSUMS.sha256",
+      "UPDATE_MANIFEST.json",
+      "checks/test_v07_rules.py"
+    ]
+  },
+  "verification_history": {
+    "first_ci": "Two role-structure checks expected eight roles. They now require all nine and their exact clinic scopes.",
+    "sequential_ci": "Run 42396329026 reached the 60-minute job limit. Two successful jobs cover the same test manifest at the exact application commit.",
+    "local_deep_legacy_rollback": "The local process exited 137. The exact application commit was verified by the full GitHub suite."
+  },
+  "native_invoice_projection": "shared Django source with split medication lines and fallback for older clients"
+}

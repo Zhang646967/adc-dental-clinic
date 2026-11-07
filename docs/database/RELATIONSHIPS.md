@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-489条实际SQL外键，其中488条对应ORM单列关系，1条为账单同次就诊复合外键。
+540条实际SQL外键，其中539条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -170,6 +170,10 @@
 | adc_dentist_quarter_cost | quarter_id | adc_quarter | id |
 | adc_department | clinic_id | adc_clinic | id |
 | adc_department_hours | department_id | adc_department | id |
+| adc_dispense_movement | duty_id | adc_prescription_duty | id |
+| adc_dispense_movement | line_id | adc_pharmacy_quote_line | id |
+| adc_dispense_movement | original_issue_id | adc_dispense_movement | id |
+| adc_dispense_movement | actor_id | adc_user | id |
 | adc_equipment_asset | clinic_id | adc_clinic | id |
 | adc_equipment_asset | registered_by_id | adc_user | id |
 | adc_equipment_cost_amendment | based_amendment_id | adc_equipment_cost_amendment | id |
@@ -282,6 +286,9 @@
 | adc_medical_proxy_version | plan_id | adc_treatment_plan | id |
 | adc_medical_proxy_version | proxy_id | adc_medical_proxy | id |
 | adc_medical_proxy_version | submitted_by_id | adc_user | id |
+| adc_medication_charge | quote_line_id | adc_pharmacy_quote_line | id |
+| adc_medication_charge | record_version_id | adc_visit_record_version | id |
+| adc_medication_charge | through_movement_id | adc_dispense_movement | id |
 | adc_monthly_cost | dentist_id | adc_dentist | id |
 | adc_monthly_cost | equipment_event_id | adc_equipment_event | id |
 | adc_monthly_cost | period_id | adc_cost_month | id |
@@ -295,6 +302,14 @@
 | adc_notification_outbox | source_event_id | adc_audit_event | id |
 | adc_notification_outbox | task_id | adc_coordination_task | id |
 | adc_notification_outbox | clinic_id | adc_clinic | id |
+| adc_nursing_duty | clinic_id | adc_clinic | id |
+| adc_nursing_duty | user_id | adc_user | id |
+| adc_nursing_execution | issue_id | adc_dispense_movement | id |
+| adc_nursing_execution | performed_id | adc_performed_procedure | id |
+| adc_nursing_execution | sterile_pack_id | adc_sterile_pack | id |
+| adc_nursing_execution | actor_id | adc_user | id |
+| adc_nursing_execution | duty_id | adc_nursing_duty | id |
+| adc_nursing_execution | visit_id | adc_visit | id |
 | adc_patient | created_in_clinic_id | adc_clinic | id |
 | adc_patient_access | patient_id | adc_patient | id |
 | adc_patient_access | user_id | adc_user | id |
@@ -322,6 +337,14 @@
 | adc_performed_procedure | step_version_id | adc_plan_step_version | id |
 | adc_performed_procedure | treatment_type_id | adc_treatment_type | id |
 | adc_performed_procedure | recorded_by_id | adc_user | id |
+| adc_pharmacy_quote | approval_id | adc_prescription_decision | id |
+| adc_pharmacy_quote | duty_id | adc_prescription_duty | id |
+| adc_pharmacy_quote | prepared_by_id | adc_user | id |
+| adc_pharmacy_quote_line | item_id | adc_prescription_catalogue_item | id |
+| adc_pharmacy_quote_line | quote_id | adc_pharmacy_quote | id |
+| adc_pharmacy_stop | actor_id | adc_user | id |
+| adc_pharmacy_stop | approval_id | adc_prescription_decision | id |
+| adc_pharmacy_stop | duty_id | adc_prescription_duty | id |
 | adc_plan_appointment | instruction_id | adc_next_visit_instruction | id |
 | adc_plan_appointment | linked_by_id | adc_user | id |
 | adc_plan_appointment | visit_id | adc_visit | id |
@@ -351,6 +374,18 @@
 | adc_portal_booking_receipt | access_id | adc_patient_access | id |
 | adc_portal_booking_receipt | appointment_grant_id | adc_patient_appointment_grant | id |
 | adc_portal_booking_receipt | visit_id | adc_visit | id |
+| adc_prescription | prescriber_id | adc_user | id |
+| adc_prescription | visit_id | adc_visit | id |
+| adc_prescription_catalogue_item | clinic_id | adc_clinic | id |
+| adc_prescription_decision | duty_id | adc_prescription_duty | id |
+| adc_prescription_decision | version_id | adc_prescription_version | id |
+| adc_prescription_decision | actor_id | adc_user | id |
+| adc_prescription_duty | clinic_id | adc_clinic | id |
+| adc_prescription_duty | user_id | adc_user | id |
+| adc_prescription_version | clinical_scope_id | adc_professional_authorization | id |
+| adc_prescription_version | prescriber_duty_id | adc_prescription_duty | id |
+| adc_prescription_version | prescription_id | adc_prescription | id |
+| adc_prescription_version | record_id | adc_clinical_record_version | id |
 | adc_procedure_gap | performed_id | adc_performed_procedure | id |
 | adc_procedure_gap | recorded_by_id | adc_user | id |
 | adc_procedure_gap_review | gap_id | adc_procedure_gap | id |
@@ -438,6 +473,22 @@
 | adc_statement_use | cash_match_id | adc_reconciliation_match | id |
 | adc_statement_use | fund_transfer_id | adc_fund_transfer | id |
 | adc_statement_use | line_id | adc_statement_line | id |
+| adc_sterile_hold | actor_id | adc_user | id |
+| adc_sterile_hold | duty_id | adc_nursing_duty | id |
+| adc_sterile_hold | pack_id | adc_sterile_pack | id |
+| adc_sterile_pack | clinic_id | adc_clinic | id |
+| adc_sterile_pack | duty_id | adc_nursing_duty | id |
+| adc_sterile_pack | released_by_id | adc_user | id |
+| adc_stock_item | clinic_id | adc_clinic | id |
+| adc_stock_item | prescription_item_id | adc_prescription_catalogue_item | id |
+| adc_stock_lot | item_id | adc_stock_item | id |
+| adc_stock_movement | actor_id | adc_user | id |
+| adc_stock_movement | dispense_id | adc_dispense_movement | id |
+| adc_stock_movement | execution_id | adc_nursing_execution | id |
+| adc_stock_movement | lot_id | adc_stock_lot | id |
+| adc_stock_movement | reverses_id | adc_stock_movement | id |
+| adc_stock_recall | actor_id | adc_user | id |
+| adc_stock_recall | lot_id | adc_stock_lot | id |
 | adc_tooth_finding | record_id | adc_clinical_record_version | id |
 | adc_treatment_control_policy | activated_by_id | adc_user | id |
 | adc_treatment_control_policy | clinic_id | adc_clinic | id |

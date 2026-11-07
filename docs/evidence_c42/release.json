@@ -1,0 +1,88 @@
+{
+  "release_stage": "c42",
+  "application_commit": "3869a5dde607a0835b53dfde64de31dbeff345ae",
+  "scope": "single clinic synthetic local rehearsal",
+  "image": "sha256:fc124053bd268ae125a7d8d6e883910cfc5981ec6e1d9852e61d24f03f4077ed",
+  "exact_ci": {
+    "run_id": 42393013779,
+    "job_id": 128464369961,
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42393013779",
+    "tested_source_commit": "3869a5dde607a0835b53dfde64de31dbeff345ae",
+    "verified_source_log": true,
+    "test_counts": [
+      1169,
+      2336
+    ],
+    "native_checks": 339
+  },
+  "browser": {
+    "passed": true,
+    "browser": "156.0.8078.75",
+    "priceAndPartialIssue": true,
+    "receiptPosted": true,
+    "versionCorrection": true,
+    "refundPosted": true,
+    "ownInvoiceAndHistory": true,
+    "crossPatientDenied": true
+  },
+  "local_targeted_postgresql": 9,
+  "independent_encrypted_restore": {
+    "passed": true,
+    "source_database": "c42 isolated synthetic",
+    "postgresql_major": 17,
+    "tables": 177,
+    "rows": 1147,
+    "application_rows": 174,
+    "scheme": "AES-256-GCM; same-version migrate then independent data-only restore",
+    "encrypted_sha256": "ef4a01a27a69ce093a278e4f83894dee4624e3f85dc46a1bb15e8f63207cbf4a",
+    "schema_and_row_digests_equal": true,
+    "pharmacy_quotes": 1,
+    "dispensing_movements": 2,
+    "medication_lines": 2,
+    "published_invoices": 1,
+    "stock_movements": 0,
+    "nursing_executions": 0,
+    "elapsed_seconds": 1.74
+  },
+  "actual_postgresql": {
+    "tables": 177,
+    "orm_tables": 176,
+    "foreign_keys": 516,
+    "business_triggers": 156,
+    "application_migrations": 88,
+    "views": {
+      "er_dispensing_charges": {
+        "passed": true,
+        "entities": 8,
+        "edges": 9
+      }
+    }
+  },
+  "course_pdf": {
+    "passed": true,
+    "physical_pages": 295,
+    "sha256": "67e6068790dd53ede6cc9ef269760839c8bd7d7a88fee2ff3f5682b8a1532159"
+  },
+  "official_miniprogram_tool": "pending, WorkBuddy application exposed no interactive window",
+  "platform_and_partner_site": "pending actual platform and qualified clinic acceptance",
+  "actual_native_invoice_http": {
+    "passed": true,
+    "network": "real Django HTTP with two synthetic sessions",
+    "current": {
+      "revision": 2,
+      "quantity": 3,
+      "amount": "37.50"
+    },
+    "historical": {
+      "revision": 1,
+      "quantity": 4,
+      "amount": "50.00"
+    },
+    "posted": [
+      "50.00",
+      "12.50"
+    ],
+    "otherStatus": 404,
+    "otherResponseHasNoInvoice": true
+  }
+}

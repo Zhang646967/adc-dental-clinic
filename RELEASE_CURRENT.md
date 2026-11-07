@@ -1,3 +1,21 @@
+# C5 批次库存、护理执行与召回追溯
+
+门店批次连接实际发药和耗用，护理按本次实际来源记录给药、无菌包使用和异常。库存与药费按各自事实核对。医师可回查护理交接和混合账单。 [业务设计](docs/decisions/ADR_C5_BATCH_AND_NURSING_TRACE.md) · [验收](docs/evidence_c5/README.md)
+
+准确应用提交 `6f3de62` 通过完整验证，包含 1,169 项源检查、2,344 项 PostgreSQL 测试及 339 项小程序源码与传输检查。 [GitHub CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42401919126)
+
+# C4.2 发退药、费用版本与独立记账
+
+合成实例中按当前通过的处方划价，实际发药可分次登记。退药保留原发药事实，关闭后由负责医师申请、独立财务审核更正。同一单号保留历史费用。 [岗位与状态](docs/decisions/ADR_C42_DISPENSING_AND_CHARGES.md) · [验收](docs/evidence_c42/README.md)
+
+准确应用提交 `3869a5d` 通过完整验证，包含 1,169 项源检查、2,336 项 PostgreSQL 测试及 339 项小程序源码与传输检查。 [GitHub CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42393013779)
+
+# C4.1 处方与独立审方
+
+在单店合成演练中，负责医师从确认病历提交处方，药师在本店工作台审核。退回后追加版本，原版与决定可查。Chrome 正常办理、PostgreSQL 权限和并发验证以及独立加密恢复已执行。课程 PDF 补充第二批小程序实测及 C4.1 设计页。 [岗位规则](docs/decisions/ADR_C41_PRESCRIPTION_REVIEW.md) · [验收记录](docs/evidence_c41/README.md)
+
+应用提交 `4c7fc2b` 的完整验证包含 1,169 项源检查、2,327 项 PostgreSQL 测试及 339 项小程序源码与传输检查。 [GitHub CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42391010814)
+
 # 双端患者服务闭环
 
 ## 第二批商用整改

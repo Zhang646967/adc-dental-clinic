@@ -1,0 +1,19 @@
+{
+  "scope": "18476 independent synthetic rehearsal; WeChat developer-tool operation and read-only server reconciliation",
+  "client_and_backend_commit": "8bf9ecd02a58ebaa3dfe9ae004cd6602e4e8e5e0",
+  "checksum_entries_verified": 97,
+  "developer_tool_base_library": "3.17.5",
+  "compiled_pages": 27,
+  "viewport": "390x844",
+  "passed": ["WB2-01", "WB2-02", "WB2-03", "WB2-04", "WB2-05 available 390-width checks"],
+  "independent_reconciliation": {
+    "baseline_bookings": 2,
+    "new_bookings": 1,
+    "matching_booking_receipts": 1,
+    "new_confirmation_requests": 1,
+    "confirmation_http_status": 200,
+    "foreign_appointment_http_status": 404
+  },
+  "pending": ["375 width", "430 width", "enlarged font", "software keyboard", "native date gestures", "physical phone and WeChat platform"],
+  "source": "WorkBuddy operator return plus Codex read-only reconciliation of the frozen environment"
+}

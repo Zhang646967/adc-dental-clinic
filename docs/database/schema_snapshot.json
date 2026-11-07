@@ -281,6 +281,34 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_daily_close_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE prior adc_daily_close%ROWTYPE; facts jsonb; value text;\nBEGIN\n IF TG_OP='DELETE' THEN RAISE EXCEPTION 'daily close history cannot be deleted' USING ERRCODE='23514'; END IF;\n PERFORM pg_advisory_xact_lock(hashtextextended('adc.daily-close:' || NEW.clinic_id::text || ':' || NEW.business_date::text,0));\n IF TG_OP='INSERT' THEN\n   IF NEW.state<>'PENDING' OR NEW.lock_version<>0 OR NEW.business_date>(now() AT TIME ZONE 'Asia/Shanghai')::date\n      OR btrim(NEW.evidence)='' OR btrim(NEW.reason)='' THEN\n     RAISE EXCEPTION 'daily close starts with current dated evidence pending review' USING ERRCODE='23514';\n   END IF;\n   SELECT * INTO prior FROM adc_daily_close WHERE clinic_id=NEW.clinic_id AND business_date=NEW.business_date ORDER BY version DESC LIMIT 1;\n   IF NEW.previous_id IS DISTINCT FROM prior.id OR NEW.version<>coalesce(prior.version,0)+1 OR prior.state='PENDING' THEN\n     RAISE EXCEPTION 'daily close requires latest terminal predecessor' USING ERRCODE='23514';\n   END IF;\n   IF jsonb_typeof(NEW.declared) IS DISTINCT FROM 'object' THEN\n     RAISE EXCEPTION 'invalid declared amounts' USING ERRCODE='23514';\n   END IF;\n   IF NOT (NEW.declared ?& ARRAY['RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'])\n      OR (SELECT count(*) FROM jsonb_object_keys(NEW.declared))<>4 THEN\n     RAISE EXCEPTION 'all four independent amounts required' USING ERRCODE='23514';\n   END IF;\n   FOR value IN SELECT jsonb_each_text.value FROM jsonb_each_text(NEW.declared) LOOP\n     IF value IS NULL OR value !~ '^(0|[1-9][0-9]{0,25})\\.[0-9]{2}$' THEN\n       RAISE EXCEPTION 'invalid declared amount format' USING ERRCODE='23514';\n     END IF;\n   END LOOP;\n ELSE\n   IF OLD.state<>'PENDING' OR NEW.state NOT IN ('APPROVED','REJECTED') OR NEW.lock_version<>1\n      OR (NEW.operation_id,NEW.clinic_id,NEW.business_date,NEW.version,NEW.previous_id,NEW.snapshot,NEW.declared,NEW.evidence,NEW.reason,NEW.prepared_by_id,NEW.prepared_at)\n        IS DISTINCT FROM (OLD.operation_id,OLD.clinic_id,OLD.business_date,OLD.version,OLD.previous_id,OLD.snapshot,OLD.declared,OLD.evidence,OLD.reason,OLD.prepared_by_id,OLD.prepared_at)\n      OR btrim(NEW.review_reason)='' OR NEW.reviewed_at<NEW.prepared_at THEN\n      RAISE EXCEPTION 'daily close facts and terminal decisions are immutable' USING ERRCODE='23514';\n   END IF;\n END IF;\n IF TG_OP='INSERT' OR NEW.state='APPROVED' THEN\n   facts=adc_daily_facts(NEW.clinic_id,NEW.business_date);\n   IF NEW.snapshot IS DISTINCT FROM facts THEN RAISE EXCEPTION 'daily close snapshot stale' USING ERRCODE='23514'; END IF;\n   IF NEW.state='APPROVED' AND ((facts->>'pending')::bigint<>0 OR NEW.declared IS DISTINCT FROM facts->'totals') THEN\n      RAISE EXCEPTION 'unresolved daily discrepancy or pending cash' USING ERRCODE='23514';\n   END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_dispense_movement",
+      "name": "dispense_retained",
+      "definition": "CREATE TRIGGER dispense_retained BEFORE DELETE OR UPDATE ON public.adc_dispense_movement FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "dispense_scope",
+      "definition": "CREATE TRIGGER dispense_scope BEFORE INSERT ON public.adc_dispense_movement FOR EACH ROW EXECUTE FUNCTION adc_guard_dispense_movement()",
+      "function": "adc_guard_dispense_movement",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_dispense_movement()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE v adc_visit%ROWTYPE; approval bigint; ordered integer; original integer; used bigint;\nBEGIN\n SELECT q.approval_id,l.ordered_quantity INTO approval,ordered FROM adc_pharmacy_quote_line l\n JOIN adc_pharmacy_quote q ON q.id=l.quote_id WHERE l.id=NEW.line_id;\n v=adc_pharmacy_visit(approval,NEW.actor_id,NEW.duty_id);\n IF NEW.kind='ISSUE' THEN\n  SELECT coalesce(sum(quantity),0) INTO used FROM adc_dispense_movement WHERE line_id=NEW.line_id AND kind='ISSUE';\n  IF v.status<>'CHECKED_IN' OR used+NEW.quantity>ordered OR\n     EXISTS (SELECT 1 FROM adc_pharmacy_stop s WHERE s.approval_id=approval) THEN\n   RAISE EXCEPTION 'Issuance exceeds the remaining open prescription' USING ERRCODE='23514';\n  END IF;\n ELSE\n  SELECT quantity INTO original FROM adc_dispense_movement\n  WHERE id=NEW.original_issue_id AND line_id=NEW.line_id AND kind='ISSUE';\n  SELECT coalesce(sum(quantity),0) INTO used FROM adc_dispense_movement WHERE original_issue_id=NEW.original_issue_id;\n  IF v.status NOT IN ('CHECKED_IN','COMPLETED') OR original IS NULL OR used+NEW.quantity>original THEN\n   RAISE EXCEPTION 'Return exceeds the matching original issue' USING ERRCODE='23514';\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "dispense_stock_required",
+      "definition": "CREATE CONSTRAINT TRIGGER dispense_stock_required AFTER INSERT ON public.adc_dispense_movement DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_stock_links()",
+      "function": "adc_check_stock_links",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_stock_links()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='adc_dispense_movement' THEN\n  IF NEW.requires_batch AND NOT EXISTS (SELECT 1 FROM adc_stock_movement WHERE dispense_id=NEW.id) THEN\n   RAISE EXCEPTION 'Traced dispensing needs its stock movement' USING ERRCODE='23514';\n  END IF;\n ELSIF NEW.kind='MATERIAL' AND NOT EXISTS (SELECT 1 FROM adc_stock_movement WHERE execution_id=NEW.id) THEN\n  RAISE EXCEPTION 'Material execution needs its stock movement' USING ERRCODE='23514';\n END IF;\n RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "dispense_use_consistency",
+      "definition": "CREATE TRIGGER dispense_use_consistency BEFORE INSERT ON public.adc_dispense_movement FOR EACH ROW EXECUTE FUNCTION adc_guard_administered_return()",
+      "function": "adc_guard_administered_return",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_administered_return()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE prior_quantity integer; accounted bigint; trace_needed boolean;\nBEGIN\n IF NEW.kind='RETURN' THEN\n  -- dispense_scope has already serialized this visit and checked the issue identity.\n  SELECT quantity,requires_batch INTO prior_quantity,trace_needed FROM adc_dispense_movement WHERE id=NEW.original_issue_id;\n  SELECT coalesce(sum(quantity),0) INTO accounted FROM (\n   SELECT quantity FROM adc_nursing_execution WHERE issue_id=NEW.original_issue_id\n   UNION ALL SELECT quantity FROM adc_dispense_movement WHERE original_issue_id=NEW.original_issue_id\n  ) relevant;\n  IF accounted+NEW.quantity>prior_quantity OR NEW.requires_batch IS DISTINCT FROM trace_needed THEN\n   RAISE EXCEPTION 'Return cannot consume administered quantity or lose lot provenance' USING ERRCODE='23514';\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_equipment_asset",
       "name": "equipment_asset_history",
       "definition": "CREATE TRIGGER equipment_asset_history BEFORE DELETE OR UPDATE ON public.adc_equipment_asset FOR EACH ROW EXECUTE FUNCTION adc_equipment_asset_guard()",
@@ -505,6 +533,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_validate_correction_publication()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE r adc_visit_record_version%ROWTYPE; c adc_correction_request%ROWTYPE;\nBEGIN\n  SELECT * INTO r FROM adc_visit_record_version WHERE id=NEW.current_record_version_id;\n  IF r.previous_version_id IS NULL THEN\n    IF r.revision_no<>1 OR r.correction_request_id IS NOT NULL THEN\n      RAISE EXCEPTION 'first publication must be revision one' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    SELECT * INTO c FROM adc_correction_request WHERE id=r.correction_request_id;\n    IF NOT FOUND OR c.status<>'APPLIED' OR c.visit_id<>NEW.visit_id OR c.base_record_version_id<>r.previous_version_id\n       OR c.reviewer_id IS NULL OR c.reviewer_id=c.requester_id OR r.reviewed_by_id IS NULL OR r.reviewed_by_id<>c.reviewer_id THEN\n      RAISE EXCEPTION 'correction requires a matching independent approval' USING ERRCODE='23514';\n    END IF;\n    IF NOT EXISTS(SELECT 1 FROM adc_visit_record_version p WHERE p.id=r.previous_version_id AND p.visit_id=r.visit_id AND p.revision_no<r.revision_no AND p.state='PUBLISHED') THEN\n      RAISE EXCEPTION 'invalid predecessor revision' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  IF TG_OP='UPDATE' AND NEW.current_record_version_id<>OLD.current_record_version_id THEN\n    IF r.previous_version_id IS DISTINCT FROM OLD.current_record_version_id THEN\n      RAISE EXCEPTION 'current invoice must advance from its current revision' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NULL;\nEND $function$\n"
     },
     {
+      "table": "adc_invoice",
+      "name": "invoice_medication_publication",
+      "definition": "CREATE CONSTRAINT TRIGGER invoice_medication_publication AFTER INSERT OR UPDATE ON public.adc_invoice DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_invoice_medication()",
+      "function": "adc_check_invoice_medication",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_invoice_medication()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE old_version bigint; scope text;\nBEGIN\n IF TG_OP='UPDATE' THEN\n  IF NEW.current_record_version_id=OLD.current_record_version_id THEN RETURN NULL; END IF;\n  old_version=OLD.current_record_version_id;\n  SELECT c.proposed_change->>'scope' INTO scope FROM adc_correction_request c\n  JOIN adc_visit_record_version r ON r.correction_request_id=c.id WHERE r.id=NEW.current_record_version_id;\n END IF;\n IF old_version IS NULL OR scope='medication_returns' THEN\n  IF EXISTS (\n   WITH expected AS (\n    SELECT m.line_id AS quote_line_id,max(m.id) AS through_movement_id\n    FROM adc_dispense_movement m JOIN adc_pharmacy_quote_line l ON l.id=m.line_id\n    JOIN adc_pharmacy_quote q ON q.id=l.quote_id JOIN adc_prescription_decision d ON d.id=q.approval_id\n    JOIN adc_prescription_version r ON r.id=d.version_id JOIN adc_prescription p ON p.id=r.prescription_id\n    WHERE p.visit_id=NEW.visit_id GROUP BY m.line_id\n   ), actual AS (\n    SELECT quote_line_id,through_movement_id FROM adc_medication_charge\n    WHERE record_version_id=NEW.current_record_version_id\n   )\n   SELECT 1 FROM expected FULL JOIN actual USING (quote_line_id,through_movement_id)\n   WHERE expected.quote_line_id IS NULL OR actual.quote_line_id IS NULL\n  ) THEN\n   RAISE EXCEPTION 'Invoice must include each current dispensing source' USING ERRCODE='23514';\n  END IF;\n ELSIF EXISTS (\n  WITH previous AS (\n   SELECT quote_line_id,through_movement_id FROM adc_medication_charge WHERE record_version_id=old_version\n  ), current_lines AS (\n   SELECT quote_line_id,through_movement_id FROM adc_medication_charge WHERE record_version_id=NEW.current_record_version_id\n  )\n  SELECT 1 FROM previous FULL JOIN current_lines USING (quote_line_id,through_movement_id)\n  WHERE previous.quote_line_id IS NULL OR current_lines.quote_line_id IS NULL\n ) THEN\n  RAISE EXCEPTION 'Only an approved return correction can change medication charges' USING ERRCODE='23514';\n END IF;\n RETURN NULL;\nEND $function$\n"
+    },
+    {
       "table": "adc_lab_case",
       "name": "lab_acceptance_consistency",
       "definition": "CREATE CONSTRAINT TRIGGER lab_acceptance_consistency AFTER INSERT OR UPDATE ON public.adc_lab_case DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_lab_acceptance()",
@@ -603,6 +638,20 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_medical_proxy_version_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_OP<>'INSERT' THEN RAISE EXCEPTION 'Medical proxy evidence versions are retained'; END IF;\n IF NOT EXISTS(SELECT 1 FROM adc_medical_proxy m JOIN adc_treatment_plan p ON p.id=NEW.plan_id\n JOIN adc_clinical_encounter e ON e.id=p.origin_encounter_id JOIN adc_visit v ON v.id=e.visit_id\n WHERE m.id=NEW.proxy_id AND (m.patient_id,m.clinic_id)=(v.patient_id,v.clinic_id)) OR\n NEW.number<>COALESCE((SELECT MAX(number)+1 FROM adc_medical_proxy_version WHERE proxy_id=NEW.proxy_id),1) THEN\n RAISE EXCEPTION 'Proxy evidence must retain its own patient clinic plan and next version'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_medication_charge",
+      "name": "medication_charge_published_guard",
+      "definition": "CREATE TRIGGER medication_charge_published_guard BEFORE INSERT OR DELETE OR UPDATE ON public.adc_medication_charge FOR EACH ROW EXECUTE FUNCTION adc_protect_published_line()",
+      "function": "adc_protect_published_line",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_published_line()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE old_id bigint; new_id bigint; s text;\nBEGIN\n  IF TG_OP<>'INSERT' THEN old_id=OLD.record_version_id; END IF;\n  IF TG_OP<>'DELETE' THEN new_id=NEW.record_version_id; END IF;\n  -- Lock parents in ascending order. Completion must use the same parent lock protocol.\n  FOR s IN SELECT state FROM adc_visit_record_version WHERE id IN (old_id,new_id) ORDER BY id FOR UPDATE LOOP\n    IF s='PUBLISHED' THEN\n      RAISE EXCEPTION 'cannot change lines of a published version' USING ERRCODE='23514';\n    END IF;\n  END LOOP;\n  IF TG_OP='DELETE' THEN RETURN OLD; END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "medication_charge_source",
+      "definition": "CREATE TRIGGER medication_charge_source BEFORE INSERT OR UPDATE ON public.adc_medication_charge FOR EACH ROW EXECUTE FUNCTION adc_guard_medication_charge()",
+      "function": "adc_guard_medication_charge",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_medication_charge()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE actual bigint; gross bigint; price numeric;\nBEGIN\n SELECT l.unit_price INTO price FROM adc_pharmacy_quote_line l\n JOIN adc_pharmacy_quote q ON q.id=l.quote_id JOIN adc_prescription_decision d ON d.id=q.approval_id\n JOIN adc_prescription_version r ON r.id=d.version_id JOIN adc_prescription p ON p.id=r.prescription_id\n JOIN adc_visit_record_version c ON c.visit_id=p.visit_id AND c.id=NEW.record_version_id\n JOIN adc_dispense_movement m ON m.line_id=l.id AND m.id=NEW.through_movement_id\n WHERE l.id=NEW.quote_line_id;\n SELECT coalesce(sum(CASE WHEN kind='ISSUE' THEN quantity ELSE -quantity END),0),\n        coalesce(sum(quantity) FILTER (WHERE kind='ISSUE'),0) INTO actual,gross\n FROM adc_dispense_movement WHERE line_id=NEW.quote_line_id AND id<=NEW.through_movement_id;\n IF price IS NULL OR gross=0 OR actual<>NEW.quantity OR price*NEW.quantity<>NEW.line_amount THEN\n  RAISE EXCEPTION 'Medication charge requires matching physical facts and retained price' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_monthly_cost",
       "name": "monthly_cost_history",
       "definition": "CREATE TRIGGER monthly_cost_history BEFORE DELETE OR UPDATE ON public.adc_monthly_cost FOR EACH ROW EXECUTE FUNCTION adc_monthly_cost_history()",
@@ -622,6 +671,27 @@
       "definition": "CREATE TRIGGER notice_identity_guard BEFORE DELETE OR UPDATE ON public.adc_notification_outbox FOR EACH ROW EXECUTE FUNCTION adc_notice_immutable()",
       "function": "adc_notice_immutable",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_notice_immutable()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION 'notification event history is immutable' USING ERRCODE='23514';\n  END IF;\n  IF (NEW.source_event_id, NEW.task_id, NEW.clinic_id, NEW.task_revision, NEW.action,\n      NEW.event_state, NEW.occurred_at, NEW.recipients)\n    IS DISTINCT FROM\n     (OLD.source_event_id, OLD.task_id, OLD.clinic_id, OLD.task_revision, OLD.action,\n      OLD.event_state, OLD.occurred_at, OLD.recipients) THEN\n    RAISE EXCEPTION 'notification source and targets are immutable' USING ERRCODE='23514';\n  END IF;\n  IF OLD.state IN ('DELIVERED','NO_RECIPIENTS') THEN\n    RAISE EXCEPTION 'completed notification outcome cannot be rewritten' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "nursing_execution_retained",
+      "definition": "CREATE TRIGGER nursing_execution_retained BEFORE DELETE OR UPDATE ON public.adc_nursing_execution FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "nursing_execution_scope",
+      "definition": "CREATE TRIGGER nursing_execution_scope BEFORE INSERT ON public.adc_nursing_execution FOR EACH ROW EXECUTE FUNCTION adc_guard_nursing_execution()",
+      "function": "adc_guard_nursing_execution",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_nursing_execution()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE v adc_visit%ROWTYPE; pack adc_sterile_pack%ROWTYPE; lot adc_stock_lot%ROWTYPE; issued integer; handled bigint;\nBEGIN\n SELECT * INTO v FROM adc_visit WHERE id=NEW.visit_id FOR UPDATE;\n IF v.status<>'CHECKED_IN' OR v.attended_at IS NULL OR NEW.observed_at<v.attended_at\n  OR NOT adc_nursing_authorized(NEW.actor_id,v.clinic_id,NEW.duty_id,'EXECUTE') THEN\n  RAISE EXCEPTION 'Nursing execution needs an active in-clinic encounter and scoped duty' USING ERRCODE='23514';\n END IF;\n IF NEW.kind IN ('MATERIAL','STERILE') AND NOT EXISTS (\n  SELECT 1 FROM adc_performed_procedure p JOIN adc_clinical_encounter e ON e.id=p.encounter_id\n  WHERE p.id=NEW.performed_id AND e.visit_id=v.id AND p.state='ACTIVE'\n ) THEN RAISE EXCEPTION 'Nursing care needs the corresponding active performed procedure' USING ERRCODE='23514'; END IF;\n IF NEW.kind='STERILE' THEN\n  SELECT * INTO pack FROM adc_sterile_pack WHERE id=NEW.sterile_pack_id FOR UPDATE;\n  IF pack.clinic_id IS DISTINCT FROM v.clinic_id OR NEW.observed_at<pack.released_at OR pack.valid_until<=clock_timestamp()\n   OR EXISTS (SELECT 1 FROM adc_sterile_hold h WHERE h.pack_id=pack.id) THEN\n   RAISE EXCEPTION 'Sterile package must be usable in the same clinic' USING ERRCODE='23514';\n  END IF;\n ELSIF NEW.kind='ADMINISTER' THEN\n  SELECT d.quantity INTO issued FROM adc_dispense_movement d JOIN adc_pharmacy_quote_line q ON q.id=d.line_id\n  JOIN adc_pharmacy_quote h ON h.id=q.quote_id JOIN adc_prescription_decision a ON a.id=h.approval_id\n  JOIN adc_prescription_version r ON r.id=a.version_id JOIN adc_prescription p ON p.id=r.prescription_id\n  WHERE d.id=NEW.issue_id AND d.kind='ISSUE' AND d.requires_batch AND p.visit_id=v.id AND d.occurred_at<=NEW.observed_at;\n  SELECT l.* INTO lot FROM adc_stock_lot l JOIN adc_stock_movement m ON m.lot_id=l.id\n  WHERE m.dispense_id=NEW.issue_id AND m.kind='ISSUE' FOR UPDATE OF l;\n  SELECT coalesce(sum(quantity),0) INTO handled FROM (\n   SELECT quantity FROM adc_nursing_execution WHERE issue_id=NEW.issue_id\n   UNION ALL SELECT quantity FROM adc_dispense_movement WHERE original_issue_id=NEW.issue_id\n  ) accounted;\n  IF issued IS NULL OR lot.id IS NULL OR lot.expires_on<(now() AT TIME ZONE 'Asia/Shanghai')::date\n   OR EXISTS (SELECT 1 FROM adc_stock_recall c WHERE c.lot_id=lot.id) OR handled+NEW.quantity>issued THEN\n   RAISE EXCEPTION 'Administration needs a usable issued lot and undisposed quantity' USING ERRCODE='23514';\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "nursing_stock_required",
+      "definition": "CREATE CONSTRAINT TRIGGER nursing_stock_required AFTER INSERT ON public.adc_nursing_execution DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_stock_links()",
+      "function": "adc_check_stock_links",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_stock_links()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF TG_TABLE_NAME='adc_dispense_movement' THEN\n  IF NEW.requires_batch AND NOT EXISTS (SELECT 1 FROM adc_stock_movement WHERE dispense_id=NEW.id) THEN\n   RAISE EXCEPTION 'Traced dispensing needs its stock movement' USING ERRCODE='23514';\n  END IF;\n ELSIF NEW.kind='MATERIAL' AND NOT EXISTS (SELECT 1 FROM adc_stock_movement WHERE execution_id=NEW.id) THEN\n  RAISE EXCEPTION 'Material execution needs its stock movement' USING ERRCODE='23514';\n END IF;\n RETURN NULL;\nEND $function$\n"
     },
     {
       "table": "adc_patient_enrollment_event",
@@ -664,6 +734,55 @@
       "definition": "CREATE CONSTRAINT TRIGGER performed_visit_final_consistency AFTER INSERT OR UPDATE ON public.adc_performed_procedure DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_performed_final()",
       "function": "adc_check_performed_final",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_performed_final()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE visit_id bigint;\nBEGIN\n SELECT e.visit_id INTO visit_id FROM adc_clinical_encounter e WHERE e.id=NEW.encounter_id;\n PERFORM adc_validate_visit(visit_id);\n RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "pharmacy_quote_complete",
+      "definition": "CREATE CONSTRAINT TRIGGER pharmacy_quote_complete AFTER INSERT ON public.adc_pharmacy_quote DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_pharmacy_quote_lines()",
+      "function": "adc_check_pharmacy_quote_lines",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_check_pharmacy_quote_lines()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF (SELECT count(*) FROM adc_pharmacy_quote_line l WHERE l.quote_id=NEW.id)\n   <> (SELECT jsonb_array_length(r.items) FROM adc_prescription_version r\n       JOIN adc_prescription_decision d ON d.version_id=r.id WHERE d.id=NEW.approval_id)\n THEN\n  RAISE EXCEPTION 'Quote must contain all approved items' USING ERRCODE='23514';\n END IF;\n RETURN NULL;\nEND $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "pharmacy_quote_retained",
+      "definition": "CREATE TRIGGER pharmacy_quote_retained BEFORE DELETE OR UPDATE ON public.adc_pharmacy_quote FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "pharmacy_quote_scope",
+      "definition": "CREATE TRIGGER pharmacy_quote_scope BEFORE INSERT ON public.adc_pharmacy_quote FOR EACH ROW EXECUTE FUNCTION adc_guard_pharmacy_header()",
+      "function": "adc_guard_pharmacy_header",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_pharmacy_header()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE v adc_visit%ROWTYPE; operator_id bigint;\nBEGIN\n IF TG_TABLE_NAME='adc_pharmacy_quote' THEN operator_id=NEW.prepared_by_id;\n ELSE operator_id=NEW.actor_id;\n END IF;\n v=adc_pharmacy_visit(NEW.approval_id,operator_id,NEW.duty_id);\n IF v.status<>'CHECKED_IN' OR (\n  TG_TABLE_NAME='adc_pharmacy_quote' AND EXISTS (SELECT 1 FROM adc_pharmacy_stop s WHERE s.approval_id=NEW.approval_id)\n ) THEN\n  RAISE EXCEPTION 'New quote or stop requires an open dispensing encounter' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "pharmacy_line_retained",
+      "definition": "CREATE TRIGGER pharmacy_line_retained BEFORE DELETE OR UPDATE ON public.adc_pharmacy_quote_line FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "pharmacy_line_scope",
+      "definition": "CREATE TRIGGER pharmacy_line_scope BEFORE INSERT ON public.adc_pharmacy_quote_line FOR EACH ROW EXECUTE FUNCTION adc_guard_pharmacy_line()",
+      "function": "adc_guard_pharmacy_line",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_pharmacy_line()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF NOT EXISTS (\n  SELECT 1 FROM adc_pharmacy_quote q\n  JOIN adc_prescription_decision d ON d.id=q.approval_id\n  JOIN adc_prescription_version r ON r.id=d.version_id\n  JOIN adc_prescription p ON p.id=r.prescription_id\n  JOIN adc_visit v ON v.id=p.visit_id AND v.status='CHECKED_IN'\n  JOIN adc_prescription_catalogue_item i ON i.id=NEW.item_id AND i.clinic_id=v.clinic_id\n  CROSS JOIN LATERAL jsonb_array_elements(r.items) AS entry\n  WHERE q.id=NEW.quote_id AND i.is_active AND i.rehearsal_unit_price=NEW.unit_price\n    AND (entry->>'item_id')::bigint=i.id AND entry->>'name'=NEW.name_snapshot\n    AND entry->>'quantity_unit'=NEW.unit_snapshot AND (entry->>'quantity')::int=NEW.ordered_quantity\n ) THEN\n  RAISE EXCEPTION 'Quote line must match an approved retained item and its clinic price' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "pharmacy_stop_retained",
+      "definition": "CREATE TRIGGER pharmacy_stop_retained BEFORE DELETE OR UPDATE ON public.adc_pharmacy_stop FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "pharmacy_stop_scope",
+      "definition": "CREATE TRIGGER pharmacy_stop_scope BEFORE INSERT ON public.adc_pharmacy_stop FOR EACH ROW EXECUTE FUNCTION adc_guard_pharmacy_header()",
+      "function": "adc_guard_pharmacy_header",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_pharmacy_header()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE v adc_visit%ROWTYPE; operator_id bigint;\nBEGIN\n IF TG_TABLE_NAME='adc_pharmacy_quote' THEN operator_id=NEW.prepared_by_id;\n ELSE operator_id=NEW.actor_id;\n END IF;\n v=adc_pharmacy_visit(NEW.approval_id,operator_id,NEW.duty_id);\n IF v.status<>'CHECKED_IN' OR (\n  TG_TABLE_NAME='adc_pharmacy_quote' AND EXISTS (SELECT 1 FROM adc_pharmacy_stop s WHERE s.approval_id=NEW.approval_id)\n ) THEN\n  RAISE EXCEPTION 'New quote or stop requires an open dispensing encounter' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_plan_appointment",
@@ -713,6 +832,41 @@
       "definition": "CREATE TRIGGER plan_version_retained BEFORE DELETE OR UPDATE ON public.adc_plan_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
       "function": "adc_clinical_history_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "rx_header_retained",
+      "definition": "CREATE TRIGGER rx_header_retained BEFORE DELETE OR UPDATE ON public.adc_prescription FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "rx_decision_retained",
+      "definition": "CREATE TRIGGER rx_decision_retained BEFORE DELETE OR UPDATE ON public.adc_prescription_decision FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "rx_decision_scope",
+      "definition": "CREATE TRIGGER rx_decision_scope BEFORE INSERT ON public.adc_prescription_decision FOR EACH ROW EXECUTE FUNCTION adc_prescription_decision_guard()",
+      "function": "adc_prescription_decision_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_prescription_decision_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE owner_id bigint; target_clinic bigint;\nBEGIN\n SELECT p.prescriber_id,v.clinic_id INTO owner_id,target_clinic FROM adc_prescription_version r\n JOIN adc_prescription p ON p.id=r.prescription_id JOIN adc_visit v ON v.id=p.visit_id\n WHERE r.id=NEW.version_id;\n IF (NEW.actor_id=owner_id) IS DISTINCT FROM (NEW.action='WITHDRAWN') OR NOT EXISTS (\n  SELECT 1 FROM adc_prescription_duty d WHERE d.id=NEW.duty_id\n  AND d.user_id=NEW.actor_id AND d.clinic_id=target_clinic\n  AND d.kind=CASE WHEN NEW.action='WITHDRAWN' THEN 'PRESCRIBE' ELSE 'REVIEW' END\n ) THEN RAISE EXCEPTION 'Prescription decision needs the proper independent actor and scope'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "rx_version_retained",
+      "definition": "CREATE TRIGGER rx_version_retained BEFORE DELETE OR UPDATE ON public.adc_prescription_version FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "rx_version_scope",
+      "definition": "CREATE TRIGGER rx_version_scope BEFORE INSERT ON public.adc_prescription_version FOR EACH ROW EXECUTE FUNCTION adc_prescription_version_guard()",
+      "function": "adc_prescription_version_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_prescription_version_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE source_visit bigint; target_visit bigint; owner_id bigint; target_clinic bigint;\nBEGIN\n SELECT r.visit_id INTO source_visit FROM adc_clinical_encounter r\n JOIN adc_clinical_record_version v ON v.encounter_id=r.id WHERE v.id=NEW.record_id;\n SELECT p.visit_id,p.prescriber_id,v.clinic_id INTO target_visit,owner_id,target_clinic\n FROM adc_prescription p JOIN adc_visit v ON v.id=p.visit_id WHERE p.id=NEW.prescription_id;\n IF source_visit IS DISTINCT FROM target_visit OR NOT EXISTS (\n  SELECT 1 FROM adc_prescription_duty d WHERE d.id=NEW.prescriber_duty_id\n  AND d.user_id=owner_id AND d.clinic_id=target_clinic AND d.kind='PRESCRIBE'\n ) OR NOT EXISTS (\n  SELECT 1 FROM adc_professional_authorization a WHERE a.id=NEW.clinical_scope_id\n  AND a.user_id=owner_id AND a.clinic_id=target_clinic\n ) THEN RAISE EXCEPTION 'Prescription source and prescriber scope must match'; END IF;\n IF jsonb_typeof(NEW.items) IS DISTINCT FROM 'array' OR jsonb_array_length(NEW.items) NOT BETWEEN 1 AND 5\n THEN RAISE EXCEPTION 'A prescription needs a bounded retained item list'; END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_procedure_gap",
@@ -895,6 +1049,83 @@
       "definition": "CREATE TRIGGER statement_use_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_statement_use FOR EACH ROW EXECUTE FUNCTION adc_guard_statement_use()",
       "function": "adc_guard_statement_use",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_statement_use()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE owner_line bigint; owner_state text; owner_created timestamptz; owner_released timestamptz;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'statement use history is retained' USING ERRCODE='23514';\n  END IF;\n  PERFORM 1 FROM adc_statement_line WHERE id=NEW.line_id FOR UPDATE;\n  IF NEW.cash_match_id IS NOT NULL THEN\n    SELECT line_id,state,prepared_at,coalesce(invalidated_at,reviewed_at)\n      INTO owner_line,owner_state,owner_created,owner_released FROM adc_reconciliation_match WHERE id=NEW.cash_match_id;\n  ELSE\n    SELECT line_id,state,prepared_at,reviewed_at INTO owner_line,owner_state,owner_created,owner_released\n      FROM adc_fund_transfer WHERE id=NEW.fund_transfer_id;\n  END IF;\n  IF owner_line IS DISTINCT FROM NEW.line_id OR owner_created IS DISTINCT FROM NEW.created_at THEN\n    RAISE EXCEPTION 'statement use must refer to its retained source owner' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'ACTIVE' OR NEW.derived_from_existing OR owner_state NOT IN ('PENDING','CONFIRMED') THEN\n      RAISE EXCEPTION 'new use is active and cannot fabricate old source history' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'ACTIVE' OR NEW.state<>'RELEASED' OR owner_state NOT IN ('REJECTED','STALE')\n      OR NEW.released_at IS DISTINCT FROM owner_released\n      OR (to_jsonb(NEW)-ARRAY['state','released_at']) IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','released_at']) THEN\n    RAISE EXCEPTION 'statement use releases only with its original owner decision' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "sterile_hold_retained",
+      "definition": "CREATE TRIGGER sterile_hold_retained BEFORE DELETE OR UPDATE ON public.adc_sterile_hold FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "sterile_hold_scope",
+      "definition": "CREATE TRIGGER sterile_hold_scope BEFORE INSERT ON public.adc_sterile_hold FOR EACH ROW EXECUTE FUNCTION adc_guard_sterile_pack()",
+      "function": "adc_guard_sterile_pack",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_sterile_pack()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE clinic bigint;\nBEGIN\n IF TG_TABLE_NAME='adc_sterile_pack' THEN\n  IF NOT adc_nursing_authorized(NEW.released_by_id,NEW.clinic_id,NEW.duty_id,'STERILITY')\n   OR btrim(NEW.code)='' OR btrim(NEW.process_reference)='' THEN\n   RAISE EXCEPTION 'Sterile package needs a scoped release and process evidence' USING ERRCODE='23514';\n  END IF;\n ELSE\n  SELECT clinic_id INTO clinic FROM adc_sterile_pack WHERE id=NEW.pack_id FOR UPDATE;\n  IF NOT adc_nursing_authorized(NEW.actor_id,clinic,NEW.duty_id,'STERILITY') OR btrim(NEW.reason)='' THEN\n   RAISE EXCEPTION 'Sterile hold needs a scoped actor and reason' USING ERRCODE='23514';\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "sterile_pack_retained",
+      "definition": "CREATE TRIGGER sterile_pack_retained BEFORE DELETE OR UPDATE ON public.adc_sterile_pack FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "sterile_pack_scope",
+      "definition": "CREATE TRIGGER sterile_pack_scope BEFORE INSERT ON public.adc_sterile_pack FOR EACH ROW EXECUTE FUNCTION adc_guard_sterile_pack()",
+      "function": "adc_guard_sterile_pack",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_sterile_pack()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE clinic bigint;\nBEGIN\n IF TG_TABLE_NAME='adc_sterile_pack' THEN\n  IF NOT adc_nursing_authorized(NEW.released_by_id,NEW.clinic_id,NEW.duty_id,'STERILITY')\n   OR btrim(NEW.code)='' OR btrim(NEW.process_reference)='' THEN\n   RAISE EXCEPTION 'Sterile package needs a scoped release and process evidence' USING ERRCODE='23514';\n  END IF;\n ELSE\n  SELECT clinic_id INTO clinic FROM adc_sterile_pack WHERE id=NEW.pack_id FOR UPDATE;\n  IF NOT adc_nursing_authorized(NEW.actor_id,clinic,NEW.duty_id,'STERILITY') OR btrim(NEW.reason)='' THEN\n   RAISE EXCEPTION 'Sterile hold needs a scoped actor and reason' USING ERRCODE='23514';\n  END IF;\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "stock_item_retained",
+      "definition": "CREATE TRIGGER stock_item_retained BEFORE DELETE OR UPDATE ON public.adc_stock_item FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "stock_item_scope",
+      "definition": "CREATE TRIGGER stock_item_scope BEFORE INSERT ON public.adc_stock_item FOR EACH ROW EXECUTE FUNCTION adc_guard_stock_item()",
+      "function": "adc_guard_stock_item",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_stock_item()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n IF NEW.kind='DRUG' AND NOT EXISTS (\n  SELECT 1 FROM adc_prescription_catalogue_item p WHERE p.id=NEW.prescription_item_id\n  AND p.clinic_id=NEW.clinic_id AND p.quantity_unit=NEW.unit\n ) THEN RAISE EXCEPTION 'Drug inventory needs a matching clinic item and unit' USING ERRCODE='23514'; END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "stock_lot_retained",
+      "definition": "CREATE TRIGGER stock_lot_retained BEFORE DELETE OR UPDATE ON public.adc_stock_lot FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "stock_movement_retained",
+      "definition": "CREATE TRIGGER stock_movement_retained BEFORE DELETE OR UPDATE ON public.adc_stock_movement FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "stock_movement_scope",
+      "definition": "CREATE TRIGGER stock_movement_scope BEFORE INSERT ON public.adc_stock_movement FOR EACH ROW EXECUTE FUNCTION adc_guard_stock_movement()",
+      "function": "adc_guard_stock_movement",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_stock_movement()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE clinic bigint; item_kind text; rx_item bigint; expiry date; unit text; balance bigint; source_valid boolean;\nBEGIN\n SELECT i.clinic_id,i.kind,i.prescription_item_id,l.expires_on,i.unit INTO clinic,item_kind,rx_item,expiry,unit\n FROM adc_stock_lot l JOIN adc_stock_item i ON i.id=l.item_id WHERE l.id=NEW.lot_id FOR UPDATE OF l;\n IF NEW.kind IN ('RECEIPT','ISSUE','USE') AND\n  (expiry < (now() AT TIME ZONE 'Asia/Shanghai')::date OR EXISTS (SELECT 1 FROM adc_stock_recall r WHERE r.lot_id=NEW.lot_id)) THEN\n  RAISE EXCEPTION 'Expired or recalled stock cannot be received or issued' USING ERRCODE='23514';\n END IF;\n IF NEW.kind IN ('ISSUE','USE','WASTE','REVERSE_IN') THEN\n  balance=adc_stock_balance(NEW.lot_id);\n  IF balance<NEW.quantity THEN RAISE EXCEPTION 'Available lot stock cannot be negative' USING ERRCODE='23514'; END IF;\n END IF;\n IF NEW.kind IN ('ISSUE','QUARANTINE') THEN\n  SELECT EXISTS (\n   SELECT 1 FROM adc_dispense_movement d JOIN adc_pharmacy_quote_line q ON q.id=d.line_id\n   JOIN adc_pharmacy_quote h ON h.id=q.quote_id JOIN adc_prescription_decision a ON a.id=h.approval_id\n   JOIN adc_prescription_version r ON r.id=a.version_id JOIN adc_prescription p ON p.id=r.prescription_id\n   JOIN adc_visit v ON v.id=p.visit_id\n   WHERE d.id=NEW.dispense_id AND d.requires_batch AND d.actor_id=NEW.actor_id AND d.quantity=NEW.quantity\n     AND q.item_id=rx_item AND q.unit_snapshot=unit AND v.clinic_id=clinic\n     AND (d.kind='ISSUE' AND NEW.kind='ISSUE' OR d.kind='RETURN' AND NEW.kind='QUARANTINE' AND EXISTS (\n       SELECT 1 FROM adc_stock_movement m WHERE m.dispense_id=d.original_issue_id AND m.lot_id=NEW.lot_id AND m.kind='ISSUE'\n     ))\n  ) INTO source_valid;\n ELSIF NEW.kind='USE' THEN\n  SELECT EXISTS (\n   SELECT 1 FROM adc_nursing_execution n JOIN adc_visit v ON v.id=n.visit_id\n   WHERE n.id=NEW.execution_id AND n.kind='MATERIAL' AND n.actor_id=NEW.actor_id\n   AND n.quantity=NEW.quantity AND v.clinic_id=clinic AND item_kind IN ('MATERIAL','IMPLANT')\n  ) INTO source_valid;\n ELSE\n  source_valid=adc_stock_operator(NEW.actor_id,clinic,item_kind);\n  IF NEW.kind='RECEIPT' THEN source_valid=source_valid AND btrim(NEW.reference)<>'';\n  ELSIF NEW.kind IN ('REVERSE_IN','REVERSE_OUT') THEN\n   source_valid=source_valid AND EXISTS (\n    SELECT 1 FROM adc_stock_movement m WHERE m.id=NEW.reverses_id AND m.lot_id=NEW.lot_id AND m.quantity=NEW.quantity\n    AND m.kind=CASE WHEN NEW.kind='REVERSE_IN' THEN 'RECEIPT' ELSE 'WASTE' END\n   );\n  END IF;\n END IF;\n IF source_valid IS DISTINCT FROM true THEN\n  RAISE EXCEPTION 'Stock movement must match its scoped physical source' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "stock_recall_retained",
+      "definition": "CREATE TRIGGER stock_recall_retained BEFORE DELETE OR UPDATE ON public.adc_stock_recall FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "stock_recall_scope",
+      "definition": "CREATE TRIGGER stock_recall_scope BEFORE INSERT ON public.adc_stock_recall FOR EACH ROW EXECUTE FUNCTION adc_guard_stock_recall()",
+      "function": "adc_guard_stock_recall",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_guard_stock_recall()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE clinic bigint; item_kind text;\nBEGIN\n SELECT i.clinic_id,i.kind INTO clinic,item_kind FROM adc_stock_lot l JOIN adc_stock_item i ON i.id=l.item_id\n WHERE l.id=NEW.lot_id FOR UPDATE OF l;\n IF NOT adc_stock_operator(NEW.actor_id,clinic,item_kind) OR btrim(NEW.reference)='' OR btrim(NEW.reason)='' THEN\n  RAISE EXCEPTION 'Recall needs a scoped actor and retained basis' USING ERRCODE='23514';\n END IF;\n RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_tooth_finding",
@@ -8673,6 +8904,158 @@
       "unique_together": []
     },
     {
+      "table": "adc_dispense_movement",
+      "model": "clinical.DispenseMovement",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "line",
+          "column": "line_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_pharmacy_quote_line",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(6)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 6,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "original_issue",
+          "column": "original_issue_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_dispense_movement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "quantity",
+          "column": "quantity",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "requires_batch",
+          "column": "requires_batch",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "occurred_at",
+          "column": "occurred_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_equipment_asset",
       "model": "equipment.EquipmentAsset",
       "app": "equipment",
@@ -14332,6 +14715,93 @@
       "unique_together": []
     },
     {
+      "table": "adc_medication_charge",
+      "model": "care.MedicationCharge",
+      "app": "care",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "record_version",
+          "column": "record_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "quote_line",
+          "column": "quote_line_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_pharmacy_quote_line",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "through_movement",
+          "column": "through_movement_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_dispense_movement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "quantity",
+          "column": "quantity",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "line_amount",
+          "column": "line_amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_monthly_cost",
       "model": "finance.MonthlyCost",
       "app": "finance",
@@ -14936,6 +15406,297 @@
           "unique": false,
           "null": false,
           "max_length": 24,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_nursing_duty",
+      "model": "supplies.NursingDuty",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "user",
+          "column": "user_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(10)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 10,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_from",
+          "column": "valid_from",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_until",
+          "column": "valid_until",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revoked_at",
+          "column": "revoked_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_nursing_execution",
+      "model": "supplies.NursingExecution",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "visit",
+          "column": "visit_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "performed",
+          "column": "performed_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_performed_procedure",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "sterile_pack",
+          "column": "sterile_pack_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_sterile_pack",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "issue",
+          "column": "issue_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_dispense_movement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(10)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 10,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "quantity",
+          "column": "quantity",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_nursing_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "observed_at",
+          "column": "observed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -16373,6 +17134,306 @@
       "unique_together": []
     },
     {
+      "table": "adc_pharmacy_quote",
+      "model": "clinical.PharmacyQuote",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "approval",
+          "column": "approval_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_decision",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "model": "clinical.PharmacyQuoteLine",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "quote",
+          "column": "quote_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_pharmacy_quote",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "item",
+          "column": "item_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_catalogue_item",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "name_snapshot",
+          "column": "name_snapshot",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "unit_snapshot",
+          "column": "unit_snapshot",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "ordered_quantity",
+          "column": "ordered_quantity",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "unit_price",
+          "column": "unit_price",
+          "type": "DecimalField",
+          "db_type": "numeric(10, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "model": "clinical.PharmacyStop",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "approval",
+          "column": "approval_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_decision",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "stopped_at",
+          "column": "stopped_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_plan_appointment",
       "model": "clinical.PlanAppointment",
       "app": "clinical",
@@ -17345,6 +18406,584 @@
         {
           "name": "created_at",
           "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_prescription",
+      "model": "clinical.Prescription",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "visit",
+          "column": "visit_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prescriber",
+          "column": "prescriber_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "model": "clinical.PrescriptionCatalogueItem",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "code",
+          "column": "code",
+          "type": "CharField",
+          "db_type": "varchar(30)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 30,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "name",
+          "column": "name",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "strength",
+          "column": "strength",
+          "type": "CharField",
+          "db_type": "varchar(60)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 60,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "dose_unit",
+          "column": "dose_unit",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "quantity_unit",
+          "column": "quantity_unit",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "route",
+          "column": "route",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "is_active",
+          "column": "is_active",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "rehearsal_unit_price",
+          "column": "rehearsal_unit_price",
+          "type": "DecimalField",
+          "db_type": "numeric(10, 2)",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_prescription_decision",
+      "model": "clinical.PrescriptionDecision",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "version",
+          "column": "version_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "decided_at",
+          "column": "decided_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_prescription_duty",
+      "model": "clinical.PrescriptionDuty",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "user",
+          "column": "user_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_from",
+          "column": "valid_from",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_until",
+          "column": "valid_until",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "revoked_at",
+          "column": "revoked_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_prescription_version",
+      "model": "clinical.PrescriptionVersion",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prescription",
+          "column": "prescription_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "number",
+          "column": "number",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "record",
+          "column": "record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prescriber_duty",
+          "column": "prescriber_duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_prescription_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinical_scope",
+          "column": "clinical_scope_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_professional_authorization",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "clinical_scope_revision",
+          "column": "clinical_scope_revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "indication",
+          "column": "indication",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "items",
+          "column": "items",
+          "type": "JSONField",
+          "db_type": "jsonb",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "submitted_at",
+          "column": "submitted_at",
           "type": "DateTimeField",
           "db_type": "timestamp with time zone",
           "pk": false,
@@ -21638,6 +23277,684 @@
       "unique_together": []
     },
     {
+      "table": "adc_sterile_hold",
+      "model": "supplies.SterileHold",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "pack",
+          "column": "pack_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_sterile_pack",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_nursing_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_sterile_pack",
+      "model": "supplies.SterilePack",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "code",
+          "column": "code",
+          "type": "CharField",
+          "db_type": "varchar(60)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 60,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "process_reference",
+          "column": "process_reference",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "processed_at",
+          "column": "processed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "valid_until",
+          "column": "valid_until",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "released_by",
+          "column": "released_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "duty",
+          "column": "duty_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_nursing_duty",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "released_at",
+          "column": "released_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_stock_item",
+      "model": "supplies.StockItem",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "clinic",
+          "column": "clinic_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinic",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prescription_item",
+          "column": "prescription_item_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_prescription_catalogue_item",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "code",
+          "column": "code",
+          "type": "CharField",
+          "db_type": "varchar(30)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 30,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "name",
+          "column": "name",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "unit",
+          "column": "unit",
+          "type": "CharField",
+          "db_type": "varchar(16)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 16,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_stock_lot",
+      "model": "supplies.StockLot",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "item",
+          "column": "item_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_stock_item",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "code",
+          "column": "code",
+          "type": "CharField",
+          "db_type": "varchar(60)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 60,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "expires_on",
+          "column": "expires_on",
+          "type": "DateField",
+          "db_type": "date",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "created_at",
+          "column": "created_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_stock_movement",
+      "model": "supplies.StockMovement",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "lot",
+          "column": "lot_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_stock_lot",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "quantity",
+          "column": "quantity",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "dispense",
+          "column": "dispense_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_dispense_movement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "execution",
+          "column": "execution_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_nursing_execution",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reverses",
+          "column": "reverses_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_stock_movement",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_stock_recall",
+      "model": "supplies.StockRecall",
+      "app": "supplies",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "lot",
+          "column": "lot_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_stock_lot",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reference",
+          "column": "reference",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_tooth_finding",
       "model": "clinical.ToothFinding",
       "app": "clinical",
@@ -24225,6 +26542,7 @@
     "adc_dentist_quarter_cost",
     "adc_department",
     "adc_department_hours",
+    "adc_dispense_movement",
     "adc_equipment_asset",
     "adc_equipment_cost_amendment",
     "adc_equipment_event",
@@ -24263,9 +26581,12 @@
     "adc_medical_proxy_event",
     "adc_medical_proxy_scope",
     "adc_medical_proxy_version",
+    "adc_medication_charge",
     "adc_monthly_cost",
     "adc_next_visit_instruction",
     "adc_notification_outbox",
+    "adc_nursing_duty",
+    "adc_nursing_execution",
     "adc_patient",
     "adc_patient_access",
     "adc_patient_allergy",
@@ -24276,6 +26597,9 @@
     "adc_patient_relationship_event",
     "adc_payment_account",
     "adc_performed_procedure",
+    "adc_pharmacy_quote",
+    "adc_pharmacy_quote_line",
+    "adc_pharmacy_stop",
     "adc_plan_appointment",
     "adc_plan_decision",
     "adc_plan_draft",
@@ -24283,6 +26607,11 @@
     "adc_plan_step_version",
     "adc_plan_version",
     "adc_portal_booking_receipt",
+    "adc_prescription",
+    "adc_prescription_catalogue_item",
+    "adc_prescription_decision",
+    "adc_prescription_duty",
+    "adc_prescription_version",
     "adc_procedure_gap",
     "adc_procedure_gap_review",
     "adc_professional_authorization",
@@ -24315,6 +26644,12 @@
     "adc_statement_batch",
     "adc_statement_line",
     "adc_statement_use",
+    "adc_sterile_hold",
+    "adc_sterile_pack",
+    "adc_stock_item",
+    "adc_stock_lot",
+    "adc_stock_movement",
+    "adc_stock_recall",
     "adc_tooth_finding",
     "adc_treatment_control_policy",
     "adc_treatment_plan",
@@ -26862,6 +29197,60 @@
       "definition": "CHECK (((closes_at > opens_at) AND (weekday <= 6)))"
     },
     {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movemen_duty_id_b8137e17_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movemen_line_id_821ea801_fk_adc_pharm",
+      "kind": "f",
+      "definition": "FOREIGN KEY (line_id) REFERENCES adc_pharmacy_quote_line(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movemen_original_issue_id_f02eec27_fk_adc_dispe",
+      "kind": "f",
+      "definition": "FOREIGN KEY (original_issue_id) REFERENCES adc_dispense_movement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_actor_id_da903136_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_quantity_check",
+      "kind": "c",
+      "definition": "CHECK ((quantity >= 0))"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "dispense_movement_values",
+      "kind": "c",
+      "definition": "CHECK (((quantity >= 1) AND (quantity <= 9999) AND (NOT ((reason)::text = ''::text)) AND ((((kind)::text = 'ISSUE'::text) AND (original_issue_id IS NULL)) OR (((kind)::text = 'RETURN'::text) AND (original_issue_id IS NOT NULL)))))"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "dispense_stock_required",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
       "table": "adc_equipment_asset",
       "name": "adc_equipment_asset_clinic_id_b7a09438_fk_adc_clinic_id",
       "kind": "f",
@@ -28123,6 +30512,12 @@
     },
     {
       "table": "adc_invoice",
+      "name": "invoice_medication_publication",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_invoice",
       "name": "invoice_same_visit_fk",
       "kind": "f",
       "definition": "FOREIGN KEY (current_record_version_id, visit_id) REFERENCES adc_visit_record_version(id, visit_id) DEFERRABLE INITIALLY DEFERRED"
@@ -28710,6 +31105,48 @@
       "definition": "UNIQUE (proxy_id, number)"
     },
     {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charg_quote_line_id_b759ef09_fk_adc_pharm",
+      "kind": "f",
+      "definition": "FOREIGN KEY (quote_line_id) REFERENCES adc_pharmacy_quote_line(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charg_record_version_id_b676a54c_fk_adc_visit",
+      "kind": "f",
+      "definition": "FOREIGN KEY (record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charg_through_movement_id_ece1514e_fk_adc_dispe",
+      "kind": "f",
+      "definition": "FOREIGN KEY (through_movement_id) REFERENCES adc_dispense_movement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charge_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charge_quantity_check",
+      "kind": "c",
+      "definition": "CHECK ((quantity >= 0))"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "medication_charge_item_unique",
+      "kind": "u",
+      "definition": "UNIQUE (record_version_id, quote_line_id)"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "medication_charge_values",
+      "kind": "c",
+      "definition": "CHECK (((line_amount >= (0)::numeric) AND (quantity >= 0) AND (quantity <= 9999)))"
+    },
+    {
       "table": "adc_monthly_cost",
       "name": "adc_monthly_cost_dentist_id_5d7c80c0_fk_adc_dentist_id",
       "kind": "f",
@@ -28912,6 +31349,108 @@
       "name": "notice_timing_valid",
       "kind": "c",
       "definition": "CHECK ((((completed_at IS NULL) AND (next_attempt_at IS NOT NULL) AND ((state)::text = 'PENDING'::text)) OR ((NOT ((state)::text = 'PENDING'::text)) AND (completed_at IS NOT NULL) AND (next_attempt_at IS NULL))))"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "adc_nursing_duty_clinic_id_20621066_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "adc_nursing_duty_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "adc_nursing_duty_user_id_ca42a3e6_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "nursing_duty_period",
+      "kind": "c",
+      "definition": "CHECK ((((kind)::text = ANY ((ARRAY['EXECUTE'::character varying, 'STERILITY'::character varying])::text[])) AND (valid_until > valid_from)))"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_executio_issue_id_d478ff00_fk_adc_dispe",
+      "kind": "f",
+      "definition": "FOREIGN KEY (issue_id) REFERENCES adc_dispense_movement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_executio_performed_id_233e1732_fk_adc_perfo",
+      "kind": "f",
+      "definition": "FOREIGN KEY (performed_id) REFERENCES adc_performed_procedure(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_executio_sterile_pack_id_bccb68d7_fk_adc_steri",
+      "kind": "f",
+      "definition": "FOREIGN KEY (sterile_pack_id) REFERENCES adc_sterile_pack(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_actor_id_dc7b75b1_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_duty_id_203cc20f_fk_adc_nursing_duty_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_nursing_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_quantity_check",
+      "kind": "c",
+      "definition": "CHECK ((quantity >= 0))"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_sterile_pack_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (sterile_pack_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_visit_id_92c10279_fk_adc_visit_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "nursing_execution_source",
+      "kind": "c",
+      "definition": "CHECK ((((issue_id IS NULL) AND ((kind)::text = 'MATERIAL'::text) AND (performed_id IS NOT NULL) AND (quantity >= 1) AND (sterile_pack_id IS NULL)) OR ((issue_id IS NULL) AND ((kind)::text = 'STERILE'::text) AND (performed_id IS NOT NULL) AND (quantity = 1) AND (sterile_pack_id IS NOT NULL)) OR ((issue_id IS NOT NULL) AND ((kind)::text = 'ADMINISTER'::text) AND (performed_id IS NULL) AND (quantity >= 1) AND (sterile_pack_id IS NULL)) OR ((issue_id IS NULL) AND ((kind)::text = 'ESCALATE'::text) AND (performed_id IS NULL) AND (quantity = 0) AND (sterile_pack_id IS NULL))))"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "nursing_execution_time_reason",
+      "kind": "c",
+      "definition": "CHECK (((observed_at <= recorded_at) AND (NOT ((reason)::text = ''::text))))"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "nursing_stock_required",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
     },
     {
       "table": "adc_patient",
@@ -29352,6 +31891,126 @@
       "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
     },
     {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_approval_id_b988d1c9_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (approval_id) REFERENCES adc_prescription_decision(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_approval_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (approval_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_duty_id_01d698e3_fk_adc_prescription_duty_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_prepared_by_id_235134ed_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "pharmacy_quote_complete",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_l_item_id_8f3143cb_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (item_id) REFERENCES adc_prescription_catalogue_item(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_l_quote_id_451c7b38_fk_adc_pharm",
+      "kind": "f",
+      "definition": "FOREIGN KEY (quote_id) REFERENCES adc_pharmacy_quote(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_line_ordered_quantity_check",
+      "kind": "c",
+      "definition": "CHECK ((ordered_quantity >= 0))"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_line_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "pharmacy_quote_item_unique",
+      "kind": "u",
+      "definition": "UNIQUE (quote_id, item_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "pharmacy_quote_line_values",
+      "kind": "c",
+      "definition": "CHECK (((ordered_quantity >= 1) AND (ordered_quantity <= 9999) AND (unit_price > (0)::numeric)))"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_actor_id_af5d231a_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_approval_id_e378eee6_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (approval_id) REFERENCES adc_prescription_decision(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_approval_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (approval_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_duty_id_5d061012_fk_adc_prescription_duty_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "pharmacy_stop_reason",
+      "kind": "c",
+      "definition": "CHECK ((NOT ((reason)::text = ''::text)))"
+    },
+    {
       "table": "adc_plan_appointment",
       "name": "adc_plan_appointment_instruction_id_f8bbb3a8_fk_adc_next_",
       "kind": "f",
@@ -29716,6 +32375,192 @@
       "name": "booking_receipt_one_authority",
       "kind": "c",
       "definition": "CHECK ((((access_id IS NOT NULL) AND (appointment_grant_id IS NULL)) OR ((access_id IS NULL) AND (appointment_grant_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_prescriber_id_3457c2af_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prescriber_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_visit_id_9471f26c_fk_adc_visit_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_visit_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (visit_id)"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "adc_prescription_cat_clinic_id_9b010dcf_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "adc_prescription_catalogue_item_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "rx_catalogue_clinic_code",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id, code)"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "rx_catalogue_rehearsal_price",
+      "kind": "c",
+      "definition": "CHECK (((rehearsal_unit_price IS NULL) OR (rehearsal_unit_price > (0)::numeric)))"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "rx_catalogue_route",
+      "kind": "c",
+      "definition": "CHECK (((route)::text = ANY ((ARRAY['ORAL'::character varying, 'LOCAL'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_dec_duty_id_75989e14_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_dec_version_id_15095758_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (version_id) REFERENCES adc_prescription_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_actor_id_cdee30df_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_version_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (version_id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "rx_decision_content",
+      "kind": "c",
+      "definition": "CHECK ((((action)::text = ANY ((ARRAY['APPROVED'::character varying, 'RETURNED'::character varying, 'REJECTED'::character varying, 'WITHDRAWN'::character varying])::text[])) AND (NOT ((reason)::text = ''::text))))"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "adc_prescription_duty_clinic_id_1de2b15c_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "adc_prescription_duty_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "adc_prescription_duty_user_id_03c6835f_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "rx_duty_kind",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['PRESCRIBE'::character varying, 'REVIEW'::character varying, 'DISPENSE'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "rx_duty_period",
+      "kind": "c",
+      "definition": "CHECK ((valid_until > valid_from))"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_ver_clinical_scope_id_6147dcd8_fk_adc_profe",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinical_scope_id) REFERENCES adc_professional_authorization(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_ver_prescriber_duty_id_9bf51d8b_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prescriber_duty_id) REFERENCES adc_prescription_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_ver_prescription_id_66acd23f_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prescription_id) REFERENCES adc_prescription(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_ver_record_id_5d14abca_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_clinical_scope_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((clinical_scope_revision >= 0))"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_number_check",
+      "kind": "c",
+      "definition": "CHECK ((number >= 0))"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "rx_version_content",
+      "kind": "c",
+      "definition": "CHECK (((number >= 1) AND (NOT ((indication)::text = ''::text))))"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "rx_version_number_unique",
+      "kind": "u",
+      "definition": "UNIQUE (prescription_id, number)"
     },
     {
       "table": "adc_procedure_gap",
@@ -30681,7 +33526,7 @@
       "table": "adc_role_assignment",
       "name": "role_scope_valid",
       "kind": "c",
-      "definition": "CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))"
+      "definition": "CHECK ((((clinic_id IS NOT NULL) AND ((role)::text = ANY ((ARRAY['FRONT_DESK'::character varying, 'MANAGER'::character varying, 'PHARMACIST'::character varying, 'NURSE'::character varying])::text[])) AND ((scope_kind)::text = 'CLINIC'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'DENTIST'::text) AND ((scope_kind)::text = 'SELF_DENTIST'::text)) OR ((clinic_id IS NULL) AND ((role)::text = ANY ((ARRAY['HQ'::character varying, 'FINANCE'::character varying])::text[])) AND ((scope_kind)::text = 'CHAIN'::text)) OR ((clinic_id IS NULL) AND ((role)::text = 'SYSADMIN'::text) AND ((scope_kind)::text = 'TECHNICAL'::text))))"
     },
     {
       "table": "adc_schedule_plan",
@@ -30946,6 +33791,252 @@
       "name": "statement_use_state",
       "kind": "c",
       "definition": "CHECK ((((released_at IS NULL) AND ((state)::text = 'ACTIVE'::text)) OR ((released_at IS NOT NULL) AND ((state)::text = 'RELEASED'::text))))"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_actor_id_f32207ad_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_duty_id_e675233e_fk_adc_nursing_duty_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_nursing_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_pack_id_c8320311_fk_adc_sterile_pack_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (pack_id) REFERENCES adc_sterile_pack(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_pack_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (pack_id)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_clinic_id_54c1e059_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_duty_id_acef8b70_fk_adc_nursing_duty_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (duty_id) REFERENCES adc_nursing_duty(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_released_by_id_fca85efe_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (released_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "sterile_pack_clinic_code_unique",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id, code)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "sterile_pack_release_times",
+      "kind": "c",
+      "definition": "CHECK (((processed_at <= released_at) AND (valid_until > released_at)))"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_clinic_id_76cd79e1_fk_adc_clinic_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_prescription_item_id_e0b4bf8d_fk_adc_presc",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prescription_item_id) REFERENCES adc_prescription_catalogue_item(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_prescription_item_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (prescription_item_id)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "stock_item_clinic_code_unique",
+      "kind": "u",
+      "definition": "UNIQUE (clinic_id, code)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "stock_item_source",
+      "kind": "c",
+      "definition": "CHECK (((((kind)::text = 'DRUG'::text) AND (prescription_item_id IS NOT NULL)) OR (((kind)::text = ANY ((ARRAY['MATERIAL'::character varying, 'IMPLANT'::character varying])::text[])) AND (prescription_item_id IS NULL))))"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "adc_stock_lot_item_id_8cc28284_fk_adc_stock_item_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (item_id) REFERENCES adc_stock_item(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "adc_stock_lot_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "stock_lot_code_required",
+      "kind": "c",
+      "definition": "CHECK ((NOT ((code)::text = ''::text)))"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "stock_lot_item_code_unique",
+      "kind": "u",
+      "definition": "UNIQUE (item_id, code)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_actor_id_ff7765b8_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_dispense_id_b7b3f9ad_fk_adc_dispe",
+      "kind": "f",
+      "definition": "FOREIGN KEY (dispense_id) REFERENCES adc_dispense_movement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_dispense_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (dispense_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_execution_id_7b1a11bb_fk_adc_nursi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (execution_id) REFERENCES adc_nursing_execution(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_execution_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (execution_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_lot_id_507475e2_fk_adc_stock_lot_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (lot_id) REFERENCES adc_stock_lot(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_quantity_check",
+      "kind": "c",
+      "definition": "CHECK ((quantity >= 0))"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_reverses_id_34307f0d_fk_adc_stock",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reverses_id) REFERENCES adc_stock_movement(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_reverses_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (reverses_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "stock_movement_source",
+      "kind": "c",
+      "definition": "CHECK ((((dispense_id IS NOT NULL) AND (execution_id IS NULL) AND ((kind)::text = ANY ((ARRAY['ISSUE'::character varying, 'QUARANTINE'::character varying])::text[])) AND (reverses_id IS NULL)) OR ((dispense_id IS NULL) AND (execution_id IS NOT NULL) AND ((kind)::text = 'USE'::text) AND (reverses_id IS NULL)) OR ((dispense_id IS NULL) AND (execution_id IS NULL) AND ((kind)::text = ANY ((ARRAY['REVERSE_IN'::character varying, 'REVERSE_OUT'::character varying])::text[])) AND (reverses_id IS NOT NULL)) OR ((dispense_id IS NULL) AND (execution_id IS NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'WASTE'::character varying])::text[])) AND (reverses_id IS NULL))))"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "stock_movement_values",
+      "kind": "c",
+      "definition": "CHECK (((quantity >= 1) AND (quantity <= 1000000) AND (NOT ((reason)::text = ''::text))))"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_actor_id_d818e0ed_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_lot_id_23863b0b_fk_adc_stock_lot_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (lot_id) REFERENCES adc_stock_lot(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_lot_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (lot_id)"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
     },
     {
       "table": "adc_tooth_finding",
@@ -31509,7 +34600,7 @@
       "table": "adc_visit_record_version",
       "name": "version_outcome_valid",
       "kind": "c",
-      "definition": "CHECK (((outcome)::text = ANY ((ARRAY['TREATED'::character varying, 'NO_TREATMENT'::character varying])::text[])))"
+      "definition": "CHECK (((outcome)::text = ANY ((ARRAY['TREATED'::character varying, 'NO_TREATMENT'::character varying, 'PHARMACY_ONLY'::character varying])::text[])))"
     },
     {
       "table": "adc_visit_record_version",
@@ -31755,7 +34846,7 @@
       "table": "adc_workspace_context",
       "name": "workspace_clinic_role",
       "kind": "c",
-      "definition": "CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying])::text[]))))"
+      "definition": "CHECK (((clinic_id IS NULL) OR ((role)::text = ANY ((ARRAY['MANAGER'::character varying, 'FRONT_DESK'::character varying, 'PHARMACIST'::character varying, 'NURSE'::character varying])::text[]))))"
     },
     {
       "table": "adc_workspace_context",
@@ -33271,6 +36362,36 @@
       "definition": "CREATE UNIQUE INDEX adc_department_hours_pkey ON public.adc_department_hours USING btree (id)"
     },
     {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_actor_id_da903136",
+      "definition": "CREATE INDEX adc_dispense_movement_actor_id_da903136 ON public.adc_dispense_movement USING btree (actor_id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_duty_id_b8137e17",
+      "definition": "CREATE INDEX adc_dispense_movement_duty_id_b8137e17 ON public.adc_dispense_movement USING btree (duty_id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_line_id_821ea801",
+      "definition": "CREATE INDEX adc_dispense_movement_line_id_821ea801 ON public.adc_dispense_movement USING btree (line_id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_dispense_movement_operation_id_key ON public.adc_dispense_movement USING btree (operation_id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_original_issue_id_f02eec27",
+      "definition": "CREATE INDEX adc_dispense_movement_original_issue_id_f02eec27 ON public.adc_dispense_movement USING btree (original_issue_id)"
+    },
+    {
+      "table": "adc_dispense_movement",
+      "name": "adc_dispense_movement_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_dispense_movement_pkey ON public.adc_dispense_movement USING btree (id)"
+    },
+    {
       "table": "adc_equipment_asset",
       "name": "adc_equipment_asset_clinic_id_b7a09438",
       "definition": "CREATE INDEX adc_equipment_asset_clinic_id_b7a09438 ON public.adc_equipment_asset USING btree (clinic_id)"
@@ -34341,6 +37462,31 @@
       "definition": "CREATE UNIQUE INDEX medical_proxy_version_number ON public.adc_medical_proxy_version USING btree (proxy_id, number)"
     },
     {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charge_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_medication_charge_pkey ON public.adc_medication_charge USING btree (id)"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charge_quote_line_id_b759ef09",
+      "definition": "CREATE INDEX adc_medication_charge_quote_line_id_b759ef09 ON public.adc_medication_charge USING btree (quote_line_id)"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charge_record_version_id_b676a54c",
+      "definition": "CREATE INDEX adc_medication_charge_record_version_id_b676a54c ON public.adc_medication_charge USING btree (record_version_id)"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "adc_medication_charge_through_movement_id_ece1514e",
+      "definition": "CREATE INDEX adc_medication_charge_through_movement_id_ece1514e ON public.adc_medication_charge USING btree (through_movement_id)"
+    },
+    {
+      "table": "adc_medication_charge",
+      "name": "medication_charge_item_unique",
+      "definition": "CREATE UNIQUE INDEX medication_charge_item_unique ON public.adc_medication_charge USING btree (record_version_id, quote_line_id)"
+    },
+    {
       "table": "adc_monthly_cost",
       "name": "adc_monthly_cost_dentist_id_5d7c80c0",
       "definition": "CREATE INDEX adc_monthly_cost_dentist_id_5d7c80c0 ON public.adc_monthly_cost USING btree (dentist_id)"
@@ -34439,6 +37585,66 @@
       "table": "adc_notification_outbox",
       "name": "notice_due_idx",
       "definition": "CREATE INDEX notice_due_idx ON public.adc_notification_outbox USING btree (state, next_attempt_at, id)"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "adc_nursing_duty_clinic_id_20621066",
+      "definition": "CREATE INDEX adc_nursing_duty_clinic_id_20621066 ON public.adc_nursing_duty USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "adc_nursing_duty_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_nursing_duty_pkey ON public.adc_nursing_duty USING btree (id)"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "adc_nursing_duty_user_id_ca42a3e6",
+      "definition": "CREATE INDEX adc_nursing_duty_user_id_ca42a3e6 ON public.adc_nursing_duty USING btree (user_id)"
+    },
+    {
+      "table": "adc_nursing_duty",
+      "name": "nursing_duty_active_unique",
+      "definition": "CREATE UNIQUE INDEX nursing_duty_active_unique ON public.adc_nursing_duty USING btree (user_id, clinic_id, kind) WHERE (revoked_at IS NULL)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_actor_id_dc7b75b1",
+      "definition": "CREATE INDEX adc_nursing_execution_actor_id_dc7b75b1 ON public.adc_nursing_execution USING btree (actor_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_duty_id_203cc20f",
+      "definition": "CREATE INDEX adc_nursing_execution_duty_id_203cc20f ON public.adc_nursing_execution USING btree (duty_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_issue_id_d478ff00",
+      "definition": "CREATE INDEX adc_nursing_execution_issue_id_d478ff00 ON public.adc_nursing_execution USING btree (issue_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_nursing_execution_operation_id_key ON public.adc_nursing_execution USING btree (operation_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_performed_id_233e1732",
+      "definition": "CREATE INDEX adc_nursing_execution_performed_id_233e1732 ON public.adc_nursing_execution USING btree (performed_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_nursing_execution_pkey ON public.adc_nursing_execution USING btree (id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_sterile_pack_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_nursing_execution_sterile_pack_id_key ON public.adc_nursing_execution USING btree (sterile_pack_id)"
+    },
+    {
+      "table": "adc_nursing_execution",
+      "name": "adc_nursing_execution_visit_id_92c10279",
+      "definition": "CREATE INDEX adc_nursing_execution_visit_id_92c10279 ON public.adc_nursing_execution USING btree (visit_id)"
     },
     {
       "table": "adc_patient",
@@ -34691,6 +37897,76 @@
       "definition": "CREATE UNIQUE INDEX one_active_performed_step_per_visit ON public.adc_performed_procedure USING btree (encounter_id, step_version_id) WHERE (((state)::text = 'ACTIVE'::text) AND (step_version_id IS NOT NULL))"
     },
     {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_approval_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_quote_approval_id_key ON public.adc_pharmacy_quote USING btree (approval_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_duty_id_01d698e3",
+      "definition": "CREATE INDEX adc_pharmacy_quote_duty_id_01d698e3 ON public.adc_pharmacy_quote USING btree (duty_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_quote_operation_id_key ON public.adc_pharmacy_quote USING btree (operation_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_quote_pkey ON public.adc_pharmacy_quote USING btree (id)"
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "name": "adc_pharmacy_quote_prepared_by_id_235134ed",
+      "definition": "CREATE INDEX adc_pharmacy_quote_prepared_by_id_235134ed ON public.adc_pharmacy_quote USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_line_item_id_8f3143cb",
+      "definition": "CREATE INDEX adc_pharmacy_quote_line_item_id_8f3143cb ON public.adc_pharmacy_quote_line USING btree (item_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_line_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_quote_line_pkey ON public.adc_pharmacy_quote_line USING btree (id)"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "adc_pharmacy_quote_line_quote_id_451c7b38",
+      "definition": "CREATE INDEX adc_pharmacy_quote_line_quote_id_451c7b38 ON public.adc_pharmacy_quote_line USING btree (quote_id)"
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "name": "pharmacy_quote_item_unique",
+      "definition": "CREATE UNIQUE INDEX pharmacy_quote_item_unique ON public.adc_pharmacy_quote_line USING btree (quote_id, item_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_actor_id_af5d231a",
+      "definition": "CREATE INDEX adc_pharmacy_stop_actor_id_af5d231a ON public.adc_pharmacy_stop USING btree (actor_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_approval_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_stop_approval_id_key ON public.adc_pharmacy_stop USING btree (approval_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_duty_id_5d061012",
+      "definition": "CREATE INDEX adc_pharmacy_stop_duty_id_5d061012 ON public.adc_pharmacy_stop USING btree (duty_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_stop_operation_id_key ON public.adc_pharmacy_stop USING btree (operation_id)"
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "name": "adc_pharmacy_stop_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_pharmacy_stop_pkey ON public.adc_pharmacy_stop USING btree (id)"
+    },
+    {
       "table": "adc_plan_appointment",
       "name": "adc_plan_appointment_instruction_id_f8bbb3a8",
       "definition": "CREATE INDEX adc_plan_appointment_instruction_id_f8bbb3a8 ON public.adc_plan_appointment USING btree (instruction_id)"
@@ -34909,6 +38185,116 @@
       "table": "adc_portal_booking_receipt",
       "name": "adc_portal_booking_receipt_visit_id_key",
       "definition": "CREATE UNIQUE INDEX adc_portal_booking_receipt_visit_id_key ON public.adc_portal_booking_receipt USING btree (visit_id)"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_pkey ON public.adc_prescription USING btree (id)"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_prescriber_id_3457c2af",
+      "definition": "CREATE INDEX adc_prescription_prescriber_id_3457c2af ON public.adc_prescription USING btree (prescriber_id)"
+    },
+    {
+      "table": "adc_prescription",
+      "name": "adc_prescription_visit_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_visit_id_key ON public.adc_prescription USING btree (visit_id)"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "adc_prescription_catalogue_item_clinic_id_9b010dcf",
+      "definition": "CREATE INDEX adc_prescription_catalogue_item_clinic_id_9b010dcf ON public.adc_prescription_catalogue_item USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "adc_prescription_catalogue_item_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_catalogue_item_pkey ON public.adc_prescription_catalogue_item USING btree (id)"
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "name": "rx_catalogue_clinic_code",
+      "definition": "CREATE UNIQUE INDEX rx_catalogue_clinic_code ON public.adc_prescription_catalogue_item USING btree (clinic_id, code)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_actor_id_cdee30df",
+      "definition": "CREATE INDEX adc_prescription_decision_actor_id_cdee30df ON public.adc_prescription_decision USING btree (actor_id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_duty_id_75989e14",
+      "definition": "CREATE INDEX adc_prescription_decision_duty_id_75989e14 ON public.adc_prescription_decision USING btree (duty_id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_decision_operation_id_key ON public.adc_prescription_decision USING btree (operation_id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_decision_pkey ON public.adc_prescription_decision USING btree (id)"
+    },
+    {
+      "table": "adc_prescription_decision",
+      "name": "adc_prescription_decision_version_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_decision_version_id_key ON public.adc_prescription_decision USING btree (version_id)"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "adc_prescription_duty_clinic_id_1de2b15c",
+      "definition": "CREATE INDEX adc_prescription_duty_clinic_id_1de2b15c ON public.adc_prescription_duty USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "adc_prescription_duty_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_duty_pkey ON public.adc_prescription_duty USING btree (id)"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "adc_prescription_duty_user_id_03c6835f",
+      "definition": "CREATE INDEX adc_prescription_duty_user_id_03c6835f ON public.adc_prescription_duty USING btree (user_id)"
+    },
+    {
+      "table": "adc_prescription_duty",
+      "name": "rx_duty_one_unrevoked",
+      "definition": "CREATE UNIQUE INDEX rx_duty_one_unrevoked ON public.adc_prescription_duty USING btree (user_id, clinic_id, kind) WHERE (revoked_at IS NULL)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_clinical_scope_id_6147dcd8",
+      "definition": "CREATE INDEX adc_prescription_version_clinical_scope_id_6147dcd8 ON public.adc_prescription_version USING btree (clinical_scope_id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_version_operation_id_key ON public.adc_prescription_version USING btree (operation_id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_prescription_version_pkey ON public.adc_prescription_version USING btree (id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_prescriber_duty_id_9bf51d8b",
+      "definition": "CREATE INDEX adc_prescription_version_prescriber_duty_id_9bf51d8b ON public.adc_prescription_version USING btree (prescriber_duty_id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_prescription_id_66acd23f",
+      "definition": "CREATE INDEX adc_prescription_version_prescription_id_66acd23f ON public.adc_prescription_version USING btree (prescription_id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "adc_prescription_version_record_id_5d14abca",
+      "definition": "CREATE INDEX adc_prescription_version_record_id_5d14abca ON public.adc_prescription_version USING btree (record_id)"
+    },
+    {
+      "table": "adc_prescription_version",
+      "name": "rx_version_number_unique",
+      "definition": "CREATE UNIQUE INDEX rx_version_number_unique ON public.adc_prescription_version USING btree (prescription_id, number)"
     },
     {
       "table": "adc_procedure_gap",
@@ -35674,6 +39060,156 @@
       "table": "adc_statement_use",
       "name": "statement_one_active_use",
       "definition": "CREATE UNIQUE INDEX statement_one_active_use ON public.adc_statement_use USING btree (line_id) WHERE ((state)::text = 'ACTIVE'::text)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_actor_id_f32207ad",
+      "definition": "CREATE INDEX adc_sterile_hold_actor_id_f32207ad ON public.adc_sterile_hold USING btree (actor_id)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_duty_id_e675233e",
+      "definition": "CREATE INDEX adc_sterile_hold_duty_id_e675233e ON public.adc_sterile_hold USING btree (duty_id)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_sterile_hold_operation_id_key ON public.adc_sterile_hold USING btree (operation_id)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_pack_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_sterile_hold_pack_id_key ON public.adc_sterile_hold USING btree (pack_id)"
+    },
+    {
+      "table": "adc_sterile_hold",
+      "name": "adc_sterile_hold_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_sterile_hold_pkey ON public.adc_sterile_hold USING btree (id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_clinic_id_54c1e059",
+      "definition": "CREATE INDEX adc_sterile_pack_clinic_id_54c1e059 ON public.adc_sterile_pack USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_duty_id_acef8b70",
+      "definition": "CREATE INDEX adc_sterile_pack_duty_id_acef8b70 ON public.adc_sterile_pack USING btree (duty_id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_sterile_pack_operation_id_key ON public.adc_sterile_pack USING btree (operation_id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_sterile_pack_pkey ON public.adc_sterile_pack USING btree (id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "adc_sterile_pack_released_by_id_fca85efe",
+      "definition": "CREATE INDEX adc_sterile_pack_released_by_id_fca85efe ON public.adc_sterile_pack USING btree (released_by_id)"
+    },
+    {
+      "table": "adc_sterile_pack",
+      "name": "sterile_pack_clinic_code_unique",
+      "definition": "CREATE UNIQUE INDEX sterile_pack_clinic_code_unique ON public.adc_sterile_pack USING btree (clinic_id, code)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_clinic_id_76cd79e1",
+      "definition": "CREATE INDEX adc_stock_item_clinic_id_76cd79e1 ON public.adc_stock_item USING btree (clinic_id)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_stock_item_pkey ON public.adc_stock_item USING btree (id)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "adc_stock_item_prescription_item_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_item_prescription_item_id_key ON public.adc_stock_item USING btree (prescription_item_id)"
+    },
+    {
+      "table": "adc_stock_item",
+      "name": "stock_item_clinic_code_unique",
+      "definition": "CREATE UNIQUE INDEX stock_item_clinic_code_unique ON public.adc_stock_item USING btree (clinic_id, code)"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "adc_stock_lot_item_id_8cc28284",
+      "definition": "CREATE INDEX adc_stock_lot_item_id_8cc28284 ON public.adc_stock_lot USING btree (item_id)"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "adc_stock_lot_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_stock_lot_pkey ON public.adc_stock_lot USING btree (id)"
+    },
+    {
+      "table": "adc_stock_lot",
+      "name": "stock_lot_item_code_unique",
+      "definition": "CREATE UNIQUE INDEX stock_lot_item_code_unique ON public.adc_stock_lot USING btree (item_id, code)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_actor_id_ff7765b8",
+      "definition": "CREATE INDEX adc_stock_movement_actor_id_ff7765b8 ON public.adc_stock_movement USING btree (actor_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_dispense_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_movement_dispense_id_key ON public.adc_stock_movement USING btree (dispense_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_execution_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_movement_execution_id_key ON public.adc_stock_movement USING btree (execution_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_lot_id_507475e2",
+      "definition": "CREATE INDEX adc_stock_movement_lot_id_507475e2 ON public.adc_stock_movement USING btree (lot_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_movement_operation_id_key ON public.adc_stock_movement USING btree (operation_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_stock_movement_pkey ON public.adc_stock_movement USING btree (id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "adc_stock_movement_reverses_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_movement_reverses_id_key ON public.adc_stock_movement USING btree (reverses_id)"
+    },
+    {
+      "table": "adc_stock_movement",
+      "name": "stock_lot_receipt_reference_unique",
+      "definition": "CREATE UNIQUE INDEX stock_lot_receipt_reference_unique ON public.adc_stock_movement USING btree (lot_id, reference) WHERE ((kind)::text = 'RECEIPT'::text)"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_actor_id_d818e0ed",
+      "definition": "CREATE INDEX adc_stock_recall_actor_id_d818e0ed ON public.adc_stock_recall USING btree (actor_id)"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_lot_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_recall_lot_id_key ON public.adc_stock_recall USING btree (lot_id)"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_stock_recall_operation_id_key ON public.adc_stock_recall USING btree (operation_id)"
+    },
+    {
+      "table": "adc_stock_recall",
+      "name": "adc_stock_recall_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_stock_recall_pkey ON public.adc_stock_recall USING btree (id)"
     },
     {
       "table": "adc_tooth_finding",
@@ -39568,6 +43104,72 @@
       "null": false
     },
     {
+      "table": "adc_dispense_movement",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "kind",
+      "db_type": "character varying(6)",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "quantity",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "occurred_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "original_issue_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "line_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_dispense_movement",
+      "column": "requires_batch",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
       "table": "adc_equipment_asset",
       "column": "id",
       "db_type": "bigint",
@@ -42022,6 +45624,42 @@
       "null": false
     },
     {
+      "table": "adc_medication_charge",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medication_charge",
+      "column": "quantity",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_medication_charge",
+      "column": "line_amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_medication_charge",
+      "column": "quote_line_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medication_charge",
+      "column": "record_version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_medication_charge",
+      "column": "through_movement_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_monthly_cost",
       "column": "id",
       "db_type": "bigint",
@@ -42290,6 +45928,132 @@
       "column": "error_code",
       "db_type": "character varying(24)",
       "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "kind",
+      "db_type": "character varying(10)",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "reference",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "valid_from",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "valid_until",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "revoked_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_duty",
+      "column": "user_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "kind",
+      "db_type": "character varying(10)",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "quantity",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "observed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "issue_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "performed_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "visit_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_nursing_execution",
+      "column": "sterile_pack_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_patient",
@@ -42910,6 +46674,132 @@
       "null": true
     },
     {
+      "table": "adc_pharmacy_quote",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "column": "approval_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "name_snapshot",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "unit_snapshot",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "ordered_quantity",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "unit_price",
+      "db_type": "numeric(10,2)",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "item_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_quote_line",
+      "column": "quote_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "stopped_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "approval_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_pharmacy_stop",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_plan_appointment",
       "column": "id",
       "db_type": "bigint",
@@ -43334,6 +47224,252 @@
       "column": "appointment_grant_id",
       "db_type": "bigint",
       "null": true
+    },
+    {
+      "table": "adc_prescription",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_prescription",
+      "column": "prescriber_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription",
+      "column": "visit_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "code",
+      "db_type": "character varying(30)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "name",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "strength",
+      "db_type": "character varying(60)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "dose_unit",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "quantity_unit",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "route",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "is_active",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_catalogue_item",
+      "column": "rehearsal_unit_price",
+      "db_type": "numeric(10,2)",
+      "null": true
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "action",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "decided_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_decision",
+      "column": "version_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "kind",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "reference",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "valid_from",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "valid_until",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "revoked_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_duty",
+      "column": "user_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "number",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "clinical_scope_revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "indication",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "items",
+      "db_type": "jsonb",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "submitted_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "clinical_scope_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "prescriber_duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "prescription_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_prescription_version",
+      "column": "record_id",
+      "db_type": "bigint",
+      "null": false
     },
     {
       "table": "adc_procedure_gap",
@@ -45178,6 +49314,294 @@
       "null": false
     },
     {
+      "table": "adc_sterile_hold",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_hold",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_hold",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_hold",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_hold",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_hold",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_hold",
+      "column": "pack_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "code",
+      "db_type": "character varying(60)",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "process_reference",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "processed_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "valid_until",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "released_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "duty_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_sterile_pack",
+      "column": "released_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "kind",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "code",
+      "db_type": "character varying(30)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "name",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "unit",
+      "db_type": "character varying(16)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "clinic_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_item",
+      "column": "prescription_item_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_stock_lot",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_lot",
+      "column": "code",
+      "db_type": "character varying(60)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_lot",
+      "column": "expires_on",
+      "db_type": "date",
+      "null": false
+    },
+    {
+      "table": "adc_stock_lot",
+      "column": "created_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_stock_lot",
+      "column": "item_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "kind",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "quantity",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "reference",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "dispense_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "execution_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "lot_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_movement",
+      "column": "reverses_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "reference",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_stock_recall",
+      "column": "lot_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_tooth_finding",
       "column": "id",
       "db_type": "bigint",
@@ -46294,6 +50718,14 @@
       "name": "0007_roleassignment_can_verify_record_copies_and_more"
     },
     {
+      "app": "accounts",
+      "name": "0008_c41_prescriptions"
+    },
+    {
+      "app": "accounts",
+      "name": "0009_c5_batch_nursing"
+    },
+    {
       "app": "assistants",
       "name": "0001_initial"
     },
@@ -46358,6 +50790,14 @@
       "name": "0003_correction_publication_guard"
     },
     {
+      "app": "care",
+      "name": "0004_c42_medication_charges"
+    },
+    {
+      "app": "care",
+      "name": "0005_c42_billing_guards"
+    },
+    {
       "app": "clinical",
       "name": "0001_professional_authority_and_shared_care"
     },
@@ -46420,6 +50860,26 @@
     {
       "app": "clinical",
       "name": "0016_record_copy_guards"
+    },
+    {
+      "app": "clinical",
+      "name": "0017_c41_prescriptions"
+    },
+    {
+      "app": "clinical",
+      "name": "0018_c41_prescription_guards"
+    },
+    {
+      "app": "clinical",
+      "name": "0019_c42_dispensing"
+    },
+    {
+      "app": "clinical",
+      "name": "0020_c42_pharmacy_guards"
+    },
+    {
+      "app": "clinical",
+      "name": "0021_c5_batch_nursing"
     },
     {
       "app": "contenttypes",
@@ -46630,6 +51090,14 @@
       "name": "0001_initial"
     },
     {
+      "app": "supplies",
+      "name": "0001_c5_batch_nursing"
+    },
+    {
+      "app": "supplies",
+      "name": "0002_c5_trace_guards"
+    },
+    {
       "app": "workspaces",
       "name": "0001_initial"
     },
@@ -46644,9 +51112,17 @@
     {
       "app": "workspaces",
       "name": "0004_workspacecontext_medical_proxy_and_more"
+    },
+    {
+      "app": "workspaces",
+      "name": "0005_c41_prescriptions"
+    },
+    {
+      "app": "workspaces",
+      "name": "0006_c5_batch_nursing"
     }
   ],
-  "observed_on": "2026-11-02",
-  "observed_scope": "Read-only actual PostgreSQL metadata from frozen 0b7bf8739f25422a365eafe7e2c0b15c1e3a006f independent18382 and protected original18000; complete observed structures equal. No business rows or private configuration exported.",
-  "application_commit": "0b7bf8739f25422a365eafe7e2c0b15c1e3a006f"
+  "application_commit": "6f3de628be6ca929b80537b198cf1f50d7e74523",
+  "observed_database": "PostgreSQL 17.10 isolated synthetic",
+  "observed_on": "2026-11-07"
 }

@@ -45,3 +45,16 @@ stateDiagram-v2
 | RX41-06 | 在真实 PostgreSQL 核对追加迁移、原业务表和账单记录，检查版本与决定不可覆盖。另库恢复后复查处方链。 |
 
 按源码、隔离库、浏览器操作、独立恢复及合作诊所验收分别记录结果。
+
+## 本机演练入口
+
+在独立合成库迁移到当前版本后，显式启用 `ADC_RC_SYNTHETIC=1` 与 `ADC_PRESCRIPTION_REHEARSAL=1`。使用既有操作员、负责医师和专用药师账号登记本店演练职责。
+
+```sh
+python manage.py configure_prescription_rehearsal --synthetic-only --operator OPERATOR --clinic CLINIC \
+  provision --prescriber DOCTOR --pharmacist PHARMACIST
+python manage.py configure_prescription_rehearsal --synthetic-only --operator OPERATOR --clinic CLINIC \
+  revoke --user PHARMACIST --duty REVIEW
+```
+
+开方医师通过员工入口进入「检查记录工作台 → 核对本次就诊 → 办理本次处方」。药师通过同一员工入口登录并选择诊所，进入「处方审核」。从处方详情的版本导航查看已办理的原版及决定。演练目录为虚构条目，职责有效期为三十天。
