@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 库存批次追溯{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'stock_queue' %}">返回本店库存</a>
+  <h1>{{ lot.item.name }} · {{ lot.code }}</h1>
+  <section class="panel"><h2>批次状态</h2>
+    <p>有效期至 {{ lot.expires_on|date:'Y-m-d' }} · 在库 {{ lot.available }} {{ lot.item.unit }}</p>
+    {% if lot.recall %}<p class="notice">已召回，停止出库</p><p>{{ lot.recall.reference }} · {{ lot.recall.reason }}</p>
+    {% elif lot.expires_on < today %}<p class="notice">已过有效期，停止出库</p>{% endif %}
+  </section>
+  {% if not adc_read_only %}{% include 'supplies/action_forms.html' %}{% endif %}
+  <section class="panel"><h2>按批次追溯</h2>
+    <p>核对曾发出或耗用本批次的就诊。按患者编号交接给本店有权人员跟进。</p>
+    {% for row in affected %}
+    <p>{{ row.visit }} · 患者 {{ row.patient }} · {{ row.kind }} {{ row.quantity }} {{ lot.item.unit }} · {{ row.recorded_at|date:'Y-m-d H:i' }}</p>
+    {% empty %}<p>暂无发药或耗用来源。</p>{% endfor %}
+    {% if trace_page.has_previous %}<a href="?trace_page={{ trace_page.previous_page_number }}">上一页追溯</a>{% endif %}
+    {% if trace_page.has_next %}<a href="?trace_page={{ trace_page.next_page_number }}">下一页追溯</a>{% endif %}
+  </section>
+  <section class="panel"><h2>库存流水</h2>
+    {% for row in page %}
+    <article class="clinical-history">
+      <h3>#{{ row.pk }} · {{ row.get_kind_display }} · {{ row.quantity }} {{ lot.item.unit }}</h3>
+      <p>{{ row.actor.username }} · {{ row.recorded_at|date:'Y-m-d H:i' }}</p>
+      <p>{{ row.reason }} {% if row.reference %}· {{ row.reference }}{% endif %}{% if row.reverses_id %} · 对应原记录 #{{ row.reverses_id }}{% endif %}</p>
+    </article>
+    {% empty %}<p>暂无库存流水。</p>{% endfor %}
+    {% include '_pagination.html' %}
+  </section>
+</div>
+{% endblock %}

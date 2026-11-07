@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 登记到货{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'stock_queue' %}">返回本店库存</a>
+  <h1>登记到货</h1><p>根据实际到货核对本店条目、批号、效期和凭据。</p>
+  {% if has_items and not adc_read_only %}
+  <form method="post" class="panel form-panel">
+    {% csrf_token %}{% workspace_token %}{{ form.as_div }}
+    <button type="submit">预览到货登记</button>
+  </form>
+  {% else %}<p class="notice">当前没有可办理的库存条目，请联系本店目录维护人员。</p>{% endif %}
+</div>
+{% endblock %}

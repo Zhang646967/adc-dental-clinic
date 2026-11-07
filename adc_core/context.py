@@ -13,6 +13,7 @@ NAV={
  'FINANCE':[('payment_accounts','渠道账户'),('reconciliation_home','渠道对账'),('maintenance_list','维护工单与验收'),('daily_close_list','日结对账与交接'),('cash_receivables','应收与退款余额'),('cash_list','现金账与独立审核'),('equipment_expenses','设备费用逐笔核对'),('equipment_cost_queue','费用补正审核'),('equipment_list','设备台账查阅'),('finance_home','财务首页'),('finance_quarters','季度成本与核对'),('catalogue_list','治疗价格目录'),('corrections','更正审核'),('staff_assistant','操作问答')],
  'SYSADMIN':[('technical_home','技术首页'),('directory_home','基础资料目录'),('account_manage_list','账号与授权')],
  'PHARMACIST':[('prescription_review_queue','处方审核')],
+ 'NURSE':[('nursing_queue','护理工作台')],
 }
 
 for _role in ('DENTIST','MANAGER'):
@@ -45,6 +46,13 @@ def navigation(request):
     role=ctx.role if ctx else '';clinic=ctx.clinic if ctx and ctx.clinic_id else None
     choose_clinic=role in CLINIC_ROLES and clinic is None
     items=[] if choose_clinic else NAV.get(role,[])
+    if clinic and role in ('MANAGER','PHARMACIST'):
+        from supplies.access import enabled as stock_enabled
+        from clinical.dispensing import enabled as dispensing_enabled
+        from clinical.prescription_access import active_duties
+        if stock_enabled() and (role=='MANAGER' or dispensing_enabled() and
+                active_duties(user.pk,'DISPENSE').filter(clinic=clinic).exists()):
+            items=items+[('stock_queue','本店库存批次')]
     data={'can_front':has_role(user,'FRONT_DESK'),'can_manage':has_role(user,'MANAGER'),
       'is_dentist':has_role(user,'DENTIST'),'build_version':settings.ADC_VERSION,'adc_read_only':settings.ADC_READ_ONLY,
       'environment_label':settings.ADC_PUBLIC_ENVIRONMENT_LABEL,

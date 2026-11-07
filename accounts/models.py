@@ -26,7 +26,7 @@ class RoleAssignment(models.Model):
             models.CheckConstraint(condition=Q(can_verify_record_copies=False) | Q(role='FRONT_DESK',scope_kind='CLINIC',clinic__isnull=False),name='copy_frontdesk_duty'),
             models.CheckConstraint(condition=Q(can_verify_medical_proxy_identity=False) | Q(role='FRONT_DESK',scope_kind='CLINIC',clinic__isnull=False), name='medical_proxy_frontdesk_duty'),
             models.CheckConstraint(condition=Q(can_verify_patient_relationships=False) | Q(role='FRONT_DESK', scope_kind='CLINIC', clinic__isnull=False), name='identity_reviewer_frontdesk'),
-            models.CheckConstraint(condition=(Q(role__in=["FRONT_DESK", "MANAGER", "PHARMACIST"], scope_kind="CLINIC", clinic__isnull=False) | Q(role="DENTIST", scope_kind="SELF_DENTIST", clinic__isnull=True) | Q(role__in=["HQ", "FINANCE"], scope_kind="CHAIN", clinic__isnull=True) | Q(role="SYSADMIN", scope_kind="TECHNICAL", clinic__isnull=True)), name="role_scope_valid"),
+            models.CheckConstraint(condition=(Q(role__in=["FRONT_DESK", "MANAGER", "PHARMACIST", "NURSE"], scope_kind="CLINIC", clinic__isnull=False) | Q(role="DENTIST", scope_kind="SELF_DENTIST", clinic__isnull=True) | Q(role__in=["HQ", "FINANCE"], scope_kind="CHAIN", clinic__isnull=True) | Q(role="SYSADMIN", scope_kind="TECHNICAL", clinic__isnull=True)), name="role_scope_valid"),
             models.UniqueConstraint(fields=["user", "role", "scope_kind", "clinic"], condition=Q(clinic__isnull=False), name="role_clinic_unique"),
             models.UniqueConstraint(fields=["user", "role", "scope_kind"], condition=Q(clinic__isnull=True), name="role_noclinic_unique"),
         ]

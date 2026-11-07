@@ -9,7 +9,8 @@ LABELS={
  'proxy_versions':'医疗代理依据版本','proxy_events':'代理材料核验与适用性历史','preflights':'治疗前核对依据',
  'rules':'适用的临床规则','gaps':'已发生治疗的事前材料缺口','gap_reviews':'独立医务复核（不构成事前通过）',
  'laboratory':'加工件记录','laboratory_reviews':'临床验收','laboratory_events':'加工流转历史','fee':'选定的已发布收费版本',
- 'issues':'未完成事项','drafts':'未确认草稿（仅资料保全，不作为确认文书）',
+ 'nursing':'实际护理与批次追溯','sterile_pack__code':'无菌包编号',
+ 'sterile_pack__process_reference':'灭菌来源','stock_movement__lot__code':'耗用批号','issues':'未完成事项','drafts':'未确认草稿（仅资料保全，不作为确认文书）',
  'examinations':'检查草稿','documents':'文书草稿','payload':'草稿原文',
  'id':'来源编号','patient_id':'患者编号来源','patient_no':'患者业务编号','patient_name':'患者姓名','clinic_id':'诊所来源编号',
  'clinic_name':'诊所名称','dentist_id':'医师来源编号','dentist_name':'负责医师','employee_no':'医师工号','visit_no':'就诊编号',
@@ -52,7 +53,7 @@ VALUES={'INITIAL':'初诊病历','FOLLOWUP':'复诊病历','ACCOUNT_CONFIRMATION
  'REVIEW':'需进一步专业判断','PENDING':'待办理','PER_EXECUTION':'按实际已提供项目计费','ON_COMPLETION':'步骤实际完成时计费',
  'GUARDIAN':'未成年监护','WRITTEN':'成年患者书面委托','OBSERVATION':'检查发现','MISSING':'牙缺失','EXISTING_WORK':'既往处置'}
 SECTIONS=['document','clinical_source','plan_versions','steps','scheme_decisions','medical_notices','medical_events',
- 'proxy_versions','proxy_events','actuals','preflights','rules','gaps','gap_reviews','laboratory','laboratory_reviews','laboratory_events','fee','issues','drafts']
+ 'proxy_versions','proxy_events','actuals','preflights','rules','gaps','gap_reviews','laboratory','laboratory_reviews','laboratory_events','nursing','fee','issues','drafts']
 TECHNICAL={'operation_id','scope_digest','source_cursor','content_digest','history_cursor','digest','contract'}
 
 

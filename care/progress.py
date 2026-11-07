@@ -57,7 +57,8 @@ def care_progress(actor, visit_id):
         bind_performed_sources(display_lines)
         from clinical.authority import may_refer
         clinical_record=ClinicalRecordVersion.objects.filter(encounter__visit=visit).order_by('-revision').first() if structured else None
-        return dict(visit=visit, clinical_started=structured,clinical_available=clinical_available,clinical_record=clinical_record,record=display_record, lines=display_lines, invoice=invoice, published=published, can_refer=may_refer(actor,visit),
+        nursing=visit.nursing_executions.select_related('actor','stock_movement__lot','sterile_pack','issue__line').order_by('-pk')[:20]
+        return dict(visit=visit,nursing_history=list(nursing), clinical_started=structured,clinical_available=clinical_available,clinical_record=clinical_record,record=display_record, lines=display_lines, invoice=invoice, published=published, can_refer=may_refer(actor,visit),
             editable=editable, allergy_current=allergy_current, treated_blockers=treated_blockers,
             actual=actual,medication_lines=medicine,pharmacy_blocker=pharmacy_blocker,
             completion_total=published.total_amount if published else sum(row.line_amount for row in lines)+sum(row['line_amount'] for row in medicine),

@@ -43,6 +43,11 @@ def authorized_clinics(user, role):
         if enabled():
             duties = duties | active_duties(user.pk, 'DISPENSE')
         clinics = clinics.filter(pk__in=duties.values('clinic_id'))
+    if role == 'NURSE':
+        from supplies.access import duties as nursing_duties, enabled
+        if not enabled():
+            return clinics.none()
+        clinics = clinics.filter(pk__in=nursing_duties(user.pk).values('clinic_id'))
     return clinics
 
 def existing_context(request):

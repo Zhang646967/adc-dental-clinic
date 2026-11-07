@@ -17,7 +17,7 @@ class WorkspaceContext(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         db_table = 'adc_workspace_context'
-        constraints = [models.CheckConstraint(condition=Q(clinic__isnull=True) | Q(role__in=['MANAGER','FRONT_DESK','PHARMACIST']), name='workspace_clinic_role'),
+        constraints = [models.CheckConstraint(condition=Q(clinic__isnull=True) | Q(role__in=['MANAGER','FRONT_DESK','PHARMACIST','NURSE']), name='workspace_clinic_role'),
             models.CheckConstraint(condition=Q(medical_proxy__isnull=True) | Q(role='PATIENT'), name='workspace_medical_subject'),
             models.CheckConstraint(condition=Q(patient_grant__isnull=True) | Q(role='PATIENT'), name='workspace_patient_subject'),
             models.CheckConstraint(condition=Q(login_channel='') | Q(login_channel='PATIENT', role__in=['','PATIENT']) |

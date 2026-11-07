@@ -212,10 +212,18 @@ class DispensingTests(DispensingFixture, TransactionTestCase):
         patient.force_login(self.patient)
         url=reverse('portal_invoice',args=[invoice.pk])
         self.assertContains(patient.get(url),'实际发退药费用')
+        native=reverse('mini_invoice',args=[invoice.pk])
+        current=patient.get(native).json()['data']
+        self.assertEqual(current['treatment_lines'],[])
+        self.assertEqual(current['medication_lines'][0]['quantity'],4)
+        self.assertEqual(current['lines'][0]['line_amount'],'50.00')
+        self.assertTrue(current['lines'][0]['name_snapshot'].startswith('药费 · '))
+        self.assertEqual(patient.get(native,{'revision':1}).json()['data']['medication_lines'][0]['quantity'],6)
         other=UserAccount.objects.create_user(username='other_rx_patient')
         PatientAccess.objects.create(user=other,patient=self.p2)
         patient.force_login(other)
         self.assertEqual(patient.get(url).status_code,404)
+        self.assertEqual(patient.get(native).status_code,404)
 
     def test_stale_correction_does_not_hide_another_return(self):
         line=self.priced()

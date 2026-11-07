@@ -7,8 +7,16 @@
       <view class="label">查看发布历史</view><picker range="{{versions}}" range-key="label" value="{{revisionIndex}}" bindchange="version"><view class="picker">{{versions[revisionIndex].label}} ▾</view></picker>
     </view>
     <view class="card"><view class="section-title">收费明细</view>
-      <view wx:for="{{invoice.lines}}" wx:key="index" class="invoice-line"><view class="label">{{item.name_snapshot}}</view><view class="row"><text>{{item.quantity}}{{item.unit_snapshot}} × ¥{{item.unit_price}}</text><text>¥{{item.line_amount}}</text></view></view>
-      <view wx:if="{{!invoice.lines.length}}" class="muted">本版没有收费项目，请结合就诊结果核对。</view><view class="invoice-total">本版账单金额 <text>¥{{invoice.total}}</text></view>
+      <view wx:for="{{invoice.treatment_lines}}" wx:key="index" class="invoice-line"><view class="label">{{item.name_snapshot}}</view><view class="row"><text>{{item.quantity}}{{item.unit_snapshot}} × ¥{{item.unit_price}}</text><text>¥{{item.line_amount}}</text></view></view>
+      <block wx:if="{{invoice.medication_lines.length}}">
+        <view class="label line">实际发退药费用</view>
+        <view class="muted">计费数量为实际发出减退回。</view>
+        <view wx:for="{{invoice.medication_lines}}" wx:key="index" class="invoice-line">
+          <view class="label">{{item.name_snapshot}}</view>
+          <view class="row"><text>{{item.quantity}}{{item.unit_snapshot}} × ¥{{item.unit_price}}</text><text>¥{{item.line_amount}}</text></view>
+        </view>
+      </block>
+      <view wx:if="{{!invoice.treatment_lines.length && !invoice.medication_lines.length}}" class="muted">本版没有收费项目，请结合就诊结果核对。</view><view class="invoice-total">本版账单金额 <text>¥{{invoice.total}}</text></view>
     </view>
     <view class="card"><view class="section-title">当前收退款与应付</view><view wx:if="{{!invoice.is_current}}" class="notice">以下余额对应当前第{{invoice.cash_balance.current_revision}}版，不是历史版本余额。</view>
       <view class="fact-row"><text>当前账单金额</text><text>¥{{invoice.cash_balance.billed}}</text></view>

@@ -8,8 +8,9 @@ ROLES = {
     'FINANCE': ('财务', 'finance_home'),
     'SYSADMIN': ('技术管理', 'technical_home'),
     'PHARMACIST': ('药师', 'prescription_review_queue'),
+    'NURSE': ('护理', 'nursing_queue'),
 }
-CLINIC_ROLES = frozenset(('MANAGER', 'FRONT_DESK', 'PHARMACIST'))
+CLINIC_ROLES = frozenset(('MANAGER', 'FRONT_DESK', 'PHARMACIST', 'NURSE'))
 
 def scope_fits(role, clinic):
     return role in ROLES and (clinic is None or role in CLINIC_ROLES)

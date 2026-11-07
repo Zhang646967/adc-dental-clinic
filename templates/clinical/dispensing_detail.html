@@ -12,6 +12,7 @@
   </section>
   {% endif %}
   {% include 'clinical/dispensing_summary.html' %}
+  {% if stock_missing %}<p class="notice">当前无符合本店和药品条件的可用批次。<a href="{% url 'stock_queue' %}">核对本店库存</a></p>{% endif %}
   {% if error %}<p class="notice" role="alert">{{ error }}</p>{% endif %}
   {% for kind, label, form in actions %}
   <section class="panel form-panel">
@@ -30,6 +31,7 @@
     <article class="clinical-history">
       <h3>#{{ movement.pk }} · {{ movement.get_kind_display }}</h3>
       <p>{{ movement.line.name_snapshot }} · {{ movement.quantity }} {{ movement.line.unit_snapshot }} · {{ movement.occurred_at|date:'Y-m-d H:i' }} · {{ movement.actor.username }}</p>
+      {% if movement.stock_movement %}<p>原批号 {{ movement.stock_movement.lot.code }}{% if movement.kind == 'RETURN' %} · 退回已隔离{% endif %}</p>{% endif %}
       {% if movement.original_issue_id %}<p>对应原发药 #{{ movement.original_issue_id }}</p>{% endif %}
       <p>{{ movement.reason }}</p>
     </article>

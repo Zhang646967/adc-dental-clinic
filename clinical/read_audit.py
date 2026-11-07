@@ -8,6 +8,8 @@ from clinical.models import SensitiveReadEvent
 from django.urls import resolve, Resolver404
 
 ROUTES = {
+    'stock_detail':('STOCK_LOT','TRACE'), 'nursing_queue':('VISIT_LIST','NURSING'),
+    'nursing_detail':('CARE','NURSING'), 'sterile_packs':('STERILE_LIST','NURSING'),
     'dispensing_queue': ('RX_LIST', 'PHARMACY'), 'dispensing_detail': ('PRESCRIPTION', 'PHARMACY'),
     'dispensing_confirm': ('PRESCRIPTION', 'PHARMACY'),
     'prescription_review_queue': ('RX_LIST', 'PHARMACY'), 'prescription_visit': ('CARE', 'PRESCRIBING'),

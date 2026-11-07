@@ -15,6 +15,8 @@ Page({
       const invoice=await api.request(`invoices/${this.id}/`,'GET',query);
       const versions=invoice.revisions.map(r=>({...r,label:'第'+r.revision_no+'版 · '+dateTime(r.published_at)}));
       invoice.publishedLabel=dateTime(invoice.published_at);
+      invoice.treatment_lines=invoice.treatment_lines||invoice.lines;
+      invoice.medication_lines=invoice.medication_lines||[];
       if(invoice.cash_activity)invoice.cash_activity.entries=invoice.cash_activity.entries.map(row=>({...row,postedLabel:dateTime(row.posted_at)}));
       this.setData({invoice,versions,revisionIndex:Math.max(0,versions.findIndex(r=>r.revision_no===invoice.revision)),busy:false});
     }catch(e){showError(this,e,{separateRequestId:true});}

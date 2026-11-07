@@ -10,6 +10,7 @@
     <h2>处方 #{{ case.pk }} · 第 {{ version.number }} 版</h2>
     {% for row in data.lines %}<p>{{ row.name }} · 审定 {{ row.quantity }} {{ row.unit }} · ¥{{ row.price }} / {{ row.unit }}</p>{% endfor %}
     {% if item %}<p>{{ item.name_snapshot }} · {{ data.quantity }} {{ item.unit_snapshot }}</p>{% endif %}
+    {% if lot %}<p>实际批号 {{ lot.code }} · 有效期至 {{ lot.expires_on|date:'Y-m-d' }}</p>{% endif %}
     {% if data.issue %}<p>原发药 #{{ data.issue }}</p>{% endif %}
     <p>{{ data.reason }}</p>
   </section>

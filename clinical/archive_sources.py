@@ -118,6 +118,13 @@ def capture(visit,*,fee_version_id=None):
             documents=rows(ClinicalDocumentDraft,document__encounter=encounter),
             plans=rows(PlanDraft,plan__origin_encounter=encounter)),
         fee=fee_data,issues=issues)
+    from supplies.models import NursingExecution
+    nursing=list(NursingExecution.objects.filter(visit=visit).values(
+        'id','kind','observed_at','recorded_at','quantity','performed_id','issue_id','actor_id','reason',
+        'sterile_pack__code','sterile_pack__process_reference','stock_movement__lot__code',
+    ).order_by('pk'))
+    if nursing:
+        result['nursing']=nursing
     return plain(result)
 
 

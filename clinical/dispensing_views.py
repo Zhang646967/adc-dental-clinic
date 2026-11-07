@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import F, OuterRef, Subquery, Sum
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
@@ -18,6 +19,9 @@ from clinical.prescription_access import active_duties
 from clinical.prescription_forms import PrescriptionConfirmForm
 from clinical.prescription_models import Prescription, PrescriptionDuty, PrescriptionVersion
 from clinical.prescriptions import current_version
+from supplies.access import enabled as stock_enabled
+from supplies.pharmacy import choices as lot_choices
+from supplies.models import NursingExecution
 from workspaces.views import select_clinic
 
 ACTIONS = {'QUOTE': '确认本店划价', 'ISSUE': '登记实际发药', 'RETURN': '登记实际退药', 'STOP': '停止剩余调配'}
@@ -26,21 +30,25 @@ ACTIONS = {'QUOTE': '确认本店划价', 'ISSUE': '登记实际发药', 'RETURN
 class ActionForm(forms.Form):
     reason = forms.CharField(label='办理依据', max_length=500, widget=forms.Textarea(attrs={'rows': 2}))
 
-    def __init__(self, *args, kind, rows=(), issues=(), **kwargs):
+    def __init__(self, *args, kind, rows=(), issues=(), lots=(), **kwargs):
         super().__init__(*args, **kwargs)
         if kind == 'ISSUE':
             self.fields['line'] = forms.TypedChoiceField(label='药品条目', coerce=int, choices=[
                 (row.pk, f'{row.name_snapshot} · 尚可发 {row.ordered_quantity-row.issued} {row.unit_snapshot}')
                 for row in rows if row.issued < row.ordered_quantity
             ])
+            if stock_enabled():
+                self.fields['lot'] = forms.TypedChoiceField(label='实际发药批次', coerce=int, choices=[
+                    (lot.pk,f'{lot.item.name} · {lot.code} · 可用 {lot.available} {lot.item.unit}') for lot in lots
+                ])
         if kind == 'RETURN':
             self.fields['issue'] = forms.TypedChoiceField(label='原发药记录', coerce=int, choices=[
-                (row.pk, f'#{row.pk} · {row.line.name_snapshot} · 原发 {row.quantity} {row.line.unit_snapshot}')
+                (row.pk, f'#{row.pk} · {row.line.name_snapshot} · 可退 {row.quantity-row.returned-row.administered} {row.line.unit_snapshot}')
                 for row in issues
             ])
         if kind in ('ISSUE', 'RETURN'):
             self.fields['quantity'] = forms.IntegerField(label='实际数量', min_value=1, max_value=9999)
-            self.order_fields(['line', 'issue', 'quantity', 'reason'])
+            self.order_fields(['line', 'lot', 'issue', 'quantity', 'reason'])
 
 
 def case_history(version):
@@ -89,10 +97,14 @@ def detail(request, pk):
     history = case_history(version)
     quote = history.get('quote')
     rows = history.get('quote_lines', [])
-    moves = DispenseMovement.objects.filter(line__quote=quote).select_related('line', 'actor').order_by('-pk') if quote else DispenseMovement.objects.none()
+    moves = DispenseMovement.objects.filter(line__quote=quote).select_related('line', 'actor', 'stock_movement__lot').order_by('-pk') if quote else DispenseMovement.objects.none()
+    administered=NursingExecution.objects.filter(issue_id=OuterRef('pk')).order_by().values('issue_id').annotate(
+        total=Sum('quantity'),
+    ).values('total')
     issues = moves.filter(kind='ISSUE').annotate(
         returned=Sum('returns__quantity', default=0),
-    ).filter(quantity__gt=F('returned')) if quote else moves
+        administered=Coalesce(Subquery(administered),0),
+    ).filter(quantity__gt=F('returned')+F('administered')) if quote else moves
     kinds = []
     if not settings.ADC_READ_ONLY and request.user.pk != case.prescriber_id and version and version.state == 'APPROVED':
         if case.visit.status == 'CHECKED_IN' and not history['stop']:
@@ -102,9 +114,13 @@ def detail(request, pk):
                 kinds.extend(['ISSUE', 'STOP'])
         if case.visit.status in ('CHECKED_IN', 'COMPLETED') and issues.exists():
             kinds.append('RETURN')
+    lots=list(lot_choices(rows)) if 'ISSUE' in kinds else []
+    stock_missing='ISSUE' in kinds and stock_enabled() and not lots
+    if stock_missing:
+        kinds.remove('ISSUE')
     posted = request.POST.get('action') if request.method == 'POST' else None
     action_forms = {kind: ActionForm(request.POST if kind == posted else None, prefix=kind.lower(),
-                                    kind=kind, rows=rows, issues=issues if kind == 'RETURN' else ())
+                                    kind=kind, rows=rows, issues=issues if kind == 'RETURN' else (), lots=lots)
                     for kind in kinds}
     error, status = '', 200
     if request.method == 'POST':
@@ -119,18 +135,20 @@ def detail(request, pk):
             issue = next((row for row in issues if row.pk == data.get('issue')), None) if posted == 'RETURN' else None
             try:
                 info, token = cmd.prepare(request.user, case, posted, data['reason'],
-                    line_id=issue.line_id if issue else data.get('line'), issue_id=data.get('issue'), quantity=data.get('quantity'))
+                    line_id=issue.line_id if issue else data.get('line'), issue_id=data.get('issue'),
+                    quantity=data.get('quantity'),lot_id=data.get('lot'))
             except EXPECTED_ERRORS as exc:
                 add_error(form, exc)
                 status = 409
             else:
                 return clinical_render(request, 'clinical/dispensing_confirm.html', dict(
                     case=case, visit=case.visit, version=version, data=info, label=ACTIONS[posted],
-                    item=issue.line if issue else line, form=PrescriptionConfirmForm(initial={'proposal_token': token}),
+                    item=issue.line if issue else line, lot=next((row for row in lots if row.pk==info.get('lot')),None),
+                    form=PrescriptionConfirmForm(initial={'proposal_token': token}),
                 ))
     return clinical_render(request, 'clinical/dispensing_detail.html', dict(
         case=case, version=version, visit=case.visit, history=history,
-        movements=Paginator(moves, 25).get_page(request.GET.get('page')), error=error,
+        movements=Paginator(moves, 25).get_page(request.GET.get('page')), error=error, stock_missing=stock_missing,
         actions=[(kind, ACTIONS[kind], form) for kind, form in action_forms.items()],
     ), status=status)
 

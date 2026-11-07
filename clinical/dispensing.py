@@ -78,7 +78,7 @@ def quote_rows(quote):
     ).order_by('pk')
 
 
-def _action_data(actor, case, kind, reason, line_id=None, issue_id=None, quantity=None, *, lock=False):
+def _action_data(actor, case, kind, reason, line_id=None, issue_id=None, quantity=None, lot_id=None, *, lock=False):
     duty = dispenser(actor, case.visit.clinic_id, lock=lock)
     if case.prescriber_id == actor.pk:
         raise PermissionDenied('发药须由不同于开方医师的药师办理。')
@@ -114,6 +114,8 @@ def _action_data(actor, case, kind, reason, line_id=None, issue_id=None, quantit
     line = PharmacyQuoteLine.objects.filter(pk=line_id, quote=quote).first() if quote else None
     if line is None:
         raise RuleError('请先完成划价，再选择本版本的药品条目。')
+    from supplies.pharmacy import administered, lot_for
+    issue = None
     if kind == ISSUE:
         issued = movement_totals(line.movements)['issued']
         if quantity > line.ordered_quantity - issued:
@@ -123,14 +125,15 @@ def _action_data(actor, case, kind, reason, line_id=None, issue_id=None, quantit
         if case.visit.status not in ('CHECKED_IN', 'COMPLETED'):
             raise RuleError('该次就诊当前不能登记退药。')
         issue = line.movements.filter(pk=issue_id, kind=ISSUE).first()
-        if issue is None or quantity > issue.quantity - movement_totals(issue.returns)['returned']:
-            raise RuleError('请核对原发药记录及可退数量。')
-    return dict(data, line=line.pk, issue=issue_id, quantity=quantity)
+        if issue is None or quantity > issue.quantity - movement_totals(issue.returns)['returned'] - administered(issue):
+            raise RuleError('请核对原发药记录及可退数量，已实际给药的数量不能退回。')
+    lot=lot_for(case.visit,line,kind,quantity,lot_id=lot_id,issue=issue,lock=lock)
+    return dict(data, line=line.pk, issue=issue_id, quantity=quantity, lot=lot.pk if lot else None)
 
 
 @sensitive_variables()
-def prepare(actor, case, kind, reason, *, line_id=None, issue_id=None, quantity=None):
-    data = _action_data(actor, case, kind, reason, line_id, issue_id, quantity)
+def prepare(actor, case, kind, reason, *, line_id=None, issue_id=None, quantity=None, lot_id=None):
+    data = _action_data(actor, case, kind, reason, line_id, issue_id, quantity, lot_id)
     return data, proposal(actor, CONTRACT, ROLES, data)
 
 
@@ -172,7 +175,7 @@ def confirm(actor, token, confirmed, *, case_id=None):
     if previous:
         return previous, True
     actual = _action_data(actor, case, kind, data['reason'], data.get('line'), data.get('issue'),
-                          data.get('quantity'), lock=True)
+                          data.get('quantity'), data.get('lot'), lock=True)
     if actual != data:
         raise RuleError('划价、处方或办理条件已变化，请重新预览。')
     if kind == 'QUOTE':
@@ -189,7 +192,9 @@ def confirm(actor, token, confirmed, *, case_id=None):
     else:
         obj = DispenseMovement.objects.create(line_id=data['line'], kind=kind, original_issue_id=data['issue'],
                                               quantity=data['quantity'], actor=actor, duty=duty,
-                                              reason=data['reason'], operation_id=op)
+                                              reason=data['reason'], operation_id=op, requires_batch=bool(data['lot']))
+        from supplies.pharmacy import record_lot
+        record_lot(obj,data['lot'])
     visit.lock_version += 1
     visit.save(update_fields=['lock_version'])
     emit(actor, 'PHARMACY_' + kind, obj, visit=visit, summary={'approval': approval.pk, 'quantity': data.get('quantity')})

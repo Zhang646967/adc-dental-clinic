@@ -14,4 +14,9 @@ def detail(request,pk):
         invoice=get_object_or_404(Invoice.objects.select_related('current_record_version'),pk=pk,
             visit__patient_id=access.patient_id)
         data=published_invoice(invoice,revision=request.GET.get('revision'),cash_page=request.GET.get('cash_page',1))
+        data['treatment_lines']=data['lines']
+        # Existing deployed clients keep a complete list until they adopt the split view.
+        data['lines']=data['treatment_lines']+[
+            dict(line,name_snapshot='药费 · '+line['name_snapshot']) for line in data['medication_lines']
+        ]
     return result(request,data)

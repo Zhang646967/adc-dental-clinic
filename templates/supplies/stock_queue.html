@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 本店库存批次{% endblock %}
+{% block content %}
+<div class="workspace-heading"><p class="eyebrow">{{ workspace_scope }} · 合成库存演练</p><h1>本店库存批次</h1>
+  <p>按批号和有效期核对在库数量。退回药品单独登记隔离。</p>
+</div>
+{% if not adc_read_only %}<p><a class="button" href="{% url 'stock_receive' %}">登记到货</a></p>{% endif %}
+<section class="panel">
+  {% for lot in page %}
+  <article class="clinical-history">
+    <h2><a href="{% url 'stock_detail' lot.pk %}">{{ lot.item.name }} · {{ lot.code }}</a></h2>
+    <p>有效期至 {{ lot.expires_on|date:'Y-m-d' }} · 在库 {{ lot.available }} {{ lot.item.unit }} · 退药隔离累计 {{ lot.quarantined }}</p>
+    {% if lot.recall %}<p class="notice">已召回，停止出库</p>{% elif lot.expires_on < today %}<p class="notice">已过有效期，停止出库</p>{% endif %}
+  </article>
+  {% empty %}<p>本店暂无当前岗位可见的批次。</p>{% endfor %}
+  {% include '_pagination.html' %}
+</section>
+{% endblock %}

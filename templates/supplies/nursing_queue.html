@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 本店护理工作台{% endblock %}
+{% block content %}
+<div class="workspace-heading"><p class="eyebrow">{{ workspace_scope }} · 合成护理演练</p><h1>本店护理工作台</h1>
+  <p>选择本次就诊，登记实际给药、耗用、无菌包使用及需要交接的异常。</p>
+</div>
+<nav class="actions">
+  <a class="button secondary" href="{% url 'nursing_queue' %}"{% if not past %} aria-current="page"{% endif %}>在诊</a>
+  <a class="button secondary" href="?queue=past"{% if past %} aria-current="page"{% endif %}>结束的护理记录</a>
+  {% if can_release %}<a class="button secondary" href="{% url 'sterile_packs' %}">无菌包管理</a>{% endif %}
+</nav>
+<section class="panel">
+  {% for visit in page %}
+  <article class="clinical-history">
+    <h2><a href="{% url 'nursing_detail' visit.pk %}">{{ visit.visit_no }} · {{ visit.patient.name }}</a></h2>
+    <p>患者编号 {{ visit.patient.patient_no }} · {{ visit.get_status_display }} · 到诊 {{ visit.attended_at|date:'Y-m-d H:i' }}</p>
+  </article>
+  {% empty %}<p>当前范围暂无可见就诊。</p>{% endfor %}
+  {% if past %}
+    {% if page.has_previous %}<a href="?queue=past&amp;page={{ page.previous_page_number }}">上一页</a>{% endif %}
+    {% if page.has_next %}<a href="?queue=past&amp;page={{ page.next_page_number }}">下一页</a>{% endif %}
+  {% else %}{% include '_pagination.html' %}{% endif %}
+</section>
+{% endblock %}

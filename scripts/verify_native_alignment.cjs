@@ -43,6 +43,14 @@ async function verify(){
   }
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
   let d=page('invoice',{responses:[invoice()]});d.p.onLoad({id:5});await d.p.onShow();assert.equal(d.calls[0][0],'invoices/5/');assert.equal(d.p.data.invoice.total,'99.99');count++;
+  assert.deepEqual(Array.from(d.p.data.invoice.treatment_lines),[]);
+  assert.deepEqual(Array.from(d.p.data.invoice.medication_lines),[]);count++;
+  const drug={name_snapshot:'合成目录条目',quantity:3,unit_price:'12.50',line_amount:'37.50'};
+  d=page('invoice',{responses:[{...invoice(),lines:[{...drug,name_snapshot:'药费 · 合成目录条目'}],
+    treatment_lines:[],medication_lines:[drug]}]});
+  d.p.onLoad({id:5});await d.p.onShow();
+  assert.equal(d.p.data.invoice.treatment_lines.length,0);
+  assert.equal(d.p.data.invoice.medication_lines[0].line_amount,'37.50');count++;
   d=page('invoice',{responses:[invoice(),{...invoice(),revision:1,total:'199.98',is_current:false}]});d.p.onLoad({id:5});await d.p.onShow();await d.p.version({detail:{value:1}});await new Promise(r=>setImmediate(r));assert.equal(d.calls[1][2].revision,1);assert.equal(d.p.data.invoice.total,'199.98');assert.equal(d.p.data.invoice.cash_balance.current_revision,2);count++;
   assert(d.calls.every(c=>c[1]==='GET'));count++;
   d=page('invoice');d.p.onLoad({id:'../account'});await d.p.onShow();assert.equal(d.calls.length,0);assert(d.p.data.error);count++;

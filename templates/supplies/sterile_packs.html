@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 本店无菌包{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'nursing_queue' %}">返回护理工作台</a>
+  <h1>本店无菌包放行与停用</h1>
+  <p>按灭菌及放行凭据确认包号。异常停用保留原放行和使用记录。</p>
+  {% if not adc_read_only %}{% include 'supplies/action_forms.html' %}{% endif %}
+  <section class="panel"><h2>已登记无菌包</h2>
+    {% for pack in page %}
+    <article class="clinical-history">
+      <h3>{{ pack.code }} · {% if pack.hold %}已停用{% elif pack.execution %}已使用{% elif pack.valid_until <= now %}已到期{% else %}已放行{% endif %}</h3>
+      <p>灭菌凭据 {{ pack.process_reference }} · 放行 {{ pack.released_at|date:'Y-m-d H:i' }} · 有效至 {{ pack.valid_until|date:'Y-m-d H:i' }}</p>
+      {% if pack.hold %}<p>停用依据 {{ pack.hold.reason }}</p>{% endif %}
+      {% if pack.execution %}<p>使用来源护理记录 #{{ pack.execution.pk }}</p>{% endif %}
+    </article>
+    {% empty %}<p>本店暂无已登记无菌包。</p>{% endfor %}
+    {% include '_pagination.html' %}
+  </section>
+</div>
+{% endblock %}

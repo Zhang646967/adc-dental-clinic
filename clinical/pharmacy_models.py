@@ -44,6 +44,7 @@ class DispenseMovement(models.Model):
     original_issue = models.ForeignKey('self', on_delete=models.PROTECT, null=True, blank=True,
                                        related_name='returns')
     quantity = models.PositiveIntegerField()
+    requires_batch = models.BooleanField(default=False)
     actor = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
     duty = models.ForeignKey('clinical.PrescriptionDuty', on_delete=models.PROTECT)
     reason = models.CharField(max_length=500)

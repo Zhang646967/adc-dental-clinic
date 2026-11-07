@@ -13,7 +13,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 INSTALLED_APPS = [
     "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions",
     "django.contrib.messages", "django.contrib.staticfiles", "django.contrib.postgres",
-    "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment", "operations", "reception", "clinical", "insurance",
+    "accounts", "registry", "patients", "scheduling", "care", "finance", "adc_core", "portal", "assistants", "workspaces", "coordination", "notifications", "equipment", "operations", "reception", "clinical", "insurance", "supplies",
 ]
 MIDDLEWARE = [
     "adc_core.request_trace.RequestTraceMiddleware",
@@ -61,6 +61,7 @@ ADC_READ_ONLY = os.environ.get("ADC_READ_ONLY", "0") == "1"
 ADC_CLINICAL_SYNTHETIC = os.environ.get("ADC_RC_SYNTHETIC", "0") == "1"
 ADC_PRESCRIPTION_REHEARSAL = os.environ.get("ADC_PRESCRIPTION_REHEARSAL", "0") == "1"
 ADC_DISPENSING_REHEARSAL = os.environ.get("ADC_DISPENSING_REHEARSAL", "0") == "1"
+ADC_STOCK_REHEARSAL = os.environ.get("ADC_STOCK_REHEARSAL", "0") == "1"
 ADC_PATIENT_AUTH_MODE = os.environ.get('ADC_PATIENT_AUTH_MODE', 'demo' if ADC_CLINICAL_SYNTHETIC else 'live')
 ADC_PATIENT_IDENTITY_PROVIDER = os.environ.get('ADC_PATIENT_IDENTITY_PROVIDER', 'local' if ADC_CLINICAL_SYNTHETIC and ADC_PATIENT_AUTH_MODE=='demo' else 'disabled')
 ADC_TEACHER_TEST_MODE = os.environ.get('ADC_TEACHER_TEST_MODE') == '1'

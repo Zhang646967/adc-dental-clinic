@@ -1,0 +1,12 @@
+{% load workspace_tags %}
+{% for action,label,form in actions %}
+<section class="panel form-panel">
+  <h2>{{ label }}</h2>
+  <form method="post">
+    {% csrf_token %}{% workspace_token %}
+    <input type="hidden" name="action" value="{{ action }}">
+    {{ form.as_div }}
+    <button type="submit">预览{{ label }}</button>
+  </form>
+</section>
+{% endfor %}

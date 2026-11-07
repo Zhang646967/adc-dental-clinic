@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 本次护理执行{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'nursing_queue' %}">返回本店护理工作台</a>
+  <h1>本次护理执行</h1>
+  <section class="panel"><h2>{{ visit.patient.name }} · {{ visit.patient.patient_no }}</h2>
+    <p>{{ visit.visit_no }} · {{ visit.get_status_display }} · 到诊 {{ visit.attended_at|date:'Y-m-d H:i' }}</p>
+    <p>发生后据实登记。材料和无菌包使用须关联本次实际治疗，给药须关联可追溯的原发药。</p>
+  </section>
+  {% include 'supplies/action_forms.html' %}
+  <section class="panel">
+    <h2>已登记的实际执行</h2>
+    {% for row in page %}
+    <article class="clinical-history">
+      <h3>#{{ row.pk }} · {{ row.get_kind_display }}</h3>
+      <p>实际发生 {{ row.observed_at|date:'Y-m-d H:i:s' }} · {{ row.actor.username }}{% if row.quantity %} · 数量 {{ row.quantity }}{% endif %}</p>
+      {% if row.performed_id %}<p>对应实际治疗 #{{ row.performed_id }}{% if row.performed.state == 'VOIDED' %} · 原治疗已更正，实际耗用留存{% endif %}</p>{% endif %}
+      {% if row.issue_id %}<p>原发药 #{{ row.issue_id }} · {{ row.issue.line.name_snapshot }}</p>{% endif %}
+      {% if row.stock_movement %}<p>批次 {{ row.stock_movement.lot.code }}</p>{% endif %}
+      {% if row.sterile_pack %}<p>无菌包 {{ row.sterile_pack.code }} · {{ row.sterile_pack.process_reference }}</p>{% endif %}
+      <p>{{ row.reason }}</p>
+    </article>
+    {% empty %}<p>本次暂无已登记的护理事实。</p>{% endfor %}
+    {% include '_pagination.html' %}
+  </section>
+</div>
+{% endblock %}
