@@ -1997,11 +1997,122 @@
       ]
     }
   },
+  "er_prescription_review": {
+    "title": "处方版本与独立审方",
+    "tables": 8,
+    "relationships": 10,
+    "note": "一次就诊至多一张处方。处方按编号追加版本，每版引用准确确认病历、开方职责和专业授权。决定与版本一对一，允许暂未决定。开方人和审核人分离，撤回由原医师办理。目录条目在 items 内固定为 JSON 快照，目录按诊所维护，快照编号不构成外键。",
+    "columns": {
+      "adc_visit": [
+        "id",
+        "clinic_id",
+        "patient_id"
+      ],
+      "adc_clinical_record_version": [
+        "id",
+        "revision"
+      ],
+      "adc_user": [
+        "id"
+      ],
+      "adc_professional_authorization": [
+        "id",
+        "revision"
+      ],
+      "adc_prescription_duty": [
+        "id",
+        "user_id",
+        "kind",
+        "valid_until",
+        "revoked_at"
+      ],
+      "adc_prescription": [
+        "id",
+        "visit_id",
+        "prescriber_id"
+      ],
+      "adc_prescription_version": [
+        "id",
+        "prescription_id",
+        "number",
+        "record_id",
+        "prescriber_duty_id",
+        "clinical_scope_id",
+        "items"
+      ],
+      "adc_prescription_decision": [
+        "id",
+        "version_id",
+        "actor_id",
+        "duty_id",
+        "action"
+      ]
+    }
+  },
+  "er_dispensing_charges": {
+    "title": "审方依据、发退药与版本化费用",
+    "tables": 8,
+    "relationships": 9,
+    "note": "已审核通过的版本至多一次划价和一次停止余量。报价行关联已审定的目录条目，退药引用原发药。药费引用准确报价行和实际发退药流水截止点；发布后历史不覆盖。原账单的复合外键继续约束同次就诊。",
+    "columns": {
+      "adc_prescription_decision": [
+        "id",
+        "version_id",
+        "action"
+      ],
+      "adc_pharmacy_quote": [
+        "id",
+        "approval_id",
+        "prepared_by_id",
+        "duty_id"
+      ],
+      "adc_pharmacy_quote_line": [
+        "id",
+        "quote_id",
+        "item_id",
+        "ordered_quantity",
+        "unit_price"
+      ],
+      "adc_dispense_movement": [
+        "id",
+        "line_id",
+        "kind",
+        "original_issue_id",
+        "quantity"
+      ],
+      "adc_pharmacy_stop": [
+        "id",
+        "approval_id",
+        "actor_id",
+        "stopped_at"
+      ],
+      "adc_medication_charge": [
+        "id",
+        "record_version_id",
+        "quote_line_id",
+        "through_movement_id",
+        "quantity",
+        "line_amount"
+      ],
+      "adc_visit_record_version": [
+        "id",
+        "visit_id",
+        "revision_no",
+        "outcome",
+        "total_amount"
+      ],
+      "adc_invoice": [
+        "id",
+        "visit_id",
+        "current_record_version_id"
+      ]
+    }
+  },
   "validation": {
     "passed": true,
-    "tables": 167,
-    "orm_tables": 166,
-    "columns_types_and_nullability_checked": 1667,
+    "tables": 177,
+    "orm_tables": 176,
+    "columns_types_and_nullability_checked": 1745,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2010,10 +2121,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 488,
-    "sql_foreign_keys": 489,
+    "orm_foreign_keys": 515,
+    "sql_foreign_keys": 516,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "fd412c0ea10afa67d2a33b6a9773b90ec6c7539928c6d9c7d5a91492a30cbb66",
+    "snapshot_sha256": "d4e7bef0004549db528f03c3bbb892e75a56edd374811a4ba728bde1d6f98d8a",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

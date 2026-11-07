@@ -1,3 +1,15 @@
+# C4.2 发退药、费用版本与独立记账
+
+合成实例中按当前通过的处方划价，实际发药可分次登记。退药保留原发药事实，关闭后由负责医师申请、独立财务审核更正。同一单号保留历史费用。 [岗位与状态](docs/decisions/ADR_C42_DISPENSING_AND_CHARGES.md) · [验收](docs/evidence_c42/README.md)
+
+准确应用提交 `3869a5d` 通过完整验证，包含 1,169 项源检查、2,336 项 PostgreSQL 测试及 339 项小程序源码与传输检查。 [GitHub CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42393013779)
+
+# C4.1 处方与独立审方
+
+在单店合成演练中，负责医师从确认病历提交处方，药师在本店工作台审核。退回后追加版本，原版与决定可查。Chrome 正常办理、PostgreSQL 权限和并发验证以及独立加密恢复已执行。课程 PDF 补充第二批小程序实测及 C4.1 设计页。 [岗位规则](docs/decisions/ADR_C41_PRESCRIPTION_REVIEW.md) · [验收记录](docs/evidence_c41/README.md)
+
+应用提交 `4c7fc2b` 的完整验证包含 1,169 项源检查、2,327 项 PostgreSQL 测试及 339 项小程序源码与传输检查。 [GitHub CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42391010814)
+
 # 双端患者服务闭环
 
 ## 第二批商用整改

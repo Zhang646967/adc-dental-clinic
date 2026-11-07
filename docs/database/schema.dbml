@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 166 ORM tables; django_migrations is a framework migration journal.
+// All 176 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -770,6 +770,19 @@ Table adc_department_hours {
   closes_at "time without time zone" [not null]
 }
 
+Table adc_dispense_movement {
+  id "bigint" [pk, not null]
+  line_id "bigint" [not null]
+  kind "character varying(6)" [not null]
+  original_issue_id "bigint" [null]
+  quantity "integer" [not null]
+  actor_id "bigint" [not null]
+  duty_id "bigint" [not null]
+  reason "character varying(500)" [not null]
+  operation_id "uuid" [unique, not null]
+  occurred_at "timestamp with time zone" [not null]
+}
+
 Table adc_equipment_asset {
   id "bigint" [pk, not null]
   clinic_id "bigint" [not null]
@@ -1343,6 +1356,18 @@ Table adc_medical_proxy_version {
   }
 }
 
+Table adc_medication_charge {
+  id "bigint" [pk, not null]
+  record_version_id "bigint" [not null]
+  quote_line_id "bigint" [not null]
+  through_movement_id "bigint" [not null]
+  quantity "integer" [not null]
+  line_amount "numeric(16,2)" [not null]
+  indexes {
+    (record_version_id, quote_line_id) [unique, name: 'medication_charge_item_unique']
+  }
+}
+
 Table adc_monthly_cost {
   id "bigint" [pk, not null]
   period_id "bigint" [not null]
@@ -1536,6 +1561,39 @@ Table adc_performed_procedure {
   operation_id "uuid" [unique, not null]
 }
 
+Table adc_pharmacy_quote {
+  id "bigint" [pk, not null]
+  approval_id "bigint" [unique, not null]
+  prepared_by_id "bigint" [not null]
+  duty_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  reason "character varying(500)" [not null]
+  prepared_at "timestamp with time zone" [not null]
+}
+
+Table adc_pharmacy_quote_line {
+  id "bigint" [pk, not null]
+  quote_id "bigint" [not null]
+  item_id "bigint" [not null]
+  name_snapshot "character varying(100)" [not null]
+  unit_snapshot "character varying(16)" [not null]
+  ordered_quantity "integer" [not null]
+  unit_price "numeric(10,2)" [not null]
+  indexes {
+    (quote_id, item_id) [unique, name: 'pharmacy_quote_item_unique']
+  }
+}
+
+Table adc_pharmacy_stop {
+  id "bigint" [pk, not null]
+  approval_id "bigint" [unique, not null]
+  actor_id "bigint" [not null]
+  duty_id "bigint" [not null]
+  reason "character varying(500)" [not null]
+  operation_id "uuid" [unique, not null]
+  stopped_at "timestamp with time zone" [not null]
+}
+
 Table adc_plan_appointment {
   id "bigint" [pk, not null]
   instruction_id "bigint" [not null]
@@ -1636,6 +1694,68 @@ Table adc_portal_booking_receipt {
   appointment_grant_id "bigint" [null]
   visit_id "bigint" [unique, not null]
   created_at "timestamp with time zone" [not null]
+}
+
+Table adc_prescription {
+  id "bigint" [pk, not null]
+  visit_id "bigint" [unique, not null]
+  prescriber_id "bigint" [not null]
+  created_at "timestamp with time zone" [not null]
+}
+
+Table adc_prescription_catalogue_item {
+  id "bigint" [pk, not null]
+  clinic_id "bigint" [not null]
+  code "character varying(30)" [not null]
+  name "character varying(100)" [not null]
+  strength "character varying(60)" [not null]
+  dose_unit "character varying(16)" [not null]
+  quantity_unit "character varying(16)" [not null]
+  route "character varying(12)" [not null]
+  is_active "boolean" [not null]
+  rehearsal_unit_price "numeric(10,2)" [null]
+  indexes {
+    (clinic_id, code) [unique, name: 'rx_catalogue_clinic_code']
+  }
+}
+
+Table adc_prescription_decision {
+  id "bigint" [pk, not null]
+  version_id "bigint" [unique, not null]
+  actor_id "bigint" [not null]
+  duty_id "bigint" [not null]
+  action "character varying(12)" [not null]
+  reason "character varying(500)" [not null]
+  operation_id "uuid" [unique, not null]
+  decided_at "timestamp with time zone" [not null]
+}
+
+Table adc_prescription_duty {
+  id "bigint" [pk, not null]
+  user_id "bigint" [not null]
+  clinic_id "bigint" [not null]
+  kind "character varying(12)" [not null]
+  reference "character varying(120)" [not null]
+  valid_from "timestamp with time zone" [not null]
+  valid_until "timestamp with time zone" [not null]
+  revoked_at "timestamp with time zone" [null]
+}
+
+Table adc_prescription_version {
+  id "bigint" [pk, not null]
+  prescription_id "bigint" [not null]
+  number "integer" [not null]
+  record_id "bigint" [not null]
+  prescriber_duty_id "bigint" [not null]
+  clinical_scope_id "bigint" [not null]
+  clinical_scope_revision "integer" [not null]
+  indication "character varying(500)" [not null]
+  items "jsonb" [not null]
+  operation_id "uuid" [unique, not null]
+  submitted_at "timestamp with time zone" [not null]
+  indexes {
+    (prescription_id, number) [unique, name: 'rx_version_number_unique']
+  }
 }
 
 Table adc_procedure_gap {
@@ -2503,6 +2623,10 @@ Ref: adc_dentist_quarter_cost.dentist_id > adc_dentist.id
 Ref: adc_dentist_quarter_cost.quarter_id > adc_quarter.id
 Ref: adc_department.clinic_id > adc_clinic.id
 Ref: adc_department_hours.department_id > adc_department.id
+Ref: adc_dispense_movement.duty_id > adc_prescription_duty.id
+Ref: adc_dispense_movement.line_id > adc_pharmacy_quote_line.id
+Ref: adc_dispense_movement.original_issue_id > adc_dispense_movement.id
+Ref: adc_dispense_movement.actor_id > adc_user.id
 Ref: adc_equipment_asset.clinic_id > adc_clinic.id
 Ref: adc_equipment_asset.registered_by_id > adc_user.id
 Ref: adc_equipment_cost_amendment.based_amendment_id > adc_equipment_cost_amendment.id
@@ -2615,6 +2739,9 @@ Ref: adc_medical_proxy_scope.version_id > adc_medical_proxy_version.id
 Ref: adc_medical_proxy_version.plan_id > adc_treatment_plan.id
 Ref: adc_medical_proxy_version.proxy_id > adc_medical_proxy.id
 Ref: adc_medical_proxy_version.submitted_by_id > adc_user.id
+Ref: adc_medication_charge.quote_line_id > adc_pharmacy_quote_line.id
+Ref: adc_medication_charge.record_version_id > adc_visit_record_version.id
+Ref: adc_medication_charge.through_movement_id > adc_dispense_movement.id
 Ref: adc_monthly_cost.dentist_id > adc_dentist.id
 Ref: adc_monthly_cost.equipment_event_id > adc_equipment_event.id
 Ref: adc_monthly_cost.period_id > adc_cost_month.id
@@ -2655,6 +2782,14 @@ Ref: adc_performed_procedure.source_record_id > adc_clinical_record_version.id
 Ref: adc_performed_procedure.step_version_id > adc_plan_step_version.id
 Ref: adc_performed_procedure.treatment_type_id > adc_treatment_type.id
 Ref: adc_performed_procedure.recorded_by_id > adc_user.id
+Ref: adc_pharmacy_quote.approval_id - adc_prescription_decision.id
+Ref: adc_pharmacy_quote.duty_id > adc_prescription_duty.id
+Ref: adc_pharmacy_quote.prepared_by_id > adc_user.id
+Ref: adc_pharmacy_quote_line.item_id > adc_prescription_catalogue_item.id
+Ref: adc_pharmacy_quote_line.quote_id > adc_pharmacy_quote.id
+Ref: adc_pharmacy_stop.actor_id > adc_user.id
+Ref: adc_pharmacy_stop.approval_id - adc_prescription_decision.id
+Ref: adc_pharmacy_stop.duty_id > adc_prescription_duty.id
 Ref: adc_plan_appointment.instruction_id > adc_next_visit_instruction.id
 Ref: adc_plan_appointment.linked_by_id > adc_user.id
 Ref: adc_plan_appointment.visit_id > adc_visit.id
@@ -2684,6 +2819,18 @@ Ref: adc_plan_version.source_record_id > adc_clinical_record_version.id
 Ref: adc_portal_booking_receipt.access_id > adc_patient_access.id
 Ref: adc_portal_booking_receipt.appointment_grant_id > adc_patient_appointment_grant.id
 Ref: adc_portal_booking_receipt.visit_id - adc_visit.id
+Ref: adc_prescription.prescriber_id > adc_user.id
+Ref: adc_prescription.visit_id - adc_visit.id
+Ref: adc_prescription_catalogue_item.clinic_id > adc_clinic.id
+Ref: adc_prescription_decision.duty_id > adc_prescription_duty.id
+Ref: adc_prescription_decision.version_id - adc_prescription_version.id
+Ref: adc_prescription_decision.actor_id > adc_user.id
+Ref: adc_prescription_duty.clinic_id > adc_clinic.id
+Ref: adc_prescription_duty.user_id > adc_user.id
+Ref: adc_prescription_version.clinical_scope_id > adc_professional_authorization.id
+Ref: adc_prescription_version.prescriber_duty_id > adc_prescription_duty.id
+Ref: adc_prescription_version.prescription_id > adc_prescription.id
+Ref: adc_prescription_version.record_id > adc_clinical_record_version.id
 Ref: adc_procedure_gap.performed_id - adc_performed_procedure.id
 Ref: adc_procedure_gap.recorded_by_id > adc_user.id
 Ref: adc_procedure_gap_review.gap_id - adc_procedure_gap.id

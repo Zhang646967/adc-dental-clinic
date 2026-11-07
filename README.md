@@ -22,6 +22,10 @@
 
 ## 当前状态与开发
 
+C4.2 在合成实例完成划价、分次发退药、停止余量及独立账单更正。患者可按版本核对药费，收退款沿原账单流程。 [C4.2 验收记录](docs/evidence_c42/README.md)
+
+C4.1 完成单店合成处方演练。负责医师可从确认病历开方，独立药师可审核，退回后可提交新版本并查阅历史。 [C4.1 验收记录](docs/evidence_c41/README.md)
+
 第二批商用整改增加了患者关键路径外部探测。二十店隔离环境通过查号故障识别、重启、加密备份回读和独立空库恢复。目标服务器的连续观测、实际异地存储和手机业务各自验收。 [验收门槛与操作](docs/COMMERCIAL_BATCH2.md) · [本机证据](docs/evidence_commercial_batch2/README.md)
 
 第一批一致性整改涵盖网页筛选、二十店介绍、课程 PDF 和小程序预约联系入口。预约联系页置顶本单门店，并为待核实的预约显示核实提示。WorkBuddy 已完成微信开发者工具复测。[整改与交接](docs/CONSISTENCY_BATCH1.md) · [分项验收](docs/evidence_consistency1/README.md)
@@ -127,7 +131,7 @@ production patient care. Historical engineering and academic materials follow.
 
 | 分类 | 入口 | 内容 |
 |---|---|---|
-| 课程交付 | [课程报告/](课程报告/) | 当前 PDF 和 Word，便于直接下载 |
+| 课程交付 | [课程报告/](课程报告/) | 当前正式课程报告 PDF，便于直接下载 |
 | 项目文档 | [docs/](docs/README.md) | 业务流程、系统设计、部署运维、验收和历史导航 |
 | 系统源码 | [源码结构](docs/README.md#源码与资源) | 按接诊、财务、设备、排班、通知等业务模块组织 |
 | 验证 | [tests/](tests/)、[checks/](checks/) | PostgreSQL/业务回归与源代码规则检查 |

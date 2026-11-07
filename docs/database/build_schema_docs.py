@@ -405,6 +405,40 @@ VIEWS['er_archive_amendment']['note']+=' 审核人与委任的完整关系见归
 
 VIEWS.update({'er_copy_identity': {'title': '副本申请身份、用途与独立职责', 'tables': {'adc_patient': ['id', 'patient_no'], 'adc_clinic': ['id'], 'adc_user': ['id', 'dentist_id'], 'adc_clinical_reviewer': ['id', 'user_id', 'clinic_id', 'can_review_copies'], 'adc_record_copy_request': ['id', 'patient_id', 'clinic_id', 'recipient_id', 'created_by_id', 'verified_by_id', 'assigned_reviewer_id', 'reviewed_by_id', 'kind', 'purpose', 'state', 'pickup_until']}, 'note': '一份申请固定一个患者、诊所、用途和指定领取账号；监护与本用途书面委托由前台另核材料，不继承代约或医疗决定授权。前台专项职责、医务专项职责均默认关闭；原负责医师、申请人及材料核验人不得独立批准自己的事项。identity_snapshot与verification保留核对事实，具体原件另行保管，不虚构证件附件表。'}, 'er_copy_scope': {'title': '申请范围与准确归档来源', 'tables': {'adc_record_copy_request': ['id', 'patient_id', 'clinic_id', 'state'], 'adc_record_copy_item': ['id', 'request_id', 'visit_id', 'package_id', 'sections'], 'adc_visit': ['id', 'patient_id', 'clinic_id'], 'adc_archive_package': ['id', 'archive_id', 'submission_id', 'number', 'pdf_sha256'], 'adc_archive_submission': ['id', 'kind', 'state']}, 'note': '申请至范围项是一对多，每次就诊在同一申请至多一项。来源包尚未就绪时package可空，材料核对阶段只补齐缺失来源，不能替换已选历史版本；同患者、同店、同就诊关系由数据库核对。sections为显式资料类别，不是独立实体或SQL外键；副本从所选快照投影，原员工归档PDF不直接开放。'}, 'er_copy_delivery': {'title': '固定副本、受控领取与追加历史', 'tables': {'adc_record_copy_request': ['id', 'recipient_id', 'state', 'revision', 'pickup_until'], 'adc_record_copy_file': ['id', 'request_id', 'sha256', 'renderer', 'created_at'], 'adc_record_copy_event': ['id', 'request_id', 'actor_id', 'operation_id', 'action', 'created_at'], 'adc_user': ['id']}, 'note': '一份获准申请至多生成一个固定副本文件；字节、摘要、清单及办理事件不可覆盖。短时领取凭据绑定原登录账号和工作区，持链接而无会话不能读取；下载时重核领取权、期限和准确文件。服务端响应记录不表示患者已经阅读。到期按读取时间判断，不删除文件和历史；撤销只停止后续领取，已交付本地副本无法远程收回。'}})
 
+VIEWS['er_prescription_review'] = {
+    'title': '处方版本与独立审方',
+    'tables': {
+        'adc_visit': ['id', 'clinic_id', 'patient_id'],
+        'adc_clinical_record_version': ['id', 'revision'],
+        'adc_user': ['id'],
+        'adc_professional_authorization': ['id', 'revision'],
+        'adc_prescription_duty': ['id', 'user_id', 'kind', 'valid_until', 'revoked_at'],
+        'adc_prescription': ['id', 'visit_id', 'prescriber_id'],
+        'adc_prescription_version': ['id', 'prescription_id', 'number', 'record_id',
+                                     'prescriber_duty_id', 'clinical_scope_id', 'items'],
+        'adc_prescription_decision': ['id', 'version_id', 'actor_id', 'duty_id', 'action'],
+    },
+    'note': '一次就诊至多一张处方。处方按编号追加版本，每版引用准确确认病历、开方职责和专业授权。决定与版本一对一，允许暂未决定。开方人和审核人分离，撤回由原医师办理。目录条目在 items 内固定为 JSON 快照，目录按诊所维护，快照编号不构成外键。',
+}
+
+
+
+VIEWS['er_dispensing_charges'] = {
+    'title': '审方依据、发退药与版本化费用',
+    'tables': {
+        'adc_prescription_decision': ['id','version_id','action'],
+        'adc_pharmacy_quote': ['id','approval_id','prepared_by_id','duty_id'],
+        'adc_pharmacy_quote_line': ['id','quote_id','item_id','ordered_quantity','unit_price'],
+        'adc_dispense_movement': ['id','line_id','kind','original_issue_id','quantity'],
+        'adc_pharmacy_stop': ['id','approval_id','actor_id','stopped_at'],
+        'adc_medication_charge': ['id','record_version_id','quote_line_id','through_movement_id','quantity','line_amount'],
+        'adc_visit_record_version': ['id','visit_id','revision_no','outcome','total_amount'],
+        'adc_invoice': ['id','visit_id','current_record_version_id'],
+    },
+    'note': '已审核通过的版本至多一次划价和一次停止余量。报价行关联已审定的目录条目，退药引用原发药。药费引用准确报价行和实际发退药流水截止点；发布后历史不覆盖。原账单的复合外键继续约束同次就诊。',
+}
+
+
 def sql_foreign_key(item):
     m = re.match(r'FOREIGN KEY \(([^)]+)\) REFERENCES ([^ (]+)\(([^)]+)\)', item['definition'])
     assert m, item
