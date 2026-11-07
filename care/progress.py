@@ -43,6 +43,15 @@ def care_progress(actor, visit_id):
             treated_blockers.append('部分治疗尚未由本次负责牙医确认。')
         invoice = Invoice.objects.filter(visit_id=visit.pk).select_related('current_record_version').first()
         published = invoice.current_record_version if invoice else None
+        from clinical.dispensing import completion_blocker
+        from care.medication_charges import charge_projection, pending_charges, preview_charges
+        medicine=[]
+        pharmacy_blocker=completion_blocker(visit) if editable else ''
+        if published:
+            medicine=charge_projection(published)
+        elif editable:
+            medicine=preview_charges(pending_charges(visit))
+        if pharmacy_blocker: treated_blockers.append(pharmacy_blocker)
         display_record=draft or published
         display_lines=lines if draft else list(published.treatment_lines.order_by('line_no')) if published else []
         bind_performed_sources(display_lines)
@@ -50,5 +59,7 @@ def care_progress(actor, visit_id):
         clinical_record=ClinicalRecordVersion.objects.filter(encounter__visit=visit).order_by('-revision').first() if structured else None
         return dict(visit=visit, clinical_started=structured,clinical_available=clinical_available,clinical_record=clinical_record,record=display_record, lines=display_lines, invoice=invoice, published=published, can_refer=may_refer(actor,visit),
             editable=editable, allergy_current=allergy_current, treated_blockers=treated_blockers,
-            actual=actual,no_treatment_allowed=not blockers and not clinical_blockers and not lines and not actual['provided'],
+            actual=actual,medication_lines=medicine,pharmacy_blocker=pharmacy_blocker,
+            completion_total=published.total_amount if published else sum(row.line_amount for row in lines)+sum(row['line_amount'] for row in medicine),
+            no_treatment_allowed=not blockers and not clinical_blockers and not pharmacy_blocker and not lines and not actual['provided'] and not medicine,
             clinical_note=draft.clinical_note if draft else published.clinical_note if published else '')

@@ -33,7 +33,14 @@ class TreatmentForm(VersionForm):
 class CompletionForm(VersionForm):
     outcome=forms.ChoiceField(label="本次结果",choices=[("TREATED","已实施治疗，完成并开单"),("NO_TREATMENT","已到诊但未治疗，关闭并出零金额单")])
     reason=forms.CharField(label="无治疗关闭原因",max_length=500,required=False,widget=forms.Textarea(attrs={"rows":3}))
-    confirmed=forms.BooleanField(label="我已核对实际治疗和金额；发布后不能直接修改。")
+    confirmed=forms.BooleanField(label="我已核对实际治疗、发退药及金额。")
+
+    def __init__(self,*args,pharmacy_only=False,**kwargs):
+        super().__init__(*args,**kwargs)
+        if pharmacy_only:
+            self.fields['outcome'].choices=list(self.fields['outcome'].choices)+[
+                ('PHARMACY_ONLY','已发药，完成并开单'),
+            ]
 
 class RemoveLineForm(VersionForm):
     line_id=forms.IntegerField(min_value=1,widget=forms.HiddenInput)

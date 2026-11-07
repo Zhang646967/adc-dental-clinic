@@ -13,11 +13,13 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 from clinical import prescriptions as cmd
+from clinical import dispensing
+from clinical.dispensing_views import case_history
 from clinical.encounter_views import clinical_render
 from clinical.form_binding import check_patient_form, patient_form_binding
-from clinical.prescription_access import pharmacist, prescriber, require_rehearsal
+from clinical.prescription_access import active_duties, pharmacist, prescriber, require_rehearsal
 from clinical.prescription_forms import PrescriptionConfirmForm, PrescriptionDecisionForm, PrescriptionForm, PrescriptionItems
-from clinical.prescription_models import Prescription, PrescriptionDecision, PrescriptionVersion
+from clinical.prescription_models import Prescription, PrescriptionDecision, PrescriptionDuty, PrescriptionVersion
 from clinical.prescription_payload import catalogue_for
 from scheduling.models import Visit
 from workspaces.views import select_clinic
@@ -56,6 +58,9 @@ def review_queue(request):
     clinic_id = request.workspace.clinic_id
     if clinic_id is None:
         return select_clinic(request)
+    can_dispense = dispensing.enabled() and active_duties(request.user.pk, PrescriptionDuty.Kind.DISPENSE).filter(clinic_id=clinic_id).exists()
+    if can_dispense and not active_duties(request.user.pk, PrescriptionDuty.Kind.REVIEW).filter(clinic_id=clinic_id).exists():
+        return redirect('dispensing_queue')
     pharmacist(request.user, clinic_id)
     latest = PrescriptionVersion.objects.filter(prescription=OuterRef('prescription')).order_by('-number')
     rows = PrescriptionVersion.objects.filter(
@@ -66,7 +71,8 @@ def review_queue(request):
         'prescription__visit__patient', 'prescription__prescriber', 'decision',
     ).order_by('-submitted_at', '-pk')
     return clinical_render(request, 'clinical/prescription_queue.html',
-                           dict(page=Paginator(rows, 20).get_page(request.GET.get('page')), show_history=show_history))
+                           dict(page=Paginator(rows, 20).get_page(request.GET.get('page')),
+                                show_history=show_history, can_dispense=can_dispense))
 
 
 @login_required
@@ -165,7 +171,9 @@ def detail(request, pk):
             status = 400
     return clinical_render(request, 'clinical/prescription_detail.html', dict(
         case=case, visit=case.visit, version=version, versions=versions, current=current,
-        pharmacist=is_pharmacist, editable=editable, form=form,
+        pharmacist=is_pharmacist, editable=editable, form=form, history=case_history(version),
+        can_dispense=is_pharmacist and dispensing.enabled() and active_duties(
+            request.user.pk, PrescriptionDuty.Kind.DISPENSE).filter(clinic_id=case.visit.clinic_id).exists(),
         can_revise=current and version.state in cmd.REOPENABLE and case.visit.status == 'CHECKED_IN'
         and case.visit.patient.is_active and not settings.ADC_READ_ONLY,
     ), status=status)

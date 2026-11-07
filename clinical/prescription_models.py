@@ -7,6 +7,7 @@ class PrescriptionDuty(models.Model):
     class Kind(models.TextChoices):
         PRESCRIBE = 'PRESCRIBE', '开方'
         REVIEW = 'REVIEW', '审方'
+        DISPENSE = 'DISPENSE', '调配与发药'
 
     user = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
     clinic = models.ForeignKey('registry.Clinic', on_delete=models.PROTECT)
@@ -19,7 +20,7 @@ class PrescriptionDuty(models.Model):
     class Meta:
         db_table = 'adc_prescription_duty'
         constraints = [
-            models.CheckConstraint(condition=Q(kind__in=['PRESCRIBE', 'REVIEW']), name='rx_duty_kind'),
+            models.CheckConstraint(condition=Q(kind__in=['PRESCRIBE', 'REVIEW', 'DISPENSE']), name='rx_duty_kind'),
             models.CheckConstraint(condition=Q(valid_until__gt=F('valid_from')), name='rx_duty_period'),
             models.UniqueConstraint(fields=['user', 'clinic', 'kind'], condition=Q(revoked_at__isnull=True),
                                     name='rx_duty_one_unrevoked'),
@@ -39,6 +40,7 @@ class PrescriptionCatalogueItem(models.Model):
     quantity_unit = models.CharField(max_length=16)
     route = models.CharField(max_length=12, choices=Route.choices)
     is_active = models.BooleanField(default=True)
+    rehearsal_unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = 'adc_prescription_catalogue_item'
@@ -46,6 +48,8 @@ class PrescriptionCatalogueItem(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['clinic', 'code'], name='rx_catalogue_clinic_code'),
             models.CheckConstraint(condition=Q(route__in=['ORAL', 'LOCAL']), name='rx_catalogue_route'),
+            models.CheckConstraint(condition=Q(rehearsal_unit_price__isnull=True) | Q(rehearsal_unit_price__gt=0),
+                                   name='rx_catalogue_rehearsal_price'),
         ]
 
     def __str__(self):

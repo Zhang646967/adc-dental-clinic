@@ -25,7 +25,7 @@ PUBLIC.update({'patient_wechat_qr_start','patient_wechat_qr_status','patient_wec
 # Copy-account routes apply their own channel, account token and per-application scope.
 PUBLIC.update({'portal_record_copies','portal_record_copy_new','portal_record_copy','portal_record_copy_confirm','portal_record_copy_download',
     'mini_record_copies','mini_record_copy_options','mini_record_copy_submit','mini_record_copy_confirm','mini_record_copy_download','mini_record_copy','mini_record_copy_action'})
-ROLE_HOME={'manager_home','frontdesk_home','prescription_review_queue','select_clinic','activate_clinic'}
+ROLE_HOME={'manager_home','frontdesk_home','prescription_review_queue','dispensing_queue','select_clinic','activate_clinic'}
 # These views own exact medical-step authorization. Appointment authority is a
 # different contract; role/workspace/CSRF checks still run below.
 MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_medical_proxy',
@@ -34,6 +34,7 @@ MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_me
     'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
 ALL=set(ROLES)
 ROUTES={
+ 'dispensing_queue':{'PHARMACIST'},'dispensing_detail':{'PHARMACIST'},'dispensing_confirm':{'PHARMACIST'},
  'prescription_visit':{'DENTIST'},'prescription_review_queue':{'PHARMACIST'},
  'prescription_detail':{'DENTIST','PHARMACIST'},'prescription_confirm':{'DENTIST','PHARMACIST'},
  'record_copies':{'FRONT_DESK','DENTIST'},'record_copy_new':{'FRONT_DESK'},'record_copy_detail':{'FRONT_DESK','DENTIST'},'record_copy_confirm':{'FRONT_DESK','DENTIST'},

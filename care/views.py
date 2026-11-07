@@ -68,8 +68,11 @@ def workspace(request,pk):
 def complete(request,pk):
     _own_visit(request.user,pk)
     progress=care_progress(request.user,pk);v=progress['visit']
-    form=CompletionForm(request.POST or None,initial={"expected_version":v.lock_version,
-        "outcome":"TREATED" if progress['lines'] or progress['actual']['provided'] else "NO_TREATMENT"})
+    treated=bool(progress['lines'] or progress['actual']['provided'])
+    pharmacy_only=bool(progress['medication_lines']) and not treated
+    outcome='TREATED' if treated else 'PHARMACY_ONLY' if pharmacy_only else 'NO_TREATMENT'
+    form=CompletionForm(request.POST or None,pharmacy_only=pharmacy_only,
+        initial={'expected_version':v.lock_version,'outcome':outcome})
     if request.method=="POST" and form.is_valid():
         data=dict(form.cleaned_data);data.pop("confirmed")
         try: invoice=complete_visit(actor=request.user,visit_id=v.pk,**data)
@@ -88,8 +91,13 @@ def invoice_context(invoice,request,*,portal=False):
 def _invoice_context(invoice,request,*,portal=False):
     from care.invoice_queries import published_invoice
     data=published_invoice(invoice,revision=request.GET.get('revision'),cash_page=request.GET.get('cash_page',1))
-    data.update(base_template='portal/base.html' if portal else 'base.html',patient_portal=portal,
-        may_correct=not portal and invoice.visit.status=='COMPLETED' and bool(data['lines']) and bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists(),
+    doctor=not portal and bindings(request.user).filter(
+        role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists()
+    from care.medication_charges import pending_charges, saved_charges
+    may_correct_medication=(doctor and data['is_current'] and bool(data['medication_lines']) and
+        saved_charges(invoice.current_record_version)!=pending_charges(invoice.visit))
+    data.update(may_correct_medication=may_correct_medication,base_template='portal/base.html' if portal else 'base.html',patient_portal=portal,
+        may_correct=doctor and invoice.visit.status=='COMPLETED' and bool(data['lines']),
         can_request_cash=not portal and bindings(request.user).filter(role='FRONT_DESK',scope_kind='CLINIC',clinic_id=invoice.visit.clinic_id).exists())
     return data
 

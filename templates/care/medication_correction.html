@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 核对退药费用{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'invoice_detail' invoice.pk %}">返回原账单</a>
+  <h1>核对退药费用</h1>
+  <p>就诊 {{ visit.visit_no }} · 结算单 {{ invoice.invoice_no }}</p>
+  <section class="panel">
+    <h2>当前发布版本</h2>
+    {% include 'care/medication_table.html' with medication_lines=old_lines %}
+  </section>
+  <section class="panel">
+    <h2>按当前发退药记录核算</h2>
+    {% include 'care/medication_table.html' %}
+    <p>财务批准后发布下一版，同一单号保留原版和已记账资金。</p>
+  </section>
+  {% if can_request or form.errors %}
+  <form method="post" class="panel form-panel">
+    {% csrf_token %}{% workspace_token %}{{ form.as_div }}
+    <button type="submit">提交退药费用更正</button>
+  </form>
+  {% else %}<p class="notice">本次药费与发退药记录一致，无需申请。</p>{% endif %}
+</div>
+{% endblock %}

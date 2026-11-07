@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -23,6 +24,9 @@ class Command(BaseCommand):
         provision = actions.add_parser('provision')
         provision.add_argument('--prescriber', required=True)
         provision.add_argument('--pharmacist', required=True)
+        dispensing = actions.add_parser('dispensing')
+        dispensing.add_argument('--pharmacist', required=True)
+        dispensing.add_argument('--price', action='append', default=[], metavar='CODE=CNY')
         revoke = actions.add_parser('revoke')
         revoke.add_argument('--user', required=True)
         revoke.add_argument('--duty', choices=PrescriptionDuty.Kind.values, required=True)
@@ -39,6 +43,10 @@ class Command(BaseCommand):
             names.extend([options['prescriber'], options['pharmacist']])
             if len(set(names)) != 3:
                 raise CommandError('维护人员、开方医师和药师须使用三个不同账号。')
+        elif options['action']=='dispensing':
+            names.append(options['pharmacist'])
+            if names[0]==names[1]:
+                raise CommandError('维护人员和发药药师须为不同账号。')
         else:
             names.append(options['user'])
         accounts = {user.username: user for user in UserAccount.objects.select_for_update()
@@ -50,6 +58,9 @@ class Command(BaseCommand):
             raise CommandError('操作员需要有效技术管理权限。')
         require_writable(operator)
         now = timezone.now()
+        if options['action']=='dispensing':
+            self._configure_dispensing(operator, accounts[options['pharmacist']], clinic, now, options['price'])
+            return
         if options['action'] == 'revoke':
             duty = PrescriptionDuty.objects.select_for_update().filter(
                 clinic=clinic, user=accounts[options['user']], kind=options['duty'], revoked_at__isnull=True,
@@ -92,3 +103,42 @@ class Command(BaseCommand):
                 defaults={'name': name, 'strength': '课程虚构规格', 'route': route, 'dose_unit': unit, 'quantity_unit': unit},
             )
         self.stdout.write('合成处方目录和三十天岗位职责已核对。')
+
+
+    def _configure_dispensing(self, operator, user, clinic, now, prices):
+        from clinical.dispensing import enabled
+        if not enabled():
+            raise CommandError('须明确启用合成发药演练。')
+        if not RoleAssignment.objects.filter(
+            user=user, clinic=clinic, role='PHARMACIST', scope_kind='CLINIC', is_active=True,
+        ).exists():
+            raise CommandError('请先登记有效的本店药师工作身份。')
+        duty, created = PrescriptionDuty.objects.get_or_create(
+            user=user, clinic=clinic, kind=PrescriptionDuty.Kind.DISPENSE, revoked_at__isnull=True,
+            defaults={'reference':'C42-SYNTHETIC-REHEARSAL', 'valid_from':now, 'valid_until':now+timedelta(days=30)},
+        )
+        if duty.valid_until <= now:
+            raise CommandError('原发药职责已到期，请先撤销再登记。')
+        if created:
+            emit(operator,'PRESCRIPTION_DUTY_PROVISIONED',duty,summary={'kind':duty.kind})
+        catalogue = {row.code:row for row in PrescriptionCatalogueItem.objects.select_for_update().filter(
+            clinic=clinic, is_active=True,
+        ).order_by('pk')}
+        updated = set()
+        for entry in prices:
+            code, separator, amount = entry.partition('=')
+            if not separator or code in updated or code not in catalogue:
+                raise CommandError('每个本店启用的目录代码只能填写一次单价。')
+            try:
+                price = Decimal(amount)
+            except InvalidOperation as exc:
+                raise CommandError('请填写有效的人民币单价。') from exc
+            if not price.is_finite() or not 0 < price <= Decimal('99999999.99') or price.as_tuple().exponent < -2:
+                raise CommandError('单价须大于零，最多两位小数。')
+            row = catalogue[code]
+            if row.rehearsal_unit_price != price:
+                row.rehearsal_unit_price = price
+                row.save(update_fields=['rehearsal_unit_price'])
+                emit(operator,'PHARMACY_PRICE_CONFIGURED',row,summary={'currency':'CNY'})
+            updated.add(code)
+        self.stdout.write('合成发药职责和指定单价已核对。')

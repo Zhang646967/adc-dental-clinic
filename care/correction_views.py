@@ -10,7 +10,8 @@ from accounts.policies import bindings
 from adc_core.http_support import EXPECTED_ERRORS,add_error
 from care.models import CorrectionRequest,Invoice,TreatmentRecord
 from care.views import _own_visit
-from care.corrections import request_line_correction,review_correction
+from care.corrections import request_line_correction,request_medication_correction,review_correction
+from care.medication_charges import charge_projection,pending_charges,preview_charges,saved_charges
 from urllib.parse import urlencode
 
 
@@ -30,6 +31,32 @@ class RequestForm(forms.Form):
     unit_price=forms.DecimalField(label='更正后单价（元）',max_digits=12,decimal_places=2,min_value=0)
     reason=forms.CharField(label='误录原因及事实依据',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
     confirmed=forms.BooleanField(label='我确认仍是同一项目、同一患者；这些数值反映实际提供的服务')
+
+class MedicationRequestForm(forms.Form):
+    expected_version=forms.IntegerField(min_value=0,widget=forms.HiddenInput)
+    reason=forms.CharField(label='退药费用更正依据',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
+    confirmed=forms.BooleanField(label='我已核对原账单和实际退药，申请财务独立复核。')
+
+
+def _medication_request(request,visit,invoice):
+    base=invoice.current_record_version
+    old=saved_charges(base)
+    charges=pending_charges(visit)
+    form=MedicationRequestForm(request.POST or None,initial={'expected_version':visit.lock_version})
+    if request.method=='POST' and form.is_valid():
+        values=dict(form.cleaned_data)
+        values.pop('confirmed')
+        try:
+            req=request_medication_correction(actor=request.user,visit_id=visit.pk,**values)
+        except EXPECTED_ERRORS as exc:
+            add_error(form,exc)
+        else:
+            return redirect('correction_detail',pk=req.pk)
+    return render(request,'care/medication_correction.html',dict(
+        form=form,visit=visit,invoice=invoice,old_lines=charge_projection(base),
+        medication_lines=preview_charges(charges),can_request=bool(old and old!=charges),
+    ))
+
 
 class ReviewForm(forms.Form):
     decision=forms.ChoiceField(label='审核决定',choices=[('approve','批准并发布新版本'),('reject','拒绝并保留原账单')])
@@ -69,6 +96,8 @@ def listing(request):
 def create(request,pk):
     v=_own_visit(request.user,pk)
     invoice=get_object_or_404(Invoice.objects.select_related('current_record_version'),visit=v)
+    if request.GET.get('scope')=='medication_returns':
+        return _medication_request(request,v,invoice)
     lines=list(invoice.current_record_version.treatment_lines.all())
     form=RequestForm(request.POST or None,initial={'expected_version':v.lock_version})
     form.fields['line_id'].choices=[(r.pk,f'第{r.line_no}行 · {r.name_snapshot} / 数量{r.quantity} / 单价{r.unit_price}') for r in lines]
@@ -101,4 +130,6 @@ def detail(request,pk):
         requester=SimpleNamespace(username=req.requester.username),get_status_display=req.get_status_display())
     return render(request,'care/correction_detail.html',{'req':request_summary,'old_lines':list(req.base_record_version.treatment_lines.values(*columns)),
         'new_lines':list(req.new_version.treatment_lines.values(*columns)),'old_total':req.base_record_version.total_amount,
-        'new_total':req.new_version.total_amount,'can_review':can_review and req.status=='OPEN','form':form})
+        'new_total':req.new_version.total_amount,
+        'old_medication':charge_projection(req.base_record_version),'new_medication':charge_projection(req.new_version),
+        'can_review':can_review and req.status=='OPEN','form':form})

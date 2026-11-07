@@ -31,7 +31,7 @@ class VisitRecordVersion(models.Model):
     visit = models.ForeignKey("scheduling.Visit", on_delete=models.PROTECT, related_name="record_versions")
     revision_no = models.PositiveIntegerField()
     state = models.CharField(max_length=12, default="DRAFT", choices=[("DRAFT", "草稿"), ("PUBLISHED", "已发布"), ("ABANDONED", "已弃用")])
-    outcome = models.CharField(max_length=16, choices=[("TREATED", "有治疗"), ("NO_TREATMENT", "无治疗")])
+    outcome = models.CharField(max_length=16, choices=[("TREATED", "有治疗"), ("NO_TREATMENT", "无治疗"), ("PHARMACY_ONLY", "仅发药")])
     previous_version = models.ForeignKey("care.VisitRecordVersion", on_delete=models.PROTECT, null=True, blank=True, related_name="next_versions")
     correction_request = models.OneToOneField("care.CorrectionRequest", on_delete=models.PROTECT, null=True, blank=True, related_name="new_version")
     prepared_by = models.ForeignKey("accounts.UserAccount", on_delete=models.PROTECT, related_name="prepared_versions")
@@ -52,7 +52,7 @@ class VisitRecordVersion(models.Model):
             models.UniqueConstraint(fields=["visit"], condition=Q(state="DRAFT"), name="one_draft_per_visit"),
             models.CheckConstraint(condition=Q(revision_no__gte=1), name="revision_positive"),
             models.CheckConstraint(condition=Q(state__in=["DRAFT", "PUBLISHED", "ABANDONED"]), name="version_state_valid"),
-            models.CheckConstraint(condition=Q(outcome__in=["TREATED", "NO_TREATMENT"]), name="version_outcome_valid"),
+            models.CheckConstraint(condition=Q(outcome__in=["TREATED", "NO_TREATMENT", "PHARMACY_ONLY"]), name="version_outcome_valid"),
             models.CheckConstraint(condition=Q(total_amount__gte=0, currency="CNY"), name="version_money_valid"),
             models.CheckConstraint(condition=(Q(state="PUBLISHED", published_at__isnull=False) | (~Q(state="PUBLISHED") & Q(published_at__isnull=True))), name="version_publish_metadata"),
             models.CheckConstraint(condition=~Q(previous_version=F("id")), name="version_not_previous_self"),
@@ -102,3 +102,21 @@ class AuditEvent(models.Model):
     class Meta:
         db_table = "adc_audit_event"
         indexes = [models.Index(fields=["subject_type", "subject_key", "recorded_at"], name="audit_subject_time_idx")]
+
+
+class MedicationCharge(models.Model):
+    """A published version references a precise physical movement cutoff per item."""
+    record_version = models.ForeignKey(VisitRecordVersion, on_delete=models.PROTECT, related_name='medication_lines')
+    quote_line = models.ForeignKey('clinical.PharmacyQuoteLine', on_delete=models.PROTECT)
+    through_movement = models.ForeignKey('clinical.DispenseMovement', on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField()
+    line_amount = models.DecimalField(max_digits=16, decimal_places=2)
+
+    class Meta:
+        db_table = 'adc_medication_charge'
+        ordering = ['quote_line_id']
+        constraints = [
+            models.UniqueConstraint(fields=['record_version', 'quote_line'], name='medication_charge_item_unique'),
+            models.CheckConstraint(condition=Q(quantity__gte=0, quantity__lte=9999, line_amount__gte=0),
+                                   name='medication_charge_values'),
+        ]

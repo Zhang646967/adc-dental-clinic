@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 核对药事办理{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'dispensing_detail' case.pk %}">返回处方调配</a>
+  <h1>{{ label }}</h1>
+  {% include 'clinical/prescription_patient.html' %}
+  {% if data %}
+  <section class="panel">
+    <h2>处方 #{{ case.pk }} · 第 {{ version.number }} 版</h2>
+    {% for row in data.lines %}<p>{{ row.name }} · 审定 {{ row.quantity }} {{ row.unit }} · ¥{{ row.price }} / {{ row.unit }}</p>{% endfor %}
+    {% if item %}<p>{{ item.name_snapshot }} · {{ data.quantity }} {{ item.unit_snapshot }}</p>{% endif %}
+    {% if data.issue %}<p>原发药 #{{ data.issue }}</p>{% endif %}
+    <p>{{ data.reason }}</p>
+  </section>
+  <form method="post" class="panel form-panel" action="{% url 'dispensing_confirm' case.pk %}">
+    {% csrf_token %}{% workspace_token %}{{ form.as_div }}
+    <button type="submit">确认保存</button>
+  </form>
+  {% else %}
+  <section class="panel" role="alert">{{ form.errors }}<p>请返回处方核对已保存的办理进度。</p></section>
+  {% endif %}
+</div>
+{% endblock %}

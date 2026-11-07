@@ -134,17 +134,24 @@ def record_no_charge_effect(*,actor,visit_id,expected_version,performed_id):
 @transaction.atomic
 def complete_visit(*,actor,visit_id,expected_version,outcome,reason=""):
     v=_lock_care(actor,visit_id)
-    target={"TREATED":"COMPLETED","NO_TREATMENT":"CLOSED_NO_TREATMENT"}.get(outcome)
+    target={"TREATED":"COMPLETED","NO_TREATMENT":"CLOSED_NO_TREATMENT","PHARMACY_ONLY":"COMPLETED"}.get(outcome)
     if target is None: raise RuleError("未知关闭类型。")
     if v.status in CLOSED_STATUSES:
-        if v.status!=target: raise RuleError("此次就诊已经以其他结果关闭，不能改写。")
-        return Invoice.objects.get(visit=v)  # Retry-safe AFTER rechecking current authorization.
+        invoice=Invoice.objects.select_related("current_record_version").get(visit=v)
+        if v.status!=target or invoice.current_record_version.outcome!=outcome:
+            raise RuleError("此次就诊已经以其他结果关闭，不能改写。")
+        return invoice  # Retry-safe AFTER rechecking current authorization.
     _assert_current(v,expected_version)
     # Global patient lock precedes version lock, as in allergy review.
     patient=Patient.objects.select_for_update().get(pk=v.patient_id,is_active=True)
     from clinical.completion import completion_blockers
     clinical_blockers=completion_blockers(v)
     if clinical_blockers:raise RuleError(clinical_blockers[0])
+    from clinical.dispensing import completion_blocker
+    from care.medication_charges import pending_charges, save_charges
+    pharmacy_blocker=completion_blocker(v)
+    if pharmacy_blocker: raise RuleError(pharmacy_blocker)
+    medication=pending_charges(v)
     draft=_draft(actor,v)
     lines=list(draft.treatment_lines.select_for_update().order_by("line_no"))
     from clinical.actual_summary import actual_care_summary
@@ -154,8 +161,12 @@ def complete_visit(*,actor,visit_id,expected_version,outcome,reason=""):
         snap=draft.allergy_review_snapshot
         if snap.get("status") not in ("KNOWN","NO_KNOWN") or snap.get("information_version")!=patient.allergy_info_version or not snap.get("reviewed_at"):
             raise RuleError("过敏信息未知、未复核或已经更新，请重新复核。")
+    elif outcome=="PHARMACY_ONLY":
+        if lines or actual['provided'] or not medication:
+            raise RuleError("仅发药结算须有实际发药记录，且本次未实施其他治疗。")
     else:
-        if lines or actual['provided']: raise RuleError("已有实际治疗，不能作为无治疗关闭。")
+        if lines or actual['provided'] or medication:
+            raise RuleError("已有实际治疗或发药，不能作为无治疗关闭。")
         if not isinstance(reason,str) or not 1<=len(reason.strip())<=500: raise RuleError("无治疗关闭必须填写原因（1至500字）。")
     for item in lines:
         if item.confirmed_by_id!=actor.pk or item.confirmed_at is None:
@@ -166,7 +177,8 @@ def complete_visit(*,actor,visit_id,expected_version,outcome,reason=""):
     draft.billing_header_snapshot={"patient_name":patient.name,"patient_no":patient.patient_no,
         "billing_address":patient.billing_address,"clinic_name":v.clinic.name,
         "clinic_address":v.clinic.postal_address,"dentist_name":v.dentist.name}
-    draft.total_amount=total_amount(i.line_amount for i in lines)
+    save_charges(draft,medication)
+    draft.total_amount=total_amount([i.line_amount for i in lines]+[row["line_amount"] for row in medication])
     draft.outcome=outcome;draft.no_treatment_reason=reason.strip() if outcome=="NO_TREATMENT" else ""
     draft.reviewed_by=actor;draft.state="PUBLISHED";draft.published_at=now
     draft.save(update_fields=["billing_header_snapshot","total_amount","outcome","no_treatment_reason","reviewed_by","state","published_at"])

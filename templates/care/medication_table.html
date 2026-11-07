@@ -1,0 +1,14 @@
+{% if medication_lines %}
+<div class="table-scroll" tabindex="0">
+  <table>
+    <caption>实际发退药费用</caption>
+    <thead><tr><th>药品</th><th>单位</th><th>计费数量</th><th>单价（元）</th><th>小计（元）</th></tr></thead>
+    <tbody>
+      {% for row in medication_lines %}
+      <tr><td>{{ row.name_snapshot }}</td><td>{{ row.unit_snapshot }}</td><td>{{ row.quantity }}</td><td>{{ row.unit_price }}</td><td>{{ row.line_amount }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p>计费数量为本版本依据的实际发药减退药数量。</p>
+{% endif %}

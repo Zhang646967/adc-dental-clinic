@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}ADC · 发药工作台{% endblock %}
+{% block content %}
+<div class="workspace-heading">
+  <p class="eyebrow">{{ workspace_scope }} · 合成药事演练</p>
+  <h1>发药工作台</h1>
+  <p>核对已通过审方的版本，办理划价、实际发药和退药。</p>
+</div>
+{% if can_review %}<p><a href="{% url 'prescription_review_queue' %}">转到处方审核</a></p>{% endif %}
+<section class="panel">
+  {% for version in page %}
+  <article class="clinical-history">
+    <h2><a href="{% url 'dispensing_detail' version.prescription_id %}">处方 #{{ version.prescription_id }} · 第 {{ version.number }} 版</a></h2>
+    <p>患者编号 {{ version.prescription.visit.patient.patient_no }} · {{ version.prescription.visit.get_status_display }}</p>
+    <p>{% if version.decision.pharmacy_stop %}已停止剩余调配{% elif version.decision.pharmacy_quote %}已划价，可核对发药记录{% else %}尚未划价{% endif %}</p>
+  </article>
+  {% empty %}<p>本店暂无已通过的处方可办理。</p>{% endfor %}
+  {% include '_pagination.html' %}
+</section>
+{% endblock %}

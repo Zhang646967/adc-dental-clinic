@@ -8,10 +8,11 @@ from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
 from accounts.models import RoleAssignment,UserAccount
-from accounts.policies import bindings,require_writable
+from accounts.policies import bindings
 from adc_core.commands import business_errors,assert_revision
 from adc_core.rules import RuleError,total_amount
 from care.audit import emit
+from care.medication_charges import pending_charges, saved_charges, save_charges
 from care.models import CorrectionRequest,VisitRecordVersion,TreatmentRecord,Invoice
 from care.services import _lock_care,_bump
 from care.correction_rules import correction_values,guard_review
@@ -33,16 +34,8 @@ def request_line_correction(*,actor,visit_id,expected_version,line_id,quantity,u
     if item is None:raise RuleError('必须选择当前有效版本中的一行。')
     q,p,amount,reason=correction_values(quantity,unit_price,reason)
     if (q,p)==(item.quantity,item.unit_price):raise RuleError('数量与单价没有变化，无需更正。')
-    if CorrectionRequest.objects.filter(visit=v,status='OPEN').exists():raise RuleError('该就诊已有待审核更正。')
-    if v.record_versions.filter(state='DRAFT').exists():raise RuleError('存在未处理的工作草稿。')
-    req=CorrectionRequest.objects.create(visit=v,kind='RECORD_CONTENT',base_record_version=base,
-        expected_visit_lock_version=v.lock_version+1,requester=actor,dentist_confirmed_by=actor,reason=reason,
-        proposed_change={'line_no':item.line_no,'quantity':str(q),'unit_price':str(p),'scope':'quantity_and_price_only'})
-    rev=(v.record_versions.aggregate(n=Max('revision_no'))['n'] or 0)+1
-    draft=VisitRecordVersion.objects.create(visit=v,revision_no=rev,state='DRAFT',outcome=base.outcome,
-        previous_version=base,correction_request=req,prepared_by=actor,
-        allergy_review_snapshot=deepcopy(base.allergy_review_snapshot),billing_header_snapshot=deepcopy(base.billing_header_snapshot),
-        clinical_note=base.clinical_note,no_treatment_reason=base.no_treatment_reason)
+    change={'line_no':item.line_no,'quantity':str(q),'unit_price':str(p),'scope':'quantity_and_price_only'}
+    req,draft=_start_correction(actor,v,base,reason,change)
     for old in source:
         changed=old.pk==item.pk
         TreatmentRecord.objects.create(record_version=draft,line_no=old.line_no,treatment_type_id=old.treatment_type_id,
@@ -50,9 +43,84 @@ def request_line_correction(*,actor,visit_id,expected_version,line_id,quantity,u
             quantity=q if changed else old.quantity,unit_price=p if changed else old.unit_price,
             line_amount=amount if changed else old.line_amount,confirmed_by=actor,confirmed_at=timezone.now(),
             price_reason=reason if changed else old.price_reason)
-    draft.total_amount=total_amount(draft.treatment_lines.values_list('line_amount',flat=True));draft.save(update_fields=['total_amount'])
-    _bump(v);emit(actor,'CORRECTION_REQUESTED',req,visit=v,reason=reason,summary={'base_revision':base.revision_no,'new_revision':rev})
+    _finish_request(actor,v,req,draft,saved_charges(base))
     return req
+
+
+def _start_correction(actor,visit,base,reason,change):
+    if CorrectionRequest.objects.filter(visit=visit,status='OPEN').exists():
+        raise RuleError('该就诊已有待审核更正。')
+    if visit.record_versions.filter(state='DRAFT').exists():
+        raise RuleError('存在未处理的工作草稿。')
+    req=CorrectionRequest.objects.create(visit=visit,kind='RECORD_CONTENT',base_record_version=base,
+        expected_visit_lock_version=visit.lock_version+1,requester=actor,dentist_confirmed_by=actor,
+        reason=reason,proposed_change=change)
+    revision=(visit.record_versions.aggregate(n=Max('revision_no'))['n'] or 0)+1
+    draft=VisitRecordVersion.objects.create(visit=visit,revision_no=revision,state='DRAFT',outcome=base.outcome,
+        previous_version=base,correction_request=req,prepared_by=actor,
+        allergy_review_snapshot=deepcopy(base.allergy_review_snapshot),billing_header_snapshot=deepcopy(base.billing_header_snapshot),
+        clinical_note=base.clinical_note,no_treatment_reason=base.no_treatment_reason)
+    return req,draft
+
+
+def _finish_request(actor,visit,req,draft,charges):
+    save_charges(draft,charges)
+    dental=list(draft.treatment_lines.values_list('line_amount',flat=True))
+    draft.total_amount=total_amount(dental+[row['line_amount'] for row in charges])
+    draft.save(update_fields=['total_amount'])
+    _bump(visit)
+    emit(actor,'CORRECTION_REQUESTED',req,visit=visit,reason=req.reason,
+         summary={'base_revision':req.base_record_version.revision_no,'new_revision':draft.revision_no})
+
+
+@business_errors
+@transaction.atomic
+def request_medication_correction(*,actor,visit_id,expected_version,reason):
+    from clinical.prescription_payload import required_text
+    reason=required_text(reason,'退药费用更正依据')
+    visit=_lock_care(actor,visit_id)
+    assert_revision(visit,expected_version)
+    if visit.status!='COMPLETED':
+        raise RuleError('请先核对本次已发布的药费账单。')
+    invoice=Invoice.objects.select_for_update().get(visit=visit)
+    from insurance.settlement_projection import require_correction_ready
+    require_correction_ready(invoice.pk)
+    base=invoice.current_record_version
+    current=saved_charges(base)
+    charges=pending_charges(visit)
+    if not current or current==charges:
+        raise RuleError('当前药费已与实际发退药一致。')
+    req,draft=_start_correction(actor,visit,base,reason,{'scope':'medication_returns'})
+    TreatmentRecord.objects.bulk_create([
+        TreatmentRecord(record_version=draft,**dict(zip(_DENTAL_FIELDS,values)))
+        for values in base.treatment_lines.values_list(*_DENTAL_FIELDS)
+    ])
+    _finish_request(actor,visit,req,draft,charges)
+    return req
+
+
+_DENTAL_FIELDS=('line_no','treatment_type_id','name_snapshot','unit_snapshot','quantity','unit_price',
+                'line_amount','confirmed_by_id','confirmed_at','price_reason')
+
+
+def _verify_dental_correction(req,original,new,preparer):
+    if len(original)!=len(new) or not new:
+        raise RuleError('更正不能增加或删除实际治疗项目。')
+    changed=[]
+    for a,b in zip(original,new):
+        if (a.line_no,a.treatment_type_id,a.name_snapshot,a.unit_snapshot)!=(b.line_no,b.treatment_type_id,b.name_snapshot,b.unit_snapshot):
+            raise RuleError('本版更正不能替换项目和单位。')
+        _,_,expected,_=correction_values(b.quantity,b.unit_price,b.price_reason or req.reason)
+        if b.line_amount!=expected or b.confirmed_by_id!=preparer.pk or b.confirmed_at is None:
+            raise RuleError('更正金额或确认信息不一致。')
+        if (a.quantity,a.unit_price)!=(b.quantity,b.unit_price):
+            changed.append(b.line_no)
+    target=next((x for x in new if x.line_no==req.proposed_change.get('line_no')),None)
+    if target is None or target.quantity!=Decimal(req.proposed_change['quantity']) or target.unit_price!=Decimal(req.proposed_change['unit_price']):
+        raise RuleError('更正草稿与已确认申请不一致。')
+    if changed!=[req.proposed_change.get('line_no')]:
+        raise RuleError('只允许更正申请指定的一行。')
+
 
 @business_errors
 @transaction.atomic
@@ -84,7 +152,10 @@ def review_correction(*,actor,request_id,decision,reason):
     guard_review(req.requester_id,actor.pk,req.status,req.base_record_version_id,invoice.current_record_version_id,req.expected_visit_lock_version,v.lock_version)
     from insurance.settlement_projection import require_correction_ready
     require_correction_ready(invoice.pk)
-    if req.kind!='RECORD_CONTENT' or draft.visit_id!=v.pk or draft.previous_version_id!=req.base_record_version_id or draft.outcome!='TREATED':
+    scope=req.proposed_change.get('scope')
+    base=invoice.current_record_version
+    if (req.kind!='RECORD_CONTENT' or draft.visit_id!=v.pk or draft.previous_version_id!=base.pk or
+            draft.outcome!=base.outcome or scope not in ('quantity_and_price_only','medication_returns')):
         raise RuleError('更正范围或版本关联不一致。')
     # Authorization of the preparer must still exist at application time.
     if not preparer.is_active or not grant or preparer.dentist_id!=v.dentist_id or req.dentist_confirmed_by_id!=preparer.pk:
@@ -93,22 +164,22 @@ def review_correction(*,actor,request_id,decision,reason):
     if professional_controls(v.clinic_id):
         from clinical.authority import professional_scope,visit_service_id
         professional_scope(preparer.pk,v.clinic_id,visit_service_id(v),'RECORD',lock=True)
-    base=invoice.current_record_version
-    original=list(base.treatment_lines.order_by('line_no'));new=list(draft.treatment_lines.order_by('line_no'))
-    if len(original)!=len(new) or not new:raise RuleError('更正不能增加或删除实际治疗项目。')
-    changed=[]
-    for a,b in zip(original,new):
-        if (a.line_no,a.treatment_type_id,a.name_snapshot,a.unit_snapshot)!=(b.line_no,b.treatment_type_id,b.name_snapshot,b.unit_snapshot):raise RuleError('本版更正不能替换项目和单位。')
-        _,_,expected,_=correction_values(b.quantity,b.unit_price,b.price_reason or req.reason)
-        if b.line_amount!=expected or b.confirmed_by_id!=preparer.pk or b.confirmed_at is None:raise RuleError('更正金额或确认信息不一致。')
-        if (a.quantity,a.unit_price)!=(b.quantity,b.unit_price):changed.append(b.line_no)
-    target=next((x for x in new if x.line_no==req.proposed_change.get('line_no')),None)
-    if target is None or target.quantity!=Decimal(req.proposed_change['quantity']) or target.unit_price!=Decimal(req.proposed_change['unit_price']):
-        raise RuleError('更正草稿与已确认申请不一致。')
-    if changed!=[req.proposed_change.get('line_no')]:raise RuleError('只允许更正申请指定的一行。')
-    if draft.billing_header_snapshot!=base.billing_header_snapshot or draft.allergy_review_snapshot!=base.allergy_review_snapshot or draft.clinical_note!=base.clinical_note:
+    charges=saved_charges(draft)
+    if scope=='medication_returns':
+        if list(draft.treatment_lines.values_list(*_DENTAL_FIELDS))!=list(base.treatment_lines.values_list(*_DENTAL_FIELDS)):
+            raise RuleError('退药更正须保留原治疗明细和确认事实。')
+        if not charges or charges!=pending_charges(v) or charges==saved_charges(base):
+            raise RuleError('退药记录已变化，请拒绝本次申请并重新核对。')
+    else:
+        _verify_dental_correction(req,list(base.treatment_lines.all()),list(draft.treatment_lines.all()),preparer)
+        if charges!=saved_charges(base):
+            raise RuleError('本次治疗费用更正须保留原药费。')
+    if (draft.billing_header_snapshot!=base.billing_header_snapshot or draft.allergy_review_snapshot!=base.allergy_review_snapshot or
+            draft.clinical_note!=base.clinical_note or draft.no_treatment_reason!=base.no_treatment_reason):
         raise RuleError('本版更正不能改动临床记录或账单身份。')
-    if draft.total_amount!=total_amount(x.line_amount for x in new):raise RuleError('更正总额不一致。')
+    if draft.total_amount!=total_amount(list(draft.treatment_lines.values_list('line_amount',flat=True))+
+                                        [row['line_amount'] for row in charges]):
+        raise RuleError('更正总额不一致。')
     now=timezone.now()
     req.status='APPLIED';req.reviewer=actor;req.applied_at=now;req.save(update_fields=['status','reviewer','applied_at'])
     draft.reviewed_by=actor;draft.published_at=now;draft.state='PUBLISHED';draft.save(update_fields=['reviewed_by','published_at','state'])

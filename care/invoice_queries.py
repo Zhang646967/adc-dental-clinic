@@ -2,6 +2,7 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from care.models import VisitRecordVersion
+from care.medication_charges import charge_projection
 from finance.cash_selectors import invoice_balance
 from finance.patient_cash import invoice_activity
 from clinical.actual_summary import actual_care_summary
@@ -21,6 +22,7 @@ def published_invoice(invoice,*,revision=None,cash_page=1):
         revision=record.revision_no,header=record.billing_header_snapshot,issued_at=invoice.first_issued_at,
         total=record.total_amount,outcome=record.outcome,
         lines=list(record.treatment_lines.values('name_snapshot','unit_snapshot','quantity','unit_price','line_amount')),
+        medication_lines=charge_projection(record),
         no_charge_stages=actual['no_charge_stages'],is_current=record.pk==invoice.current_record_version_id,
         published_at=record.published_at,
         revisions=list(VisitRecordVersion.objects.filter(visit_id=invoice.visit_id,state='PUBLISHED')

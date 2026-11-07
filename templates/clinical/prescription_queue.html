@@ -8,6 +8,7 @@
 </div>
 <nav class="actions" aria-label="处方队列筛选">
   <a class="button secondary" href="{% url 'prescription_review_queue' %}"{% if not show_history %} aria-current="page"{% endif %}>待审核</a>
+  {% if can_dispense %}<a class="button secondary" href="{% url 'dispensing_queue' %}">发药工作台</a>{% endif %}
   <a class="button secondary" href="?queue=history"{% if show_history %} aria-current="page"{% endif %}>已有决定</a>
 </nav>
 <section class="panel">

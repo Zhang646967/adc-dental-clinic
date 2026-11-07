@@ -1,0 +1,14 @@
+{% if history.quote or history.stop %}
+<section class="panel">
+  <h2>调配与发退药</h2>
+  {% if history.quote %}<p>划价依据 {{ history.quote.reason }}</p>{% endif %}
+  {% if history.stop %}<p>已停止剩余调配 · {{ history.stop.stopped_at|date:'Y-m-d H:i' }}</p><p>{{ history.stop.reason }}</p>{% endif %}
+  {% for row in history.quote_lines %}
+  <div class="clinical-history">
+    <h3>{{ row.name_snapshot }}</h3>
+    <p>审定 {{ row.ordered_quantity }} {{ row.unit_snapshot }} · 已发 {{ row.issued }} · 已退 {{ row.returned }} · ¥{{ row.unit_price }} / {{ row.unit_snapshot }}</p>
+  </div>
+  {% endfor %}
+  <p>仅已实际发出且未退回的数量纳入药费。收退款由原结算流程办理。</p>
+</section>
+{% endif %}

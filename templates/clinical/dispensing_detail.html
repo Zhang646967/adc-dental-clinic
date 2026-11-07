@@ -1,0 +1,40 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}ADC · 处方调配与发药{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'dispensing_queue' %}">返回发药工作台</a>
+  <h1>处方调配与发药</h1>
+  {% include 'clinical/prescription_patient.html' %}
+  {% if version %}
+  <section class="panel">
+    <h2>处方 #{{ case.pk }} · 第 {{ version.number }} 版 · {{ version.state_label }}</h2>
+    {% include 'clinical/prescription_items.html' with items=version.items %}
+  </section>
+  {% endif %}
+  {% include 'clinical/dispensing_summary.html' %}
+  {% if error %}<p class="notice" role="alert">{{ error }}</p>{% endif %}
+  {% for kind, label, form in actions %}
+  <section class="panel form-panel">
+    <h2>{{ label }}</h2>
+    <form method="post">
+      {% csrf_token %}{% workspace_token %}
+      <input type="hidden" name="action" value="{{ kind }}">
+      {{ form.as_div }}
+      <button type="submit">预览{{ label }}</button>
+    </form>
+  </section>
+  {% endfor %}
+  <section class="panel">
+    <h2>实际发退药记录</h2>
+    {% for movement in movements %}
+    <article class="clinical-history">
+      <h3>#{{ movement.pk }} · {{ movement.get_kind_display }}</h3>
+      <p>{{ movement.line.name_snapshot }} · {{ movement.quantity }} {{ movement.line.unit_snapshot }} · {{ movement.occurred_at|date:'Y-m-d H:i' }} · {{ movement.actor.username }}</p>
+      {% if movement.original_issue_id %}<p>对应原发药 #{{ movement.original_issue_id }}</p>{% endif %}
+      <p>{{ movement.reason }}</p>
+    </article>
+    {% empty %}<p>尚无实际发退药。</p>{% endfor %}
+    {% include '_pagination.html' with page=movements %}
+  </section>
+</div>
+{% endblock %}

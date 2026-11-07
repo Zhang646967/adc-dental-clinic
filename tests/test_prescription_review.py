@@ -284,11 +284,15 @@ class PrescriptionReviewTests(PrescriptionFixture, TransactionTestCase):
     def test_populated_prescription_database_refuses_reverse(self):
         version = self.submit()
         executor = MigrationExecutor(connection)
-        with self.assertRaisesMessage(RuntimeError, 'reversing the prescription schema is refused'):
-            executor.migrate([('clinical', '0017_c41_prescriptions')])
-        self.assertTrue(PrescriptionVersion.objects.filter(pk=version.pk).exists())
-        self.assertIn(('clinical', '0018_c41_prescription_guards'),
-                      MigrationExecutor(connection).loader.applied_migrations)
+        latest = executor.loader.graph.leaf_nodes()
+        try:
+            with self.assertRaisesMessage(RuntimeError, 'reversing the prescription schema is refused'):
+                executor.migrate([('clinical', '0017_c41_prescriptions')])
+            self.assertTrue(PrescriptionVersion.objects.filter(pk=version.pk).exists())
+            self.assertIn(('clinical', '0018_c41_prescription_guards'),
+                          MigrationExecutor(connection).loader.applied_migrations)
+        finally:
+            MigrationExecutor(connection).migrate(latest)
 
     @override_settings(ADC_CLINICAL_SYNTHETIC=False)
     def test_non_synthetic_configuration_disables_pharmacy_and_entry(self):

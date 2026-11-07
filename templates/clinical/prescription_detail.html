@@ -30,6 +30,8 @@
     <p class="care-notes">{{ version.decision.reason }}</p>
   </section>
   {% endif %}
+  {% include 'clinical/dispensing_summary.html' %}
+  {% if can_dispense and version.state == 'APPROVED' %}<p><a class="button" href="{% url 'dispensing_detail' case.pk %}">办理调配与发药</a></p>{% endif %}
   {% if can_revise and not pharmacist %}<p><a class="button" href="{% url 'prescription_visit' visit.pk %}">按意见起草新版本</a></p>{% endif %}
   {% if editable %}
   <section class="panel form-panel">

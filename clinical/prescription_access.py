@@ -43,11 +43,11 @@ def prescriber(actor, visit, *, lock=False):
     return _duty(actor, visit.clinic_id, PrescriptionDuty.Kind.PRESCRIBE, lock=lock), scope
 
 
-def pharmacist(actor, clinic_id, *, lock=False):
+def pharmacist(actor, clinic_id, *, lock=False, kind=PrescriptionDuty.Kind.REVIEW):
     require_active(actor, ('PHARMACIST',), clinic_id)
     grants = bindings(actor).filter(role='PHARMACIST', scope_kind='CLINIC', clinic_id=clinic_id)
     if lock:
         grants = grants.select_for_update(of=('self',))
     if not grants.exists():
         raise PermissionDenied('当前工作身份没有本诊所药师权限。')
-    return _duty(actor, clinic_id, PrescriptionDuty.Kind.REVIEW, lock=lock)
+    return _duty(actor, clinic_id, kind, lock=lock)

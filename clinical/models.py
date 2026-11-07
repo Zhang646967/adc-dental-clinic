@@ -162,3 +162,5 @@ from clinical.copy_models import RecordCopyRequest, RecordCopyItem, RecordCopyFi
 from clinical.prescription_models import (
     Prescription, PrescriptionCatalogueItem, PrescriptionDecision, PrescriptionDuty, PrescriptionVersion,
 )
+
+from clinical.pharmacy_models import DispenseMovement, PharmacyQuote, PharmacyQuoteLine, PharmacyStop  # noqa: E402,F401

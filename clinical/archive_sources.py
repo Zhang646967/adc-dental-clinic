@@ -92,6 +92,10 @@ def capture(visit,*,fee_version_id=None):
         fee_data=dict(id=fee.pk,revision=fee.revision_no,header=fee.billing_header_snapshot,
             amount=str(fee.total_amount),published_at=fee.published_at,
             lines=list(fee.treatment_lines.order_by('line_no').values('name_snapshot','unit_snapshot','quantity','unit_price','line_amount')))
+        from care.medication_charges import charge_projection
+        medicine=charge_projection(fee)
+        if medicine:
+            fee_data['medication_lines']=medicine
     header=doc.source_snapshot['header'] if doc else dict(patient_id=visit.patient_id,patient_no=visit.patient.patient_no,
         patient_name=visit.patient.name,clinic_id=visit.clinic_id,clinic_name=visit.clinic.name,
         dentist_id=visit.dentist_id,dentist_name=visit.dentist.name,employee_no=visit.dentist.employee_no,visit_no=visit.visit_no)

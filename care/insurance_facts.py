@@ -35,6 +35,8 @@ class InsuranceBill:
 def insurance_bill(invoice):
     """Internal contract; caller authorizes the exact invoice and snapshot."""
     visit, version = invoice.visit, invoice.current_record_version
+    if version.medication_lines.exists():
+        raise RuleError('包含演练药费的账单按自费办理。当前医保费用接口仅支持已匹配的治疗项目。')
     if visit.status != 'COMPLETED' or version.state != 'PUBLISHED' or version.outcome != 'TREATED' or not visit.attended_at:
         raise RuleError('医保费用只能来自实际已接诊、治疗完成的当前发布账单。')
     rows = tuple(InsuranceCharge(r.pk, r.line_no, r.treatment_type_id, r.name_snapshot, r.unit_snapshot,
