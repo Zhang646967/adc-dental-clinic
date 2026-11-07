@@ -22,7 +22,7 @@
 
 ## 当前状态与开发
 
-第一批一致性整改已完成网页筛选、二十店介绍及课程 PDF，并通过准确完整 CI 后更新本机。小程序预约联系入口已提供补丁和独立就绪样本，交 WorkBuddy 实现与官方工具复测。[整改与交接](docs/CONSISTENCY_BATCH1.md) · [分项验收](docs/evidence_consistency1/README.md)
+第一批一致性整改涵盖网页筛选、二十店介绍、课程 PDF 和小程序预约联系入口。预约联系页置顶本单门店，并为待核实的预约显示核实提示。WorkBuddy 已完成微信开发者工具复测。[整改与交接](docs/CONSISTENCY_BATCH1.md) · [分项验收](docs/evidence_consistency1/README.md)
 
 
 D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版，迁移后失败可按同一检查点继续；已核对原记录、升级后写入和加密独立恢复。服务器尚未部署。

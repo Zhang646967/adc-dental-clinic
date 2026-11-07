@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_WEB_PROFILE_PDF_DELIVERED_NATIVE_CONTACT_PENDING_WORKBUDDY",
+  "status": "LOCAL_WEB_PROFILE_PDF_AND_NATIVE_CONTACT_DELIVERED",
   "application_commit": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
   "application_image": "sha256:b743f903a9e7e6bb264fceeb7ee7093e2ddb6ca059139063f57bb03793aaca00",
   "full_ci": {
@@ -25,7 +25,7 @@
   ],
   "checkbox_label_keyboard_focus_overflow": "PASS",
   "native_source_transport_checks": 339,
-  "native_client_changes_in_main": false,
+  "native_client_changes_in_main": true,
   "profile_updates": {
     "clinics": 20,
     "new_published_versions": 20,
@@ -75,15 +75,97 @@
     "logins_checked": 2,
     "private_guide_fixed_location": true,
     "minimal_patch_ready": true,
-    "implementation": "PENDING",
-    "official_tool": "PENDING",
+    "implementation": "COMPLETE",
+    "official_tool": "PASS",
     "real_time_coordination_required": false
   },
   "pending": [
-    "WorkBuddy native contact link implementation and official tool regression",
     "mini-program device/font/keyboard/native gestures and actual phone",
     "real network interruption and location refusal",
     "second real WeChat identity and platform qualification",
     "actual cloud deployment and target-host sustained operation"
-  ]
+  ],
+  "native_contact_release": {
+    "integration_commit": "e379642d212d05a57dea959282013efd21694aca",
+    "workbuddy_commits": [
+      "384cd3cc09371bb403c79b59b168761da92d975e",
+      "3b0fd568de1cd421d90c9dfa422bae284b768e45"
+    ],
+    "official_tool": {
+      "status": "PASS",
+      "base_library": "3.17.5",
+      "viewport": [
+        390,
+        844
+      ],
+      "device_pixel_ratio": 3,
+      "pages": 27,
+      "project_files": 93,
+      "passed_items": 5
+    },
+    "frozen_handoff_review": {
+      "checksums_verified": 100,
+      "project_tree_sha256": "faa1893743f1198fa7f86c18172b085793c1f38a18e9452651796c2b3b2ce6bc",
+      "project_tree_verified": true,
+      "only_reviewed_templates_changed": true,
+      "screenshots_inspected": 3
+    },
+    "isolated_application_log_review": {
+      "passed": true,
+      "screen_evidence_count": 16,
+      "corresponding_404_requests": 3,
+      "completed_requests": 93,
+      "post_routes": [
+        "mini_login",
+        "mini_logout"
+      ],
+      "posts": 6,
+      "scope": "Retained application logs between the frozen handoff archive and screenshot export"
+    },
+    "isolated_contact_rendering": {
+      "passed": true,
+      "projected_appointment_cases": 2,
+      "no_focus_cases": 3,
+      "missing_visit_link_hidden": true,
+      "flagged_notice_rendered": true,
+      "upcoming_notice_hidden": true,
+      "correct_first_clinic_and_phone": true,
+      "scope": "Read-only isolated PostgreSQL visit projections passed through actual native Page handler and official offline compiled WXML with controlled transport"
+    },
+    "official_offline_compiler": {
+      "status": "passed",
+      "wxml_pages": 27,
+      "wxss_files": 1,
+      "scope": "Official offline syntax only; not an IDE preview or WeChat runtime"
+    },
+    "full_ci": {
+      "run_id": 42348698541,
+      "job_id": 128331980192,
+      "head_sha": "e379642d212d05a57dea959282013efd21694aca",
+      "tested_source_commit": "e379642d212d05a57dea959282013efd21694aca",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42348698541",
+      "validated_source_log_verified": true,
+      "source_tests": 1169,
+      "native_checks": 339,
+      "all_gates_passed": true,
+      "postgresql_tests": 2310
+    },
+    "local_client_install": {
+      "passed": true,
+      "client_source_commit": "e379642d212d05a57dea959282013efd21694aca",
+      "official_tool_client_commit": "3b0fd568de1cd421d90c9dfa422bae284b768e45",
+      "backend_commit": "6f10ce4616f39056cb65ee74a4cdb68e50cde0ec",
+      "image": "sha256:b743f903a9e7e6bb264fceeb7ee7093e2ddb6ca059139063f57bb03793aaca00",
+      "feature_files_verified": 91,
+      "updated_templates": [
+        "miniprogram/pages/help/index.wxml",
+        "miniprogram/pages/visit/index.wxml"
+      ],
+      "local_endpoint_status": 200,
+      "configuration_checksums_match": true,
+      "version_sha256": "f06d06d7e16e1bf24eacdb51dd70eee5e1cff66c03045ba595f7f13967021e25"
+    }
+  }
 }
