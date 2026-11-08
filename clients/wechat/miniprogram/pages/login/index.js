@@ -15,14 +15,21 @@ Page({
   togglePassword(){this.setData({passwordMode:!this.data.passwordMode,password:'',error:''});},
   consent(e){this.setData({localConfirmed:e.detail.value.includes('agree')});},
   authConsent(e){this.setData({authConfirmed:e.detail.value.includes('agree')});},
-  async wechatLogin(){
+  wechatLogin(){return this.submitWechat({});},
+  associateWechat(){
+    if(this.data.busy)return;
+    const username=this.data.username.trim(),password=this.data.password;
+    if(!username||!password){this.setData({error:'请填写原患者账号和密码。'});return;}
+    return this.submitWechat({username,password});
+  },
+  async submitWechat(association){
     if(this.data.busy)return;
     if(!this.data.authConfirmed){this.setData({error:'请先同意使用微信身份登录本人患者账号。'});return;}
     this.setData({busy:true,error:''});
     try{
       await api.bootstrap();
       const credential=await new Promise((resolve,reject)=>wx.login({success:resolve,fail:()=>reject(new Error('微信登录未完成，请重新点击授权。'))}));
-      const session=await api.request('auth/wechat/','POST',{code:credential.code,confirmed:'on',username:this.data.username.trim(),password:this.data.password});
+      const session=await api.request('auth/wechat/','POST',{code:credential.code,confirmed:'on',...association});
       navigation.reLaunch({url:intent.destination(getApp(),session)});
     }catch(e){showError(this,e);}finally{this.setData({busy:false,password:''});}
   },

@@ -32,4 +32,16 @@ python3 scripts/g4_patient_probe.py \
 
 回执按轮原子写入私有目录。连续两轮失败或超时发出 `OPENED`，首轮恢复发出 `RECOVERED`。进程中断保留 `INCOMPLETE`；窗口内的失败记录随恢复保留。告警接收端监视进程、最后观测时间与事件送达。在目标机验收一次真实告警到达与恢复确认。接收方仅需失败步骤、状态码、耗时与请求编号。
 
+通过判定同时检查实际 UTC 采样顺序、相邻间隔和相对起始计划的时间偏差。首末样本覆盖完整计划窗口，时钟与单调计时的偏差容许一秒。记录齐全但有断档、重复或逆序时，汇总为 `FAIL`。
+
+在独立于探针进程的定时任务中每分钟执行以下检查。探针或其所在主机可能同时失联时，由另一个观测点读取经私有通道同步的最新回执。
+
+```sh
+python3 scripts/g4_probe_watch.py \
+  --receipt /PRIVATE/target-observation.json \
+  --state /PRIVATE/probe-heartbeat.json
+```
+
+巡检以最后一轮或启动时刻为准，超过两个采样间隔加十秒标为 `STALE`，缺失或不可读标为 `UNAVAILABLE`。业务探针发出 `PATIENT_JOURNEY`，独立检查发出 `PROBE_HEARTBEAT`。各自记录 `OPENED` 与 `RECOVERED`。探针正常结束时返回 `FINISHED` 并附窗口结果。换新观察窗口时给巡检指向新的回执，延用同一目标的心跳状态。把事件和巡检退出状态接到目标告警渠道，分别验证业务故障、探针失联和两者恢复。
+
 本机短时演练使用 `--rehearsal --https-port 18477 --ca-file /PRIVATE/rehearsal-ca.pem`。此模式固定连本机 IPv4 回环。目标证据另核对真实域名、独立观测点、主机和证书续期、对象存储、真实手机与完整观察窗口。

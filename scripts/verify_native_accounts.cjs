@@ -23,8 +23,9 @@ async function verify(){
   let attempts=0;const denied=Object.assign(new Error('账号或密码核对未通过（查询编号 trial-request）'),{status:401});
   const d=page('login',{session:{account_authenticated:false},request:async()=>{if(++attempts===1)throw denied;return {...pending,authenticated:true};}});
   intent.remember(d.state,22,2);d.p.setData({authConfirmed:true,passwordMode:true,username:'old-patient',password:'wrong-password'});
-  await d.p.wechatLogin();assert.equal(d.p.data.error,denied.message);assert.equal(d.p.data.password,'');assert.equal(d.p.data.username,'old-patient');assert.equal(d.p.data.passwordMode,true);assert.equal(d.p.data.authConfirmed,true);assert.equal(d.p.data.busy,false);assert.equal(d.navigation.length,0);assert.equal(d.bootstraps,1);assert.equal(d.state.globalData.bookingIntent.service,22);
-  d.p.setData({password:'correct-password'});await d.p.wechatLogin();assert.equal(d.bootstraps,2);assert.equal(d.calls.length,2);assert.equal(d.p.data.error,'');assert.equal(d.p.data.password,'');assert.equal(d.navigation.length,1);assert(d.navigation[0].url.includes('/pages/booking/index?service=22&clinic=2'));assert.equal(d.state.globalData.bookingIntent,null);
+  await d.p.associateWechat();assert.equal(d.p.data.error,denied.message);assert.equal(d.p.data.password,'');assert.equal(d.p.data.username,'old-patient');assert.equal(d.p.data.passwordMode,true);assert.equal(d.p.data.authConfirmed,true);assert.equal(d.p.data.busy,false);assert.equal(d.navigation.length,0);assert.equal(d.bootstraps,1);assert.equal(d.state.globalData.bookingIntent.service,22);
+  d.p.setData({password:'correct-password'});await d.p.associateWechat();assert.equal(d.bootstraps,2);assert.equal(d.calls.length,2);assert.equal(d.p.data.error,'');assert.equal(d.p.data.password,'');assert.equal(d.navigation.length,1);assert(d.navigation[0].url.includes('/pages/booking/index?service=22&clinic=2'));assert.equal(d.state.globalData.bookingIntent,null);
+  assert.deepEqual(plain(d.calls[1].data),{code:'provider-one-use-code',confirmed:'on',username:'old-patient',password:'correct-password'});
  });
  await test('Wrong original password remains visible without resetting the login form',async()=>{
   const denied=Object.assign(new Error('账号或密码核对未通过'),{status:401});const d=page('login',{session:{account_authenticated:false},loginError:denied});d.p.setData({username:'original-patient',password:'wrong-password',passwordMode:true});await d.p.login();assert.equal(d.p.data.error,denied.message);assert.equal(d.p.data.username,'original-patient');assert.equal(d.p.data.password,'');assert.equal(d.p.data.passwordMode,true);assert.equal(d.p.data.busy,false);assert.equal(d.navigation.length,0);
@@ -83,9 +84,14 @@ async function verify(){
  await test('unlink submits own selected identity/version without patient fields',async()=>{
   const d=page('account',{request:async()=>plain(profile)});d.p.setData({unlinkPassword:'private-fallback'});await d.p.unlink({currentTarget:{dataset:{id:5,revision:2}}});assert.deepEqual(plain(d.calls[0].data),{identity:5,revision:2,password:'private-fallback',confirmed:'on'});assert.equal(d.p.data.unlinkPassword,'');
  });
- await test('WeChat login requires consent and sends only platform code with explicit old-account fields',async()=>{
+ await test('Ordinary WeChat login ignores populated and collapsed old-account fields',async()=>{
   const d=page('login',{session:{account_authenticated:false},request:async()=>plain(pending)});await d.p.wechatLogin();assert.equal(d.calls.length,0);
-  d.p.setData({authConfirmed:true});await d.p.wechatLogin();assert.equal(d.calls[0].route,'auth/wechat/');assert.deepEqual(plain(d.calls[0].data),{code:'provider-one-use-code',confirmed:'on',username:'',password:''});assert.equal(d.navigation[0].url,'/pages/account/index');
+  d.p.setData({authConfirmed:true,passwordMode:true,username:'retained-original',password:'unused-password'});
+  await d.p.wechatLogin();assert.equal(d.calls[0].route,'auth/wechat/');assert.deepEqual(plain(d.calls[0].data),{code:'provider-one-use-code',confirmed:'on'});assert.equal(d.navigation[0].url,'/pages/account/index');
+  d.p.togglePassword();await d.p.wechatLogin();assert.deepEqual(plain(d.calls[1].data),{code:'provider-one-use-code',confirmed:'on'});
+  await d.p.associateWechat();assert.equal(d.calls.length,2);assert(d.p.data.error.includes('密码'));
+  const markup=fs.readFileSync(path.join(root,'pages/login/index.wxml'),'utf8');
+  assert(markup.includes('bindtap="associateWechat"'));
  });
  await test('WeChat platform refusal cannot create an ADC login',async()=>{
   const d=page('login',{wechatError:true});d.p.setData({authConfirmed:true});await d.p.wechatLogin();assert.equal(d.calls.length,0);assert(d.p.data.error);assert.equal(d.p.data.busy,false);
@@ -96,7 +102,7 @@ async function verify(){
   const markup=fs.readFileSync(path.join(root,'pages/login/index.wxml'),'utf8');assert(markup.includes('wx:if="{{realSmsAvailable}}"'));assert(!markup.includes('测试号码'));assert(!markup.includes('test_code'));
  });
  await test('WeChat-first login does not add a phone or password prerequisite',async()=>{
-  const d=page('login',{session:{account_authenticated:false,auth_capabilities:{wechat_mini:true,sms_enabled:true,sms_demo:true}},request:async()=>plain(pending)});await d.p.onLoad();assert.equal(d.p.data.smsMode,false);assert.equal(d.p.data.passwordMode,false);d.p.setData({authConfirmed:true});await d.p.wechatLogin();assert.deepEqual(plain(d.calls[0].data),{code:'provider-one-use-code',confirmed:'on',username:'',password:''});
+  const d=page('login',{session:{account_authenticated:false,auth_capabilities:{wechat_mini:true,sms_enabled:true,sms_demo:true}},request:async()=>plain(pending)});await d.p.onLoad();assert.equal(d.p.data.smsMode,false);assert.equal(d.p.data.passwordMode,false);d.p.setData({authConfirmed:true});await d.p.wechatLogin();assert.deepEqual(plain(d.calls[0].data),{code:'provider-one-use-code',confirmed:'on'});
  });
  await test('Only real SMS uses the provider challenge; no test code is displayed',async()=>{
   const d=page('login',{session:{account_authenticated:false,auth_capabilities:{sms_enabled:true,sms_demo:false}},request:async route=>route.endsWith('/send/')?{challenge:'one-challenge',demo:false}:plain(pending)});await d.p.onLoad();d.p.setData({phone:'13800000000',authConfirmed:true});await d.p.sendSms();assert(d.p.data.smsNotice.includes('提交发送'));assert(!d.p.data.smsNotice.includes('undefined'));d.p.setData({smsCode:'123456'});await d.p.smsLogin();assert.deepEqual(plain(d.calls[1].data),{phone:'13800000000',challenge:'one-challenge',code:'123456',confirmed:'on'});assert.equal(d.p.data.smsCode,'');assert.equal(d.p.data.smsNotice,'');

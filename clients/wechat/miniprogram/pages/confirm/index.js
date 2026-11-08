@@ -2,7 +2,7 @@ const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const intent=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
-const {staleSubject}=require('../../utils/subject-state');
+const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const actions={
   booking:['确认就诊安排','我已核对诊所、服务、医师和起止时间，同意提交预约。','确认提交预约','确认成功后产生一次预约，接诊时再确认实际治疗。'],
   reschedule:['确认预约改期','我已核对原、新医师和时间，同意用新安排替代原预约。','确认改期','成功后替换指定原预约，其他候补不会自动退出。'],
@@ -56,21 +56,7 @@ Page({
     });
     showError(this,error,{separateRequestId:true,stayOnPage:true});
   },
-  async recoverSubject(){
-    if(this.data.busy||!this.data.subjectInvalid)return;
-    const requestId=this.data.requestId;
-    this.setData({busy:true});
-    try{
-      const session=await api.bootstrap();
-      let url='/pages/login/index';
-      if(session.account_authenticated)url=session.authenticated?'/pages/patients/index':'/pages/account/index';
-      this.setData({busy:false});
-      navigation.reLaunch({url});
-    }catch(e){
-      showError(this,e,{separateRequestId:true,stayOnPage:true});
-      if(!e.requestId)this.setData({requestId});
-    }
-  },
+  recoverSubject(){return recoverSubject(this,api.bootstrap,navigation.reLaunch);},
   subjects(){
     if(this.data.busy||this.data.subjectInvalid)return;
     const selection=this.data.review&&this.data.review.selection;

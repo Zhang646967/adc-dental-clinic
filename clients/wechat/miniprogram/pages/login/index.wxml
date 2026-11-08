@@ -23,7 +23,7 @@
       <label class="label" for="username">原患者账号</label><input id="username" class="input" value="{{username}}" maxlength="150" placeholder="请输入患者账号" data-field="username" bindinput="field" aria-label="患者账号" />
       <label class="label" for="password">密码</label><input id="password" class="input" value="{{password}}" password maxlength="128" data-field="password" bindinput="field" confirm-type="go" bindconfirm="login" aria-label="密码" />
       <button class="primary" loading="{{busy}}" disabled="{{busy}}" bindtap="login">登录原账号</button>
-      <button wx:if="{{auth.wechat_mini}}" class="secondary" bindtap="wechatLogin" disabled="{{busy||!authConfirmed||!username||!password}}">核对原账号并关联微信</button>
+      <button wx:if="{{auth.wechat_mini}}" class="secondary" bindtap="associateWechat" disabled="{{busy||!authConfirmed||!username||!password}}">核对原账号并关联微信</button>
       <view wx:if="{{auth.wechat_mini}}" class="muted">核对原账号后关联微信；已有其他归属的微信不会自动合并。</view>
     </view>
   </view><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>

@@ -14,6 +14,7 @@ from pathlib import Path
 import plistlib
 import re
 import shlex
+import socket
 import subprocess
 import sys
 import tarfile
@@ -23,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.g4_course import (BACKUP_NAME, MAX_BACKUP_BYTES, RECIPIENT, backup_inventory,
                               decrypt_backup, digest, exclusive, private_directory,
-                              private_file, prune_backups, run)
+                              private_file, prune_backups, run, verify_public_dns)
 from scripts.g4_prepare import MINI_SECRET_FILE, inspect_bundle
 from scripts.g4_mac_demo import atomic_text
 from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instant, age as recovery_age, utc_now, validate_restore, MAX_ARCHIVE
@@ -32,6 +33,10 @@ from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instan
 PUBLISH_FILES = ('plan.json', 'compose.env', 'compose.yaml', 'nginx.conf', 'init-db.sh',
                  'private/runtime.env', 'private/maintenance.env', 'private/database.env')
 PUBLISH_INTENT = '.g4/private/initial-publish.json'
+PUBLISH_RECEIPTS = ('demo-credentials.txt', 'COURSE_ACCESS.md')
+# Allow the server's full sequence, including migration/initialization or restore.
+# These transport limits are independent of the measured target recovery window.
+OPERATION_TIMEOUTS = {'deploy': 2100, 'restore-verified-dump': 2100, 'backup': 1500}
 VERIFY_PUBLISH_RESUME = """
 import hashlib, json, sys
 from pathlib import Path
@@ -52,6 +57,31 @@ for name in ('fullchain.pem', 'privkey.pem'):
     if path.is_symlink() or not path.is_file() or not path.stat().st_size:
         raise ValueError('Complete the TLS stage before resuming publication.')
 """
+VERIFY_PUBLISH_COMPLETION = """
+import json, sys
+from pathlib import Path
+
+private = Path(sys.argv[1]) / 'private'
+marker = private / 'deployed.json'
+ready = marker.is_file()
+if marker.is_symlink() or (marker.exists() and not ready):
+    raise ValueError('The deployment marker is not a regular file.')
+if ready:
+    recorded = json.loads(marker.read_text())
+    if (recorded.get('project') != sys.argv[2] or recorded.get('source_commit') != sys.argv[3]
+            or recorded.get('fresh_seed') is not True):
+        raise ValueError('The deployment marker belongs to a different operation.')
+for name in sys.argv[4:]:
+    path = private / name
+    if path.is_symlink() or (path.exists() and (not path.is_file() or path.stat().st_mode & 0o077)):
+        raise ValueError('Use a regular owner-only handover file.')
+    ready = ready and path.is_file() and path.stat().st_size > 0
+print(json.dumps(ready))
+"""
+
+
+class PublicationPreflightError(ValueError):
+    pass
 
 
 class Remote:
@@ -78,7 +108,8 @@ class Remote:
         checked = run(['ssh-keygen', '-E', 'sha256', '-lf', str(hosts)], self.log).decode().split()
         if len(checked) < 2 or checked[1] != c['fingerprint']:
             raise ValueError('Pinned SSH host-key fingerprint differs.')
-        self.options = ['-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+        self.options = ['-F', '/dev/null', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+                        '-o', 'GlobalKnownHostsFile=/dev/null', '-o', 'UpdateHostKeys=no',
                         '-o', 'IdentitiesOnly=yes', '-o', 'ConnectTimeout=10',
                         '-o', 'UserKnownHostsFile=' + str(hosts), '-i', str(key)]
         self.target = c['user'] + '@' + c['host']
@@ -116,10 +147,10 @@ class Remote:
         else:
             run(['scp'] + self.options + [str(source), remote], self.log, timeout=600)
 
-    def operation(self, action, extra=(), *, timeout=600):
+    def operation(self, action, extra=(), *, timeout=None):
         return json.loads(self.ssh(['python3', self.folder + '/scripts/g4_course.py',
             '--output', self.remote_bundle, '--docker', '/usr/bin/docker', '--context', 'default',
-            action] + list(extra), timeout=timeout))
+            action] + list(extra), timeout=timeout if timeout is not None else OPERATION_TIMEOUTS.get(action, 600)))
 
     def _publication_inputs(self, artifacts, recipient_file):
         artifacts = private_directory(artifacts)
@@ -143,6 +174,38 @@ class Remote:
         return json.dumps({'mode': mode, 'project': self.plan['project'],
                            'source_commit': self.plan['requested_source_commit'],
                            'app_image': self.plan['images']['app']}, sort_keys=True) + '\n'
+
+    def _preflight(self, artifacts):
+        try:
+            verify_public_dns(self.plan['host'], self.config['host'])
+        except socket.gaierror:
+            raise PublicationPreflightError('DNS lookup failed during preflight; verify the registered hostname.') from None
+        except ValueError as error:
+            raise PublicationPreflightError(str(error)) from None
+        archive_bytes = sum((artifacts / name).stat().st_size for name in ('source.tar', 'application.tar'))
+        script = (ROOT / 'scripts/g4_host_bootstrap.sh').read_text()
+        try:
+            result = self.ssh(['sh', '-c', script, 'adc-course-host', '--preflight', self.folder,
+                               str(archive_bytes)], timeout=60)
+        except (RuntimeError, subprocess.TimeoutExpired) as error:
+            raise PublicationPreflightError('Target host preflight stopped before upload; check the private operations log.') from error
+        if result.strip() != b'HOST_PREFLIGHT_READY':
+            raise PublicationPreflightError('The host did not confirm read-only first-publication checks.')
+
+    def preflight(self, artifacts, recipient_file):
+        artifacts, meta, _ = self._publication_inputs(artifacts, recipient_file)
+        self._preflight(artifacts)
+        return {'status': 'PREFLIGHT_READY', 'source_commit': meta['source_commit'],
+                'public_acceptance_executed': False}
+
+    def _publish_complete(self, metadata):
+        return json.loads(self.ssh(['python3', '-c', VERIFY_PUBLISH_COMPLETION,
+            self.remote_bundle, self.plan['project'], metadata['source_commit'], *PUBLISH_RECEIPTS], timeout=60)) is True
+
+    def _verify_ready_publication(self, result, metadata):
+        if (result['status'] != 'ORIGIN_READY' or result['project'] != self.plan['project']
+                or result['source_commit'] != metadata['source_commit'] or not self._publish_complete(metadata)):
+            raise ValueError('Resolve origin readiness and handover before completing publication.')
 
     def publish(self, artifacts, recipient_file, restore_backup=None, identity_file=None, age='age', offsite_config=None):
         with exclusive(self.bundle / 'private/publish.lock'):
@@ -168,6 +231,7 @@ class Remote:
                     restore_book.load()
             if file_digest(restore_backup) != cipher_sha or file_digest(identity_file) != key_sha:
                 raise ValueError('Recovery archive or key changed during authentication.')
+        self._preflight(artifacts)
         # A fresh transfer never overwrites a previous server release.
         setup = ("from pathlib import Path; import os,pwd; "
                  "p=Path(" + repr(self.folder) + "); "
@@ -256,6 +320,7 @@ class Remote:
                       '[ (p/"private"/n).unlink() for n in ' + repr(recovery_files) + ']'])
         else:
             result = self.operation('deploy')
+            self._verify_ready_publication(result, metadata)
             self.copy(self.bundle / 'private/demo-credentials.txt',
                       self.remote_bundle + '/private/demo-credentials.txt', download=True)
         self.copy(self.bundle / 'private/COURSE_ACCESS.md',
@@ -282,12 +347,10 @@ class Remote:
             result = self.operation('status')
             if result['project'] != self.plan['project'] or result['source_commit'] != meta['source_commit']:
                 raise ValueError('Publication target differs from the reviewed project and release.')
-            if result['status'] != 'ORIGIN_READY':
+            if result['status'] != 'ORIGIN_READY' or not self._publish_complete(meta):
                 result = self.operation('deploy')
-            if (result['status'] != 'ORIGIN_READY' or result['project'] != self.plan['project']
-                    or result['source_commit'] != meta['source_commit']):
-                raise ValueError('Resolve the origin readiness issue before completing publication.')
-            for name in ('demo-credentials.txt', 'COURSE_ACCESS.md'):
+                self._verify_ready_publication(result, meta)
+            for name in PUBLISH_RECEIPTS:
                 self._collect_publish_receipt(name)
             recipient_path = self.remote_bundle + '/private/backup-recipient.txt'
             self.operation('install-server-jobs', ['--recipient-file', recipient_path])
@@ -516,6 +579,9 @@ def main():
     publish.add_argument('--age', default='age')
     publish.add_argument('--trusted-synthetic-copy', action='store_true')
     publish.add_argument('--offsite-config')
+    preflight = sub.add_parser('preflight')
+    preflight.add_argument('--artifacts', required=True)
+    preflight.add_argument('--recipient-file', required=True)
     resume = sub.add_parser('resume-publish')
     resume.add_argument('--artifacts', required=True)
     resume.add_argument('--recipient-file', required=True)
@@ -550,6 +616,8 @@ def main():
                 raise ValueError('Recovery requires the explicit trusted-synthetic-copy flag.')
             result = remote.publish(args.artifacts, args.recipient_file,
                                     args.restore_backup, args.identity_file, args.age, args.offsite_config)
+        elif args.action == 'preflight':
+            result = remote.preflight(args.artifacts, args.recipient_file)
         elif args.action == 'resume-publish':
             result = remote.resume_publish(args.artifacts, args.recipient_file)
         elif args.action == 'upgrade':
@@ -578,5 +646,7 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+    except PublicationPreflightError as error:
+        raise SystemExit(str(error)) from None
     except (OSError, ValueError, TypeError, KeyError, OverflowError, RecursionError, RuntimeError, subprocess.SubprocessError, tarfile.TarError):
         raise SystemExit('Remote operation stopped. Preserve private state and diagnostics; no cloud acceptance granted.') from None

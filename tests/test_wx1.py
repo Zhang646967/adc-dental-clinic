@@ -172,6 +172,31 @@ class WebLoginTests(FixtureMixin,TransactionTestCase):
             for _ in range(2):self.assertEqual(client.post('/api/mini/v1/auth/wechat/',{'code':'fresh-code','confirmed':'on'}).status_code,200)
         self.assertEqual(ExternalIdentity.objects.count(),1);self.assertFalse(AccountPhone.objects.filter(user=self.user).exists());self.assertFalse(PatientAccess.objects.filter(user=self.user).exists())
 
+    def test_wechat_login_and_explicit_original_account_association_are_distinct(self):
+        route='/api/mini/v1/auth/wechat/'
+        password='test-only-original-patient'
+        original=UserAccount.objects.create_user(username='original-patient',password=password)
+        PatientAccess.objects.create(user=original,patient=self.p1)
+        login={'code':'ordinary-code','confirmed':'on'}
+        with patch.object(providers,'wechat_subject',return_value=self.proof):
+            result=Client().post(route,login)
+        self.assertEqual(result.status_code,200)
+        self.assertEqual(result.json()['data']['account_name'],self.user.username)
+        self.assertFalse(ExternalIdentity.objects.filter(user=original).exists())
+        association=login|{'code':'association-code','username':original.username}
+        with patch.object(providers,'wechat_subject') as provider:
+            result=Client().post(route,association|{'password':'wrong-password'})
+            self.assertEqual(result.status_code,401)
+            provider.assert_not_called()
+        new_proof=('WECHAT_MINI',LIVE['ADC_WECHAT_MINI_APP_ID'],'separate-synthetic-wechat')
+        with patch.object(providers,'wechat_subject',return_value=new_proof):
+            result=Client().post(route,association|{'password':password})
+        self.assertEqual(result.status_code,200)
+        self.assertEqual(result.json()['data']['account_name'],original.username)
+        self.assertEqual(ExternalIdentity.objects.filter(user=original,provider='WECHAT_MINI').count(),1)
+        self.identity.refresh_from_db()
+        self.assertEqual(self.identity.user_id,self.user.pk)
+
 
 @override_settings(**CLOUD)
 class CloudBaseTests(FixtureMixin,TransactionTestCase):

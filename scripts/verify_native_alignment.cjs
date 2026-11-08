@@ -135,6 +135,41 @@ async function verify(){
     await d.p.recoverSubject();
     assert.equal(routes.at(-1).url,url,code);count++;
   }
+  const ownedVisit={...visit,can_change:true,version:3};
+  for(const {status,code,freshSession,url} of deniedConfirmations){
+    const denied=Object.assign(Error('当前就诊人或授权已变化'),{status,code,requestId:'SYNTHETIC-VISIT-QUERY'});
+    d=page('visit',{session:confirmSession,freshSession,review:confirmReview,responses:[ownedVisit,denied]});
+    d.p.onLoad({id:visit.id});await d.p.onShow();
+    assert.equal(d.p.data.patientName,priorSubject.patient_name,code);
+    d.p.cancel();d.p.reason({detail:{value:'PRIVATE_CANCEL_DRAFT'}});
+    assert.equal(d.p.data.reason,'PRIVATE_CANCEL_DRAFT',code);
+    await d.p.onShow();
+    assert.equal(d.state.globalData.review,null,code);
+    for(const [field,value] of Object.entries({visit:null,patientName:'',patientCapacity:'',patientDelegated:false,
+      reason:'',cancelOpen:false,subjectInvalid:true,requestId:'SYNTHETIC-VISIT-QUERY'})){
+      assert.equal(d.p.data[field],value,code+': '+field);
+    }
+    await d.p.previewCancel();d.p.reschedule();assert.equal(d.calls.length,2,code);
+    await d.p.recoverSubject();assert.equal(routes.at(-1).url,url,code);count++;
+  }
+  const revoked=Object.assign(Error('撤权'),{status:409,code:'WORKSPACE_CHANGED'});
+  let deliverPreview;
+  d=page('visit',{session:confirmSession,responses:[ownedVisit,
+    new Promise(resolve=>{deliverPreview=resolve;}),revoked]});
+  d.p.onLoad({id:visit.id});await d.p.onShow();d.p.cancel();d.p.reason({detail:{value:'PRIVATE_CANCEL_DRAFT'}});
+  const preview=d.p.previewCancel();
+  await d.p.onShow();
+  deliverPreview({proposal_token:'expired-synthetic-preview'});
+  await preview;
+  assert.equal(d.p.data.subjectInvalid,true);
+  assert.equal(d.state.globalData.review,null);count++;
+  d=page('visit',{session:confirmSession,responses:[ownedVisit,ownedVisit,{proposal_token:'fresh-synthetic-preview'}]});
+  d.p.onLoad({id:visit.id});await d.p.onShow();d.p.cancel();d.p.reason({detail:{value:'合成取消原因'}});
+  await d.p.onShow();assert.equal(d.p.data.reason,'合成取消原因');assert(d.p.data.cancelOpen);
+  await d.p.previewCancel();
+  assert.equal(d.calls[2][0],'visits/12/cancel/preview/');
+  assert.equal(d.state.globalData.review.preview.proposal_token,'fresh-synthetic-preview');
+  assert.equal(routes.at(-1).url,'/pages/confirm/index');count++;
   const expired=Object.assign(Error('会话已失效'),{status:401,code:'LOGIN_REQUIRED',requestId:'SYNTHETIC-ORIGINAL-QUERY'});
   d=page('confirm',{session:confirmSession,review:confirmReview,responses:[expired],bootstrapError:Error('网络不可用')});
   d.p.onLoad();d.p.checked({detail:{value:['yes']}});await d.p.submit();

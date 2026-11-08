@@ -19,11 +19,13 @@ from scripts.g4_course import private_directory, private_file
 from scripts.g4_https_probe import NoRedirect, TargetHTTPSConnection
 from scripts.g4_mac_demo import atomic_text
 from scripts.g4_prepare import write_private
+from scripts.recovery_receipts import instant
 
 API = '/api/mini/v1/'
 MAX_RESPONSE = 256 * 1024
 LATENCY_MS = 5000
 MAX_START_DELAY_MS = 10000
+CLOCK_TOLERANCE_MS = 1000
 TARGET_ROUNDS = 24 * 60 + 1
 HOSTNAME = re.compile(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?')
 
@@ -163,22 +165,49 @@ def good(row):
             and row['start_delay_ms'] <= MAX_START_DELAY_MS)
 
 
-def summarize(rows, expected):
+def timestamps_match_schedule(rows, interval, started_at):
+    if not rows:
+        return False
+    try:
+        times = [instant(row['at']) for row in rows]
+        anchor = instant(started_at) if started_at else times[0] - timedelta(
+            milliseconds=rows[0]['start_delay_ms'])
+    except (KeyError, ValueError):
+        return False
+    for index, at in enumerate(times):
+        wall_ms = (at - anchor).total_seconds() * 1000
+        scheduled_ms = index * interval * 1000 + rows[index]['start_delay_ms']
+        if abs(wall_ms - scheduled_ms) > CLOCK_TOLERANCE_MS:
+            return False
+        if index:
+            gap_ms = (at - times[index - 1]).total_seconds() * 1000
+            if not 0 < gap_ms <= interval * 1000 + MAX_START_DELAY_MS + CLOCK_TOLERANCE_MS:
+                return False
+    return True
+
+
+def summarize(rows, expected, *, interval=60, started_at=None):
     good_count = sum(good(row) for row in rows)
     complete = len(rows) == expected
-    on_time = all(row['start_delay_ms'] <= MAX_START_DELAY_MS for row in rows)
+    on_time = all(0 <= row['start_delay_ms'] <= MAX_START_DELAY_MS for row in rows)
+    wall_clock_verified = timestamps_match_schedule(rows, interval, started_at)
     incident_open = bool(len(rows) >= 2 and not good(rows[-1]) and not good(rows[-2]))
-    passed = (complete and bool(rows) and on_time and good_count * 1000 >= expected * 999
+    passed = (complete and on_time and wall_clock_verified and good_count * 1000 >= expected * 999
               and not incident_open and good(rows[-1]))
     return {'state': 'PASS' if passed else 'FAIL' if complete else 'INCOMPLETE',
             'samples': len(rows), 'expected': expected, 'good_samples': good_count,
-            'all_started_on_time': on_time, 'incident_open': incident_open}
+            'all_started_on_time': on_time, 'wall_clock_schedule_verified': wall_clock_verified,
+            'incident_open': incident_open}
 
 
 def observe(run_sample, path, *, count, interval, scope):
     rows = []
     incident_open = False
     start = time.monotonic()
+    receipt = {'scope': scope, 'interval_seconds': interval, 'expected_samples': count,
+               'started_at': datetime.now(timezone.utc).isoformat(), 'samples': rows,
+               'summary': summarize(rows, count, interval=interval)}
+    write_private(path, json.dumps(receipt) + '\n')
     for n in range(count):
         scheduled = start + n * interval
         time.sleep(max(0, scheduled - time.monotonic()))
@@ -186,15 +215,15 @@ def observe(run_sample, path, *, count, interval, scope):
         delay = round((time.monotonic() - scheduled) * 1000)
         row = run_sample() | {'at': at, 'start_delay_ms': delay}
         rows.append(row)
-        summary = summarize(rows, count)
+        summary = summarize(rows, count, interval=interval, started_at=receipt['started_at'])
         if incident_open != summary['incident_open']:
             incident_open = summary['incident_open']
             row['event'] = 'OPENED' if incident_open else 'RECOVERED'
-        atomic_text(path, json.dumps({'scope': scope, 'interval_seconds': interval,
-                                     'samples': rows, 'summary': summary}, indent=2) + '\n')
+        receipt['summary'] = summary
+        atomic_text(path, json.dumps(receipt, indent=2) + '\n')
         if 'event' in row:
-            print(json.dumps({'event': row['event'], 'at': at}), flush=True)
-    return summary
+            print(json.dumps({'signal': 'PATIENT_JOURNEY', 'event': row['event'], 'at': at}), flush=True)
+    return receipt['summary']
 
 
 def main():
@@ -217,7 +246,6 @@ def main():
         path = Path(args.receipt).absolute()
         private_directory(path.parent)
         scope = 'LOOPBACK_REHEARSAL' if args.rehearsal else 'DIRECT_HTTPS_SYNTHETIC_PATIENT'
-        write_private(path, json.dumps({'scope': scope, 'summary': {'state': 'INCOMPLETE'}}) + '\n')
         summary = observe(lambda: sample(fixture, rehearsal=args.rehearsal, https_port=args.https_port,
                                         ca_file=args.ca_file), path,
                           count=TARGET_ROUNDS if args.observe else args.rehearsal_rounds,

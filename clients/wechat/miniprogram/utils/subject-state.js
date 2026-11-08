@@ -1,4 +1,5 @@
 /* Classify patient-subject and workspace failures for pages with cached data. */
+const {showError} = require('./format');
 
 const STALE_CODES = ['WORKSPACE_CHANGED', 'SUBJECT_REQUIRED', 'SUBJECT_CHANGED', 'ACCESS_DENIED'];
 
@@ -21,4 +22,20 @@ function staleSubject(error, session, {uncodedConflictIsStale = true} = {}) {
   };
 }
 
-module.exports = {staleSubject, STALE_CODES};
+async function recoverSubject(page, bootstrap, reLaunch) {
+  if (page.data.busy || !page.data.subjectInvalid) return;
+  const requestId = page.data.requestId;
+  page.setData({busy:true});
+  try {
+    const session = await bootstrap();
+    let url = '/pages/login/index';
+    if (session.account_authenticated) url = session.authenticated ? '/pages/patients/index' : '/pages/account/index';
+    page.setData({busy:false});
+    reLaunch({url});
+  } catch (error) {
+    showError(page,error,{separateRequestId:true,stayOnPage:true});
+    if (!error.requestId) page.setData({requestId});
+  }
+}
+
+module.exports = {staleSubject, recoverSubject, STALE_CODES};

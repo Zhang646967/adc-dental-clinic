@@ -93,6 +93,23 @@ The known-hosts file must contain exactly one key for that IPv4 on port 22.
 Compare it with the fingerprint obtained through the server provider's trusted
 console before trusting it. Strict SSH verification is never disabled.
 
+Run the read-only first-publication preflight with the reviewed archive and
+recipient:
+
+```sh
+python3 scripts/g4_remote.py --ssh-config .course-private/ssh.json \
+  --output .course-private/cloud/.g4 preflight \
+  --artifacts .course-private/build-amd64 \
+  --recipient-file .course-private/backup-key/recipient.txt
+```
+
+The preflight checks the archive digests, A/AAAA answers, pinned SSH host,
+effective root access, Ubuntu 24.04 amd64, free HTTP/HTTPS ports and the absence
+of a prior release or running containers. It checks space for the two archives
+and Docker storage, at least 3 GiB total memory and 2 GiB available. On a shared
+filesystem it adds the release and Docker space requirements. These are startup
+minimums. Target capacity still requires the measured test below.
+
 ```sh
 python3 scripts/g4_remote.py --ssh-config .course-private/ssh.json \
   --output .course-private/cloud/.g4 publish \
@@ -100,7 +117,8 @@ python3 scripts/g4_remote.py --ssh-config .course-private/ssh.json \
   --recipient-file .course-private/backup-key/recipient.txt
 ```
 
-Publish creates a new project-specific release folder under /srv/adc-course,
+Publish repeats the preflight before creating a project directory or uploading
+anything. It then creates a new project-specific release folder under /srv/adc-course,
 checks transfer hashes, provisions dependencies only on a dedicated empty Ubuntu
 24.04 amd64 host, loads/pulls the pinned images, issues TLS, initializes the
 empty database, seeds synthetic accounts once, and starts web/worker/gateway.
@@ -117,13 +135,17 @@ python3 scripts/g4_remote.py --ssh-config .course-private/ssh.json \
 ```
 
 The command checks the release identity, archive and bundle digests, TLS files
-and the encryption recipient. It uses the existing deployment completion
-records, preserves matching private handover files, and reuses a verified backup
+and the encryption recipient. It requires the matching fresh deployment marker
+and both private handover files. If the origin is already healthy but these
+records are still being finalized, it invokes the existing guarded deploy
+continuation. It preserves matching private handover files and reuses a verified backup
 for the same version. This stage completes the first server backup. Off-site
 configuration and read-back are separate checks. Earlier transfer or TLS
 interruptions, restore-mode publication and initialization without a confirmed
 checkpoint require diagnosis in the retained project. The continuation command
 requires a fresh-transfer record from the current Mac publisher.
+Deploy, backup and restore have distinct SSH deadlines sized for their server
+steps. Measure the target recovery window independently.
 
 Initial HTTP-01 uses a temporary challenge-only listener on port 80. Certbot
 uses webroot for issuance and renewal; certificates are copied privately and

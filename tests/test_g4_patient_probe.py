@@ -1,4 +1,5 @@
 import contextlib
+from datetime import datetime, timedelta, timezone
 from io import BytesIO, StringIO
 import json
 from pathlib import Path
@@ -8,11 +9,13 @@ from unittest.mock import patch
 from urllib.parse import parse_qs
 
 from scripts.g4_patient_probe import Journey, availability, load_fixture, observe, summarize
+from scripts.g4_probe_watch import check
 
 
 FIXTURE = {'scope': 'synthetic-patient', 'host': 'adc.probe.test',
            'username': 'probe_fixture', 'password': 'do-not-record-fixture-password',
            'clinic': 1, 'service': 17, 'own_visit': 20, 'foreign_visit': 21}
+START = datetime(2026, 11, 7, tzinfo=timezone.utc)
 
 
 class ProbeTests(TestCase):
@@ -86,25 +89,71 @@ class ProbeTests(TestCase):
 
     def test_observation_requires_coverage_latency_and_final_healthy_sample(self):
         good = {'passed': True, 'elapsed_ms': 35, 'start_delay_ms': 0}
-        late = good | {'start_delay_ms': 10001}
-        slow = good | {'elapsed_ms': 5001}
-        self.assertEqual(summarize([good], 1441)['state'], 'INCOMPLETE')
-        self.assertEqual(summarize([good] * 1441, 1441)['state'], 'PASS')
-        self.assertEqual(summarize([slow] + [good] * 1440, 1441)['state'], 'PASS')
-        self.assertEqual(summarize([late] + [good] * 1440, 1441)['state'], 'FAIL')
-        self.assertEqual(summarize([good] * 1440 + [slow], 1441)['state'], 'FAIL')
-        self.assertTrue(summarize([good, slow, slow], 3)['incident_open'])
+        rows = [good | {'at': (START + timedelta(minutes=n)).isoformat()} for n in range(1441)]
+        self.assertEqual(summarize(rows[:1], 1441)['state'], 'INCOMPLETE')
+        self.assertEqual(summarize(rows, 1441)['state'], 'PASS')
+        self.assertEqual(summarize([rows[0] | {'elapsed_ms': 5001}] + rows[1:], 1441)['state'], 'PASS')
+        self.assertEqual(summarize([rows[0] | {'start_delay_ms': 10001}] + rows[1:], 1441)['state'], 'FAIL')
+        self.assertEqual(summarize(rows[:-1] + [rows[-1] | {'elapsed_ms': 5001}], 1441)['state'], 'FAIL')
+        self.assertTrue(summarize(rows[:1] + [r | {'elapsed_ms': 5001} for r in rows[1:3]], 3)['incident_open'])
+        gap = rows[:720] + [r | {'at': (START + timedelta(minutes=n, days=1)).isoformat()}
+                           for n, r in enumerate(rows[720:], start=720)]
+        for bad in (gap, rows[:720] + [rows[719]] + rows[721:],
+                    rows[:720] + rows[720:722][::-1] + rows[722:]):
+            with self.subTest(at=bad[720]['at']):
+                result = summarize(bad, 1441)
+                self.assertEqual(result['state'], 'FAIL')
+                self.assertFalse(result['wall_clock_schedule_verified'])
+        delayed = rows[720] | {'at': (START + timedelta(minutes=720, seconds=9)).isoformat(),
+                               'start_delay_ms': 9000}
+        self.assertEqual(summarize(rows[:720] + [delayed] + rows[721:], 1441)['state'], 'PASS')
+        self.assertEqual(summarize(rows, 1441, started_at=(START - timedelta(hours=1)).isoformat())['state'], 'FAIL')
 
     def test_alarm_events_and_failed_rounds_survive_recovery(self):
         ok = {'passed': True, 'elapsed_ms': 120}
         failed = {'passed': False, 'elapsed_ms': 9}
         rows = iter([ok, failed, failed, failed, ok])
-        with TemporaryDirectory() as directory, contextlib.redirect_stdout(StringIO()):
+        clock = [0]
+        with (TemporaryDirectory() as directory, contextlib.redirect_stdout(StringIO()) as output,
+              patch('scripts.g4_patient_probe.time.monotonic', side_effect=lambda: clock[0]),
+              patch('scripts.g4_patient_probe.time.sleep', side_effect=lambda delay: clock.__setitem__(0, clock[0] + delay)),
+              patch('scripts.g4_patient_probe.datetime') as dt):
+            dt.now.side_effect = lambda tz: START + timedelta(seconds=clock[0])
             path = Path(directory) / 'receipt.json'
-            summary = observe(lambda: next(rows), path, count=5, interval=0, scope='TEST')
+            summary = observe(lambda: next(rows), path, count=5, interval=5, scope='TEST')
             receipt = json.loads(path.read_text())
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
         self.assertEqual([row['event'] for row in receipt['samples'] if 'event' in row], ['OPENED', 'RECOVERED'])
+        self.assertEqual([json.loads(line)['signal'] for line in output.getvalue().splitlines()],
+                         ['PATIENT_JOURNEY', 'PATIENT_JOURNEY'])
         self.assertEqual(summary['good_samples'], 2)
         self.assertEqual(summary['state'], 'FAIL')
         self.assertFalse(summary['incident_open'])
+        self.assertTrue(summary['wall_clock_schedule_verified'])
+
+    def test_independent_heartbeat_detects_stop_and_recovers_on_new_activity(self):
+        with TemporaryDirectory() as directory:
+            receipt, state = (Path(directory) / name for name in ('receipt.json', 'heartbeat.json'))
+            data = {'interval_seconds': 60, 'expected_samples': 2, 'started_at': START.isoformat(),
+                    'samples': [], 'summary': summarize([], 2)}
+            receipt.write_text(json.dumps(data))
+            receipt.chmod(0o600)
+            self.assertEqual(check(receipt, state, START)['state'], 'FRESH')
+            then = START + timedelta(seconds=131)
+            outage = check(receipt, state, then)
+            self.assertEqual((outage['signal'], outage['state'], outage['event']),
+                             ('PROBE_HEARTBEAT', 'STALE', 'OPENED'))
+            self.assertNotIn('event', check(receipt, state, then))
+            data['samples'] = [{'passed': False, 'at': then.isoformat(), 'start_delay_ms': 0, 'elapsed_ms': 45}]
+            data['summary'] = summarize(data['samples'], 2)
+            receipt.write_text(json.dumps(data))
+            self.assertEqual(check(receipt, state, then)['event'], 'RECOVERED')
+            self.assertEqual(state.stat().st_mode & 0o777, 0o600)
+            data['samples'].append(data['samples'][0] | {'at': (then + timedelta(minutes=1)).isoformat()})
+            data['summary'] = summarize(data['samples'], 2)
+            receipt.write_text(json.dumps(data))
+            finished = check(receipt, state, then + timedelta(days=1))
+            self.assertEqual((finished['state'], finished['observation']), ('FINISHED', 'FAIL'))
+            self.assertFalse(finished['incident_open'])
+            receipt.unlink()
+            self.assertEqual(check(receipt, state, then)['event'], 'OPENED')

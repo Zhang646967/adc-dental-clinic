@@ -625,14 +625,7 @@ class Course:
     def tls(self, public_ip, certbot='certbot'):
         if self.rehearsal or self.plan['ports'] != [80, 443]:
             raise ValueError('Public certificate issuance is unavailable in a local rehearsal.')
-        address = ipaddress.IPv4Address(public_ip)
-        if not address.is_global:
-            raise ValueError('An explicit global server IPv4 address is required.')
-        addresses = {r[4][0] for r in socket.getaddrinfo(self.plan['host'], 80, socket.AF_INET)}
-        if addresses != {str(address)}:
-            raise ValueError('Actual hostname A records must resolve to this server.')
-        if has_ipv6(self.plan['host']):
-            raise ValueError('Remove unreviewed AAAA records before IPv4-only issuance.')
+        verify_public_dns(self.plan['host'], public_ip)
         if self.dc('ps', '--status', 'running', '-q', 'gateway').strip():
             raise ValueError('Initial challenge listener requires the gateway to be stopped.')
         challenge = self.bundle / 'private/http-challenge.conf'
@@ -715,11 +708,21 @@ class Course:
                 'off_host_copy': 'Mac synchronization still required'}
 
 
-def has_ipv6(host):
+def verify_public_dns(host, public_ip):
+    address = ipaddress.IPv4Address(public_ip)
+    if not address.is_global:
+        raise ValueError('An explicit global server IPv4 address is required.')
+    addresses = {r[4][0] for r in socket.getaddrinfo(host, 80, socket.AF_INET)}
+    if addresses != {str(address)}:
+        raise ValueError('Actual hostname A records must resolve to this server.')
     try:
-        return bool(socket.getaddrinfo(host, 80, socket.AF_INET6))
-    except socket.gaierror:
-        return False
+        ipv6 = socket.getaddrinfo(host, 80, socket.AF_INET6)
+    except socket.gaierror as exc:
+        if exc.errno not in (socket.EAI_NONAME, socket.EAI_NODATA):
+            raise
+        ipv6 = []
+    if ipv6:
+        raise ValueError('Remove unreviewed AAAA records before IPv4-only issuance.')
 
 
 def backup_inventory(folder, project):

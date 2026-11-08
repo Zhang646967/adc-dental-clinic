@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import shutil
+import socket
 import subprocess
 import sys
 import tarfile
@@ -11,7 +12,8 @@ from unittest.mock import Mock, patch
 
 from scripts.g4_course import digest, exclusive
 from scripts.g4_prepare import prepare
-from scripts.g4_remote import PUBLISH_INTENT, Remote, VERIFY_PUBLISH_RESUME
+from scripts.g4_remote import (PUBLISH_INTENT, PublicationPreflightError, Remote,
+                               VERIFY_PUBLISH_COMPLETION, VERIFY_PUBLISH_RESUME)
 
 
 class PublishResumeTests(unittest.TestCase):
@@ -51,6 +53,11 @@ class PublishResumeTests(unittest.TestCase):
         for name in ('demo-credentials.txt', 'COURSE_ACCESS.md'):
             self.private(self.release / '.g4/private' / name, b'synthetic receipt')
         self.ready = dict(status='ORIGIN_READY', project=plan['project'], source_commit=self.source)
+        self.marker = self.release / '.g4/private/deployed.json'
+        self.private(self.marker, self.marker_bytes())
+
+    def marker_bytes(self):
+        return json.dumps(dict(project=self.ready['project'], source_commit=self.source, fresh_seed=True)).encode()
 
     @staticmethod
     def private(path, value):
@@ -59,7 +66,7 @@ class PublishResumeTests(unittest.TestCase):
         return path
 
     def ssh(self, args, **kwargs):
-        if args[:3] == ['python3', '-c', VERIFY_PUBLISH_RESUME]:
+        if args[:2] == ['python3', '-c'] and args[2] in (VERIFY_PUBLISH_RESUME, VERIFY_PUBLISH_COMPLETION):
             result = subprocess.run([sys.executable, *args[1:]], capture_output=True, timeout=10)
             if result.returncode:
                 raise RuntimeError('Verified transfer or TLS prerequisite rejected.')
@@ -100,6 +107,40 @@ class PublishResumeTests(unittest.TestCase):
         self.assertEqual([call.args[0] for call in self.remote.operation.call_args_list],
                          ['status', 'deploy', 'install-server-jobs', 'list-backups', 'backup'])
 
+    def test_healthy_origin_before_handover_finishes_using_existing_deploy(self):
+        guide = self.marker.with_name('COURSE_ACCESS.md')
+        guide.unlink()
+        self.marker.unlink()
+        credentials = self.marker.with_name('demo-credentials.txt')
+        before = (credentials.stat().st_ino, digest(credentials))
+
+        def operation(action, extra=()):
+            if action == 'deploy':
+                self.private(guide, b'completed access guide')
+                self.private(self.marker, self.marker_bytes())
+            return {'list-backups': {'backups': []}, 'backup': {'status': 'SERVER_BACKUP_CREATED'}}.get(
+                action, self.ready)
+
+        self.remote.operation = Mock(side_effect=operation)
+        self.assertEqual(self.resume()['first_server_backup'], 'CREATED')
+        self.assertEqual([call.args[0] for call in self.remote.operation.call_args_list],
+                         ['status', 'deploy', 'install-server-jobs', 'list-backups', 'backup'])
+        self.assertEqual((credentials.stat().st_ino, digest(credentials)), before)
+        self.assertEqual((self.bundle / 'private' / guide.name).read_bytes(), guide.read_bytes())
+
+    def test_still_missing_completion_or_wrong_marker_never_installs_jobs(self):
+        self.marker.unlink()
+        self.remote.operation = Mock(return_value=self.ready)
+        with self.assertRaisesRegex(ValueError, 'readiness and handover'):
+            self.resume()
+        self.assertEqual([call.args[0] for call in self.remote.operation.call_args_list], ['status', 'deploy'])
+        self.private(self.marker, self.marker_bytes().replace(self.source.encode(), b'b' * 40))
+        self.remote.operation.reset_mock()
+        with self.assertRaises(RuntimeError):
+            self.resume()
+        self.remote.operation.assert_called_once_with('status')
+        self.remote.copy.assert_not_called()
+
     def test_incomplete_changed_and_restore_transfers_stop_before_runtime(self):
         self.remote.operation = Mock()
         for relative in ('application.tar', '.g4/private/runtime.env', '.g4/tls/fullchain.pem', PUBLISH_INTENT):
@@ -137,12 +178,77 @@ class PublishResumeTests(unittest.TestCase):
         self.remote.ssh = Mock(side_effect=ssh)
         self.remote.copy = Mock(side_effect=shutil.copyfile)
         self.remote.operation = Mock()
+        self.remote._preflight = Mock()
         with self.assertRaisesRegex(RuntimeError, 'after checked transfer'):
             self.remote.publish(self.artifacts, self.recipient)
         self.assertEqual((root / PUBLISH_INTENT).read_text(), self.remote._publish_intent('fresh'))
         self.assertEqual(digest(root / 'source-marker'), digest(fixture))
         self.assertEqual(digest(root / '.g4/plan.json'), digest(self.bundle / 'plan.json'))
         self.remote.operation.assert_not_called()
+
+    def test_preflight_refusals_do_not_prepare_remote_paths_or_upload(self):
+        remote = self.remote
+        remote.config = {'host': '8.8.8.8', 'user': 'synthetic'}
+
+        def answers(host, port, family):
+            if family == socket.AF_INET:
+                return [(family, 0, 0, '', ('8.8.8.8', port))]
+            raise socket.gaierror(socket.EAI_NONAME, 'synthetic no AAAA')
+
+        with patch('scripts.g4_course.socket.getaddrinfo', return_value=[
+                (socket.AF_INET, 0, 0, '', ('8.8.4.4', 80))]):
+            with self.assertRaisesRegex(ValueError, 'A records'):
+                remote.publish(self.artifacts, self.recipient)
+        remote.ssh.assert_not_called()
+        remote.copy.assert_not_called()
+
+        for failure in ('amd64 required', 'port already occupied', 'insufficient disk'):
+            remote.ssh = Mock(side_effect=RuntimeError(failure))
+            with self.subTest(failure=failure), patch('scripts.g4_course.socket.getaddrinfo', side_effect=answers):
+                with self.assertRaisesRegex(PublicationPreflightError, 'before upload'):
+                    remote.publish(self.artifacts, self.recipient)
+            remote.ssh.assert_called_once()
+            command = remote.ssh.call_args.args[0]
+            self.assertEqual(command[:2], ['sh', '-c'])
+            self.assertEqual(command[4], '--preflight')
+            remote.copy.assert_not_called()
+
+        remote.ssh = Mock(return_value=b'HOST_PREFLIGHT_READY\n')
+        with patch('scripts.g4_course.socket.getaddrinfo', side_effect=answers):
+            result = remote.preflight(self.artifacts, self.recipient)
+        self.assertEqual(result['status'], 'PREFLIGHT_READY')
+        self.assertFalse(result['public_acceptance_executed'])
+        remote.ssh.assert_called_once()
+        remote.copy.assert_not_called()
+
+    def test_actual_host_preflight_shell_rejects_wrong_platform_and_occupied_ports(self):
+        script = Path(__file__).resolve().parents[1] / 'scripts/g4_host_bootstrap.sh'
+        ubuntu = self.private(self.root / 'os-release', b'ID=ubuntu\nVERSION_ID=24.04\n')
+        apt = self.private(self.root / 'apt-get', b'#!/bin/sh\nexit 89\n')
+        apt.chmod(0o700)
+        payload = script.read_text().replace('. /etc/os-release', '. "$3"')
+        # Override only the read-only host inputs. Reaching apt would fail.
+        fixture = ('id() { echo 0; }; uname() { echo "$ARCH"; }; ss() { printf "%s" "$LISTENERS"; }; '
+                   'docker() { case "$*" in *ps*) :;; *info*) echo /var/lib/docker;; esac; }; '
+                   'python3() { cat >/dev/null; echo HOST_PREFLIGHT_READY; };\n')
+        for arch, listeners, expected in (('aarch64', '', 'amd64'), ('x86_64', ':443', 'HTTPS listener'),
+                                           ('x86_64', '', 'HOST_PREFLIGHT_READY')):
+            env = dict(ARCH=arch, LISTENERS=listeners, PATH=f'{self.root}:/usr/bin:/bin')
+            call = subprocess.run(['sh', '-c', fixture + payload, 'test-host', '--preflight',
+                                   str(self.root / 'new-release'), str(ubuntu)],
+                                  env=env, capture_output=True, text=True, timeout=10)
+            self.assertIn(expected, call.stdout + call.stderr)
+            self.assertEqual(call.returncode, 0 if expected == 'HOST_PREFLIGHT_READY' else 1)
+        self.assertFalse((self.root / 'new-release').exists())
+
+    def test_first_publish_transport_allows_combined_server_stages(self):
+        remote = self.remote
+        remote.ssh = Mock(return_value=b'{}')
+        for action in ('deploy', 'restore-verified-dump', 'backup'):
+            remote.operation(action)
+            self.assertGreater(remote.ssh.call_args.kwargs['timeout'], 900)
+        remote.operation('upgrade', timeout=1800)
+        self.assertEqual(remote.ssh.call_args.kwargs['timeout'], 1800)
 
     def test_partial_existing_credentials_are_preserved_and_block_finalization(self):
         local = self.private(self.bundle / 'private/demo-credentials.txt', b'synthetic partial')
