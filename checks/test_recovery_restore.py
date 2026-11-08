@@ -102,6 +102,28 @@ class IndependentRestoreGateTests(unittest.TestCase):
         course.start_runtime = Mock()
         return course, dump, meta, expected
 
+    def test_both_restore_entries_share_the_deployment_lock(self):
+        from scripts.g4_course import exclusive
+        course, dump, meta, _ = self.materials()
+        key = self.private('identity.txt', b'synthetic key')
+        with exclusive(course.bundle / 'private/release.lock'):
+            with self.assertRaises(BlockingIOError):
+                course.restore_decrypted(dump, meta)
+            with self.assertRaises(BlockingIOError):
+                course.restore(dump, key)
+        course.start_database.assert_not_called()
+
+    def test_previously_initialized_target_is_refused_before_starting_database(self):
+        course, dump, meta, _ = self.materials()
+        for name in ('deployment-phase.json', 'deployed.json'):
+            with self.subTest(marker=name):
+                marker = course.bundle / 'private' / name
+                marker.write_text('{}')
+                with self.assertRaisesRegex(ValueError, 'no deployment history'):
+                    course.restore_decrypted(dump, meta)
+                marker.unlink()
+        course.start_database.assert_not_called()
+
     def test_fact_mismatch_does_not_start_runtime_or_record_success(self):
         course, dump, meta, expected = self.materials()
         actual = deepcopy(expected); actual['tables']['public.finance_statementbatch']['sha256'] = 'f'*64
@@ -134,6 +156,15 @@ class IndependentRestoreGateTests(unittest.TestCase):
             result = course.restore_decrypted(dump, meta, schema_mode='migration-built')
         self.assertEqual(result['business_comparison'], 'PASSED')
         self.assertTrue(any('--data-only --disable-triggers' in str(c) for c in course.dc.call_args_list))
+
+    def test_migration_built_restore_refuses_a_writer_started_before_import(self):
+        course, dump, meta, expected = self.materials()
+        course.dc.side_effect = [b'db\n', b'', b'db\nweb\n']
+        with patch('scripts.g4_course.run', return_value=json.dumps({'facts': expected}).encode()):
+            with self.assertRaisesRegex(ValueError, 'stopped-writer state changed'):
+                course.restore_decrypted(dump, meta, schema_mode='migration-built')
+        course.start_runtime.assert_not_called()
+        self.assertFalse(any('TRUNCATE' in str(c) for c in course.dc.call_args_list))
 
     def test_running_worker_blocks_even_if_web_stopped(self):
         course, dump, meta, _ = self.materials()

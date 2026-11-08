@@ -10,6 +10,7 @@ LABELS={
  'rules':'适用的临床规则','gaps':'已发生治疗的事前材料缺口','gap_reviews':'独立医务复核（不构成事前通过）',
  'laboratory':'加工件记录','laboratory_reviews':'临床验收','laboratory_events':'加工流转历史','fee':'选定的已发布收费版本',
  'nursing':'实际护理与批次追溯','sterile_pack__code':'无菌包编号',
+ 'issue__stock_movement__lot__code':'原发药批号','issue__line__name_snapshot':'给药药品','issue__line__unit_snapshot':'给药计量单位',
  'sterile_pack__process_reference':'灭菌来源','stock_movement__lot__code':'耗用批号','issues':'未完成事项','drafts':'未确认草稿（仅资料保全，不作为确认文书）',
  'examinations':'检查草稿','documents':'文书草稿','payload':'草稿原文',
  'id':'来源编号','patient_id':'患者编号来源','patient_no':'患者业务编号','patient_name':'患者姓名','clinic_id':'诊所来源编号',

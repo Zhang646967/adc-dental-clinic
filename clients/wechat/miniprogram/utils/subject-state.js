@@ -1,10 +1,8 @@
-/* Decide how the visits page must react when a refresh fails because the
-   subject or workspace is no longer valid. Kept pure so the failure modes can
-   be checked without a WeChat runtime. */
+/* Classify patient-subject and workspace failures for pages with cached data. */
 
 const STALE_CODES = ['WORKSPACE_CHANGED', 'SUBJECT_REQUIRED', 'SUBJECT_CHANGED', 'ACCESS_DENIED'];
 
-function staleSubject(error, session) {
+function staleSubject(error, session, {uncodedConflictIsStale = true} = {}) {
   const code = error && error.code;
   const status = error && error.status;
   const sessionLost = status === 401 ||
@@ -12,7 +10,7 @@ function staleSubject(error, session) {
   // A bare 409 from the read-only overview/visits requests can only mean the
   // subject context changed; coded business conflicts are not expected here.
   const invalid = STALE_CODES.indexOf(code) >= 0 || status === 403 ||
-    (status === 409 && !code) || sessionLost;
+    (uncodedConflictIsStale && status === 409 && !code) || sessionLost;
   const canSwitch = !!session && session.account_authenticated === true && !sessionLost;
   return {
     invalid,

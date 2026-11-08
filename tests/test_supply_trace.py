@@ -17,6 +17,7 @@ from accounts.models import RoleAssignment, UserAccount
 from adc_core.rules import RuleError
 from care.models import Invoice, TreatmentRecord
 from clinical import dispensing
+from clinical.archive_display import sections
 from clinical.archive_sources import capture
 from clinical.pharmacy_models import DispenseMovement
 from finance.cash_models import CashEntry
@@ -130,6 +131,13 @@ class BatchTraceTests(SupplyFixture,TransactionTestCase):
         self.assertContains(detail,'按批次追溯')
         self.assertContains(detail,self.visit.patient.patient_no)
         self.assertContains(detail,'退药隔离')
+        snapshot = capture(self.visit)
+        saved = snapshot['nursing'][0]
+        self.assertEqual((saved['issue_id'], saved['issue__stock_movement__lot__code']), (issue.pk, lot.code))
+        self.assertEqual((saved['issue__line__name_snapshot'], saved['issue__line__unit_snapshot']),
+                         (line.name_snapshot, line.unit_snapshot))
+        rendered = next(section['rows'] for section in sections(snapshot) if section['title'] == '实际护理与批次追溯')
+        self.assertIn(('条目1 · 原发药批号', lot.code), rendered)
 
     def test_material_sterility_and_exception_reference_actual_care(self):
         lot=self.receive(self.material,quantity=6).lot

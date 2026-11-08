@@ -10,6 +10,7 @@ from adc_core.commands import business_errors
 from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
 from care.audit import emit
+from care.models import AuditEvent
 from clinical.authority import professional_scope, visit_service_id
 from clinical.encounter_models import ClinicalRecordVersion
 from clinical.encounters import history_cursor
@@ -33,6 +34,31 @@ def current_version(case):
 
 def current_record(visit):
     return ClinicalRecordVersion.objects.filter(encounter__visit=visit).order_by('-revision').first()
+
+
+def confirmed_allergy_snapshot(visit, prescriber_id):
+    snapshot = visit.record_versions.filter(state='DRAFT', correction_request__isnull=True).values_list(
+        'allergy_review_snapshot', flat=True,
+    ).first() or {}
+    patient = visit.patient
+    if (snapshot.get('status') in ('KNOWN', 'NO_KNOWN') and snapshot['status'] == patient.allergy_status
+            and snapshot.get('reviewed_by') == prescriber_id and snapshot.get('reviewed_at')
+            and snapshot.get('information_version') == patient.allergy_info_version):
+        return snapshot
+    return None
+
+
+def submitted_allergy_snapshot(version):
+    case = version.prescription
+    # The submission receipt is append-only and saved in the same transaction as its version.
+    summary = AuditEvent.objects.filter(
+        event_type='PRESCRIPTION_SUBMITTED', subject_type='prescriptionversion', subject_key=str(version.pk),
+        visit_id=case.visit_id, actor_id=case.prescriber_id,
+    ).order_by('pk').values_list('change_summary', flat=True).first() or {}
+    snapshot = confirmed_allergy_snapshot(case.visit, case.prescriber_id)
+    if snapshot and summary.get('allergy_info_version') == snapshot['information_version']:
+        return snapshot
+    return None
 
 
 def _eligible_record(visit, *, lock=False):
@@ -62,9 +88,13 @@ def _submit_data(actor, visit, expected_record, previous, indication, entries, *
         raise RuleError('本次就诊已有新处方进度，请刷新后查看。')
     if case and (case.prescriber_id != actor.pk or not latest or latest.state not in REOPENABLE):
         raise RuleError('请在当前版本退回或撤回后重新提交。')
+    allergy = confirmed_allergy_snapshot(visit, actor.pk)
+    if allergy is None:
+        raise RuleError('请先在本次接诊复核当前过敏资料，再提交处方。')
     return dict(
         kind='SUBMIT', visit=visit.pk, patient=visit.patient_id, record=record.pk, previous=previous,
         duty=duty.pk, scope=scope.pk, scope_revision=scope.revision,
+        allergy_info_version=allergy['information_version'],
         indication=required_text(indication, '临床依据'), items=normalize_items(visit.clinic_id, entries, lock=lock),
     )
 
@@ -105,8 +135,14 @@ def _approval_basis(version, *, lock=False):
         raise RuleError('原医师的专业授权已失效，请退回后重新核对。') from exc
     if (scope.pk, scope.revision) != (version.clinical_scope_id, version.clinical_scope_revision):
         raise RuleError('本版本的专业授权已变化，请退回后重新核对。')
+    allergy = submitted_allergy_snapshot(version)
+    if allergy is None:
+        if version.state == ACTION.APPROVED:
+            raise RuleError('本版本的医师核实过敏资料缺失或已变化，请停止剩余调配并交负责医师核对。')
+        raise RuleError('本版本的医师核实过敏资料缺失或已变化，请退回给负责医师核对并重新提交。')
     if normalize_items(visit.clinic_id, version.items, lock=lock) != version.items:
         raise RuleError('目录资料已变化，请退回给开方医师核对。')
+    return allergy['information_version']
 
 
 def _decision_data(actor, version, action, reason, *, lock=False):
@@ -114,10 +150,11 @@ def _decision_data(actor, version, action, reason, *, lock=False):
     latest = current_version(version.prescription)
     if not latest or latest.pk != version.pk or latest.state != 'PENDING':
         raise RuleError('当前版本已有办理结果，请刷新查看。')
-    if action == ACTION.APPROVED:
-        _approval_basis(version, lock=lock)
-    return dict(kind='DECIDE', case=version.prescription_id, version=version.pk,
+    data = dict(kind='DECIDE', case=version.prescription_id, version=version.pk,
                 action=action, duty=duty.pk, reason=required_text(reason, '决定依据'))
+    if action == ACTION.APPROVED:
+        data['allergy_info_version'] = _approval_basis(version, lock=lock)
+    return data
 
 
 @sensitive_variables()
@@ -147,7 +184,9 @@ def _confirm_submit(actor, op, data):
         clinical_scope_id=data['scope'], clinical_scope_revision=data['scope_revision'],
         indication=data['indication'], items=data['items'], operation_id=op,
     )
-    emit(actor, 'PRESCRIPTION_SUBMITTED', version, visit=visit, summary={'version': number})
+    emit(actor, 'PRESCRIPTION_SUBMITTED', version, visit=visit, summary={
+        'version': number, 'allergy_info_version': data['allergy_info_version'],
+    })
     return version, False
 
 

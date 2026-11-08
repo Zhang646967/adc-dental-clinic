@@ -23,6 +23,7 @@
     <p class="care-notes">临床依据 {{ data.indication }}</p>
     {% include 'clinical/prescription_items.html' with items=data.items %}
     {% endif %}
+    {% if data.allergy_info_version %}<p>本次办理绑定医师已复核的过敏资料第 {{ data.allergy_info_version }} 版。</p>{% endif %}
   </section>
   <section class="panel form-panel">
     <form method="post" action="{% url 'prescription_confirm' %}" data-rx-confirm>

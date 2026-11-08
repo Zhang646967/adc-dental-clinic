@@ -7,7 +7,7 @@ Page({
   data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
   async onShow() {
     const pending=navigation.consume('/pages/home/index');
-    if(pending&&pending.queue==='all')this.setData({queue:'all',page:1});
+    if(pending&&['all','history'].includes(pending.queue))this.setData({queue:pending.queue,page:1});
     this.setData({rows:[],overview:null,primary:null,patient:'',error:'',requestId:'',subjectInvalid:false,busy:true,guest:false,needsSubject:false,needsEnrollment:false});
     api.showSubject(this);
     try {

@@ -30,16 +30,16 @@ async function verify(){
   assert.equal(intent.destination(app,{authenticated:true}),'/pages/booking/index?service=11&clinic=3&dentist=7&day=2026-10-29');count++;
   intent.remember(app,12,4,null,null,'CHILDREN');assert.equal(intent.destination(app,{authenticated:true,delegated:false}),'/pages/patients/index');assert(app.globalData.bookingIntent);count++;
   assert.equal(intent.destination(app,{authenticated:true,delegated:true,guardian:true}),'/pages/booking/index?service=12&clinic=4');count++;
-  function page(name,{responses=[],session={},bootstrapError=null}={}){
-    let definition;const calls=[];const state={globalData:{}};
-    const api={async bootstrap(){if(bootstrapError)throw bootstrapError;return session;},sessionInfo:()=>session,
+  function page(name,{responses=[],session={},freshSession=session,bootstrapError=null,review=null}={}){
+    let definition;const calls=[];const state={globalData:{review}};
+    const api={async bootstrap(){if(bootstrapError)throw bootstrapError;return freshSession;},sessionInfo:()=>session,
       showSubject:p=>p.setData({patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated}),
       async request(...args){calls.push(args);const r=responses.shift();if(r instanceof Error)throw r;return r;}};
     vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
       Page:d=>definition=d,getApp:()=>state,wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
         key.endsWith('/subject-state')?subjectState:key.endsWith('/format')?format:null});
-    return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls};
+    return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
   let d=page('invoice',{responses:[invoice()]});d.p.onLoad({id:5});await d.p.onShow();assert.equal(d.calls[0][0],'invoices/5/');assert.equal(d.p.data.invoice.total,'99.99');count++;
@@ -55,6 +55,12 @@ async function verify(){
   assert(d.calls.every(c=>c[1]==='GET'));count++;
   d=page('invoice');d.p.onLoad({id:'../account'});await d.p.onShow();assert.equal(d.calls.length,0);assert(d.p.data.error);count++;
   d=page('invoice',{responses:[Error('当前身份不可查看本人账单')]});d.p.data.invoice=invoice();d.p.onLoad({id:5});await d.p.onShow();assert.equal(d.p.data.invoice,null);assert(d.p.data.error);count++;
+  d=page('invoice',{responses:[{...invoice(),revision:1,is_current:false}]});
+  d.p.onLoad({id:5,revision:1});await d.p.onShow();d.p.back();
+  d=page('home',{session:{authenticated:true,account_authenticated:true},responses:[{rows:[],page:1,pages:1},{}]});
+  d.p.setData({queue:'active',page:4});
+  await d.p.onShow();
+  assert.deepEqual({...d.calls[0][2]},{queue:'history',page:1});count++;
   d=page('home',{session:{authenticated:false,account_authenticated:false}});d.p.data.rows=[{patient:'OLD_PRIVATE'}];await d.p.onShow();assert.equal(d.p.data.guest,true);assert.equal(d.calls.length,0);assert.equal(d.p.data.rows.length,0);count++;
   const primary=patientAction.primaryAction;
   const action=(kind,visit=null,offer=null)=>primary({primary_action:{kind,visit,offer}});
@@ -97,6 +103,52 @@ async function verify(){
       count++;
     }
   }
+  const confirmSession={...priorSubject,subject_key:'grant:1',workspace_id:'SYNTHETIC-WORKSPACE',subject_revision:4};
+  const confirmReview={
+    subjectKey:confirmSession.subject_key,workspaceKey:confirmSession.workspace_id,subjectRevision:confirmSession.subject_revision,
+    kind:'booking',path:'booking/confirm/',preview:{proposal_token:'SYNTHETIC-PROPOSAL',patient_request:'OLD_SYNTHETIC_REQUEST'}
+  };
+  const deniedConfirmations=[
+    {status:409,code:'WORKSPACE_CHANGED',freshSession:{authenticated:false,account_authenticated:true},url:'/pages/account/index'},
+    {status:409,code:'SUBJECT_REQUIRED',freshSession:{authenticated:true,account_authenticated:true,subject_required:true},url:'/pages/patients/index'},
+    {status:403,code:'ACCESS_DENIED',freshSession:{authenticated:true,account_authenticated:true},url:'/pages/patients/index'},
+    {status:401,code:'LOGIN_REQUIRED',freshSession:{authenticated:false,account_authenticated:false},url:'/pages/login/index'}
+  ];
+  for(const {status,code,freshSession,url} of deniedConfirmations){
+    const denied=Object.assign(Error('当前就诊人或授权已变化'),{status,code,requestId:'SYNTHETIC-CONFIRM-QUERY'});
+    d=page('confirm',{session:confirmSession,freshSession,review:confirmReview,responses:[denied]});
+    d.p.onLoad();
+    d.p.checked({detail:{value:['yes']}});
+    const routeCount=routes.length;
+    await d.p.submit();
+    assert.equal(d.state.globalData.review,null,code);
+    assert.equal(d.p.data.review,null,code);
+    assert.equal(d.p.data.patientName,'',code);
+    assert.equal(d.p.data.patientCapacity,'',code);
+    assert.equal(d.p.data.patientDelegated,false,code);
+    assert.equal(d.p.data.checked,false,code);
+    assert.equal(d.p.data.subjectInvalid,true,code);
+    assert.equal(d.p.data.requestId,'SYNTHETIC-CONFIRM-QUERY',code);
+    assert.equal(routes.length,routeCount,code);
+    await d.p.submit();
+    assert.equal(d.calls.length,1,code);
+    await d.p.recoverSubject();
+    assert.equal(routes.at(-1).url,url,code);count++;
+  }
+  const expired=Object.assign(Error('会话已失效'),{status:401,code:'LOGIN_REQUIRED',requestId:'SYNTHETIC-ORIGINAL-QUERY'});
+  d=page('confirm',{session:confirmSession,review:confirmReview,responses:[expired],bootstrapError:Error('网络不可用')});
+  d.p.onLoad();d.p.checked({detail:{value:['yes']}});await d.p.submit();
+  const routeCount=routes.length;
+  await d.p.recoverSubject();
+  assert.equal(d.p.data.requestId,'SYNTHETIC-ORIGINAL-QUERY');
+  assert.equal(d.p.data.error,'网络不可用');
+  assert.equal(d.p.data.busy,false);
+  assert.equal(routes.length,routeCount);count++;
+  const occupied=Object.assign(Error('所选时段已占用'),{status:409,code:'BUSINESS_CONFLICT'});
+  d=page('confirm',{session:confirmSession,review:confirmReview,responses:[occupied]});
+  d.p.onLoad();d.p.checked({detail:{value:['yes']}});await d.p.submit();
+  assert.equal(d.p.data.subjectInvalid,false);
+  assert.equal(d.p.data.review.preview.proposal_token,'SYNTHETIC-PROPOSAL');count++;
   d=page('account',{session:{account_authenticated:false}});await d.p.onShow();assert.equal(d.p.data.guest,true);assert.equal(d.p.data.profile,null);count++;
   d.p.setData({newPassword:'SECRET',repeatPassword:'SECRET',smsCode:'SECRET',unlinkPassword:'SECRET'});d.p.onHide();assert.equal(d.p.data.newPassword,'');assert.equal(d.p.data.smsCode,'');count++;
   return {passed:true,cases:count,scope:'actual tab routing and patient Page handlers with controlled transport; not IDE/device acceptance'};

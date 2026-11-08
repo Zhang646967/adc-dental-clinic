@@ -125,6 +125,7 @@ def visit_prescription(request, pk):
             status = 400
     return clinical_render(request, 'clinical/prescription_visit.html', dict(
         visit=visit, record=record, latest=latest, form=form, items=items, editable=editable,
+        allergy_ready=editable and bool(cmd.confirmed_allergy_snapshot(visit, request.user.pk)),
         has_catalogue=catalogue_for(visit.clinic_id).exists(),
     ), status=status)
 
@@ -171,6 +172,7 @@ def detail(request, pk):
             status = 400
     return clinical_render(request, 'clinical/prescription_detail.html', dict(
         case=case, visit=case.visit, version=version, versions=versions, current=current,
+        confirmed_allergy=cmd.submitted_allergy_snapshot(version) if editable else None,
         pharmacist=is_pharmacist, editable=editable, form=form, history=case_history(version),
         can_dispense=is_pharmacist and dispensing.enabled() and active_duties(
             request.user.pk, PrescriptionDuty.Kind.DISPENSE).filter(clinic_id=case.visit.clinic_id).exists(),

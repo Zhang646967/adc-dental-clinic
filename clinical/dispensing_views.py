@@ -17,8 +17,7 @@ from clinical.encounter_views import clinical_render
 from clinical.pharmacy_models import DispenseMovement, PharmacyQuote, PharmacyStop
 from clinical.prescription_access import active_duties
 from clinical.prescription_forms import PrescriptionConfirmForm
-from clinical.prescription_models import Prescription, PrescriptionDuty, PrescriptionVersion
-from clinical.prescriptions import current_version
+from clinical.prescription_models import PrescriptionDuty, PrescriptionVersion
 from supplies.access import enabled as stock_enabled
 from supplies.pharmacy import choices as lot_choices
 from supplies.models import NursingExecution
@@ -59,11 +58,21 @@ def case_history(version):
     return dict(quote=quote, stop=stop, quote_lines=list(cmd.quote_rows(quote)) if quote else [])
 
 
-def _case(request, pk):
-    cmd.dispenser(request.user, request.workspace.clinic_id)
-    cases = Prescription.objects.select_related('visit__clinic', 'visit__patient', 'prescriber').exclude(prescriber=request.user)
-    return get_object_or_404(cases,
-                             pk=pk, visit__clinic_id=request.workspace.clinic_id)
+def _approved_versions(actor, clinic):
+    latest = PrescriptionVersion.objects.filter(prescription_id=OuterRef('prescription_id')).order_by('-number')
+    return PrescriptionVersion.objects.filter(
+        pk=Subquery(latest.values('pk')[:1]), prescription__visit__clinic_id=clinic,
+        decision__action='APPROVED',
+    ).exclude(prescription__prescriber=actor)
+
+
+def _approved_version(request, pk):
+    clinic = request.workspace.clinic_id
+    cmd.dispenser(request.user, clinic)
+    rows = _approved_versions(request.user, clinic).select_related(
+        'prescription__visit__clinic', 'prescription__visit__patient', 'prescription__prescriber', 'decision',
+    )
+    return get_object_or_404(rows, prescription_id=pk)
 
 
 @login_required
@@ -74,11 +83,7 @@ def queue(request):
     if clinic is None and cmd.enabled():
         return select_clinic(request)
     cmd.dispenser(request.user, clinic)
-    latest = PrescriptionVersion.objects.filter(prescription=OuterRef('prescription')).order_by('-number')
-    rows = PrescriptionVersion.objects.filter(
-        pk=Subquery(latest.values('pk')[:1]), prescription__visit__clinic_id=clinic,
-        decision__action='APPROVED',
-    ).exclude(prescription__prescriber=request.user).select_related(
+    rows = _approved_versions(request.user, clinic).select_related(
         'prescription__visit__patient', 'decision__pharmacy_quote', 'decision__pharmacy_stop',
     ).order_by('-submitted_at', '-pk')
     can_review = active_duties(request.user.pk, PrescriptionDuty.Kind.REVIEW).filter(clinic_id=clinic).exists()
@@ -92,8 +97,8 @@ def queue(request):
 @sensitive_post_parameters()
 @require_http_methods(['GET', 'POST'])
 def detail(request, pk):
-    case = _case(request, pk)
-    version = current_version(case)
+    version = _approved_version(request, pk)
+    case = version.prescription
     history = case_history(version)
     quote = history.get('quote')
     rows = history.get('quote_lines', [])
@@ -106,7 +111,7 @@ def detail(request, pk):
         administered=Coalesce(Subquery(administered),0),
     ).filter(quantity__gt=F('returned')+F('administered')) if quote else moves
     kinds = []
-    if not settings.ADC_READ_ONLY and request.user.pk != case.prescriber_id and version and version.state == 'APPROVED':
+    if not settings.ADC_READ_ONLY:
         if case.visit.status == 'CHECKED_IN' and not history['stop']:
             if not quote:
                 kinds.extend(['QUOTE', 'STOP'])
@@ -158,7 +163,7 @@ def detail(request, pk):
 @sensitive_post_parameters()
 @require_POST
 def confirm(request, pk):
-    case = _case(request, pk)
+    case = _approved_version(request, pk).prescription
     form = PrescriptionConfirmForm(request.POST)
     if form.is_valid():
         try:

@@ -119,10 +119,18 @@ def capture(visit,*,fee_version_id=None):
             plans=rows(PlanDraft,plan__origin_encounter=encounter)),
         fee=fee_data,issues=issues)
     from supplies.models import NursingExecution
+    administered_fields = ('issue__stock_movement__lot__code', 'issue__line__name_snapshot', 'issue__line__unit_snapshot')
     nursing=list(NursingExecution.objects.filter(visit=visit).values(
         'id','kind','observed_at','recorded_at','quantity','performed_id','issue_id','actor_id','reason',
         'sterile_pack__code','sterile_pack__process_reference','stock_movement__lot__code',
+        *administered_fields,
     ).order_by('pk'))
+    for row in nursing:
+        if row['kind'] == NursingExecution.Kind.ADMINISTER:
+            row.pop('stock_movement__lot__code')
+        else:
+            for field in administered_fields:
+                row.pop(field)
     if nursing:
         result['nursing']=nursing
     return plain(result)

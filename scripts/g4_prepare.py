@@ -326,13 +326,14 @@ def inspect_bundle(output, rendered=None, *, resume_source=None):
         if writable and any(service.get('platform') != 'linux/' + plan['architecture'] for service in services.values()):
             raise ValueError('All course services must use the reviewed image architecture.')
         ports = services['gateway'].get('ports', [])
-        targets = {80} if plan.get('mode') in ('mac_tunnel','teacher_tunnel') else {80, 443}
-        if len(ports) != len(targets) or {int(p['target']) for p in ports} != targets:
-            raise ValueError('Gateway ports do not match the reviewed deployment mode.')
+        tunnel = plan.get('mode') in ('mac_tunnel', 'teacher_tunnel')
+        targets = (80,) if tunnel else (80, 443)
+        actual = {int(p['target']): int(p.get('published', 0)) for p in ports}
+        if len(ports) != len(targets) or actual != dict(zip(targets, plan['ports'], strict=True)):
+            raise ValueError('Gateway ports do not match the reviewed host ports.')
         if any(p.get('host_ip') != plan['bind_ip'] for p in ports):
             raise ValueError('Gateway binding does not match the reviewed plan.')
-        if plan.get('mode') in ('mac_tunnel','teacher_tunnel') and (plan['bind_ip'] != '127.0.0.1' or
-                any(int(p.get('published', 0)) != plan['ports'][0] for p in ports)):
+        if tunnel and plan['bind_ip'] != '127.0.0.1':
             raise ValueError('Mac tunnel origin must use the reviewed IPv4 loopback port.')
     return {'status': 'PREPARED_NOT_DEPLOYED', 'configuration_checks': 'PASS',
             'project': plan['project'], 'host': inputs.host, 'read_only': inputs.read_only,

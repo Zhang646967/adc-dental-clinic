@@ -153,8 +153,8 @@ class G4PreparationTests(unittest.TestCase):
                'networks': {'private': {'internal': True}, 'edge': {}}}
         for name in ('web', 'notification-worker', 'operations'):
             doc['services'][name] = {'environment': runtime, 'image': plan['images']['app']}
-        doc['services']['gateway']['ports'] = [{'target': 80, 'host_ip': '127.0.0.1'},
-                                               {'target': 443, 'host_ip': '127.0.0.1'}]
+        doc['services']['gateway']['ports'] = [{'target': 80, 'published': '80', 'host_ip': '127.0.0.1'},
+                                               {'target': 443, 'published': '443', 'host_ip': '127.0.0.1'}]
         rendered = self.folder / 'private/rendered.json'
         rendered.write_text(json.dumps(doc))
         self.assertEqual(inspect_bundle(self.folder, rendered)['configuration_checks'], 'PASS')
@@ -162,6 +162,10 @@ class G4PreparationTests(unittest.TestCase):
         bad['services']['db']['ports'] = [{'target': 5432, 'published': '5432'}]
         rendered.write_text(json.dumps(bad))
         with self.assertRaises(ValueError):
+            inspect_bundle(self.folder, rendered)
+        doc['services']['gateway']['ports'][1]['published'] = '18000'
+        rendered.write_text(json.dumps(doc))
+        with self.assertRaisesRegex(ValueError, 'reviewed host ports'):
             inspect_bundle(self.folder, rendered)
 
     def test_rendered_external_network_refused(self):

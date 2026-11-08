@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from io import StringIO
 from threading import Barrier
+from unittest.mock import patch
 from uuid import uuid4
 
 from django.core.exceptions import PermissionDenied
@@ -15,10 +16,13 @@ from django.utils import timezone
 
 from accounts.models import RoleAssignment, UserAccount
 from adc_core.rules import RuleError
+from care.audit import emit
 from care.models import AuditEvent, Invoice, TreatmentRecord
+from care.services import review_allergies
 from clinical import encounters, prescriptions
 from clinical.prescription_models import Prescription, PrescriptionCatalogueItem, PrescriptionDecision, PrescriptionDuty, PrescriptionVersion
 from finance.cash_models import CashEntry
+from registry.models import Allergy
 from tests.test_clinical_authority import AuthorityFixture
 from tests.workspace_client import WorkspaceClient
 from workspaces.context import available_roles
@@ -46,6 +50,13 @@ class PrescriptionFixture(AuthorityFixture):
         encounters.confirm_record(actor=self.doc, proposal_token=preview['proposal_token'], confirmed=True)
         self.record = prescriptions.current_record(self.visit)
         self.items = list(PrescriptionCatalogueItem.objects.filter(clinic=self.a))
+        self.review_confirmed_allergies('NO_KNOWN')
+
+    def review_confirmed_allergies(self, status, allergy_ids=()):
+        self.visit.refresh_from_db()
+        review_allergies(actor=self.doc, visit_id=self.visit.pk, expected_version=self.visit.lock_version,
+                         patient_version=self.visit.patient.allergy_info_version, status=status, allergy_ids=allergy_ids)
+        self.visit.refresh_from_db()
 
     def configure(self, *args):
         return call_command('configure_prescription_rehearsal', '--synthetic-only', '--operator', self.tech.username,
@@ -203,6 +214,48 @@ class PrescriptionReviewTests(PrescriptionFixture, TransactionTestCase):
         with self.assertRaisesMessage(RuleError, '自述资料已有更新'):
             prescriptions.confirm(self.rx_user, approval, True)
         _, returned = prescriptions.prepare_decision(self.rx_user, version, 'RETURNED', '请核对补充自述。')
+        prescriptions.confirm(self.rx_user, returned, True)
+        self.assertEqual(PrescriptionDecision.objects.get().action, 'RETURNED')
+
+    def test_confirmed_allergy_change_requires_new_prescription_before_approval(self):
+        self.review_confirmed_allergies('UNKNOWN')
+        with self.assertRaisesMessage(RuleError, '复核当前过敏资料'):
+            self.submit()
+        self.review_confirmed_allergies('NO_KNOWN')
+        version = self.submit()
+        _, approval = prescriptions.prepare_decision(self.rx_user, version, 'APPROVED', '合成审核')
+
+        allergy = Allergy.objects.create(code='C41-VERIFIED', name='新核实合成过敏条目')
+        self.review_confirmed_allergies('KNOWN', [allergy.pk])
+        self.assertEqual(prescriptions.current_record(self.visit).pk, version.record_id)
+        with self.assertRaisesMessage(RuleError, '医师核实过敏资料缺失或已变化'):
+            prescriptions.confirm(self.rx_user, approval, True)
+        self.assertFalse(PrescriptionDecision.objects.exists())
+
+        _, returned = prescriptions.prepare_decision(self.rx_user, version, 'RETURNED', '请核对新资料。')
+        prescriptions.confirm(self.rx_user, returned, True)
+        revised = self.submit(previous=version.pk)
+        pharmacy = WorkspaceClient()
+        pharmacy.force_login(self.rx_user)
+        self.assertContains(pharmacy.get(reverse('prescription_detail', args=[revised.prescription_id])), allergy.name)
+        _, approval = prescriptions.prepare_decision(self.rx_user, revised, 'APPROVED', '核对后重新审方')
+        prescriptions.confirm(self.rx_user, approval, True)
+        self.assertEqual(list(PrescriptionDecision.objects.order_by('pk').values_list('action', flat=True)),
+                         ['RETURNED', 'APPROVED'])
+
+    def test_legacy_pending_prescription_is_readable_and_can_be_returned(self):
+        def emit_legacy_receipt(actor, event_type, subject, **kwargs):
+            kwargs['summary'] = {'version': subject.number}
+            return emit(actor, event_type, subject, **kwargs)
+
+        with patch.object(prescriptions, 'emit', side_effect=emit_legacy_receipt):
+            legacy = self.submit()
+        pharmacy = WorkspaceClient()
+        pharmacy.force_login(self.rx_user)
+        self.assertContains(pharmacy.get(reverse('prescription_detail', args=[legacy.prescription_id])), '待审核')
+        with self.assertRaisesMessage(RuleError, '医师核实过敏资料缺失或已变化'):
+            prescriptions.prepare_decision(self.rx_user, legacy, 'APPROVED', '旧版本无绑定依据')
+        _, returned = prescriptions.prepare_decision(self.rx_user, legacy, 'RETURNED', '请重新核对过敏资料。')
         prescriptions.confirm(self.rx_user, returned, True)
         self.assertEqual(PrescriptionDecision.objects.get().action, 'RETURNED')
 

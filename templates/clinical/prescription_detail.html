@@ -14,6 +14,11 @@
     <p>开方账号 {{ case.prescriber.username }} · {{ version.submitted_at|date:'Y-m-d H:i' }} · 确认病历第 {{ version.record.revision }} 版</p>
     <dl class="detail-grid">
       <dt>临床依据</dt><dd class="care-notes">{{ version.indication }}</dd>
+      {% if editable %}
+      <dt>本版本绑定的医师复核过敏资料</dt>
+      <dd>{% if confirmed_allergy %}{% if confirmed_allergy.status == 'NO_KNOWN' %}目前无已知过敏{% else %}{% for item in confirmed_allergy.items %}{{ item.name }}{% if not forloop.last %}、{% endif %}{% endfor %}{% endif %}
+        （资料版本 {{ confirmed_allergy.information_version }}）{% else %}未取得可用的核实依据，请由负责医师重新核对。{% endif %}</dd>
+      {% endif %}
       {% if version.record.history %}
       <dt>引用的过敏自述</dt><dd>{{ version.record.history.get_allergy_status_display }} <span class="care-notes">{{ version.record.history.reported_allergies }}</span></dd>
       <dt>引用的用药自述</dt><dd>{{ version.record.history.get_medication_status_display }} <span class="care-notes">{{ version.record.history.medications }}</span></dd>

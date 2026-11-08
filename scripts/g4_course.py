@@ -462,7 +462,7 @@ class Course:
 
     def restore(self, encrypted, identity, age='age', *, schema_mode='pg-dump'):
         encrypted, identity = private_file(encrypted), private_file(identity)
-        with exclusive(self.bundle / 'private/restore.lock'), tempfile.TemporaryDirectory(dir=self.bundle / 'private') as temporary:
+        with exclusive(self.bundle / 'private/release.lock'), tempfile.TemporaryDirectory(dir=self.bundle / 'private') as temporary:
             temporary = Path(temporary)
             cipher_sha, key_sha = file_digest(encrypted), file_digest(identity)
             meta = decrypt_backup(encrypted, identity, temporary, self.log, age)
@@ -479,7 +479,7 @@ class Course:
                 book.load()
             if file_digest(encrypted) != cipher_sha or file_digest(identity) != key_sha:
                 raise ValueError('Recovery archive or key changed during authentication.')
-            result = self.restore_decrypted(temporary / 'database.dump', meta, schema_mode=schema_mode)
+            result = self._restore_decrypted(temporary / 'database.dump', meta, schema_mode=schema_mode)
             if result['business_comparison'] == 'PASSED':
                 if file_digest(encrypted) != cipher_sha or file_digest(identity) != key_sha:
                     raise ValueError('Recovery archive or current key changed during restoration.')
@@ -527,6 +527,10 @@ class Course:
         return validate_observations(json.loads(raw))
 
     def restore_decrypted(self, dump, meta, *, schema_mode='pg-dump'):
+        with exclusive(self.bundle / 'private/release.lock'):
+            return self._restore_decrypted(dump, meta, schema_mode=schema_mode)
+
+    def _restore_decrypted(self, dump, meta, *, schema_mode):
         # A Mac operator can transfer a verified dump through pinned SSH without
         # ever uploading the private decryption key. Its checksum remains bound
         # to the decrypted archive manifest.
@@ -541,6 +545,9 @@ class Course:
                 meta['files']['database.dump']['sha256'] != digest(dump) or
                 meta['files']['database.dump']['size'] != dump.stat().st_size):
             raise ValueError('Verified recovery dump does not match the target contract.')
+        if any((self.bundle / 'private' / name).exists()
+               for name in ('deployed.json', 'deployment-phase.json')):
+            raise ValueError('Restore requires a new project with no deployment history.')
         self.start_database()
         started = time.monotonic()  # Replacement database/image environment is now ready.
         if self.tables() or set(self.dc('ps', '--status', 'running', '--services').decode().split()) - {'db'}:
@@ -571,6 +578,9 @@ class Course:
             if ({n: f['schema_sha256'] for n, f in expected['tables'].items()} !=
                     {n: f['schema_sha256'] for n, f in built['tables'].items()}):
                 raise ValueError('Migration-built schema differs from the backup; data was not imported.')
+            if (self.database_identity() != target or
+                    set(self.dc('ps', '--status', 'running', '--services').decode().split()) - {'db'}):
+                raise ValueError('Restore target storage or stopped-writer state changed before import.')
             # Only this new, already-proven-empty target is modified. Initial
             # migration rows are replaced by the authenticated snapshot too.
             truncate = ("DO $$ DECLARE names text; BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') "
@@ -898,8 +908,7 @@ def main():
         elif args.action == 'restore':
             result = course.restore(args.backup_file, args.identity_file, args.age, schema_mode=args.schema_mode)
         elif args.action == 'restore-verified-dump':
-            with exclusive(course.bundle / 'private/restore.lock'):
-                result = course.restore_decrypted(args.dump_file, json.loads(private_file(args.manifest_file).read_text()), schema_mode=args.schema_mode)
+            result = course.restore_decrypted(args.dump_file, json.loads(private_file(args.manifest_file).read_text()), schema_mode=args.schema_mode)
         elif args.action == 'issue-tls':
             result = course.tls(args.public_ip, args.certbot)
         elif args.action == 'renew-tls':

@@ -1,5 +1,6 @@
-<view class="page"><view class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><button class="link-button" bindtap="subjects" disabled="{{busy}}">切换就诊人</button></view><view wx:if="{{review.kind==='booking'}}" class="steps">第 3 步 · 核对提交</view><view class="title">{{done?'办理结果':uncertain?'请核对办理结果':title||'核对就诊安排'}}</view>
+<view class="page"><view wx:if="{{!subjectInvalid}}" class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><button class="link-button" bindtap="subjects" disabled="{{busy}}">切换就诊人</button></view><view wx:if="{{review.kind==='booking'}}" class="steps">第 3 步 · 核对提交</view><view class="title">{{done?'办理结果':uncertain?'请核对办理结果':subjectInvalid?'请重新核对就诊人':title||'核对就诊安排'}}</view>
   <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text></view>
+  <button wx:if="{{subjectInvalid}}" class="primary" bindtap="recoverSubject" disabled="{{busy}}" loading="{{busy}}">核对账号与就诊人</button>
   <view wx:if="{{done}}" class="card"><view class="pill">{{done.status_label}}</view><view class="time">{{done.startLabel}}</view><view>{{done.clinic}} · {{done.dentist}}</view><view>{{doneType==='waitlist'?'候补':'预约'}}编号 #{{done.id}}</view><view wx:if="{{doneType==='waitlist'}}" class="notice">请以候补当前状态为准；尚未成约时不按预约到诊。</view><button class="primary" bindtap="result">{{doneType==='waitlist'?'查看候补进展':'查看这条预约'}}</button></view>
   <block wx:elif="{{review}}">
     <view wx:if="{{review.preview.original}}" class="card"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}}</view><view>{{review.preview.original.clinic}} · {{review.preview.original.dentist}}</view><view>{{review.preview.original.startLabel}} 至 {{review.preview.original.endLabel}}</view></view>
@@ -11,5 +12,5 @@
     <view class="notice">{{note}}</view><view class="muted">时间均为北京时间。预约及候补操作不产生治疗或收费。</view>
     <checkbox-group bindchange="checked"><label class="check"><checkbox value="yes" checked="{{checked}}"/><text>{{consent}}</text></label></checkbox-group>
     <button class="{{review.kind==='cancel' || review.kind==='wait_withdraw' || review.kind==='offer_decline'?'danger':'primary'}}" disabled="{{!checked || busy}}" loading="{{busy}}" bindtap="submit">{{button}}</button>
-  </block><button class="secondary" bindtap="home">查询办理结果</button>
+  </block><button wx:if="{{!subjectInvalid}}" class="secondary" bindtap="home">查询办理结果</button>
 </view>

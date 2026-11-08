@@ -28,6 +28,7 @@ from finance.cash_selectors import invoice_balance
 from finance.cash_services import confirm_cash_request, confirm_cash_review, prepare_cash, prepare_review
 from finance.reconciliation_models import PaymentAccount
 from portal.models import PatientAccess
+from registry.models import Allergy
 from tests.test_prescription_review import PrescriptionFixture
 from tests.workspace_client import WorkspaceClient
 from workspaces.models import WorkspaceContext
@@ -164,6 +165,42 @@ class DispensingTests(DispensingFixture, TransactionTestCase):
                 self.plan('ISSUE',line_id=line.pk,quantity=1)
             self.perform('STOP')
         self.assertFalse(DispenseMovement.objects.exists())
+
+    def test_confirmed_allergy_change_blocks_issue_and_keeps_stop_and_return(self):
+        line = self.priced()
+        issue = self.perform('ISSUE', line_id=line.pk, quantity=2)
+        stale = self.plan('ISSUE', line_id=line.pk, quantity=1)
+        allergy = Allergy.objects.create(code='C42-VERIFIED', name='发药前新核实合成过敏条目')
+        self.review_confirmed_allergies('KNOWN', [allergy.pk])
+
+        with self.assertRaisesMessage(RuleError, '请停止剩余调配'):
+            dispensing.confirm(self.rx_user, stale, True)
+        self.assertEqual(list(DispenseMovement.objects.values_list('pk', flat=True)), [issue.pk])
+        self.perform('STOP')
+        returned = self.perform('RETURN', line_id=line.pk, issue_id=issue.pk, quantity=1)
+        self.assertEqual((returned.original_issue_id, returned.quantity), (issue.pk, 1))
+
+    def test_dispense_only_direct_urls_reject_pending_and_rejected(self):
+        user = UserAccount.objects.create_user(username='synthetic_dispense_only')
+        RoleAssignment.objects.create(user=user, clinic=self.a, role='PHARMACIST', scope_kind='CLINIC')
+        now = timezone.now()
+        PrescriptionDuty.objects.create(user=user, clinic=self.a, kind='DISPENSE', reference='C42-SYNTHETIC',
+                                        valid_from=now-timedelta(hours=1), valid_until=now+timedelta(hours=1))
+        pharmacy = WorkspaceClient()
+        pharmacy.force_login(user)
+        detail = reverse('dispensing_detail', args=[self.case.pk])
+        confirmation = reverse('dispensing_confirm', args=[self.case.pk])
+        for state in ('PENDING', 'REJECTED'):
+            with self.subTest(state=state):
+                if state == 'REJECTED':
+                    _, token = prescriptions.prepare_decision(self.rx_user, self.version, 'REJECTED', '合成拒绝')
+                    prescriptions.confirm(self.rx_user, token, True)
+                queue = pharmacy.get(reverse('dispensing_queue'))
+                self.assertEqual(queue.status_code, 200)
+                self.assertEqual(list(queue.context['page'].object_list), [])
+                self.assertEqual(pharmacy.get(detail).status_code, 404)
+                self.assertEqual(pharmacy.post(detail, {'action': 'QUOTE'}).status_code, 404)
+                self.assertEqual(pharmacy.post(confirmation, {'confirmed': 'on'}).status_code, 404)
 
     def test_revoked_duty_and_wrong_store_cannot_issue(self):
         line=self.priced()
