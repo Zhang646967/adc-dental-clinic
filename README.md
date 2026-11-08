@@ -4,15 +4,15 @@
 
 ## 访问与登录
 
-**正式公网地址：尚未部署。** 固定HTTPS地址通过实际验收后在此公布。后续仅部署统一ADC系统，教师按普通用户方式访问，不另建“教师上线版”。历史记录中的临时隧道和本机端口不是当前正式访问地址。
+**课程网页试用已部署。** 当前服务器运行 D2.4 源码 `19238b8`，提供二十家课程合成门店。 [应用版本 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42451753585)
 
 | 使用对象 | 入口 | 登录方式 |
 |---|---|---|
-| 访客 | 部署后的首页 `/` | 无需登录即可查看门店、医师和服务 |
-| 患者 | 微信小程序；患者网站 `/portal/login/` | 使用部署后实际启用的微信或原账号方式；小程序可用入口在平台与真机验收后公布 |
-| 员工 | 独立员工入口 `/accounts/login/` | 使用分配的岗位账号，按权限进入对应岗位及诊所 |
+| 访客 | [ADC 首页](https://lijiahao.duckdns.org/) | 直接查看门店、医师和服务 |
+| 患者 | [患者登录](https://lijiahao.duckdns.org/portal/login/) | 使用项目作者分配的患者账号和密码 |
+| 员工 | [员工登录](https://lijiahao.duckdns.org/accounts/login/) | 使用分配的岗位账号，按页面提示选择诊所或角色 |
 
-**账号获取：** 体验账号由项目作者单独提供，老师按要查看的业务使用对应角色账号。密码、AppSecret和服务器密钥不放公开仓库。手机号短信尚未真实开通，不列为已可用登录方式。
+老师按试用场景向项目作者领取账号。账号密码通过私有渠道交付。小程序平台、真机及目标机的持续运行验收分别记录。
 
 ## 课程报告
 
@@ -35,7 +35,7 @@ C4.1 完成单店合成处方演练。负责医师可从确认病历开方，独
 第一批一致性整改涵盖网页筛选、二十店介绍、课程 PDF 和小程序预约联系入口。预约联系页置顶本单门店，并为待核实的预约显示核实提示。WorkBuddy 已完成微信开发者工具复测。[整改与交接](docs/CONSISTENCY_BATCH1.md) · [分项验收](docs/evidence_consistency1/README.md)
 
 
-D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版，迁移后失败可按同一检查点继续；已核对原记录、升级后写入和加密独立恢复。服务器尚未部署。
+D2.2已通过准确CI与77→80追加迁移演练。备份失败可恢复旧版，迁移后失败可按同一检查点继续；该轮在隔离环境中核对原记录、升级后写入和加密独立恢复。
 
 [独立运行本机演练](docs/D23_INDEPENDENT_OPERATIONS.md) · [追加迁移验收](docs/evidence_d22/README.md) · [部署包执行结果](docs/evidence_d21/README.md) · [小程序既有验收](docs/WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [统一服务器上线计划](docs/SERVER_DEPLOYMENT_PLAN.md) · [开发进度](RELEASE_CURRENT.md) · [实际数据库设计](docs/database/README.md)
 
@@ -244,8 +244,7 @@ Chrome checks. G4 is PARTIAL: the temporary read-only Mac demonstration passed
 bounded public checks. The next target is the writable course deployment on an
 independent Hong Kong server, with a fixed free hostname and verified Mac backups.
 See [the course deployment and recovery guide](docs/COURSE_ONLINE.md).
-The server has not been purchased; cloud write/reboot/off-host/24-hour acceptance
-remains NOT_RUN. Original Windows backup recovery remains unresolved.
+That stage recorded local and temporary-gateway evidence. See [current course access](#访问与登录) for the independent server. Original Windows backup recovery remains unresolved.
 
 - [Release scope and history](RELEASE_CURRENT.md)
 - [Two business demonstration routes](docs/DEMO_ROUTES_RC1.md)
