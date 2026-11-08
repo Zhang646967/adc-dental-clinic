@@ -76,7 +76,48 @@
     "live_revocation_scope": "real PostgreSQL, native Page and transport, loopback HTTP with modeled wx.request; official IDE separate",
     "workbuddy_project_checksums": 98,
     "workbuddy_active_test_grants_at_freeze": 3,
-    "workbuddy_official_tool": "PENDING_WORKBUDDY",
+    "workbuddy_official_tool": "PASS",
+    "workbuddy_tool_receipt": {
+      "client_matches_tested_source": true,
+      "backend_matches_publication_commit_and_image": true,
+      "isolated_loopback_port": 18524,
+      "base_library": "3.17.5",
+      "simulator": "iPhone 12/13 (Pro), 390 × 844, tourist AppID",
+      "compiled_pages": 27,
+      "project_files": 93,
+      "checksums_verified": 98,
+      "tree_sha256": "534a940682d07114111f219f0ca2187b8b1760a5aa27ba6014850e88970fb221",
+      "archive_ci_status_at_freeze": "dispatch_requested",
+      "ci_success_verified_for_exact_client": true,
+      "scenarios": {
+        "WB24-A": {
+          "status": "PASS",
+          "old_identity_appointment_draft_and_actions_cleared": true,
+          "recovery": "remaining subject selectable; only its appointment displayed"
+        },
+        "WB24-B": {
+          "status": "PASS",
+          "old_identity_appointment_draft_and_actions_cleared": true,
+          "recovery": "login required; no usable subject",
+          "follow_up_check": "reLaunch of subject picker also returned to login"
+        },
+        "wechat_login_intent": {
+          "status": "PASS",
+          "scope": "frozen page handlers with controlled transport",
+          "ordinary_login_omits_original_account_fields": true,
+          "explicit_association_requires_both_fields": true
+        }
+      },
+      "read_only_reconciliation": {
+        "revocation_events": 2,
+        "refresh_denials_matched_in_logs": 2,
+        "retained_scheduled_appointments": 2,
+        "original_appointment_versions_preserved": true,
+        "cancel_reschedule_or_booking_posts": 0
+      },
+      "private_screenshot_files": 8,
+      "key_screenshots_reviewed": 4
+    },
     "real_wechat_and_target_devices": "PENDING_PLATFORM_OR_DEVICE"
   },
   "application_migrations_changed": false,
