@@ -1,0 +1,82 @@
+{
+  "scope": "WorkBuddy read-only WeChat DevTools on the 18480 C4.2 synthetic backend",
+  "client_commit": "6f3de628be6ca929b80537b198cf1f50d7e74523",
+  "backend_commit": "3869a5dde607a0835b53dfde64de31dbeff345ae",
+  "backend_image": "sha256:fc124053bd268ae125a7d8d6e883910cfc5981ec6e1d9852e61d24f03f4077ed",
+  "client_ci": {
+    "id": 42401919126,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "backend_ci": {
+    "id": 42393013779,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "package": {
+    "verified_checksums": 96,
+    "project_files": 93,
+    "tree_sha256": "26c09e86c5bf986d70ce5d75a763106e926e7ad63c4eedf95e6790eab9432937"
+  },
+  "devtools": {
+    "base_library": "3.17.5",
+    "appid_mode": "touristappid",
+    "simulator": "iPhone 12/13 (Pro)",
+    "screen_px": [
+      390,
+      844
+    ],
+    "font_size_setting": 16,
+    "compiled_pages": 27,
+    "readability_and_back_navigation": "pass",
+    "private_screenshot_count": 11
+  },
+  "read_only_cases": {
+    "current_version": 2,
+    "current_charge_cny": "37.50",
+    "historical_version": 1,
+    "historical_charge_cny": "50.00",
+    "historical_access": "explicit page path",
+    "balances_reference_current_version": true,
+    "posted_receipt_cny": "50.00",
+    "posted_refund_cny": "12.50",
+    "posted_net_cny": "37.50",
+    "amount_due_cny": "0.00",
+    "amount_to_refund_cny": "0.00",
+    "treatment_charge_lines": 0,
+    "other_account": "generic 404 and no previous invoice data"
+  },
+  "independent_check": {
+    "matched_request_ids": 6,
+    "post_routes_in_test_window": {
+      "mini_login": 3,
+      "mini_logout": 2
+    },
+    "business_writes": 0,
+    "compared_tables_to_pretest_restore": 177,
+    "schema_matches": true,
+    "changed_facts": [
+      "sensitive read audit",
+      "workspace context",
+      "session",
+      "user last_login"
+    ]
+  },
+  "pending": [
+    "native version picker gesture",
+    "other screen widths",
+    "enlarged fonts",
+    "on-screen keyboard",
+    "real handset",
+    "WeChat platform"
+  ],
+  "course_pdf_revision": {
+    "passed": true,
+    "physical_pages": 296,
+    "physical_page_changed": 295,
+    "printed_page_changed": 289,
+    "other_page_streams_identical": 295,
+    "baseline_sha256": "4d3e9b75e701489799384bd68ff7604e05905e4d9cebcfebdae2b9970e5dcd29",
+    "sha256": "b8e924e8b6a58f56126bb8ab798843eba026d78300daf26692588f28444ef9b2"
+  }
+}

@@ -10,6 +10,8 @@
 
 准确应用提交 `3869a5d` 通过完整验证，包含 1,169 项源检查、2,336 项 PostgreSQL 测试及 339 项小程序源码与传输检查。 [GitHub CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42393013779)
 
+患者小程序客户端 `6f3de62` 连接 C4.2 合成后端，在 390 px 微信开发者工具通过 27 页编译、当前与历史药费、当前收退款、返回就诊及跨账号拒绝。历史账单通过页面路径读取，原生版本选择手势和真机另验。 [复测与只读对账](docs/evidence_c42/README.md#患者小程序只读复测)
+
 # C4.1 处方与独立审方
 
 在单店合成演练中，负责医师从确认病历提交处方，药师在本店工作台审核。退回后追加版本，原版与决定可查。Chrome 正常办理、PostgreSQL 权限和并发验证以及独立加密恢复已执行。课程 PDF 补充第二批小程序实测及 C4.1 设计页。 [岗位规则](docs/decisions/ADR_C41_PRESCRIPTION_REVIEW.md) · [验收记录](docs/evidence_c41/README.md)

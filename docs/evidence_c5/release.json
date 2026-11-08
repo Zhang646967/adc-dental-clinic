@@ -119,7 +119,7 @@
     ],
     "sha256": "4d3e9b75e701489799384bd68ff7604e05905e4d9cebcfebdae2b9970e5dcd29"
   },
-  "official_miniprogram_tool": "pending, WorkBuddy application exposed no interactive window",
+  "official_miniprogram_tool": "passed for 18480 patient pharmacy charge read-only cases at 390 px",
   "platform_and_partner_site": "pending actual platform and qualified clinic acceptance",
   "local_integrated_postgresql": 85,
   "native_source_and_transport": 339,
@@ -151,5 +151,6 @@
     "sequential_ci": "Run 42396329026 reached the 60-minute job limit. Two successful jobs cover the same test manifest at the exact application commit.",
     "local_deep_legacy_rollback": "The local process exited 137. The exact application commit was verified by the full GitHub suite."
   },
-  "native_invoice_projection": "shared Django source with split medication lines and fallback for older clients"
+  "native_invoice_projection": "shared Django source with split medication lines and fallback for older clients",
+  "official_miniprogram_tool_evidence": "../evidence_c42/workbuddy-closure.json"
 }

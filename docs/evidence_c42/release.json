@@ -63,7 +63,7 @@
     "physical_pages": 295,
     "sha256": "67e6068790dd53ede6cc9ef269760839c8bd7d7a88fee2ff3f5682b8a1532159"
   },
-  "official_miniprogram_tool": "pending, WorkBuddy application exposed no interactive window",
+  "official_miniprogram_tool": "passed for 18480 patient pharmacy charge read-only cases at 390 px",
   "platform_and_partner_site": "pending actual platform and qualified clinic acceptance",
   "actual_native_invoice_http": {
     "passed": true,
@@ -84,5 +84,6 @@
     ],
     "otherStatus": 404,
     "otherResponseHasNoInvoice": true
-  }
+  },
+  "official_miniprogram_tool_evidence": "workbuddy-closure.json"
 }
