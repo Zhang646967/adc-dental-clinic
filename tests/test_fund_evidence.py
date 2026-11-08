@@ -172,16 +172,18 @@ class FundEvidenceTests(EvidenceFixture,TransactionTestCase):
         from django.db import connection
         from django.db.migrations.executor import MigrationExecutor
         from finance.cash_evidence_services import effective
+        entry=self.posted();line=self.imported();evidence_id=effective(entry.pk).pk
         targets=MigrationExecutor(connection).loader.graph.leaf_nodes()
-        MigrationExecutor(connection).migrate([('finance','0009_evidence_history_guards')])
+        old_state=MigrationExecutor(connection).migrate([('finance','0009_evidence_history_guards')])
         try:
-            entry=self.posted();line=self.imported()
-            # A pre-increment retained R1 row, validated by the original SQL
-            # guards. The current commands require the new ownership table.
-            match=ReconciliationMatch.objects.create(cash_entry=entry,evidence=effective(entry.pk),line=line,prepared_by=self.manager)
-            before=ReconciliationMatch.objects.values().get(pk=match.pk)
+            # The earlier schema supports the retained match through its own model.
+            old_match=old_state.apps.get_model('finance','ReconciliationMatch')
+            match_id=old_match.objects.create(cash_entry_id=entry.pk,evidence_id=evidence_id,
+                line_id=line.pk,prepared_by_id=self.manager.pk).pk
+            before=old_match.objects.values().get(pk=match_id)
         finally:
             MigrationExecutor(connection).migrate(targets)
+        match=ReconciliationMatch.objects.get(pk=match_id)
         self.assertEqual(ReconciliationMatch.objects.values().get(pk=match.pk),before)
         use=StatementUse.objects.get(cash_match=match)
         self.assertTrue(use.derived_from_existing);self.assertEqual(use.created_at,match.prepared_at)
