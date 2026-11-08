@@ -1227,7 +1227,7 @@
     "finance/migrations/0010_fundtransfer_statementuse_and_more.py": "b66e1d60481fddba6c6e0d047ae03f86f6da5b588329c4c2f0afda7c8db89bbe",
     "finance/migrations/0011_fundallocation_fundallocationline_fundissue_and_more.py": "39a2dbed0240aa9cb122c1a8331b5f64e6566c0fc6a58e96cc2d7e9129306d00",
     "finance/migrations/0012_costmonth_managementreport_costallocation_and_more.py": "de18e74610603ef24002839815dee06415687166b4d7e7ef1e5aa87cbdf5181a",
-    "finance/migrations/0013_patient_advance_receipts.py": "54d5cd8866c88e33d04bb38502803aa80526223f28beae8888b39d9b28e82c0e",
+    "finance/migrations/0013_patient_advance_receipts.py": "696a2163e126b9c22fe6feee87011ad9f220d117176acdafa12a03aa4e6f33d4",
     "finance/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "finance/models.py": "4a1e31f3d16f8f094796b4b78510827a7e9ed20db69eff20161b7a24cfcbd2a9",
     "finance/patient_cash.py": "b4b10d6873585e7e68467c7bb71c3a4c1e44465c8dfde55f58eb4890cd69da15",

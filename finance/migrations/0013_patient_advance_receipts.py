@@ -3,7 +3,6 @@
 from importlib import import_module
 
 import django.db.models.deletion
-from django.conf import settings
 from django.db import migrations, models
 
 
@@ -109,12 +108,8 @@ def refuse_to_drop_advances(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('care', '0005_c42_billing_guards'),
-        ('equipment', '0007_remove_maintenanceorder_maintenance_report_metadata_and_more'),
         ('finance', '0012_costmonth_managementreport_costallocation_and_more'),
         ('patients', '0001_initial'),
-        ('registry', '0003_clinicprofilepolicy_profileversion_and_more'),
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
