@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block content %}<div class="business-flow">
+  <a href="{% url 'cash_detail' receipt.pk %}">← 原预收款</a>
+  <h1>申请预收款抵扣</h1>
+  <p>{{ receipt.clinic.name }} · {{ receipt.advance_patient.name }} · 预收款 #{{ receipt.pk }}</p>
+  <p>原款 ¥ {{ receipt.amount }} · 当前可用 ¥ {{ available }}。通过财务复核后，各张账单同时抵扣。</p>
+  {% include 'components/form_errors.html' %}
+  {% if can_apply %}
+    <form method="post" class="panel form-panel">
+      {% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">
+      {{ lines.management_form }}{{ lines.non_form_errors }}
+      <p>选择本店同一患者的账单，填写每张账单的金额。未使用的行留空。</p>
+      {% for line in lines %}
+        <fieldset class="form-section"><legend>账单 {{ forloop.counter }}</legend>
+          {{ line.non_field_errors }}
+          {% for field in line.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+        </fieldset>
+      {% endfor %}
+      {% for field in form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+      <button type="submit"{% if adc_read_only %} disabled{% endif %}>预览抵扣申请</button>
+    </form>
+  {% else %}
+    <p class="notice">请先确认原预收款已记账且有可用余额，并核对本店是否有待付账单。</p>
+  {% endif %}
+</div>{% endblock %}

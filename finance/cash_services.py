@@ -54,7 +54,7 @@ def _request_payload(data):
     if data['source_type']=='equipment' and data['version'] is not None and (type(data['version']) is not int or data['version']<=0):raise RuleError('设备来源版本无效。')
     if data['source_type']=='advance' and (data['version'] is not None or data['reversal'] is not None):
         raise RuleError('预收款申请来源无效。')
-    if (type(data['cursor']) is not list or len(data['cursor'])!=3 or
+    if (type(data['cursor']) is not list or len(data['cursor']) not in (3,5) or
         any(type(v) is not int or v<0 for v in data['cursor'])):raise RuleError('历史校验无效。')
     if data['kind'] not in ('RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'):
         raise RuleError('申请类型无效。')
@@ -178,7 +178,8 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
         if kind=='RECEIPT':check_receipt_reference(account,reference,advance=source_type=='advance')
         if source_type=='equipment' and reversal is None and rows.filter(state='PENDING',kind=kind).exists():
             raise RuleError('该设备费用已有待审核申请。')
-        data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,cursor=cursor(rows),
+        data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,
+            cursor=cursor(rows,source_id if source_type=='invoice' else None),
             insurance_cursor=_insurance_cursor(source_type,source_id),
             kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id,
             account=account.pk,account_version=account.lock_version,reference=reference)
@@ -203,7 +204,8 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     source,clinic,rows,version=_source(data['source_type'],data['source'],lock=True,clinic_id=data['clinic'])
     if _insurance_cursor(data['source_type'],source.pk)!=data['insurance_cursor']:
         raise RuleError('医保结算进度已变化，请重新核对患者实际责任和收退款金额。')
-    if clinic!=data['clinic'] or version!=data['version'] or cursor(rows)!=data['cursor']:
+    invoice_id=source.pk if data['source_type']=='invoice' else None
+    if clinic!=data['clinic'] or version!=data['version'] or cursor(rows,invoice_id)!=data['cursor']:
         raise RuleError('来源账单或记账申请已变化，请重新预览。')
     reversal=rows.get(pk=data['reversal']) if data['reversal'] else None
     amount=money(data['amount']);day=_date(data['occurred_on'])
@@ -240,7 +242,7 @@ def prepare_review(*,actor,entry_id,decision,reason):
             if blocker:raise RuleError(blocker)
         data=dict(entry=entry.pk,entry_version=entry.lock_version,source_type=source_type,source=source_id,
             insurance_cursor=_insurance_cursor(source_type,source_id),
-            version=version,cursor=cursor(rows),decision=decision,reason=_reason(reason))
+            version=version,cursor=cursor(rows,entry.invoice_id),decision=decision,reason=_reason(reason))
         balance=_balance(source_type,source,rows)
         evidence=entry.evidence_versions.select_related('account').filter(initial=True).first() if entry.advance_patient_id else None
         return dict(entry=entry,source=source,source_type=source_type,balance=balance,
@@ -308,7 +310,7 @@ def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None)
             role='MANAGER' if entry.equipment_event_id else 'FRONT_DESK',scope_kind='CLINIC',clinic_id=clinic).first()
         if not users[entry.prepared_by_id].is_active or not grant:raise RuleError('原申请人授权已失效，请拒绝申请。')
         based=entry.based_record_version_id if data['source_type']=='invoice' else entry.equipment_cost_amendment_id
-        if version!=based or version!=data['version'] or cursor(rows)!=data['cursor']:
+        if version!=based or version!=data['version'] or cursor(rows,entry.invoice_id)!=data['cursor']:
             raise RuleError('来源账单或记账状态已变化，请重新核对。')
         _validate_review(entry,data['source_type'],source,rows)
     entry.state=target;entry.lock_version=1;entry.reviewed_by=actor;entry.reviewed_at=timezone.now();entry.review_reason=_reason(data['reason'])

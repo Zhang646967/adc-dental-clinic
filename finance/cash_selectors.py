@@ -9,6 +9,7 @@ from accounts.policies import bindings
 from adc_core.proposals import workspace_binding
 from adc_core.snapshots import reporting_snapshot
 from care.models import Invoice
+from finance.advance_projection import applied_invoice_amounts, invoice_advance_facts, receipt_applied
 from finance.cash_models import CashEntry
 
 ZERO=Decimal('0.00')
@@ -25,15 +26,21 @@ def cash_scope(actor,detail=False):
         raise PermissionDenied('当前身份无该项明细权限。')
     return qs
 
-def cursor(qs):
+def cursor(qs, invoice_id=None):
     r=qs.aggregate(last=Max('pk'),count=Count('pk'),versions=Sum('lock_version'))
-    return [r['last'] or 0,r['count'],r['versions'] or 0]
+    return _balance_cursor(r, invoice_id)
+
+def _balance_cursor(values, invoice_id):
+    progress = [values['last'] or 0, values['count'], values['versions'] or 0]
+    if invoice_id is not None:
+        progress.extend(invoice_advance_facts(invoice_id)[1])
+    return progress
 
 def invoice_cash_facts(invoice_id):
     """Finance-owned cursor, including pending requests; no grant is inferred."""
     r=CashEntry.objects.filter(invoice_id=invoice_id).aggregate(last=Max('pk'),count=Count('pk'),
         versions=Sum('lock_version'),pending=Count('pk',filter=Q(state='PENDING')))
-    return dict(cursor=[r['last'] or 0,r['count'],r['versions'] or 0],pending=r['pending'])
+    return dict(cursor=_balance_cursor(r,invoice_id),pending=r['pending'])
 
 def posted_amount(qs,plus,minus):
     values=qs.filter(state='POSTED').aggregate(
@@ -53,17 +60,28 @@ def invoice_balance(invoice):
     from insurance.settlement_projection import invoice_insurance_facts
     from insurance.settlement_rules import patient_balance
     insurance=invoice_insurance_facts(invoice.pk)
-    return dict(**patient_balance(total,net,personal_account=insurance['personal_account'],fund_amount=insurance['fund_amount']),
+    balance = patient_balance(total,net,personal_account=insurance['personal_account'],fund_amount=insurance['fund_amount'])
+    return dict(**_with_advance_credit(balance, invoice_advance_facts(invoice.pk)[0]),
         insurance_pending=insurance['unresolved'],pending=values['pending'],
         pending_receipts=values['pending_receipts'] or ZERO,pending_refunds=values['pending_refunds'] or ZERO,
         current_revision=invoice.current_record_version.revision_no)
 
+def _with_advance_credit(balance, applied):
+    responsibility = balance['patient_responsibility']
+    residual = max(responsibility-applied, ZERO)
+    return dict(balance, advance_applied=applied, advance_excess=max(applied-responsibility, ZERO),
+                remaining=max(residual-balance['net_received'], ZERO),
+                refund_due=max(balance['net_received']-residual, ZERO))
+
 def advance_balance(rows):
-    """A clinic/patient advance receipt balance, independent of invoices."""
+    """A clinic/patient advance balance based on retained receipts and applications."""
     values=rows.aggregate(advance_received=Sum('amount',filter=Q(state='POSTED')),
         pending_receipts=Sum('amount',filter=Q(state='PENDING')),
         pending=Count('pk',filter=Q(state='PENDING')))
-    return {key: values[key] or ZERO for key in ('advance_received','pending_receipts')} | {'pending':values['pending']}
+    received = values['advance_received'] or ZERO
+    applied = receipt_applied(rows)
+    return dict(advance_received=received, advance_applied=applied, advance_available=received-applied,
+                pending_receipts=values['pending_receipts'] or ZERO, pending=values['pending'])
 
 def projected_balance(balance,kind,amount,decision='approve'):
     """One candidate's effect; other pending entries are not money or promises."""
@@ -71,11 +89,10 @@ def projected_balance(balance,kind,amount,decision='approve'):
     if decision!='approve':return result
     if 'advance_received' in balance:
         result['advance_received']+=amount
+        result['advance_available']+=amount
     elif kind in ('RECEIPT','REFUND'):
-        net=balance['net_received']+(amount if kind=='RECEIPT' else -amount)
-        responsibility=balance.get('patient_responsibility',balance['billed'])
-        result.update(net_received=net,remaining=max(responsibility-net,ZERO),
-                      refund_due=max(net-responsibility,ZERO))
+        result['net_received']+=amount if kind=='RECEIPT' else -amount
+        result=_with_advance_credit(result, balance['advance_applied'])
     else:
         result['net_equipment_expense']=balance['net_equipment_expense']+(amount if kind=='EQUIPMENT_EXPENSE' else -amount)
     return result
@@ -123,9 +140,12 @@ def cash_detail(actor,entry_id):
     with reporting_snapshot():
         row=cash_scope(actor,detail=True).select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','advance_patient','prepared_by','reviewed_by','reversal_of').get(pk=entry_id)
         evidence=None
+        allocation_available=None
         if row.advance_patient_id:
             balance=advance_balance(CashEntry.objects.filter(clinic_id=row.clinic_id,advance_patient_id=row.advance_patient_id))
             evidence=row.evidence_versions.select_related('account').filter(initial=True).first()
+            if row.state=='POSTED':
+                allocation_available=row.amount-receipt_applied(CashEntry.objects.filter(pk=row.pk))
         elif row.invoice_id:
             balance=invoice_balance(row.invoice)
         else:
@@ -134,11 +154,34 @@ def cash_detail(actor,entry_id):
         from finance.cash_services import approval_blocker
         blocker=approval_blocker(row) if row.state=='PENDING' else ''
         return dict(entry=row,balance=balance,approval_blocker=blocker,initial_evidence=evidence,
+            allocation_available=allocation_available,
             projected=projected_balance(balance,row.kind,row.amount) if row.state=='PENDING' and not blocker else None)
+
+def with_invoice_balances(qs):
+    """Reusable bounded expressions for authorized invoice lists."""
+    from django.db.models import IntegerField
+    from insurance.settlement_projection import credit_expressions
+
+    output=DecimalField(max_digits=20,decimal_places=2)
+    signed=Case(When(kind='RECEIPT',then=F('amount')),When(kind='REFUND',then=-F('amount')),
+                default=Value(ZERO),output_field=output)
+    cash=CashEntry.objects.filter(invoice_id=OuterRef('pk'),state='POSTED').order_by().values('invoice_id').annotate(value=Sum(signed)).values('value')
+    pending=CashEntry.objects.filter(invoice_id=OuterRef('pk'),state='PENDING').order_by().values('invoice_id')
+    qs=qs.annotate(net_received=Coalesce(Subquery(cash,output_field=output),Value(ZERO),output_field=output),
+        advance_applied=Coalesce(Subquery(applied_invoice_amounts(),output_field=output),Value(ZERO),output_field=output),
+        pending_count=Coalesce(Subquery(pending.annotate(value=Count('pk')).values('value'),output_field=IntegerField()),Value(0)),
+        pending_receipts=Coalesce(Subquery(pending.filter(kind='RECEIPT').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)),
+        pending_refunds=Coalesce(Subquery(pending.filter(kind='REFUND').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)))
+    qs=qs.annotate(**credit_expressions()).annotate(
+        patient_responsibility=F('current_record_version__total_amount')-F('insurance_personal_account')-F('insurance_fund'))
+    residual=Greatest(F('patient_responsibility')-F('advance_applied'),Value(ZERO),output_field=output)
+    return qs.annotate(remaining=Greatest(residual-F('net_received'),Value(ZERO),output_field=output),
+                       refund_due=Greatest(F('net_received')-residual,Value(ZERO),output_field=output),
+                       advance_excess=Greatest(F('advance_applied')-F('patient_responsibility'),Value(ZERO),output_field=output))
 
 def receivables(actor,state='',page='1'):
     from adc_core.rules import RuleError
-    if state not in ('','due','credit','settled'):raise RuleError('应收筛选无效。')
+    if state not in ('','due','credit','settled','advance-excess'):raise RuleError('应收筛选无效。')
     b=workspace_binding(actor,('FRONT_DESK','FINANCE','HQ'))
     with reporting_snapshot():
         qs=Invoice.objects.select_related('visit__clinic','current_record_version')
@@ -148,32 +191,23 @@ def receivables(actor,state='',page='1'):
             qs=qs.filter(visit__clinic_id__in=clinic_ids(actor))
         elif not bindings(actor).filter(role=b['role'],scope_kind='CHAIN').exists():
             raise PermissionDenied
-        output=DecimalField(max_digits=20,decimal_places=2)
-        signed=Case(When(kind='RECEIPT',then=F('amount')),When(kind='REFUND',then=-F('amount')),
-                    default=Value(ZERO),output_field=output)
-        cash=CashEntry.objects.filter(invoice_id=OuterRef('pk'),state='POSTED').order_by().values('invoice_id').annotate(value=Sum(signed)).values('value')
-        qs=qs.annotate(net_received=Coalesce(Subquery(cash,output_field=output),Value(ZERO),output_field=output))
-        pending=CashEntry.objects.filter(invoice_id=OuterRef('pk'),state='PENDING').order_by().values('invoice_id')
-        from django.db.models import IntegerField
-        qs=qs.annotate(pending_count=Coalesce(Subquery(pending.annotate(value=Count('pk')).values('value'),output_field=IntegerField()),Value(0)),
-            pending_receipts=Coalesce(Subquery(pending.filter(kind='RECEIPT').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)),
-            pending_refunds=Coalesce(Subquery(pending.filter(kind='REFUND').annotate(value=Sum('amount')).values('value'),output_field=output),Value(ZERO)))
-        from insurance.settlement_projection import credit_expressions
-        qs=qs.annotate(**credit_expressions()).annotate(patient_responsibility=F('current_record_version__total_amount')-F('insurance_personal_account')-F('insurance_fund'))
-        qs=qs.annotate(remaining=Greatest(F('patient_responsibility')-F('net_received'),Value(ZERO),output_field=output),
-                       refund_due=Greatest(F('net_received')-F('patient_responsibility'),Value(ZERO),output_field=output))
+        qs=with_invoice_balances(qs)
         totals=qs.aggregate(bills=Count('pk'),billed=Sum('current_record_version__total_amount'),
                             insurance_personal_total=Sum('insurance_personal_account'),insurance_fund_total=Sum('insurance_fund'),
                             patient_responsibility_total=Sum('patient_responsibility'),
-                            net_total=Sum('net_received'),remaining_total=Sum('remaining'),refund_total=Sum('refund_due'))
+                            net_total=Sum('net_received'),remaining_total=Sum('remaining'),refund_total=Sum('refund_due'),
+                            advance_applied_total=Sum('advance_applied'),advance_excess_total=Sum('advance_excess'))
         for source,target in [('net_total','net_received'),('remaining_total','remaining'),('refund_total','refund_due'),
             ('insurance_personal_total','insurance_personal_account'),('insurance_fund_total','insurance_fund'),
             ('patient_responsibility_total','patient_responsibility')]:
             totals[target]=totals.pop(source)
-        for key in ('billed','net_received','remaining','refund_due','insurance_personal_account','insurance_fund','patient_responsibility'):totals[key]=totals[key] or ZERO
+        for key in ('billed','net_received','remaining','refund_due','insurance_personal_account','insurance_fund',
+                    'patient_responsibility','advance_applied_total','advance_excess_total'):
+            totals[key]=totals[key] or ZERO
         if state=='due':qs=qs.filter(remaining__gt=0)
         elif state=='credit':qs=qs.filter(refund_due__gt=0)
-        elif state=='settled':qs=qs.filter(remaining=0,refund_due=0)
+        elif state=='settled':qs=qs.filter(remaining=0,refund_due=0,advance_excess=0)
+        elif state=='advance-excess':qs=qs.filter(advance_excess__gt=0)
         page_obj=Paginator(qs.order_by('-first_issued_at','-pk'),20).get_page(page)
         return dict(rows=list(page_obj.object_list),page_obj=page_obj,totals=totals,state_filter=state,
                     detail_allowed=b['role']!='HQ',can_request=b['role']=='FRONT_DESK')

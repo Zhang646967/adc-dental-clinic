@@ -110,10 +110,11 @@ def _source_label(source_type,source):
 def _balance_summary(balance,projected,source_type):
     if source_type=='advance':
         return [('已记账预收（CNY）',balance['advance_received']),('待审核预收（CNY）',balance['pending_receipts']),
-                ('本条获批后预收余额（CNY）',projected['advance_received'])]
+                ('已抵扣（CNY）',balance['advance_applied']),('本条获批后可用预收（CNY）',projected['advance_available'])]
     if source_type=='invoice':
         return [('当前账单版本',balance['current_revision']),('当前开单金额（CNY）',balance['billed']),
-            ('当前已审核净收款（CNY）',balance['net_received']),('待审核收款金额（未计入现金）',balance['pending_receipts']),
+            ('当前已审核净收款（CNY）',balance['net_received']),('已抵扣预收（CNY）',balance['advance_applied']),
+            ('待审核收款金额（未计入现金）',balance['pending_receipts']),
             ('待审核退款金额（未计入现金）',balance['pending_refunds']),
             ('本条单独获批后净收款（CNY）',projected['net_received']),('本条单独获批后待收（CNY）',projected['remaining']),
             ('本条单独获批后待退（CNY）',projected['refund_due'])]

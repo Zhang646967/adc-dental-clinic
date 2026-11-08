@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}<div class="business-flow">
+  <a href="{% url 'cash_list' %}">← 记账申请</a>
+  <h1>预收款分配记录</h1>
+  <p>已抵扣金额计入账单结算。日结按原收退款记录统计实际资金。</p>
+  <form method="get" class="worklist-filters">
+    {% if receipt_filter %}<input type="hidden" name="receipt" value="{{ receipt_filter }}">{% endif %}
+    <div><label for="allocation-state">状态</label><select name="state" id="allocation-state">
+      <option value="">全部</option>
+      <option value="PENDING"{% if state_filter == 'PENDING' %} selected{% endif %}>待财务复核</option>
+      <option value="POSTED"{% if state_filter == 'POSTED' %} selected{% endif %}>已抵扣</option>
+      <option value="REJECTED"{% if state_filter == 'REJECTED' %} selected{% endif %}>已拒绝</option>
+    </select></div>
+    <button type="submit">查询分配</button>
+  </form>
+  <ul class="worklist-items">{% for row in rows %}
+    <li><div><strong>分配 #{{ row.pk }} · {{ row.get_state_display }}</strong>
+      <p>{{ row.receipt.clinic.name }} · {{ row.receipt.advance_patient.name }} · ¥ {{ row.total }}</p>
+      <p>原预收 #{{ row.receipt_id }} · 申请 {{ row.prepared_at|date:'Y-m-d H:i' }}</p></div>
+      <a class="button secondary" href="{% url 'advance_allocation_detail' row.pk %}">查看分配 #{{ row.pk }}</a>
+    </li>
+  {% empty %}<li>当前范围内没有符合条件的分配。</li>{% endfor %}</ul>
+  {% include 'business/pagination.html' %}
+</div>{% endblock %}

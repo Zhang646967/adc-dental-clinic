@@ -1,0 +1,36 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block content %}<div class="business-flow">
+  <a href="{% url 'advance_allocation_list' %}?receipt={{ row.receipt_id }}">← 本笔预收分配记录</a>
+  <h1>预收分配 #{{ row.pk }}</h1>
+  <section class="panel">
+    <h2>{{ row.get_state_display }}</h2>
+    <p>{{ row.receipt.clinic.name }} · {{ row.receipt.advance_patient.name }} · 分配合计 ¥ {{ row.total }}</p>
+    <p><a href="{% url 'cash_detail' row.receipt_id %}">原预收 #{{ row.receipt_id }}</a> · 当前可用 ¥ {{ available }}</p>
+    <p>申请人 {{ row.prepared_by.username }} · {{ row.prepared_at|date:'Y-m-d H:i' }}</p>
+    <p>{{ row.basis }}</p>
+    {% if row.reviewed_by_id %}
+      <p>复核人 {{ row.reviewed_by.username }} · {{ row.reviewed_at|date:'Y-m-d H:i' }}</p>
+      <p>{{ row.review_reason }}</p>
+    {% endif %}
+  </section>
+  <section class="panel">
+    <h2>申请时的账单依据</h2>
+    <ul class="worklist-items">{% for line in lines %}
+      <li><div><strong><a href="{% url 'invoice_detail' line.invoice_id %}?revision={{ line.record_version.revision_no }}">{{ line.invoice.invoice_no }} · 第 {{ line.record_version.revision_no }} 版</a></strong>
+      <p>患者责任 ¥ {{ line.responsibility }} · 当时待付 ¥ {{ line.due_at_request }} · 本次抵扣 ¥ {{ line.amount }}</p></div></li>
+    {% endfor %}</ul>
+  </section>
+  {% if workspace_role == 'FINANCE' and row.state == 'PENDING' %}
+    {% if row.prepared_by_id == request.user.pk %}
+      <p class="notice">请由另一名财务人员独立复核。</p>
+    {% else %}
+      <form class="panel form-panel" method="post" action="{% url 'advance_allocation_review' row.pk %}">
+        {% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">
+        <h2>独立复核</h2>
+        {% include 'components/form_errors.html' with form=review_form %}
+        {% for field in review_form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+        <button type="submit"{% if adc_read_only %} disabled{% endif %}>预览复核决定</button>
+      </form>
+    {% endif %}
+  {% endif %}
+</div>{% endblock %}
