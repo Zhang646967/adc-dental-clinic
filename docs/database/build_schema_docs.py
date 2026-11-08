@@ -292,6 +292,18 @@ VIEWS = {
         },
         'note': '预收款按收款门店和患者归集。预收、收费单和设备三种来源互斥。申请与复核关联不同账号，已记账预收纳入当日实收。渠道凭据保留版本并可沿既有关系独立对账。',
     },
+    'er_advance_allocations': {
+        'title': '预收款抵扣、独立复核与账单版本',
+        'tables': {
+            'adc_cash_entry': ['id', 'advance_patient_id', 'clinic_id', 'amount', 'state'],
+            'adc_user': ['id'],
+            'adc_advance_allocation': ['id', 'receipt_id', 'prepared_by_id', 'reviewed_by_id', 'total', 'state'],
+            'adc_advance_allocation_line': ['id', 'allocation_id', 'invoice_id', 'record_version_id', 'amount'],
+            'adc_invoice': ['id', 'current_record_version_id'],
+            'adc_visit_record_version': ['id', 'visit_id', 'revision_no'],
+        },
+        'note': '一张抵扣单关联一笔已记账预收及一至五张本店同患者账单。明细固定当时准确发布版本，申请与复核关联不同账号。复核通过后减少待付和预收可用余额，原实收保留。',
+    },
 }
 
 

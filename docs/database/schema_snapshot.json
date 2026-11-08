@@ -8,6 +8,27 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_protect_audit()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  RAISE EXCEPTION 'audit events are append-only for normal DML' USING ERRCODE='23514';\nEND $function$\n"
     },
     {
+      "table": "adc_advance_allocation",
+      "name": "advance_allocation_complete",
+      "definition": "CREATE CONSTRAINT TRIGGER advance_allocation_complete AFTER INSERT ON public.adc_advance_allocation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_complete()",
+      "function": "adc_advance_allocation_complete",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_allocation_complete()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n  IF NEW.total IS DISTINCT FROM\n      (SELECT sum(amount) FROM adc_advance_allocation_line WHERE allocation_id=NEW.id) THEN\n    RAISE EXCEPTION 'allocation requires all its lines in the same transaction' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_allocation_history",
+      "definition": "CREATE TRIGGER advance_allocation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_history()",
+      "function": "adc_advance_allocation_history",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_allocation_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE received numeric; used numeric;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'advance allocation history is retained' USING ERRCODE='23514';\n  ELSIF TG_OP='INSERT' THEN\n    SELECT amount INTO received FROM adc_cash_entry WHERE id=NEW.receipt_id\n      AND advance_patient_id IS NOT NULL AND kind='RECEIPT' AND state='POSTED';\n    IF NOT FOUND OR NEW.state<>'PENDING' OR NEW.available_at_request>received OR btrim(NEW.basis)='' THEN\n      RAISE EXCEPTION 'allocation requires a posted advance receipt and a pending request' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR btrim(NEW.review_reason)=''\n     OR (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id'])\n        IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id']) THEN\n    RAISE EXCEPTION 'allocation source and terminal decisions are immutable' USING ERRCODE='23514';\n  ELSIF NEW.state='POSTED' THEN\n    SELECT amount INTO received FROM adc_cash_entry WHERE id=NEW.receipt_id FOR UPDATE;\n    SELECT coalesce(sum(total),0) INTO used FROM adc_advance_allocation\n      WHERE receipt_id=NEW.receipt_id AND state='POSTED';\n    IF NEW.total+used>received OR EXISTS (\n      SELECT 1 FROM adc_advance_allocation_line l JOIN adc_invoice i ON i.id=l.invoice_id\n      WHERE l.allocation_id=NEW.id AND i.current_record_version_id<>l.record_version_id\n    ) THEN\n      RAISE EXCEPTION 'allocation exceeds receipt or refers to a replaced bill' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "advance_allocation_line_history",
+      "definition": "CREATE TRIGGER advance_allocation_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation_line FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_line_history()",
+      "function": "adc_advance_allocation_line_history",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_allocation_line_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE receipt bigint; batch_total numeric; line_count int; filled numeric;\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'retained advance allocation lines are immutable' USING ERRCODE='23514';\n  END IF;\n  SELECT receipt_id,total INTO receipt,batch_total FROM adc_advance_allocation\n    WHERE id=NEW.allocation_id AND state='PENDING' FOR UPDATE;\n  IF NOT FOUND OR NOT EXISTS (\n    SELECT 1 FROM adc_invoice i\n    JOIN adc_visit v ON v.id=i.visit_id\n    JOIN adc_visit_record_version bill ON bill.id=NEW.record_version_id\n    JOIN adc_cash_entry r ON r.id=receipt\n    WHERE i.id=NEW.invoice_id AND v.clinic_id=r.clinic_id AND v.patient_id=r.advance_patient_id\n      AND i.current_record_version_id=bill.id AND bill.visit_id=v.id AND bill.state='PUBLISHED'\n  ) THEN\n    RAISE EXCEPTION 'allocation line requires its own clinic, patient and published bill' USING ERRCODE='23514';\n  END IF;\n  SELECT count(*),coalesce(sum(amount),0) INTO line_count,filled FROM adc_advance_allocation_line\n    WHERE allocation_id=NEW.allocation_id;\n  IF line_count>=5 OR filled+NEW.amount>batch_total THEN\n    RAISE EXCEPTION 'allocation lines exceed the request total or line limit' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
       "table": "adc_appointment_action_event",
       "name": "appointment_history_immutable",
       "definition": "CREATE TRIGGER appointment_history_immutable BEFORE DELETE OR UPDATE ON public.adc_appointment_action_event FOR EACH ROW EXECUTE FUNCTION adc_appointment_history_immutable()",
@@ -1382,6 +1403,284 @@
           "column": "verified_at",
           "type": "DateTimeField",
           "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_advance_allocation",
+      "model": "finance.AdvanceAllocation",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "receipt",
+          "column": "receipt_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_cash_entry",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "total",
+          "column": "total",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "available_at_request",
+          "column": "available_at_request",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_reason",
+          "column": "review_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_operation_id",
+          "column": "review_operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "model": "finance.AdvanceAllocationLine",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "allocation",
+          "column": "allocation_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_advance_allocation",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "invoice",
+          "column": "invoice_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_invoice",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "record_version",
+          "column": "record_version_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_visit_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "amount",
+          "column": "amount",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "responsibility",
+          "column": "responsibility",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "due_at_request",
+          "column": "due_at_request",
+          "type": "DecimalField",
+          "db_type": "numeric(16, 2)",
           "pk": false,
           "unique": false,
           "null": false,
@@ -26504,6 +26803,8 @@
   "tables": [
     "adc_account_identity_event",
     "adc_account_phone",
+    "adc_advance_allocation",
+    "adc_advance_allocation_line",
     "adc_ai_usage_bucket",
     "adc_allergy",
     "adc_appointment_action_event",
@@ -26742,6 +27043,102 @@
       "name": "adc_account_phone_user_id_key",
       "kind": "u",
       "definition": "UNIQUE (user_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_prepared_by_id_707e1a9b_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_receipt_id_d9fe4dc8_fk_adc_cash_entry_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (receipt_id) REFERENCES adc_cash_entry(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_review_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (review_operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_reviewed_by_id_5701a986_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_alloc_independent",
+      "kind": "c",
+      "definition": "CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_alloc_request_amount",
+      "kind": "c",
+      "definition": "CHECK (((total > (0)::numeric) AND (total <= available_at_request)))"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_alloc_review_metadata",
+      "kind": "c",
+      "definition": "CHECK ((((review_operation_id IS NULL) AND ((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((review_operation_id IS NOT NULL) AND (reviewed_at >= prepared_at) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['POSTED'::character varying, 'REJECTED'::character varying])::text[])) AND (reviewed_at IS NOT NULL) AND (NOT ((review_reason)::text = ''::text)))))"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_allocation_complete",
+      "kind": "t",
+      "definition": "TRIGGER DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocati_allocation_id_4866f623_fk_adc_advan",
+      "kind": "f",
+      "definition": "FOREIGN KEY (allocation_id) REFERENCES adc_advance_allocation(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocati_invoice_id_8a7a3981_fk_adc_invoi",
+      "kind": "f",
+      "definition": "FOREIGN KEY (invoice_id) REFERENCES adc_invoice(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocati_record_version_id_c3b1de0a_fk_adc_visit",
+      "kind": "f",
+      "definition": "FOREIGN KEY (record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocation_line_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "advance_alloc_line_amount",
+      "kind": "c",
+      "definition": "CHECK (((amount > (0)::numeric) AND (amount <= due_at_request) AND (due_at_request <= responsibility)))"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "advance_alloc_once_per_bill",
+      "kind": "u",
+      "definition": "UNIQUE (allocation_id, invoice_id)"
     },
     {
       "table": "adc_ai_usage_bucket",
@@ -34996,6 +35393,71 @@
       "definition": "CREATE UNIQUE INDEX adc_account_phone_user_id_key ON public.adc_account_phone USING btree (user_id)"
     },
     {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_operation_id_key ON public.adc_advance_allocation USING btree (operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_pkey ON public.adc_advance_allocation USING btree (id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_prepared_by_id_707e1a9b",
+      "definition": "CREATE INDEX adc_advance_allocation_prepared_by_id_707e1a9b ON public.adc_advance_allocation USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_receipt_id_d9fe4dc8",
+      "definition": "CREATE INDEX adc_advance_allocation_receipt_id_d9fe4dc8 ON public.adc_advance_allocation USING btree (receipt_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_review_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_review_operation_id_key ON public.adc_advance_allocation USING btree (review_operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "adc_advance_allocation_reviewed_by_id_5701a986",
+      "definition": "CREATE INDEX adc_advance_allocation_reviewed_by_id_5701a986 ON public.adc_advance_allocation USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_alloc_queue_idx",
+      "definition": "CREATE INDEX advance_alloc_queue_idx ON public.adc_advance_allocation USING btree (state, id DESC)"
+    },
+    {
+      "table": "adc_advance_allocation",
+      "name": "advance_alloc_receipt_idx",
+      "definition": "CREATE INDEX advance_alloc_receipt_idx ON public.adc_advance_allocation USING btree (receipt_id, state)"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocation_line_allocation_id_4866f623",
+      "definition": "CREATE INDEX adc_advance_allocation_line_allocation_id_4866f623 ON public.adc_advance_allocation_line USING btree (allocation_id)"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocation_line_invoice_id_8a7a3981",
+      "definition": "CREATE INDEX adc_advance_allocation_line_invoice_id_8a7a3981 ON public.adc_advance_allocation_line USING btree (invoice_id)"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocation_line_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_line_pkey ON public.adc_advance_allocation_line USING btree (id)"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "adc_advance_allocation_line_record_version_id_c3b1de0a",
+      "definition": "CREATE INDEX adc_advance_allocation_line_record_version_id_c3b1de0a ON public.adc_advance_allocation_line USING btree (record_version_id)"
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "name": "advance_alloc_once_per_bill",
+      "definition": "CREATE UNIQUE INDEX advance_alloc_once_per_bill ON public.adc_advance_allocation_line USING btree (allocation_id, invoice_id)"
+    },
+    {
       "table": "adc_ai_usage_bucket",
       "name": "adc_ai_usage_bucket_key_d220a79a_like",
       "definition": "CREATE INDEX adc_ai_usage_bucket_key_d220a79a_like ON public.adc_ai_usage_bucket USING btree (key varchar_pattern_ops)"
@@ -39882,6 +40344,126 @@
     {
       "table": "adc_account_phone",
       "column": "user_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "state",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "total",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "available_at_request",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "basis",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "review_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "review_operation_id",
+      "db_type": "uuid",
+      "null": true
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "receipt_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "amount",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "responsibility",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "due_at_request",
+      "db_type": "numeric(16,2)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "allocation_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "invoice_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_line",
+      "column": "record_version_id",
       "db_type": "bigint",
       "null": false
     },
@@ -51026,6 +51608,10 @@
       "name": "0013_patient_advance_receipts"
     },
     {
+      "app": "finance",
+      "name": "0014_patient_advance_allocation"
+    },
+    {
       "app": "insurance",
       "name": "0001_initial"
     },
@@ -51167,6 +51753,6 @@
     }
   ],
   "observed_database": "PostgreSQL 17.11 isolated synthetic",
-  "application_commit": "a998aab3bba5c82259023701d261b1887b8fc012",
+  "application_commit": "cc96406d54aa12e593ff471ecbc24f0568081ece",
   "observed_on": "2026-11-08"
 }

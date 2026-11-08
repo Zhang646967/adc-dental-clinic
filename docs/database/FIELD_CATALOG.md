@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-08。本目录列出184张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-08。本目录列出186张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -66,6 +66,90 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+
+## adc_advance_allocation
+
+模型：`finance.AdvanceAllocation`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| receipt_id | bigint | FK | 否 | `adc_cash_entry.id` |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| total | numeric(16,2) | — | 否 | — |
+| available_at_request | numeric(16,2) | — | 否 | — |
+| basis | character varying(500) | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+| review_operation_id | uuid | UK | 是 | — |
+
+数据库约束：
+
+- `adc_advance_allocation_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_advance_allocation_pkey`：`PRIMARY KEY (id)`。
+- `adc_advance_allocation_prepared_by_id_707e1a9b_fk_adc_user_id`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocation_receipt_id_d9fe4dc8_fk_adc_cash_entry_id`：`FOREIGN KEY (receipt_id) REFERENCES adc_cash_entry(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocation_review_operation_id_key`：`UNIQUE (review_operation_id)`。
+- `adc_advance_allocation_reviewed_by_id_5701a986_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `advance_alloc_independent`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `advance_alloc_request_amount`：`CHECK (((total > (0)::numeric) AND (total <= available_at_request)))`。
+- `advance_alloc_review_metadata`：`CHECK ((((review_operation_id IS NULL) AND ((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((review_operation_id IS NOT NULL) AND (reviewed_at >= prepared_at) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['POSTED'::character varying, 'REJECTED'::character varying])::text[])) AND (reviewed_at IS NOT NULL) AND (NOT ((review_reason)::text = ''::text)))))`。
+- `advance_allocation_complete`：`TRIGGER DEFERRABLE INITIALLY DEFERRED`。
+
+索引（含条件唯一索引）：
+
+- `adc_advance_allocation_operation_id_key`：`CREATE UNIQUE INDEX adc_advance_allocation_operation_id_key ON public.adc_advance_allocation USING btree (operation_id)`。
+- `adc_advance_allocation_pkey`：`CREATE UNIQUE INDEX adc_advance_allocation_pkey ON public.adc_advance_allocation USING btree (id)`。
+- `adc_advance_allocation_prepared_by_id_707e1a9b`：`CREATE INDEX adc_advance_allocation_prepared_by_id_707e1a9b ON public.adc_advance_allocation USING btree (prepared_by_id)`。
+- `adc_advance_allocation_receipt_id_d9fe4dc8`：`CREATE INDEX adc_advance_allocation_receipt_id_d9fe4dc8 ON public.adc_advance_allocation USING btree (receipt_id)`。
+- `adc_advance_allocation_review_operation_id_key`：`CREATE UNIQUE INDEX adc_advance_allocation_review_operation_id_key ON public.adc_advance_allocation USING btree (review_operation_id)`。
+- `adc_advance_allocation_reviewed_by_id_5701a986`：`CREATE INDEX adc_advance_allocation_reviewed_by_id_5701a986 ON public.adc_advance_allocation USING btree (reviewed_by_id)`。
+- `advance_alloc_queue_idx`：`CREATE INDEX advance_alloc_queue_idx ON public.adc_advance_allocation USING btree (state, id DESC)`。
+- `advance_alloc_receipt_idx`：`CREATE INDEX advance_alloc_receipt_idx ON public.adc_advance_allocation USING btree (receipt_id, state)`。
+
+跨表及历史触发器：
+
+- `advance_allocation_complete`：`CREATE CONSTRAINT TRIGGER advance_allocation_complete AFTER INSERT ON public.adc_advance_allocation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_complete()`。
+- `advance_allocation_history`：`CREATE TRIGGER advance_allocation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_history()`。
+
+## adc_advance_allocation_line
+
+模型：`finance.AdvanceAllocationLine`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| allocation_id | bigint | FK | 否 | `adc_advance_allocation.id` |
+| invoice_id | bigint | FK | 否 | `adc_invoice.id` |
+| record_version_id | bigint | FK | 否 | `adc_visit_record_version.id` |
+| amount | numeric(16,2) | — | 否 | — |
+| responsibility | numeric(16,2) | — | 否 | — |
+| due_at_request | numeric(16,2) | — | 否 | — |
+
+数据库约束：
+
+- `adc_advance_allocati_allocation_id_4866f623_fk_adc_advan`：`FOREIGN KEY (allocation_id) REFERENCES adc_advance_allocation(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocati_invoice_id_8a7a3981_fk_adc_invoi`：`FOREIGN KEY (invoice_id) REFERENCES adc_invoice(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocati_record_version_id_c3b1de0a_fk_adc_visit`：`FOREIGN KEY (record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocation_line_pkey`：`PRIMARY KEY (id)`。
+- `advance_alloc_line_amount`：`CHECK (((amount > (0)::numeric) AND (amount <= due_at_request) AND (due_at_request <= responsibility)))`。
+- `advance_alloc_once_per_bill`：`UNIQUE (allocation_id, invoice_id)`。
+
+索引（含条件唯一索引）：
+
+- `adc_advance_allocation_line_allocation_id_4866f623`：`CREATE INDEX adc_advance_allocation_line_allocation_id_4866f623 ON public.adc_advance_allocation_line USING btree (allocation_id)`。
+- `adc_advance_allocation_line_invoice_id_8a7a3981`：`CREATE INDEX adc_advance_allocation_line_invoice_id_8a7a3981 ON public.adc_advance_allocation_line USING btree (invoice_id)`。
+- `adc_advance_allocation_line_pkey`：`CREATE UNIQUE INDEX adc_advance_allocation_line_pkey ON public.adc_advance_allocation_line USING btree (id)`。
+- `adc_advance_allocation_line_record_version_id_c3b1de0a`：`CREATE INDEX adc_advance_allocation_line_record_version_id_c3b1de0a ON public.adc_advance_allocation_line USING btree (record_version_id)`。
+- `advance_alloc_once_per_bill`：`CREATE UNIQUE INDEX advance_alloc_once_per_bill ON public.adc_advance_allocation_line USING btree (allocation_id, invoice_id)`。
+
+跨表及历史触发器：
+
+- `advance_allocation_line_history`：`CREATE TRIGGER advance_allocation_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation_line FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_line_history()`。
 
 ## adc_ai_usage_bucket
 

@@ -1,4 +1,8 @@
-# C6 患者预收款关系
+# C6 患者预收款与抵扣关系
+
+独立 PostgreSQL 17.11 核对 95 份应用迁移、187 张 SQL 表、186 张 ORM 表、547 条外键及 175 项业务触发器。抵扣申请及明细为两张新表，关联原预收、申请人、独立复核人、逻辑账单及准确发布版本。原 94 份迁移保持原字节。 [抵扣 ER](er_advance_allocations.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../C6_PATIENT_ADVANCES.md)
+
+## 第 94 份迁移的历史范围
 
 独立 PostgreSQL 17 核对 94 份应用迁移、185 张 SQL 表、184 张 ORM 表、541 条外键及 172 项业务触发器。现金账增加可空的患者外键，并按患者、门店和记账状态检索。渠道凭据保留原版本关系。原 93 份迁移保持原字节。 [预收款 ER](er_patient_advances.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../C6_PATIENT_ADVANCES.md)
 

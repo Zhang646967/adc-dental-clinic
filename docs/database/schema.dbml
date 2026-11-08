@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 184 ORM tables; django_migrations is a framework migration journal.
+// All 186 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -19,6 +19,35 @@ Table adc_account_phone {
   source "character varying(24)" [not null]
   revision "integer" [not null]
   verified_at "timestamp with time zone" [not null]
+}
+
+Table adc_advance_allocation {
+  id "bigint" [pk, not null]
+  receipt_id "bigint" [not null]
+  operation_id "uuid" [unique, not null]
+  state "character varying(12)" [not null]
+  total "numeric(16,2)" [not null]
+  available_at_request "numeric(16,2)" [not null]
+  basis "character varying(500)" [not null]
+  prepared_by_id "bigint" [not null]
+  prepared_at "timestamp with time zone" [not null]
+  reviewed_by_id "bigint" [null]
+  reviewed_at "timestamp with time zone" [null]
+  review_reason "character varying(500)" [not null]
+  review_operation_id "uuid" [unique, null]
+}
+
+Table adc_advance_allocation_line {
+  id "bigint" [pk, not null]
+  allocation_id "bigint" [not null]
+  invoice_id "bigint" [not null]
+  record_version_id "bigint" [not null]
+  amount "numeric(16,2)" [not null]
+  responsibility "numeric(16,2)" [not null]
+  due_at_request "numeric(16,2)" [not null]
+  indexes {
+    (allocation_id, invoice_id) [unique, name: 'advance_alloc_once_per_bill']
+  }
 }
 
 Table adc_ai_usage_bucket {
@@ -2564,6 +2593,12 @@ Table django_session {
 Ref: adc_account_identity_event.user_id > adc_user.id
 Ref: adc_account_identity_event.identity_id > adc_external_identity.id
 Ref: adc_account_phone.user_id - adc_user.id
+Ref: adc_advance_allocation.prepared_by_id > adc_user.id
+Ref: adc_advance_allocation.receipt_id > adc_cash_entry.id
+Ref: adc_advance_allocation.reviewed_by_id > adc_user.id
+Ref: adc_advance_allocation_line.allocation_id > adc_advance_allocation.id
+Ref: adc_advance_allocation_line.invoice_id > adc_invoice.id
+Ref: adc_advance_allocation_line.record_version_id > adc_visit_record_version.id
 Ref: adc_appointment_action_event.followup_id > adc_cancellation_followup.id
 Ref: adc_appointment_action_event.improvement_id > adc_appointment_improvement.id
 Ref: adc_appointment_action_event.actor_id > adc_user.id

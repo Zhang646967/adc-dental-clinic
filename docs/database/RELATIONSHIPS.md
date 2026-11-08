@@ -1,12 +1,18 @@
 # 当前数据库外键关系
 
-541条实际SQL外键，其中540条对应ORM单列关系，1条为账单同次就诊复合外键。
+547条实际SQL外键，其中546条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
 | adc_account_identity_event | user_id | adc_user | id |
 | adc_account_identity_event | identity_id | adc_external_identity | id |
 | adc_account_phone | user_id | adc_user | id |
+| adc_advance_allocation | prepared_by_id | adc_user | id |
+| adc_advance_allocation | receipt_id | adc_cash_entry | id |
+| adc_advance_allocation | reviewed_by_id | adc_user | id |
+| adc_advance_allocation_line | allocation_id | adc_advance_allocation | id |
+| adc_advance_allocation_line | invoice_id | adc_invoice | id |
+| adc_advance_allocation_line | record_version_id | adc_visit_record_version | id |
 | adc_appointment_action_event | followup_id | adc_cancellation_followup | id |
 | adc_appointment_action_event | improvement_id | adc_appointment_improvement | id |
 | adc_appointment_action_event | actor_id | adc_user | id |

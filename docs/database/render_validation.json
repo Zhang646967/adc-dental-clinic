@@ -292,5 +292,12 @@
     "width": 509,
     "height": 695,
     "minPrintedFontPt": 12.47457760314342
+  },
+  "er_advance_allocations": {
+    "nodes": 6,
+    "edges": 7,
+    "width": 662,
+    "height": 582,
+    "minPrintedFontPt": 9.591480362537766
   }
 }

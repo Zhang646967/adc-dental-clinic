@@ -1196,6 +1196,48 @@
       ]
     }
   },
+  "er_advance_allocations": {
+    "title": "预收款抵扣、独立复核与账单版本",
+    "tables": 6,
+    "relationships": 7,
+    "note": "一张抵扣单关联一笔已记账预收及一至五张本店同患者账单。明细固定当时准确发布版本，申请与复核关联不同账号。复核通过后减少待付和预收可用余额，原实收保留。",
+    "columns": {
+      "adc_cash_entry": [
+        "id",
+        "advance_patient_id",
+        "clinic_id",
+        "amount",
+        "state"
+      ],
+      "adc_user": [
+        "id"
+      ],
+      "adc_advance_allocation": [
+        "id",
+        "receipt_id",
+        "prepared_by_id",
+        "reviewed_by_id",
+        "total",
+        "state"
+      ],
+      "adc_advance_allocation_line": [
+        "id",
+        "allocation_id",
+        "invoice_id",
+        "record_version_id",
+        "amount"
+      ],
+      "adc_invoice": [
+        "id",
+        "current_record_version_id"
+      ],
+      "adc_visit_record_version": [
+        "id",
+        "visit_id",
+        "revision_no"
+      ]
+    }
+  },
   "er_treatment_plan": {
     "title": "跨次就诊方案与保留版本",
     "tables": 7,
@@ -2265,9 +2307,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 185,
-    "orm_tables": 184,
-    "columns_types_and_nullability_checked": 1816,
+    "tables": 187,
+    "orm_tables": 186,
+    "columns_types_and_nullability_checked": 1836,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2276,10 +2318,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 540,
-    "sql_foreign_keys": 541,
+    "orm_foreign_keys": 546,
+    "sql_foreign_keys": 547,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "785888823fcc0ce75bb02966fb05ddf5dae1347f143f25caf3c35c16187211cd",
+    "snapshot_sha256": "15715e8437144952f54564e3569adcf4be693a3ea96520e07e13618800c73e57",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }
