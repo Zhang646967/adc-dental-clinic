@@ -51167,6 +51167,6 @@
     }
   ],
   "observed_database": "PostgreSQL 17.11 isolated synthetic",
-  "application_commit": "f118d89904bbd96b29e5108ffdd6f09898d1f14d",
+  "application_commit": "a998aab3bba5c82259023701d261b1887b8fc012",
   "observed_on": "2026-11-08"
 }
