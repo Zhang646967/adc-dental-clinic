@@ -7,7 +7,8 @@ const blankDraft={reason:'',cancelOpen:false};
 Page({
   data:{visit:null,...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false},
   onLoad(q){this.id=Number(q.id);this.generation=0;},
-  async onShow(){
+  onShow(){return this.load();},
+  async load(){
     const generation=++this.generation;
     this.setData({visit:null,...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false});
     try{

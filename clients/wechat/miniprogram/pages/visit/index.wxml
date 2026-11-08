@@ -6,5 +6,7 @@
   <view wx:if="{{visit.can_change && !readOnly}}"><button class="primary" bindtap="reschedule">选择新的就诊安排</button><button class="danger" bindtap="cancel">{{cancelOpen?'保留预约，收起取消':'需要取消这次预约'}}</button></view>
   <view wx:if="{{visit.can_change && !readOnly && cancelOpen}}" class="card"><label class="label" for="reason">取消原因</label><textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="取消原因"/><button class="danger" bindtap="previewCancel" disabled="{{busy}}" loading="{{busy}}">核对取消内容</button></view>
   <button wx:if="{{visit.predecessor}}" class="secondary" data-id="{{visit.predecessor}}" bindtap="related">查看改期前的预约</button><button wx:if="{{visit.successor}}" class="secondary" data-id="{{visit.successor}}" bindtap="related">查看改期后的预约</button>
-  <navigator wx:if="{{visit}}" class="link" url="/pages/help/index?visit={{visit.id}}">联系前台协助</navigator><button bindtap="home">返回我的预约</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+  <navigator wx:if="{{visit}}" class="link" url="/pages/help/index?visit={{visit.id}}">联系前台协助</navigator>
+  <button wx:if="{{visit || (error && !subjectInvalid)}}" class="secondary" bindtap="load" disabled="{{busy}}">刷新预约详情</button>
+  <button bindtap="home">返回我的预约</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 <view wx:if="{{visit&&!patientDelegated}}" class="card"><button wx:if="{{visit.invoice_id}}" class="primary" bindtap="invoice">查看本人结算单</button><view wx:else class="muted">尚未形成结算单。未开单不等于免费或已付款。</view></view></view>

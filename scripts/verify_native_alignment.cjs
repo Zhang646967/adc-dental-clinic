@@ -143,7 +143,7 @@ async function verify(){
     assert.equal(d.p.data.patientName,priorSubject.patient_name,code);
     d.p.cancel();d.p.reason({detail:{value:'PRIVATE_CANCEL_DRAFT'}});
     assert.equal(d.p.data.reason,'PRIVATE_CANCEL_DRAFT',code);
-    await d.p.onShow();
+    await d.p.load();
     assert.equal(d.state.globalData.review,null,code);
     for(const [field,value] of Object.entries({visit:null,patientName:'',patientCapacity:'',patientDelegated:false,
       reason:'',cancelOpen:false,subjectInvalid:true,requestId:'SYNTHETIC-VISIT-QUERY'})){
