@@ -1154,6 +1154,48 @@
       ]
     }
   },
+  "er_patient_advances": {
+    "title": "患者预收款、独立记账与渠道凭据",
+    "tables": 6,
+    "relationships": 8,
+    "note": "预收款按收款门店和患者归集。预收、收费单和设备三种来源互斥。申请与复核关联不同账号，已记账预收纳入当日实收。渠道凭据保留版本并可沿既有关系独立对账。",
+    "columns": {
+      "adc_clinic": [
+        "id",
+        "clinic_code"
+      ],
+      "adc_patient": [
+        "id",
+        "created_in_clinic_id"
+      ],
+      "adc_user": [
+        "id"
+      ],
+      "adc_cash_entry": [
+        "id",
+        "clinic_id",
+        "advance_patient_id",
+        "amount",
+        "occurred_on",
+        "state",
+        "prepared_by_id",
+        "reviewed_by_id"
+      ],
+      "adc_payment_account": [
+        "id",
+        "clinic_id",
+        "code"
+      ],
+      "adc_cash_evidence": [
+        "id",
+        "cash_entry_id",
+        "account_id",
+        "reference",
+        "version",
+        "state"
+      ]
+    }
+  },
   "er_treatment_plan": {
     "title": "跨次就诊方案与保留版本",
     "tables": 7,
@@ -2225,7 +2267,7 @@
     "passed": true,
     "tables": 185,
     "orm_tables": 184,
-    "columns_types_and_nullability_checked": 1815,
+    "columns_types_and_nullability_checked": 1816,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2234,10 +2276,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 539,
-    "sql_foreign_keys": 540,
+    "orm_foreign_keys": 540,
+    "sql_foreign_keys": 541,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "5e04daf9c33fcf7c26e0d13e2894e57b09b64fe635df98e31e5c21dda4ee1715",
+    "snapshot_sha256": "f7d7f3fe98f7fec59889e570e37e973c0c018011179de3ea1d36580e6b20b87e",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

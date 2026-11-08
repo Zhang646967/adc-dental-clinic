@@ -1,3 +1,9 @@
+# C6 患者预收款关系
+
+独立 PostgreSQL 17 核对 94 份应用迁移、185 张 SQL 表、184 张 ORM 表、541 条外键及 172 项业务触发器。现金账增加可空的患者外键，并按患者、门店和记账状态检索。渠道凭据保留原版本关系。原 93 份迁移保持原字节。 [预收款 ER](er_patient_advances.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../C6_PATIENT_ADVANCES.md)
+
+下文保留各批历史结构的观察范围。
+
 # C5 实际数据库与批次护理关系
 
 独立 PostgreSQL 17 核对 93 份应用迁移、185 张 SQL 表、184 张 ORM 表、540 条外键及 172 项业务触发器。八张表承载库存、批次、护理职责和实际执行。 [批次 ER](er_stock_trace.svg) · [护理执行 ER](er_nursing_execution.svg) · [实际快照](schema_snapshot.json)

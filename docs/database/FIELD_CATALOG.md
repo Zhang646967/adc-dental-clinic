@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-07。本目录列出184张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-08。本目录列出184张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -640,6 +640,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | operation_id | uuid | UK | 否 | — |
 | clinic_id | bigint | FK | 否 | `adc_clinic.id` |
 | invoice_id | bigint | FK | 是 | `adc_invoice.id` |
+| advance_patient_id | bigint | FK | 是 | `adc_patient.id` |
 | based_record_version_id | bigint | FK | 是 | `adc_visit_record_version.id` |
 | equipment_event_id | bigint | FK | 是 | `adc_equipment_event.id` |
 | equipment_cost_amendment_id | bigint | FK | 是 | `adc_equipment_cost_amendment.id` |
@@ -658,6 +659,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 数据库约束：
 
+- `adc_cash_entry_advance_patient_id_8e11f773_fk_adc_patient_id`：`FOREIGN KEY (advance_patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_cash_entry_based_record_version_22b48b6f_fk_adc_visit`：`FOREIGN KEY (based_record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_cash_entry_clinic_id_6376e513_fk_adc_clinic_id`：`FOREIGN KEY (clinic_id) REFERENCES adc_clinic(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_cash_entry_equipment_cost_amend_57ace712_fk_adc_equip`：`FOREIGN KEY (equipment_cost_amendment_id) REFERENCES adc_equipment_cost_amendment(id) DEFERRABLE INITIALLY DEFERRED`。
@@ -671,7 +673,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_cash_entry_reviewed_by_id_f7f3a418_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `cash_amount_positive`：`CHECK ((amount > (0)::numeric))`。
 - `cash_cost_requires_equipment`：`CHECK (((equipment_cost_amendment_id IS NULL) OR (equipment_event_id IS NOT NULL)))`。
-- `cash_exact_source`：`CHECK ((((based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[])))))`。
+- `cash_exact_source`：`CHECK ((((advance_patient_id IS NULL) AND (based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((advance_patient_id IS NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[]))) OR ((advance_patient_id IS NOT NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NULL) AND ((kind)::text = 'RECEIPT'::text) AND (reversal_of_id IS NULL))))`。
 - `cash_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying, 'EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[])))`。
 - `cash_no_self_review`：`CHECK ((NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL))))`。
 - `cash_review_metadata`：`CHECK ((((lock_version = 0) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((lock_version = 1) AND (reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['POSTED'::character varying, 'REJECTED'::character varying])::text[])))))`。
@@ -679,6 +681,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 索引（含条件唯一索引）：
 
+- `adc_cash_entry_advance_patient_id_8e11f773`：`CREATE INDEX adc_cash_entry_advance_patient_id_8e11f773 ON public.adc_cash_entry USING btree (advance_patient_id)`。
 - `adc_cash_entry_based_record_version_id_22b48b6f`：`CREATE INDEX adc_cash_entry_based_record_version_id_22b48b6f ON public.adc_cash_entry USING btree (based_record_version_id)`。
 - `adc_cash_entry_clinic_id_6376e513`：`CREATE INDEX adc_cash_entry_clinic_id_6376e513 ON public.adc_cash_entry USING btree (clinic_id)`。
 - `adc_cash_entry_equipment_cost_amendment_id_57ace712`：`CREATE INDEX adc_cash_entry_equipment_cost_amendment_id_57ace712 ON public.adc_cash_entry USING btree (equipment_cost_amendment_id)`。
@@ -689,6 +692,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_cash_entry_prepared_by_id_9c735baa`：`CREATE INDEX adc_cash_entry_prepared_by_id_9c735baa ON public.adc_cash_entry USING btree (prepared_by_id)`。
 - `adc_cash_entry_reversal_of_id_dd479024`：`CREATE INDEX adc_cash_entry_reversal_of_id_dd479024 ON public.adc_cash_entry USING btree (reversal_of_id)`。
 - `adc_cash_entry_reviewed_by_id_f7f3a418`：`CREATE INDEX adc_cash_entry_reviewed_by_id_f7f3a418 ON public.adc_cash_entry USING btree (reviewed_by_id)`。
+- `cash_advance_clinic_state_idx`：`CREATE INDEX cash_advance_clinic_state_idx ON public.adc_cash_entry USING btree (clinic_id, advance_patient_id, state) WHERE (advance_patient_id IS NOT NULL)`。
 - `cash_clinic_day_idx`：`CREATE INDEX cash_clinic_day_idx ON public.adc_cash_entry USING btree (clinic_id, occurred_on)`。
 - `cash_clinic_state_date_idx`：`CREATE INDEX cash_clinic_state_date_idx ON public.adc_cash_entry USING btree (clinic_id, state, occurred_on)`。
 - `cash_one_live_reversal`：`CREATE UNIQUE INDEX cash_one_live_reversal ON public.adc_cash_entry USING btree (reversal_of_id) WHERE ((reversal_of_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[])))`。
@@ -747,6 +751,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_cash_evidence_prepared_by_id_cbe61383`：`CREATE INDEX adc_cash_evidence_prepared_by_id_cbe61383 ON public.adc_cash_evidence USING btree (prepared_by_id)`。
 - `adc_cash_evidence_previous_id_key`：`CREATE UNIQUE INDEX adc_cash_evidence_previous_id_key ON public.adc_cash_evidence USING btree (previous_id)`。
 - `adc_cash_evidence_reviewed_by_id_3250b8bc`：`CREATE INDEX adc_cash_evidence_reviewed_by_id_3250b8bc ON public.adc_cash_evidence USING btree (reviewed_by_id)`。
+- `cash_evidence_account_ref_idx`：`CREATE INDEX cash_evidence_account_ref_idx ON public.adc_cash_evidence USING btree (account_id, reference)`。
 - `cash_evidence_one_pending`：`CREATE UNIQUE INDEX cash_evidence_one_pending ON public.adc_cash_evidence USING btree (cash_entry_id) WHERE ((state)::text = 'PENDING'::text)`。
 - `cash_evidence_version_unique`：`CREATE UNIQUE INDEX cash_evidence_version_unique ON public.adc_cash_evidence USING btree (cash_entry_id, version)`。
 

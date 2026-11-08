@@ -285,5 +285,12 @@
     "width": 773,
     "height": 582,
     "minPrintedFontPt": 8.21417852522639
+  },
+  "er_patient_advances": {
+    "nodes": 6,
+    "edges": 8,
+    "width": 509,
+    "height": 695,
+    "minPrintedFontPt": 12.47457760314342
   }
 }

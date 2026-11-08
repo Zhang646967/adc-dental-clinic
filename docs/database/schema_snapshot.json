@@ -68,7 +68,7 @@
       "name": "cash_entry_history",
       "definition": "CREATE TRIGGER cash_entry_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_cash_history_guard()",
       "function": "adc_cash_history_guard",
-      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_cash_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE i adc_invoice%ROWTYPE; a adc_equipment_asset%ROWTYPE; e adc_equipment_event%ROWTYPE;\n        original adc_cash_entry%ROWTYPE; amendment adc_equipment_cost_amendment%ROWTYPE; current_amendment bigint; fee numeric; clinic bigint; vstate text; vvisit bigint;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'cash history cannot be deleted' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PENDING' OR NEW.lock_version<>0 OR NEW.review_reason<>'' THEN\n      RAISE EXCEPTION 'cash entry starts as an unreviewed request' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    IF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR NEW.lock_version<>1\n       OR (NEW.operation_id,NEW.clinic_id,NEW.invoice_id,NEW.based_record_version_id,NEW.equipment_event_id,\n           NEW.equipment_cost_amendment_id,NEW.reversal_of_id,NEW.kind,NEW.amount,NEW.occurred_on,NEW.reason,NEW.prepared_by_id,NEW.prepared_at)\n         IS DISTINCT FROM\n          (OLD.operation_id,OLD.clinic_id,OLD.invoice_id,OLD.based_record_version_id,OLD.equipment_event_id,\n           OLD.equipment_cost_amendment_id,OLD.reversal_of_id,OLD.kind,OLD.amount,OLD.occurred_on,OLD.reason,OLD.prepared_by_id,OLD.prepared_at)\n       OR btrim(NEW.review_reason)='' OR NEW.reviewed_at<NEW.prepared_at THEN\n      RAISE EXCEPTION 'cash request facts and terminal decisions are immutable' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  IF NEW.invoice_id IS NOT NULL THEN\n    SELECT * INTO i FROM adc_invoice WHERE id=NEW.invoice_id;\n    SELECT clinic_id INTO clinic FROM adc_visit WHERE id=i.visit_id;\n    SELECT state,visit_id INTO vstate,vvisit FROM adc_visit_record_version WHERE id=NEW.based_record_version_id;\n    IF clinic IS DISTINCT FROM NEW.clinic_id OR vstate IS DISTINCT FROM 'PUBLISHED' OR vvisit IS DISTINCT FROM i.visit_id\n       OR (NEW.state<>'REJECTED' AND i.current_record_version_id<>NEW.based_record_version_id) THEN\n      RAISE EXCEPTION 'cash request requires its own current published bill' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    PERFORM 1 FROM adc_equipment_asset WHERE id=(SELECT asset_id FROM adc_equipment_event WHERE id=NEW.equipment_event_id) FOR UPDATE;\n    SELECT * INTO e FROM adc_equipment_event WHERE id=NEW.equipment_event_id FOR UPDATE;\n    SELECT * INTO a FROM adc_equipment_asset WHERE id=e.asset_id;\n    fee=e.cost;\n    IF NEW.equipment_cost_amendment_id IS NOT NULL THEN\n      SELECT * INTO amendment FROM adc_equipment_cost_amendment WHERE id=NEW.equipment_cost_amendment_id;\n      IF NOT FOUND OR amendment.event_id<>e.id OR amendment.state<>'APPROVED' THEN\n        RAISE EXCEPTION 'invalid equipment cost basis' USING ERRCODE='23514';\n      END IF;\n      fee=amendment.proposed_cost;\n    END IF;\n    IF a.clinic_id IS DISTINCT FROM NEW.clinic_id OR e.kind NOT IN ('REGISTER','SERVICE')\n       OR fee IS NULL OR fee<=0 OR NEW.amount<>fee THEN\n      RAISE EXCEPTION 'equipment cash requires matching retained cost basis' USING ERRCODE='23514';\n    END IF;\n    IF NEW.state<>'REJECTED' AND NEW.reversal_of_id IS NULL THEN\n      SELECT id INTO current_amendment FROM adc_equipment_cost_amendment WHERE event_id=e.id AND state='APPROVED' ORDER BY id DESC LIMIT 1;\n      IF NEW.equipment_cost_amendment_id IS DISTINCT FROM current_amendment\n         OR EXISTS (SELECT 1 FROM adc_equipment_cost_amendment WHERE event_id=e.id AND state='PENDING') THEN\n        RAISE EXCEPTION 'equipment cost basis is stale or pending review' USING ERRCODE='23514';\n      END IF;\n    END IF;\n  END IF;\n  IF NEW.reversal_of_id IS NOT NULL THEN\n    SELECT * INTO original FROM adc_cash_entry WHERE id=NEW.reversal_of_id;\n    IF NOT FOUND OR original.state<>'POSTED' OR original.reversal_of_id IS NOT NULL OR original.amount<>NEW.amount\n       OR original.clinic_id<>NEW.clinic_id OR original.invoice_id IS DISTINCT FROM NEW.invoice_id\n       OR original.equipment_event_id IS DISTINCT FROM NEW.equipment_event_id\n       OR original.equipment_cost_amendment_id IS DISTINCT FROM NEW.equipment_cost_amendment_id\n       OR NOT ((original.kind='RECEIPT' AND NEW.kind='REFUND') OR (original.kind='REFUND' AND NEW.kind='RECEIPT')\n               OR (original.kind='EQUIPMENT_EXPENSE' AND NEW.kind='EXPENSE_REVERSAL')) THEN\n      RAISE EXCEPTION 'invalid cash reversal lineage' USING ERRCODE='23514';\n    END IF;\n  ELSIF NEW.kind='EXPENSE_REVERSAL' THEN\n    RAISE EXCEPTION 'expense reversal requires its original entry' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_cash_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE i adc_invoice%ROWTYPE; a adc_equipment_asset%ROWTYPE; e adc_equipment_event%ROWTYPE;\n        original adc_cash_entry%ROWTYPE; amendment adc_equipment_cost_amendment%ROWTYPE; current_amendment bigint; fee numeric; clinic bigint; vstate text; vvisit bigint;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'cash history cannot be deleted' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PENDING' OR NEW.lock_version<>0 OR NEW.review_reason<>'' THEN\n      RAISE EXCEPTION 'cash entry starts as an unreviewed request' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    IF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR NEW.lock_version<>1\n       OR (NEW.operation_id,NEW.clinic_id,NEW.invoice_id,NEW.based_record_version_id,NEW.equipment_event_id,\n           NEW.advance_patient_id,NEW.equipment_cost_amendment_id,NEW.reversal_of_id,NEW.kind,NEW.amount,NEW.occurred_on,NEW.reason,NEW.prepared_by_id,NEW.prepared_at)\n         IS DISTINCT FROM\n          (OLD.operation_id,OLD.clinic_id,OLD.invoice_id,OLD.based_record_version_id,OLD.equipment_event_id,\n           OLD.advance_patient_id,OLD.equipment_cost_amendment_id,OLD.reversal_of_id,OLD.kind,OLD.amount,OLD.occurred_on,OLD.reason,OLD.prepared_by_id,OLD.prepared_at)\n       OR btrim(NEW.review_reason)='' OR NEW.reviewed_at<NEW.prepared_at THEN\n      RAISE EXCEPTION 'cash request facts and terminal decisions are immutable' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  IF NEW.advance_patient_id IS NOT NULL THEN\n    IF NEW.state<>'REJECTED' AND NOT EXISTS (\n      SELECT 1 FROM adc_patient p WHERE p.id=NEW.advance_patient_id AND p.is_active\n      AND (p.created_in_clinic_id=NEW.clinic_id OR EXISTS (\n        SELECT 1 FROM adc_visit v WHERE v.patient_id=p.id AND v.clinic_id=NEW.clinic_id))\n    ) THEN\n      RAISE EXCEPTION 'patient advance requires an active patient in the clinic' USING ERRCODE='23514';\n    END IF;\n    IF NEW.state='POSTED' AND NOT EXISTS (\n      SELECT 1 FROM adc_cash_evidence WHERE cash_entry_id=NEW.id AND initial AND state='PENDING'\n    ) THEN\n      RAISE EXCEPTION 'patient advance requires original receipt evidence' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\n  END IF;\n  IF NEW.invoice_id IS NOT NULL THEN\n    SELECT * INTO i FROM adc_invoice WHERE id=NEW.invoice_id;\n    SELECT clinic_id INTO clinic FROM adc_visit WHERE id=i.visit_id;\n    SELECT state,visit_id INTO vstate,vvisit FROM adc_visit_record_version WHERE id=NEW.based_record_version_id;\n    IF clinic IS DISTINCT FROM NEW.clinic_id OR vstate IS DISTINCT FROM 'PUBLISHED' OR vvisit IS DISTINCT FROM i.visit_id\n       OR (NEW.state<>'REJECTED' AND i.current_record_version_id<>NEW.based_record_version_id) THEN\n      RAISE EXCEPTION 'cash request requires its own current published bill' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    PERFORM 1 FROM adc_equipment_asset WHERE id=(SELECT asset_id FROM adc_equipment_event WHERE id=NEW.equipment_event_id) FOR UPDATE;\n    SELECT * INTO e FROM adc_equipment_event WHERE id=NEW.equipment_event_id FOR UPDATE;\n    SELECT * INTO a FROM adc_equipment_asset WHERE id=e.asset_id;\n    fee=e.cost;\n    IF NEW.equipment_cost_amendment_id IS NOT NULL THEN\n      SELECT * INTO amendment FROM adc_equipment_cost_amendment WHERE id=NEW.equipment_cost_amendment_id;\n      IF NOT FOUND OR amendment.event_id<>e.id OR amendment.state<>'APPROVED' THEN\n        RAISE EXCEPTION 'invalid equipment cost basis' USING ERRCODE='23514';\n      END IF;\n      fee=amendment.proposed_cost;\n    END IF;\n    IF a.clinic_id IS DISTINCT FROM NEW.clinic_id OR e.kind NOT IN ('REGISTER','SERVICE')\n       OR fee IS NULL OR fee<=0 OR NEW.amount<>fee THEN\n      RAISE EXCEPTION 'equipment cash requires matching retained cost basis' USING ERRCODE='23514';\n    END IF;\n    IF NEW.state<>'REJECTED' AND NEW.reversal_of_id IS NULL THEN\n      SELECT id INTO current_amendment FROM adc_equipment_cost_amendment WHERE event_id=e.id AND state='APPROVED' ORDER BY id DESC LIMIT 1;\n      IF NEW.equipment_cost_amendment_id IS DISTINCT FROM current_amendment\n         OR EXISTS (SELECT 1 FROM adc_equipment_cost_amendment WHERE event_id=e.id AND state='PENDING') THEN\n        RAISE EXCEPTION 'equipment cost basis is stale or pending review' USING ERRCODE='23514';\n      END IF;\n    END IF;\n  END IF;\n  IF NEW.reversal_of_id IS NOT NULL THEN\n    SELECT * INTO original FROM adc_cash_entry WHERE id=NEW.reversal_of_id;\n    IF NOT FOUND OR original.state<>'POSTED' OR original.reversal_of_id IS NOT NULL OR original.amount<>NEW.amount\n       OR original.clinic_id<>NEW.clinic_id OR original.invoice_id IS DISTINCT FROM NEW.invoice_id\n       OR original.equipment_event_id IS DISTINCT FROM NEW.equipment_event_id\n       OR original.advance_patient_id IS DISTINCT FROM NEW.advance_patient_id\n       OR original.equipment_cost_amendment_id IS DISTINCT FROM NEW.equipment_cost_amendment_id\n       OR NOT ((original.kind='RECEIPT' AND NEW.kind='REFUND') OR (original.kind='REFUND' AND NEW.kind='RECEIPT')\n               OR (original.kind='EQUIPMENT_EXPENSE' AND NEW.kind='EXPENSE_REVERSAL')) THEN\n      RAISE EXCEPTION 'invalid cash reversal lineage' USING ERRCODE='23514';\n    END IF;\n  ELSIF NEW.kind='EXPENSE_REVERSAL' THEN\n    RAISE EXCEPTION 'expense reversal requires its original entry' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_cash_evidence",
@@ -3529,6 +3529,19 @@
           "null": true,
           "max_length": null,
           "target_table": "adc_invoice",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "advance_patient",
+          "column": "advance_patient_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_patient",
           "target_column": "id",
           "on_delete": "PROTECT"
         },
@@ -27368,6 +27381,12 @@
     },
     {
       "table": "adc_cash_entry",
+      "name": "adc_cash_entry_advance_patient_id_8e11f773_fk_adc_patient_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (advance_patient_id) REFERENCES adc_patient(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_cash_entry",
       "name": "adc_cash_entry_based_record_version_22b48b6f_fk_adc_visit",
       "kind": "f",
       "definition": "FOREIGN KEY (based_record_version_id) REFERENCES adc_visit_record_version(id) DEFERRABLE INITIALLY DEFERRED"
@@ -27448,7 +27467,7 @@
       "table": "adc_cash_entry",
       "name": "cash_exact_source",
       "kind": "c",
-      "definition": "CHECK ((((based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[])))))"
+      "definition": "CHECK ((((advance_patient_id IS NULL) AND (based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((advance_patient_id IS NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[]))) OR ((advance_patient_id IS NOT NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NULL) AND ((kind)::text = 'RECEIPT'::text) AND (reversal_of_id IS NULL))))"
     },
     {
       "table": "adc_cash_entry",
@@ -35358,6 +35377,11 @@
     },
     {
       "table": "adc_cash_entry",
+      "name": "adc_cash_entry_advance_patient_id_8e11f773",
+      "definition": "CREATE INDEX adc_cash_entry_advance_patient_id_8e11f773 ON public.adc_cash_entry USING btree (advance_patient_id)"
+    },
+    {
+      "table": "adc_cash_entry",
       "name": "adc_cash_entry_based_record_version_id_22b48b6f",
       "definition": "CREATE INDEX adc_cash_entry_based_record_version_id_22b48b6f ON public.adc_cash_entry USING btree (based_record_version_id)"
     },
@@ -35408,6 +35432,11 @@
     },
     {
       "table": "adc_cash_entry",
+      "name": "cash_advance_clinic_state_idx",
+      "definition": "CREATE INDEX cash_advance_clinic_state_idx ON public.adc_cash_entry USING btree (clinic_id, advance_patient_id, state) WHERE (advance_patient_id IS NOT NULL)"
+    },
+    {
+      "table": "adc_cash_entry",
       "name": "cash_clinic_day_idx",
       "definition": "CREATE INDEX cash_clinic_day_idx ON public.adc_cash_entry USING btree (clinic_id, occurred_on)"
     },
@@ -35455,6 +35484,11 @@
       "table": "adc_cash_evidence",
       "name": "adc_cash_evidence_reviewed_by_id_3250b8bc",
       "definition": "CREATE INDEX adc_cash_evidence_reviewed_by_id_3250b8bc ON public.adc_cash_evidence USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_cash_evidence",
+      "name": "cash_evidence_account_ref_idx",
+      "definition": "CREATE INDEX cash_evidence_account_ref_idx ON public.adc_cash_evidence USING btree (account_id, reference)"
     },
     {
       "table": "adc_cash_evidence",
@@ -40862,6 +40896,12 @@
     {
       "table": "adc_cash_entry",
       "column": "equipment_cost_amendment_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_cash_entry",
+      "column": "advance_patient_id",
       "db_type": "bigint",
       "null": true
     },
@@ -50982,6 +51022,10 @@
       "name": "0012_costmonth_managementreport_costallocation_and_more"
     },
     {
+      "app": "finance",
+      "name": "0013_patient_advance_receipts"
+    },
+    {
       "app": "insurance",
       "name": "0001_initial"
     },
@@ -51122,7 +51166,7 @@
       "name": "0006_c5_batch_nursing"
     }
   ],
-  "application_commit": "6f3de628be6ca929b80537b198cf1f50d7e74523",
-  "observed_database": "PostgreSQL 17.10 isolated synthetic",
-  "observed_on": "2026-11-07"
+  "observed_database": "PostgreSQL 17.11 isolated synthetic",
+  "application_commit": "f118d89904bbd96b29e5108ffdd6f09898d1f14d",
+  "observed_on": "2026-11-08"
 }

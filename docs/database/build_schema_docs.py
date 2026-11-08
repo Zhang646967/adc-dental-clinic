@@ -279,6 +279,19 @@ VIEWS = {
         },
         'note': '每次就诊至多一个逻辑账单；账单另有复合外键保证当前记录版本属于同一次就诊。凭据与匹配保留多次历史，活动匹配的唯一性由条件约束限定。',
     },
+    'er_patient_advances': {
+        'title': '患者预收款、独立记账与渠道凭据',
+        'tables': {
+            'adc_clinic': ['id', 'clinic_code'],
+            'adc_patient': ['id', 'created_in_clinic_id'],
+            'adc_user': ['id'],
+            'adc_cash_entry': ['id', 'clinic_id', 'advance_patient_id', 'amount', 'occurred_on', 'state',
+                               'prepared_by_id', 'reviewed_by_id'],
+            'adc_payment_account': ['id', 'clinic_id', 'code'],
+            'adc_cash_evidence': ['id', 'cash_entry_id', 'account_id', 'reference', 'version', 'state'],
+        },
+        'note': '预收款按收款门店和患者归集。预收、收费单和设备三种来源互斥。申请与复核关联不同账号，已记账预收纳入当日实收。渠道凭据保留版本并可沿既有关系独立对账。',
+    },
 }
 
 

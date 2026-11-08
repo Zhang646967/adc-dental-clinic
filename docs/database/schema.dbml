@@ -230,6 +230,7 @@ Table adc_cash_entry {
   operation_id "uuid" [unique, not null]
   clinic_id "bigint" [not null]
   invoice_id "bigint" [null]
+  advance_patient_id "bigint" [null]
   based_record_version_id "bigint" [null]
   equipment_event_id "bigint" [null]
   equipment_cost_amendment_id "bigint" [null]
@@ -2605,6 +2606,7 @@ Ref: adc_booking_service_dentists.dentist_id > adc_dentist.id
 Ref: adc_cancellation_followup.assigned_to_id > adc_user.id
 Ref: adc_cancellation_followup.replacement_visit_id > adc_visit.id
 Ref: adc_cancellation_followup.visit_id - adc_visit.id
+Ref: adc_cash_entry.advance_patient_id > adc_patient.id
 Ref: adc_cash_entry.based_record_version_id > adc_visit_record_version.id
 Ref: adc_cash_entry.clinic_id > adc_clinic.id
 Ref: adc_cash_entry.equipment_cost_amendment_id > adc_equipment_cost_amendment.id
