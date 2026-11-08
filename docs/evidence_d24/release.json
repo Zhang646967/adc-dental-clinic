@@ -1,0 +1,84 @@
+{
+  "tested_source_commit": "19238b8c4678b7b0da87a3c74a078645073de52d",
+  "ci": {
+    "id": 42451753585,
+    "html_url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42451753585",
+    "source_checks": 1184,
+    "postgres_tests": 2350,
+    "native_checks": 342,
+    "verified_source_log": true
+  },
+  "publication": {
+    "passed": true,
+    "application_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "application_image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+    "actual_postgresql_tables": 185,
+    "compared_rows": 9989,
+    "same_volume": true,
+    "same_accounts_and_initialization": true,
+    "complete_handover": true,
+    "deployment_resumed_once": true,
+    "encrypted_first_backup_count": 1,
+    "backup_reused": true,
+    "interruptions": [
+      "ORIGIN_READY_BEFORE_HANDOVER",
+      "AFTER_ENCRYPTED_FIRST_BACKUP"
+    ],
+    "scope": "local loopback amd64 C5 PostgreSQL and Age, controlled SSH/systemd replies",
+    "public_acceptance_executed": false
+  },
+  "monitoring": {
+    "passed": true,
+    "healthy_1441_sample_schedule": "PASS",
+    "same_count_with_24h_gap": "FAIL",
+    "actual_gateway_failure": {
+      "http_health": 200,
+      "availability": 503,
+      "events": [
+        "OPENED",
+        "RECOVERED"
+      ],
+      "complete_fault_window": "FAIL"
+    },
+    "stopped_probe": {
+      "signal": "PROBE_HEARTBEAT",
+      "events": [
+        "OPENED",
+        "RECOVERED"
+      ],
+      "site_http_health": 200,
+      "complete_paused_window": "FAIL"
+    },
+    "scope": "isolated actual HTTPS, real process pause and independently launched heartbeat command",
+    "target_observation_executed": false
+  },
+  "mini_program": {
+    "source_transport_checks": 342,
+    "offline_compiler_pages": 27,
+    "live_revocation_cases": [
+      {
+        "case": "with_other",
+        "revocation_recorded": true,
+        "cleared_prior_patient_and_draft": true,
+        "no_cancellation_or_reschedule_sent": true,
+        "recovery": "/pages/patients/index",
+        "visit_status": "SCHEDULED"
+      },
+      {
+        "case": "only",
+        "revocation_recorded": true,
+        "cleared_prior_patient_and_draft": true,
+        "no_cancellation_or_reschedule_sent": true,
+        "recovery": "/pages/login/index",
+        "visit_status": "SCHEDULED"
+      }
+    ],
+    "live_revocation_scope": "real PostgreSQL, native Page and transport, loopback HTTP with modeled wx.request; official IDE separate",
+    "workbuddy_project_checksums": 98,
+    "workbuddy_active_test_grants_at_freeze": 3,
+    "workbuddy_official_tool": "PENDING_WORKBUDDY",
+    "real_wechat_and_target_devices": "PENDING_PLATFORM_OR_DEVICE"
+  },
+  "application_migrations_changed": false,
+  "target_public_acceptance_executed": false
+}
