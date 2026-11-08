@@ -29,6 +29,31 @@ from scripts.g4_mac_demo import atomic_text
 from scripts.recovery_receipts import ReceiptBook, artifact, file_digest, instant, age as recovery_age, utc_now, validate_restore, MAX_ARCHIVE
 
 
+PUBLISH_FILES = ('plan.json', 'compose.env', 'compose.yaml', 'nginx.conf', 'init-db.sh',
+                 'private/runtime.env', 'private/maintenance.env', 'private/database.env')
+PUBLISH_INTENT = '.g4/private/initial-publish.json'
+VERIFY_PUBLISH_RESUME = """
+import hashlib, json, sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+if root.is_symlink() or (root / '.g4').is_symlink() or (root / '.g4/private').is_symlink():
+    raise ValueError('The reviewed publication directory differs.')
+expected = json.loads(sys.argv[2])
+for name, checksum in expected.items():
+    path = root / name
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('The reviewed transfer is incomplete.')
+    with path.open('rb') as stream:
+        if hashlib.file_digest(stream, 'sha256').hexdigest() != checksum:
+            raise ValueError('The reviewed transfer differs.')
+for name in ('fullchain.pem', 'privkey.pem'):
+    path = root / '.g4/tls' / name
+    if path.is_symlink() or not path.is_file() or not path.stat().st_size:
+        raise ValueError('Complete the TLS stage before resuming publication.')
+"""
+
+
 class Remote:
     def __init__(self, config, bundle):
         self.config_path = private_file(config)
@@ -77,10 +102,17 @@ class Remote:
             # A non-root SSH account may need sudo to read the root-owned
             # backup. Stream through the same pinned SSH connection.
             command = (['sudo', '-n'] if self.config.get('sudo') else []) + ['cat', '--', target]
-            with Path(source).open('xb') as stream:
-                os.fchmod(stream.fileno(), 0o600)
-                run(['ssh'] + self.options + [self.target, shlex.join(command)], self.log,
-                    output_file=stream, timeout=600)
+            destination = Path(source)
+            if destination.exists() or destination.is_symlink():
+                raise FileExistsError(destination)
+            with tempfile.TemporaryDirectory(dir=destination.parent) as folder:
+                pending = Path(folder) / 'download'
+                with pending.open('xb') as stream:
+                    os.fchmod(stream.fileno(), 0o600)
+                    run(['ssh'] + self.options + [self.target, shlex.join(command)], self.log,
+                        output_file=stream, timeout=600)
+                # A lost SSH reply never leaves a partial final file or overwrites one.
+                os.link(pending, destination)
         else:
             run(['scp'] + self.options + [str(source), remote], self.log, timeout=600)
 
@@ -89,7 +121,7 @@ class Remote:
             '--output', self.remote_bundle, '--docker', '/usr/bin/docker', '--context', 'default',
             action] + list(extra), timeout=timeout))
 
-    def publish(self, artifacts, recipient_file, restore_backup=None, identity_file=None, age='age', offsite_config=None):
+    def _publication_inputs(self, artifacts, recipient_file):
         artifacts = private_directory(artifacts)
         metadata = json.loads(private_file(artifacts / 'build.json').read_text())
         recipient = private_file(recipient_file).read_text().strip()
@@ -102,6 +134,22 @@ class Remote:
         for name, field in (('source.tar', 'source_sha256'), ('application.tar', 'image_archive_sha256')):
             if digest(private_file(artifacts / name)) != metadata[field]:
                 raise ValueError('Build archive checksum differs.')
+        return artifacts, metadata, recipient
+
+    def _publish_files(self):
+        return PUBLISH_FILES + ((MINI_SECRET_FILE,) if self.plan.get('wechat_mini_app_id') else ())
+
+    def _publish_intent(self, mode):
+        return json.dumps({'mode': mode, 'project': self.plan['project'],
+                           'source_commit': self.plan['requested_source_commit'],
+                           'app_image': self.plan['images']['app']}, sort_keys=True) + '\n'
+
+    def publish(self, artifacts, recipient_file, restore_backup=None, identity_file=None, age='age', offsite_config=None):
+        with exclusive(self.bundle / 'private/publish.lock'):
+            return self._publish(artifacts, recipient_file, restore_backup, identity_file, age, offsite_config)
+
+    def _publish(self, artifacts, recipient_file, restore_backup, identity_file, age, offsite_config):
+        artifacts, metadata, recipient = self._publication_inputs(artifacts, recipient_file)
         if restore_backup:
             if not identity_file:
                 raise ValueError('Recovery requires the Mac key.')
@@ -120,8 +168,7 @@ class Remote:
                     restore_book.load()
             if file_digest(restore_backup) != cipher_sha or file_digest(identity_file) != key_sha:
                 raise ValueError('Recovery archive or key changed during authentication.')
-        # An existing directory is never overwritten: status and sync are the
-        # recovery operations after an interrupted publish.
+        # A fresh transfer never overwrites a previous server release.
         setup = ("from pathlib import Path; import os,pwd; "
                  "p=Path(" + repr(self.folder) + "); "
                  "p.mkdir(mode=0o700,parents=True,exist_ok=False); "
@@ -129,12 +176,8 @@ class Remote:
         self.ssh(['python3', '-c', setup])
         with tempfile.TemporaryDirectory(dir=self.bundle / 'private') as folder:
             tarpath = Path(folder) / 'bundle.tar'
-            allowed = ['plan.json', 'compose.env', 'compose.yaml', 'nginx.conf', 'init-db.sh',
-                       'private/runtime.env', 'private/maintenance.env', 'private/database.env']
-            if self.plan.get('wechat_mini_app_id'):
-                allowed.append(MINI_SECRET_FILE)
             with tarfile.open(tarpath, 'w') as archive:
-                for name in allowed:
+                for name in self._publish_files():
                     path = self.bundle / name
                     if path.is_symlink():
                         raise ValueError('Bundle transfer refuses symbolic links.')
@@ -145,6 +188,7 @@ class Remote:
             self.copy(tarpath, self.folder + '/bundle.tar')
         for name in ('source.tar', 'application.tar'):
             self.copy(artifacts / name, self.folder + '/' + name)
+        intent = self._publish_intent('restore' if restore_backup else 'fresh')
         unpack = ("from pathlib import Path; import hashlib,tarfile,os; "
                   "p=Path(" + repr(self.folder) + "); expected=" + repr(hashes) + "; "
                   "assert all(hashlib.file_digest((p/n).open('rb'),'sha256').hexdigest()==v for n,v in expected.items()); "
@@ -155,7 +199,9 @@ class Remote:
                   "[(p/'.g4'/n).mkdir(mode=0o700,exist_ok=True) for n in ('tls','backups')]; "
                   "(p/'.g4/acme/.well-known/acme-challenge').mkdir(mode=0o755,parents=True,exist_ok=True); "
                   "(p/'.g4/private/backup-recipient.txt').write_text(" + repr(recipient + '\n') + "); "
-                  "os.chmod(p/'.g4/private/backup-recipient.txt',0o600)")
+                  "os.chmod(p/'.g4/private/backup-recipient.txt',0o600); "
+                  "record=p/" + repr(PUBLISH_INTENT) + "; "
+                  "record.write_text(" + repr(intent) + "); os.chmod(record,0o600)")
         self.ssh(['python3', '-c', unpack])
         self.ssh(['sh', self.folder + '/scripts/g4_host_bootstrap.sh', '--new-course-server'], timeout=1800)
         # stdout may include image names; diagnostics remain private, never print envs.
@@ -220,6 +266,54 @@ class Remote:
         self.operation('backup', ['--recipient-file', self.remote_bundle + '/private/backup-recipient.txt'])
         return {'status': result['status'], 'hostname': self.plan['host'],
                 'source_commit': metadata['source_commit'], 'public_acceptance_executed': False}
+
+    def resume_publish(self, artifacts, recipient_file):
+        """Continue a fresh publication after verified transfer and TLS."""
+        with exclusive(self.bundle / 'private/publish.lock'):
+            _, meta, recipient = self._publication_inputs(artifacts, recipient_file)
+            hashes = {
+                'source.tar': meta['source_sha256'],
+                'application.tar': meta['image_archive_sha256'],
+                PUBLISH_INTENT: hashlib.sha256(self._publish_intent('fresh').encode()).hexdigest(),
+                '.g4/private/backup-recipient.txt': hashlib.sha256((recipient + '\n').encode()).hexdigest(),
+            }
+            hashes.update({'.g4/' + name: digest(self.bundle / name) for name in self._publish_files()})
+            self.ssh(['python3', '-c', VERIFY_PUBLISH_RESUME, self.folder, json.dumps(hashes)], timeout=120)
+            result = self.operation('status')
+            if result['project'] != self.plan['project'] or result['source_commit'] != meta['source_commit']:
+                raise ValueError('Publication target differs from the reviewed project and release.')
+            if result['status'] != 'ORIGIN_READY':
+                result = self.operation('deploy')
+            if (result['status'] != 'ORIGIN_READY' or result['project'] != self.plan['project']
+                    or result['source_commit'] != meta['source_commit']):
+                raise ValueError('Resolve the origin readiness issue before completing publication.')
+            for name in ('demo-credentials.txt', 'COURSE_ACCESS.md'):
+                self._collect_publish_receipt(name)
+            recipient_path = self.remote_bundle + '/private/backup-recipient.txt'
+            self.operation('install-server-jobs', ['--recipient-file', recipient_path])
+            backups = self.operation('list-backups')['backups']
+            reuse = any(row.get('source_commit') == meta['source_commit']
+                        and row.get('app_image') == meta['app_image'] for row in backups)
+            if not reuse:
+                backup = self.operation('backup', ['--recipient-file', recipient_path])
+                if backup['status'] != 'SERVER_BACKUP_CREATED':
+                    raise ValueError('First server backup was not confirmed.')
+            return {'status': 'ORIGIN_READY', 'project': self.plan['project'],
+                    'hostname': self.plan['host'], 'source_commit': meta['source_commit'],
+                    'first_server_backup': 'REUSED' if reuse else 'CREATED',
+                    'public_acceptance_executed': False}
+
+    def _collect_publish_receipt(self, name):
+        destination = self.bundle / 'private' / name
+        target = self.remote_bundle + '/private/' + name
+        if destination.exists() or destination.is_symlink():
+            remote_checksum = self.ssh(['sha256sum', '--', target]).decode().split()[0]
+            if digest(private_file(destination)) != remote_checksum:
+                raise ValueError('Existing private handover file differs; preserve and review it.')
+        else:
+            self.copy(destination, target, download=True)
+        if not private_file(destination).stat().st_size:
+            raise ValueError('A required private handover file is empty.')
 
     def check_backup_recipient(self, recipient_file):
         recipient = private_file(recipient_file).read_text().strip()
@@ -422,6 +516,9 @@ def main():
     publish.add_argument('--age', default='age')
     publish.add_argument('--trusted-synthetic-copy', action='store_true')
     publish.add_argument('--offsite-config')
+    resume = sub.add_parser('resume-publish')
+    resume.add_argument('--artifacts', required=True)
+    resume.add_argument('--recipient-file', required=True)
     for action in ('upgrade', 'rollback'):
         command = sub.add_parser(action)
         command.add_argument('--recipient-file', required=True)
@@ -453,6 +550,8 @@ def main():
                 raise ValueError('Recovery requires the explicit trusted-synthetic-copy flag.')
             result = remote.publish(args.artifacts, args.recipient_file,
                                     args.restore_backup, args.identity_file, args.age, args.offsite_config)
+        elif args.action == 'resume-publish':
+            result = remote.resume_publish(args.artifacts, args.recipient_file)
         elif args.action == 'upgrade':
             result = remote.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit, args.age,
                                     allow_additive=args.allow_additive_migrations)

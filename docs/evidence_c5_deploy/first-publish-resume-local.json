@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "application_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+  "application_image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+  "actual_postgresql_tables": 185,
+  "compared_rows": 10016,
+  "retained_data_and_volume": true,
+  "initializer_receipt_preserved": true,
+  "handover_files_preserved": true,
+  "encrypted_backups_created": 1,
+  "reused_on_resume": true,
+  "interrupted_at": "after actual encrypted backup, before controller receives its reply",
+  "scope": "local real C5 amd64 origin and Age backup, simulated SSH and systemd replies",
+  "public_acceptance_executed": false,
+  "source_regression_scope": "Host controller; pinned C5 application image and database used for loopback rehearsal."
+}

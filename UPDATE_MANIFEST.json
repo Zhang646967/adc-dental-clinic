@@ -139,6 +139,7 @@
     "checks/test_availability_rules.py": "16b9928ffaef5b8370c88f69aa9cd33a9e4ba66d8a3a6372e335b49087bbb65d",
     "checks/test_catalogue_rules.py": "b5d771730351ad20c4ed3a9891230e4fded6bfd62204f7e8d2e8b05ab45b13c6",
     "checks/test_cloud_offsite.py": "a2f892b54e64a37a5016f93171f95625051b7e81630d9f8a6e84cf6eb5a2a4b9",
+    "checks/test_cloud_publish_resume.py": "a12321f3781e66c74cc80e0ad64bf6c35bb48396a5c137723b8d4f4aeb44d612",
     "checks/test_cloud_release.py": "6412c545a190f684cfc6610d09fc1149dee4f4893f8640c77849cdb43ab99da4",
     "checks/test_contact_rules.py": "1803054c1786dbd0ed24b730a5b279c5cf47a7639d721cd1c875a535598cbd51",
     "checks/test_coordination_tasks.py": "2ac962a9b89892d9585868f92ae046432fb6df6d9843e6b65c6146e2cb7d062a",
@@ -480,7 +481,7 @@
     "docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md": "d6c01465ba7a154cfc6b56f7b9c3bea1785f351aacb58d39ac79e0f83f3bda4f",
     "docs/C33_ARCHIVE_ROLES.md": "68edeb95e3c46e696aeeeb9449c2bb602bc915836d7b04283f31f1fd3e7a741f",
     "docs/C3_RECORD_CONSENT_ARCHIVE_PLAN.md": "5a725e40ef18feef0a3666c3fbea8e1bd366222b76301e2d5fc98313ac5cefd8",
-    "docs/C5_UNIFIED_DEPLOYMENT.md": "e2bd71cc88779b3042713312f4ce2b5148dc607e659c728aebf6531b52148573",
+    "docs/C5_UNIFIED_DEPLOYMENT.md": "aa8254bd875b6926fe1f920e6d4ba926e482f70db5d530bfa3553484bab1a044",
     "docs/C61A_LOCAL_GUIDE.md": "54bb26a744fcb0b76defd5cc9a9f001395eec0f1da2a01e3ff6855598ce883a5",
     "docs/C61A_PREPARATION_CONTRACT.md": "4afab8daebcede0ec7a9838533d1f6e27b66ba6d4cb2940eb2c003340df077fd",
     "docs/C61BC_LOCAL_GUIDE.md": "d76aa7aef282ed3f0b6e0a83547ecf2eea72d76b38f9130010eaf857d35cb8ed",
@@ -503,7 +504,7 @@
     "docs/CONSISTENCY_BATCH1.md": "d47fb6101760994db232c30dfe584edd9e34d548a67b1398d12f5d54b733c5b5",
     "docs/CONTINUING_CARE_DEMO.md": "04d65607c3d0fd4f802feec690599da0ee8af00b50bf7041853e5630a9076e44",
     "docs/CONTRACTS_v0.5.md": "b0a6e489d0b07fd72c6f04615731636ba5a0b07422a5d31cc38dc3083a146125",
-    "docs/COURSE_ONLINE.md": "fa0220a50710facaa676545b61c703ef7f35996158a0e821645bfa902ac9f4e2",
+    "docs/COURSE_ONLINE.md": "2a7e3e0d7e2ba95120b2c040e6a9b3673ce4bfe3f1854d82ac8b2ca0fe49562c",
     "docs/COURSE_REPORT_v0.7.md": "4176b028660ac94b4acf003f55f07b39fe577dd40ebe6e6e83635e525f23f164",
     "docs/COURSE_TEACHER_DELIVERY.md": "fbffab33219baa43473c05f7116e130874332e5d0b2c8317b112d21fe6dd47bb",
     "docs/D1_CLOUD_RELEASE.md": "67e4ae40298deb8cee931a332faa6cc37e51520b33a41e8153864088a33a9607",
@@ -928,6 +929,7 @@
     "docs/evidence_c42/workbuddy-closure.json": "6f8410754fdf6b5945cb7bf7218dc8ea6559e63bcf1813d98abcd938a10d246b",
     "docs/evidence_c5/README.md": "ebd059c2aa3bd8104341d57eb338be0deff3ce26927e19d9ce46a8b3227b45ba",
     "docs/evidence_c5/release.json": "11b06a50551ab2aa0b731ca15dcc5e72b9789c87c254ea4f8cd2d85eca8ae899",
+    "docs/evidence_c5_deploy/first-publish-resume-local.json": "d5a2ef85bafd7af34b437d6c51b37947471800fd150b7c5f1fe7c7faad49b7a6",
     "docs/evidence_c5_deploy/release.json": "7cd5fae710e4d32d95f845586e8fea041bdbc33405575b45fcc1ed46c962196f",
     "docs/evidence_commercial_batch2/README.md": "4ed9e0599d9fd9b9170518a3692ae075529ab9e45912eb26c91052f8797e3fe8",
     "docs/evidence_commercial_batch2/release.json": "4d343523c073f495b9c25ad5fe0130777231d9caa9375adaa3bdd71755ca7a14",
@@ -1519,7 +1521,7 @@
     "scripts/g4_patient_probe.py": "c188d1239b8fbed7422baed1f7228d37041b02b8969ac56bb945531c44248e35",
     "scripts/g4_prepare.py": "b6e3446bcb001d93010be6da7ff0024719130019187300ce801c0f55e4306de6",
     "scripts/g4_release.py": "3454d478fe8e03ba56f6f1d680441b66ffedbfb727dab359665ea120fb833682",
-    "scripts/g4_remote.py": "7d97090999d6bf344695bc3d8abb1063814cfc8ecffe29f14f9b9333f0f67819",
+    "scripts/g4_remote.py": "75bb134afd4f61fcb9c671b9a46f17ea6ef8e5f5e5056346340243f1541c9915",
     "scripts/g4_worker.py": "ec79a02920db46fcdf4c34ba53f7b5839bb6f5a12b88cf2e9202b013fdf1f6f6",
     "scripts/host_events.py": "25e12509dd01cca043b487a879b53af9d04e752d39ac9aac5d18a1d5a7358701",
     "scripts/init_local.py": "9a5f280faef2901e6d9426a1e8db46641ade59667ff2a088a2509cf885434b50",
@@ -2287,5 +2289,11 @@
     "app_image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
     "application_migrations": 93,
     "evidence": "docs/evidence_c5_deploy/release.json"
+  },
+  "first_publish_resume_followup": {
+    "tool": "scripts/g4_remote.py resume-publish",
+    "application_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "evidence": "docs/evidence_c5_deploy/first-publish-resume-local.json",
+    "target_acceptance": "NOT_RUN"
   }
 }

@@ -105,11 +105,25 @@ checks transfer hashes, provisions dependencies only on a dedicated empty Ubuntu
 24.04 amd64 host, loads/pulls the pinned images, issues TLS, initializes the
 empty database, seeds synthetic accounts once, and starts web/worker/gateway.
 It installs daily encrypted server backups and twice-daily certificate checks.
-An existing release folder is preserved and publication stops; diagnose an
-interrupted run through pinned SSH rather than uploading over its private state.
-Successful seeding is recorded before runtime startup; retrying deploy after a
-runtime failure starts services without reseeding. Earlier initialization
-failures require diagnosis.
+An existing release folder is preserved when a fresh publication is attempted.
+After a verified **fresh** transfer and TLS installation, use the current Mac
+controller to continue in the same directory with the original bundle:
+
+```sh
+python3 scripts/g4_remote.py --ssh-config .course-private/ssh.json \
+  --output .course-private/cloud/.g4 resume-publish \
+  --artifacts .course-private/build-amd64 \
+  --recipient-file .course-private/backup-key/recipient.txt
+```
+
+The command checks the release identity, archive and bundle digests, TLS files
+and the encryption recipient. It uses the existing deployment completion
+records, preserves matching private handover files, and reuses a verified backup
+for the same version. This stage completes the first server backup. Off-site
+configuration and read-back are separate checks. Earlier transfer or TLS
+interruptions, restore-mode publication and initialization without a confirmed
+checkpoint require diagnosis in the retained project. The continuation command
+requires a fresh-transfer record from the current Mac publisher.
 
 Initial HTTP-01 uses a temporary challenge-only listener on port 80. Certbot
 uses webroot for issuance and renewal; certificates are copied privately and
