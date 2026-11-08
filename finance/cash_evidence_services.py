@@ -22,6 +22,13 @@ def checked_account(account_id,clinic_id,reference,*,lock=False):
     if account is None:raise RuleError('渠道账户不属于本店或已停用。')
     return account,text(reference)
 
+def check_receipt_reference(account,reference,*,advance,exclude_entry=None):
+    """One receipt reference can support only one advance; confirm under the account lock."""
+    used=CashEvidenceVersion.objects.filter(account=account,reference=reference,state__in=('PENDING','APPROVED'),
+        cash_entry__kind='RECEIPT',cash_entry__state__in=('PENDING','POSTED')).exclude(cash_entry_id=exclude_entry)
+    if not advance:used=used.filter(cash_entry__advance_patient__isnull=False)
+    if used.exists():raise RuleError('此渠道凭据已用于一笔收款申请，请先核对原条目。')
+
 def effective(entry_id):
     return CashEvidenceVersion.objects.filter(cash_entry_id=entry_id,state='APPROVED').order_by('-version').first()
 
@@ -42,11 +49,12 @@ def prepare_evidence(*,actor,entry_id,payment_account_id,reference,reason):
     from finance.cash_services import _request_scope,_reason
     with reporting_snapshot():
         entry=cash_scope(actor,detail=True).get(pk=entry_id)
-        _request_scope(actor,'invoice' if entry.invoice_id else 'equipment',entry.clinic_id)
+        _request_scope(actor,entry.source_type,entry.clinic_id)
         if entry.state!='POSTED':raise RuleError('仅对已记账条目补证或更正；待审申请应先处理原审核。')
         previous=entry.evidence_versions.order_by('-version').first()
         if previous and previous.state=='PENDING':raise RuleError('已有待复核凭据，请先处理。')
         account,reference=checked_account(payment_account_id,entry.clinic_id,reference)
+        if entry.kind=='RECEIPT':check_receipt_reference(account,reference,advance=bool(entry.advance_patient_id),exclude_entry=entry.pk)
         data=dict(entry=entry.pk,previous=previous.pk if previous else None,account=account.pk,
             account_version=account.lock_version,reference=reference,reason=_reason(reason))
         return dict(entry=entry,account=account,data=data,proposal_token=proposal(actor,REQUEST,('FRONT_DESK','MANAGER'),data))
@@ -59,7 +67,7 @@ def confirm_evidence(*,actor,proposal_token,confirmed,expected_entry_id):
     p=read_proposal(actor,REQUEST,('FRONT_DESK','MANAGER'),proposal_token);d=p['data']
     if set(d)!={'entry','previous','account','account_version','reference','reason'} or d['entry']!=expected_entry_id:raise RuleError('凭据确认目标无效。')
     preview=cash_scope(actor,detail=True).get(pk=d['entry']);lock_people(actor.pk)
-    _request_scope(actor,'invoice' if preview.invoice_id else 'equipment',preview.clinic_id,lock=True)
+    _request_scope(actor,preview.source_type,preview.clinic_id,lock=True)
     entry=CashEntry.objects.select_for_update().get(pk=preview.pk)
     prior=CashEvidenceVersion.objects.filter(operation_id=p['operation'],prepared_by=actor,cash_entry=entry).first()
     if prior:return prior,True
@@ -68,6 +76,7 @@ def confirm_evidence(*,actor,proposal_token,confirmed,expected_entry_id):
     if (previous.pk if previous else None)!=d['previous'] or (previous and previous.state=='PENDING'):raise RuleError('凭据历史已变化，请重新核对。')
     account,reference=checked_account(d['account'],entry.clinic_id,d['reference'],lock=True)
     if account.lock_version!=d['account_version']:raise RuleError('渠道账户已变化，请重新预览。')
+    if entry.kind=='RECEIPT':check_receipt_reference(account,reference,advance=bool(entry.advance_patient_id),exclude_entry=entry.pk)
     row=CashEvidenceVersion.objects.create(cash_entry=entry,account=account,reference=reference,
         previous=previous,version=previous.version+1 if previous else 1,prepared_by=actor,
         operation_id=p['operation'],reason=_reason(d['reason']))
@@ -103,7 +112,7 @@ def confirm_evidence_review(*,actor,proposal_token,confirmed,expected_evidence_i
         if row.state==target and row.reviewed_by_id==actor.pk and row.review_reason==d['reason']:return row,True
         raise RuleError('该凭据已有其他复核结果。')
     if target=='APPROVED':
-        role='FRONT_DESK' if entry.invoice_id else 'MANAGER'
+        role='MANAGER' if entry.equipment_event_id else 'FRONT_DESK'
         from accounts.models import RoleAssignment
         list(RoleAssignment.objects.select_for_update().filter(user_id=row.prepared_by_id,role=role,clinic_id=entry.clinic_id).order_by('pk'))
         if entry.state!='POSTED' or not preparer_current(row.prepared_by_id,entry.clinic_id,role):raise RuleError('款项或补证人的授权已失效，请退回。')

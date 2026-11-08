@@ -41,6 +41,7 @@ class CashEvidenceVersion(models.Model):
     review_reason = models.CharField(max_length=500, blank=True, default='')
     class Meta:
         db_table = 'adc_cash_evidence'
+        indexes = [models.Index(fields=['account','reference'], name='cash_evidence_account_ref_idx')]
         constraints = [models.UniqueConstraint(fields=['cash_entry','version'], name='cash_evidence_version_unique'),
             models.UniqueConstraint(fields=['cash_entry'], condition=Q(state='PENDING'), name='cash_evidence_one_pending'),
             models.CheckConstraint(condition=Q(state__in=[v for v,l in DECISIONS]), name='cash_evidence_state_valid'),

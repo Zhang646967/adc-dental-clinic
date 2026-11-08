@@ -7,5 +7,6 @@ urlpatterns=[
     path('finance/cash/<int:pk>/review/',views.review,name='cash_review'),
     path('finance/cash/<int:pk>/reverse/',views.reversal,name='cash_reversal'),
     path('invoices/<int:pk>/cash-request/',views.invoice_request,name='cash_invoice_request'),
+    path('patients/<int:pk>/advance-request/',views.advance_request,name='cash_advance_request'),
     path('equipment/events/<int:pk>/expense/',views.expense_request,name='cash_equipment_request'),
 ]

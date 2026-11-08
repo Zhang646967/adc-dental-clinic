@@ -19,7 +19,8 @@ def cash_scope(actor,detail=False):
         if b['clinic'] is None or not bindings(actor).filter(role=b['role'],scope_kind='CLINIC',clinic_id=b['clinic']).exists():
             raise PermissionDenied('请选择获授权的当前诊所。')
         qs=qs.filter(clinic_id=b['clinic'])
-        return qs.filter(invoice__isnull=b['role']=='MANAGER')
+        if b['role']=='MANAGER':return qs.filter(equipment_event__isnull=False)
+        return qs.filter(Q(invoice__isnull=False)|Q(advance_patient__isnull=False))
     if not bindings(actor).filter(role=b['role'],scope_kind='CHAIN').exists() or (detail and b['role']=='HQ'):
         raise PermissionDenied('当前身份无该项明细权限。')
     return qs
@@ -57,11 +58,20 @@ def invoice_balance(invoice):
         pending_receipts=values['pending_receipts'] or ZERO,pending_refunds=values['pending_refunds'] or ZERO,
         current_revision=invoice.current_record_version.revision_no)
 
+def advance_balance(rows):
+    """A clinic/patient advance receipt balance, independent of invoices."""
+    values=rows.aggregate(advance_received=Sum('amount',filter=Q(state='POSTED')),
+        pending_receipts=Sum('amount',filter=Q(state='PENDING')),
+        pending=Count('pk',filter=Q(state='PENDING')))
+    return {key: values[key] or ZERO for key in ('advance_received','pending_receipts')} | {'pending':values['pending']}
+
 def projected_balance(balance,kind,amount,decision='approve'):
     """One candidate's effect; other pending entries are not money or promises."""
     result=dict(balance)
     if decision!='approve':return result
-    if kind in ('RECEIPT','REFUND'):
+    if 'advance_received' in balance:
+        result['advance_received']+=amount
+    elif kind in ('RECEIPT','REFUND'):
         net=balance['net_received']+(amount if kind=='RECEIPT' else -amount)
         responsibility=balance.get('patient_responsibility',balance['billed'])
         result.update(net_received=net,remaining=max(responsibility-net,ZERO),
@@ -73,44 +83,57 @@ def projected_balance(balance,kind,amount,decision='approve'):
 def event_net(event_id):
     return posted_amount(CashEntry.objects.filter(equipment_event_id=event_id),'EQUIPMENT_EXPENSE','EXPENSE_REVERSAL')
 
-def cash_listing(actor,state='',page='1',*,kind='',invoice='',event=''):
+def cash_listing(actor,state='',page='1',*,kind='',invoice='',event='',advance=''):
     from adc_core.rules import RuleError
     if state not in ('','PENDING','POSTED','REJECTED'):raise RuleError('记账筛选无效。')
-    if kind not in ('','RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'):raise RuleError('记账类型无效。')
-    if invoice and event:raise RuleError('一次只能核对一个来源。')
-    for value in (invoice,event):
+    if kind not in ('','RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL','ADVANCE'):raise RuleError('记账类型无效。')
+    if sum(bool(value) for value in (invoice,event,advance))>1:raise RuleError('一次只能核对一个来源。')
+    for value in (invoice,event,advance):
         if value and (type(value) is not str or len(value)>19 or not value.isascii() or not value.isdecimal() or not 0<int(value)<2**63):
             raise RuleError('记账来源无效。')
     with reporting_snapshot():
         qs=cash_scope(actor)
+        detail_allowed=actor._adc_workspace.role!='HQ'
+        if advance and not detail_allowed:raise PermissionDenied('总部可查询预收汇总。')
         if invoice:qs=qs.filter(invoice_id=int(invoice))
         if event:qs=qs.filter(equipment_event_id=int(event))
-        if kind:qs=qs.filter(kind=kind)
+        if advance:qs=qs.filter(advance_patient_id=int(advance))
+        if kind=='ADVANCE':qs=qs.filter(advance_patient__isnull=False)
+        elif kind:qs=qs.filter(kind=kind)
         totals=qs.aggregate(pending=Count('pk',filter=Q(state='PENDING')),posted=Count('pk',filter=Q(state='POSTED')),
             pending_receipts=Sum('amount',filter=Q(state='PENDING',kind='RECEIPT')),
             pending_refunds=Sum('amount',filter=Q(state='PENDING',kind='REFUND')),
             pending_expenses=Sum('amount',filter=Q(state='PENDING',kind='EQUIPMENT_EXPENSE')),
             pending_expense_reversals=Sum('amount',filter=Q(state='PENDING',kind='EXPENSE_REVERSAL')),
             receipts=Sum('amount',filter=Q(state='POSTED',kind='RECEIPT')),refunds=Sum('amount',filter=Q(state='POSTED',kind='REFUND')),
+            advance_receipts=Sum('amount',filter=Q(state='POSTED',advance_patient__isnull=False)),
             expenses=Sum('amount',filter=Q(state='POSTED',kind='EQUIPMENT_EXPENSE')),expense_reversals=Sum('amount',filter=Q(state='POSTED',kind='EXPENSE_REVERSAL')))
-        for k in ('receipts','refunds','expenses','expense_reversals','pending_receipts','pending_refunds','pending_expenses','pending_expense_reversals'):totals[k]=totals[k] or ZERO
+        for k in ('receipts','refunds','expenses','expense_reversals','pending_receipts','pending_refunds','pending_expenses','pending_expense_reversals','advance_receipts'):totals[k]=totals[k] or ZERO
         totals['net_received']=totals['receipts']-totals['refunds']
         totals['net_equipment_expense']=totals['expenses']-totals['expense_reversals']
+        if not detail_allowed:qs=qs.filter(advance_patient__isnull=True)
         if state:qs=qs.filter(state=state)
-        qs=qs.select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','prepared_by','reviewed_by').order_by('-pk')
+        qs=qs.select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','advance_patient','prepared_by','reviewed_by').order_by('-pk')
         page_obj=Paginator(qs,20).get_page(page)
         return dict(rows=list(page_obj.object_list),page_obj=page_obj,totals=totals,state_filter=state,
-            detail_allowed=getattr(actor,'_adc_workspace').role!='HQ',kind_filter=kind,invoice_filter=invoice,event_filter=event,
-            page_query=urlencode(dict(state=state,kind=kind,invoice=invoice,event=event)))
+            detail_allowed=detail_allowed,kind_filter=kind,invoice_filter=invoice,event_filter=event,
+            advance_filter=advance,page_query=urlencode(dict(state=state,kind=kind,invoice=invoice,event=event,advance=advance)))
 
 def cash_detail(actor,entry_id):
     with reporting_snapshot():
-        row=cash_scope(actor,detail=True).select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','prepared_by','reviewed_by','reversal_of').get(pk=entry_id)
-        from equipment.costs import effective_cost
-        balance=invoice_balance(row.invoice) if row.invoice_id else dict(known_cost=effective_cost(row.equipment_event)[0],net_equipment_expense=event_net(row.equipment_event_id))
+        row=cash_scope(actor,detail=True).select_related('clinic','invoice__current_record_version','based_record_version','equipment_event__asset','advance_patient','prepared_by','reviewed_by','reversal_of').get(pk=entry_id)
+        evidence=None
+        if row.advance_patient_id:
+            balance=advance_balance(CashEntry.objects.filter(clinic_id=row.clinic_id,advance_patient_id=row.advance_patient_id))
+            evidence=row.evidence_versions.select_related('account').filter(initial=True).first()
+        elif row.invoice_id:
+            balance=invoice_balance(row.invoice)
+        else:
+            from equipment.costs import effective_cost
+            balance=dict(known_cost=effective_cost(row.equipment_event)[0],net_equipment_expense=event_net(row.equipment_event_id))
         from finance.cash_services import approval_blocker
         blocker=approval_blocker(row) if row.state=='PENDING' else ''
-        return dict(entry=row,balance=balance,approval_blocker=blocker,
+        return dict(entry=row,balance=balance,approval_blocker=blocker,initial_evidence=evidence,
             projected=projected_balance(balance,row.kind,row.amount) if row.state=='PENDING' and not blocker else None)
 
 def receivables(actor,state='',page='1'):

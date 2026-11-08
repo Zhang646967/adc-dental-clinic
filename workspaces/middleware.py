@@ -109,7 +109,7 @@ ROUTES={
  'equipment_list':{'MANAGER','FINANCE','HQ'},'equipment_detail':{'MANAGER','FINANCE','HQ'},
  'equipment_register':{'MANAGER'},'equipment_change':{'MANAGER'},
  'cash_list':{'FRONT_DESK','MANAGER','FINANCE','HQ'},'cash_detail':{'FRONT_DESK','MANAGER','FINANCE'},
- 'cash_invoice_request':{'FRONT_DESK'},'cash_equipment_request':{'MANAGER'},
+ 'cash_invoice_request':{'FRONT_DESK'},'cash_advance_request':{'FRONT_DESK'},'cash_equipment_request':{'MANAGER'},
  'cash_reversal':{'FRONT_DESK','MANAGER'},'cash_review':{'FINANCE'},
  'cash_receivables':{'FRONT_DESK','FINANCE','HQ'},
  'notification_inbox':{'MANAGER','FRONT_DESK'},

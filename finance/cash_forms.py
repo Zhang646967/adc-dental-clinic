@@ -18,6 +18,9 @@ class CashRequestForm(EvidenceFields):
     occurred_on=forms.DateField(label='事实日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     reason=forms.CharField(label='核对依据（合成案例，不含病历）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
 
+class AdvanceRequestForm(CashRequestForm):
+    kind=None
+
 class ExpenseRequestForm(EvidenceFields):
     occurred_on=forms.DateField(label='事实日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     reason=forms.CharField(label='设备费用核对依据',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
