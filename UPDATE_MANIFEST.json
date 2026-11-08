@@ -1,10 +1,10 @@
 {
-  "target": "C5 batch stock, nursing execution and traceability rehearsal",
+  "target": "Unified C5 deployment package and release-gate fixes",
   "parent": "C4.2 dispensing and versioned medication charges",
   "supported_source": "One request owns scope, identity review, independent clinical review and authenticated pickup. Existing clinical and financial effects retained.",
   "scope": "Declared application/config/tests/docs present in the Docker build. Runtime evidence directories and logs excluded here; full archive CHECKSUMS.sha256 covers them. Hashes detect difference, not publisher authenticity.",
   "schema_change": "93 additive application migrations and 185 observed PostgreSQL tables. Previous migration bytes retained.",
-  "user_release_validation": "Exact app 6f3de62 passed GitHub CI 42401919126. Chrome, targeted PostgreSQL and encrypted independent recovery passed in synthetic scope.",
+  "user_release_validation": "Exact application 6cc624d passed CI 42440196486, independent 93-migration installation, protected 80→93 upgrade and two encrypted restores.",
   "removed_from_original_v07": [],
   "files": {
     ".dockerignore": "45494731fef1b0ed53133c336f718bb0bc5984552b66ab41f96cbc674dc5a121",
@@ -23,8 +23,8 @@
     "PATIENT_AUTH_ENV.example": "d05afc6520356e9f62451999bfaa7d491eef89eb1a8c65943c313146fb24c822",
     "RC_MACOS.sh": "0050ef5d740ef8b293155df1baa45bf42dd4729a320ff8fb61052fe47f99bbdb",
     "RC_WINDOWS.cmd": "bae2be5acdf108e45bd381bc6e55ce29e0e809aed5eaba06f5282e8108cd311d",
-    "README.md": "1187a06e5e2044f63beb94e3f7a8966a309ca02b8d6736b209d7a48af1e4366e",
-    "RELEASE_CURRENT.md": "928bcf9841b7c018c2eddb4055807831a307ce56ca608b1159e66d50e8487fee",
+    "README.md": "fea3534ef7b6523914bfb493699dcfe75b92b5e85981e72a320ff02645512a5a",
+    "RELEASE_CURRENT.md": "032cc2bf2d461467621b5b0fa5fc4221e966c627c1641b45010719a90f765221",
     "START_HERE.html": "de1f9a48a3b81abba07918f0aab42fba3022496162660dbc61e2a9524bd83387",
     "UPGRADE_RC_NOTICE.txt": "110f0b7fb649b5eafde6b38cd0422434aea3ce46867e9cb000be2217c5f640e5",
     "UPGRADE_V07_WINDOWS.cmd": "a13b14f019831b5dc4ff815086c6a9669c0bed204552f4dc6685f16578fd8116",
@@ -480,6 +480,7 @@
     "docs/C33_ARCHIVE_IMPLEMENTATION_PLAN.md": "d6c01465ba7a154cfc6b56f7b9c3bea1785f351aacb58d39ac79e0f83f3bda4f",
     "docs/C33_ARCHIVE_ROLES.md": "68edeb95e3c46e696aeeeb9449c2bb602bc915836d7b04283f31f1fd3e7a741f",
     "docs/C3_RECORD_CONSENT_ARCHIVE_PLAN.md": "5a725e40ef18feef0a3666c3fbea8e1bd366222b76301e2d5fc98313ac5cefd8",
+    "docs/C5_UNIFIED_DEPLOYMENT.md": "e2bd71cc88779b3042713312f4ce2b5148dc607e659c728aebf6531b52148573",
     "docs/C61A_LOCAL_GUIDE.md": "54bb26a744fcb0b76defd5cc9a9f001395eec0f1da2a01e3ff6855598ce883a5",
     "docs/C61A_PREPARATION_CONTRACT.md": "4afab8daebcede0ec7a9838533d1f6e27b66ba6d4cb2940eb2c003340df077fd",
     "docs/C61BC_LOCAL_GUIDE.md": "d76aa7aef282ed3f0b6e0a83547ecf2eea72d76b38f9130010eaf857d35cb8ed",
@@ -554,7 +555,7 @@
     "docs/RESCHEDULING_OPTIMIZATION.md": "b2c3952fe21550f4ecea0853df93064d673ca72e122979559423943d15d994fb",
     "docs/ROADMAP_TO_V1.md": "bcf7beadd0cc5dae506036fd20da7a4897f372ee97634f3783e6e74ebdd6c57f",
     "docs/SECURITY_ASVS_GAP_REGISTER.md": "14169b9a5860bb0e3158b3e693d2d1b1e5ece6752c0b8fe8936987eb655cc010",
-    "docs/SERVER_DEPLOYMENT_PLAN.md": "c050dc3cee95efe67fb49c80aac83583b23933cc450702baeb197c1f38913cdd",
+    "docs/SERVER_DEPLOYMENT_PLAN.md": "5ce86e8a56cab77c7481c21022f152106cec7cf57dd98bf454be03c3164997f9",
     "docs/SOURCES.md": "c017b3052d41975428b0bf1d871da71b719a1f72e86bdbd6fe82c825e4c38e9d",
     "docs/SOURCES_v0.4.md": "c613323c0af6142632ff41feb22ae5b2f614d3bb748df2b4be398aebadcf8bb8",
     "docs/SOURCES_v0.7.md": "98405b53dafd5e0b4ce6ba193339187e9c412125ea63ead1cac0b88c3a9a4a67",
@@ -927,6 +928,7 @@
     "docs/evidence_c42/workbuddy-closure.json": "6f8410754fdf6b5945cb7bf7218dc8ea6559e63bcf1813d98abcd938a10d246b",
     "docs/evidence_c5/README.md": "ebd059c2aa3bd8104341d57eb338be0deff3ce26927e19d9ce46a8b3227b45ba",
     "docs/evidence_c5/release.json": "11b06a50551ab2aa0b731ca15dcc5e72b9789c87c254ea4f8cd2d85eca8ae899",
+    "docs/evidence_c5_deploy/release.json": "7cd5fae710e4d32d95f845586e8fea041bdbc33405575b45fcc1ed46c962196f",
     "docs/evidence_commercial_batch2/README.md": "4ed9e0599d9fd9b9170518a3692ae075529ab9e45912eb26c91052f8797e3fe8",
     "docs/evidence_commercial_batch2/release.json": "4d343523c073f495b9c25ad5fe0130777231d9caa9375adaa3bdd71755ca7a14",
     "docs/evidence_commercial_batch2/workbuddy-closure.json": "903b22eda6c5fb49bce5aaf1730fb6cdbe85d13b520979a9b1d0cb30a4083d5b",
@@ -2279,5 +2281,11 @@
     "native_changes": false,
     "schema_changes": false,
     "target_server": "PENDING"
+  },
+  "unified_c5_deployment": {
+    "application_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "app_image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+    "application_migrations": 93,
+    "evidence": "docs/evidence_c5_deploy/release.json"
   }
 }

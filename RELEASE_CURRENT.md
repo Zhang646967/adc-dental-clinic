@@ -1,3 +1,7 @@
+# C5 统一部署包与上线门槛复审
+
+应用 `6cc624d` 完成二十店空库、80→93 受控升级和独立加密恢复。原 167 张表的 9,913 条记录保留。临床、权限、患者端和恢复互斥整改通过完整回归。 [验收与目标机门槛](docs/C5_UNIFIED_DEPLOYMENT.md) · [准确 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42440196486)
+
 # C5 批次库存、护理执行与召回追溯
 
 门店批次连接实际发药和耗用，护理按本次实际来源记录给药、无菌包使用和异常。库存与药费按各自事实核对。医师可回查护理交接和混合账单。 [业务设计](docs/decisions/ADR_C5_BATCH_AND_NURSING_TRACE.md) · [验收](docs/evidence_c5/README.md)

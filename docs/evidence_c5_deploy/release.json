@@ -1,0 +1,221 @@
+{
+  "status": "PASS_ISOLATED_C5_PACKAGE",
+  "reviewed_base": "ff697da86a691944da337b2861322602e49d2c6f",
+  "application_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+  "image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+  "architecture": "linux/amd64",
+  "build": {
+    "source_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "architecture": "amd64",
+    "app_image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+    "source_sha256": "0fcd46b867b91c5556006dedd3f57b8decc353e415390d7beb616996a5732df5",
+    "image_archive_sha256": "53c9f706e77e33d301a2c30a31858cfff4c9cf14b5b4d41419c2f5e4d2d79e4d",
+    "release_inventory": {
+      "format": 1,
+      "product": "ADC",
+      "release_edition": "UNIFIED",
+      "application_migrations": 93,
+      "migration_sha256": "804127df48ce4cce43b0032b221038e07f6e7d5f91ff82ae82e7c91c798e8001",
+      "requirements_sha256": {
+        "requirements-dev.txt": "69075054c6d3bf5e0104bbc5d72895f380f050216a76ee8978dc4fbfd62f95e8",
+        "requirements-operations.txt": "4ca06d78e5e2087919dbce9518b6ba2908323302effede198fd156594fe0b6d2",
+        "requirements-production.txt": "d72302014be01f884f0ea5c28bbb43c7bdb3c3fde6c9d53626b79e16c07a1d7f",
+        "requirements.txt": "193602ae97a0482beb09288858cb6479626911096ae0f695c9b4bd93429c08c8"
+      },
+      "native_client": {
+        "source_files": 93,
+        "pages": 27,
+        "source_tree_sha256": "58769b5ed94aa414efa5e3e29d2f7cc283f4da6dda17d99673b208db814b831b",
+        "compiled_or_platform_verified": false
+      },
+      "access_paths": {
+        "public": "/",
+        "patient": "/portal/login/",
+        "staff": "/accounts/login/"
+      },
+      "scope": "Archived source inventory; not installed dependencies or cloud/device acceptance."
+    },
+    "wechat_mini_secret_file": true
+  },
+  "original_migration_bytes_retained": 80,
+  "exact_ci": {
+    "run_id": 42440196486,
+    "url": "https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42440196486",
+    "tested_source_commit": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "verified_source_log": true,
+    "test_counts": [
+      1172,
+      2348
+    ],
+    "native_checks": 340,
+    "workflow_head_sha": "53195cdcac097ca844355d6b311aedbbf45b77a5",
+    "manifest_sha256": "973b72b4708e5447ea69ab43e474802ea2a11ea6e6fe74139edc2c27aac7af05",
+    "shards": {
+      "1": {
+        "job_id": 128607580365,
+        "manifest": {
+          "assigned": [
+            1174,
+            1174
+          ],
+          "count": 2348,
+          "sha256": "973b72b4708e5447ea69ab43e474802ea2a11ea6e6fe74139edc2c27aac7af05",
+          "shard": 1
+        },
+        "counts": [
+          1172,
+          1174
+        ],
+        "native_checks": 340
+      },
+      "0": {
+        "job_id": 128607580521,
+        "manifest": {
+          "assigned": [
+            1174,
+            1174
+          ],
+          "count": 2348,
+          "sha256": "973b72b4708e5447ea69ab43e474802ea2a11ea6e6fe74139edc2c27aac7af05",
+          "shard": 0
+        },
+        "counts": [
+          1172,
+          1174
+        ],
+        "native_checks": 340
+      }
+    }
+  },
+  "named_ci_regressions": [
+    "test_both_restore_entries_share_the_deployment_lock",
+    "test_confirmed_allergy_change_blocks_issue_and_keeps_stop_and_return",
+    "test_confirmed_allergy_change_requires_new_prescription_before_approval",
+    "test_dispense_only_direct_urls_reject_pending_and_rejected",
+    "test_legacy_pending_prescription_is_readable_and_can_be_returned",
+    "test_migration_built_restore_refuses_a_writer_started_before_import",
+    "test_previously_initialized_target_is_refused_before_starting_database",
+    "test_ward_admin_and_quarantined_return_keep_issue_and_batch"
+  ],
+  "review_scope": "Three independent implementation reviews of clinical and finance flows, engineering and security, and patient experience.",
+  "fixed_cases": [
+    "Retain the actual administered drug, unit and source lot in new archives.",
+    "Recheck confirmed allergy evidence before approval, pricing and new issues.",
+    "Apply approved-prescription object scope to the dispensing detail and confirmation.",
+    "Clear stale subject and write preview on confirmation rejection. Return invoices to visit history.",
+    "Use the same project release lock for deploy, encrypted restore and verified-dump restore.",
+    "Require rendered gateway host port mappings to match the reviewed plan."
+  ],
+  "old_empty_install": {
+    "source": "de8585b73995c4f8fab01a978fb260401a9eee17",
+    "image": "sha256:d468e993eb02682857f630263a075fa4934c79961a436ccd67642277f6ea807c",
+    "migrations": 80,
+    "migration_sha256": "f2b2c9f77a4821e6a1a2d94efd4b59aa95f61a15d63b83a5f8303f0289924e8e",
+    "clinics": 20,
+    "operations": "HEALTHY",
+    "sql_tables": 167,
+    "tls": "loopback certificate and hostname checked",
+    "passed": true,
+    "second_deploy_preserved_all_rows_and_credentials": true,
+    "rows": 9886
+  },
+  "empty_install": {
+    "source": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+    "migrations": 93,
+    "migration_sha256": "804127df48ce4cce43b0032b221038e07f6e7d5f91ff82ae82e7c91c798e8001",
+    "clinics": 20,
+    "operations": "HEALTHY",
+    "sql_tables": 185,
+    "tls": "loopback certificate and hostname checked",
+    "passed": true,
+    "second_deploy_preserved_all_rows_and_credentials": true,
+    "rows": 9989
+  },
+  "additive_upgrade": {
+    "source": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+    "image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+    "migrations": 93,
+    "migration_sha256": "804127df48ce4cce43b0032b221038e07f6e7d5f91ff82ae82e7c91c798e8001",
+    "clinics": 20,
+    "operations": "HEALTHY",
+    "sql_tables": 185,
+    "tls": "loopback certificate and hostname checked",
+    "passed": true,
+    "from_source": "de8585b73995c4f8fab01a978fb260401a9eee17",
+    "from_migrations": 80,
+    "added_migrations": 13,
+    "original_tables": 167,
+    "preserved_original_rows": 9913,
+    "same_volume": true,
+    "original_credentials_preserved": true,
+    "repeated_upgrade": "ALREADY_ACTIVE"
+  },
+  "encrypted_restores": {
+    "pre_upgrade": {
+      "source": "de8585b73995c4f8fab01a978fb260401a9eee17",
+      "image": "sha256:d468e993eb02682857f630263a075fa4934c79961a436ccd67642277f6ea807c",
+      "migrations": 80,
+      "migration_sha256": "f2b2c9f77a4821e6a1a2d94efd4b59aa95f61a15d63b83a5f8303f0289924e8e",
+      "clinics": 20,
+      "operations": "HEALTHY",
+      "sql_tables": 167,
+      "tls": "loopback certificate and hostname checked",
+      "passed": true,
+      "backup": "age X25519 encrypted, verified ciphertext SHA-256",
+      "separate_volume": true,
+      "compared_tables": 167,
+      "compared_rows": 9913,
+      "elapsed_ms": 57037,
+      "historical_observations": "RETAINED_NOT_REPLAYED"
+    },
+    "after_new_write": {
+      "source": "6cc624d63a1519aa083c8e4f58fb1a72e8bae9ca",
+      "image": "sha256:214f947c24a1814bbc7593a59a1e094a4138c4b738a54f3bf1711f13a80f4b2e",
+      "migrations": 93,
+      "migration_sha256": "804127df48ce4cce43b0032b221038e07f6e7d5f91ff82ae82e7c91c798e8001",
+      "clinics": 20,
+      "operations": "HEALTHY",
+      "sql_tables": 185,
+      "tls": "loopback certificate and hostname checked",
+      "passed": true,
+      "backup": "age X25519 encrypted, verified ciphertext SHA-256",
+      "separate_volume": true,
+      "compared_tables": 185,
+      "compared_rows": 10043,
+      "elapsed_ms": 62389,
+      "historical_observations": "RETAINED_NOT_REPLAYED",
+      "concurrent_deploy_blocked_before_initialization": true
+    }
+  },
+  "browser": {
+    "before_upgrade": {
+      "passed": true,
+      "checks": 33,
+      "browser_version": "156.0.8078.75"
+    },
+    "after_upgrade": {
+      "passed": true,
+      "checks": 33,
+      "browser_version": "156.0.8078.75"
+    },
+    "fresh_install": {
+      "passed": true,
+      "checks": 33,
+      "browser_version": "156.0.8078.75"
+    }
+  },
+  "rehearsal_notes": [
+    "Loopback TLS with a local certificate. amd64 Docker images ran on the Mac using local emulation.",
+    "The first local focused PostgreSQL command exited 137 during migrations. The exact application passed the complete CI suite.",
+    "The first C5 empty-schema process was killed. A separate empty project passed with serialized local rehearsals.",
+    "The 20-clinic fixture uses synthetic records and the standard default-off clinical rehearsal switches."
+  ],
+  "pending": [
+    "actual SSH and interrupted initial publish",
+    "public trusted HTTPS and renewal",
+    "real off-site storage and 24-hour target observation",
+    "new client DevTools and native device results",
+    "real clinic, pharmacy and payment qualification"
+  ]
+}
