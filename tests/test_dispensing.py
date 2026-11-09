@@ -319,7 +319,11 @@ class DispensingTests(DispensingFixture, TransactionTestCase):
         self.close()
         with self.assertRaises(DatabaseError),transaction.atomic():
             MedicationCharge.objects.update(quantity=5,line_amount=D('62.50'))
-        executor=MigrationExecutor(connections['default'])
-        with self.assertRaisesMessage(RuntimeError,'Medication billing history exists'):
+        connection=connections['default']
+        executor=MigrationExecutor(connection)
+        applied=set(executor.loader.applied_migrations)
+        # A failed downgrade must leave dependent migrations applied for the next test.
+        with self.assertRaisesMessage(RuntimeError,'Medication billing history exists'),transaction.atomic():
             executor.migrate([('care','0004_c42_medication_charges')])
+        self.assertEqual(set(MigrationExecutor(connection).loader.applied_migrations),applied)
         self.assertEqual(MedicationCharge.objects.get().quantity,6)
