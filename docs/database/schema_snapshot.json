@@ -19,7 +19,7 @@
       "name": "advance_allocation_history",
       "definition": "CREATE TRIGGER advance_allocation_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_history()",
       "function": "adc_advance_allocation_history",
-      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_allocation_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE received numeric; used numeric;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'advance allocation history is retained' USING ERRCODE='23514';\n  ELSIF TG_OP='INSERT' THEN\n    SELECT amount INTO received FROM adc_cash_entry WHERE id=NEW.receipt_id\n      AND advance_patient_id IS NOT NULL AND kind='RECEIPT' AND state='POSTED';\n    IF NOT FOUND OR NEW.state<>'PENDING' OR NEW.available_at_request>received OR btrim(NEW.basis)='' THEN\n      RAISE EXCEPTION 'allocation requires a posted advance receipt and a pending request' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR btrim(NEW.review_reason)=''\n     OR (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id'])\n        IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id']) THEN\n    RAISE EXCEPTION 'allocation source and terminal decisions are immutable' USING ERRCODE='23514';\n  ELSIF NEW.state='POSTED' THEN\n    SELECT amount INTO received FROM adc_cash_entry WHERE id=NEW.receipt_id FOR UPDATE;\n    SELECT coalesce(sum(total),0) INTO used FROM adc_advance_allocation\n      WHERE receipt_id=NEW.receipt_id AND state='POSTED';\n    IF NEW.total+used>received OR EXISTS (\n      SELECT 1 FROM adc_advance_allocation_line l JOIN adc_invoice i ON i.id=l.invoice_id\n      WHERE l.allocation_id=NEW.id AND i.current_record_version_id<>l.record_version_id\n    ) THEN\n      RAISE EXCEPTION 'allocation exceeds receipt or refers to a replaced bill' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_allocation_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE received numeric;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'advance allocation history is retained' USING ERRCODE='23514';\n  ELSIF TG_OP='INSERT' THEN\n    SELECT amount INTO received FROM adc_cash_entry WHERE id=NEW.receipt_id\n      AND advance_patient_id IS NOT NULL AND kind='RECEIPT' AND state='POSTED';\n    IF NOT FOUND OR NEW.state<>'PENDING' OR NEW.available_at_request>received OR btrim(NEW.basis)='' THEN\n      RAISE EXCEPTION 'allocation requires a posted advance receipt and a pending request' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR btrim(NEW.review_reason)=''\n     OR (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id'])\n        IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id']) THEN\n    RAISE EXCEPTION 'allocation source and terminal decisions are immutable' USING ERRCODE='23514';\n  ELSIF NEW.state='POSTED' THEN\n    PERFORM 1 FROM adc_cash_entry WHERE id=NEW.receipt_id FOR UPDATE;\n    IF NEW.total>adc_advance_available(NEW.receipt_id) OR EXISTS (\n      SELECT 1 FROM adc_advance_allocation_line l JOIN adc_invoice i ON i.id=l.invoice_id\n      WHERE l.allocation_id=NEW.id AND i.current_record_version_id<>l.record_version_id\n    ) THEN\n      RAISE EXCEPTION 'allocation exceeds available receipt or refers to a replaced bill' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_advance_allocation_line",
@@ -27,6 +27,13 @@
       "definition": "CREATE TRIGGER advance_allocation_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation_line FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_line_history()",
       "function": "adc_advance_allocation_line_history",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_allocation_line_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE receipt bigint; batch_total numeric; line_count int; filled numeric;\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'retained advance allocation lines are immutable' USING ERRCODE='23514';\n  END IF;\n  SELECT receipt_id,total INTO receipt,batch_total FROM adc_advance_allocation\n    WHERE id=NEW.allocation_id AND state='PENDING' FOR UPDATE;\n  IF NOT FOUND OR NOT EXISTS (\n    SELECT 1 FROM adc_invoice i\n    JOIN adc_visit v ON v.id=i.visit_id\n    JOIN adc_visit_record_version bill ON bill.id=NEW.record_version_id\n    JOIN adc_cash_entry r ON r.id=receipt\n    WHERE i.id=NEW.invoice_id AND v.clinic_id=r.clinic_id AND v.patient_id=r.advance_patient_id\n      AND i.current_record_version_id=bill.id AND bill.visit_id=v.id AND bill.state='PUBLISHED'\n  ) THEN\n    RAISE EXCEPTION 'allocation line requires its own clinic, patient and published bill' USING ERRCODE='23514';\n  END IF;\n  SELECT count(*),coalesce(sum(amount),0) INTO line_count,filled FROM adc_advance_allocation_line\n    WHERE allocation_id=NEW.allocation_id;\n  IF line_count>=5 OR filled+NEW.amount>batch_total THEN\n    RAISE EXCEPTION 'allocation lines exceed the request total or line limit' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "advance_reversal_history",
+      "definition": "CREATE TRIGGER advance_reversal_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation_reversal FOR EACH ROW EXECUTE FUNCTION adc_advance_reversal_history()",
+      "function": "adc_advance_reversal_history",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_reversal_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE receipt bigint;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'advance reversal history is retained' USING ERRCODE='23514';\n  ELSIF TG_OP='INSERT' THEN\n    IF NEW.state<>'PENDING' OR btrim(NEW.basis)='' OR NOT EXISTS (\n      SELECT 1 FROM adc_advance_allocation_line l JOIN adc_advance_allocation a ON a.id=l.allocation_id\n      WHERE l.id=NEW.line_id AND a.state='POSTED'\n    ) THEN\n      RAISE EXCEPTION 'reversal starts pending for a posted application line' USING ERRCODE='23514';\n    END IF;\n  ELSIF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR btrim(NEW.review_reason)=''\n     OR (to_jsonb(NEW)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id'])\n        IS DISTINCT FROM (to_jsonb(OLD)-ARRAY['state','reviewed_by_id','reviewed_at','review_reason','review_operation_id']) THEN\n    RAISE EXCEPTION 'advance reversal source and terminal decisions are immutable' USING ERRCODE='23514';\n  ELSIF NEW.state='POSTED' THEN\n    SELECT a.receipt_id INTO receipt FROM adc_advance_allocation_line l\n      JOIN adc_advance_allocation a ON a.id=l.allocation_id WHERE l.id=NEW.line_id;\n    PERFORM 1 FROM adc_cash_entry WHERE id=receipt FOR UPDATE;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_appointment_action_event",
@@ -86,10 +93,24 @@
     },
     {
       "table": "adc_cash_entry",
+      "name": "advance_refund_history",
+      "definition": "CREATE TRIGGER advance_refund_history BEFORE INSERT OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_advance_refund_history()",
+      "function": "adc_advance_refund_history",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_refund_history()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE original adc_cash_entry%ROWTYPE; original_account bigint; refund_account bigint;\nBEGIN\n  IF NEW.advance_patient_id IS NULL OR NEW.kind<>'REFUND' THEN RETURN NEW; END IF;\n  SELECT * INTO original FROM adc_cash_entry WHERE id=NEW.reversal_of_id FOR UPDATE;\n  IF NOT FOUND OR original.state<>'POSTED' OR original.kind<>'RECEIPT'\n     OR original.advance_patient_id IS DISTINCT FROM NEW.advance_patient_id OR original.clinic_id<>NEW.clinic_id\n     OR NEW.occurred_on<original.occurred_on OR NEW.amount>original.amount THEN\n    RAISE EXCEPTION 'advance refund requires the same posted receipt, patient and clinic' USING ERRCODE='23514';\n  END IF;\n  IF NEW.state='POSTED' THEN\n    IF NEW.amount>adc_advance_available(original.id) THEN\n      RAISE EXCEPTION 'refund exceeds available advance' USING ERRCODE='23514';\n    END IF;\n    SELECT account_id INTO original_account FROM adc_cash_evidence\n      WHERE cash_entry_id=original.id AND state='APPROVED' ORDER BY version DESC LIMIT 1;\n    SELECT account_id INTO refund_account FROM adc_cash_evidence\n      WHERE cash_entry_id=NEW.id AND initial AND state='PENDING';\n    IF refund_account IS NULL OR original_account IS DISTINCT FROM refund_account THEN\n      RAISE EXCEPTION 'refund requires evidence on the original channel' USING ERRCODE='23514';\n    END IF;\n    PERFORM 1 FROM adc_payment_account WHERE id=refund_account AND is_active FOR UPDATE;\n    IF NOT FOUND THEN\n      RAISE EXCEPTION 'refund channel account is inactive' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_cash_entry",
       "name": "cash_entry_history",
       "definition": "CREATE TRIGGER cash_entry_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_cash_history_guard()",
       "function": "adc_cash_history_guard",
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_cash_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE i adc_invoice%ROWTYPE; a adc_equipment_asset%ROWTYPE; e adc_equipment_event%ROWTYPE;\n        original adc_cash_entry%ROWTYPE; amendment adc_equipment_cost_amendment%ROWTYPE; current_amendment bigint; fee numeric; clinic bigint; vstate text; vvisit bigint;\nBEGIN\n  IF TG_OP='DELETE' THEN\n    RAISE EXCEPTION 'cash history cannot be deleted' USING ERRCODE='23514';\n  END IF;\n  IF TG_OP='INSERT' THEN\n    IF NEW.state<>'PENDING' OR NEW.lock_version<>0 OR NEW.review_reason<>'' THEN\n      RAISE EXCEPTION 'cash entry starts as an unreviewed request' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    IF OLD.state<>'PENDING' OR NEW.state NOT IN ('POSTED','REJECTED') OR NEW.lock_version<>1\n       OR (NEW.operation_id,NEW.clinic_id,NEW.invoice_id,NEW.based_record_version_id,NEW.equipment_event_id,\n           NEW.advance_patient_id,NEW.equipment_cost_amendment_id,NEW.reversal_of_id,NEW.kind,NEW.amount,NEW.occurred_on,NEW.reason,NEW.prepared_by_id,NEW.prepared_at)\n         IS DISTINCT FROM\n          (OLD.operation_id,OLD.clinic_id,OLD.invoice_id,OLD.based_record_version_id,OLD.equipment_event_id,\n           OLD.advance_patient_id,OLD.equipment_cost_amendment_id,OLD.reversal_of_id,OLD.kind,OLD.amount,OLD.occurred_on,OLD.reason,OLD.prepared_by_id,OLD.prepared_at)\n       OR btrim(NEW.review_reason)='' OR NEW.reviewed_at<NEW.prepared_at THEN\n      RAISE EXCEPTION 'cash request facts and terminal decisions are immutable' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  IF NEW.advance_patient_id IS NOT NULL THEN\n    IF NEW.state<>'REJECTED' AND NOT EXISTS (\n      SELECT 1 FROM adc_patient p WHERE p.id=NEW.advance_patient_id AND p.is_active\n      AND (p.created_in_clinic_id=NEW.clinic_id OR EXISTS (\n        SELECT 1 FROM adc_visit v WHERE v.patient_id=p.id AND v.clinic_id=NEW.clinic_id))\n    ) THEN\n      RAISE EXCEPTION 'patient advance requires an active patient in the clinic' USING ERRCODE='23514';\n    END IF;\n    IF NEW.state='POSTED' AND NOT EXISTS (\n      SELECT 1 FROM adc_cash_evidence WHERE cash_entry_id=NEW.id AND initial AND state='PENDING'\n    ) THEN\n      RAISE EXCEPTION 'patient advance requires original receipt evidence' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\n  END IF;\n  IF NEW.invoice_id IS NOT NULL THEN\n    SELECT * INTO i FROM adc_invoice WHERE id=NEW.invoice_id;\n    SELECT clinic_id INTO clinic FROM adc_visit WHERE id=i.visit_id;\n    SELECT state,visit_id INTO vstate,vvisit FROM adc_visit_record_version WHERE id=NEW.based_record_version_id;\n    IF clinic IS DISTINCT FROM NEW.clinic_id OR vstate IS DISTINCT FROM 'PUBLISHED' OR vvisit IS DISTINCT FROM i.visit_id\n       OR (NEW.state<>'REJECTED' AND i.current_record_version_id<>NEW.based_record_version_id) THEN\n      RAISE EXCEPTION 'cash request requires its own current published bill' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    PERFORM 1 FROM adc_equipment_asset WHERE id=(SELECT asset_id FROM adc_equipment_event WHERE id=NEW.equipment_event_id) FOR UPDATE;\n    SELECT * INTO e FROM adc_equipment_event WHERE id=NEW.equipment_event_id FOR UPDATE;\n    SELECT * INTO a FROM adc_equipment_asset WHERE id=e.asset_id;\n    fee=e.cost;\n    IF NEW.equipment_cost_amendment_id IS NOT NULL THEN\n      SELECT * INTO amendment FROM adc_equipment_cost_amendment WHERE id=NEW.equipment_cost_amendment_id;\n      IF NOT FOUND OR amendment.event_id<>e.id OR amendment.state<>'APPROVED' THEN\n        RAISE EXCEPTION 'invalid equipment cost basis' USING ERRCODE='23514';\n      END IF;\n      fee=amendment.proposed_cost;\n    END IF;\n    IF a.clinic_id IS DISTINCT FROM NEW.clinic_id OR e.kind NOT IN ('REGISTER','SERVICE')\n       OR fee IS NULL OR fee<=0 OR NEW.amount<>fee THEN\n      RAISE EXCEPTION 'equipment cash requires matching retained cost basis' USING ERRCODE='23514';\n    END IF;\n    IF NEW.state<>'REJECTED' AND NEW.reversal_of_id IS NULL THEN\n      SELECT id INTO current_amendment FROM adc_equipment_cost_amendment WHERE event_id=e.id AND state='APPROVED' ORDER BY id DESC LIMIT 1;\n      IF NEW.equipment_cost_amendment_id IS DISTINCT FROM current_amendment\n         OR EXISTS (SELECT 1 FROM adc_equipment_cost_amendment WHERE event_id=e.id AND state='PENDING') THEN\n        RAISE EXCEPTION 'equipment cost basis is stale or pending review' USING ERRCODE='23514';\n      END IF;\n    END IF;\n  END IF;\n  IF NEW.reversal_of_id IS NOT NULL THEN\n    SELECT * INTO original FROM adc_cash_entry WHERE id=NEW.reversal_of_id;\n    IF NOT FOUND OR original.state<>'POSTED' OR original.reversal_of_id IS NOT NULL OR original.amount<>NEW.amount\n       OR original.clinic_id<>NEW.clinic_id OR original.invoice_id IS DISTINCT FROM NEW.invoice_id\n       OR original.equipment_event_id IS DISTINCT FROM NEW.equipment_event_id\n       OR original.advance_patient_id IS DISTINCT FROM NEW.advance_patient_id\n       OR original.equipment_cost_amendment_id IS DISTINCT FROM NEW.equipment_cost_amendment_id\n       OR NOT ((original.kind='RECEIPT' AND NEW.kind='REFUND') OR (original.kind='REFUND' AND NEW.kind='RECEIPT')\n               OR (original.kind='EQUIPMENT_EXPENSE' AND NEW.kind='EXPENSE_REVERSAL')) THEN\n      RAISE EXCEPTION 'invalid cash reversal lineage' USING ERRCODE='23514';\n    END IF;\n  ELSIF NEW.kind='EXPENSE_REVERSAL' THEN\n    RAISE EXCEPTION 'expense reversal requires its original entry' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
+    },
+    {
+      "table": "adc_cash_evidence",
+      "name": "advance_refund_evidence",
+      "definition": "CREATE TRIGGER advance_refund_evidence BEFORE INSERT ON public.adc_cash_evidence FOR EACH ROW EXECUTE FUNCTION adc_advance_refund_evidence()",
+      "function": "adc_advance_refund_evidence",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_advance_refund_evidence()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE refund boolean;\nBEGIN\n  SELECT advance_patient_id IS NOT NULL AND kind='REFUND' INTO refund\n    FROM adc_cash_entry WHERE id=NEW.cash_entry_id;\n  IF refund AND NOT NEW.initial AND NOT EXISTS (\n    SELECT 1 FROM adc_cash_evidence WHERE cash_entry_id=NEW.cash_entry_id AND initial AND account_id=NEW.account_id\n  ) THEN\n    RAISE EXCEPTION 'refund evidence correction must retain the posted channel' USING ERRCODE='23514';\n  END IF;\n  PERFORM 1 FROM adc_payment_account WHERE id=NEW.account_id FOR UPDATE;\n  IF EXISTS (\n    SELECT 1 FROM adc_cash_evidence e JOIN adc_cash_entry c ON c.id=e.cash_entry_id\n    WHERE e.account_id=NEW.account_id AND e.reference=NEW.reference AND e.cash_entry_id<>NEW.cash_entry_id\n      AND e.state IN ('PENDING','APPROVED') AND c.state IN ('PENDING','POSTED')\n      AND (refund OR (c.advance_patient_id IS NOT NULL AND c.kind='REFUND'))\n  ) THEN\n    RAISE EXCEPTION 'advance refund evidence reference is already in use' USING ERRCODE='23514';\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
       "table": "adc_cash_evidence",
@@ -1685,6 +1706,158 @@
           "unique": false,
           "null": false,
           "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "model": "finance.AdvanceAllocationReversal",
+      "app": "finance",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "line",
+          "column": "line_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_advance_allocation_line",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "state",
+          "column": "state",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "basis",
+          "column": "basis",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "prepared_by",
+          "column": "prepared_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "prepared_at",
+          "column": "prepared_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reviewed_by",
+          "column": "reviewed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "reviewed_at",
+          "column": "reviewed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_reason",
+          "column": "review_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "review_operation_id",
+          "column": "review_operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": true,
+          "max_length": 32,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -26805,6 +26978,7 @@
     "adc_account_phone",
     "adc_advance_allocation",
     "adc_advance_allocation_line",
+    "adc_advance_allocation_reversal",
     "adc_ai_usage_bucket",
     "adc_allergy",
     "adc_appointment_action_event",
@@ -27139,6 +27313,54 @@
       "name": "advance_alloc_once_per_bill",
       "kind": "u",
       "definition": "UNIQUE (allocation_id, invoice_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocati_line_id_03d1c0a5_fk_adc_advan",
+      "kind": "f",
+      "definition": "FOREIGN KEY (line_id) REFERENCES adc_advance_allocation_line(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocati_prepared_by_id_52317cf1_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocati_reviewed_by_id_c2c61432_fk_adc_user_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_review_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (review_operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "advance_reverse_independent",
+      "kind": "c",
+      "definition": "CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "advance_reverse_review_metadata",
+      "kind": "c",
+      "definition": "CHECK ((((review_operation_id IS NULL) AND ((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((review_operation_id IS NOT NULL) AND (reviewed_at >= prepared_at) AND (reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['POSTED'::character varying, 'REJECTED'::character varying])::text[])) AND (reviewed_at IS NOT NULL) AND (NOT ((review_reason)::text = ''::text)))))"
     },
     {
       "table": "adc_ai_usage_bucket",
@@ -27864,7 +28086,7 @@
       "table": "adc_cash_entry",
       "name": "cash_exact_source",
       "kind": "c",
-      "definition": "CHECK ((((advance_patient_id IS NULL) AND (based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((advance_patient_id IS NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[]))) OR ((advance_patient_id IS NOT NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NULL) AND ((kind)::text = 'RECEIPT'::text) AND (reversal_of_id IS NULL))))"
+      "definition": "CHECK ((((advance_patient_id IS NULL) AND (based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((advance_patient_id IS NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[]))) OR ((advance_patient_id IS NOT NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NULL) AND ((((kind)::text = 'RECEIPT'::text) AND (reversal_of_id IS NULL)) OR (((kind)::text = 'REFUND'::text) AND (reversal_of_id IS NOT NULL))))))"
     },
     {
       "table": "adc_cash_entry",
@@ -35458,6 +35680,46 @@
       "definition": "CREATE UNIQUE INDEX advance_alloc_once_per_bill ON public.adc_advance_allocation_line USING btree (allocation_id, invoice_id)"
     },
     {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_line_id_03d1c0a5",
+      "definition": "CREATE INDEX adc_advance_allocation_reversal_line_id_03d1c0a5 ON public.adc_advance_allocation_reversal USING btree (line_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_reversal_operation_id_key ON public.adc_advance_allocation_reversal USING btree (operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_reversal_pkey ON public.adc_advance_allocation_reversal USING btree (id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_prepared_by_id_52317cf1",
+      "definition": "CREATE INDEX adc_advance_allocation_reversal_prepared_by_id_52317cf1 ON public.adc_advance_allocation_reversal USING btree (prepared_by_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_review_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_advance_allocation_reversal_review_operation_id_key ON public.adc_advance_allocation_reversal USING btree (review_operation_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "adc_advance_allocation_reversal_reviewed_by_id_c2c61432",
+      "definition": "CREATE INDEX adc_advance_allocation_reversal_reviewed_by_id_c2c61432 ON public.adc_advance_allocation_reversal USING btree (reviewed_by_id)"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "advance_reverse_one_live_line",
+      "definition": "CREATE UNIQUE INDEX advance_reverse_one_live_line ON public.adc_advance_allocation_reversal USING btree (line_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[]))"
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "name": "advance_reverse_queue_idx",
+      "definition": "CREATE INDEX advance_reverse_queue_idx ON public.adc_advance_allocation_reversal USING btree (state, id DESC)"
+    },
+    {
       "table": "adc_ai_usage_bucket",
       "name": "adc_ai_usage_bucket_key_d220a79a_like",
       "definition": "CREATE INDEX adc_ai_usage_bucket_key_d220a79a_like ON public.adc_ai_usage_bucket USING btree (key varchar_pattern_ops)"
@@ -35910,7 +36172,7 @@
     {
       "table": "adc_cash_entry",
       "name": "cash_one_live_reversal",
-      "definition": "CREATE UNIQUE INDEX cash_one_live_reversal ON public.adc_cash_entry USING btree (reversal_of_id) WHERE ((reversal_of_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[])))"
+      "definition": "CREATE UNIQUE INDEX cash_one_live_reversal ON public.adc_cash_entry USING btree (reversal_of_id) WHERE ((advance_patient_id IS NULL) AND (reversal_of_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[])))"
     },
     {
       "table": "adc_cash_evidence",
@@ -40466,6 +40728,72 @@
       "column": "record_version_id",
       "db_type": "bigint",
       "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "state",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "basis",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "prepared_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "reviewed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "review_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "review_operation_id",
+      "db_type": "uuid",
+      "null": true
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "line_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "prepared_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_advance_allocation_reversal",
+      "column": "reviewed_by_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_ai_usage_bucket",
@@ -51612,6 +51940,10 @@
       "name": "0014_patient_advance_allocation"
     },
     {
+      "app": "finance",
+      "name": "0015_advance_fund_dispositions"
+    },
+    {
       "app": "insurance",
       "name": "0001_initial"
     },
@@ -51753,6 +52085,6 @@
     }
   ],
   "observed_database": "PostgreSQL 17.11 isolated synthetic",
-  "application_commit": "cc96406d54aa12e593ff471ecbc24f0568081ece",
+  "application_commit": "4e1abde5de559e55ebd01cf14458b5e055acabd9",
   "observed_on": "2026-11-08"
 }

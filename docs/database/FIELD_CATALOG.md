@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-08。本目录列出186张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-08。本目录列出187张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -150,6 +150,50 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `advance_allocation_line_history`：`CREATE TRIGGER advance_allocation_line_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation_line FOR EACH ROW EXECUTE FUNCTION adc_advance_allocation_line_history()`。
+
+## adc_advance_allocation_reversal
+
+模型：`finance.AdvanceAllocationReversal`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| line_id | bigint | FK | 否 | `adc_advance_allocation_line.id` |
+| operation_id | uuid | UK | 否 | — |
+| state | character varying(12) | — | 否 | — |
+| basis | character varying(500) | — | 否 | — |
+| prepared_by_id | bigint | FK | 否 | `adc_user.id` |
+| prepared_at | timestamp with time zone | — | 否 | — |
+| reviewed_by_id | bigint | FK | 是 | `adc_user.id` |
+| reviewed_at | timestamp with time zone | — | 是 | — |
+| review_reason | character varying(500) | — | 否 | — |
+| review_operation_id | uuid | UK | 是 | — |
+
+数据库约束：
+
+- `adc_advance_allocati_line_id_03d1c0a5_fk_adc_advan`：`FOREIGN KEY (line_id) REFERENCES adc_advance_allocation_line(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocati_prepared_by_id_52317cf1_fk_adc_user_`：`FOREIGN KEY (prepared_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocati_reviewed_by_id_c2c61432_fk_adc_user_`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_advance_allocation_reversal_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_advance_allocation_reversal_pkey`：`PRIMARY KEY (id)`。
+- `adc_advance_allocation_reversal_review_operation_id_key`：`UNIQUE (review_operation_id)`。
+- `advance_reverse_independent`：`CHECK (((reviewed_by_id IS NULL) OR (NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL)))))`。
+- `advance_reverse_review_metadata`：`CHECK ((((review_operation_id IS NULL) AND ((review_reason)::text = ''::text) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((review_operation_id IS NOT NULL) AND (reviewed_at >= prepared_at) AND (reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['POSTED'::character varying, 'REJECTED'::character varying])::text[])) AND (reviewed_at IS NOT NULL) AND (NOT ((review_reason)::text = ''::text)))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_advance_allocation_reversal_line_id_03d1c0a5`：`CREATE INDEX adc_advance_allocation_reversal_line_id_03d1c0a5 ON public.adc_advance_allocation_reversal USING btree (line_id)`。
+- `adc_advance_allocation_reversal_operation_id_key`：`CREATE UNIQUE INDEX adc_advance_allocation_reversal_operation_id_key ON public.adc_advance_allocation_reversal USING btree (operation_id)`。
+- `adc_advance_allocation_reversal_pkey`：`CREATE UNIQUE INDEX adc_advance_allocation_reversal_pkey ON public.adc_advance_allocation_reversal USING btree (id)`。
+- `adc_advance_allocation_reversal_prepared_by_id_52317cf1`：`CREATE INDEX adc_advance_allocation_reversal_prepared_by_id_52317cf1 ON public.adc_advance_allocation_reversal USING btree (prepared_by_id)`。
+- `adc_advance_allocation_reversal_review_operation_id_key`：`CREATE UNIQUE INDEX adc_advance_allocation_reversal_review_operation_id_key ON public.adc_advance_allocation_reversal USING btree (review_operation_id)`。
+- `adc_advance_allocation_reversal_reviewed_by_id_c2c61432`：`CREATE INDEX adc_advance_allocation_reversal_reviewed_by_id_c2c61432 ON public.adc_advance_allocation_reversal USING btree (reviewed_by_id)`。
+- `advance_reverse_one_live_line`：`CREATE UNIQUE INDEX advance_reverse_one_live_line ON public.adc_advance_allocation_reversal USING btree (line_id) WHERE ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[]))`。
+- `advance_reverse_queue_idx`：`CREATE INDEX advance_reverse_queue_idx ON public.adc_advance_allocation_reversal USING btree (state, id DESC)`。
+
+跨表及历史触发器：
+
+- `advance_reversal_history`：`CREATE TRIGGER advance_reversal_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_advance_allocation_reversal FOR EACH ROW EXECUTE FUNCTION adc_advance_reversal_history()`。
 
 ## adc_ai_usage_bucket
 
@@ -757,7 +801,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_cash_entry_reviewed_by_id_f7f3a418_fk_adc_user_id`：`FOREIGN KEY (reviewed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `cash_amount_positive`：`CHECK ((amount > (0)::numeric))`。
 - `cash_cost_requires_equipment`：`CHECK (((equipment_cost_amendment_id IS NULL) OR (equipment_event_id IS NOT NULL)))`。
-- `cash_exact_source`：`CHECK ((((advance_patient_id IS NULL) AND (based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((advance_patient_id IS NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[]))) OR ((advance_patient_id IS NOT NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NULL) AND ((kind)::text = 'RECEIPT'::text) AND (reversal_of_id IS NULL))))`。
+- `cash_exact_source`：`CHECK ((((advance_patient_id IS NULL) AND (based_record_version_id IS NOT NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NOT NULL) AND ((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying])::text[]))) OR ((advance_patient_id IS NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NOT NULL) AND (invoice_id IS NULL) AND ((kind)::text = ANY ((ARRAY['EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[]))) OR ((advance_patient_id IS NOT NULL) AND (based_record_version_id IS NULL) AND (equipment_event_id IS NULL) AND (invoice_id IS NULL) AND ((((kind)::text = 'RECEIPT'::text) AND (reversal_of_id IS NULL)) OR (((kind)::text = 'REFUND'::text) AND (reversal_of_id IS NOT NULL))))))`。
 - `cash_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['RECEIPT'::character varying, 'REFUND'::character varying, 'EQUIPMENT_EXPENSE'::character varying, 'EXPENSE_REVERSAL'::character varying])::text[])))`。
 - `cash_no_self_review`：`CHECK ((NOT ((prepared_by_id = reviewed_by_id) AND (reviewed_by_id IS NOT NULL))))`。
 - `cash_review_metadata`：`CHECK ((((lock_version = 0) AND (reviewed_at IS NULL) AND (reviewed_by_id IS NULL) AND ((state)::text = 'PENDING'::text)) OR ((lock_version = 1) AND (reviewed_at IS NOT NULL) AND (reviewed_by_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['POSTED'::character varying, 'REJECTED'::character varying])::text[])))))`。
@@ -779,11 +823,12 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `cash_advance_clinic_state_idx`：`CREATE INDEX cash_advance_clinic_state_idx ON public.adc_cash_entry USING btree (clinic_id, advance_patient_id, state) WHERE (advance_patient_id IS NOT NULL)`。
 - `cash_clinic_day_idx`：`CREATE INDEX cash_clinic_day_idx ON public.adc_cash_entry USING btree (clinic_id, occurred_on)`。
 - `cash_clinic_state_date_idx`：`CREATE INDEX cash_clinic_state_date_idx ON public.adc_cash_entry USING btree (clinic_id, state, occurred_on)`。
-- `cash_one_live_reversal`：`CREATE UNIQUE INDEX cash_one_live_reversal ON public.adc_cash_entry USING btree (reversal_of_id) WHERE ((reversal_of_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[])))`。
+- `cash_one_live_reversal`：`CREATE UNIQUE INDEX cash_one_live_reversal ON public.adc_cash_entry USING btree (reversal_of_id) WHERE ((advance_patient_id IS NULL) AND (reversal_of_id IS NOT NULL) AND ((state)::text = ANY ((ARRAY['PENDING'::character varying, 'POSTED'::character varying])::text[])))`。
 
 跨表及历史触发器：
 
 - `aaa_daily_cash_lock`：`CREATE TRIGGER aaa_daily_cash_lock BEFORE INSERT OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_daily_cash_lock()`。
+- `advance_refund_history`：`CREATE TRIGGER advance_refund_history BEFORE INSERT OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_advance_refund_history()`。
 - `cash_entry_history`：`CREATE TRIGGER cash_entry_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_cash_entry FOR EACH ROW EXECUTE FUNCTION adc_cash_history_guard()`。
 
 ## adc_cash_evidence
@@ -841,6 +886,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 跨表及历史触发器：
 
+- `advance_refund_evidence`：`CREATE TRIGGER advance_refund_evidence BEFORE INSERT ON public.adc_cash_evidence FOR EACH ROW EXECUTE FUNCTION adc_advance_refund_evidence()`。
 - `cash_evidence_history`：`CREATE TRIGGER cash_evidence_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_cash_evidence FOR EACH ROW EXECUTE FUNCTION adc_financial_evidence_guard()`。
 - `evidence_matches_current`：`CREATE CONSTRAINT TRIGGER evidence_matches_current AFTER INSERT OR UPDATE ON public.adc_cash_evidence DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_evidence_commit_guard()`。
 

@@ -304,6 +304,18 @@ VIEWS = {
         },
         'note': '一张抵扣单关联一笔已记账预收及一至五张本店同患者账单。明细固定当时准确发布版本，申请与复核关联不同账号。复核通过后减少待付和预收可用余额，原实收保留。',
     },
+    'er_advance_dispositions': {
+        'title': '预收抵扣撤销与原渠道退款',
+        'tables': {
+            'adc_cash_entry': ['id', 'advance_patient_id', 'clinic_id', 'reversal_of_id', 'kind', 'amount', 'state'],
+            'adc_cash_evidence': ['id', 'cash_entry_id', 'account_id', 'version', 'state'],
+            'adc_advance_allocation': ['id', 'receipt_id', 'state'],
+            'adc_advance_allocation_line': ['id', 'allocation_id', 'invoice_id', 'amount'],
+            'adc_advance_allocation_reversal': ['id', 'line_id', 'prepared_by_id', 'reviewed_by_id', 'state'],
+            'adc_user': ['id'],
+        },
+        'note': '撤销引用原抵扣明细，独立批准后释放该行金额。原渠道退款追加现金账，引用原预收并保留自己的核实凭据。一笔原预收可有多笔部分退款，累计受可用余额限制。',
+    },
 }
 
 
