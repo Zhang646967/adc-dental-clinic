@@ -13,6 +13,8 @@ for(const selector of css.matchAll(/(?:^|})\s*([^{}]+)\{/g)) {
 checks++;
 for(const page of app.pages){
   for(const ext of ['.js','.wxml']){assert(fs.existsSync(path.join(root,page+ext)));checks++;}
+  const pageConfig=JSON.parse(fs.readFileSync(path.join(root,page+'.json'),'utf8'));
+  assert(pageConfig && typeof pageConfig==='object' && !Array.isArray(pageConfig),page+' requires a page configuration object');checks++;
   const source=fs.readFileSync(path.join(root,page+'.js'),'utf8');new vm.Script(source,{filename:page});checks++;
   const markup=fs.readFileSync(path.join(root,page+'.wxml'),'utf8');
   for(const match of markup.matchAll(/bind(?:tap|input|change|confirm)="([A-Za-z]\w*)"/g)){
