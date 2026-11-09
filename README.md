@@ -4,7 +4,7 @@
 
 ## 访问与登录
 
-**课程网页试用已部署。** 当前服务器运行 D2.4 源码 `19238b8`，提供二十家课程合成门店。 [应用版本 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42451753585)
+**课程网页试用已升级至 C6。** 当前服务器运行源码 `25a32a5`，提供二十家课程合成门店和患者本人预收与资金流水。 [应用版本 CI](https://github.com/Zhang646967/adc-dental-clinic/actions/runs/42555758535)
 
 | 使用对象 | 入口 | 登录方式 |
 |---|---|---|
