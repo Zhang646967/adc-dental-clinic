@@ -1,6 +1,7 @@
 /* Invoice Page handlers only; official tool and physical device remain separate. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const file=path.resolve(__dirname,'../clients/wechat/miniprogram/pages/invoice/index.js');
+const fundsFile=path.resolve(__dirname,'../clients/wechat/miniprogram/pages/funds/index.js');
 function fixture(options={}){
  let definition;const calls=[];
  const api={request:async(route,method,data)=>{
@@ -22,4 +23,36 @@ async function verify(){
  await test('busy state prevents duplicate pagination reads',async()=>{const d=fixture();await d.p.onShow();d.p.data.busy=true;await d.p.cashPageChange({currentTarget:{dataset:{direction:'next'}}});assert.equal(d.calls.length,1);});
  return {passed:true,cases:details.length,details,scope:'Native invoice Page handlers with controlled transport; not official-tool or phone acceptance'};
 }
-module.exports={verify};
+
+async function verifyFunds(){
+ let definition;
+ const requests=[];
+ const api={request(route,method,query){return new Promise((resolve,reject)=>requests.push({route,method,query:{...query},resolve,reject}));}};
+ const format={dateTime:x=>'BJ '+x,showError:(p,e)=>p.setData({error:e.message,busy:false})};
+ vm.runInNewContext(fs.readFileSync(fundsFile,'utf8'),{Page:p=>definition=p,require:n=>n.endsWith('/api')?api:format});
+ const p={...definition,data:{...definition.data},setData:v=>Object.assign(p.data,v)};
+ const data=(id,page)=>({selected:{id,available:'130.00'},entries:[{posted_at:'2026-11-08T10:00:00Z'}],page,next:page===1?2:null});
+
+ let pending=p.onShow();
+ assert.deepEqual([requests[0].route,requests[0].method,requests[0].query],['funds/','GET',{clinic:'',page:1}]);
+ requests[0].resolve(data(1,1));await pending;
+ assert.equal(p.data.statement.entries[0].postedLabel,'BJ 2026-11-08T10:00:00Z');
+ pending=p.turn({currentTarget:{dataset:{direction:'next'}}});
+ assert.deepEqual(requests[1].query,{clinic:1,page:2});
+ requests[1].resolve(data(1,2));await pending;
+ pending=p.selectClinic({currentTarget:{dataset:{clinic:2}}});
+ assert.deepEqual(requests[2].query,{clinic:2,page:1});
+ assert.equal(p.data.statement,null);
+ requests[2].resolve(data(2,1));await pending;
+ pending=p.onShow();p.onHide();
+ requests[3].resolve(data(2,1));await pending;
+ assert.equal(p.data.statement,null);
+ pending=p.onShow();requests[4].reject(Error('当前账号授权已失效'));await pending;
+ assert.equal(p.data.statement,null);assert(p.data.error);
+ pending=p.retry();assert.deepEqual(requests[5].query,{clinic:'',page:1});
+ requests[5].resolve(data(1,1));await pending;
+ assert.equal(p.data.error,'');assert.equal(p.data.statement.selected.available,'130.00');
+ return {passed:true,cases:6,scope:'read, date, pagination, clinic change, late response, and revoked retry with controlled transport'};
+}
+
+module.exports={verify,verifyFunds};

@@ -16,8 +16,7 @@ from adc_core.snapshots import reporting_snapshot
 from care.audit import emit
 from care.models import Invoice
 from finance.advance_models import AdvanceAllocation, AdvanceAllocationLine
-from finance.advance_projection import receipt_applied
-from finance.cash_models import CashEntry
+from finance.advance_projection import receipt_available
 from finance.cash_selectors import cash_scope, invoice_balance
 from finance.cash_services import _reason, _require_advance_patient
 from finance.evidence_policies import lock_people, preparer_current
@@ -35,7 +34,7 @@ MAX_LINES = 5
 
 def advance_receipts(actor):
     workspace_binding(actor, FRONT + FINANCE)
-    return cash_scope(actor, detail=True).filter(advance_patient__isnull=False)
+    return cash_scope(actor, detail=True).filter(advance_patient__isnull=False, kind='RECEIPT')
 
 
 def allocations(actor):
@@ -43,7 +42,7 @@ def allocations(actor):
 
 
 def available_amount(receipt):
-    return receipt.amount - receipt_applied(CashEntry.objects.filter(pk=receipt.pk)) if receipt.state == 'POSTED' else Decimal('0.00')
+    return receipt_available(receipt) if receipt.state == 'POSTED' else Decimal('0.00')
 
 
 def receipt_invoices(receipt):
@@ -161,17 +160,16 @@ def _reviewable(actor, row, decision):
         raise RuleError('请选择待复核分配的明确决定。')
 
 
-def _require_preparer(row, *, lock=False):
-    clinic_id = row.receipt.clinic_id
+def require_advance_preparer(user_id, clinic_id, *, lock=False):
     if lock:
         list(RoleAssignment.objects.select_for_update().filter(
-            user_id=row.prepared_by_id, role='FRONT_DESK', scope_kind='CLINIC', clinic_id=clinic_id).order_by('pk'))
-    if not preparer_current(row.prepared_by_id, clinic_id, 'FRONT_DESK'):
+            user_id=user_id, role='FRONT_DESK', scope_kind='CLINIC', clinic_id=clinic_id).order_by('pk'))
+    if not preparer_current(user_id, clinic_id, 'FRONT_DESK'):
         raise RuleError('原申请人的本店前台授权已失效，请拒绝该申请。')
 
 
 def _approval_facts(actor, row, *, lock=False):
-    _require_preparer(row, lock=lock)
+    require_advance_preparer(row.prepared_by_id, row.receipt.clinic_id, lock=lock)
     originals = list(row.lines.order_by('invoice_id'))
     amounts = {line.invoice_id: line.amount for line in originals}
     bills = _bills(row.receipt, amounts, lock=lock)

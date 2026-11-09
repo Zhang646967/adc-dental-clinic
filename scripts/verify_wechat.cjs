@@ -88,6 +88,7 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const profiles=await require('./verify_native_profiles.cjs').verify();
   const alignment=await require('./verify_native_alignment.cjs').verify();
   const patient_cash=await require('./verify_patient_cash_wechat.cjs').verify();
+  const patient_funds=await require('./verify_patient_cash_wechat.cjs').verifyFunds();
   const record_copies=await require('./verify_native_record_copies.cjs').verify();
-  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,record_copies,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

@@ -28,8 +28,11 @@
         <view class="fact-row"><text>已记账退款合计</text><text>¥{{invoice.cash_activity.refunds}}</text></view>
       </block>
       <view class="fact-row"><text>已记账净收款</text><text>¥{{invoice.cash_balance.net_received}}</text></view>
+      <view class="fact-row"><text>已抵扣预收款</text><text>¥{{invoice.cash_balance.advance_applied||'0.00'}}</text></view>
       <view class="fact-row"><text>尚需支付</text><text>¥{{invoice.cash_balance.remaining}}</text></view>
       <view class="fact-row"><text>应退余额</text><text>¥{{invoice.cash_balance.refund_due}}</text></view>
+      <view wx:if="{{invoice.cash_balance.advance_excess > 0}}" class="notice">预收抵扣超额 ¥{{invoice.cash_balance.advance_excess}}，请联系原门店核对。</view>
+      <navigator class="link" url="/pages/funds/index">核对我的预收与资金流水 →</navigator>
       <view wx:if="{{invoice.cash_balance.pending}}" class="notice">有{{invoice.cash_balance.pending}}笔收退款请求待复核，尚未计入已记账总额或明细。</view>
       <view wx:if="{{invoice.cash_balance.insurance_pending}}" class="notice">有医保原请求待处理，请联系原门店核对；非现金承担不代表资金到账。</view>
       <view class="muted line">付款或退款请联系原门店前台；本页不发起支付。医保处理中金额以原结算记录核对。</view>

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block content %}<div class="business-flow">
+  <a href="{% url 'advance_allocation_detail' line.allocation_id %}">← 原分配记录</a>
+  <h1>申请撤销抵扣明细</h1>
+  <p>账单 {{ line.invoice.invoice_no }} · 原抵扣 ¥ {{ line.amount }}。独立复核后，该明细的金额回到原预收可用额。</p>
+  <form method="post" class="panel form-panel">
+    {% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">
+    {% include 'components/form_errors.html' %}
+    {% for field in form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+    <button type="submit"{% if adc_read_only %} disabled{% endif %}>预览撤销申请</button>
+  </form>
+</div>{% endblock %}

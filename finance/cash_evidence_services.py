@@ -29,11 +29,23 @@ def check_receipt_reference(account,reference,*,advance,exclude_entry=None):
     if not advance:used=used.filter(cash_entry__advance_patient__isnull=False)
     if used.exists():raise RuleError('此渠道凭据已用于一笔收款申请，请先核对原条目。')
 
+def check_refund_reference(account,reference,*,advance_refund,exclude_entry=None):
+    used=CashEvidenceVersion.objects.filter(account=account,reference=reference,state__in=('PENDING','APPROVED'),
+        cash_entry__state__in=('PENDING','POSTED')).exclude(cash_entry_id=exclude_entry)
+    if not advance_refund:
+        used=used.filter(cash_entry__advance_patient__isnull=False,cash_entry__kind='REFUND')
+    if used.exists():raise RuleError('原渠道退款须使用独立凭据编号，请核对已使用的渠道流水。')
+
+def _refund_evidence_account(entry,account):
+    if entry.is_advance_refund and not entry.evidence_versions.filter(initial=True,account=account).exists():
+        raise RuleError('退款补证须保留该笔退款原有的渠道账户。')
+
 def effective(entry_id):
     return CashEvidenceVersion.objects.filter(cash_entry_id=entry_id,state='APPROVED').order_by('-version').first()
 
 def create_initial(*,entry,account_id,reference,actor):
     account,reference=checked_account(account_id,entry.clinic_id,reference,lock=True)
+    check_refund_reference(account,reference,advance_refund=entry.is_advance_refund,exclude_entry=entry.pk)
     return CashEvidenceVersion.objects.create(cash_entry=entry,account=account,reference=reference,version=1,initial=True,
         operation_id=entry.operation_id,prepared_by=actor,reason='随原始收付款申请提交的合成凭据')
 
@@ -55,6 +67,8 @@ def prepare_evidence(*,actor,entry_id,payment_account_id,reference,reason):
         if previous and previous.state=='PENDING':raise RuleError('已有待复核凭据，请先处理。')
         account,reference=checked_account(payment_account_id,entry.clinic_id,reference)
         if entry.kind=='RECEIPT':check_receipt_reference(account,reference,advance=bool(entry.advance_patient_id),exclude_entry=entry.pk)
+        _refund_evidence_account(entry,account)
+        check_refund_reference(account,reference,advance_refund=entry.is_advance_refund,exclude_entry=entry.pk)
         data=dict(entry=entry.pk,previous=previous.pk if previous else None,account=account.pk,
             account_version=account.lock_version,reference=reference,reason=_reason(reason))
         return dict(entry=entry,account=account,data=data,proposal_token=proposal(actor,REQUEST,('FRONT_DESK','MANAGER'),data))
@@ -77,6 +91,8 @@ def confirm_evidence(*,actor,proposal_token,confirmed,expected_entry_id):
     account,reference=checked_account(d['account'],entry.clinic_id,d['reference'],lock=True)
     if account.lock_version!=d['account_version']:raise RuleError('渠道账户已变化，请重新预览。')
     if entry.kind=='RECEIPT':check_receipt_reference(account,reference,advance=bool(entry.advance_patient_id),exclude_entry=entry.pk)
+    _refund_evidence_account(entry,account)
+    check_refund_reference(account,reference,advance_refund=entry.is_advance_refund,exclude_entry=entry.pk)
     row=CashEvidenceVersion.objects.create(cash_entry=entry,account=account,reference=reference,
         previous=previous,version=previous.version+1 if previous else 1,prepared_by=actor,
         operation_id=p['operation'],reason=_reason(d['reason']))

@@ -29,16 +29,22 @@ class CashEntry(models.Model):
     @property
     def source_type(self):
         if self.advance_patient_id:
-            return 'advance'
+            return 'advance_refund' if self.kind == 'REFUND' else 'advance'
         return 'invoice' if self.invoice_id else 'equipment'
 
     @property
     def source_id(self):
-        return self.advance_patient_id or self.invoice_id or self.equipment_event_id
+        return self.reversal_of_id if self.is_advance_refund else self.advance_patient_id or self.invoice_id or self.equipment_event_id
+
+    @property
+    def is_advance_refund(self):
+        return bool(self.advance_patient_id and self.kind == 'REFUND')
 
     @property
     def display_kind(self):
-        return '患者预收款' if self.advance_patient_id else self.get_kind_display()
+        if self.advance_patient_id:
+            return '患者预收原渠道退款' if self.is_advance_refund else '患者预收款'
+        return self.get_kind_display()
 
     class Meta:
         db_table = 'adc_cash_entry'
@@ -58,9 +64,12 @@ class CashEntry(models.Model):
                 Q(invoice__isnull=True,based_record_version__isnull=True,equipment_event__isnull=False,
                   advance_patient__isnull=True,kind__in=['EQUIPMENT_EXPENSE','EXPENSE_REVERSAL']) |
                 Q(invoice__isnull=True,based_record_version__isnull=True,equipment_event__isnull=True,
-                  advance_patient__isnull=False,reversal_of__isnull=True,kind='RECEIPT')), name='cash_exact_source'),
+                  advance_patient__isnull=False)
+                & (Q(reversal_of__isnull=True,kind='RECEIPT') | Q(reversal_of__isnull=False,kind='REFUND'))),
+                name='cash_exact_source'),
             models.CheckConstraint(condition=(
                 Q(state='PENDING',reviewed_by__isnull=True,reviewed_at__isnull=True,lock_version=0) |
                 Q(state__in=['POSTED','REJECTED'],reviewed_by__isnull=False,reviewed_at__isnull=False,lock_version=1)), name='cash_review_metadata'),
-            models.UniqueConstraint(fields=['reversal_of'],condition=Q(reversal_of__isnull=False,state__in=['PENDING','POSTED']), name='cash_one_live_reversal'),
+            models.UniqueConstraint(fields=['reversal_of'],condition=Q(reversal_of__isnull=False,
+                advance_patient__isnull=True,state__in=['PENDING','POSTED']), name='cash_one_live_reversal'),
         ]

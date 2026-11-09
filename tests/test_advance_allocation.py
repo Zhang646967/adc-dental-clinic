@@ -27,7 +27,7 @@ from tests.test_financial_evidence import EvidenceFixture
 D = Decimal
 
 
-class AdvanceAllocationTests(EvidenceFixture, TransactionTestCase):
+class AdvanceAllocationFixture(EvidenceFixture):
     def setUp(self):
         self.setup_evidence()
 
@@ -61,6 +61,8 @@ class AdvanceAllocationTests(EvidenceFixture, TransactionTestCase):
         return allocation.confirm_allocation_review(actor=actor, allocation_id=row.pk,
             proposal_token=self.review_preview(row, actor, decision), confirmed=True)[0]
 
+
+class AdvanceAllocationTests(AdvanceAllocationFixture, TransactionTestCase):
     def test_normal_web_flow_splits_300_and_keeps_one_cash_receipt(self):
         _, first = self.billed()
         second = self.other_bill()

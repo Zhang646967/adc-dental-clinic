@@ -9,6 +9,7 @@
   <view wx:if="{{busy}}" class="notice">正在读取就诊安排…</view>
   <view wx:if="{{overview}}" class="card patient-section task-links">
     <view class="section-title">办理与查询</view>
+    <navigator wx:if="{{!patientDelegated}}" url="/pages/funds/index">我的预收与资金流水 →</navigator>
     <navigator url="/pages/waitlist/index">我的候补<text wx:if="{{overview.waiting_count}}"> · {{overview.waiting_count}} 条</text></navigator>
     <navigator wx:if="{{!patientDelegated}}" url="/pages/record-copies/index">病历副本申请与领取</navigator>
     <navigator url="/pages/help/index">联系门店</navigator>

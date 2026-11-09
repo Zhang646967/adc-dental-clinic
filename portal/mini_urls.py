@@ -10,6 +10,7 @@ from portal import mini_medical as medical
 from portal import mini_discovery as discovery
 from portal import mini_account as account
 from portal import mini_invoices as invoices
+from portal import patient_funds
 from portal import auth_views as auth
 from portal import web_login_views as qr
 
@@ -82,6 +83,7 @@ urlpatterns = [
     path('visits/', api.visits, name='mini_visits'),
     path('visits/<int:pk>/', api.detail, name='mini_visit'),
     path('invoices/<int:pk>/', invoices.detail, name='mini_invoice'),
+    path('funds/', patient_funds.mini, name='mini_funds'),
     path('booking/preview/', api.book_preview, name='mini_book_preview'),
     path('booking/confirm/', api.book_confirm, name='mini_book_confirm'),
     path('visits/<int:pk>/cancel/preview/', api.cancel_preview, name='mini_cancel_preview'),

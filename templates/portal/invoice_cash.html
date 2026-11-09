@@ -14,6 +14,7 @@
     <dt>应退余额</dt><dd>¥ {{ cash_balance.refund_due }}</dd>
   </dl>
   {% if cash_balance.advance_excess %}<p class="notice">预收款抵扣超出当前账单责任 ¥ {{ cash_balance.advance_excess }}。请联系原门店核对分配。</p>{% endif %}
+  <p><a href="{% url 'portal_funds' %}">核对我的预收与资金流水 →</a></p>
   {% if cash_balance.pending %}<p class="notice">有{{ cash_balance.pending }}笔收退款请求待复核，尚未计入已记账总额或下方明细。</p>{% endif %}
   {% if cash_balance.insurance_pending %}<p class="notice">有医保原请求待处理，请联系原门店核对；非现金承担不代表资金到账。</p>{% endif %}
   <h3>已记账收退款明细</h3>

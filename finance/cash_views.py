@@ -15,12 +15,12 @@ from equipment.models import EquipmentEvent
 from equipment.policies import manager_clinic
 from equipment.costs import effective_cost
 from equipment.forms import ExplicitProposalForm
-from finance.cash_forms import AdvanceRequestForm,CashRequestForm,ExpenseRequestForm,CashReviewForm
+from finance.cash_forms import AdvanceRefundForm,AdvanceRequestForm,CashRequestForm,ExpenseRequestForm,CashReviewForm
 from finance.cash_selectors import cash_listing,cash_detail
 from finance.cash_selectors import advance_balance,invoice_balance,event_net
 from adc_core.snapshots import reporting_snapshot
 from finance.cash_selectors import receivables as receivables_read
-from finance.cash_services import advance_context,prepare_cash,confirm_cash_request,prepare_review,confirm_cash_review
+from finance.cash_services import advance_context,advance_refund_context,prepare_cash,confirm_cash_request,prepare_review,confirm_cash_review
 from finance.cash_models import KINDS
 
 @login_required
@@ -54,8 +54,9 @@ def _request(request,source_type,pk,reversal_id=None):
         if source_type=='invoice':
             source=get_object_or_404(Invoice.objects.select_related('visit__clinic','current_record_version'),pk=pk,visit__clinic_id__in=clinic_ids(request.user))
             balance=invoice_balance(source)
-        elif source_type=='advance':
-            try:source,_,rows,_=advance_context(request.user,pk)
+        elif source_type in ('advance','advance_refund'):
+            load=advance_context if source_type=='advance' else advance_refund_context
+            try:source,_,rows,_=load(request.user,pk)
             except EXPECTED_ERRORS:raise Http404
             balance=advance_balance(rows)
         else:
@@ -63,8 +64,9 @@ def _request(request,source_type,pk,reversal_id=None):
             source=get_object_or_404(EquipmentEvent.objects.select_related('asset__clinic'),pk=pk,asset__clinic_id=clinic)
             balance=dict(known_cost=effective_cost(source)[0],net_equipment_expense=event_net(source.pk),pending=source.cash_entries.filter(state='PENDING').count())
     action=request.POST.get('action','preview')
-    titles={'invoice':'申请模拟收款／退款','equipment':'申请设备费用记账','advance':'登记患者预收款'}
-    title='申请冲回误记条目' if reversal_id else titles[source_type]
+    titles={'invoice':'申请模拟收款／退款','equipment':'申请设备费用记账',
+            'advance':'登记患者预收款','advance_refund':'登记预收原渠道退款'}
+    title='申请冲回误记条目' if reversal_id and source_type!='advance_refund' else titles[source_type]
     if request.method=='POST' and action=='confirm':
         form=ExplicitProposalForm(request.POST)
         if form.is_valid():
@@ -79,8 +81,9 @@ def _request(request,source_type,pk,reversal_id=None):
                 return redirect('cash_detail',pk=entry.pk)
         return render(request,'business/proposal.html',{'title':title,'form':form,'button':'确认提交待审核申请','recovery_route':'cash_list'},status=409)
     if request.method=='POST' and action!='preview':raise PermissionDenied
-    forms={'invoice':CashRequestForm,'equipment':ExpenseRequestForm,'advance':AdvanceRequestForm}
-    klass=ExpenseRequestForm if reversal_id else forms[source_type]
+    forms={'invoice':CashRequestForm,'equipment':ExpenseRequestForm,'advance':AdvanceRequestForm,
+           'advance_refund':AdvanceRefundForm}
+    klass=ExpenseRequestForm if reversal_id and source_type!='advance_refund' else forms[source_type]
     initial={'occurred_on':timezone.localdate()}
     if source_type=='invoice' and reversal_id is None:
         initial.update(kind='REFUND' if balance['refund_due'] else 'RECEIPT',
@@ -88,29 +91,33 @@ def _request(request,source_type,pk,reversal_id=None):
     form=klass(request.POST if request.method=='POST' else None,initial=initial,actor=request.user)
     if request.method=='POST' and form.is_valid():
         values=dict(form.cleaned_data)
-        values.setdefault('kind',{'invoice':'REFUND','equipment':'EQUIPMENT_EXPENSE','advance':'RECEIPT'}[source_type])
+        values.setdefault('kind',{'invoice':'REFUND','equipment':'EQUIPMENT_EXPENSE',
+            'advance':'RECEIPT','advance_refund':'REFUND'}[source_type])
         try:preview=prepare_cash(actor=request.user,source_type=source_type,source_id=pk,reversal_id=reversal_id,**values)
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         else:
-            summary=[('类型','患者预收款' if source_type=='advance' else dict(KINDS)[preview['kind']]),
+            label={'advance':'患者预收款','advance_refund':'患者预收原渠道退款'}
+            summary=[('类型',label.get(source_type,dict(KINDS)[preview['kind']])),
                 ('来源',_source_label(source_type,preview['source'])),
                 ('金额（CNY）',preview['amount']),('事实日期',preview['occurred_on']),('核对依据',preview['reason']),
                 ('渠道账户',str(preview['account'])),('凭据编号',preview['reference']),
                 ('提交后状态','待财务审核；尚未记账')]
-            if source_type=='advance':summary.insert(1,('门店',request.workspace.clinic.name))
+            if source_type in ('advance','advance_refund'):summary.insert(1,('门店',request.workspace.clinic.name))
             summary.extend(_balance_summary(preview['balance'],preview['projected'],source_type))
             return render(request,'business/proposal.html',{'title':title,'summary':summary,'form':ExplicitProposalForm(initial={'proposal_token':preview['proposal_token']}),'button':'确认提交待审核申请','recovery_route':'cash_list'})
     return render(request,'finance/cash_request.html',dict(source=source,source_type=source_type,title=title,form=form,balance=balance))
 
 def _source_label(source_type,source):
     if source_type=='advance':return f'{source.patient_no} · {source.name}'
+    if source_type=='advance_refund':return f'原预收 #{source.pk} · {source.advance_patient.name}'
     if source_type=='invoice':return source.invoice_no
     return source.asset.asset_code
 
 def _balance_summary(balance,projected,source_type):
-    if source_type=='advance':
-        return [('已记账预收（CNY）',balance['advance_received']),('待审核预收（CNY）',balance['pending_receipts']),
-                ('已抵扣（CNY）',balance['advance_applied']),('本条获批后可用预收（CNY）',projected['advance_available'])]
+    if source_type in ('advance','advance_refund'):
+        return [('已记账预收（CNY）',balance['advance_received']),('已记账预收退款（CNY）',balance['advance_refunded']),
+                ('已抵扣（CNY）',balance['advance_applied']),('当前可用预收（CNY）',balance['advance_available']),
+                ('本条获批后可用预收（CNY）',projected['advance_available'])]
     if source_type=='invoice':
         return [('当前账单版本',balance['current_revision']),('当前开单金额（CNY）',balance['billed']),
             ('当前已审核净收款（CNY）',balance['net_received']),('已抵扣预收（CNY）',balance['advance_applied']),
@@ -130,6 +137,11 @@ def invoice_request(request,pk):return _request(request,'invoice',pk)
 @sensitive_post_parameters()
 @require_http_methods(['GET','POST'])
 def advance_request(request,pk):return _request(request,'advance',pk)
+
+@login_required
+@sensitive_post_parameters()
+@require_http_methods(['GET','POST'])
+def advance_refund(request,pk):return _request(request,'advance_refund',pk,pk)
 
 @login_required
 @sensitive_post_parameters()
@@ -183,8 +195,8 @@ def review(request,pk):
             elif p['source_type']=='invoice':
                 summary.extend([('当前账单版本',p['balance']['current_revision']),('当前开单金额（CNY）',p['balance']['billed']),
                     ('已审核净收款（CNY）',p['balance']['net_received'])])
-            elif p['source_type']=='advance':
-                summary.append(('当前已记账预收（CNY）',p['balance']['advance_received']))
+            elif p['source_type'] in ('advance','advance_refund'):
+                summary.append(('当前可用预收（CNY）',p['balance']['advance_available']))
             else:
                 summary.extend([('当前核对费用（CNY）',p['balance']['known_cost']),
                                 ('该事件已审核净费用（CNY）',p['balance']['net_equipment_expense'])])

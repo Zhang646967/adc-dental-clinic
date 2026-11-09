@@ -3,6 +3,7 @@ from datetime import date
 from decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from accounts.models import UserAccount,RoleAssignment
 from accounts.policies import lock_clinic_grant
@@ -18,6 +19,7 @@ from scheduling.coordination import lock_slots
 from equipment.models import EquipmentAsset,EquipmentEvent
 from equipment.policies import manager_clinic
 from patients.models import Patient
+from finance.advance_projection import receipt_application_cursor, receipt_available
 from finance.cash_models import CashEntry
 from finance.cash_selectors import advance_balance,cash_scope,cursor,invoice_balance,event_net,projected_balance
 from finance.policies import money
@@ -25,7 +27,7 @@ from finance.policies import money
 REQUEST='adc.cash.request.v3'
 REVIEW='adc.cash.review.v3'
 ROLES=('FRONT_DESK','MANAGER')
-SOURCES=('invoice','equipment','advance')
+SOURCES=('invoice','equipment','advance','advance_refund')
 
 def _insurance_cursor(source_type,source_id):
     if source_type!='invoice':return [0,0,0]
@@ -54,7 +56,11 @@ def _request_payload(data):
     if data['source_type']=='equipment' and data['version'] is not None and (type(data['version']) is not int or data['version']<=0):raise RuleError('设备来源版本无效。')
     if data['source_type']=='advance' and (data['version'] is not None or data['reversal'] is not None):
         raise RuleError('预收款申请来源无效。')
-    if (type(data['cursor']) is not list or len(data['cursor']) not in (3,5) or
+    if data['source_type']=='advance_refund' and (
+            data['reversal']!=data['source'] or data['kind']!='REFUND' or
+            type(data['version']) is not int or data['version']<=0):
+        raise RuleError('原渠道退款来源无效。')
+    if (type(data['cursor']) is not list or len(data['cursor']) not in (3,5,6) or
         any(type(v) is not int or v<0 for v in data['cursor'])):raise RuleError('历史校验无效。')
     if data['kind'] not in ('RECEIPT','REFUND','EQUIPMENT_EXPENSE','EXPENSE_REVERSAL'):
         raise RuleError('申请类型无效。')
@@ -98,6 +104,17 @@ def _source(source_type,source_id,lock=False,*,clinic_id=None):
         patients=Patient.objects.select_for_update() if lock else Patient.objects
         source=patients.get(pk=source_id)
         return source,clinic_id,CashEntry.objects.filter(clinic_id=clinic_id,advance_patient=source),None
+    if source_type=='advance_refund':
+        receipts=CashEntry.objects.select_related('clinic','advance_patient').filter(
+            advance_patient__isnull=False,kind='RECEIPT',state='POSTED')
+        source=receipts.get(pk=source_id)
+        if lock:
+            Patient.objects.select_for_update().get(pk=source.advance_patient_id)
+            source=receipts.select_for_update(of=('self',)).get(pk=source_id)
+        from finance.cash_evidence_services import effective
+        source.refund_evidence=effective(source.pk)
+        rows=CashEntry.objects.filter(Q(pk=source.pk) | Q(reversal_of=source,kind='REFUND',advance_patient__isnull=False))
+        return source,source.clinic_id,rows,source.refund_evidence.pk if source.refund_evidence else None
     raise RuleError('来源类型无效。')
 
 def _require_advance_patient(patient,clinic_id):
@@ -113,10 +130,23 @@ def advance_context(actor,patient_id):
     _require_advance_patient(source,clinic)
     return source,clinic,rows,version
 
+def advance_refund_context(actor,receipt_id):
+    clinic=workspace_binding(actor,('FRONT_DESK',))['clinic']
+    cash_scope(actor,detail=True).get(pk=receipt_id,clinic_id=clinic,advance_patient__isnull=False,kind='RECEIPT')
+    source,clinic,rows,version=_source('advance_refund',receipt_id)
+    _request_scope(actor,'advance_refund',clinic)
+    _require_advance_patient(source.advance_patient,clinic)
+    return source,clinic,rows,version
+
 def _balance(source_type,source,rows):
-    if source_type=='advance':return advance_balance(rows)
+    if source_type in ('advance','advance_refund'):return advance_balance(rows)
     if source_type=='invoice':return invoice_balance(source)
     return dict(known_cost=source.effective_cost,net_equipment_expense=event_net(source.pk))
+
+def _history_cursor(source_type,source,rows):
+    stamp=cursor(rows,source.pk if source_type=='invoice' else None)
+    if source_type=='advance_refund':stamp.extend(receipt_application_cursor(source.pk))
+    return stamp
 
 def _validate(source_type,source,rows,kind,amount,occurred_on,reversal=None,request_id=None,*,clinic_id=None):
     if amount<=0:raise RuleError('记账金额必须大于零。')
@@ -124,6 +154,15 @@ def _validate(source_type,source,rows,kind,amount,occurred_on,reversal=None,requ
         _require_advance_patient(source,clinic_id)
         if kind!='RECEIPT' or reversal is not None:
             raise RuleError('此入口仅登记患者预收款。')
+        return
+    if source_type=='advance_refund':
+        _require_advance_patient(source.advance_patient,clinic_id)
+        if kind!='REFUND' or reversal is None or reversal.pk!=source.pk or clinic_id!=source.clinic_id or not source.clinic.is_active:
+            raise RuleError('请选择本店仍可办理的原预收款。')
+        if occurred_on<source.occurred_on:
+            raise RuleError('退款事实日期不能早于原预收。')
+        if amount>receipt_available(source):
+            raise RuleError('退款金额超过本笔预收可用额，请核对已有退款及抵扣。')
         return
     if source_type=='invoice':
         from insurance.settlement_projection import require_cash_ready
@@ -160,11 +199,20 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
     with reporting_snapshot():
         if source_type=='advance':
             source,clinic,rows,version=advance_context(actor,source_id)
+        elif source_type=='advance_refund':
+            source,clinic,rows,version=advance_refund_context(actor,source_id)
         else:
             source,clinic,rows,version=_source(source_type,source_id)
             _request_scope(actor,source_type,clinic)
         reversal=None
-        if reversal_id is not None:
+        if source_type=='advance_refund':
+            reversal=source
+            reversal_id=source.pk
+            if not source.refund_evidence:
+                raise RuleError('请先核对原收款的渠道凭据。')
+            if payment_account_id is None:
+                payment_account_id=source.refund_evidence.account_id
+        elif reversal_id is not None:
             reversal=cash_scope(actor,detail=True).get(pk=reversal_id)
             if reversal.source_type!=source_type or reversal.source_id!=source_id:
                 raise RuleError('冲回来源不匹配。')
@@ -173,13 +221,15 @@ def prepare_cash(*,actor,source_type,source_id,kind,amount=None,occurred_on,reas
         amount=money(source.effective_cost if source_type=='equipment' and reversal is None else amount)
         day=_date(occurred_on);reason=_reason(reason)
         _validate(source_type,source,rows,kind,amount,day,reversal,clinic_id=clinic)
-        from finance.cash_evidence_services import checked_account,check_receipt_reference
+        from finance.cash_evidence_services import checked_account,check_receipt_reference,check_refund_reference
         account,reference=checked_account(payment_account_id,clinic,reference)
         if kind=='RECEIPT':check_receipt_reference(account,reference,advance=source_type=='advance')
+        _refund_channel(source_type,source,account)
+        check_refund_reference(account,reference,advance_refund=source_type=='advance_refund')
         if source_type=='equipment' and reversal is None and rows.filter(state='PENDING',kind=kind).exists():
             raise RuleError('该设备费用已有待审核申请。')
         data=dict(source_type=source_type,source=source_id,clinic=clinic,version=version,
-            cursor=cursor(rows,source_id if source_type=='invoice' else None),
+            cursor=_history_cursor(source_type,source,rows),
             insurance_cursor=_insurance_cursor(source_type,source_id),
             kind=kind,amount=str(amount),occurred_on=day.isoformat(),reason=reason,reversal=reversal_id,
             account=account.pk,account_version=account.lock_version,reference=reference)
@@ -204,8 +254,7 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     source,clinic,rows,version=_source(data['source_type'],data['source'],lock=True,clinic_id=data['clinic'])
     if _insurance_cursor(data['source_type'],source.pk)!=data['insurance_cursor']:
         raise RuleError('医保结算进度已变化，请重新核对患者实际责任和收退款金额。')
-    invoice_id=source.pk if data['source_type']=='invoice' else None
-    if clinic!=data['clinic'] or version!=data['version'] or cursor(rows,invoice_id)!=data['cursor']:
+    if clinic!=data['clinic'] or version!=data['version'] or _history_cursor(data['source_type'],source,rows)!=data['cursor']:
         raise RuleError('来源账单或记账申请已变化，请重新预览。')
     reversal=rows.get(pk=data['reversal']) if data['reversal'] else None
     amount=money(data['amount']);day=_date(data['occurred_on'])
@@ -213,6 +262,7 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
     from finance.cash_evidence_services import checked_account,check_receipt_reference,create_initial
     account,reference=checked_account(data['account'],clinic,data['reference'],lock=True)
     if account.lock_version!=data['account_version']:raise RuleError('渠道账户已变化，请重新预览。')
+    _refund_channel(data['source_type'],source,account)
     if data['kind']=='RECEIPT':check_receipt_reference(account,reference,advance=data['source_type']=='advance')
     if data['source_type']=='equipment' and not reversal and rows.filter(state='PENDING',kind=data['kind']).exists():
         raise RuleError('该设备费用已有待审核申请。')
@@ -220,6 +270,8 @@ def confirm_cash_request(*,actor,proposal_token,confirmed,expected_source_type=N
         fields=dict(invoice=source,based_record_version_id=version)
     elif data['source_type']=='advance':
         fields=dict(advance_patient=source)
+    elif data['source_type']=='advance_refund':
+        fields=dict(advance_patient=source.advance_patient)
     else:
         fields=dict(equipment_event=source,equipment_cost_amendment_id=reversal.equipment_cost_amendment_id if reversal else version)
     entry=CashEntry.objects.create(operation_id=payload['operation'],clinic_id=clinic,kind=data['kind'],amount=amount,
@@ -242,7 +294,7 @@ def prepare_review(*,actor,entry_id,decision,reason):
             if blocker:raise RuleError(blocker)
         data=dict(entry=entry.pk,entry_version=entry.lock_version,source_type=source_type,source=source_id,
             insurance_cursor=_insurance_cursor(source_type,source_id),
-            version=version,cursor=cursor(rows,entry.invoice_id),decision=decision,reason=_reason(reason))
+            version=version,cursor=_history_cursor(source_type,source,rows),decision=decision,reason=_reason(reason))
         balance=_balance(source_type,source,rows)
         evidence=entry.evidence_versions.select_related('account').filter(initial=True).first() if entry.advance_patient_id else None
         return dict(entry=entry,source=source,source_type=source_type,balance=balance,
@@ -268,10 +320,21 @@ def approval_blocker(entry,source_type=None,source=None,rows=None):
     except RuleError as exc:return str(exc)
     return ''
 
-def _validate_review(entry,source_type,source,rows):
+def _refund_channel(source_type,source,account):
+    if source_type=='advance_refund' and (
+            source.refund_evidence is None or account.pk!=source.refund_evidence.account_id):
+        raise RuleError('退款须使用原预收款当前核实的渠道账户。')
+
+def _validate_review(entry,source_type,source,rows,*,lock=False):
     _validate(source_type,source,rows,entry.kind,entry.amount,entry.occurred_on,entry.reversal_of,entry.pk,clinic_id=entry.clinic_id)
-    if entry.advance_patient_id and not entry.evidence_versions.filter(initial=True,state='PENDING').exists():
-        raise RuleError('原始预收凭据缺失，请拒绝申请并核对。')
+    if entry.advance_patient_id:
+        evidence=entry.evidence_versions.filter(initial=True,state='PENDING').first()
+        if evidence is None:raise RuleError('原始预收凭据缺失，请拒绝申请并核对。')
+        if entry.is_advance_refund:
+            from finance.cash_evidence_services import checked_account,check_refund_reference
+            account,reference=checked_account(evidence.account_id,entry.clinic_id,evidence.reference,lock=lock)
+            _refund_channel(source_type,source,account)
+            check_refund_reference(account,reference,advance_refund=True,exclude_entry=entry.pk)
 
 @business_errors
 @transaction.atomic
@@ -310,9 +373,10 @@ def confirm_cash_review(*,actor,proposal_token,confirmed,expected_entry_id=None)
             role='MANAGER' if entry.equipment_event_id else 'FRONT_DESK',scope_kind='CLINIC',clinic_id=clinic).first()
         if not users[entry.prepared_by_id].is_active or not grant:raise RuleError('原申请人授权已失效，请拒绝申请。')
         based=entry.based_record_version_id if data['source_type']=='invoice' else entry.equipment_cost_amendment_id
-        if version!=based or version!=data['version'] or cursor(rows,entry.invoice_id)!=data['cursor']:
+        if ((not entry.is_advance_refund and version!=based) or version!=data['version']
+                or _history_cursor(data['source_type'],source,rows)!=data['cursor']):
             raise RuleError('来源账单或记账状态已变化，请重新核对。')
-        _validate_review(entry,data['source_type'],source,rows)
+        _validate_review(entry,data['source_type'],source,rows,lock=True)
     entry.state=target;entry.lock_version=1;entry.reviewed_by=actor;entry.reviewed_at=timezone.now();entry.review_reason=_reason(data['reason'])
     entry.save(update_fields=['state','lock_version','reviewed_by','reviewed_at','review_reason'])
     from finance.cash_evidence_services import review_initial

@@ -25,3 +25,11 @@ AllocationLines = forms.formset_factory(AllocationLineForm, extra=MAX_LINES, max
 class AllocationReviewForm(forms.Form):
     decision = forms.ChoiceField(label='复核决定', choices=[('approve', '批准抵扣'), ('reject', '拒绝分配')])
     reason = forms.CharField(label='独立复核依据', max_length=500, widget=forms.Textarea(attrs={'rows': 3}))
+
+
+class ReversalBasisForm(AllocationBasisForm):
+    basis = forms.CharField(label='撤销依据', max_length=500, widget=forms.Textarea(attrs={'rows': 3}))
+
+
+class ReversalReviewForm(AllocationReviewForm):
+    decision = forms.ChoiceField(label='复核决定', choices=[('approve', '批准撤销'), ('reject', '拒绝撤销')])

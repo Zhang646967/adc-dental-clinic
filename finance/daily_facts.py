@@ -30,7 +30,11 @@ def day_facts(clinic_id, day):
     return _snapshot(CashEntry.objects.filter(clinic_id=clinic_id,occurred_on=day).aggregate(**_aggregates()))
 
 def advance_receipts_on_day(clinic_id,day):
-    return (CashEntry.objects.filter(clinic_id=clinic_id,occurred_on=day,state='POSTED',advance_patient__isnull=False)
+    return (CashEntry.objects.filter(clinic_id=clinic_id,occurred_on=day,state='POSTED',kind='RECEIPT',advance_patient__isnull=False)
+            .aggregate(total=Sum('amount'))['total'] or Decimal('0.00'))
+
+def advance_refunds_on_day(clinic_id,day):
+    return (CashEntry.objects.filter(clinic_id=clinic_id,occurred_on=day,state='POSTED',kind='REFUND',advance_patient__isnull=False)
             .aggregate(total=Sum('amount'))['total'] or Decimal('0.00'))
 
 def page_day_facts(pairs):

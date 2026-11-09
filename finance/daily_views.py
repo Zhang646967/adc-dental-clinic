@@ -15,7 +15,7 @@ from adc_core.snapshots import reporting_snapshot
 from equipment.forms import ExplicitProposalForm
 from equipment.policies import manager_clinic
 from finance.cash_services import _date
-from finance.daily_facts import advance_receipts_on_day, day_facts, page_day_facts, comparison, KINDS, LABELS
+from finance.daily_facts import advance_receipts_on_day, advance_refunds_on_day, day_facts, page_day_facts, comparison, KINDS, LABELS
 from finance.daily_services import (close_scope,latest,blocker,prepare_close,confirm_close,
     prepare_close_review,confirm_close_review)
 
@@ -42,6 +42,7 @@ def _data(actor,pk):
         return dict(row=row,current=current,channel_summary=evidence_summary(row.clinic_id,row.business_date),comparison=comparison(row.snapshot,row.declared),
             fund_summary=daily_fund_summary(row.clinic_id,row.business_date),
             advance_receipts=advance_receipts_on_day(row.clinic_id,row.business_date),
+            advance_refunds=advance_refunds_on_day(row.clinic_id,row.business_date),
             changed=row.snapshot!=current,blocker=blocker(row,current) if row.state=='PENDING' else '',
             latest=latest(row.clinic_id,row.business_date))
 

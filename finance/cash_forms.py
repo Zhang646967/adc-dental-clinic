@@ -7,6 +7,7 @@ class EvidenceFields(forms.Form):
     reference=forms.CharField(label='合成付款凭据编号',max_length=80,help_text='填写可供流水核对的参考编号，不含银行卡、真实账号或病历。')
     def __init__(self,*args,actor=None,**kwargs):
         super().__init__(*args,**kwargs)
+        if 'payment_account_id' not in self.fields:return
         from finance.evidence_policies import account_choices
         choices=account_choices(actor) if actor is not None else []
         self.fields['payment_account_id'].choices=[('', '请选择渠道账户')]+[(a.pk,str(a)) for a in choices]
@@ -20,6 +21,11 @@ class CashRequestForm(EvidenceFields):
 
 class AdvanceRequestForm(CashRequestForm):
     kind=None
+
+class AdvanceRefundForm(AdvanceRequestForm):
+    payment_account_id=None
+    reference=forms.CharField(label='本次合成退款凭据编号',max_length=80,
+        help_text='使用本次退款独立凭据，与原收款凭据区分。')
 
 class ExpenseRequestForm(EvidenceFields):
     occurred_on=forms.DateField(label='事实日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))

@@ -9,7 +9,7 @@ from accounts.policies import bindings
 from adc_core.proposals import workspace_binding
 from adc_core.snapshots import reporting_snapshot
 from care.models import Invoice
-from finance.advance_projection import applied_invoice_amounts, invoice_advance_facts, receipt_applied
+from finance.advance_projection import applied_invoice_amounts, invoice_advance_facts, receipt_applied, receipt_available
 from finance.cash_models import CashEntry
 
 ZERO=Decimal('0.00')
@@ -61,12 +61,12 @@ def invoice_balance(invoice):
     from insurance.settlement_rules import patient_balance
     insurance=invoice_insurance_facts(invoice.pk)
     balance = patient_balance(total,net,personal_account=insurance['personal_account'],fund_amount=insurance['fund_amount'])
-    return dict(**_with_advance_credit(balance, invoice_advance_facts(invoice.pk)[0]),
+    return dict(**with_advance_credit(balance, invoice_advance_facts(invoice.pk)[0]),
         insurance_pending=insurance['unresolved'],pending=values['pending'],
         pending_receipts=values['pending_receipts'] or ZERO,pending_refunds=values['pending_refunds'] or ZERO,
         current_revision=invoice.current_record_version.revision_no)
 
-def _with_advance_credit(balance, applied):
+def with_advance_credit(balance, applied):
     responsibility = balance['patient_responsibility']
     residual = max(responsibility-applied, ZERO)
     return dict(balance, advance_applied=applied, advance_excess=max(applied-responsibility, ZERO),
@@ -75,24 +75,32 @@ def _with_advance_credit(balance, applied):
 
 def advance_balance(rows):
     """A clinic/patient advance balance based on retained receipts and applications."""
-    values=rows.aggregate(advance_received=Sum('amount',filter=Q(state='POSTED')),
-        pending_receipts=Sum('amount',filter=Q(state='PENDING')),
+    values=rows.aggregate(advance_received=Sum('amount',filter=Q(state='POSTED',kind='RECEIPT')),
+        advance_refunded=Sum('amount',filter=Q(state='POSTED',kind='REFUND')),
+        pending_receipts=Sum('amount',filter=Q(state='PENDING',kind='RECEIPT')),
+        pending_refunds=Sum('amount',filter=Q(state='PENDING',kind='REFUND')),
         pending=Count('pk',filter=Q(state='PENDING')))
     received = values['advance_received'] or ZERO
+    refunded = values['advance_refunded'] or ZERO
     applied = receipt_applied(rows)
-    return dict(advance_received=received, advance_applied=applied, advance_available=received-applied,
-                pending_receipts=values['pending_receipts'] or ZERO, pending=values['pending'])
+    return dict(advance_received=received, advance_refunded=refunded, advance_applied=applied,
+                advance_available=received-refunded-applied, pending_receipts=values['pending_receipts'] or ZERO,
+                pending_refunds=values['pending_refunds'] or ZERO, pending=values['pending'])
 
 def projected_balance(balance,kind,amount,decision='approve'):
     """One candidate's effect; other pending entries are not money or promises."""
     result=dict(balance)
     if decision!='approve':return result
     if 'advance_received' in balance:
-        result['advance_received']+=amount
-        result['advance_available']+=amount
+        if kind=='REFUND':
+            result['advance_refunded']+=amount
+            result['advance_available']-=amount
+        else:
+            result['advance_received']+=amount
+            result['advance_available']+=amount
     elif kind in ('RECEIPT','REFUND'):
         result['net_received']+=amount if kind=='RECEIPT' else -amount
-        result=_with_advance_credit(result, balance['advance_applied'])
+        result=with_advance_credit(result, balance['advance_applied'])
     else:
         result['net_equipment_expense']=balance['net_equipment_expense']+(amount if kind=='EQUIPMENT_EXPENSE' else -amount)
     return result
@@ -123,7 +131,7 @@ def cash_listing(actor,state='',page='1',*,kind='',invoice='',event='',advance='
             pending_expenses=Sum('amount',filter=Q(state='PENDING',kind='EQUIPMENT_EXPENSE')),
             pending_expense_reversals=Sum('amount',filter=Q(state='PENDING',kind='EXPENSE_REVERSAL')),
             receipts=Sum('amount',filter=Q(state='POSTED',kind='RECEIPT')),refunds=Sum('amount',filter=Q(state='POSTED',kind='REFUND')),
-            advance_receipts=Sum('amount',filter=Q(state='POSTED',advance_patient__isnull=False)),
+            advance_receipts=Sum('amount',filter=Q(state='POSTED',kind='RECEIPT',advance_patient__isnull=False)),
             expenses=Sum('amount',filter=Q(state='POSTED',kind='EQUIPMENT_EXPENSE')),expense_reversals=Sum('amount',filter=Q(state='POSTED',kind='EXPENSE_REVERSAL')))
         for k in ('receipts','refunds','expenses','expense_reversals','pending_receipts','pending_refunds','pending_expenses','pending_expense_reversals','advance_receipts'):totals[k]=totals[k] or ZERO
         totals['net_received']=totals['receipts']-totals['refunds']
@@ -144,8 +152,8 @@ def cash_detail(actor,entry_id):
         if row.advance_patient_id:
             balance=advance_balance(CashEntry.objects.filter(clinic_id=row.clinic_id,advance_patient_id=row.advance_patient_id))
             evidence=row.evidence_versions.select_related('account').filter(initial=True).first()
-            if row.state=='POSTED':
-                allocation_available=row.amount-receipt_applied(CashEntry.objects.filter(pk=row.pk))
+            if row.state=='POSTED' and row.kind=='RECEIPT':
+                allocation_available=receipt_available(row)
         elif row.invoice_id:
             balance=invoice_balance(row.invoice)
         else:

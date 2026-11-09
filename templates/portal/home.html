@@ -28,5 +28,6 @@
 <div class="service-section-heading"><div><h2>今天需要办理什么？</h2></div><span class="muted">当前就诊人 · 授权范围内</span></div>
 <section class="task-grid service-task-grid" aria-label="常用任务"><a class="task-card" href="{% url 'portal_appointments' %}"><span class="task-no" aria-hidden="true">01 / 预约管理</span><h2>核对与调整安排</h2><p>查看诊所和时间，办理未开始预约的改期或取消。</p><span>我的预约 →</span></a><a class="task-card" href="{% url 'waitlist' %}"><span class="task-no" aria-hidden="true">02 / 前台协调</span><h2>等一个合适的时段</h2><p>登记可接受范围，查看邀约和成约结果，保留原有安排。</p><span>我的候补 →</span></a><a class="task-card" href="{% url 'portal_help' %}"><span class="task-no" aria-hidden="true">03 / 到诊协助</span><h2>需要人工帮忙</h2><p>了解到诊、结算和资料核对流程，联系原诊所前台。</p><span>查看帮助 →</span></a></section>
 {% include 'workspaces/business_worklist.html' %}
+{% if can_view_funds %}<section class="service-assistance"><div><h2>我的预收与资金流水</h2><p>按门店核对到账、账单抵扣、撤销和退款。</p></div><a class="button secondary" href="{% url 'portal_funds' %}">查看资金流水 →</a></section>{% endif %}
 <section class="service-assistance"><div><h2>第一次使用？</h2><p>可按操作指南逐步办理，也可以向小助手询问流程。</p></div><div class="actions"><a class="button secondary" href="{% url 'guide_index' %}">逐步操作指南</a><a href="{% url 'portal_assistant' %}">问问小助手 →</a></div></section>
 {% endblock %}

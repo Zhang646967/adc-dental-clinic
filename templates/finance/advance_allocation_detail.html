@@ -15,9 +15,15 @@
   </section>
   <section class="panel">
     <h2>申请时的账单依据</h2>
+    <p><a href="{% url 'advance_reversal_list' %}?allocation={{ row.pk }}">查看本单撤销申请与历史</a></p>
     <ul class="worklist-items">{% for line in lines %}
       <li><div><strong><a href="{% url 'invoice_detail' line.invoice_id %}?revision={{ line.record_version.revision_no }}">{{ line.invoice.invoice_no }} · 第 {{ line.record_version.revision_no }} 版</a></strong>
-      <p>患者责任 ¥ {{ line.responsibility }} · 当时待付 ¥ {{ line.due_at_request }} · 本次抵扣 ¥ {{ line.amount }}</p></div></li>
+      <p>患者责任 ¥ {{ line.responsibility }} · 当时待付 ¥ {{ line.due_at_request }} · 本次抵扣 ¥ {{ line.amount }}</p></div>
+      {% if line.live_reversals %}{% with reversal=line.live_reversals.0 %}
+        <a class="button secondary" href="{% url 'advance_reversal_detail' reversal.pk %}">{{ reversal.get_state_display }} · 查看撤销</a>
+      {% endwith %}{% elif workspace_role == 'FRONT_DESK' and row.state == 'POSTED' %}
+        <a class="button secondary" href="{% url 'advance_reverse_line' line.pk %}">申请撤销该明细</a>
+      {% endif %}</li>
     {% endfor %}</ul>
   </section>
   {% if workspace_role == 'FINANCE' and row.state == 'PENDING' %}

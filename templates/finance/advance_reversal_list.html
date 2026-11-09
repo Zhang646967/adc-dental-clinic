@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}<div class="business-flow">
+  <h1>预收抵扣撤销</h1>
+  <div class="actions"><a href="{% url 'advance_reversal_list' %}?state=PENDING">查看待复核</a><a href="{% url 'advance_reversal_list' %}">查看全部</a></div>
+  <section class="panel"><ul class="worklist-items">
+    {% for row in rows %}<li><div>
+      <strong>撤销 #{{ row.pk }} · {{ row.get_state_display }} · ¥ {{ row.line.amount }}</strong>
+      <p>{{ row.line.allocation.receipt.clinic.name }} · {{ row.line.allocation.receipt.advance_patient.name }} · {{ row.line.invoice.invoice_no }}</p>
+    </div><a class="button secondary" href="{% url 'advance_reversal_detail' row.pk %}">查看撤销</a></li>
+    {% empty %}<li>当前范围暂无撤销申请。</li>{% endfor %}
+  </ul></section>
+  {% include 'business/pagination.html' %}
+</div>{% endblock %}

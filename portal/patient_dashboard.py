@@ -35,7 +35,7 @@ def dashboard(actor, *, now=None):
     upcoming = visits.filter(status='SCHEDULED', scheduled_start__gt=now).select_related('clinic', 'dentist').order_by('scheduled_start', 'pk').first()
     waiting_count = waits.filter(state__in=('WAITING', 'OFFERED')).count()
     offers = active_offers(WaitOffer.objects.filter(request__in=waits), now)
-    return dict(patient=access.patient, next_visit=current or upcoming,
+    return dict(patient=access.patient, can_view_funds=not access.delegated, next_visit=current or upcoming,
         active_count=visits.filter(status__in=('SCHEDULED', 'CHECKED_IN')).count(),
         history_count=visits.exclude(status__in=('SCHEDULED', 'CHECKED_IN')).count(),
         waiting_count=waiting_count, offer_count=offers.count(),

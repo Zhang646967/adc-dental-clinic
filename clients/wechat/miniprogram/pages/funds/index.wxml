@@ -1,0 +1,38 @@
+<view class="page">
+  <view class="page-heading"><view class="title">我的资金流水</view><view class="muted">各门店分别核对，按记账时间倒序。</view></view>
+  <view wx:if="{{busy}}" class="notice">正在读取资金流水…</view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}
+    <text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text>
+    <button class="secondary" bindtap="retry">重新读取</button>
+  </view>
+  <block wx:if="{{statement}}">
+    <block wx:if="{{statement.selected}}">
+      <view wx:if="{{statement.clinics.length > 1}}" class="card">
+        <view class="section-title">选择门店</view>
+        <button wx:for="{{statement.clinics}}" wx:key="id" class="secondary" data-clinic="{{item.id}}" bindtap="selectClinic" disabled="{{item.id === statement.selected.id}}">{{item.name}}</button>
+      </view>
+      <view class="card">
+        <view class="section-title">{{statement.selected.name}}</view>
+        <view class="fact-row"><text>已到账</text><text>¥{{statement.selected.received}}</text></view>
+        <view class="fact-row"><text>有效抵扣</text><text>¥{{statement.selected.applied}}</text></view>
+        <view class="fact-row"><text>已记账退款</text><text>¥{{statement.selected.refunded}}</text></view>
+        <view class="fact-row"><text>当前可用</text><text>¥{{statement.selected.available}}</text></view>
+      </view>
+      <view class="card">
+        <view class="section-title">已记账记录</view>
+        <view wx:for="{{statement.entries}}" wx:key="key" class="invoice-line">
+          <view class="fact-row"><text>{{item.label}}</text><text>¥{{item.amount}}</text></view>
+          <view class="muted">业务日期 {{item.business_date}} · 记账 {{item.postedLabel}}</view>
+          <navigator wx:if="{{item.invoice_id}}" class="link" url="/pages/invoice/index?id={{item.invoice_id}}">查看关联账单 →</navigator>
+        </view>
+        <view class="muted line">共 {{statement.count}} 笔 · 第 {{statement.page}}／{{statement.pages}} 页</view>
+        <view wx:if="{{statement.previous || statement.next}}" class="filter-actions">
+          <button class="secondary compact" disabled="{{!statement.previous}}" data-direction="previous" bindtap="turn">上一页</button>
+          <button class="secondary compact" disabled="{{!statement.next}}" data-direction="next" bindtap="turn">下一页</button>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="notice">暂无已记账预收记录。</view>
+  </block>
+  <button class="secondary" bindtap="back">返回我的就诊</button>
+</view>

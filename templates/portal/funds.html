@@ -1,0 +1,38 @@
+{% extends 'portal/base.html' %}
+{% block title %}我的资金流水 · ADC{% endblock %}
+{% block content %}
+<div class="business-flow">
+  <a href="{% url 'portal_home' %}">← 患者服务中心</a>
+  <h1>我的资金流水</h1>
+  <p>各门店分别保留余额。资金流水按记账时间倒序，现金到账和退款另列业务日期。</p>
+  {% if selected %}
+    <form method="get" class="worklist-filters">
+      <div><label for="funds-clinic">收款门店</label><select id="funds-clinic" name="clinic">
+        {% for clinic in clinics %}<option value="{{ clinic.id }}"{% if clinic.id == selected.id %} selected{% endif %}>{{ clinic.name }}</option>{% endfor %}
+      </select></div><button type="submit">查看门店</button>
+    </form>
+    <section class="panel">
+      <h2>{{ selected.name }}</h2>
+      <dl class="detail-grid">
+        <dt>已到账</dt><dd>¥ {{ selected.received }}</dd>
+        <dt>有效抵扣</dt><dd>¥ {{ selected.applied }}</dd>
+        <dt>已记账退款</dt><dd>¥ {{ selected.refunded }}</dd>
+        <dt>当前可用</dt><dd>¥ {{ selected.available }}</dd>
+      </dl>
+    </section>
+    <section class="panel">
+      <h2>已记账记录</h2>
+      <ul class="worklist-items">{% for item in entries %}<li><div>
+        <strong>{{ item.label }} · ¥ {{ item.amount }}</strong>
+        <p>业务日期 {{ item.business_date|date:'Y-m-d' }} · 记账 {{ item.posted_at|date:'Y-m-d H:i' }}</p>
+        {% if item.invoice_id %}<a href="{% url 'portal_invoice' item.invoice_id %}">查看关联账单 {{ item.invoice_number }}</a>{% endif %}
+      </div></li>{% endfor %}</ul>
+      <nav class="actions" aria-label="资金流水分页">
+        {% if previous %}<a href="?clinic={{ selected.id }}&amp;page={{ previous }}">上一页</a>{% endif %}
+        <span>共 {{ count }} 笔 · 第 {{ page }} / {{ pages }} 页</span>
+        {% if next %}<a href="?clinic={{ selected.id }}&amp;page={{ next }}">下一页</a>{% endif %}
+      </nav>
+    </section>
+  {% else %}<p class="notice">暂无已记账预收记录。</p>{% endif %}
+</div>
+{% endblock %}

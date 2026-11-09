@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block content %}<div class="business-flow">
+  <a href="{% url 'advance_allocation_detail' row.line.allocation_id %}">← 原分配记录</a>
+  <h1>抵扣撤销 #{{ row.pk }}</h1>
+  <section class="panel">
+    <h2>{{ row.get_state_display }}</h2>
+    <p>{{ row.line.allocation.receipt.clinic.name }} · {{ row.line.allocation.receipt.advance_patient.name }}</p>
+    <p>账单 {{ row.line.invoice.invoice_no }} · 原抵扣第 {{ row.line.record_version.revision_no }} 版 · ¥ {{ row.line.amount }}</p>
+    <p><a href="{% url 'cash_detail' row.line.allocation.receipt_id %}">查看原预收与当前可用额</a></p>
+    <p>申请人 {{ row.prepared_by.username }} · {{ row.prepared_at|date:'Y-m-d H:i' }}</p>
+    <p>{{ row.basis }}</p>
+    {% if row.reviewed_by_id %}<p>复核人 {{ row.reviewed_by.username }} · {{ row.reviewed_at|date:'Y-m-d H:i' }}</p><p>{{ row.review_reason }}</p>{% endif %}
+  </section>
+  {% if workspace_role == 'FINANCE' and row.state == 'PENDING' %}
+    {% if row.prepared_by_id == request.user.pk %}<p class="notice">请由另一名财务人员独立复核。</p>{% else %}
+      <form class="panel form-panel" method="post" action="{% url 'advance_reversal_review' row.pk %}">
+        {% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">
+        <h2>独立复核</h2>
+        {% include 'components/form_errors.html' with form=review_form %}
+        {% for field in review_form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+        <button type="submit"{% if adc_read_only %} disabled{% endif %}>预览复核决定</button>
+      </form>
+    {% endif %}
+  {% endif %}
+</div>{% endblock %}
