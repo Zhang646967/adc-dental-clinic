@@ -38,9 +38,14 @@ def describe(row):
         remaining_seconds=max(0,int((row.expires_at-timezone.now()).total_seconds())))
 
 
+def _require_enabled():
+    if not auth_providers.capabilities()['wechat_qr']:
+        raise RuleError('微信扫码登录尚未开放，请使用其他登录方式。')
+
+
 def start(request):
     writable()
-    if not auth_providers.capabilities()['wechat_qr']:raise RuleError('微信扫码登录尚未配置，请使用其他登录方式。')
+    _require_enabled()
     previous=request.session.get('adc_web_qr',{}).get('ticket')
     if previous:WebLoginTicket.objects.filter(pk=ticket_id(previous),state__in=['PENDING','APPROVED']).update(state='REJECTED',decided_at=timezone.now())
     secret=secrets.token_urlsafe(32)
@@ -55,18 +60,21 @@ def start(request):
 
 
 def browser_ticket(request,value):
+    _require_enabled()
     pk=ticket_id(value);binding=_browser(request,pk)
     row=WebLoginTicket.objects.get(pk=pk,browser_digest=binding)
     return row
 
 
 def inspect(actor,value):
+    _require_enabled()
     _account_actor(actor)
     return describe(WebLoginTicket.objects.get(pk=ticket_id(value)))
 
 
 def decide(*,actor,value,decision,code='',confirmed=False):
     writable();_account_actor(actor)
+    _require_enabled()
     if decision not in ('approve','reject'):raise RuleError('请明确确认或拒绝网站登录。')
     proof=auth_providers.wechat_subject(code,'MINI') if decision=='approve' and confirmed is True else None
     if decision=='approve' and proof is None:raise RuleError('请明确同意在所示网站登录。')
@@ -92,7 +100,9 @@ def decide(*,actor,value,decision,code='',confirmed=False):
 
 
 def consume(request,value):
-    writable();pk=ticket_id(value);binding=_browser(request,pk);error=None;user=None
+    writable()
+    _require_enabled()
+    pk=ticket_id(value);binding=_browser(request,pk);error=None;user=None
     with transaction.atomic():
         row=WebLoginTicket.objects.select_for_update().get(pk=pk,browser_digest=binding)
         if _state(row)=='EXPIRED':row.state='EXPIRED';row.save(update_fields=['state']);error='二维码已过期，请重新扫码。'
@@ -101,7 +111,7 @@ def consume(request,value):
             identity=ExternalIdentity.objects.select_for_update().get(pk=row.identity_id)
             user=UserAccount.objects.select_for_update().get(pk=row.user_id)
             from portal.policies import has_patient_account
-            valid=(auth_providers.capabilities()['wechat_qr'] and user.is_active and has_patient_account(user) and
+            valid=(user.is_active and has_patient_account(user) and
                 identity.user_id==user.pk and identity.provider=='WECHAT_MINI' and identity.app_id==settings.ADC_WECHAT_MINI_APP_ID and
                 identity.revision==row.identity_revision and digest(user.get_session_auth_hash())==row.auth_digest and
                 WorkspaceContext.objects.filter(pk=row.workspace_id,user=user,revision=row.workspace_revision,login_channel='PATIENT',role__in=['','PATIENT']).exists())

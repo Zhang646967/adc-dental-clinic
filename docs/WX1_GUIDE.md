@@ -18,6 +18,8 @@ python3 scripts/wx1_platform.py status --private-config '/Users/zhang/Downloads/
 
 应用前保留加密数据库与配置备份；使用已通过验证的相同应用镜像重建Web和运行处理服务，再重建网关以刷新Web地址。核对`/api/mini/v1/session/`中的`auth_mode=live`、`wechat_mini=true`、`sms_demo=false`。能力字段只证明配置已加载；还需实际执行`wx.login → code2Session → ADC会话`。未开通真实短信时使用`ADC_SMS_PROVIDER=disabled`，不显示或发送测试验证码。
 
+小程序独立体验使用 `ADC_WECHAT_QR_ENABLED=0`。此时网站保留账号入口，扫码发码、读取、确认和领取均受开关控制，旧票据也不能完成登录。通过 `apply-rc` 导入后对应 `RC_WECHAT_QR_ENABLED=0`。带微信凭据新生成的 G4 直连 HTTPS 包默认使用此配置。历史配置省略该开关时沿用既有扫码行为。网页扫码另行启用时，核对 `ADC_WECHAT_QR_ENV_VERSION` 与已验证的小程序版本一致。
+
 真实真机联调使用独立合成教师HTTPS环境。由操作者把已核验的ADC认证配置应用到该环境的`private/runtime.env`与`private/maintenance.env`，保留原数据库owner/runtime分离、临床合成及教师环境标记；设置`ADC_PATIENT_AUTH_MODE=live`、`ADC_PATIENT_IDENTITY_PROVIDER=disabled`，短信未具备免费条件时设置`ADC_SMS_PROVIDER=disabled`。按原G4流程更新私有plan文件摘要、重新渲染并校验Compose后重建Web/worker。原18000数据库不通过隧道公开，原教师环境从空合成库建立的来源保持不变。
 
 ## 微信开发者工具
@@ -30,7 +32,7 @@ python3 scripts/prepare_wechat.py --mode development --appid '你的注册AppID'
 
 `local`只用于回环HTTP模拟器；`development`要求真实AppID和HTTPS，可在明确的开发调试中关闭请求域名校验；`experience`启用域名校验，须配置合规请求域名。开发调试、离线编译、真机、上传与体验版分别验收。
 
-配置真实身份后，小程序主动确认微信登录；新账号进入本人建档核验，原账号可以先用密码或短信登录，再在我的账号绑定微信。扫码登录进入`pages/web-login/index`，核对目标网站与期限，明确确认或拒绝。网站以小程序扫码为主，手机及密码为同页备选。
+配置真实身份后，小程序主动确认微信登录；新账号进入本人建档核验，原账号可以先用密码或短信登录，再在我的账号绑定微信。网页扫码启用时，从 `pages/web-login/index` 核对目标网站与期限后明确确认或拒绝。
 
 ## 免费短信条件
 

@@ -25,7 +25,7 @@ def capabilities():
     return dict(wechat_mini=mini,wechat_phone=mini and settings.ADC_WECHAT_PHONE_ENABLED,
         wechat_web=real and bool(settings.ADC_WECHAT_WEB_APP_ID and settings.ADC_WECHAT_WEB_APP_SECRET),
         wechat_mp=real and bool(settings.ADC_WECHAT_MP_APP_ID and settings.ADC_WECHAT_MP_APP_SECRET),
-        wechat_qr=mini,sms_captcha=bool(cloudbase),sms_enabled=bool(demo or tencent or cloudbase),sms_demo=bool(demo),auth_mode=settings.ADC_PATIENT_AUTH_MODE)
+        wechat_qr=mini and settings.ADC_WECHAT_QR_ENABLED,sms_captcha=bool(cloudbase),sms_enabled=bool(demo or tencent or cloudbase),sms_demo=bool(demo),auth_mode=settings.ADC_PATIENT_AUTH_MODE)
 
 
 class NoRedirect(HTTPRedirectHandler):

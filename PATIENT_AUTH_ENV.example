@@ -1,6 +1,8 @@
 # WX1 live auth is independent from synthetic clinical data. No secrets in source.
 ADC_PATIENT_AUTH_MODE=live
 ADC_PATIENT_IDENTITY_PROVIDER=disabled
+# Enable browser QR approval separately after the matching mini-program QR version is verified.
+ADC_WECHAT_QR_ENABLED=0
 ADC_WECHAT_QR_ENV_VERSION=develop
 ADC_CLOUDBASE_ENV_ID=
 ADC_CLOUDBASE_REGION=ap-shanghai

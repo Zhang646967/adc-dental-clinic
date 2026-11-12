@@ -43,17 +43,20 @@ class WechatSecretFileTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);prepare(root);before=(root/'.rc/compose.env').read_text()
             values={'ADC_PATIENT_AUTH_MODE':'live','ADC_PATIENT_IDENTITY_PROVIDER':'disabled',
-                    'ADC_WECHAT_MINI_APP_ID':'wx'+'1'*16,'ADC_WECHAT_MINI_APP_SECRET':'synthetic-test-secret'}
+                    'ADC_WECHAT_MINI_APP_ID':'wx'+'1'*16,'ADC_WECHAT_MINI_APP_SECRET':'synthetic-test-secret',
+                    'ADC_WECHAT_QR_ENABLED':'0'}
             result=apply_rc(values,root);after=(root/'.rc/compose.env').read_text()
             self.assertEqual(result['secret_storage'],'WEB_READ_ONLY_FILE')
             self.assertIn('RC_WECHAT_MINI_APP_SECRET=\n',after)
             self.assertIn('RC_WECHAT_MINI_APP_SECRET_FILE=/run/adc-wechat/mini-app-secret',after)
+            self.assertIn('RC_WECHAT_QR_ENABLED=0',after)
             self.assertNotIn('synthetic-test-secret',after)
             self.assertEqual((root/'.rc/private/wechat/mini-app-secret').read_text(),'synthetic-test-secret\n')
             self.assertEqual((root/'.rc/private').stat().st_mode&0o777,0o700)
             self.assertEqual(Path(result['backup_file']).read_text(),before)
             validate(root)
             compose=json.loads((Path(__file__).resolve().parents[1]/'compose.rc.yaml').read_text())
+            self.assertEqual(compose['services']['web']['environment']['ADC_WECHAT_QR_ENABLED'],'${RC_WECHAT_QR_ENABLED:-1}')
             self.assertTrue(any(isinstance(v,dict) and v.get('target')=='/run/adc-wechat' and v['read_only'] for v in compose['services']['web']['volumes']))
             for name in ['schema','notification-worker','operations','bootstrap']:
                 self.assertNotIn('ADC_WECHAT_MINI_APP_SECRET_FILE',compose['services'][name]['environment'])

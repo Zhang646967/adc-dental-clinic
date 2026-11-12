@@ -31,13 +31,14 @@ def validate(root):
         k,v=line.split('=',1);env[k]=v
     required={'RC_PROJECT','RC_APP_SECRET','RC_DB_PASSWORD','RC_WEB_PORT','RC_READ_ONLY'}
     authentication={'RC_SMS_PROVIDER','RC_TEACHER_TEST_MODE','RC_PATIENT_AUTH_MODE','RC_PATIENT_IDENTITY_PROVIDER',
-        'RC_WECHAT_MINI_APP_ID','RC_WECHAT_MINI_APP_SECRET','RC_WECHAT_MINI_APP_SECRET_FILE','RC_WECHAT_QR_ENV_VERSION','RC_CLOUDBASE_ENV_ID',
+        'RC_WECHAT_MINI_APP_ID','RC_WECHAT_MINI_APP_SECRET','RC_WECHAT_MINI_APP_SECRET_FILE','RC_WECHAT_QR_ENABLED','RC_WECHAT_QR_ENV_VERSION','RC_CLOUDBASE_ENV_ID',
         'RC_CLOUDBASE_REGION','RC_CLOUDBASE_PUBLISHABLE_KEY','RC_SMS_FREE_QUOTA_CONFIRMED',
         'RC_SMS_ALLOWED_TEST_PHONES','RC_SMS_LIVE_TEST_LIMIT'}
     if not required<=set(env) or set(env)-required-authentication:raise ValueError('Unexpected configuration keys.')
     if env.get('RC_SMS_PROVIDER','disabled') not in ('disabled','demo','cloudbase') or env.get('RC_TEACHER_TEST_MODE','0') not in ('0','1'):raise ValueError('Invalid local authentication configuration.')
     if env.get('RC_PATIENT_AUTH_MODE','demo') not in ('demo','live') or env.get('RC_PATIENT_IDENTITY_PROVIDER','disabled') not in ('disabled','local'):raise ValueError('Invalid patient authentication mode.')
     if env.get('RC_PATIENT_AUTH_MODE')=='live' and (env.get('RC_SMS_PROVIDER')=='demo' or env.get('RC_PATIENT_IDENTITY_PROVIDER')=='local'):raise ValueError('Live authentication cannot use demonstration credentials.')
+    if env.get('RC_WECHAT_QR_ENABLED','1') not in ('0','1'):raise ValueError('Invalid WeChat browser QR switch.')
     if env.get('RC_WECHAT_QR_ENV_VERSION','develop') not in ('develop','trial','release'):raise ValueError('Invalid WeChat code environment.')
     if env.get('RC_WECHAT_MINI_APP_SECRET_FILE'):
         if env['RC_WECHAT_MINI_APP_SECRET_FILE']!='/run/adc-wechat/mini-app-secret' or env.get('RC_WECHAT_MINI_APP_SECRET'):

@@ -59,6 +59,7 @@ class G4PreparationTests(unittest.TestCase):
         secret.chmod(0o600)
         prepare(self.folder, **self.inputs, **options)
         inspect_bundle(self.folder)
+        self.assertEqual(read_env(self.folder / 'private/runtime.env')['ADC_WECHAT_QR_ENABLED'], '0')
         for name in ('runtime.env', 'maintenance.env', 'database.env'):
             self.assertNotIn('ADC_WECHAT_MINI_APP', (self.folder / 'private' / name).read_text())
         self.assertEqual((self.folder / MINI_SECRET_FILE).read_bytes(), secret.read_bytes())

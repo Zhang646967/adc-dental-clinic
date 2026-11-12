@@ -127,6 +127,8 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     if dataset == 'course-20':
         runtime.update(ADC_RC_SYNTHETIC='1', ADC_PATIENT_AUTH_MODE='live',
                        ADC_PATIENT_IDENTITY_PROVIDER='disabled', ADC_SOURCE_COMMIT=source_commit)
+    if mini_secret is not None:
+        runtime['ADC_WECHAT_QR_ENABLED'] = '0'
     if mode == 'teacher_tunnel':
         runtime.update(ADC_RC_SYNTHETIC='1',ADC_TEACHER_TEST_MODE='1',ADC_SMS_PROVIDER='demo')
     owner_password = secrets.token_urlsafe(48)

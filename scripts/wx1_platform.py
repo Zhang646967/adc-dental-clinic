@@ -38,8 +38,11 @@ def apply_rc(values,root):
     if not facts['wechat_configuration_ready']:raise ValueError('Registered AppID and matching AppSecret are still required; existing install unchanged.')
     if values.get('ADC_PATIENT_AUTH_MODE')!='live' or values.get('ADC_PATIENT_IDENTITY_PROVIDER')!='disabled':raise ValueError('Use live authentication and disable local credential substitutes.')
     if values.get('ADC_WECHAT_QR_ENV_VERSION','develop') not in ('develop','trial','release'):raise ValueError('Invalid QR environment version.')
+    qr_enabled=values.get('ADC_WECHAT_QR_ENABLED')
+    if qr_enabled is not None and qr_enabled not in ('0','1'):raise ValueError('Invalid WeChat browser QR switch.')
     path=Path(root).expanduser()/'.rc/compose.env';read_private(path)
     source=path.read_text();updates={'RC_'+key:values.get('ADC_'+key,'') for key in KEYS}
+    if qr_enabled is not None:updates['RC_WECHAT_QR_ENABLED']=qr_enabled
     private=path.parent/'private';private.mkdir(mode=0o700,exist_ok=True)
     if private.is_symlink() or stat.S_IMODE(private.stat().st_mode)&0o077:
         raise ValueError('Protect .rc/private with mode700 before applying the WeChat secret.')

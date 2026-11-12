@@ -21,7 +21,8 @@ from tests.fixtures import FixtureMixin
 from workspaces.models import WorkspaceContext
 
 LIVE=dict(ADC_PATIENT_AUTH_MODE='live',ADC_PATIENT_IDENTITY_PROVIDER='disabled',ADC_SMS_PROVIDER='disabled',ADC_READ_ONLY=False,
-    ADC_WECHAT_MINI_APP_ID='wx0000000000000001',ADC_WECHAT_MINI_APP_SECRET='isolated-secret',ADC_CLINICAL_SYNTHETIC=True)
+    ADC_WECHAT_MINI_APP_ID='wx0000000000000001',ADC_WECHAT_MINI_APP_SECRET='isolated-secret',ADC_WECHAT_QR_ENABLED=True,
+    ADC_CLINICAL_SYNTHETIC=True)
 CLOUD=dict(**{**LIVE,'ADC_SMS_PROVIDER':'cloudbase'},ADC_CLOUDBASE_ENV_ID='isolated-env-001',ADC_CLOUDBASE_REGION='ap-shanghai',ADC_CLOUDBASE_PUBLISHABLE_KEY='isolated-publishable',
     ADC_SMS_FREE_QUOTA_CONFIRMED=True,ADC_SMS_ALLOWED_TEST_PHONES=('13800000001','13800000002'),ADC_SMS_LIVE_TEST_LIMIT=10)
 
@@ -129,6 +130,45 @@ class WebLoginTests(FixtureMixin,TransactionTestCase):
     def test_mini_without_account_login_cannot_see_destination(self):
         _,row=self.start();client=Client();response=client.get('/api/mini/v1/account/web-login/',{'ticket':row.pk.hex})
         self.assertEqual(response.status_code,401);self.assertNotIn(row.origin,response.content.decode())
+    @override_settings(ADC_WECHAT_QR_ENABLED=False)
+    def test_mini_sign_in_keeps_working_with_browser_qr_disabled(self):
+        client=Client()
+        caps=client.get('/api/mini/v1/session/').json()['data']['auth_capabilities']
+        self.assertTrue(caps['wechat_mini'])
+        self.assertFalse(caps['wechat_qr'])
+        page=client.get('/portal/login/')
+        self.assertNotContains(page,'id="wechat-qr-login"')
+        with patch.object(providers,'mini_login_image') as image:
+            self.assertEqual(client.post('/portal/auth/wechat/qr/start/').status_code,409)
+            image.assert_not_called()
+        with patch.object(providers,'_request',return_value={'openid':self.proof[2],'session_key':'PROVIDER_ONLY'}):
+            result=client.post('/api/mini/v1/auth/wechat/',{'code':'fresh-wechat-code','confirmed':'on'})
+        self.assertEqual(result.status_code,200,result.content)
+        self.assertEqual(result.json()['data']['account_name'],self.user.username)
+        self.assertNotContains(result,'PROVIDER_ONLY')
+        self.assertFalse(WebLoginTicket.objects.exists())
+        self.assertFalse(PatientAccess.objects.filter(user=self.user).exists())
+
+    def test_disabled_browser_qr_refuses_existing_tickets_before_provider_or_login(self):
+        request,approved=self.start()
+        self.approve(approved)
+        _,pending=self.start()
+        with override_settings(ADC_WECHAT_QR_ENABLED=False),patch.object(providers,'wechat_subject') as provider:
+            actions=(
+                lambda: qr.browser_ticket(request,approved.pk),
+                lambda: qr.inspect(self.user,pending.pk),
+                lambda: qr.decide(actor=self.user,value=pending.pk,decision='approve',code='fresh-code',confirmed=True),
+                lambda: qr.consume(request,approved.pk),
+            )
+            for action in actions:
+                with self.assertRaises(RuleError):
+                    action()
+            provider.assert_not_called()
+        approved.refresh_from_db()
+        pending.refresh_from_db()
+        self.assertEqual((approved.state,pending.state),('APPROVED','PENDING'))
+        self.assertIsNone(approved.consumed_at)
+        self.assertFalse(request.user.is_authenticated)
     def test_official_jpeg_and_existing_png_codes_survive_storage_and_http_delivery(self):
         for raw,mime in ((b'\xff\xd8\xfffixture-jpeg','image/jpeg'),(b'\x89PNG\r\n\x1a\nfixture-png','image/png')):
             with self.subTest(mime=mime):
