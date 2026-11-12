@@ -1,5 +1,45 @@
 <view class="page">
-  <view class="service-hero"><view class="brand">ADC 口腔</view><view class="title">口腔门诊服务</view><view class="hero-note">查找门店和医师，选择合适的就诊时间。</view><button class="hero-button" bindtap="services">预约就诊</button><view class="entry-links"><button bindtap="stores">找门店</button><button bindtap="doctors">找医师</button></view></view>
+  <view class="subject-banner">
+    <view wx:if="{{serviceState==='ready'}}"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}<text wx:if="{{patientDelegated}}"> · 代约身份</text></view><view class="row"><button class="compact secondary" bindtap="subjects">切换就诊人</button><button class="compact secondary" bindtap="logout">退出</button></view></view>
+    <view wx:if="{{serviceState==='loading'}}">正在核对当前就诊人…</view>
+    <view wx:if="{{serviceState==='guest'}}">登录后可查看本人的下一步与常用办理。<view class="row"><button class="compact secondary" bindtap="login">登录／注册</button></view></view>
+    <view wx:if="{{serviceState==='enrollment'}}">账号已登录，本人档案待前台核验。核验后可查看就诊与费用。<view class="row"><button class="compact secondary" bindtap="account">查看资料核验进度</button></view></view>
+    <view wx:if="{{serviceState==='subject'}}">请选择本次要办理的就诊人。<view class="row"><button class="compact secondary" bindtap="subjects">选择就诊人</button></view></view>
+    <view wx:if="{{serviceState==='medical'}}">当前为独立医疗代理，请从医疗授权入口办理。<view class="row"><button class="compact secondary" bindtap="medical">查看医疗授权</button></view></view>
+    <view wx:if="{{serviceState==='error'}}">暂时无法核对就诊人，已清除原有就诊信息。<view class="row"><button class="compact secondary" bindtap="retryService">重新核对</button></view></view>
+  </view>
+
+  <view class="page-heading"><view class="title">患者服务中心</view><view class="muted">下一步、常用办理与公开门店资料。</view></view>
+
+  <view wx:if="{{serviceError}}" class="error" role="alert">{{serviceError}}<text wx:if="{{serviceRequestId}}" class="support-code" selectable>查询编号 {{serviceRequestId}}</text></view>
+
+  <view wx:if="{{serviceState==='ready'&&primary}}" class="card next-card primary-card">
+    <view class="section-label">下一步 · {{primary.label}}</view>
+    <view wx:if="{{primary.timeLabel}}" class="time">{{primary.timeLabel}}</view>
+    <view wx:if="{{primary.detail}}">{{primary.detail}}</view>
+    <view wx:if="{{primary.serviceLine}}" class="muted">{{primary.serviceLine}}</view>
+    <view wx:if="{{primary.deadline}}" class="deadline">{{primary.deadline}}</view>
+    <view wx:if="{{primary.arrived}}" class="notice">已到诊表示前台完成登记；医师实际接诊与治疗进展以现场指引和已发布的诊疗记录为准。</view>
+    <view wx:if="{{primary.contact}}" class="notice">本次办理结果需由门店核实，请通过下方入口联系本单门店。</view>
+    <view wx:if="{{primary.review}}" class="notice">请联系门店核实</view>
+    <view class="muted">{{primary.hint}}</view>
+    <button class="primary" bindtap="primaryTap">{{primary.actionLabel}}</button>
+  </view>
+  <view wx:if="{{serviceState==='ready'&&!primary&&!serviceError}}" class="card"><view class="section-title">暂无待办</view><view class="muted">可从下方常用办理预约就诊或查看清单。</view></view>
+
+  <view class="section-heading"><view class="section-title">常用办理</view></view>
+  <view class="quick-grid">
+    <view class="quick-item" bindtap="book"><view class="section-title">预约就诊</view><view class="muted">选择服务和时间</view></view>
+    <view class="quick-item" bindtap="arrangements"><view class="section-title">到诊安排</view><view class="muted">待到诊与已到诊记录</view></view>
+  </view>
+  <view class="quick-grid">
+    <view wx:if="{{canViewFunds}}" class="quick-item" bindtap="fees"><view class="section-title">费用查询</view><view class="muted">结算单和收退款</view></view>
+    <view class="quick-item" bindtap="records"><view class="section-title">就诊记录</view><view class="muted">历史就诊与改期结果</view></view>
+  </view>
+
+  <view class="section-heading"><view class="section-title">找门店与医师</view></view>
+  <view class="card"><view class="row"><button class="secondary" bindtap="stores">找门店</button><button class="secondary" bindtap="doctors">找医师</button><button class="secondary" bindtap="services">找服务</button></view><view class="muted small">无需登录即可浏览公开门店、医师与服务。</view></view>
+
   <view id="store-search" class="card"><view class="section-title">查找门店</view><view class="filter-grid"><view><view class="label">就诊城市</view><picker range="{{cities}}" value="{{cityIndex}}" bindchange="city"><view class="picker">{{cities[cityIndex]}} ▾</view></picker></view><view><view class="label">需要的服务</view><picker range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="category"><view class="picker">{{categories[categoryIndex].name}} ▾</view></picker></view></view>
     <input value="{{keyword}}" bindinput="keyword" placeholder="搜索区域或门店名称" maxlength="80" aria-label="搜索区域或门店名称"/>
     <view class="filter-actions"><button class="compact secondary" bindtap="locate" loading="{{locating}}" disabled="{{locating}}">定位找附近门店</button><label class="small">仅看线上预约 <switch checked="{{onlineOnly}}" bindchange="online"/></label></view><view class="muted small">{{locationNote}}</view>

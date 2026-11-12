@@ -3,9 +3,36 @@ const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 const {selectedCatalogue}=require('../../utils/service-selection');
+
+function bjDay(iso){
+  if(!iso)return '';
+  const t=Date.parse(iso);
+  return isNaN(t)?'':new Date(t+8*3600000).toISOString().slice(0,10);
+}
+/* By-doctor mode groups the same candidate read on dentist_id and surfaces the
+   earliest available slot of this query for each dentist. The flat rows stay
+   intact so the existing preview handler can still select any slot by index. */
+function groupByDentist(rows){
+  const map=new Map();
+  rows.forEach((r,index)=>{
+    const key=String(r.dentist_id||r.dentist||'');
+    if(!map.has(key))map.set(key,{id:key,name:r.dentist||'可接收的医师',earliest:null,rows:[],preview:[],expanded:false,count:0,earliestLabel:''});
+    const g=map.get(key);
+    g.rows.push(Object.assign({},r,{index}));
+    if(!g.earliest||Date.parse(r.start)<Date.parse(g.earliest.start))g.earliest=r;
+  });
+  const groups=Array.from(map.values()).map(g=>{
+    g.count=g.rows.length;
+    g.earliestLabel=g.earliest?g.earliest.startLabel:'';
+    g.preview=g.rows.slice(0,3);
+    return g;
+  });
+  groups.sort((a,b)=>Date.parse(a.earliest.start)-Date.parse(b.earliest.start));
+  return groups;
+}
 Page({
   data:{clinics:[], services:[], doctors:[], allServices:[], clinicIndex:0, serviceIndex:0, doctorIndex:0,
-    day:'', firstDay:'', lastDay:'', rows:[], error:'', busy:false, searched:false, source:null, reason:'',patientRequest:'',selectedService:null},
+    day:'', firstDay:'', lastDay:'', rows:[], groups:[], mode:'date', searchFailed:false, emptyReason:'', error:'', busy:false, searched:false, source:null, reason:'',patientRequest:'',selectedService:null},
   onLoad(query) { this.query=query;return this.load(); },
   async load() {
     const query=this.query;
@@ -77,18 +104,57 @@ Page({
     const d=this.data.doctors[this.data.doctorIndex];
     navigation.navigateTo({url:`/pages/waitjoin/index?clinic=${c?c.id:''}&service=${s?s.id:''}&day=${this.data.day}&dentist=${d?d.id:''}`});
   },
+  setMode(e) {
+    if(this.data.busy)return;
+    const mode=e.currentTarget.dataset.mode==='dentist'?'dentist':'date';
+    if(mode===this.data.mode)return;
+    // Keep clinic, service, dentist and date; only the query shape changes.
+    this.setData({mode,rows:[],groups:[],searched:false,searchFailed:false,note:'',emptyReason:'',error:''});
+    return this.search();
+  },
+  nextDay() {
+    if(this.data.busy)return;
+    const first=this.data.firstDay,last=this.data.lastDay;
+    const base=this.data.day||first||'2026-01-01';
+    let next=new Date(Date.parse(base+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+    if(last&&next>last)next=first||next;
+    if(first&&next<first)next=first;
+    this.setData({mode:'date',day:next});
+    return this.search();
+  },
+  nextDoctor() {
+    if(this.data.busy||this.data.doctors.length<2)return;
+    this.setData({doctorIndex:(this.data.doctorIndex+1)%this.data.doctors.length});
+    return this.search();
+  },
+  expandGroup(e) {
+    const i=Number(e.currentTarget.dataset.index);
+    if(isNaN(i))return;
+    this.setData({['groups['+i+'].expanded']:true});
+  },
   async search() {
     if (this.data.busy) return;
-    this.setData({rows:[],searched:false,note:''});
+    const mode=this.data.mode||'date';
+    this.setData({rows:[],groups:[],searched:false,note:'',searchFailed:false,emptyReason:''});
     const c=this.data.clinics[this.data.clinicIndex], s=this.data.services[this.data.serviceIndex], d=this.data.doctors[this.data.doctorIndex];
     if (!c || !s) {this.setData({error:'当前服务尚未配置，请联系前台。'});return;}
-    if(!this.data.day){this.setData({error:'请先选择有出诊的日期，或登记候补。'});return;}
-    this.setData({busy:true,error:'',rows:[],searched:false,note:''});
+    if(mode==='date'&&!this.data.day){this.setData({error:'请先选择有出诊的日期，或登记候补。'});return;}
+    this.setData({busy:true,error:'',rows:[],groups:[],searched:false,note:'',searchFailed:false});
     try {
       const path=this.data.source ? `visits/${this.data.source.id}/reschedule/candidates/` : 'candidates/';
-      const data=await api.request(path,'GET',{clinic:c.id,service:s.id,dentist:d.id,day:this.data.day});
-      this.setData({rows:data.rows.map(arrangement),busy:false,searched:true,note:data.limited?'本次候选达到查询上限，可缩小日期或联系前台。':data.message||'',availabilityTitle:data.status==='NO_SCHEDULE'?'当天暂无出诊':'当天暂无可用时段'});
-    } catch(e) { showError(this,e,{separateRequestId:true}); }
+      const params={clinic:c.id,service:s.id,dentist:d.id};
+      if(mode==='date')params.day=this.data.day;
+      const data=await api.request(path,'GET',params);
+      const rows=data.rows.map(arrangement);
+      const status=data.status||'';
+      this.setData({rows,groups:mode==='dentist'?groupByDentist(rows):[],busy:false,searched:true,
+        note:data.limited?'本次候选达到查询上限，可缩小日期或联系前台。':data.message||'',
+        availabilityTitle:status==='NO_SCHEDULE'?'当天暂无出诊':'当天暂无可用时段',
+        emptyReason:status==='NO_SCHEDULE'?'当天没有已发布出诊，可换日期或换医师。':status==='NO_COMBINATION'?'有出诊但没有符合该服务与医师组合的号源，可换医师或登记候补。':'本次没有可约时段，可换日期、换医师或登记候补。'});
+    } catch(e) {
+      this.setData({busy:false,searched:false,searchFailed:true,rows:[],groups:[]});
+      showError(this,e,{separateRequestId:true});
+    }
   },
   async choose(e) {
     if (this.data.busy) return;
@@ -100,7 +166,7 @@ Page({
       const path=source ? `visits/${source.id}/reschedule/preview/` : 'booking/preview/';
       const payload=source ? {action:'preview',slot_id:row.slot,start:row.start,expected_version:source.version,reason:this.data.reason} : {slot:row.slot,start:row.start,service:row.service||'',patient_request:this.data.patientRequest};
       const preview=await api.request(path,'POST',payload);
-      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
+      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.mode==='dentist'?bjDay(row.start):this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
       navigation.navigateTo({url:'/pages/confirm/index'}); this.setData({busy:false});
     } catch(e) { showError(this,e,{separateRequestId:true}); }
   }

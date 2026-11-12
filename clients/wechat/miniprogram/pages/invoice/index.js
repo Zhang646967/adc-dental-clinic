@@ -4,7 +4,12 @@ const {positive}=require('../../utils/booking-intent');
 const {showError,dateTime}=require('../../utils/format');
 Page({
   data:{invoice:null,busy:false,error:'',requestId:'',revisionIndex:0,versions:[]},
-  onLoad(query){this.id=query.id;this.visitId=positive(query.visit)?Number(query.visit):null;this.revision=positive(query.revision)?Number(query.revision):null;this.cashPage=1;},
+  onLoad(query){
+    this.id=query.id;this.visitId=positive(query.visit)?Number(query.visit):null;this.revision=positive(query.revision)?Number(query.revision):null;this.cashPage=1;
+    this.fromBilling=query.from==='billing';
+    const page=Number(query.page);
+    this.billingPage=Number.isSafeInteger(page)&&page>0?page:1;
+  },
   async onShow(){await this.load();},
   async load(){
     if(this.data.busy)return;
@@ -21,7 +26,11 @@ Page({
       this.setData({invoice,versions,revisionIndex:Math.max(0,versions.findIndex(r=>r.revision_no===invoice.revision)),busy:false});
     }catch(e){showError(this,e,{separateRequestId:true});}
   },
-  back(){const visit=this.data.invoice&&this.visitId;navigation.returnTo(visit?'/pages/visit/index?id='+visit:'/pages/home/index?queue=history');},
+  back(){
+    if(this.fromBilling)return navigation.returnTo('/pages/billing/index?page='+this.billingPage);
+    const visit=this.data.invoice&&this.visitId;
+    navigation.returnTo(visit?'/pages/visit/index?id='+visit:'/pages/home/index?queue=history');
+  },
   version(e){if(this.data.busy)return;const selected=this.data.versions[Number(e.detail.value)];if(!selected)return;this.revision=selected.revision_no;this.cashPage=1;return this.load();},
   cashPageChange(e){if(this.data.busy||!this.data.invoice)return;const page=this.data.invoice.cash_activity[e.currentTarget.dataset.direction];if(!positive(page))return;this.cashPage=Number(page);return this.load();}
 });
