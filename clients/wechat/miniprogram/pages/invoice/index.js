@@ -3,10 +3,11 @@ const navigation=require('../../utils/navigation');
 const {positive}=require('../../utils/booking-intent');
 const {showError,dateTime}=require('../../utils/format');
 Page({
-  data:{invoice:null,busy:false,error:'',requestId:'',revisionIndex:0,versions:[]},
+  data:{invoice:null,busy:false,error:'',requestId:'',revisionIndex:0,versions:[],fromBilling:false},
   onLoad(query){
     this.id=query.id;this.visitId=positive(query.visit)?Number(query.visit):null;this.revision=positive(query.revision)?Number(query.revision):null;this.cashPage=1;
     this.fromBilling=query.from==='billing';
+    this.setData({fromBilling:this.fromBilling});
     const page=Number(query.page);
     this.billingPage=Number.isSafeInteger(page)&&page>0?page:1;
   },

@@ -53,5 +53,5 @@
       </view>
     </view>
   </block>
-  <view class="patient-return"><button class="secondary" bindtap="back" disabled="{{busy}}">返回就诊记录</button></view>
+  <view class="patient-return"><button class="secondary" bindtap="back" disabled="{{busy}}">{{fromBilling?'返回费用清单':'返回就诊记录'}}</button></view>
 </view>

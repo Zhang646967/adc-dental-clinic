@@ -150,7 +150,7 @@ Page({
       this.setData({rows,groups:mode==='dentist'?groupByDentist(rows):[],busy:false,searched:true,
         note:data.limited?'本次候选达到查询上限，可缩小日期或联系前台。':data.message||'',
         availabilityTitle:status==='NO_SCHEDULE'?'当天暂无出诊':'当天暂无可用时段',
-        emptyReason:status==='NO_SCHEDULE'?'当天没有已发布出诊，可换日期或换医师。':status==='NO_COMBINATION'?'有出诊但没有符合该服务与医师组合的号源，可换医师或登记候补。':'本次没有可约时段，可换日期、换医师或登记候补。'});
+        emptyReason:rows.length?'':status==='NO_SCHEDULE'?'当天没有已发布出诊，可换日期或换医师。':status==='NO_COMBINATION'?'有出诊但没有符合该服务与医师组合的号源，可换医师或登记候补。':'本次没有可约时段，可换日期、换医师或登记候补。'});
     } catch(e) {
       this.setData({busy:false,searched:false,searchFailed:true,rows:[],groups:[]});
       showError(this,e,{separateRequestId:true});
