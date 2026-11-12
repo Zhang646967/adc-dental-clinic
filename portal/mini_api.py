@@ -20,7 +20,6 @@ from accounts.models import UserAccount
 from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
 from adc_core.snapshots import reporting_snapshot
-from care.models import Invoice
 from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
 from portal import mini_forms as forms, services, rescheduling
@@ -28,6 +27,7 @@ from portal.availability_search import availability_result
 from portal.patient_dashboard import needs_outcome_review
 from portal.service_catalogue import public_profiles, public_profile, require_self_service
 from portal.service_projection import service_data
+from portal.visit_review import visit_review
 from registry.models import Clinic
 from scheduling.models import AvailabilitySlot, Visit
 from scheduling.resource_models import ResourcePolicy
@@ -234,9 +234,11 @@ def visits(request):
 @endpoint()
 def detail(request, pk):
     visit = rescheduling.owned_visit(request.user, pk)
-    data = visit_data(visit,actor=request.user)
-    access=patient_access(request.user)
-    data['invoice_id']=Invoice.objects.filter(visit=visit).values_list('pk',flat=True).first() if not access.delegated else None
+    now = timezone.now()
+    data = visit_data(visit, actor=request.user, now=now)
+    review = visit_review(visit, access=patient_access(request.user), now=now)
+    settlement = review['settlement']
+    data.update(visit_no=visit.visit_no, review=review, invoice_id=settlement['invoice_id'] if settlement else None)
     plan = current_plan(visit)
     # Own historical service, deliberately absent from the general catalogue.
     if plan:

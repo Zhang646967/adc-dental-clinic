@@ -1,0 +1,59 @@
+{% if review.care %}
+<section class="panel" aria-labelledby="visit-result-title">
+  <h2 id="visit-result-title">本次就诊结果</h2>
+  <p><strong>{{ review.care.outcome_label }}</strong></p>
+  {% if review.care.treatments %}
+  <h3>实际处置</h3>
+  <ul>
+    {% for row in review.care.treatments %}
+    <li>{{ row.name }} · {{ row.quantity|floatformat:'-3' }} {{ row.unit }}{% if row.kind == 'NO_CHARGE_STAGE' %} · 本次不另计费{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if review.care.medications %}
+  <h3>发退药结算</h3>
+  <ul>
+    {% for row in review.care.medications %}
+    <li>{{ row.name }} · 发退药后 {{ row.net_quantity|floatformat:'-3' }} {{ row.unit }} · ¥{{ row.amount|floatformat:2 }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
+{% if review.settlement %}
+<section class="panel" aria-labelledby="visit-settlement-title">
+  <h2 id="visit-settlement-title">本次结算</h2>
+  <dl class="detail-grid">
+    <dt>结算单</dt><dd>{{ review.settlement.invoice_no }} · 第 {{ review.settlement.revision }} 版</dd>
+    <dt>账单金额</dt><dd>¥{{ review.settlement.total|floatformat:2 }}</dd>
+    <dt>尚需支付</dt><dd>¥{{ review.settlement.remaining|floatformat:2 }}</dd>
+    <dt>应退余额</dt><dd>¥{{ review.settlement.refund_due|floatformat:2 }}</dd>
+  </dl>
+  {% if review.settlement.review_pending %}<p class="notice">有结算事项待复核，余额按当前已确认结果显示。</p>{% endif %}
+  <a class="button" href="{% url 'portal_invoice' review.settlement.invoice_id %}">查看结算单</a>
+</section>
+{% else %}
+<p class="muted">结算单发布后可在这里查看费用和余额。</p>
+{% endif %}
+{% if review.followups %}
+<section class="panel" aria-labelledby="visit-followup-title">
+  <h2 id="visit-followup-title">复诊安排</h2>
+  {% for item in review.followups %}
+  <article>
+    <h3>{{ item.service }}</h3>
+    <p><strong>{{ item.label }}</strong> · 建议 {{ item.earliest_on|date:'Y年m月d日' }} 至 {{ item.latest_on|date:'Y年m月d日' }}</p>
+    {% if item.appointment %}
+    <p>{{ item.appointment.start|date:'Y年m月d日 H:i' }} · {{ item.appointment.status_label }}
+      <a href="{% url 'portal_visit' item.appointment.id %}">查看复诊预约 {{ item.appointment.visit_no }}</a>
+    </p>
+    {% endif %}
+    {% if item.overdue %}<p>建议日期已过，请联系门店核对后续安排。</p>{% endif %}
+    {% if item.status == 'WAITING' or item.status == 'REVIEW' %}
+    <a href="#frontdesk-help">联系门店核对复诊</a>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>
+{% elif review.completed_at %}
+<p class="muted">本次就诊暂无复诊指示。</p>
+{% endif %}
