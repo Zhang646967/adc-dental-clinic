@@ -4,11 +4,6 @@ const {arrangement, showError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 const {selectedCatalogue}=require('../../utils/service-selection');
 
-function bjDay(iso){
-  if(!iso)return '';
-  const t=Date.parse(iso);
-  return isNaN(t)?'':new Date(t+8*3600000).toISOString().slice(0,10);
-}
 /* By-doctor mode groups the same candidate read on dentist_id and surfaces the
    earliest available slot of this query for each dentist. The flat rows stay
    intact so the existing preview handler can still select any slot by index. */
@@ -74,28 +69,31 @@ Page({
     const c=this.data.clinics[this.data.clinicIndex];
     const services=c ? this.data.allServices.filter(s=>s.clinic===c.id && (!this.data.source || s.id===this.data.source.service_id)) : [];
     const serviceIndex=selectedId===null ? 0 : Math.max(0,services.findIndex(s=>s.id===selectedId));
-    this.setData({services,serviceIndex,doctorIndex:0,rows:[],searched:false,note:''});this.doctors();
+    this.setData({services,serviceIndex});this.doctors();
   },
   doctors() {
     const s=this.data.services[this.data.serviceIndex];
-    this.setData({selectedService:s||null,doctors:[{id:'',name:'任何可接收的医师'}].concat(s ? s.dentists : []), doctorIndex:0, rows:[], searched:false,note:''});
+    this.clearResults({selectedService:s||null,doctors:[{id:'',name:'任何可接收的医师'}].concat(s ? s.dentists : []),doctorIndex:0});
+  },
+  clearResults(updates={}) {
+    this.setData({rows:[],groups:[],searched:false,searchFailed:false,note:'',emptyReason:'',error:'',requestId:'',...updates});
   },
   async refreshDay(selectedDay=null){
     if(this.data.source)return;
     const service=this.data.services[this.data.serviceIndex],doctor=this.data.doctors[this.data.doctorIndex];
     if(!service)return;
-    this.setData({busy:true,error:'',rows:[],searched:false});
+    this.setData({busy:true});
     try{
       const info=await api.request(`services/${service.id}/`,'GET',{dentist:doctor.id});
-      const day=selectedDay||info.default_day||'';
+      const day=selectedDay===null?(info.default_day||''):selectedDay;
       if(day&&(day<this.data.firstDay||day>this.data.lastDay))throw Error('所选日期已超出预约范围，请重新选择。');
       this.setData({day,note:info.default_day?'':'近期暂无已发布出诊，可查看其他医师或登记候补。',busy:false});
     }catch(e){this.setData({day:''});showError(this,e,{separateRequestId:true});}
   },
   pickClinic(e) { if(this.data.busy)return;this.setData({clinicIndex:Number(e.detail.value),error:''});this.rebuild();return this.refreshDay(); },
   pickService(e) { if(this.data.busy)return;this.setData({serviceIndex:Number(e.detail.value),error:''});this.doctors();return this.refreshDay(); },
-  pickDoctor(e) { if(this.data.busy)return;this.setData({doctorIndex:Number(e.detail.value),rows:[],searched:false,note:''});return this.refreshDay(); },
-  pickDay(e) { if(this.data.busy)return;this.setData({day:e.detail.value,rows:[],searched:false,note:''}); },
+  pickDoctor(e) { if(this.data.busy)return;this.clearResults({doctorIndex:Number(e.detail.value)});return this.refreshDay(this.data.day); },
+  pickDay(e) { if(this.data.busy)return;this.clearResults({day:e.detail.value}); },
   reason(e) { this.setData({reason:e.detail.value}); },
   patientRequest(e){this.setData({patientRequest:e.detail.value});},
   waitlist() {
@@ -108,18 +106,22 @@ Page({
     if(this.data.busy)return;
     const mode=e.currentTarget.dataset.mode==='dentist'?'dentist':'date';
     if(mode===this.data.mode)return;
-    // Keep clinic, service, dentist and date; only the query shape changes.
-    this.setData({mode,rows:[],groups:[],searched:false,searchFailed:false,note:'',emptyReason:'',error:''});
+    this.setData({mode});
+    return this.search();
+  },
+  future() {
+    if(this.data.busy||this.data.source)return;
+    this.setData({day:''});
     return this.search();
   },
   nextDay() {
     if(this.data.busy)return;
     const first=this.data.firstDay,last=this.data.lastDay;
-    const base=this.data.day||first||'2026-01-01';
-    let next=new Date(Date.parse(base+'T00:00:00Z')+86400000).toISOString().slice(0,10);
+    const day=this.data.day;
+    let next=day?new Date(Date.parse(day+'T00:00:00Z')+86400000).toISOString().slice(0,10):first;
     if(last&&next>last)next=first||next;
     if(first&&next<first)next=first;
-    this.setData({mode:'date',day:next});
+    this.setData({day:next});
     return this.search();
   },
   nextDoctor() {
@@ -135,22 +137,24 @@ Page({
   async search() {
     if (this.data.busy) return;
     const mode=this.data.mode||'date';
-    this.setData({rows:[],groups:[],searched:false,note:'',searchFailed:false,emptyReason:''});
+    this.clearResults();
     const c=this.data.clinics[this.data.clinicIndex], s=this.data.services[this.data.serviceIndex], d=this.data.doctors[this.data.doctorIndex];
     if (!c || !s) {this.setData({error:'当前服务尚未配置，请联系前台。'});return;}
-    if(mode==='date'&&!this.data.day){this.setData({error:'请先选择有出诊的日期，或登记候补。'});return;}
-    this.setData({busy:true,error:'',rows:[],groups:[],searched:false,note:'',searchFailed:false});
+    const day=this.data.day;
+    if(this.data.source&&!day){this.setData({error:'请先选择改期日期。'});return;}
+    this.setData({busy:true});
     try {
       const path=this.data.source ? `visits/${this.data.source.id}/reschedule/candidates/` : 'candidates/';
       const params={clinic:c.id,service:s.id,dentist:d.id};
-      if(mode==='date')params.day=this.data.day;
+      if(day)params.day=day;
       const data=await api.request(path,'GET',params);
       const rows=data.rows.map(arrangement);
       const status=data.status||'';
+      const period=day?'当天':'未来14天';
       this.setData({rows,groups:mode==='dentist'?groupByDentist(rows):[],busy:false,searched:true,
-        note:data.limited?'本次候选达到查询上限，可缩小日期或联系前台。':data.message||'',
-        availabilityTitle:status==='NO_SCHEDULE'?'当天暂无出诊':'当天暂无可用时段',
-        emptyReason:rows.length?'':status==='NO_SCHEDULE'?'当天没有已发布出诊，可换日期或换医师。':status==='NO_COMBINATION'?'有出诊但没有符合该服务与医师组合的号源，可换医师或登记候补。':'本次没有可约时段，可换日期、换医师或登记候补。'});
+        note:data.limited?data.note||'本次候选达到查询上限，可缩小日期或联系前台。':'',
+        availabilityTitle:period+(status==='NO_SCHEDULE'?'暂无出诊':'暂无可用时段'),
+        emptyReason:rows.length?'':data.message||(this.data.source?'可选择其他日期，原预约继续保留。':'可换日期、医师或登记候补。')});
     } catch(e) {
       this.setData({busy:false,searched:false,searchFailed:true,rows:[],groups:[]});
       showError(this,e,{separateRequestId:true});
@@ -166,7 +170,7 @@ Page({
       const path=source ? `visits/${source.id}/reschedule/preview/` : 'booking/preview/';
       const payload=source ? {action:'preview',slot_id:row.slot,start:row.start,expected_version:source.version,reason:this.data.reason} : {slot:row.slot,start:row.start,service:row.service||'',patient_request:this.data.patientRequest};
       const preview=await api.request(path,'POST',payload);
-      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.mode==='dentist'?bjDay(row.start):this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
+      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/'};
       navigation.navigateTo({url:'/pages/confirm/index'}); this.setData({busy:false});
     } catch(e) { showError(this,e,{separateRequestId:true}); }
   }

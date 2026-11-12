@@ -111,6 +111,26 @@ class DiscoveryAlignmentTests(ResourceFixture,TransactionTestCase):
             self.assertEqual(Client().get(reverse(route)).status_code,200)
         self.assertEqual(before,(Visit.objects.count(),Invoice.objects.count(),CashEntry.objects.count()))
 
+    def test_account_waiting_for_enrollment_can_browse_public_index_and_services(self):
+        from accounts.patient_auth import exchange_identity
+
+        self.directory(self.a)
+        pending=exchange_identity(provider='WECHAT_MINI',app_id='synthetic-app',subject='synthetic-pending')
+        pending.set_password(self.password)
+        pending.save(update_fields=['password'])
+        client,session=self.login(pending)
+        self.assertTrue(session['account_authenticated'])
+        self.assertFalse(session['authenticated'])
+        self.assertFalse(PatientAccess.objects.filter(user=pending).exists())
+        for route in ('mini_public_index','mini_public_services'):
+            with self.subTest(route=route):
+                url=reverse(route)
+                public=Client().get(url)
+                response=client.get(url)
+                self.assertEqual(response.status_code,200,response.content)
+                self.assertEqual(response.json()['data'],public.json()['data'])
+        self.assertEqual(client.get(reverse('mini_billing')).status_code,409)
+
     def test_invalid_filters_are_not_silently_replaced(self):
         for query in [{'category':'UNKNOWN'},{'clinic':'-1'},{'clinic':'999999'}]:
             self.assertEqual(Client().get(reverse('mini_public_services'),query).status_code,404)

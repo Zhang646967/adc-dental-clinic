@@ -7,12 +7,12 @@
   <label class="label">预约服务</label><picker class="picker" range="{{services}}" range-key="name" value="{{serviceIndex}}" bindchange="pickService" disabled="{{!!source || busy}}">{{services[serviceIndex].name || '暂无已发布服务'}} · {{services[serviceIndex].duration || '—'}}分钟</picker>
   <view wx:if="{{!source && selectedService}}" class="card"><view>{{selectedService.summary}}</view><view class="fee">{{selectedService.fee_label}}</view><view class="prose">{{selectedService.fee_note}}</view><navigator class="link" url="/pages/service/index?id={{selectedService.id}}">核对服务内容与到诊准备</navigator></view>
   <view class="row tabs"><button class="{{mode==='date'?'selected':''}}" data-mode="date" bindtap="setMode">按日期</button><button class="{{mode==='dentist'?'selected':''}}" data-mode="dentist" bindtap="setMode">按医师</button></view>
-  <label class="label">就诊日期 北京时间</label><picker class="picker" mode="date" value="{{day}}" start="{{firstDay}}" end="{{lastDay}}" bindchange="pickDay" disabled="{{busy}}">{{day || '请选择日期'}}</picker>
-  <view wx:if="{{mode==='dentist'}}" class="muted small">按医师查询省略日期，读取未来十四天的可约时段；已选门店、服务、医师和日期保持不变。</view>
+  <label class="label">就诊日期 北京时间</label><picker class="picker" mode="date" value="{{day || firstDay}}" start="{{firstDay}}" end="{{lastDay}}" bindchange="pickDay" disabled="{{busy}}">{{day || (source?'请选择日期':'未来14天')}}</picker>
+  <button wx:if="{{!source && day && selectedService}}" class="compact secondary" disabled="{{busy}}" bindtap="future">查看未来14天</button>
   <label class="label">医师偏好</label><picker class="picker" range="{{doctors}}" range-key="name" value="{{doctorIndex}}" bindchange="pickDoctor" disabled="{{busy}}">{{doctors[doctorIndex].name}}</picker>
   <view wx:if="{{source}}"><label class="label" for="reason">改期原因</label><textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="改期原因" /></view>
   <view wx:if="{{!source}}"><label class="label" for="patientRequest">本次希望解决什么问题？（选填）</label><textarea id="patientRequest" value="{{patientRequest}}" maxlength="500" bindinput="patientRequest" placeholder="可简要说明就诊需求，请勿填写证件号或无关隐私" aria-label="本次就诊需求，选填" /><view class="muted">将保存到本次预约，供接诊人员了解；具体诊疗由面诊确认。</view></view>
-<button wx:if="{{selectedService}}" class="primary" loading="{{busy}}" disabled="{{busy || !day}}" bindtap="search">查询可用时段</button>
+  <button wx:if="{{selectedService}}" class="primary" loading="{{busy}}" disabled="{{busy || (source && !day)}}" bindtap="search">查询可用时段</button>
   <view class="muted">椅位和必要设备由系统统一核对。服务时长用于排程，实际治疗与费用由接诊后确认。</view>
   <view wx:if="{{note && (!searched || rows.length)}}" class="notice">{{note}}<button wx:if="{{!source && !day}}" class="secondary" bindtap="waitlist">登记候补</button></view>
   <block wx:if="{{mode==='date'}}"><view wx:for="{{rows}}" wx:key="id" class="card"><view class="time">{{item.startLabel}}</view><view>至 {{item.endLabel}} · {{item.dentist}}</view><button class="secondary" disabled="{{busy}}" data-index="{{index}}" bindtap="choose">选择并核对</button></view></block>

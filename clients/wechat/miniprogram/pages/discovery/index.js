@@ -30,15 +30,22 @@ Page({
   data:{all:[],rows:[],cities:['全部城市'],cityIndex:0,categories:[{id:'',name:'全部服务'}],categoryIndex:0,keyword:'',onlineOnly:false,busy:false,error:'',locating:false,origin:null,limit:10,count:0,hasMore:false,locationNote:'可直接浏览；主动使用定位后，按直线距离由近到远排序。',
     serviceState:'loading',patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false,environmentLabel:'',serviceError:'',serviceRequestId:''},
   async onShow(){await this.load();},
+  onHide(){this.clearPrivate({keepReview:true});},
   async load(){
-    if(this.data.busy)return;
+    this.clearPrivate({keepReview:true});
+    const sequence=this.serviceSequence;
+    this.setData({serviceState:'loading',serviceError:'',serviceRequestId:''});
     const previousCity=this.data.cities[this.data.cityIndex];this.setData({busy:true,error:'',rows:[],all:[]});
     try{
       const data=await api.request('discovery/index/');
       if(!Array.isArray(data.clinics)||!Array.isArray(data.categories))throw Error('门店目录暂不可用，请稍后重试。');
+      if(sequence!==this.serviceSequence)return;
       const cities=['全部城市',...new Set(data.clinics.map(r=>r.city))];
       this.setData({all:data.clinics.map(c=>({...c,cover:c.images.length?config.apiBase+c.images[0].url:''})),cities,categories:[{id:'',name:'全部服务'},...data.categories],cityIndex:Math.max(0,cities.indexOf(previousCity)),busy:false,environmentLabel:data.environment_label||''});this.filter();
-    }catch(e){showError(this,e);}
+    }catch(e){
+      if(sequence!==this.serviceSequence)return;
+      showError(this,e,{stayOnPage:true});
+    }
     await this.loadService();
   },
   /* The private section is a separate branch: a failed or unavailable
@@ -79,10 +86,10 @@ Page({
   /* Switching subject, signing out or losing authority invalidates in-flight
      reads. Bumping the sequence makes a late response unable to refill the
      page with the previous patient's private data. */
-  clearPrivate(){
+  clearPrivate({keepReview=false}={}){
     this.serviceSequence=(this.serviceSequence||0)+1;
     this.setData({patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false});
-    if(typeof getApp==='function'){const app=getApp();if(app&&app.globalData)app.globalData.review=null;}
+    if(!keepReview&&typeof getApp==='function')getApp().globalData.review=null;
   },
   filter(){
     const category=this.data.categories[this.data.categoryIndex].id;
@@ -110,8 +117,14 @@ Page({
   subjects(){this.clearPrivate();navigation.navigateTo({url:'/pages/patients/index'});},
   medical(){navigation.navigateTo({url:'/pages/medical-authorizations/index'});},
   async logout(){
-    try{await api.signOut();}catch(e){}
-    this.clearPrivate();this.setData({serviceState:'guest',serviceError:'',serviceRequestId:''});
+    this.clearPrivate();
+    this.setData({serviceState:'loading',serviceError:'',serviceRequestId:''});
+    try{await api.signOut();}
+    catch(e){
+      this.setData({serviceState:'error',serviceError:'暂时无法确认退出，请重试。',serviceRequestId:e.requestId||''});
+      return;
+    }
+    this.setData({serviceState:'guest'});
     navigation.reLaunch({url:'/pages/discovery/index'});
   },
   retryService(){this.clearPrivate();return this.loadService();},

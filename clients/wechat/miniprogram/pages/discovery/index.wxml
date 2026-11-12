@@ -4,8 +4,8 @@
     <view wx:if="{{serviceState==='loading'}}">正在核对当前就诊人…</view>
     <view wx:if="{{serviceState==='guest'}}">登录后可查看本人的下一步与常用办理。<view class="row"><button class="compact secondary" bindtap="login">登录／注册</button></view></view>
     <view wx:if="{{serviceState==='enrollment'}}">账号已登录，本人档案待前台核验。核验后可查看就诊与费用。<view class="row"><button class="compact secondary" bindtap="account">查看资料核验进度</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
-    <view wx:if="{{serviceState==='subject'}}">请选择本次要办理的就诊人。<view class="row"><button class="compact secondary" bindtap="subjects">选择就诊人</button></view></view>
-    <view wx:if="{{serviceState==='medical'}}">当前为独立医疗代理，请从医疗授权入口办理。<view class="row"><button class="compact secondary" bindtap="medical">查看医疗授权</button></view></view>
+    <view wx:if="{{serviceState==='subject'}}">请选择本次要办理的就诊人。<view class="row"><button class="compact secondary" bindtap="subjects">选择就诊人</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
+    <view wx:if="{{serviceState==='medical'}}">当前为独立医疗代理，请从医疗授权入口办理。<view class="row"><button class="compact secondary" bindtap="medical">查看医疗授权</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
     <view wx:if="{{serviceState==='error'}}">暂时无法核对就诊人，已清除原有就诊信息。<view class="row"><button class="compact secondary" bindtap="retryService">重新核对</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
   </view>
 

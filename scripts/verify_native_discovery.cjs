@@ -12,11 +12,17 @@ function page(options={}){
  let definition,geo,requests=[],navigation=[],dialogs=[],phone=0,map=0;
  const wx={getLocation(o){geo=o;},showModal(o){dialogs.push(o);},makePhoneCall(){phone++;},openLocation(){map++;},
    navigateTo(o){navigation.push(o);},reLaunch(o){navigation.push(o);}};
- const api={request:async route=>{requests.push(route);if(options.fail)throw Error('暂时无法更新');return {clinics,categories:[],environment_label:'测试环境'};}};
+ const api={bootstrap:options.bootstrap,signOut:options.signOut,request:async route=>{
+   requests.push(route);
+   if(options.fail)throw Error('暂时无法更新');
+   if(route==='overview/')return options.overview;
+   return {clinics,categories:[],environment_label:'测试环境'};
+ }};
+ const app={globalData:{}};
  const module={exports:{}};
  vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module,wx});
  vm.runInNewContext(fs.readFileSync(path.join(root,'pages/discovery/index.js'),'utf8'),{
-   Page:d=>definition=d,wx,require:name=>name.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,consume:()=>null}:name.endsWith('/config')?{apiBase:'https://fixture.invalid'}:name.endsWith('/api')?api:name.endsWith('/nearby')?nearby:module.exports
+   Page:d=>definition=d,wx,getApp:()=>app,require:name=>name.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,consume:()=>null}:name.endsWith('/config')?{apiBase:'https://fixture.invalid'}:name.endsWith('/api')?api:name.endsWith('/nearby')?nearby:module.exports
  });
  const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}};
  return {p,requests,navigation,dialogs,geo:()=>geo,external:()=>({phone,map})};
@@ -55,6 +61,34 @@ async function verify(){
  await test('failed refresh clears previously published cards',async()=>{
    const d=page({fail:true});d.p.setData({all:clinics,rows:clinics});await d.p.load();
    assert.equal(d.p.data.rows.length,0);assert.equal(d.p.data.all.length,0);assert(d.p.data.error);
+ });
+ await test('foreground refresh clears private cards before loading and ignores a hidden overview',async()=>{
+   let finishOverview;
+   const overview=new Promise(resolve=>{finishOverview=resolve;});
+   let calls=0;
+   const d=page({overview,bootstrap:async()=>calls++===0?{authenticated:true,patient_name:'OLD_SYNTHETIC_NAME'}:{authenticated:false}});
+   d.p.setData({serviceState:'ready',patientName:'OLD_SYNTHETIC_NAME',canViewFunds:true,primary:{label:'旧待办'}});
+   const old=d.p.onShow();
+   assert.equal(d.p.data.patientName,'');assert.equal(d.p.data.canViewFunds,false);assert.equal(d.p.data.primary,null);
+   await new Promise(resolve=>setImmediate(resolve));
+   assert(d.requests.includes('overview/'));
+   d.p.onHide();
+   await d.p.onShow();
+   finishOverview({can_view_funds:true,next_visit:{id:4}});
+   await old;
+   assert.equal(d.p.data.serviceState,'guest');assert.equal(d.p.data.primary,null);
+   assert.equal(d.p.data.patientName,'');assert.equal(d.p.data.canViewFunds,false);assert.equal(d.p.data.rows.length,4);
+ });
+ await test('failed logout clears private data and allows retry from the same page',async()=>{
+   let attempts=0;
+   const d=page({signOut:async()=>{if(attempts++===0)throw Error('连接中断');}});
+   d.p.setData({serviceState:'ready',patientName:'OLD_SYNTHETIC_NAME',primary:{label:'旧待办'},canViewFunds:true});
+   await d.p.logout();
+   assert.equal(d.p.data.serviceState,'error');assert.match(d.p.data.serviceError,/无法确认退出/);
+   assert.equal(d.p.data.patientName,'');assert.equal(d.p.data.primary,null);assert.equal(d.p.data.canViewFunds,false);
+   assert.equal(d.navigation.length,0);
+   await d.p.logout();
+   assert.equal(d.p.data.serviceState,'guest');assert.equal(d.navigation.at(-1).url,'/pages/discovery/index');
  });
  await test('return to discovery retains manual city choice',async()=>{
    const d=page();await d.p.onShow();const i=d.p.data.cities.indexOf('武汉');d.p.city({detail:{value:i}});await d.p.onShow();assert.equal(d.p.data.rows[0].city,'武汉');

@@ -1,6 +1,6 @@
 <view class="page">
   <view class="page-heading"><view class="title">费用查询</view><view class="muted">本人已发布的结算单、当前结算金额与收退款。</view></view>
-  <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text><button class="secondary" bindtap="load">重新读取</button></view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text><button class="secondary" bindtap="retry">重新读取</button></view>
   <view wx:if="{{busy}}" class="notice">正在读取本人费用…</view>
   <block wx:if="{{!busy&&!error}}">
     <view wx:if="{{!rows.length}}" class="card empty"><view class="section-title">暂无已发布结算单</view><view class="muted">就诊完成并发布结算后，可在这里查看金额与明细。</view></view>

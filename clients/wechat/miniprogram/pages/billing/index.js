@@ -9,11 +9,13 @@ Page({
     this.page=Number.isSafeInteger(requested)&&requested>0?requested:1;
   },
   onShow(){return this.load(this.page||1);},
+  onHide(){this.sequence=(this.sequence||0)+1;this.setData({rows:[],count:0});},
   async load(page=1){
     const sequence=(this.sequence||0)+1;this.sequence=sequence;
+    this.page=page;
     // Drop the previous patient's rows before reading; a denied or stale
     // request must never leave an old invoice on screen.
-    this.setData({busy:true,error:'',requestId:'',rows:[]});
+    this.setData({busy:true,error:'',requestId:'',rows:[],count:0});
     try{
       const d=await api.request('billing/','GET',{page});
       if(sequence!==this.sequence)return;
@@ -24,6 +26,7 @@ Page({
       if(sequence===this.sequence)showError(this,e,{separateRequestId:true});
     }
   },
+  retry(){return this.load(this.page||1);},
   turn(e){
     if(this.data.busy)return;
     const page=this.data.page+Number(e.currentTarget.dataset.step);
@@ -36,5 +39,5 @@ Page({
     const visit=r.visit_id?'&visit='+r.visit_id:'';
     navigation.navigateTo({url:`/pages/invoice/index?id=${r.id}${visit}&from=billing&page=${this.data.page}`});
   },
-  back(){navigation.returnTo('/pages/home/index');}
+  back(){navigation.returnTo('/pages/discovery/index');}
 });

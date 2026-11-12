@@ -28,7 +28,12 @@ Page({
     }catch(e){showError(this,e,{separateRequestId:true});}
   },
   back(){
-    if(this.fromBilling)return navigation.returnTo('/pages/billing/index?page='+this.billingPage);
+    if(this.fromBilling){
+      const pages=getCurrentPages();
+      const previous=pages[pages.length-2];
+      return navigation.returnTo(previous&&previous.route==='pages/billing/index'?
+        '/pages/billing/index':'/pages/billing/index?page='+this.billingPage);
+    }
     const visit=this.data.invoice&&this.visitId;
     navigation.returnTo(visit?'/pages/visit/index?id='+visit:'/pages/home/index?queue=history');
   },
