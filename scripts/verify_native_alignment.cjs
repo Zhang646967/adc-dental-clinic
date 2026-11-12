@@ -36,7 +36,7 @@ async function verify(){
       showSubject:p=>p.setData({patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated}),
       async request(...args){calls.push(args);const r=responses.shift();if(r instanceof Error)throw r;return r;}};
     vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
-      Page:d=>definition=d,getApp:()=>state,wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
+      Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
         key.endsWith('/subject-state')?subjectState:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
@@ -57,6 +57,23 @@ async function verify(){
   d=page('invoice',{responses:[Error('当前身份不可查看本人账单')]});d.p.data.invoice=invoice();d.p.onLoad({id:5});await d.p.onShow();assert.equal(d.p.data.invoice,null);assert(d.p.data.error);count++;
   d=page('invoice',{responses:[{...invoice(),revision:1,is_current:false}]});
   d.p.onLoad({id:5,revision:1});await d.p.onShow();d.p.back();
+  d=page('billing',{responses:[{page:1,pages:2,count:11,rows:[{id:5}]},
+    Object.assign(Error('暂时无法读取'),{requestId:'SYNTHETIC-RETRY'}),
+    {page:2,pages:2,count:11,rows:[{id:6,visit_id:12}]}]});
+  d.p.onLoad({});await d.p.onShow();
+  await d.p.turn({currentTarget:{dataset:{step:1}}});
+  assert.equal(d.p.data.rows.length,0);assert.equal(d.p.data.count,0);
+  assert.equal(d.p.data.requestId,'SYNTHETIC-RETRY');
+  await d.p.retry({currentTarget:{dataset:{}}});
+  assert.deepEqual(d.calls.map(c=>c[2].page),[1,2,2]);
+  assert.equal(d.p.data.page,2);
+  d.p.open({currentTarget:{dataset:{index:0}}});
+  assert.equal(routes.at(-1).url,'/pages/invoice/index?id=6&visit=12&from=billing&page=2');count++;
+  d=page('invoice');d.p.onLoad({id:6,visit:12,from:'billing',page:2});
+  global.getCurrentPages=()=>[{route:'pages/billing/index',options:{}},{route:'pages/invoice/index'}];
+  d.p.back();assert.equal(routes.at(-1).method,'navigateBack');
+  global.getCurrentPages=()=>[{route:'pages/invoice/index'}];
+  d.p.back();assert.equal(routes.at(-1).url,'/pages/billing/index?page=2');count++;
   d=page('home',{session:{authenticated:true,account_authenticated:true},responses:[{rows:[],page:1,pages:1},{}]});
   d.p.setData({queue:'active',page:4});
   await d.p.onShow();

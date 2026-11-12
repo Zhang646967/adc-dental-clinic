@@ -4,7 +4,7 @@ from workspaces.views import WorkspaceLoginView
 from adc_core import views
 from adc_core.entry_views import system_entry
 from portal import views as portal_views
-from portal import patient_funds
+from portal import patient_billing, patient_funds
 from portal import service_views
 from scheduling import service_content_views
 from registry import branch_views
@@ -74,6 +74,7 @@ urlpatterns = [
     path("portal/visits/<int:pk>/cancel/", portal_views.cancel, name="portal_cancel"),
     path("portal/visits/<int:pk>/reschedule/", portal_reschedule_views.reschedule, name="portal_reschedule"),
     path("portal/invoices/<int:pk>/", care_views.portal_invoice, name="portal_invoice"),
+    path("portal/billing/", patient_billing.web, name="portal_billing"),
     path("portal/funds/", patient_funds.web, name="portal_funds"),
     path("portal/help/", portal_views.help_page, name="portal_help"),
     path("portal/assistant/", ai_views.patient_page, name="portal_assistant"),

@@ -65,8 +65,27 @@ async function verify(){
       await p.onLoad({clinic:'2',service:'22'});
       await p.search();
       assert.equal(p.data.availabilityTitle,title);
-      assert.equal(p.data.note,'请选择其他日期');
+      assert.equal(p.data.emptyReason,'请选择其他日期');
     }
+  });
+  await test('date and dentist views share filters and explicitly widen to the next fourteen days',async()=>{
+    const {p,calls}=page('booking',{request:async route=>{
+      if(route==='catalogue/')return catalogue;
+      if(route.startsWith('services/'))return {default_day:'2026-10-23'};
+      assert.equal(route,'candidates/');
+      return {rows:[{...slot,dentist_id:5,dentist:'合成医师'}]};
+    }});
+    await p.onLoad({service:'22',day:'2026-10-24'});
+    await p.search();
+    const selected=plain(calls.at(-1).data);
+    await p.setMode({currentTarget:{dataset:{mode:'dentist'}}});
+    assert.deepEqual(plain(calls.at(-1).data),selected);
+    assert.equal(p.data.groups[0].count,1);
+    p.pickDay({detail:{value:'2026-10-25'}});
+    assert.equal(p.data.groups.length,0);
+    await p.future();
+    assert.equal(calls.at(-1).route,'candidates/');
+    assert(!Object.hasOwn(calls.at(-1).data,'day'));
   });
   await test('interrupted booking confirmation opens the results list without resubmitting',async()=>{
     const error=Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});
@@ -167,8 +186,17 @@ async function verify(){
   await test('own historical reschedule works without a public catalogue',async()=>{
     const source={id:41,clinic_id:3,clinic:'原门店',service_id:44,service:'保留的服务',start:slot.start,end:slot.end,version:0,
       reschedule_service:{id:44,clinic:3,name:'保留的服务',duration:45,dentists}};
-    const {p,calls}=page('booking',{request:async(route)=>{assert.equal(route,'visits/41/');return source;}});
+    const {p,calls}=page('booking',{request:async(route,method,data)=>{
+      if(route==='visits/41/')return source;
+      assert.equal(route,'visits/41/reschedule/candidates/');
+      assert.equal(data.day,'2026-10-23');
+      return {rows:[{...slot,dentist_id:5,dentist:'合成医师'}]};
+    }});
     await p.onLoad({visit:'41'});assert.equal(calls.length,1);assert.equal(p.data.selectedService.id,44);assert.equal(p.data.clinics[0].id,3);
+    await p.setMode({currentTarget:{dataset:{mode:'dentist'}}});
+    assert.equal(p.data.groups.length,1);
+    await p.future();
+    assert.equal(calls.length,2);
   });
   await test('legacy own visit retains a source-only rescheduling option',async()=>{
     const {p}=page('booking',{request:async()=>({id:41,clinic_id:3,clinic:'原门店',service_id:null,start:slot.start,end:slot.end,

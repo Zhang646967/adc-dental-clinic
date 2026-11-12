@@ -1,0 +1,23 @@
+<view class="page">
+  <view class="page-heading"><view class="title">费用查询</view><view class="muted">本人已发布的结算单、当前结算金额与收退款。</view></view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text><button class="secondary" bindtap="retry">重新读取</button></view>
+  <view wx:if="{{busy}}" class="notice">正在读取本人费用…</view>
+  <block wx:if="{{!busy&&!error}}">
+    <view wx:if="{{!rows.length}}" class="card empty"><view class="section-title">暂无已发布结算单</view><view class="muted">就诊完成并发布结算后，可在这里查看金额与明细。</view></view>
+    <view wx:for="{{rows}}" wx:key="id" class="card">
+      <view class="section-label">已发布结算单 · 第 {{item.revision}} 版</view>
+      <view class="line prose">{{item.invoice_no}}</view>
+      <view class="line">{{item.clinic}}</view>
+      <view class="muted line">就诊 {{item.scheduledLabel}} · 发布 {{item.publishedLabel}}</view>
+      <view wx:if="{{item.review_pending}}" class="notice">这笔结算有待复核记录，金额以门店复核后的版本为准。</view>
+      <view class="fact-row"><text>当前结算金额</text><text>¥ {{item.total}}</text></view>
+      <view class="fact-row"><text>尚需支付</text><text>¥ {{item.remaining}}</text></view>
+      <view class="fact-row"><text>应退余额</text><text>¥ {{item.refund_due}}</text></view>
+      <button class="secondary" data-index="{{index}}" bindtap="open">查看结算单与资金明细</button>
+    </view>
+    <view wx:if="{{pages>1}}" class="row"><button class="secondary" disabled="{{page<=1 || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}} / {{pages}}</view><button class="secondary" disabled="{{page>=pages || busy}}" data-step="1" bindtap="turn">下一页</button></view>
+    <view class="muted small">共 {{count}} 张结算单。</view>
+  </block>
+  <view class="card patient-section task-links"><view class="section-title">其他资金入口</view><navigator url="/pages/funds/index">我的预收与资金流水 →</navigator></view>
+  <button class="secondary" bindtap="back">返回</button>
+</view>

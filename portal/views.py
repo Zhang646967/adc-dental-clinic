@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from workspaces.views import WorkspaceLoginView as LoginView
@@ -14,6 +16,7 @@ from registry.models import Clinic
 from scheduling.resources import service_for
 from scheduling.models import Visit
 from portal.forms import BookingConfirmationForm, CancelForm, SlotFilterForm
+from portal.availability_search import availability_result
 from portal.policies import patient_access, form_authority, read_form_authority
 from portal.services import public_options, preview_booking, confirm_booking, cancel_booking
 
@@ -88,8 +91,7 @@ def home(request):
     from portal.policies import SubjectRequired
     try:overview=dashboard(request.user)
     except SubjectRequired:return redirect('portal_subjects')
-    from workspaces.worklists import workspace_worklist
-    return render(request,"portal/home.html",dict(overview, worklist=workspace_worklist(request.user)))
+    return render(request, "portal/home.html", overview)
 
 @login_required(login_url="portal_login")
 @require_GET
@@ -103,41 +105,75 @@ def appointments(request):
     if queue=='active':qs=qs.filter(status__in=['SCHEDULED','CHECKED_IN']).order_by('scheduled_start','pk')
     elif queue=='history':qs=qs.exclude(status__in=['SCHEDULED','CHECKED_IN'])
     return render(request,"portal/appointments.html",{"page":Paginator(qs,10).get_page(request.GET.get("page")),
-        'queue':queue,'queues':[(k,n,counts[k]) for k,n in [('active','待就诊与在诊'),('history','历史与改期记录'),('all','全部')]]})
+        'queue':queue,'queues':[(k,n,counts[k]) for k,n in [('active','待到诊与已到诊'),('history','历史与改期记录'),('all','全部')]]})
+
+
+SLOT_FILTERS = ('clinic', 'service', 'dentist', 'day')
+
+
+def _slots_url(filters, mode):
+    query = {key: filters[key] for key in SLOT_FILTERS if key in filters}
+    if mode == 'doctor':
+        query['by'] = mode
+    url = reverse('portal_slots')
+    return f'{url}?{urlencode(query)}' if query else url
 
 @login_required(login_url="portal_login")
 @require_GET
 def slots(request):
     patient_access(request.user)
-    query=request.GET.copy()
+    mode = 'doctor' if request.GET.get('by') == 'doctor' else 'date'
+    query = {key: request.GET[key] for key in SLOT_FILTERS if key in request.GET}
     from scheduling.service_content import positive_id
     from portal.service_catalogue import public_profiles
     from portal.discovery import service_discovery
     selected=positive_id(query.get('service',''))
     profile=next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
-    if profile and not query.get('day'):
+    if profile and 'day' not in query:
         doctor=positive_id(query.get('dentist',''))
         if not doctor or any(d.pk==doctor for d in profile.service.public_dentists):
             info=service_discovery(selected,dentist_id=doctor)
             if info['default_day']:query['day']=info['default_day']
         if not query.get('clinic'):query['clinic']=str(profile.service.department.clinic_id)
     form=SlotFilterForm(query or None,actor=request.user)
-    rows=[];profile=None;searched=False;query_failed=False
-    if form.is_valid():
-        searched=True
-        profile=form.cleaned_data['service'].patient_presentation
-        try: rows=public_options(request.user,form.cleaned_data['clinic'].pk if form.cleaned_data.get('clinic') else None,form.cleaned_data["day"],
-            form.cleaned_data['service'].pk if form.cleaned_data.get('service') else None,
-            form.cleaned_data['dentist'].pk if form.cleaned_data.get('dentist') else None)
+    rows = []
+    profile = None
+    status = ''
+    message = ''
+    searched = form.is_valid()
+    query_failed = False
+    if searched:
+        data = form.cleaned_data
+        service = data['service']
+        profile = service.patient_presentation
+        clinic_id = data['clinic'].pk if data['clinic'] else None
+        dentist_id = data['dentist'].pk if data['dentist'] else None
+        try:
+            rows = public_options(request.user, clinic_id, data['day'], service.pk, dentist_id)
+            status, message = availability_result(rows, service=service, day=data['day'], dentist_id=dentist_id)
         except EXPECTED_ERRORS as exc:
-            add_error(form,exc);query_failed=True
-    return render(request,"portal/slots.html",{'rows':rows,'form':form,'selected_profile':profile,
-        'searched':searched,'query_failed':query_failed})
+            add_error(form, exc)
+            query_failed = True
+    rows.sort(key=lambda row: (row['start'], row['slot'].pk))
+    by_doctor = {}
+    if mode == 'doctor':
+        for row in rows:
+            dentist = row['slot'].dentist
+            group = by_doctor.setdefault(dentist.pk, {'dentist': dentist, 'rows': []})
+            group['rows'].append(row)
+    return render(request, 'portal/slots.html', {
+        'rows': rows, 'doctor_groups': by_doctor.values(), 'form': form, 'selected_profile': profile,
+        'searched': searched, 'query_failed': query_failed, 'availability_status': status, 'availability_message': message,
+        'mode': mode, 'date_url': _slots_url(query, 'date'), 'doctor_url': _slots_url(query, 'doctor'),
+        'future_url': _slots_url(dict(query, day=''), mode),
+        'confirm_filters': urlencode(dict({key: value for key, value in query.items() if key != 'service'}, by=mode)),
+    })
 
 @login_required(login_url="portal_login")
 @require_http_methods(["GET","POST"])
 def booking_preview(request):
     patient_access(request.user)
+    slots_url = _slots_url(request.GET, request.GET.get('by'))
     if request.method=="POST":
         form=BookingConfirmationForm(request.POST)
         if form.is_valid():
@@ -146,7 +182,7 @@ def booking_preview(request):
             else:
                 messages.success(request,"预约已经保存。相同确认页的重复提交不会再建一条。")
                 return redirect("portal_visit",pk=v.pk)
-        return render(request,"portal/confirm.html",{"form":form,"failed":True})
+        return render(request,"portal/confirm.html",{"form":form,"failed":True,"slots_url":slots_url})
     try:
         from portal.service_catalogue import public_profiles
         from scheduling.service_content import positive_id
@@ -160,9 +196,9 @@ def booking_preview(request):
         slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start,service_id=int(request.GET["service"]) if request.GET.get("service") else None)
     except (ValueError, *EXPECTED_ERRORS):
         messages.error(request,"该时段已变化，请重新选择。")
-        return redirect("portal_slots")
+        return redirect(slots_url)
     return render(request,"portal/confirm.html",{"slot":slot,"start":start,"end":end,
-        "service_label":profile.title,"selected_profile":profile,
+        "service_label":profile.title,"selected_profile":profile,"slots_url":slots_url,
         "form":BookingConfirmationForm(initial={"token":token})})
 
 @login_required(login_url="portal_login")

@@ -1,0 +1,38 @@
+{% extends 'portal/base.html' %}
+{% block title %}费用查询 · ADC 口腔{% endblock %}
+{% block content %}
+<div class="portal-page-heading">
+  <div><h1>费用查询</h1><p>查看本人已发布的结算单、当前应付和退费余额。</p></div>
+  <a class="button secondary" href="{% url 'portal_funds' %}">预收与资金流水</a>
+</div>
+<div class="appointment-cards">
+  {% for bill in rows %}
+  <article class="appointment-card billing-card">
+    <div>
+      <h2>{{ bill.clinic }}</h2>
+      <p>{{ bill.scheduled_start|date:'Y年m月d日 H:i' }} · 第 {{ bill.revision }} 版</p>
+      <p class="muted">{{ bill.invoice_no }} · 就诊 #{{ bill.visit_id }}</p>
+      {% if bill.review_pending %}<p class="muted">有款项待复核，余额按已记账金额计算。</p>{% endif %}
+    </div>
+    <dl class="billing-amounts">
+      <div><dt>结算金额</dt><dd>¥{{ bill.total|floatformat:2 }}</dd></div>
+      <div><dt>尚需支付</dt><dd>¥{{ bill.remaining|floatformat:2 }}</dd></div>
+      <div><dt>应退余额</dt><dd>¥{{ bill.refund_due|floatformat:2 }}</dd></div>
+    </dl>
+    <a class="button secondary" href="{% url 'portal_invoice' bill.id %}">查看结算单</a>
+  </article>
+  {% empty %}
+  <section class="panel portal-empty"><h2>暂无已发布的结算单</h2>
+    <p>就诊记录确认并发布后，费用会显示在这里。</p>
+    <a href="{% url 'portal_appointments' %}?queue=history">查看就诊记录</a>
+  </section>
+  {% endfor %}
+</div>
+{% if pages > 1 %}
+<nav class="pagination" aria-label="结算单分页">
+  {% if previous %}<a class="button secondary" href="?page={{ previous }}">上一页</a>{% endif %}
+  <span>第 {{ page }} 页 / 共 {{ pages }} 页</span>
+  {% if next %}<a class="button secondary" href="?page={{ next }}">下一页</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

@@ -111,6 +111,26 @@ class DiscoveryAlignmentTests(ResourceFixture,TransactionTestCase):
             self.assertEqual(Client().get(reverse(route)).status_code,200)
         self.assertEqual(before,(Visit.objects.count(),Invoice.objects.count(),CashEntry.objects.count()))
 
+    def test_account_waiting_for_enrollment_can_browse_public_index_and_services(self):
+        from accounts.patient_auth import exchange_identity
+
+        self.directory(self.a)
+        pending=exchange_identity(provider='WECHAT_MINI',app_id='synthetic-app',subject='synthetic-pending')
+        pending.set_password(self.password)
+        pending.save(update_fields=['password'])
+        client,session=self.login(pending)
+        self.assertTrue(session['account_authenticated'])
+        self.assertFalse(session['authenticated'])
+        self.assertFalse(PatientAccess.objects.filter(user=pending).exists())
+        for route in ('mini_public_index','mini_public_services'):
+            with self.subTest(route=route):
+                url=reverse(route)
+                public=Client().get(url)
+                response=client.get(url)
+                self.assertEqual(response.status_code,200,response.content)
+                self.assertEqual(response.json()['data'],public.json()['data'])
+        self.assertEqual(client.get(reverse('mini_billing')).status_code,409)
+
     def test_invalid_filters_are_not_silently_replaced(self):
         for query in [{'category':'UNKNOWN'},{'clinic':'-1'},{'clinic':'999999'}]:
             self.assertEqual(Client().get(reverse('mini_public_services'),query).status_code,404)
@@ -136,14 +156,27 @@ class PatientInvoiceAlignmentTests(CFEFixture,TransactionTestCase):
         url=reverse('mini_invoice',args=[self.invoice.pk])
         pending=self.client.get(url).json()['data']['cash_balance']
         self.assertEqual(pending['net_received'],'0.00');self.assertEqual(pending['pending'],1)
+        pending_row = self.client.get(reverse('mini_billing')).json()['data']['rows'][0]
+        self.assertTrue(pending_row['review_pending'])
+        self.assertEqual(Decimal(pending_row['remaining']), Decimal(pending['remaining']))
         self.approve(entry)
         posted=self.client.get(url).json()['data']['cash_balance']
         self.assertEqual(posted['net_received'],'10.00')
+        native = self.client.get(reverse('mini_billing')).json()['data']['rows'][0]
+        web = self.client.get(reverse('portal_billing'))
+        self.assertContains(web, self.invoice.invoice_no)
+        self.assertEqual(native['visit_id'], self.visit.pk)
+        self.assertFalse(native['review_pending'])
+        self.assertEqual(Decimal(native['remaining']), Decimal(posted['remaining']))
+        self.assertEqual(Decimal(native['refund_due']), Decimal(posted['refund_due']))
+        self.assertEqual(web.context['rows'][0]['remaining'], Decimal(native['remaining']))
 
     def test_other_patient_cannot_read_by_guessed_invoice_id(self):
         other=UserAccount.objects.exclude(pk=self.owner.pk).filter(patient_access__is_active=True).first()
         self.assertIsNotNone(other);client=WorkspaceClient();client.force_login(other)
         self.assertEqual(client.get(reverse('mini_invoice',args=[self.invoice.pk])).status_code,404)
+        self.assertEqual(client.get(reverse('mini_billing'), {'patient': self.visit.patient_id}).json()['data']['rows'], [])
+        self.assertNotContains(client.get(reverse('portal_billing')), self.invoice.invoice_no)
 
     def test_inactive_patient_access_cannot_read(self):
         PatientAccess.objects.filter(user=self.owner).update(is_active=False)
@@ -194,3 +227,7 @@ class PatientInvoiceAlignmentTests(CFEFixture,TransactionTestCase):
         selected=client.post(reverse('mini_subject_select'),{'subject':'grant:'+str(grant.pk)},HTTP_X_ADC_WORKSPACE=client.current_token())
         self.assertEqual(selected.status_code,200,selected.content)
         self.assertEqual(client.get(reverse('mini_invoice',args=[self.invoice.pk])).status_code,403)
+        self.assertFalse(client.get(reverse('mini_overview')).json()['data']['can_view_funds'])
+        self.assertNotContains(client.get(reverse('portal_home')), reverse('portal_billing'))
+        self.assertEqual(client.get(reverse('mini_billing')).status_code,403)
+        self.assertEqual(client.get(reverse('portal_billing')).status_code,403)

@@ -23,6 +23,7 @@
     "pages/history/index",
     "pages/plans/index",
     "pages/plan/index",
+    "pages/billing/index",
     "pages/invoice/index",
     "pages/funds/index",
     "pages/consent/index",

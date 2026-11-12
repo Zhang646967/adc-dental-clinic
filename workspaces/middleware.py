@@ -157,7 +157,7 @@ ROUTES={
 }
 
 PUBLIC.update({'public_clinic_detail','public_dentists','public_dentist_detail','profile_media',
-    'mini_public_clinic','mini_public_dentists','mini_public_dentist'})
+    'mini_public_clinic','mini_public_dentists','mini_public_dentist','mini_public_index','mini_public_services'})
 ROUTES.update({
     'profile_home':{'DENTIST','MANAGER'},'profile_edit':{'DENTIST','MANAGER'},'profile_upload':{'DENTIST','MANAGER'},
     'profile_confirm':{'DENTIST','MANAGER'},'profile_transition':{'DENTIST','MANAGER'},
