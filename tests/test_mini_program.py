@@ -91,7 +91,8 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         checked = front.post(reverse('visit_detail', args=[visit.pk]), dict(action='check_in', expected_version=0))
         self.assertEqual(checked.status_code, 302, checked.content)
         self.assertEqual((overview()['kind'], overview()['visit']['id']), ('CHECKED_IN', visit.pk))
-        self.assertContains(web.get(reverse('portal_home')), '正在就诊')
+        self.assertEqual(overview()['label'], '已到诊')
+        self.assertContains(web.get(reverse('portal_home')), '<h2 id="patient-next-action">已到诊</h2>', html=True)
         other, _ = self.login(self.other)
         self.assertEqual(other.get(reverse('mini_visit', args=[visit.pk])).status_code, 404)
         self.assertEqual(other.get(reverse('mini_overview')).json()['data']['primary_action']['kind'], 'BOOK')
@@ -206,11 +207,48 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         self.assertNotIn('acquisition_cost', str(data))
 
     def test_candidates_use_shared_resource_calendar(self):
-        response = self.client.get(reverse('mini_candidates'), {'clinic': self.a.pk, 'service': self.service.pk, 'day': self.t.date().isoformat()})
+        params = {'clinic': self.a.pk, 'service': self.service.pk, 'day': self.t.date().isoformat()}
+        response = self.client.get(reverse('mini_candidates'), params)
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertTrue(response.json()['data']['rows'])
+        available = response.json()['data']
+        self.assertEqual(available['status'], 'AVAILABLE')
+        self.assertTrue(available['rows'])
+        self.assertEqual({r['dentist_id'] for r in available['rows']}, {self.d1.pk, self.d2.pk})
+        web = WorkspaceClient()
+        web.force_login(self.user)
+        grouped = web.get(reverse('portal_slots'), dict(params, by='doctor'))
+        self.assertEqual(grouped.context['availability_status'], 'AVAILABLE')
+        self.assertContains(grouped, '本次查询最早可约')
+        self.assertEqual([r['start'].isoformat() for r in grouped.context['rows']], [r['start'] for r in available['rows']])
+        empty_day = (self.t.date() + timedelta(days=1)).isoformat()
+        self.assertContains(web.get(reverse('portal_slots'), dict(params, day=empty_day)), '暂无已发布出诊')
+        empty = self.client.get(reverse('mini_candidates'), dict(params, day=empty_day)).json()['data']
+        self.assertEqual(empty['status'], 'NO_SCHEDULE')
+        future = self.client.get(reverse('mini_candidates'), {'clinic': self.a.pk, 'service': self.service.pk}).json()['data']
+        self.assertEqual(future['status'], 'AVAILABLE')
         for chair in self.chairs: self.maintain(chair)
-        self.assertEqual(self.client.get(reverse('mini_candidates'), {'clinic': self.a.pk, 'service': self.service.pk, 'day': self.t.date().isoformat()}).json()['data']['rows'], [])
+        blocked = self.client.get(reverse('mini_candidates'), params).json()['data']
+        self.assertEqual((blocked['status'], blocked['rows']), ('NO_COMBINATION', []))
+        self.assertContains(web.get(reverse('portal_slots'), params), '这次查询暂无合适时段')
+
+    def test_slot_mode_and_confirmation_keep_filters_without_holding_a_slot(self):
+        from urllib.parse import parse_qs, urlparse
+
+        web = WorkspaceClient()
+        web.force_login(self.user)
+        params = {'clinic': str(self.a.pk), 'service': str(self.service.pk), 'dentist': str(self.d1.pk),
+                  'day': self.t.date().isoformat(), 'by': 'doctor'}
+        lookup = web.get(reverse('portal_slots'), params)
+        self.assertEqual(lookup.context['mode'], 'doctor')
+        self.assertEqual(parse_qs(urlparse(lookup.context['doctor_url']).query), {k: [v] for k, v in params.items()})
+        option = lookup.context['rows'][0]
+        preview = web.get(reverse('portal_confirm'), dict(params, slot=option['slot'].pk, start=option['start_iso']))
+        self.assertEqual(preview.status_code, 200)
+        self.assertEqual(parse_qs(urlparse(preview.context['slots_url']).query), {k: [v] for k, v in params.items()})
+        upcoming = web.get(lookup.context['future_url'])
+        self.assertIsNone(upcoming.context['form'].cleaned_data['day'])
+        self.assertFalse(Visit.objects.exists())
+        self.assertFalse(ResourceClaim.objects.exists())
 
     def test_preview_never_creates_business_records(self):
         before = (Visit.objects.count(), AuditEvent.objects.count(), ResourceClaim.objects.count())

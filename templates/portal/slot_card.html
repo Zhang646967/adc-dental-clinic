@@ -1,0 +1,5 @@
+<article class="slot-card">
+  <h3>{{ row.start|date:'m月d日 H:i' }}–{{ row.end|date:'H:i' }}</h3>
+  {% if mode != 'doctor' %}<p>{{ row.slot.dentist.name }}</p>{% endif %}
+  <a class="button secondary" href="{% url 'portal_confirm' %}?slot={{ row.slot.pk }}&amp;start={{ row.start_iso|urlencode }}&amp;service={{ row.service.pk }}&amp;{{ confirm_filters }}">选择此时段</a>
+</article>

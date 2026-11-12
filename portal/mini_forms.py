@@ -7,7 +7,7 @@ class CandidateForm(forms.Form):
     clinic = forms.IntegerField(min_value=1)
     service = forms.IntegerField(min_value=1)
     dentist = forms.IntegerField(min_value=1, required=False)
-    day = forms.DateField()
+    day = forms.DateField(required=False)
 
 
 class BookingPreviewForm(forms.Form):

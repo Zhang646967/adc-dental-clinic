@@ -3,7 +3,7 @@
 Standard Django sessions, CSRF and signed workspace contexts are retained. This
 is assigned-account login, not WeChat identity verification or phone registration.
 """
-from datetime import datetime,time,timedelta
+from datetime import timedelta
 from functools import wraps
 from django.conf import settings
 from django.contrib.auth import login, logout
@@ -24,6 +24,7 @@ from care.models import Invoice
 from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
 from portal import mini_forms as forms, services, rescheduling
+from portal.availability_search import availability_result
 from portal.patient_dashboard import needs_outcome_review
 from portal.service_catalogue import public_profiles, public_profile, require_self_service
 from portal.service_projection import service_data
@@ -162,6 +163,7 @@ def visit_data(visit, *, actor=None, now=None):
 def option_data(row):
     slot = row['slot']
     return dict(id=f"{slot.pk}:{row['start'].isoformat()}", slot=slot.pk, clinic=slot.clinic.public_contact['name'], dentist=slot.dentist.name,
+        dentist_id=slot.dentist_id,
         start=row['start'].isoformat(), end=row['end'].isoformat(),
         service=row['service'].pk if row.get('service') else None)
 
@@ -196,11 +198,13 @@ def overview(request):
     d = dashboard(request.user, now=now)
     action = d['primary_action']
     offer = action['offer']
-    primary = dict(kind=action['kind'], visit=visit_data(action['visit'], now=now) if action['visit'] else None,
+    primary = dict(kind=action['kind'], label=action['label'], button=action['button'], hint=action['hint'],
+                   visit=visit_data(action['visit'], now=now) if action['visit'] else None,
                    offer=dict(id=offer.pk, expires_at=offer.expires_at.isoformat()) if offer else None)
     return result(request, dict(next_visit=visit_data(d['next_visit'],actor=request.user,now=now) if d['next_visit'] else None,
         active_count=d['active_count'], history_count=d['history_count'],
-        waiting_count=d['waiting_count'], offer_count=d['offer_count'], primary_action=primary))
+        waiting_count=d['waiting_count'], offer_count=d['offer_count'], primary_action=primary,
+        can_view_funds=d['can_view_funds']))
 
 
 @endpoint()
@@ -208,12 +212,8 @@ def candidates(request):
     d = validated(forms.CandidateForm(request.GET))
     profile=require_self_service(d['service'], clinic_id=d['clinic'], actor=request.user)
     rows = services.public_options(request.user, d['clinic'], d['day'], d['service'], d['dentist'])
-    start=timezone.make_aware(datetime.combine(d['day'],time.min))
-    published=AvailabilitySlot.objects.filter(clinic_id=d['clinic'],is_active=True,booking_paused=False,
-        dentist_id__in=[x.pk for x in profile.service.public_dentists],starts_at__lt=start+timedelta(days=1),ends_at__gt=start)
-    if d['dentist']:published=published.filter(dentist_id=d['dentist'])
-    status='AVAILABLE' if rows else 'NO_COMBINATION' if published.exists() else 'NO_SCHEDULE'
-    message='' if rows else '该日暂无符合就诊人与资源条件的组合，可换医师、日期或登记候补。' if status=='NO_COMBINATION' else '该日暂无对应的已发布出诊，可换日期或登记候补。'
+    status, message = availability_result(rows, service=profile.service, day=d['day'], dentist_id=d['dentist'])
+    rows = sorted(rows, key=lambda row: (row['start'], row['slot'].pk))
     return result(request, dict(rows=[option_data(r) for r in rows], observed_at=timezone.now().isoformat(),
         status=status,message=message,note='候选不占位；确认时重新核对。时间均为北京时间。'))
 

@@ -84,6 +84,7 @@ ROUTES = {
     'mini_referral_stop_preview': ('REFERRAL','TRANSFER'),
     'doctor_home': ('VISIT_LIST','CARE'), 'frontdesk_home': ('VISIT_LIST','COORDINATION'),
     'portal_home': ('VISIT_LIST','COORDINATION'), 'cash_receivables': ('INVOICE_LIST','BILLING'),
+    'portal_billing': ('INVOICE_LIST','BILLING'), 'mini_billing': ('INVOICE_LIST','BILLING'),
     'patient_relationships': ('PATIENT_LIST','IDENTITY'),
     'patient_relationship_detail': ('RELATIONSHIP','IDENTITY'),
     'patient_relationship_action': ('RELATIONSHIP','IDENTITY'),

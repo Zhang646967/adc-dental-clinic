@@ -121,8 +121,10 @@ class MiniWaitlistTests(ResourceFixture, TransactionTestCase):
         self.assertContains(self.client.get(reverse('portal_home')), '有 1 条邀约等待你确认')
         d = self.client.get(reverse('mini_overview')).json()['data']
         self.assertEqual((d['waiting_count'],d['offer_count'],d['active_count']), (1,1,0))
-        self.assertEqual(d['primary_action'], dict(kind='CONFIRM_OFFER', visit=None,
-            offer=dict(id=o.pk, expires_at=o.expires_at.isoformat())))
+        action = d['primary_action']
+        self.assertEqual((action['kind'], action['visit']), ('CONFIRM_OFFER', None))
+        self.assertEqual(action['offer'], dict(id=o.pk, expires_at=o.expires_at.isoformat()))
+        self.assertEqual((action['label'], action['button']), ('候补邀约待确认', '核对并答复'))
         self.assertContains(self.client.get(reverse('portal_home')), reverse('wait_offer', args=[o.pk]))
 
     def test_native_accept_then_website_replay_opens_same_visit(self):
