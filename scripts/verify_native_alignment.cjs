@@ -4,6 +4,7 @@ const root=path.resolve(__dirname,'../clients/wechat/miniprogram');
 const patientAction=require(path.join(root,'utils/primary-action'));
 const subjectState=require(path.join(root,'utils/subject-state'));
 const visitReview=require(path.join(root,'utils/visit-review'));
+const examinations=require(path.join(root,'utils/examinations'));
 const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
@@ -39,7 +40,8 @@ async function verify(){
     vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
       Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
-        key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/format')?format:null});
+        key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/examinations')?examinations:
+        key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
@@ -189,6 +191,76 @@ async function verify(){
   d=page('visit',{responses:[legacyVisit]});d.p.onLoad({id:visit.id});await d.p.onShow();
   assert.equal(d.p.data.reviewView,null);
   d.p.invoice();assert.equal(routes.at(-1).url,'/pages/invoice/index?id=5&visit=12');count++;
+
+  const exam={id:8,number:'EX-SYNTHETIC',project:'课程文本检查',state:'PUBLISHED',label:'检查报告可查阅',
+    revision:2,released_at:'2026-11-05T06:45:00Z'};
+  const examVisit={...closedVisit,examinations:[exam,{...exam,id:9,state:'PROCESSING',revision:null},
+    {...exam,id:10,state:'WITHDRAWN',revision:null},{...exam,id:11,revision:0}]};
+  const examSession={authenticated:true,account_authenticated:true,patient_name:'课程患者'};
+  const examReport={...exam,visit_id:12,visit_no:'V-SYNTHETIC',performed_at:'2026-11-05T05:59:00Z',body:'合成检查结果'};
+  const examEvent=(revision,id=8)=>({currentTarget:{dataset:{id,revision}}});
+  d=page('visit',{session:examSession,responses:[examVisit]});
+  d.p.onLoad({id:12});await d.p.onShow();
+  assert.deepEqual(d.p.data.examinations.map(row=>row.canOpen),[true,false,false,false]);
+  assert.equal(d.p.data.examinations[0].releasedLabel,'2026-11-05 14:45');
+  const beforeExam=routes.length;
+  d.p.openExamination(examEvent(0));d.p.openExamination(examEvent(undefined));
+  assert.equal(routes.length,beforeExam);
+  d.p.openExamination(examEvent(2));
+  assert.equal(routes.at(-1).url,'/pages/examination/index?visit=12&id=8&revision=2');count++;
+
+  d=page('visit',{session:{...examSession,delegated:true},responses:[examVisit]});
+  d.p.onLoad({id:12});await d.p.onShow();
+  assert.equal(d.p.data.examinations.length,0);
+  const beforeDelegateExam=routes.length;
+  d.p.openExamination(examEvent(2));assert.equal(routes.length,beforeDelegateExam);count++;
+  d=page('visit',{session:examSession,responses:[legacyVisit]});
+  d.p.onLoad({id:12});await d.p.onShow();assert.equal(d.p.data.examinations.length,0);count++;
+
+  const exam404=Object.assign(Error('已不可查看'),{status:404,code:'NOT_FOUND',requestId:'SYNTHETIC-EXAM-404'});
+  d=page('examination',{session:examSession,responses:[examReport,exam404]});
+  d.p.onLoad({visit:'12',id:'8',revision:'2'});await d.p.onShow();
+  assert.equal(d.calls[0][0],'visits/12/examinations/8/');
+  assert.deepEqual({...d.calls[0][2]},{revision:2});
+  assert.equal(d.p.data.report.performedLabel,'2026-11-05 13:59');
+  assert.equal(d.p.data.report.body,'合成检查结果');
+  await d.p.onShow();
+  assert.equal(d.p.data.report,null);assert.equal(d.p.data.patientName,'');
+  assert.equal(d.p.data.requestId,'SYNTHETIC-EXAM-404');
+  assert.equal(d.p.data.error,'报告当前不可查看，请返回就诊核对');
+  global.getCurrentPages=()=>[{route:'pages/visit/index',options:{id:'12'}},{route:'pages/examination/index'}];
+  d.p.back();assert.equal(routes.at(-1).method,'navigateBack');count++;
+
+  for(const [query,expected] of [
+    [{visit:'12',id:'8',revision:'0'},'/pages/visit/index?id=12'],
+    [{visit:'12',id:'8',revision:'2&next=elsewhere'},'/pages/visit/index?id=12'],
+    [{visit:'unknown',id:'8'},'/pages/home/index'],
+  ]){
+    d=page('examination',{session:examSession});d.p.onLoad(query);await d.p.onShow();
+    assert.equal(d.calls.length,0);assert.equal(d.p.data.report,null);assert(d.p.data.error);
+    global.getCurrentPages=()=>[{route:'pages/examination/index'}];
+    d.p.back();assert.equal(routes.at(-1).url,expected);
+  }
+  d=page('examination',{session:examSession,responses:[examReport]});
+  d.p.onLoad({visit:'12',id:'8'});await d.p.onShow();assert.deepEqual({...d.calls[0][2]},{});count++;
+
+  const exam403=Object.assign(Error('查阅被拒'),{status:403,code:'ACCESS_DENIED',requestId:'SYNTHETIC-EXAM-403'});
+  for(const delegated of [true,false]){
+    d=page('examination',{session:{...examSession,delegated},responses:[exam403]});
+    d.p.onLoad({visit:'12',id:'8',revision:'2'});await d.p.onShow();
+    assert.equal(d.p.data.report,null);assert.equal(d.p.data.subjectInvalid,!delegated);
+    assert.equal(d.p.data.requestId,'SYNTHETIC-EXAM-403');
+    if(delegated)assert(d.p.data.error.includes('请由患者本人查看报告'));
+  }
+  count++;
+
+  let oldExam;
+  d=page('examination',{session:examSession,responses:[new Promise(resolve=>{oldExam=resolve;}),exam404]});
+  d.p.onLoad({visit:'12',id:'8',revision:'2'});
+  const firstExamRead=d.p.onShow();d.p.onHide();await d.p.onShow();
+  oldExam(examReport);await firstExamRead;
+  assert.equal(d.p.data.report,null);assert.equal(d.p.data.patientName,'');
+  assert.equal(d.p.data.requestId,'SYNTHETIC-EXAM-404');count++;
 
   const ownedVisit={...visit,can_change:true,version:3,review:{attended_at:null,completed_at:null,followups:[]}};
   for(const {status,code,freshSession,url} of deniedConfirmations){

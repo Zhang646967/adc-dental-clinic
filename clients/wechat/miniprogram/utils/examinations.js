@@ -2,13 +2,13 @@
    released report detail. The server owns state, version and body text; this
    module only decides whether a patient entry exists and formats Beijing time. */
 const {dateTime} = require('./format');
+const {positive} = require('./booking-intent');
 
 function buildExaminations(visit, {delegated = false} = {}) {
   // A delegate sees the appointment only; an older backend omits the array.
   if (!visit || delegated || !Array.isArray(visit.examinations)) return [];
   return visit.examinations.map(row => {
-    const published = row.state === 'PUBLISHED' &&
-      row.revision !== null && row.revision !== undefined;
+    const published = row.state === 'PUBLISHED' && positive(row.id) && positive(row.revision);
     return {
       id: row.id,
       number: row.number || '',

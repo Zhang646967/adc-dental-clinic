@@ -14,6 +14,6 @@
     <view class="divider"></view>
     <view class="prose">{{report.body}}</view>
   </view>
-  <button wx:if="{{report||error}}" class="secondary" bindtap="back">返回原就诊</button>
+  <button class="secondary" bindtap="back">{{hasVisit?'返回原就诊':'返回就诊清单'}}</button>
   <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

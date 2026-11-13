@@ -3,43 +3,53 @@ const api=require('../../utils/api');
 const {positive}=require('../../utils/booking-intent');
 const {showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
-const examModule=require('../../utils/examinations');
-const buildReport=examModule&&typeof examModule.buildReport==='function'?examModule.buildReport:data=>data;
+const {buildReport}=require('../../utils/examinations');
 
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 
 Page({
-  data:{report:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:''},
+  data:{report:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:'',hasVisit:false},
   onLoad(query){
     this.visitId=positive(query.visit)?Number(query.visit):null;
     this.id=positive(query.id)?Number(query.id):null;
-    this.revision=positive(query.revision)?Number(query.revision):null;
+    this.revision=query.revision;
     this.generation=0;
+    this.setData({hasVisit:!!this.visitId});
   },
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    // Clear the previous body, identifiers and subject before every read so a
-    // failed or late response can never leave an older report on screen.
     this.setData({report:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false});
     try{
-      if(!positive(this.visitId)||!positive(this.id))throw Error('报告链接无效，请从就诊详情进入。');
-      const query=this.revision?{revision:this.revision}:{};
+      if(!this.visitId||!this.id||(this.revision!==undefined&&!positive(this.revision))){
+        throw Error('报告链接无效，请从就诊详情进入。');
+      }
+      const query=this.revision===undefined?{}:{revision:Number(this.revision)};
       const data=await api.request(`visits/${this.visitId}/examinations/${this.id}/`,'GET',query);
       if(generation!==this.generation)return;
+      const report=buildReport(data);
+      if(!report)throw Error('报告当前不可查看，请返回就诊核对');
       api.showSubject(this);
-      this.setData({report:buildReport(data),busy:false,environmentLabel:api.sessionInfo().environment_label||''});
+      this.setData({report,busy:false,environmentLabel:api.sessionInfo().environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
-      const state=staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false});
-      // A delegate's 403 is a scope decision, not a lost subject; keep the
-      // denial and the return path instead of prompting a subject switch.
-      if(state.invalid&&e.status!==403)this.setData({report:null,...blankSubject,subjectInvalid:true});
-      showError(this,e,{separateRequestId:true,stayOnPage:true});
-      if(e.status===404)this.setData({error:'报告当前不可查看，请返回就诊核对',requestId:e.requestId||'',busy:false});
+      const session=api.sessionInfo();
+      if(e.status===404){
+        this.setData({error:'报告当前不可查看，请返回就诊核对',requestId:e.requestId||'',busy:false});
+      }else if(e.status===403&&e.code==='ACCESS_DENIED'&&session.delegated){
+        this.setData({error:'代约仅可查看预约与到诊信息，请由患者本人查看报告。',requestId:e.requestId||'',busy:false});
+      }else{
+        const state=staleSubject(e,session,{uncodedConflictIsStale:false});
+        this.setData({subjectInvalid:state.invalid});
+        showError(this,e,{separateRequestId:true,stayOnPage:true});
+      }
     }
+  },
+  onHide(){
+    this.generation++;
+    this.setData({report:null,...blankSubject});
   },
   onUnload(){this.generation++;},
   recoverSubject(){return recoverSubject(this,api.bootstrap,navigation.reLaunch);},
-  back(){navigation.returnTo(`/pages/visit/index?id=${this.visitId}`);}
+  back(){navigation.returnTo(this.visitId?`/pages/visit/index?id=${this.visitId}`:'/pages/home/index?queue=history');}
 });

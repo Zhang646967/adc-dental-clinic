@@ -4,8 +4,7 @@ const {positive}=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {buildReview}=require('../../utils/visit-review');
-const examModule=require('../../utils/examinations');
-const buildExaminations=examModule&&typeof examModule.buildExaminations==='function'?examModule.buildExaminations:()=>[];
+const {buildExaminations}=require('../../utils/examinations');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
@@ -60,12 +59,9 @@ Page({
     navigation.navigateTo({url:`/pages/help/index?visit=${this.id}`});
   },
   openExamination(e){
-    const id=Number(e.currentTarget.dataset.id);
-    const revision=Number(e.currentTarget.dataset.revision);
-    if(!Number.isSafeInteger(id)||id<=0)return;
-    // Always pass the exact published version shown in the list.
-    const version=Number.isSafeInteger(revision)&&revision>0?`&revision=${revision}`:'';
-    navigation.navigateTo({url:`/pages/examination/index?visit=${this.id}&id=${id}${version}`});
+    const {id,revision}=e.currentTarget.dataset;
+    if(!this.data.visit||this.data.patientDelegated||!positive(this.id)||!positive(id)||!positive(revision))return;
+    navigation.navigateTo({url:`/pages/examination/index?visit=${this.id}&id=${id}&revision=${revision}`});
   },
   canChange(){return !!this.data.visit&&this.data.visit.can_change&&!this.data.readOnly;},
   reschedule(){if(this.canChange())navigation.navigateTo({url:`/pages/booking/index?visit=${this.id}`});},
