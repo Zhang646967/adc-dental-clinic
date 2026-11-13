@@ -5,6 +5,7 @@
   <view wx:if="{{!primary && overview.offer_count}}" class="attention"><view class="label">有 {{overview.offer_count}} 条邀约待你确认</view><view>时段为限时保留，请先查看截止时间，再决定是否接受。</view><navigator class="link" url="/pages/waitlist/index">立即查看邀约 →</navigator></view>
   <view wx:if="{{!primary && overview.next_visit}}" class="card next-card"><view class="section-label">{{overview.next_visit.status==='CHECKED_IN'?'正在就诊':'下一次就诊'}}</view><view class="time">{{overview.next_visit.startLabel}}</view><view>{{overview.next_visit.clinic}} · {{overview.next_visit.dentist}}</view><view class="muted">{{overview.next_visit.service}} · {{overview.next_visit.status_label}}</view><view wx:if="{{overview.next_visit.needs_outcome_review}}" class="notice">请联系门店核实</view><button class="secondary" data-id="{{overview.next_visit.id}}" bindtap="open">查看安排与到诊提示</button></view>
 
+  <view wx:if="{{reportEntry}}" class="card"><view class="section-heading"><view class="section-title">报告与复诊</view><view wx:if="{{reportUnread}}" class="pill">{{reportUnread}} 条未读</view></view><view class="muted">检查报告发布、更正或撤回时在这里提醒；未读为零也可查看历史提醒。</view><navigator class="link" url="/pages/report-notices/index">查看报告与复诊 →</navigator></view>
   <view wx:if="{{!busy && error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text><button class="secondary" bindtap="onShow">重新读取</button></view>
   <view wx:if="{{busy}}" class="notice">正在读取就诊安排…</view>
   <view wx:if="{{overview}}" class="card patient-section task-links">

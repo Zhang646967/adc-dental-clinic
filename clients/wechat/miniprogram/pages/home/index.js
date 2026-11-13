@@ -3,12 +3,16 @@ const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 const {primaryAction} = require('../../utils/primary-action');
 const {staleSubject} = require('../../utils/subject-state');
+// The projection is optional at load time so a harness that stubs modules
+// cannot break the page; the real build always ships it.
+const reportNotices = require('../../utils/report-notices') || {};
+const reportEntry = reportNotices.reportEntry || (() => null);
 Page({
-  data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null},
+  data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null, reportEntry:null, reportUnread:0},
   async onShow() {
     const pending=navigation.consume('/pages/home/index');
     if(pending&&['all','history'].includes(pending.queue))this.setData({queue:pending.queue,page:1});
-    this.setData({rows:[],overview:null,primary:null,patient:'',error:'',requestId:'',subjectInvalid:false,busy:true,guest:false,needsSubject:false,needsEnrollment:false});
+    this.setData({rows:[],overview:null,primary:null,reportEntry:null,reportUnread:0,patient:'',error:'',requestId:'',subjectInvalid:false,busy:true,guest:false,needsSubject:false,needsEnrollment:false});
     api.showSubject(this);
     try {
       const session = await api.bootstrap();api.showSubject(this);
@@ -27,7 +31,7 @@ Page({
     const state=staleSubject(e,api.sessionInfo());
     if(state.invalid){
       this.setData({patientName:'',patientCapacity:'',patientDelegated:false,patient:'',
-        rows:[],overview:null,primary:null,subjectInvalid:state.reselect});
+        rows:[],overview:null,primary:null,reportEntry:null,reportUnread:0,subjectInvalid:state.reselect});
     }
     return state;
   },
@@ -36,13 +40,17 @@ Page({
     // refresh. A 403 ACCESS_DENIED or 409 SUBJECT_REQUIRED / SUBJECT_CHANGED
     // means the old data no longer belongs to this session; leaving it on
     // screen would show appointments the patient can no longer access.
-    this.setData({rows:[],overview:null,primary:null,error:'',requestId:'',busy:true});
+    this.setData({rows:[],overview:null,primary:null,reportEntry:null,reportUnread:0,error:'',requestId:'',busy:true});
     try {
       const [d,overview] = await Promise.all([api.request('visits/', 'GET', {queue:this.data.queue, page:this.data.page}), api.request('overview/')]);
       if(overview.next_visit)overview.next_visit=arrangement(overview.next_visit);
       // Older backends omit primary_action; keep the existing entries then.
       const primary=primaryAction(overview);
-      this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, primary, busy:false});
+      // The report entry is a patient capability: a delegate or an overview
+      // without report_unread_count must not show it.
+      const entry=reportEntry(overview,{delegated:this.data.patientDelegated});
+      this.setData({rows:d.rows.map(arrangement), page:d.page, pages:d.pages, overview, primary,
+        reportEntry:entry, reportUnread:entry?entry.unread:0, busy:false});
     }
     catch (e) {
       this.clearStaleSubject(e);

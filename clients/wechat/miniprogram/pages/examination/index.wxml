@@ -14,6 +14,18 @@
     <view class="divider"></view>
     <view class="prose">{{report.body}}</view>
   </view>
+  <view wx:if="{{followup}}" class="card">
+    <view class="section-title">复诊安排</view>
+    <view wx:if="{{followup.label}}" class="pill">{{followup.label}}</view>
+    <view wx:if="{{followup.message}}" class="prose">{{followup.message}}</view>
+    <view wx:if="{{followup.windowLabel}}" class="fact-row"><text>建议日期</text><text>{{followup.windowLabel}}</text></view>
+    <view wx:if="{{followup.clinic}}" class="fact-row"><text>门店</text><text>{{followup.clinic}}</text></view>
+    <view wx:if="{{followup.service}}" class="fact-row"><text>服务</text><text>{{followup.service}}</text></view>
+    <view wx:if="{{followup.appointment}}" class="invoice-line"><view class="muted">复诊预约 #{{followup.appointment.id}}</view><view wx:if="{{followup.appointment.visitNo}}" class="muted">就诊编号 {{followup.appointment.visitNo}}</view><view class="time">{{followup.appointment.startLabel}}</view><view>{{followup.appointment.statusLabel}}</view></view>
+    <button wx:if="{{followup.canBook}}" class="primary" bindtap="bookFollowup">预约复诊</button>
+    <button wx:if="{{followup.appointment}}" class="secondary" bindtap="openAppointment">查看复诊预约</button>
+    <button wx:if="{{followup.showContact}}" class="secondary" bindtap="contactClinic">联系原门店</button>
+  </view>
   <button class="secondary" bindtap="back">{{hasVisit?'返回原就诊':'返回就诊清单'}}</button>
   <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

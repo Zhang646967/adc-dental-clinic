@@ -13,4 +13,5 @@
     <checkbox-group bindchange="checked"><label class="check"><checkbox value="yes" checked="{{checked}}"/><text>{{consent}}</text></label></checkbox-group>
     <button class="{{review.kind==='cancel' || review.kind==='wait_withdraw' || review.kind==='offer_decline'?'danger':'primary'}}" disabled="{{!checked || busy}}" loading="{{busy}}" bindtap="submit">{{button}}</button>
   </block><button wx:if="{{!subjectInvalid}}" class="secondary" bindtap="home">查询办理结果</button>
+  <button wx:if="{{followupBlocked}}" class="secondary" bindtap="visitCheck">回到原就诊核对</button>
 </view>

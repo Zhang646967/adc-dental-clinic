@@ -4,11 +4,13 @@ const {positive}=require('../../utils/booking-intent');
 const {showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {buildReport}=require('../../utils/examinations');
+const reportNotices=require('../../utils/report-notices')||{};
+const buildFollowup=reportNotices.buildFollowup||(()=>null);
 
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 
 Page({
-  data:{report:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:'',hasVisit:false},
+  data:{report:null,followup:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:'',hasVisit:false},
   onLoad(query){
     this.visitId=positive(query.visit)?Number(query.visit):null;
     this.id=positive(query.id)?Number(query.id):null;
@@ -19,7 +21,7 @@ Page({
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    this.setData({report:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false});
+    this.setData({report:null,followup:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false});
     try{
       if(!this.visitId||!this.id||(this.revision!==undefined&&!positive(this.revision))){
         throw Error('报告链接无效，请从就诊详情进入。');
@@ -29,8 +31,11 @@ Page({
       if(generation!==this.generation)return;
       const report=buildReport(data);
       if(!report)throw Error('报告当前不可查看，请返回就诊核对');
+      // The follow-up decision is bound to the version that was actually read,
+      // so a booking started from here carries this exact revision.
+      const followup=buildFollowup(data.followup,{visitId:this.visitId,examinationId:this.id,revision:report.revision});
       api.showSubject(this);
-      this.setData({report,busy:false,environmentLabel:api.sessionInfo().environment_label||''});
+      this.setData({report,followup,busy:false,environmentLabel:api.sessionInfo().environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
       const session=api.sessionInfo();
@@ -47,9 +52,23 @@ Page({
   },
   onHide(){
     this.generation++;
-    this.setData({report:null,...blankSubject});
+    this.setData({report:null,followup:null,...blankSubject});
   },
   onUnload(){this.generation++;},
+  bookFollowup(){
+    const followup=this.data.followup;
+    if(!followup||!followup.bookingUrl)return;
+    navigation.navigateTo({url:followup.bookingUrl});
+  },
+  openAppointment(){
+    const followup=this.data.followup;
+    if(!followup||!followup.appointmentUrl)return;
+    navigation.navigateTo({url:followup.appointmentUrl});
+  },
+  contactClinic(){
+    const followup=this.data.followup;
+    navigation.navigateTo({url:followup&&followup.contactUrl?followup.contactUrl:`/pages/help/index?visit=${this.visitId}`});
+  },
   recoverSubject(){return recoverSubject(this,api.bootstrap,navigation.reLaunch);},
   back(){navigation.returnTo(this.visitId?`/pages/visit/index?id=${this.visitId}`:'/pages/home/index?queue=history');}
 });

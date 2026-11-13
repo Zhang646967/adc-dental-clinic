@@ -13,7 +13,7 @@ const actions={
   offer_decline:['确认拒绝邀约','我确认拒绝这次邀约，候补继续等待安排，已有预约保留。','确认拒绝本次邀约','本次临时保留将释放，前台可继续协调新的安排。']
 };
 Page({
-  data:{review:null,checked:false,busy:false,error:'',done:null,subjectInvalid:false},
+  data:{review:null,checked:false,busy:false,error:'',done:null,subjectInvalid:false,followupVisit:null,followupBlocked:false},
   onLoad(){ api.showSubject(this);
     const review=getApp().globalData.review;
     const session=api.sessionInfo();
@@ -27,7 +27,7 @@ Page({
     this.kind=review.kind;
     this.fromWaitlist=review.fromWaitlist;
     const copy=actions[review.kind];
-    this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3]});
+    this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],followupVisit:review.followupVisit||null});
   },
   checked(e){if(this.data.review)this.setData({checked:e.detail.value.includes('yes')});},
   async submit(){
@@ -45,6 +45,9 @@ Page({
         getApp().globalData.review=null;
         this.setData({uncertain:true,review:null,checked:false});
       }
+      // A follow-up booking that hits a conflict or an unconfirmed result can
+      // always go back to the original visit to read the real state.
+      if(this.data.followupVisit&&(e.status===409||e.code==='NETWORK_UNCONFIRMED'||e.code==='BUSINESS_CONFLICT'))this.setData({followupBlocked:true});
       showError(this,e,{separateRequestId:true});
     }
   },
@@ -71,5 +74,10 @@ Page({
     const visits=this.data.uncertain?'/pages/home/index?queue=all':'/pages/home/index';
     navigation.reLaunch({url:waitlist?'/pages/waitlist/index':visits});
   },
-  result(){navigation.redirectTo({url:this.data.doneType==='waitlist'?'/pages/waitlist/index':`/pages/visit/index?id=${this.data.done.id}`});}
+  result(){navigation.redirectTo({url:this.data.doneType==='waitlist'?'/pages/waitlist/index':`/pages/visit/index?id=${this.data.done.id}`});},
+  visitCheck(){
+    if(!this.data.followupVisit)return;
+    getApp().globalData.review=null;
+    navigation.reLaunch({url:`/pages/visit/index?id=${this.data.followupVisit}`});
+  }
 });
