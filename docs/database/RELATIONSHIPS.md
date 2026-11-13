@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-562条实际SQL外键，其中561条对应ORM单列关系，1条为账单同次就诊复合外键。
+567条实际SQL外键，其中566条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -197,6 +197,10 @@
 | adc_examination_event | order_id | adc_examination_order | id |
 | adc_examination_event | report_id | adc_examination_report | id |
 | adc_examination_event | actor_id | adc_user | id |
+| adc_examination_followup | instruction_id | adc_next_visit_instruction | id |
+| adc_examination_followup | release_id | adc_examination_event | id |
+| adc_examination_followup | actor_id | adc_user | id |
+| adc_examination_notice | event_id | adc_examination_event | id |
 | adc_examination_order | active_release_id | adc_examination_event | id |
 | adc_examination_order | project_id | adc_examination_project | id |
 | adc_examination_order | source_record_id | adc_clinical_record_version | id |
@@ -369,6 +373,7 @@
 | adc_pharmacy_stop | duty_id | adc_prescription_duty | id |
 | adc_plan_appointment | instruction_id | adc_next_visit_instruction | id |
 | adc_plan_appointment | linked_by_id | adc_user | id |
+| adc_plan_appointment | report_followup_id | adc_examination_followup | id |
 | adc_plan_appointment | visit_id | adc_visit | id |
 | adc_plan_decision | actor_id | adc_user | id |
 | adc_plan_decision | proxy_version_id | adc_medical_proxy_version | id |

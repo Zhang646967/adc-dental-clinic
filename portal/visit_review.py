@@ -20,7 +20,7 @@ def _followup(row, now):
         status, label = 'WITHDRAWN', '已撤回复诊指示'
     elif recall and recall.state == 'COMPLETED':
         status, label = 'COMPLETED', '复诊目标已核对'
-    elif (recall and recall.state == 'REVIEW') or (active and needs_outcome_review(active, now)):
+    elif booking['report_review'] or (recall and recall.state == 'REVIEW') or (active and needs_outcome_review(active, now)):
         status, label = 'REVIEW', '待门店核对'
     elif active:
         status, label = 'BOOKED', '已安排复诊'

@@ -11,7 +11,7 @@
     <view wx:if="{{review.preview.duration_changed}}" class="notice">当前服务时长与原预约不同，请特别核对结束时间。</view>
     <view class="notice">{{note}}</view><view class="muted">时间均为北京时间。预约及候补操作不产生治疗或收费。</view>
     <checkbox-group bindchange="checked"><label class="check"><checkbox value="yes" checked="{{checked}}"/><text>{{consent}}</text></label></checkbox-group>
-    <button class="{{review.kind==='cancel' || review.kind==='wait_withdraw' || review.kind==='offer_decline'?'danger':'primary'}}" disabled="{{!checked || busy}}" loading="{{busy}}" bindtap="submit">{{button}}</button>
+    <button class="{{review.kind==='cancel' || review.kind==='wait_withdraw' || review.kind==='offer_decline'?'danger':'primary'}}" disabled="{{!checked || busy || followupBlocked}}" loading="{{busy}}" bindtap="submit">{{button}}</button>
   </block><button wx:if="{{!subjectInvalid}}" class="secondary" bindtap="home">查询办理结果</button>
   <button wx:if="{{followupBlocked}}" class="secondary" bindtap="visitCheck">回到原就诊核对</button>
 </view>

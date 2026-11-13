@@ -51,6 +51,24 @@ def check_instruction_step(visit,values):
     return service
 
 
+def record_instruction(*, actor, record, service, values, operation_id):
+    """Persist an authorized instruction against an already confirmed record."""
+    fields = dict(values)
+    fields.pop('service')
+    step = fields.pop('step_version')
+    for key in ('earliest_on', 'latest_on'):
+        fields[key] = date.fromisoformat(fields[key])
+    row = NextVisitInstruction.objects.create(source_record=record, service=service, step_version_id=step,
+        recorded_by=actor, **fields)
+    PlanEvent.objects.create(actor=actor, operation_id=operation_id, action='NEXT_VISIT_CREATED',
+        encounter=record.encounter, instruction=row,
+        snapshot={'revision': row.revision, 'state': row.state, 'service': row.service_id})
+    from care.audit import emit
+    emit(actor, 'NEXT_VISIT_CREATED', row, visit=record.encounter.visit,
+        summary={'instruction': row.pk, 'revision': row.revision})
+    return row
+
+
 def prepare_instruction(*,actor,visit_id,fields):
     from clinical.encounter_selectors import encounter_details
     d=encounter_details(actor,visit_id)
@@ -91,10 +109,7 @@ def confirm_instruction(*,actor,proposal_token,confirmed):
         if record.pk!=data['source_record']:raise RuleError('检查依据已有新版本，请重新预览后续安排。')
         values=instruction_fields(data['values']);service=check_instruction_step(visit,values)
         require_plan_service(actor,visit,service,lock=True)
-        values.pop('service');step=values.pop('step_version')
-        for key in ('earliest_on','latest_on'):values[key]=date.fromisoformat(values[key])
-        row=NextVisitInstruction.objects.create(source_record=record,service=service,step_version_id=step,recorded_by=actor,**values)
-        note=''
+        return record_instruction(actor=actor, record=record, service=service, values=values, operation_id=op),False
     else:
         row=NextVisitInstruction.objects.select_for_update().get(pk=data['instruction'],source_record__encounter__visit__patient=patient,
             source_record__encounter__visit__clinic_id=visit.clinic_id)
@@ -121,6 +136,30 @@ def current_promise(visit):
     return visit
 
 
+def promise_ids(visit):
+    """Retained predecessors in the same patient and clinic promise."""
+    ids = [visit.pk]
+    predecessor = visit.replaces_visit
+    while (predecessor and predecessor.pk not in ids and predecessor.status == 'RESCHEDULED'
+           and predecessor.patient_id == visit.patient_id and predecessor.clinic_id == visit.clinic_id):
+        ids.append(predecessor.pk)
+        predecessor = predecessor.replaces_visit
+    return ids
+
+
+def save_link(*, actor, instruction, visit, operation_id, report_followup=None):
+    link = PlanAppointment.objects.create(instruction=instruction, visit=visit, linked_by=actor,
+        operation_id=operation_id, report_followup=report_followup)
+    instruction.revision += 1
+    instruction.save(update_fields=['revision'])
+    PlanEvent.objects.create(actor=actor, operation_id=operation_id, action='NEXT_VISIT_LINKED', instruction=instruction,
+        snapshot={'visit': visit.pk, 'revision': instruction.revision})
+    from care.audit import emit
+    emit(actor, 'NEXT_VISIT_LINKED', instruction, visit=visit,
+        summary={'instruction': instruction.pk, 'visit': visit.pk})
+    return link
+
+
 def front_instructions(actor):
     require_active(actor,('FRONT_DESK',));clinic_id=actor._adc_workspace.clinic_id
     require_clinic(actor,clinic_id)
@@ -133,9 +172,13 @@ def instruction_booking_projection(row):
     links=list(row.appointment_links.select_related('visit').order_by('-pk'))
     promises=[dict(original=link.visit,current=current_promise(link.visit)) for link in links]
     fulfilled=has_completed_goal(row)
+    from clinical.examination_followup import order_for_instruction, current_decision, current_plan_step
+    order = order_for_instruction(row.pk)
+    decision = current_decision(order) if order else None
+    report_review = bool(order and (decision is None or decision.instruction_id != row.pk or not current_plan_step(row)))
     return dict(id=row.pk,patient=visit.patient,service=row.service,earliest_on=row.earliest_on,latest_on=row.latest_on,
         booking_note=row.booking_note,state=row.state,revision=row.revision,promises=promises,
-        completion_available=fulfilled,
+        completion_available=fulfilled, report_review=report_review,
         needs_booking=row.state=='OPEN' and not fulfilled and not any(p['current'].status in ('SCHEDULED','CHECKED_IN') or (row.completion_rule=='UNSPECIFIED' and p['current'].status in ('COMPLETED','CLOSED_NO_TREATMENT')) for p in promises),
         overdue=row.state=='OPEN' and row.latest_on<timezone.localdate())
 
@@ -165,6 +208,13 @@ def prepare_link(*,actor,instruction_id,visit_id):
     row=front_instructions(actor).get(pk=instruction_id)
     visit=Visit.objects.get(pk=visit_id,clinic_id=actor._adc_workspace.clinic_id)
     check_promise(row,visit)
+    from clinical.examination_followup import order_for_instruction, current_decision, current_plan_step, check_report_appointment
+    order = order_for_instruction(row.pk)
+    if order:
+        decision = current_decision(order)
+        if decision is None or decision.instruction_id != row.pk or not current_plan_step(row):
+            raise RuleError('关联报告或复诊指示已变化，请由医师核对当前安排。')
+        check_report_appointment(order, visit)
     data=dict(action='LINK',instruction=row.pk,revision=row.revision,visit=visit.pk,visit_revision=visit.lock_version)
     return dict(proposal_token=proposal(actor,CONTRACT,('FRONT_DESK',),data),instruction=instruction_booking_projection(row),visit=visit)
 
@@ -176,20 +226,28 @@ def confirm_link(*,actor,proposal_token,confirmed):
     p=read_proposal(actor,CONTRACT,('FRONT_DESK',),proposal_token);data=p['data'];ctx=actor._adc_workspace
     lock_clinic_grant(actor,ctx.clinic_id)
     preview=Visit.objects.get(pk=data['visit'],clinic_id=ctx.clinic_id)
-    lock_slots([preview.availability_slot_id]);visit=Visit.objects.select_for_update().get(pk=preview.pk)
-    Patient.objects.select_for_update().get(pk=visit.patient_id,is_active=True)
-    row=NextVisitInstruction.objects.select_for_update().select_related('source_record__encounter__visit').get(pk=data['instruction'],source_record__encounter__visit__clinic_id=ctx.clinic_id)
+    lock_slots([preview.availability_slot_id])
+    from coordination.reservations import lock_resources
+    lock_resources(patients=[preview.patient_id], dentists=[preview.dentist_id])
+    Patient.objects.select_for_update().get(pk=preview.patient_id,is_active=True)
+    visit=Visit.objects.select_for_update().get(pk=preview.pk)
+    from clinical.examination_followup import order_for_instruction, current_decision, current_plan_step, check_report_appointment
+    report_order = order_for_instruction(data['instruction'], lock=True)
+    row=NextVisitInstruction.objects.select_for_update(of=('self',)).select_related('source_record__encounter__visit').get(pk=data['instruction'],source_record__encounter__visit__clinic_id=ctx.clinic_id)
     read_proposal(actor,CONTRACT,('FRONT_DESK',),proposal_token);op=operation(p['operation'])
     previous=PlanAppointment.objects.filter(operation_id=op).first()
     if previous:
         if previous.linked_by_id!=actor.pk or previous.instruction_id!=row.pk or previous.visit_id!=visit.pk:raise RuleError('本操作编号已有其他关联结果。')
         return previous,True
+    if report_order is None and order_for_instruction(row.pk):
+        raise RuleError('此指示已用于检查报告，请重新核对关联。')
     if row.revision!=data['revision'] or visit.lock_version!=data['visit_revision']:raise RuleError('指示或预约已有变化，请重新核对。')
     check_promise(row,visit)
     if row.appointment_links.filter(visit=visit).exists():raise RuleError('这个预约已关联本指示，请查看已有结果。')
-    link=PlanAppointment.objects.create(instruction=row,visit=visit,linked_by=actor,operation_id=op)
-    row.revision+=1;row.save(update_fields=['revision'])
-    PlanEvent.objects.create(actor=actor,operation_id=op,action='NEXT_VISIT_LINKED',instruction=row,snapshot={'visit':visit.pk,'revision':row.revision})
-    from care.audit import emit
-    emit(actor,'NEXT_VISIT_LINKED',row,visit=visit,summary={'instruction':row.pk,'visit':visit.pk})
-    return link,False
+    decision = None
+    if report_order:
+        decision = current_decision(report_order)
+        if decision is None or decision.instruction_id != row.pk or not current_plan_step(row):
+            raise RuleError('关联报告或复诊指示已变化，请由医师核对当前安排。')
+        check_report_appointment(report_order, visit)
+    return save_link(actor=actor, instruction=row, visit=visit, operation_id=op, report_followup=decision),False

@@ -20,16 +20,24 @@
   </form>
   {% endif %}
 </section>
-{% if related_reports %}
+{% if related_reports or report_recheck %}
 <section class="panel">
-  <h2>关联原就诊检查报告</h2>
+  <h2>原报告与复诊目标</h2>
   {% for report in related_reports %}
   <article class="clinical-history">
     <h3>{{ report.project }} · 第 {{ report.revision }} 版</h3>
     <p>{{ report.number }} · 原就诊 {{ report.visit_no }} · 发布 {{ report.released_at|date:'Y-m-d H:i' }}</p>
     {{ report.body|linebreaks }}
+    {% if report.instruction %}
+    <p>{{ report.instruction.service.name }} · {{ report.instruction.earliest_on }} 至 {{ report.instruction.latest_on }}</p>
+    <p>{{ report.instruction.clinical_purpose }} · {{ report.instruction.get_completion_rule_display }}</p>
+    {% if report.instruction.step_version %}<p>方案 {{ report.instruction.step_version.version.plan_id }} · V{{ report.instruction.step_version.version.revision }} 第 {{ report.instruction.step_version.sequence }} 步</p>{% endif %}
+    {% endif %}
+    {% if report.needs_review %}<p class="notice">此预约沿用原承诺。请核对当前报告与复诊指示后再确认治疗依据。</p>{% endif %}
   </article>
+  {% empty %}<p>请核对原报告当前状态及复诊指示。</p>
   {% endfor %}
+  <div class="actions"><a href="{% url 'clinical_encounter' visit.pk %}">本次检查</a> · <a href="{% url 'clinical_plans' visit.pk %}">治疗计划</a> · <a href="{% url 'clinical_preflight' visit.pk %}">本次开治核对</a></div>
 </section>
 {% endif %}
 {% endblock %}

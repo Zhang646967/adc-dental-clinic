@@ -22,7 +22,7 @@ from adc_core.rules import RuleError
 from adc_core.snapshots import reporting_snapshot
 from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
-from portal import mini_forms as forms, services, rescheduling
+from portal import mini_forms as forms, services, rescheduling, report_followup, report_notices
 from portal.availability_search import availability_result
 from portal.examination_review import examination_summaries, published_examination
 from portal.patient_dashboard import needs_outcome_review
@@ -150,7 +150,7 @@ def visit_data(visit, *, actor=None, now=None):
     plan = current_plan(visit)
     contact=(plan.snapshot.get('public_clinic') if plan else None) or dict(name=visit.clinic.name,address=visit.clinic.postal_address,phone=visit.clinic.phone)
     successor = Visit.objects.filter(replaces_visit_id=visit.pk, patient_id=visit.patient_id).values_list('pk', flat=True).first()
-    return dict(id=visit.pk, clinic_id=visit.clinic_id, clinic=contact['name'],
+    return dict(id=visit.pk, visit_no=visit.visit_no, clinic_id=visit.clinic_id, clinic=contact['name'],
         dentist=visit.dentist.name, start=visit.scheduled_start.isoformat(), end=visit.scheduled_end.isoformat(),
         status=visit.status, status_label=visit.get_status_display(), version=visit.lock_version,
         service=(plan.snapshot.get('service', {}).get('name') or plan.service.name) if plan else '常规预约',
@@ -205,15 +205,32 @@ def overview(request):
     return result(request, dict(next_visit=visit_data(d['next_visit'],actor=request.user,now=now) if d['next_visit'] else None,
         active_count=d['active_count'], history_count=d['history_count'],
         waiting_count=d['waiting_count'], offer_count=d['offer_count'], primary_action=primary,
-        can_view_funds=d['can_view_funds']))
+        can_view_funds=d['can_view_funds'], report_unread_count=d['report_unread_count']))
+
+
+@endpoint()
+def examination_notices(request):
+    return result(request, report_notices.listing(request.user, request.GET.get('page')))
+
+
+@endpoint(('POST',))
+def examination_notice_read(request, pk):
+    return result(request, report_notices.mark_read(request.user, pk))
 
 
 @endpoint()
 def candidates(request):
     d = validated(forms.CandidateForm(request.GET))
+    followup = report_followup.binding(request.GET)
     profile=require_self_service(d['service'], clinic_id=d['clinic'], actor=request.user)
-    rows = services.public_options(request.user, d['clinic'], d['day'], d['service'], d['dentist'])
+    if followup:
+        rows = report_followup.candidates(request.user, followup, clinic_id=d['clinic'], service_id=d['service'],
+            day=d['day'], dentist_id=d['dentist'])
+    else:
+        rows = services.public_options(request.user, d['clinic'], d['day'], d['service'], d['dentist'])
     status, message = availability_result(rows, service=profile.service, day=d['day'], dentist_id=d['dentist'])
+    if followup and not rows:
+        message = '建议日期内未查到可用时段，可查看窗口内其他日期或联系原门店。'
     rows = sorted(rows, key=lambda row: (row['start'], row['slot'].pk))
     return result(request, dict(rows=[option_data(r) for r in rows], observed_at=timezone.now().isoformat(),
         status=status,message=message,note='候选不占位；确认时重新核对。时间均为北京时间。'))
@@ -234,9 +251,12 @@ def visits(request):
 
 @endpoint()
 def examination(request, pk, order_id):
-    patient_access(request.user, self_only=True)
-    visit = rescheduling.owned_visit(request.user, pk)
-    return result(request, published_examination(visit, order_id, request.GET.get('revision')))
+    with reporting_snapshot():
+        patient_access(request.user, self_only=True)
+        visit = rescheduling.owned_visit(request.user, pk)
+        report = published_examination(visit, order_id, request.GET.get('revision'))
+        report['followup'] = report_followup.projection(visit, report, request.user)
+    return result(request, report)
 
 
 @endpoint()
@@ -269,7 +289,8 @@ def book_preview(request):
     d = validated(forms.BookingPreviewForm(request.POST))
     with reporting_snapshot():
         profile = require_self_service(d['service'],actor=request.user)
-        slot, end, token = services.preview_booking(user=request.user, slot_id=d['slot'], start=d['start'], service_id=d['service'])
+        slot, end, token = services.preview_booking(user=request.user, slot_id=d['slot'], start=d['start'],
+            service_id=d['service'], followup=report_followup.binding(request.POST))
         if profile.service.department.clinic_id != slot.clinic_id:
             raise RuleError('服务与所选诊所不一致，请重新选择。')
         offering = service_data(profile,actor=request.user)

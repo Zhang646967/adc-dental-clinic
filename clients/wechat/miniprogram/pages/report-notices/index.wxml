@@ -16,7 +16,7 @@
     <view class="action-row">
       <button wx:if="{{item.canOpen}}" class="primary" data-index="{{index}}" bindtap="open">查看报告</button>
       <button wx:if="{{!item.canOpen}}" class="secondary" data-index="{{index}}" bindtap="contact">联系门店</button>
-      <button wx:if="{{item.unread}}" class="secondary" data-index="{{index}}" bindtap="markRead" disabled="{{busy}}">标记已读</button>
+      <button wx:if="{{item.unread && !readOnly}}" class="secondary" data-index="{{index}}" bindtap="markRead" disabled="{{busy}}">标记已读</button>
     </view>
     <navigator wx:if="{{item.visitUrl}}" class="link" url="{{item.visitUrl}}">查看原就诊</navigator>
   </view>

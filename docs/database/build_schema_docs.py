@@ -11,6 +11,21 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_examination_followup': {
+        'title': '报告提醒、复诊指示与正式预约',
+        'tables': {
+            'adc_examination_order': ['id', 'active_release_id'],
+            'adc_examination_report': ['id', 'order_id', 'number'],
+            'adc_examination_event': ['id', 'order_id', 'report_id', 'action', 'occurred_at'],
+            'adc_examination_notice': ['id', 'event_id', 'kind', 'read_at'],
+            'adc_examination_followup': ['id', 'release_id', 'instruction_id', 'actor_id', 'kind', 'due_at', 'operation_id'],
+            'adc_next_visit_instruction': ['id', 'earliest_on', 'latest_on', 'completion_rule'],
+            'adc_plan_appointment': ['id', 'instruction_id', 'visit_id', 'report_followup_id'],
+            'adc_visit': ['id', 'replaces_visit_id', 'status'],
+            'adc_user': ['id'],
+        },
+        'note': '一次发布或撤回事件至多一条提醒。复诊决定追加记录并引用准确发布事件，复诊关联保存办理时采用的决定。改期沿预约后继回查。开治快照记录报告依据编号，JSON 字段不绘制为外键。',
+    },
     'er_examination_release': {
         'title': '检查申请、独立审核与患者发布',
         'tables': {

@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-13。本目录列出192张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-13。本目录列出194张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -2540,6 +2540,68 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 
 - `adc_examination_event_retained`：`CREATE TRIGGER adc_examination_event_retained BEFORE DELETE OR UPDATE ON public.adc_examination_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
+## adc_examination_followup
+
+模型：`clinical.ExaminationFollowup`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| release_id | bigint | FK | 否 | `adc_examination_event.id` |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| kind | character varying(8) | — | 否 | — |
+| instruction_id | bigint | FK | 是 | `adc_next_visit_instruction.id` |
+| due_at | timestamp with time zone | — | 是 | — |
+| operation_id | uuid | UK | 否 | — |
+| recorded_at | timestamp with time zone | — | 否 | — |
+
+数据库约束：
+
+- `adc_examination_foll_instruction_id_19e94b41_fk_adc_next_`：`FOREIGN KEY (instruction_id) REFERENCES adc_next_visit_instruction(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_foll_release_id_878942b1_fk_adc_exami`：`FOREIGN KEY (release_id) REFERENCES adc_examination_event(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_followup_actor_id_3a7efc78_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_followup_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_examination_followup_pkey`：`PRIMARY KEY (id)`。
+- `examination_followup_kind_fields`：`CHECK ((((due_at IS NULL) AND (instruction_id IS NULL) AND ((kind)::text = 'NONE'::text)) OR ((due_at IS NULL) AND (instruction_id IS NOT NULL) AND ((kind)::text = 'BOOK'::text)) OR ((due_at IS NOT NULL) AND (instruction_id IS NULL) AND ((kind)::text = 'CONTACT'::text))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_followup_actor_id_3a7efc78`：`CREATE INDEX adc_examination_followup_actor_id_3a7efc78 ON public.adc_examination_followup USING btree (actor_id)`。
+- `adc_examination_followup_instruction_id_19e94b41`：`CREATE INDEX adc_examination_followup_instruction_id_19e94b41 ON public.adc_examination_followup USING btree (instruction_id)`。
+- `adc_examination_followup_operation_id_key`：`CREATE UNIQUE INDEX adc_examination_followup_operation_id_key ON public.adc_examination_followup USING btree (operation_id)`。
+- `adc_examination_followup_pkey`：`CREATE UNIQUE INDEX adc_examination_followup_pkey ON public.adc_examination_followup USING btree (id)`。
+- `adc_examination_followup_release_id_878942b1`：`CREATE INDEX adc_examination_followup_release_id_878942b1 ON public.adc_examination_followup USING btree (release_id)`。
+
+跨表及历史触发器：
+
+- `adc_examination_followup_retained`：`CREATE TRIGGER adc_examination_followup_retained BEFORE DELETE OR UPDATE ON public.adc_examination_followup FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_examination_notice
+
+模型：`clinical.ExaminationNotice`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| event_id | bigint | UK / FK | 否 | `adc_examination_event.id` |
+| kind | character varying(10) | — | 否 | — |
+| read_at | timestamp with time zone | — | 是 | — |
+
+数据库约束：
+
+- `adc_examination_noti_event_id_7d12e2a4_fk_adc_exami`：`FOREIGN KEY (event_id) REFERENCES adc_examination_event(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_notice_event_id_key`：`UNIQUE (event_id)`。
+- `adc_examination_notice_pkey`：`PRIMARY KEY (id)`。
+- `examination_notice_kind_valid`：`CHECK (((kind)::text = ANY ((ARRAY['RELEASED'::character varying, 'CORRECTED'::character varying, 'WITHDRAWN'::character varying])::text[])))`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_notice_event_id_key`：`CREATE UNIQUE INDEX adc_examination_notice_event_id_key ON public.adc_examination_notice USING btree (event_id)`。
+- `adc_examination_notice_pkey`：`CREATE UNIQUE INDEX adc_examination_notice_pkey ON public.adc_examination_notice USING btree (id)`。
+
+跨表及历史触发器：
+
+
 ## adc_examination_order
 
 模型：`clinical.ExaminationOrder`。
@@ -4872,6 +4934,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | id | bigint | PK | 否 | — |
 | instruction_id | bigint | FK | 否 | `adc_next_visit_instruction.id` |
 | visit_id | bigint | FK | 否 | `adc_visit.id` |
+| report_followup_id | bigint | FK | 是 | `adc_examination_followup.id` |
 | linked_by_id | bigint | FK | 否 | `adc_user.id` |
 | linked_at | timestamp with time zone | — | 否 | — |
 | operation_id | uuid | UK | 否 | — |
@@ -4882,6 +4945,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_plan_appointment_linked_by_id_6a09b239_fk_adc_user_id`：`FOREIGN KEY (linked_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_plan_appointment_operation_id_key`：`UNIQUE (operation_id)`。
 - `adc_plan_appointment_pkey`：`PRIMARY KEY (id)`。
+- `adc_plan_appointment_report_followup_id_8399a868_fk_adc_exami`：`FOREIGN KEY (report_followup_id) REFERENCES adc_examination_followup(id) DEFERRABLE INITIALLY DEFERRED`。
 - `adc_plan_appointment_visit_id_22de5a49_fk_adc_visit_id`：`FOREIGN KEY (visit_id) REFERENCES adc_visit(id) DEFERRABLE INITIALLY DEFERRED`。
 - `next_visit_link_unique`：`UNIQUE (instruction_id, visit_id)`。
 
@@ -4891,6 +4955,7 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 - `adc_plan_appointment_linked_by_id_6a09b239`：`CREATE INDEX adc_plan_appointment_linked_by_id_6a09b239 ON public.adc_plan_appointment USING btree (linked_by_id)`。
 - `adc_plan_appointment_operation_id_key`：`CREATE UNIQUE INDEX adc_plan_appointment_operation_id_key ON public.adc_plan_appointment USING btree (operation_id)`。
 - `adc_plan_appointment_pkey`：`CREATE UNIQUE INDEX adc_plan_appointment_pkey ON public.adc_plan_appointment USING btree (id)`。
+- `adc_plan_appointment_report_followup_id_8399a868`：`CREATE INDEX adc_plan_appointment_report_followup_id_8399a868 ON public.adc_plan_appointment USING btree (report_followup_id)`。
 - `adc_plan_appointment_visit_id_22de5a49`：`CREATE INDEX adc_plan_appointment_visit_id_22de5a49 ON public.adc_plan_appointment USING btree (visit_id)`。
 - `next_visit_link_unique`：`CREATE UNIQUE INDEX next_visit_link_unique ON public.adc_plan_appointment USING btree (instruction_id, visit_id)`。
 

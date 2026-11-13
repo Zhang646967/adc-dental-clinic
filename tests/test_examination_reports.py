@@ -61,6 +61,8 @@ class ExaminationFixture(reviews.VisitReviewFixture, archives.ArchiveFixture):
     def prepare_step(self, order, action, actor=None, **fields):
         actor = actor or self.doc
         order.refresh_from_db()
+        if action == 'PUBLISH':
+            fields.setdefault('followup_kind', 'NONE')
         return cmd.prepare_action(actor, order, action, fields)[1]
 
     def step(self, order, action, actor=None, **fields):
@@ -136,7 +138,7 @@ class ExaminationReportsTests(ExaminationFixture, TransactionTestCase):
             ('EXECUTE', case.doc, dict(performed_at=case.v.attended_at.isoformat(), source_reference=SOURCE)),
             ('SUBMIT', case.doc, dict(body=BODY1)),
             ('APPROVE', case.reviewer, {}),
-            ('PUBLISH', case.doc, {}),
+            ('PUBLISH', case.doc, dict(followup_kind='NONE')),
         ]:
             if action == 'PUBLISH':
                 self.assertEqual(self.native_report(order).status_code, 404)

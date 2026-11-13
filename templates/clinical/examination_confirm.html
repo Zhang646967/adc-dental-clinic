@@ -1,20 +1,27 @@
 {% extends 'base.html' %}{% load workspace_tags %}
 {% block content %}
 <a href="{{ back }}">返回原办理记录</a>
-<h1>核对{{ action.label }}</h1>
+<h1>核对{{ action_label }}</h1>
 <section class="panel">
   <p>{{ visit.patient.name }} · {{ visit.clinic.name }} · 就诊 {{ visit.visit_no }}</p>
-  {% if order %}<p>{{ order.project_name }} · {{ order.number }}{% if action.value == 'SUBMIT' %} · 新第 {% if report %}{{ report.number|add:1 }}{% else %}1{% endif %} 版{% elif report %} · 第 {{ report.number }} 版{% endif %}</p>{% endif %}
+  {% if order %}<p>{{ order.project_name }} · {{ order.number }}{% if action == 'SUBMIT' %} · 新第 {% if report %}{{ report.number|add:1 }}{% else %}1{% endif %} 版{% elif report %} · 第 {{ report.number }} 版{% endif %}</p>{% endif %}
   {% if data.purpose %}<p>检查记录第 {{ data.record_number }} 版 · {{ data.project_name }}</p><p>{{ data.purpose }}</p>{% endif %}
   {% if data.performed_at %}<p>实际检查 {{ performed_at|date:'Y-m-d H:i' }}（北京时间） · 依据 {{ data.source_reference }}</p>{% endif %}
-  {% if data.body %}{{ data.body|linebreaks }}{% elif report and action.value != 'WITHDRAW' %}{{ report.body|linebreaks }}{% endif %}
+  {% if data.body %}{{ data.body|linebreaks }}{% elif report and action != 'WITHDRAW' %}{{ report.body|linebreaks }}{% endif %}
   {% if data.reason %}<p>{{ data.reason }}</p>{% endif %}
-  {% if action.value == 'PUBLISH' %}<p>提交后，本人可在原就诊查阅此版报告。</p>{% endif %}
-  {% if action.value == 'WITHDRAW' %}<p>提交后，此版将停止向患者提供查阅。</p>{% endif %}
+  {% if action == 'PUBLISH' %}<p>提交后，本人可收到站内提醒并查阅此版报告。</p>{% endif %}
+  {% if action == 'WITHDRAW' %}<p>确认后显示撤回提醒，既有复诊安排可继续回查。</p>{% endif %}
+  {% if disposition_label %}
+  <p><strong>{{ disposition_label }}</strong></p>
+  {% if data.followup.instruction %}<p>采用复诊指示 {{ data.followup.instruction }} · 当前第 {{ data.followup.instruction_revision }} 版</p>{% endif %}
+  {% if data.followup.values %}<p>建议 {{ data.followup.values.earliest_on }} 至 {{ data.followup.values.latest_on }} · {{ data.followup.values.clinical_purpose }}</p>{% endif %}
+  {% if data.followup.due_at %}<p>联系期限 {{ data.followup.due_at }}</p>{% endif %}
+  {% endif %}
+  {% if data.contact %}<p>{{ data.contact.note }}</p>{% endif %}
   <form method="post" action="{% if order %}{% url 'clinical_examination_confirm' visit.pk order.pk %}{% else %}{% url 'clinical_examination_order_confirm' visit.pk %}{% endif %}">
     {% csrf_token %}{% workspace_token %}
     {{ form.as_p }}
-    <button type="submit">确认{{ action.label }}</button>
+    <button type="submit">确认{{ action_label }}</button>
   </form>
 </section>
 {% endblock %}

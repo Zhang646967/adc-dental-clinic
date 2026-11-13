@@ -5,8 +5,7 @@ const {primaryAction} = require('../../utils/primary-action');
 const {staleSubject} = require('../../utils/subject-state');
 // The projection is optional at load time so a harness that stubs modules
 // cannot break the page; the real build always ships it.
-const reportNotices = require('../../utils/report-notices') || {};
-const reportEntry = reportNotices.reportEntry || (() => null);
+const {reportEntry}=require('../../utils/report-notices');
 Page({
   data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null, reportEntry:null, reportUnread:0},
   async onShow() {

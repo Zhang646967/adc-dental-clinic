@@ -164,4 +164,5 @@ from clinical.prescription_models import (
 )
 
 from clinical.pharmacy_models import DispenseMovement, PharmacyQuote, PharmacyQuoteLine, PharmacyStop  # noqa: E402,F401
-from clinical.examination_models import ExaminationProject, ExaminationDuty, ExaminationOrder, ExaminationReport, ExaminationEvent  # noqa: E402,F401
+from clinical.examination_models import (ExaminationProject, ExaminationDuty, ExaminationOrder, ExaminationReport,
+    ExaminationEvent, ExaminationFollowup, ExaminationNotice)  # noqa: E402,F401

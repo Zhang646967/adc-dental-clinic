@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 192 ORM tables; django_migrations is a framework migration journal.
+// All 194 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -902,6 +902,24 @@ Table adc_examination_event {
   operation_id "uuid" [unique, not null]
 }
 
+Table adc_examination_followup {
+  id "bigint" [pk, not null]
+  release_id "bigint" [not null]
+  actor_id "bigint" [not null]
+  kind "character varying(8)" [not null]
+  instruction_id "bigint" [null]
+  due_at "timestamp with time zone" [null]
+  operation_id "uuid" [unique, not null]
+  recorded_at "timestamp with time zone" [not null]
+}
+
+Table adc_examination_notice {
+  id "bigint" [pk, not null]
+  event_id "bigint" [unique, not null]
+  kind "character varying(10)" [not null]
+  read_at "timestamp with time zone" [null]
+}
+
 Table adc_examination_order {
   id "bigint" [pk, not null]
   source_record_id "bigint" [not null]
@@ -1730,6 +1748,7 @@ Table adc_plan_appointment {
   id "bigint" [pk, not null]
   instruction_id "bigint" [not null]
   visit_id "bigint" [not null]
+  report_followup_id "bigint" [null]
   linked_by_id "bigint" [not null]
   linked_at "timestamp with time zone" [not null]
   operation_id "uuid" [unique, not null]
@@ -2857,6 +2876,10 @@ Ref: adc_examination_duty.user_id > adc_user.id
 Ref: adc_examination_event.order_id > adc_examination_order.id
 Ref: adc_examination_event.report_id > adc_examination_report.id
 Ref: adc_examination_event.actor_id > adc_user.id
+Ref: adc_examination_followup.instruction_id > adc_next_visit_instruction.id
+Ref: adc_examination_followup.release_id > adc_examination_event.id
+Ref: adc_examination_followup.actor_id > adc_user.id
+Ref: adc_examination_notice.event_id - adc_examination_event.id
 Ref: adc_examination_order.active_release_id > adc_examination_event.id
 Ref: adc_examination_order.project_id > adc_examination_project.id
 Ref: adc_examination_order.source_record_id > adc_clinical_record_version.id
@@ -3029,6 +3052,7 @@ Ref: adc_pharmacy_stop.approval_id - adc_prescription_decision.id
 Ref: adc_pharmacy_stop.duty_id > adc_prescription_duty.id
 Ref: adc_plan_appointment.instruction_id > adc_next_visit_instruction.id
 Ref: adc_plan_appointment.linked_by_id > adc_user.id
+Ref: adc_plan_appointment.report_followup_id > adc_examination_followup.id
 Ref: adc_plan_appointment.visit_id > adc_visit.id
 Ref: adc_plan_decision.actor_id > adc_user.id
 Ref: adc_plan_decision.proxy_version_id > adc_medical_proxy_version.id

@@ -150,6 +150,7 @@ class NextVisitInstruction(models.Model):
 class PlanAppointment(models.Model):
     instruction=models.ForeignKey(NextVisitInstruction,on_delete=models.PROTECT,related_name='appointment_links')
     visit=models.ForeignKey('scheduling.Visit',on_delete=models.PROTECT)
+    report_followup=models.ForeignKey('clinical.ExaminationFollowup',null=True,on_delete=models.PROTECT)
     linked_by=models.ForeignKey('accounts.UserAccount',on_delete=models.PROTECT)
     linked_at=models.DateTimeField(auto_now_add=True)
     operation_id=models.UUIDField(unique=True)

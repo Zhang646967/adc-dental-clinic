@@ -9,6 +9,7 @@ const patientAction=require(path.join(root,'utils/primary-action'));
 const subjectState=require(path.join(root,'utils/subject-state'));
 const visitReview=require(path.join(root,'utils/visit-review'));
 const examinations=require(path.join(root,'utils/examinations'));
+const reportNotices=require(path.join(root,'utils/report-notices'));
 const session={authenticated:true,today:'2026-10-22',last_day:'2026-11-05',read_only:false,environment_label:'测试环境'};
 const dentists=[{id:5,name:'接诊医师'}];
 const offerings=[
@@ -41,7 +42,7 @@ function page(name,options={}){
   vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
   vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
     Page:value=>{definition=value;},wx,getApp:()=>state,
-    require:module=>module.endsWith('/subject-state')?subjectState:module.endsWith('/visit-review')?visitReview:module.endsWith('/examinations')?examinations:
+    require:module=>module.endsWith('/report-notices')?reportNotices:module.endsWith('/subject-state')?subjectState:module.endsWith('/visit-review')?visitReview:module.endsWith('/examinations')?examinations:
       module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,returnTo:url=>navigation.push({method:'returnTo',url}),consume:()=>options.tabSelection||null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/primary-action')?patientAction:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};

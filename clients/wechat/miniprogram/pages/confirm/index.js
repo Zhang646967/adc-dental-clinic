@@ -31,7 +31,7 @@ Page({
   },
   checked(e){if(this.data.review)this.setData({checked:e.detail.value.includes('yes')});},
   async submit(){
-    if(this.data.busy||this.data.uncertain||this.data.done||!this.data.checked||!this.data.review)return;
+    if(this.data.busy||this.data.uncertain||this.data.done||this.data.followupBlocked||!this.data.checked||!this.data.review)return;
     this.setData({busy:true,error:'',requestId:''});
     try{const r=await api.request(this.data.review.path,'POST',{proposal_token:this.data.review.preview.proposal_token,confirmed:'on'});
       getApp().globalData.review=null;

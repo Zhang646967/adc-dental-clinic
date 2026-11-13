@@ -15,6 +15,7 @@ from adc_core.proposals import proposal, read_proposal
 from adc_core.rules import RuleError
 from clinical.authority import professional_scope, require_reviewer, require_visit_authority, visit_service_id
 from clinical.authority_services import lock_people
+from clinical import examination_followup as followup
 from clinical.examination_models import ExaminationDuty, ExaminationEvent, ExaminationOrder, ExaminationProject
 from clinical.locking import lock_clinical_visit
 from clinical.encounter_models import ClinicalRecordVersion
@@ -101,7 +102,7 @@ def _scope(actor, order, action=None, *, lock=False):
     elif action in REVIEW:
         check_duty(actor, project, Kind.REVIEW, lock=lock)
         require_reviewer(actor, visit.clinic_id, lock=lock)
-    elif action in (Action.PUBLISH, Action.WITHDRAW):
+    elif action in (Action.PUBLISH, Action.WITHDRAW, followup.FOLLOWUP, followup.CONTACT_RESULT):
         if not owner:
             raise PermissionDenied('请由原就诊负责医师办理患者发布。')
         required = 'RECORD'
@@ -129,6 +130,11 @@ def available_actions(actor, order, report, decision):
         possible.append(Action.PUBLISH)
     if order.active_release_id:
         possible.append(Action.WITHDRAW)
+        possible.append(followup.FOLLOWUP)
+        disposition = followup.current_decision(order)
+        if (disposition and disposition.kind == followup.Kind.CONTACT
+                and followup.contact_progress(disposition)['outcome'] != 'REACHED'):
+            possible.append(followup.CONTACT_RESULT)
     allowed = []
     for action in possible:
         try:
@@ -178,7 +184,7 @@ def prepare_order(actor, visit, project_id, purpose):
 
 @sensitive_variables()
 def _action_data(actor, order, action, fields, *, lock=False):
-    scope = _scope(actor, order, action, lock=lock)
+    scope = _scope(actor, order, action)
     report = latest_report(order)
     decision = report_decision(report)
     visit = order.source_record.encounter.visit
@@ -208,6 +214,17 @@ def _action_data(actor, order, action, fields, *, lock=False):
         last_release = last_publication(order)
         if decision != Action.APPROVE or (last_release and report.number <= last_release.report.number):
             raise RuleError('请发布经独立审核、尚未发布的新版本。')
+        data['followup'] = followup.decision_values(actor, order, fields, lock=lock)
+    elif action in (followup.FOLLOWUP, followup.CONTACT_RESULT):
+        if not order.active_release_id:
+            raise RuleError('当前没有已发布的报告，请重新核对。')
+        disposition = followup.current_decision(order)
+        data.update(report=order.active_release.report_id, release=order.active_release_id,
+            previous=disposition.pk if disposition else None)
+        if action == followup.FOLLOWUP:
+            data['followup'] = followup.decision_values(actor, order, fields, lock=lock)
+        else:
+            data['contact'] = followup.contact_values(disposition, fields)
     elif action == Action.WITHDRAW:
         if not order.active_release_id:
             raise RuleError('当前没有患者可查阅的版本。')
@@ -235,7 +252,7 @@ def confirm(*, actor, proposal_token, confirmed):
     lock_people(actor)
     payload = read_proposal(actor, CONTRACT, ROLES, proposal_token)
     data, operation = payload['data'], payload['operation']
-    action = Action(data['action'])
+    action = data['action']
     if action == Action.ORDER:
         visit = lock_clinical_visit(actor, data['visit'])
         replay = ExaminationEvent.objects.filter(operation_id=operation, actor=actor, action=action).first()
@@ -260,14 +277,44 @@ def confirm(*, actor, proposal_token, confirmed):
     order = orders().select_for_update(of=('self',)).get(pk=order.pk)
     if order.events.filter(operation_id=operation, actor=actor, action=action).exists():
         return order, True
+    if action == followup.FOLLOWUP and followup.ExaminationFollowup.objects.filter(
+            operation_id=operation, release__order=order, actor=actor).exists():
+        return order, True
+    if action == followup.CONTACT_RESULT and followup.AuditEvent.objects.filter(
+            event_type=followup.CONTACT_EVENT, actor=actor, visit_id=data['visit'],
+            subject_type='examinationfollowup', subject_key=str(data['contact']['decision']),
+            change_summary__operation=operation).exists():
+        return order, True
     if data['revision'] != order.revision:
         raise RuleError('检查结果或发布状态已变化，请刷新后重新核对。')
-    current = _action_data(actor, order, action, data)
+    fields = data
+    if action in (Action.PUBLISH, followup.FOLLOWUP):
+        disposition = data.get('followup')
+        if disposition is None:
+            raise RuleError('请重新核对报告发布后的安排。')
+        fields = dict(data, followup_kind=disposition['kind'], instruction=disposition.get('instruction'),
+            contact_due_at=disposition.get('due_at'), **disposition.get('values', {}))
+    elif action == followup.CONTACT_RESULT:
+        contact = data['contact']
+        fields = dict(data, contact_outcome=contact['outcome'], contact_due_at=contact['due_at'],
+            contact_note=contact['note'])
+    current = _action_data(actor, order, action, fields, lock=action in (Action.PUBLISH, followup.FOLLOWUP))
     if current != data:
         raise RuleError('就诊事实或专业授权已变化，请重新核对。')
 
     report_id = data['report']
     update = ['revision']
+    if action == followup.FOLLOWUP:
+        followup.save_decision(release=order.active_release, actor=actor, data=data['followup'], operation=operation)
+        order.revision += 1
+        order.save(update_fields=update)
+        return order, False
+    if action == followup.CONTACT_RESULT:
+        followup.save_contact(actor=actor, order=order, decision=followup.current_decision(order),
+            data=data['contact'], operation=operation)
+        order.revision += 1
+        order.save(update_fields=update)
+        return order, False
     if action == Action.EXECUTE:
         order.performed_at = parse_datetime(data['performed_at'])
         order.performed_by = actor
@@ -283,6 +330,10 @@ def confirm(*, actor, proposal_token, confirmed):
         action=action, actor=actor, reason=data.get('reason', '') if action != Action.SUBMIT else '',
         operation_id=operation)
     if action in (Action.PUBLISH, Action.WITHDRAW):
+        if action == Action.PUBLISH:
+            followup.save_decision(release=event, actor=actor, data=data['followup'], operation=operation)
+        followup.publish_notice(event, corrected=action == Action.PUBLISH and
+            order.events.filter(action=Action.PUBLISH, pk__lt=event.pk).exists())
         order.active_release = event if action == Action.PUBLISH else None
         update.append('active_release')
     order.revision += 1

@@ -3,8 +3,8 @@ const api = require('../../utils/api');
 const {arrangement, showError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 const {selectedCatalogue}=require('../../utils/service-selection');
-const reportNotices=require('../../utils/report-notices')||{};
-const buildFollowup=reportNotices.buildFollowup||(()=>null);
+const {buildFollowup}=require('../../utils/report-notices');
+const {staleSubject}=require('../../utils/subject-state');
 
 /* Follow-up booking is bound to the exact report version that produced the
    decision. The three parameters must arrive together; anything else returns
@@ -45,14 +45,27 @@ Page({
   data:{clinics:[], services:[], doctors:[], allServices:[], clinicIndex:0, serviceIndex:0, doctorIndex:0,
     day:'', firstDay:'', lastDay:'', rows:[], groups:[], mode:'date', searchFailed:false, emptyReason:'', error:'', busy:false, searched:false, source:null, reason:'',patientRequest:'',selectedService:null,
     followup:false, followupWindow:'', followupService:'', followupBlocked:false, visitId:null},
-  onLoad(query) { this.query=query;this.followup=readFollowupQuery(query);return this.load(); },
+  onLoad(query) { this.query=query;this.followup=readFollowupQuery(query);this.generation=0;return this.load(); },
+  onShow(){
+    if(this.followup&&this.wasHidden){this.wasHidden=false;return this.load();}
+  },
+  onHide(){
+    if(!this.followup)return;
+    this.wasHidden=true;
+    this.generation++;
+    this.clearResults({ready:false,busy:false,patientName:'',patientCapacity:'',patientDelegated:false,patientRequest:''});
+  },
+  onUnload(){this.generation++;},
   async load() {
     const query=this.query;
     if(this.data.busy)return;
+    const generation=++this.generation;
     this.setData({busy:true,error:'',requestId:'',ready:false});
     api.showSubject(this);
     try {
-      const session = await api.bootstrap();api.showSubject(this);
+      const session = await api.bootstrap();
+      if(generation!==this.generation)return;
+      api.showSubject(this);
       if (!session.authenticated || session.subject_required) {
         if(!query.visit && intent.positive(query.service) && intent.positive(query.clinic))
           intent.remember(getApp(),query.service,query.clinic,query.dentist,query.day);
@@ -61,7 +74,7 @@ Page({
       }
       if(session.medical&&!session.can_book){navigation.reLaunch({url:'/pages/medical-authorizations/index'});return;}
       if (session.read_only) throw new Error('当前实例仅供查看，暂不办理预约变更。');
-      if(this.followup)return await this.loadFollowup(session);
+      if(this.followup)return await this.loadFollowup(session,generation);
       let source = query.visit ? arrangement(await api.request(`visits/${query.visit}/`)) : null;
       if(source&&!source.reschedule_service)throw Error('本次预约暂不可自助改期，请联系原门店前台。');
       const selection=source ? {clinics:[{id:source.clinic_id,name:source.clinic}],allServices:[source.reschedule_service],clinicIndex:0,selectedId:source.service_id} : selectedCatalogue(await api.request('catalogue/'),query);
@@ -74,17 +87,22 @@ Page({
       }
       this.setData({ready:true});
       if(!source)await this.refreshDay(query.day);
-    } catch(e) { showError(this,e,{separateRequestId:true}); }
-    finally { this.setData({busy:false}); }
+    } catch(e) {
+      if(generation!==this.generation)return;
+      if(this.followup)this.followupError(e);
+      else showError(this,e,{separateRequestId:true});
+    }
+    finally { if(generation===this.generation)this.setData({busy:false}); }
   },
   // A report follow-up fixes the clinic, service and recommended window. The
   // patient only chooses a date, dentist and slot inside that window.
-  async loadFollowup(session){
+  async loadFollowup(session,generation){
     if(this.followup.invalid){
       this.setData({busy:false,followupBlocked:true,visitId:this.followup.visit||null,error:'复诊链接不完整，请从原报告重新进入。'});
       return;
     }
     const detail=await api.request(`visits/${this.followup.visit}/examinations/${this.followup.examination}/`,'GET',{revision:this.followup.revision});
+    if(generation!==this.generation)return;
     const followup=buildFollowup(detail.followup,{visitId:this.followup.visit,examinationId:this.followup.examination,revision:detail.revision});
     if(!followup||!followup.canBook){
       this.setData({busy:false,followupBlocked:true,visitId:this.followup.visit,
@@ -92,6 +110,7 @@ Page({
       return;
     }
     const catalogue=await api.request('catalogue/');
+    if(generation!==this.generation)return;
     const service=(catalogue.services||[]).find(s=>String(s.id)===String(followup.serviceId));
     const clinic=(catalogue.clinics||[]).find(c=>String(c.id)===String(followup.clinicId));
     if(!service||!clinic){
@@ -108,11 +127,16 @@ Page({
         followupWindow:followup.windowLabel,error:'建议复诊日期已超出可预约范围，请联系原门店安排。'});
       return;
     }
-    this.followupInfo=followup;
+    const day=this.data.day>=firstDay&&this.data.day<=lastDay?this.data.day:firstDay;
+    const doctor=this.data.doctors[this.data.doctorIndex];
     this.setData({followup:true,followupWindow:followup.windowLabel,followupService:followup.service,visitId:this.followup.visit,
       clinics:[{id:clinic.id,name:clinic.name||followup.clinic}],allServices:[service],clinicIndex:0,
-      day:firstDay,firstDay,lastDay,ready:true,busy:false});
+      day,firstDay,lastDay,ready:true,busy:false,followupBlocked:false});
     this.rebuild(service.id);
+    if(doctor&&doctor.id){
+      const index=this.data.doctors.findIndex(row=>String(row.id)===String(doctor.id));
+      if(index>0)this.setData({doctorIndex:index});
+    }
     await this.search();
   },
   subjects(){
@@ -199,6 +223,7 @@ Page({
     const day=this.data.day;
     if(this.data.source&&!day){this.setData({error:'请先选择改期日期。'});return;}
     this.setData({busy:true});
+    const generation=this.generation;
     try {
       const path=this.data.source ? `visits/${this.data.source.id}/reschedule/candidates/` : 'candidates/';
       const params={clinic:c.id,service:s.id,dentist:d.id};
@@ -207,6 +232,7 @@ Page({
       // the three parameters always travel together.
       if(this.followup)Object.assign(params,{followup_visit:this.followup.visit,followup_examination:this.followup.examination,followup_revision:this.followup.revision});
       const data=await api.request(path,'GET',params);
+      if(generation!==this.generation)return;
       const rows=data.rows.map(arrangement);
       const status=data.status||'';
       const period=day?'当天':'未来14天';
@@ -215,8 +241,10 @@ Page({
         availabilityTitle:period+(status==='NO_SCHEDULE'?'暂无出诊':'暂无可用时段'),
         emptyReason:rows.length?'':data.message||(this.data.source?'可选择其他日期，原预约继续保留。':'可换日期、医师或登记候补。')});
     } catch(e) {
+      if(generation!==this.generation)return;
       this.setData({busy:false,searched:false,searchFailed:true,rows:[],groups:[]});
-      showError(this,e,{separateRequestId:true});
+      if(this.followup)this.followupError(e);
+      else showError(this,e,{separateRequestId:true});
     }
   },
   async choose(e) {
@@ -225,14 +253,29 @@ Page({
     if(!row)return;
     if (source && !this.data.reason.trim()) {this.setData({error:'请先填写改期原因，无需填写病情或证件资料。'});return;}
     this.setData({busy:true,error:''});
+    const generation=this.generation;
     try {
       const path=source ? `visits/${source.id}/reschedule/preview/` : 'booking/preview/';
       const payload=source ? {action:'preview',slot_id:row.slot,start:row.start,expected_version:source.version,reason:this.data.reason} : {slot:row.slot,start:row.start,service:row.service||'',patient_request:this.data.patientRequest};
       if(this.followup)Object.assign(payload,{followup_visit:this.followup.visit,followup_examination:this.followup.examination,followup_revision:this.followup.revision});
       const preview=await api.request(path,'POST',payload);
-      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/',followupVisit:this.followup?this.followup.visit:null};
+      if(generation!==this.generation)return;
+      getApp().globalData.review={subjectKey:api.sessionInfo().subject_key,workspaceKey:api.sessionInfo().workspace_id,subjectRevision:api.sessionInfo().subject_revision,kind:source?'reschedule':'booking',selection:source||this.followup?null:{service:row.service||this.data.selectedService.id,clinic:this.data.selectedService.clinic,dentist:this.data.doctors[this.data.doctorIndex].id,day:this.data.day,category:this.data.selectedService.category},preview:arrangement(preview),path:source?`visits/${source.id}/reschedule/confirm/`:'booking/confirm/',followupVisit:this.followup?this.followup.visit:null};
       navigation.navigateTo({url:'/pages/confirm/index'}); this.setData({busy:false});
-    } catch(e) { showError(this,e,{separateRequestId:true}); }
+    } catch(e) {
+      if(generation!==this.generation)return;
+      if(this.followup)this.followupError(e);
+      else showError(this,e,{separateRequestId:true});
+    }
+  },
+  followupError(e){
+    const state=staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false});
+    if(state.invalid){
+      getApp().globalData.review=null;
+      this.setData({patientName:'',patientCapacity:'',patientDelegated:false,patientRequest:'',ready:false});
+    }
+    this.setData({visitId:this.followup.visit,followupBlocked:true,rows:[],groups:[]});
+    showError(this,e,{separateRequestId:true,stayOnPage:true});
   },
   backToVisit(){
     const id=this.data.visitId||(this.followup&&this.followup.visit)||null;

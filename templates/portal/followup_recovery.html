@@ -1,0 +1,8 @@
+{% extends 'portal/base.html' %}
+{% block content %}
+<h1>核对复诊安排</h1>
+<p class="notice" role="alert">{{ problem }}</p>
+{% if visit_id %}
+<div class="actions"><a class="button" href="{% url 'portal_visit' visit_id %}">返回原就诊</a><a href="{% url 'portal_visit' visit_id %}#frontdesk-help">联系原门店</a></div>
+{% else %}<a class="button" href="{% url 'portal_appointments' %}">返回就诊清单</a>{% endif %}
+{% endblock %}

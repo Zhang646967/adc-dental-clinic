@@ -393,6 +393,13 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
     },
     {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_retained",
+      "definition": "CREATE TRIGGER adc_examination_followup_retained BEFORE DELETE OR UPDATE ON public.adc_examination_followup FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_examination_report",
       "name": "adc_examination_report_retained",
       "definition": "CREATE TRIGGER adc_examination_report_retained BEFORE DELETE OR UPDATE ON public.adc_examination_report FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
@@ -10289,6 +10296,180 @@
       "unique_together": []
     },
     {
+      "table": "adc_examination_followup",
+      "model": "clinical.ExaminationFollowup",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "release",
+          "column": "release_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_examination_event",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(8)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 8,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "instruction",
+          "column": "instruction_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_next_visit_instruction",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "due_at",
+          "column": "due_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "recorded_at",
+          "column": "recorded_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_examination_notice",
+      "model": "clinical.ExaminationNotice",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "event",
+          "column": "event_id",
+          "type": "OneToOneField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_examination_event",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(10)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 10,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "read_at",
+          "column": "read_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
       "table": "adc_examination_order",
       "model": "clinical.ExaminationOrder",
       "app": "clinical",
@@ -18487,6 +18668,19 @@
           "null": false,
           "max_length": null,
           "target_table": "adc_visit",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "report_followup",
+          "column": "report_followup_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_examination_followup",
           "target_column": "id",
           "on_delete": "PROTECT"
         },
@@ -27563,6 +27757,8 @@
     "adc_equipment_event",
     "adc_examination_duty",
     "adc_examination_event",
+    "adc_examination_followup",
+    "adc_examination_notice",
     "adc_examination_order",
     "adc_examination_project",
     "adc_examination_report",
@@ -30661,6 +30857,66 @@
       "definition": "CHECK (((((action)::text = ANY ((ARRAY['ORDER'::character varying, 'EXECUTE'::character varying])::text[])) AND (report_id IS NULL)) OR (((action)::text = ANY ((ARRAY['SUBMIT'::character varying, 'APPROVE'::character varying, 'RETURN'::character varying, 'PUBLISH'::character varying, 'WITHDRAW'::character varying])::text[])) AND (report_id IS NOT NULL))))"
     },
     {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_foll_instruction_id_19e94b41_fk_adc_next_",
+      "kind": "f",
+      "definition": "FOREIGN KEY (instruction_id) REFERENCES adc_next_visit_instruction(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_foll_release_id_878942b1_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (release_id) REFERENCES adc_examination_event(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_actor_id_3a7efc78_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "examination_followup_kind_fields",
+      "kind": "c",
+      "definition": "CHECK ((((due_at IS NULL) AND (instruction_id IS NULL) AND ((kind)::text = 'NONE'::text)) OR ((due_at IS NULL) AND (instruction_id IS NOT NULL) AND ((kind)::text = 'BOOK'::text)) OR ((due_at IS NOT NULL) AND (instruction_id IS NULL) AND ((kind)::text = 'CONTACT'::text))))"
+    },
+    {
+      "table": "adc_examination_notice",
+      "name": "adc_examination_noti_event_id_7d12e2a4_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (event_id) REFERENCES adc_examination_event(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_notice",
+      "name": "adc_examination_notice_event_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (event_id)"
+    },
+    {
+      "table": "adc_examination_notice",
+      "name": "adc_examination_notice_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_notice",
+      "name": "examination_notice_kind_valid",
+      "kind": "c",
+      "definition": "CHECK (((kind)::text = ANY ((ARRAY['RELEASED'::character varying, 'CORRECTED'::character varying, 'WITHDRAWN'::character varying])::text[])))"
+    },
+    {
       "table": "adc_examination_order",
       "name": "adc_examination_orde_active_release_id_ddb3ce2f_fk_adc_exami",
       "kind": "f",
@@ -33365,6 +33621,12 @@
       "name": "adc_plan_appointment_pkey",
       "kind": "p",
       "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_report_followup_id_8399a868_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (report_followup_id) REFERENCES adc_examination_followup(id) DEFERRABLE INITIALLY DEFERRED"
     },
     {
       "table": "adc_plan_appointment",
@@ -37984,6 +38246,41 @@
       "definition": "CREATE UNIQUE INDEX examination_report_event_unique ON public.adc_examination_event USING btree (report_id, action) WHERE (report_id IS NOT NULL)"
     },
     {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_actor_id_3a7efc78",
+      "definition": "CREATE INDEX adc_examination_followup_actor_id_3a7efc78 ON public.adc_examination_followup USING btree (actor_id)"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_instruction_id_19e94b41",
+      "definition": "CREATE INDEX adc_examination_followup_instruction_id_19e94b41 ON public.adc_examination_followup USING btree (instruction_id)"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_examination_followup_operation_id_key ON public.adc_examination_followup USING btree (operation_id)"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_followup_pkey ON public.adc_examination_followup USING btree (id)"
+    },
+    {
+      "table": "adc_examination_followup",
+      "name": "adc_examination_followup_release_id_878942b1",
+      "definition": "CREATE INDEX adc_examination_followup_release_id_878942b1 ON public.adc_examination_followup USING btree (release_id)"
+    },
+    {
+      "table": "adc_examination_notice",
+      "name": "adc_examination_notice_event_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_examination_notice_event_id_key ON public.adc_examination_notice USING btree (event_id)"
+    },
+    {
+      "table": "adc_examination_notice",
+      "name": "adc_examination_notice_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_notice_pkey ON public.adc_examination_notice USING btree (id)"
+    },
+    {
       "table": "adc_examination_order",
       "name": "adc_examination_order_active_release_id_ddb3ce2f",
       "definition": "CREATE INDEX adc_examination_order_active_release_id_ddb3ce2f ON public.adc_examination_order USING btree (active_release_id)"
@@ -39562,6 +39859,11 @@
       "table": "adc_plan_appointment",
       "name": "adc_plan_appointment_pkey",
       "definition": "CREATE UNIQUE INDEX adc_plan_appointment_pkey ON public.adc_plan_appointment USING btree (id)"
+    },
+    {
+      "table": "adc_plan_appointment",
+      "name": "adc_plan_appointment_report_followup_id_8399a868",
+      "definition": "CREATE INDEX adc_plan_appointment_report_followup_id_8399a868 ON public.adc_plan_appointment USING btree (report_followup_id)"
     },
     {
       "table": "adc_plan_appointment",
@@ -45257,6 +45559,78 @@
       "null": true
     },
     {
+      "table": "adc_examination_followup",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "kind",
+      "db_type": "character varying(8)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "due_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "recorded_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "instruction_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_examination_followup",
+      "column": "release_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_notice",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_notice",
+      "column": "kind",
+      "db_type": "character varying(10)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_notice",
+      "column": "read_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_examination_notice",
+      "column": "event_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_examination_order",
       "column": "id",
       "db_type": "bigint",
@@ -48819,6 +49193,12 @@
       "column": "visit_id",
       "db_type": "bigint",
       "null": false
+    },
+    {
+      "table": "adc_plan_appointment",
+      "column": "report_followup_id",
+      "db_type": "bigint",
+      "null": true
     },
     {
       "table": "adc_plan_decision",
@@ -52871,6 +53251,10 @@
       "name": "0022_examination_reports"
     },
     {
+      "app": "clinical",
+      "name": "0023_examination_followup"
+    },
+    {
       "app": "contenttypes",
       "name": "0001_initial"
     },
@@ -53125,5 +53509,5 @@
   ],
   "observed_database": "PostgreSQL 17.11 isolated synthetic",
   "observed_on": "2026-11-13",
-  "source_migration": "clinical.0022_examination_reports"
+  "source_migration": "clinical.0023_examination_followup"
 }

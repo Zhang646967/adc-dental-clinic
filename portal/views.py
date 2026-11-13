@@ -10,9 +10,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 from adc_core.rules import RuleError
+from adc_core.snapshots import reporting_snapshot
 from registry.models import Clinic
 from scheduling.resources import service_for
 from scheduling.models import Visit
@@ -21,6 +22,7 @@ from portal.availability_search import availability_result
 from portal.examination_review import examination_summaries, published_examination
 from portal.policies import patient_access, form_authority, read_form_authority
 from portal.services import public_options, preview_booking, confirm_booking, cancel_booking
+from portal import report_followup, report_notices
 
 class PortalLoginView(LoginView):
     login_channel='PATIENT'
@@ -107,10 +109,11 @@ def appointments(request):
     if queue=='active':qs=qs.filter(status__in=['SCHEDULED','CHECKED_IN']).order_by('scheduled_start','pk')
     elif queue=='history':qs=qs.exclude(status__in=['SCHEDULED','CHECKED_IN'])
     return render(request,"portal/appointments.html",{"page":Paginator(qs,10).get_page(request.GET.get("page")),
-        'queue':queue,'queues':[(k,n,counts[k]) for k,n in [('active','待到诊与已到诊'),('history','历史与改期记录'),('all','全部')]]})
+        'queue':queue,'queues':[(k,n,counts[k]) for k,n in [('active','待到诊与已到诊'),('history','历史与改期记录'),('all','全部')]],
+        'report_unread_count': report_notices.unread_count(access)})
 
 
-SLOT_FILTERS = ('clinic', 'service', 'dentist', 'day')
+SLOT_FILTERS = ('clinic', 'service', 'dentist', 'day', *report_followup.FIELDS)
 
 
 def _slots_url(filters, mode):
@@ -126,18 +129,35 @@ def slots(request):
     patient_access(request.user)
     mode = 'doctor' if request.GET.get('by') == 'doctor' else 'date'
     query = {key: request.GET[key] for key in SLOT_FILTERS if key in request.GET}
+    try:
+        followup = report_followup.binding(request.GET)
+    except RuleError as exc:
+        return render(request, 'portal/followup_recovery.html', {'problem': str(exc)}, status=409)
+    followup_visit = followup['followup_visit'] if followup else None
+    dates = None
     from scheduling.service_content import positive_id
     from portal.service_catalogue import public_profiles
     from portal.discovery import service_discovery
     selected=positive_id(query.get('service',''))
     profile=next((p for p in public_profiles() if p.service_id==selected),None) if selected else None
-    if profile and 'day' not in query:
+    if followup:
+        try:
+            clinic_id, service_id = positive_id(query.get('clinic')), positive_id(query.get('service'))
+            _, _, first, last = report_followup.selection(request.user, followup, clinic_id=clinic_id, service_id=service_id)
+            dates = dict(first=first.isoformat(), last=last.isoformat())
+            query.setdefault('day', dates['first'])
+        except RuleError as exc:
+            return render(request, 'portal/followup_recovery.html',
+                {'problem': str(exc), 'visit_id': followup_visit}, status=409)
+    elif profile and 'day' not in query:
         doctor=positive_id(query.get('dentist',''))
         if not doctor or any(d.pk==doctor for d in profile.service.public_dentists):
             info=service_discovery(selected,dentist_id=doctor)
             if info['default_day']:query['day']=info['default_day']
         if not query.get('clinic'):query['clinic']=str(profile.service.department.clinic_id)
     form=SlotFilterForm(query or None,actor=request.user)
+    if followup:
+        form.fields['day'].widget.attrs.update(min=dates['first'], max=dates['last'])
     rows = []
     profile = None
     status = ''
@@ -151,8 +171,14 @@ def slots(request):
         clinic_id = data['clinic'].pk if data['clinic'] else None
         dentist_id = data['dentist'].pk if data['dentist'] else None
         try:
-            rows = public_options(request.user, clinic_id, data['day'], service.pk, dentist_id)
+            if followup:
+                rows = report_followup.candidates(request.user, followup, clinic_id=clinic_id,
+                    service_id=service.pk, day=data['day'], dentist_id=dentist_id)
+            else:
+                rows = public_options(request.user, clinic_id, data['day'], service.pk, dentist_id)
             status, message = availability_result(rows, service=service, day=data['day'], dentist_id=dentist_id)
+            if followup and not rows:
+                message = '建议日期内未查到可用时段，可查看窗口内其他日期或联系原门店。'
         except EXPECTED_ERRORS as exc:
             add_error(form, exc)
             query_failed = True
@@ -169,6 +195,8 @@ def slots(request):
         'mode': mode, 'date_url': _slots_url(query, 'date'), 'doctor_url': _slots_url(query, 'doctor'),
         'future_url': _slots_url(dict(query, day=''), mode),
         'confirm_filters': urlencode(dict({key: value for key, value in query.items() if key != 'service'}, by=mode)),
+        'followup_fields': followup, 'followup_visit': followup_visit, 'followup_dates': dates,
+        'followup_clinic': query.get('clinic'), 'followup_service': query.get('service'),
     })
 
 @login_required(login_url="portal_login")
@@ -176,6 +204,8 @@ def slots(request):
 def booking_preview(request):
     patient_access(request.user)
     slots_url = _slots_url(request.GET, request.GET.get('by'))
+    from scheduling.service_content import positive_id
+    followup_visit = positive_id(request.GET.get('followup_visit'))
     if request.method=="POST":
         form=BookingConfirmationForm(request.POST)
         if form.is_valid():
@@ -184,7 +214,8 @@ def booking_preview(request):
             else:
                 messages.success(request,"预约已经保存。相同确认页的重复提交不会再建一条。")
                 return redirect("portal_visit",pk=v.pk)
-        return render(request,"portal/confirm.html",{"form":form,"failed":True,"slots_url":slots_url})
+        return render(request,"portal/confirm.html",{"form":form,"failed":True,"slots_url":slots_url,
+            'followup_visit': followup_visit})
     try:
         from portal.service_catalogue import public_profiles
         from scheduling.service_content import positive_id
@@ -195,12 +226,14 @@ def booking_preview(request):
         require_self_service(selected,actor=request.user)
         start=parse_datetime(request.GET.get("start",""))
         if start is None or timezone.is_naive(start): raise RuleError("请选择有效时段。")
-        slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start,service_id=int(request.GET["service"]) if request.GET.get("service") else None)
+        slot,end,token=preview_booking(user=request.user,slot_id=int(request.GET.get("slot","0")),start=start,
+            service_id=int(request.GET["service"]) if request.GET.get("service") else None,
+            followup=report_followup.binding(request.GET))
     except (ValueError, *EXPECTED_ERRORS):
         messages.error(request,"该时段已变化，请重新选择。")
         return redirect(slots_url)
     return render(request,"portal/confirm.html",{"slot":slot,"start":start,"end":end,
-        "service_label":profile.title,"selected_profile":profile,"slots_url":slots_url,
+        "service_label":profile.title,"selected_profile":profile,"slots_url":slots_url,'followup_visit': followup_visit,
         "form":BookingConfirmationForm(initial={"token":token})})
 
 @login_required(login_url="portal_login")
@@ -222,10 +255,31 @@ def visit(request,pk):
 @never_cache
 @require_GET
 def examination(request, pk, order_id):
-    access = patient_access(request.user, self_only=True)
-    visit = get_object_or_404(access.scope(Visit.objects.all()), pk=pk)
-    report = published_examination(visit, order_id, request.GET.get('revision'))
+    with reporting_snapshot():
+        access = patient_access(request.user, self_only=True)
+        visit = get_object_or_404(access.scope(Visit.objects.select_related('clinic__public_directory')), pk=pk)
+        report = published_examination(visit, order_id, request.GET.get('revision'))
+        report['followup'] = report_followup.projection(visit, report, request.user)
     return render(request, 'portal/examination_report.html', {'report': report})
+
+
+@login_required(login_url='portal_login')
+@never_cache
+@require_GET
+def examination_notices(request):
+    result = report_notices.listing(request.user, request.GET.get('page'))
+    return render(request, 'portal/report_notices.html', result)
+
+
+@login_required(login_url='portal_login')
+@never_cache
+@require_POST
+def examination_notice_read(request, pk):
+    try:
+        report_notices.mark_read(request.user, pk)
+    except Http404:
+        messages.info(request, '这条提醒已变化，请核对当前报告。')
+    return redirect('portal_report_notices')
 
 @login_required(login_url="portal_login")
 @require_http_methods(["GET","POST"])

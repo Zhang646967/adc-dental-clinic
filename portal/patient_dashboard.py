@@ -3,6 +3,7 @@ from django.utils import timezone
 from coordination.models import WaitRequest, WaitOffer
 from coordination.presentation import active_offers
 from portal.policies import patient_access
+from portal.report_notices import unread_count
 from scheduling.models import Visit
 
 
@@ -52,4 +53,4 @@ def dashboard(actor, *, now=None):
         active_count=visits.filter(status__in=('SCHEDULED', 'CHECKED_IN')).count(),
         history_count=visits.exclude(status__in=('SCHEDULED', 'CHECKED_IN')).count(),
         waiting_count=waiting_count, offer_count=offers.count(),
-        primary_action=action)
+        primary_action=action, report_unread_count=unread_count(access))

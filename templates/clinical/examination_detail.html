@@ -28,16 +28,29 @@
   {% endfor %}
 </section>
 {% endif %}
+{% if disposition %}
+<section class="panel">
+  <h2>本版后续安排</h2>
+  <p>{{ disposition.get_kind_display }}</p>
+  {% if disposition.instruction %}
+  <p>{{ disposition.instruction.service.name }} · {{ disposition.instruction.earliest_on }} 至 {{ disposition.instruction.latest_on }} · 指示 {{ disposition.instruction_id }}</p>
+  <p>{{ disposition.instruction.clinical_purpose }}</p>
+  {% endif %}
+  {% if contact %}<p>{{ contact.state }}{% if contact.overdue %} · 已逾期{% endif %} · {{ contact.due_at|date:'Y-m-d H:i' }}（北京时间）</p>{% endif %}
+  {% for entry in contact_events %}<p>{{ entry.occurred_at|date:'Y-m-d H:i' }} · {{ entry.actor.username }} · {{ entry.reason }}</p>{% endfor %}
+</section>
+{% endif %}
 {% for item in action_forms %}
 <section class="panel">
-  <h2>{{ item.action.label }}</h2>
-  {% if item.action.value == 'PUBLISH' %}<p>确认后，患者可查阅第 {{ report.number }} 版。</p>{% endif %}
-  {% if item.action.value == 'WITHDRAW' %}<p>确认后，患者将无法继续查阅第 {{ release.report.number }} 版。</p>{% endif %}
+  <h2>{{ item.label }}</h2>
+  {% if item.action == 'PUBLISH' %}<p>确认后，患者可查阅第 {{ report.number }} 版。</p>{% endif %}
+  {% if item.action == 'WITHDRAW' %}<p>确认后，患者将无法继续查阅第 {{ release.report.number }} 版。</p>{% endif %}
+  {% if item.action == 'PUBLISH' or item.action == 'FOLLOWUP' %}<p>安排复诊时，可采用已有指示，或填写新指示的服务、日期、目标。选择需联系时填写期限。</p>{% endif %}
   <form method="post">
     {% csrf_token %}{% workspace_token %}
-    <input type="hidden" name="action" value="{{ item.action.value }}">
+    <input type="hidden" name="action" value="{{ item.action }}">
     {{ item.form.as_p }}
-    <button type="submit">核对{{ item.action.label }}</button>
+    <button type="submit">核对{{ item.label }}</button>
   </form>
 </section>
 {% endfor %}

@@ -1,0 +1,25 @@
+{% extends 'portal/base.html' %}{% load workspace_tags %}
+{% block title %}报告与复诊 · ADC 口腔{% endblock %}
+{% block content %}
+<div class="portal-page-heading"><div><h1>报告与复诊</h1><p>{{ unread_count }} 条未读</p></div><a href="{% url 'portal_appointments' %}">返回就诊清单</a></div>
+{% for row in rows %}
+<article class="panel">
+  <h2>{{ row.title }}</h2>
+  <p>{{ row.clinic }} · {{ row.occurred_at|date:'Y-m-d H:i' }}（北京时间）</p>
+  <p>{% if row.read_at %}已读 {{ row.read_at|date:'m-d H:i' }}{% else %}未读{% endif %}</p>
+  <div class="actions">
+    {% if row.revision %}<a class="button" href="{% url 'portal_examination' row.visit_id row.examination_id %}?revision={{ row.revision }}">查看第 {{ row.revision }} 版报告</a>
+    {% else %}<a class="button secondary" href="{% url 'portal_visit' row.visit_id %}#frontdesk-help">联系门店</a>{% endif %}
+    <a href="{% url 'portal_visit' row.visit_id %}">查看原就诊</a>
+    {% if not row.read_at and not read_only %}<form method="post" action="{% url 'portal_report_notice_read' row.id %}">{% csrf_token %}{% workspace_token %}<button class="secondary" type="submit">标记已读</button></form>{% endif %}
+  </div>
+</article>
+{% empty %}
+<section class="panel"><p>暂无报告提醒。可从就诊记录查看已发布报告。</p><a href="{% url 'portal_appointments' %}?queue=history">查看就诊记录</a></section>
+{% endfor %}
+{% if has_previous or has_next %}<nav class="pagination" aria-label="报告提醒分页">
+  {% if has_previous %}<a href="?page={{ page|add:'-1' }}">上一页</a>{% endif %}
+  <span>第 {{ page }} 页</span>
+  {% if has_next %}<a href="?page={{ page|add:'1' }}">下一页</a>{% endif %}
+</nav>{% endif %}
+{% endblock %}

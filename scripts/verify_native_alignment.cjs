@@ -5,6 +5,7 @@ const patientAction=require(path.join(root,'utils/primary-action'));
 const subjectState=require(path.join(root,'utils/subject-state'));
 const visitReview=require(path.join(root,'utils/visit-review'));
 const examinations=require(path.join(root,'utils/examinations'));
+const reportNotices=require(path.join(root,'utils/report-notices'));
 const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
@@ -41,9 +42,33 @@ async function verify(){
       Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
         key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/examinations')?examinations:
-        key.endsWith('/format')?format:null});
+        key.endsWith('/report-notices')?reportNotices:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
+  const notice={id:19,kind:'CORRECTED',visit_id:7,examination_id:8,revision:2,occurred_at:'2026-11-13T16:30:00Z',read_at:null};
+  const notices={rows:[notice],unread_count:1,page:1};
+  assert.equal(reportNotices.reportEntry({},{}),null);
+  assert.equal(reportNotices.reportEntry({report_unread_count:1},{delegated:true}),null);
+  assert.deepEqual(reportNotices.reportEntry({report_unread_count:0}),{unread:0});count++;
+  assert.equal(reportNotices.buildNotice(notice).url,'/pages/examination/index?visit=7&id=8&revision=2');
+  assert.equal(reportNotices.buildNotice(notice).occurredLabel,'2026-11-14 00:30');
+  assert.equal(reportNotices.buildNotice({...notice,kind:'WITHDRAWN',revision:null}).canOpen,false);count++;
+  const followup=reportNotices.buildFollowup({action:'BOOK',clinic_id:1,service_id:2,first_day:'2026-11-15',
+    last_day:'2026-11-20',earliest_on:'2026-11-14',latest_on:'2026-11-23'},
+    {visitId:7,examinationId:8,revision:2});
+  assert.equal(followup.firstDay,'2026-11-15');
+  assert.equal(followup.lastDay,'2026-11-20');
+  assert.equal(followup.bookingUrl,'/pages/booking/index?followup_visit=7&followup_examination=8&followup_revision=2');
+  assert.equal(reportNotices.buildFollowup({action:'BOOK',clinic_id:1,service_id:2}).action,'CONTACT');count++;
+  const index={currentTarget:{dataset:{index:0}}};
+  const reading=page('report-notices',{responses:[notices,{id:19,read_at:'2026-11-14T00:00:00Z',unread_count:0}]});
+  reading.p.onLoad({});await reading.p.onShow();
+  await reading.p.markRead(index);await reading.p.markRead(index);
+  assert.deepEqual(reading.calls.map(c=>c.slice(0,2)),[['report-notices/','GET'],['report-notices/19/read/','POST']]);
+  assert.equal(reading.p.data.unreadCount,0);assert.equal(reading.p.data.rows[0].unread,false);count++;
+  const hidden=page('report-notices',{responses:[notices]});
+  hidden.p.onLoad({});const readingOld=hidden.p.onShow();hidden.p.onHide();await readingOld;
+  assert.equal(hidden.p.data.rows.length,0);assert.equal(hidden.p.data.unreadCount,null);count++;
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
   let d=page('invoice',{responses:[invoice()]});d.p.onLoad({id:5});await d.p.onShow();assert.equal(d.calls[0][0],'invoices/5/');assert.equal(d.p.data.invoice.total,'99.99');count++;
   assert.deepEqual(Array.from(d.p.data.invoice.treatment_lines),[]);

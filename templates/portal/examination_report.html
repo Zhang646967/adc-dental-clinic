@@ -14,4 +14,18 @@
   <h3>检查结果</h3>
   {{ report.body|linebreaks }}
 </section>
+{% with followup=report.followup %}
+{% if followup %}
+<section class="panel">
+  <h2>复诊安排</h2>
+  <p>{{ followup.message }}</p>
+  {% if followup.service %}<p>{{ followup.clinic }} · {{ followup.service }} · {{ followup.earliest_on|date:'Y-m-d' }} 至 {{ followup.latest_on|date:'Y-m-d' }}</p>{% endif %}
+  <div class="actions">
+    {% if followup.action == 'BOOK' %}<a class="button" href="{% url 'portal_slots' %}?clinic={{ followup.clinic_id }}&amp;service={{ followup.service_id }}&amp;followup_visit={{ report.visit_id }}&amp;followup_examination={{ report.id }}&amp;followup_revision={{ report.revision }}">预约复诊</a>{% endif %}
+    {% if followup.action == 'CONTACT' %}<a class="button secondary" href="{% url 'portal_visit' report.visit_id %}#frontdesk-help">联系原门店</a>{% endif %}
+    {% if followup.appointment %}<a class="button secondary" href="{% url 'portal_visit' followup.appointment.id %}">查看复诊预约 {{ followup.appointment.visit_no }} · {{ followup.appointment.status_label }}</a>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% endwith %}
 {% endblock %}

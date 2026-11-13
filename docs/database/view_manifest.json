@@ -1,4 +1,63 @@
 {
+  "er_examination_followup": {
+    "title": "报告提醒、复诊指示与正式预约",
+    "tables": 9,
+    "relationships": 12,
+    "note": "一次发布或撤回事件至多一条提醒。复诊决定追加记录并引用准确发布事件，复诊关联保存办理时采用的决定。改期沿预约后继回查。开治快照记录报告依据编号，JSON 字段不绘制为外键。",
+    "columns": {
+      "adc_examination_order": [
+        "id",
+        "active_release_id"
+      ],
+      "adc_examination_report": [
+        "id",
+        "order_id",
+        "number"
+      ],
+      "adc_examination_event": [
+        "id",
+        "order_id",
+        "report_id",
+        "action",
+        "occurred_at"
+      ],
+      "adc_examination_notice": [
+        "id",
+        "event_id",
+        "kind",
+        "read_at"
+      ],
+      "adc_examination_followup": [
+        "id",
+        "release_id",
+        "instruction_id",
+        "actor_id",
+        "kind",
+        "due_at",
+        "operation_id"
+      ],
+      "adc_next_visit_instruction": [
+        "id",
+        "earliest_on",
+        "latest_on",
+        "completion_rule"
+      ],
+      "adc_plan_appointment": [
+        "id",
+        "instruction_id",
+        "visit_id",
+        "report_followup_id"
+      ],
+      "adc_visit": [
+        "id",
+        "replaces_visit_id",
+        "status"
+      ],
+      "adc_user": [
+        "id"
+      ]
+    }
+  },
   "er_examination_release": {
     "title": "检查申请、独立审核与患者发布",
     "tables": 10,
@@ -2416,9 +2475,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 193,
-    "orm_tables": 192,
-    "columns_types_and_nullability_checked": 1883,
+    "tables": 195,
+    "orm_tables": 194,
+    "columns_types_and_nullability_checked": 1896,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2427,10 +2486,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 561,
-    "sql_foreign_keys": 562,
+    "orm_foreign_keys": 566,
+    "sql_foreign_keys": 567,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "af060ab57dd5417cc4f1e41b7d82c3d4aa192de518f483f7b0ad62484fad5108",
+    "snapshot_sha256": "dfc9e241b588f13bcb083503641b51463594a5c6ceae8e298cceb583f488d436",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

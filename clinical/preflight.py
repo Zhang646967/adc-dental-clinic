@@ -88,6 +88,10 @@ def state(visit,record,row,step,*,communication='',lock=False):
         rule=rule.pk,item=row['treatment_type'],tooth=row['tooth'],surface=row['surface'],quantity=row['quantity'],
         resource=resource.pk if resource else None,readiness=readiness,consent_version=None,decision=None,proxy_version=None,
         communication=communication if rule.mode=='COMMUNICATION' else '')
+    from clinical.examination_followup import treatment_basis
+    reports = treatment_basis(visit, step, lock=lock)
+    if reports:
+        data['examination_basis'] = reports
     if step:
         from clinical.plans import latest_decision
         chosen=latest_decision(step);data['scheme_decision']=chosen.pk if chosen else None
@@ -171,7 +175,11 @@ def confirm(*,actor,proposal_token,confirmed):
 
 
 def execution_check(visit,record,row,step,check_id,*,lock=False):
-    if not enabled(visit.clinic_id):return None
+    if not enabled(visit.clinic_id):
+        from clinical.examination_followup import linked_orders
+        if linked_orders(visit).exists():
+            raise RuleError('请先完成本店开治控制的配置及本次报告依据核对。')
+        return None
     if not check_id:raise RuleError('本店已启用治疗前核对，请先完成本次核对并选择其编号；已发生缺材料的治疗走明确补记。')
     check=TreatmentPreflight.objects.get(pk=check_id,visit=visit,checked_by__dentist_id=visit.dentist_id)
     current=state(visit,record,row,step,communication=check.communication,lock=lock)

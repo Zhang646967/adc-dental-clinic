@@ -81,11 +81,17 @@ def public_options(user, clinic_id=None, day=None, service_id=None, dentist_id=N
             start = end
     return rows
 
-def preview_booking(*, user, slot_id, start, service_id=None):
+def preview_booking(*, user, slot_id, start, service_id=None, followup=None):
     access = patient_access(user)
     slot = AvailabilitySlot.objects.select_related("clinic","dentist").get(pk=slot_id,
         is_active=True, booking_paused=False, clinic__is_active=True, dentist__is_active=True)
     access.require_clinic(slot.clinic_id)
+    report_stamp = None
+    if followup:
+        from portal.report_followup import selection, stamp
+        disposition, instruction, _, _ = selection(user, followup, clinic_id=slot.clinic_id,
+            service_id=service_id, day=timezone.localdate(start))
+        report_stamp = stamp(followup, disposition, instruction)
     from scheduling.resources import policy,choose_bundle,service_for
     from adc_core.rules import validate_slot
     bundle=None
@@ -101,6 +107,8 @@ def preview_booking(*, user, slot_id, start, service_id=None):
     ctx=getattr(user,'_adc_workspace',None)
     data.update(service=service_id,resources=bundle,end=end.isoformat(),authority=access.stamp,
         context=str(ctx.pk) if ctx else None,context_revision=ctx.revision if ctx else None)
+    if report_stamp is not None:
+        data['report_followup'] = report_stamp
     return slot, end, signing.dumps(data, salt=SALT, compress=True)
 
 def _read_token(token, user):
@@ -133,9 +141,22 @@ def confirm_booking(*, actor, token, patient_request='', require_published_servi
     revision = data.get('intake_revision', 0)  # Legacy previews valid only before intake has ever changed.
     if type(revision) is not int or revision != slot.intake_revision:
         raise RuleError('出诊接收状态已变化，请重新选择并核对，原确认页不能继续使用。')
+    report_stamp = data.get('report_followup')
+    from coordination.reservations import lock_resources
+    lock_resources(patients=[access.patient_id], dentists=[slot.dentist_id])
+    if report_stamp:
+        from scheduling.resources import lock_physical
+        lock_physical(slot.clinic_id)
     patient = Patient.objects.select_for_update().get(pk=access.patient_id, is_active=True)
     try: start = datetime.fromisoformat(data["start"])
     except (ValueError, TypeError) as exc: raise RuleError("预约时间格式失效。") from exc
+    if report_stamp:
+        from portal.report_followup import FIELDS, selection, stamp
+        fields = {key: report_stamp[key] for key in FIELDS}
+        disposition, instruction, _, _ = selection(actor, fields, clinic_id=slot.clinic_id,
+            service_id=data.get('service'), day=timezone.localdate(start), lock=True)
+        if report_stamp != stamp(fields, disposition, instruction):
+            raise RuleError('报告或复诊安排已变化，请返回原就诊重新核对。')
     from scheduling.resources import policy
     if policy(slot.clinic_id):
         if not data.get('resources'):raise RuleError('本店已启用诊疗资源，请重新选择服务和时间。')
@@ -146,6 +167,11 @@ def confirm_booking(*, actor, token, patient_request='', require_published_servi
                        service_id=data.get("service"),resource_snapshot=data.get("resources"),
                        require_published_service=require_published_service)
     BookingReceipt.objects.create(nonce=data["nonce"], visit=visit, **access.receipt_fields)
+    if report_stamp:
+        from clinical.next_visits import check_promise, save_link
+        check_promise(instruction, visit)
+        save_link(actor=actor, instruction=instruction, visit=visit, operation_id=data['nonce'],
+            report_followup=disposition)
     emit(actor, "PORTAL_BOOKING_CONFIRMED", visit, visit=visit, summary={"source":"patient_portal"})
     return visit
 

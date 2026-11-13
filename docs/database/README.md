@@ -1,3 +1,7 @@
+# 报告提醒与复诊接续
+
+独立 PostgreSQL 17.11 核对 98 份应用迁移、195 张 SQL 表、194 张 ORM 表、567 条外键及 181 项业务触发器。新增提醒与复诊决定两张表，正式预约关联可引用准确决定。原 97 份应用迁移字节保留。 [报告复诊 ER](er_examination_followup.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../EXAMINATION_FOLLOWUP.md)
+
 # 检查申请、独立审核与患者发布
 
 独立 PostgreSQL 17.11 核对 97 份应用迁移、193 张 SQL 表、192 张 ORM 表、562 条外键及 180 项业务触发器。检查申请引用准确检查记录及本店服务，执行职责、报告版本和办理事件各自留存。原 96 份迁移保持原字节。[检查与发布 ER](er_examination_release.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../EXAMINATION_REPORTS.md)

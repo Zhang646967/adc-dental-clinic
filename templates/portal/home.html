@@ -42,6 +42,7 @@
         <a href="{% url 'public_services' %}"><strong>预约就诊</strong><span>选择服务和时间</span></a>
       {% endif %}
       <a href="{% url 'portal_appointments' %}"><strong>到诊安排</strong><span>{{ active_count }} 条待到诊与已到诊记录</span></a>
+      {% if report_unread_count != None %}<a href="{% url 'portal_report_notices' %}"><strong>报告与复诊</strong><span>{{ report_unread_count }} 条未读</span></a>{% endif %}
       {% if can_view_funds %}
         <a href="{% url 'portal_billing' %}"><strong>费用查询</strong><span>结算单和收退款</span></a>
       {% endif %}

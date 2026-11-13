@@ -2,7 +2,7 @@
 {% block title %}预约就诊 · ADC 口腔{% endblock %}
 {% block content %}
 <div class="portal-page-heading">
-  <div><h1>预约就诊</h1><p>选择服务和可约时间，提交前核对本次安排。</p></div>
+  <div>{% if followup_fields %}<h1>预约复诊</h1><p>可选日期 {{ followup_dates.first }} 至 {{ followup_dates.last }}（北京时间）</p>{% else %}<h1>预约就诊</h1><p>选择服务和可约时间，提交前核对本次安排。</p>{% endif %}</div>
   <a href="{% url 'public_services' %}">查看服务和费用说明</a>
 </div>
 {% if selected_profile %}
@@ -17,8 +17,13 @@
 </nav>
 <form class="panel filter-form portal-slot-filter" method="get">
   {% if mode == 'doctor' %}<input type="hidden" name="by" value="doctor">{% endif %}
+  {% if followup_fields %}
+  {% for key, value in followup_fields.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+  <input type="hidden" name="service" value="{{ followup_service }}"><input type="hidden" name="clinic" value="{{ followup_clinic }}">
+  {% else %}
   <div><label for="id_service">预约服务</label>{{ form.service }}{{ form.service.errors }}</div>
   <div><label for="id_clinic">就诊门店</label>{{ form.clinic }}{{ form.clinic.errors }}</div>
+  {% endif %}
   {% if mode == 'doctor' %}
     <div><label for="id_dentist">医师（可选）</label>{{ form.dentist }}{{ form.dentist.errors }}</div>
     <div><label for="day-filter">日期（可选）</label>{{ form.day }}{{ form.day.errors }}</div>
@@ -27,7 +32,7 @@
     <div><label for="id_dentist">医师（可选）</label>{{ form.dentist }}{{ form.dentist.errors }}</div>
   {% endif %}
   <button class="button" type="submit">查找可约时间</button>
-  <p class="muted">日期留空可查未来14天。时间均为北京时间。</p>
+  <p class="muted">{% if followup_fields %}日期留空查询上述窗口。{% else %}日期留空可查未来14天。{% endif %}时间均为北京时间。</p>
   {{ form.non_field_errors }}
 </form>
 {% if query_failed %}
@@ -48,9 +53,10 @@
   <section class="panel portal-empty">
     <h2>{% if availability_status == 'NO_SCHEDULE' %}暂无已发布出诊{% else %}这次查询暂无合适时段{% endif %}</h2>
     <p>{{ availability_message }}</p>
-    <div class="actions"><a class="button secondary" href="{{ future_url }}">查看未来14天</a><a href="{% url 'waitlist_join' %}">登记候补</a></div>
+    <div class="actions">{% if followup_visit %}<a class="button secondary" href="{{ future_url }}">查看建议日期内的时段</a><a href="{% url 'portal_visit' followup_visit %}#frontdesk-help">联系原门店</a>{% else %}<a class="button secondary" href="{{ future_url }}">查看未来14天</a><a href="{% url 'waitlist_join' %}">登记候补</a>{% endif %}</div>
   </section>
 {% else %}
   <section class="panel portal-empty"><h2>先选择预约服务</h2><p>选好服务后，可按日期或医师查看时间。</p><a href="{% url 'public_services' %}">浏览诊疗服务</a></section>
 {% endif %}
+{% if followup_visit %}<p><a href="{% url 'portal_visit' followup_visit %}">返回原就诊</a></p>{% endif %}
 {% endblock %}

@@ -4,8 +4,7 @@ const {positive}=require('../../utils/booking-intent');
 const {showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {buildReport}=require('../../utils/examinations');
-const reportNotices=require('../../utils/report-notices')||{};
-const buildFollowup=reportNotices.buildFollowup||(()=>null);
+const {buildFollowup}=require('../../utils/report-notices');
 
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 

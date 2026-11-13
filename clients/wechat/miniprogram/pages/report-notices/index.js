@@ -9,7 +9,7 @@ const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 
 Page({
   data:{...blankSubject,rows:[],unreadCount:null,page:1,hasPrevious:false,hasNext:false,
-    busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:''},
+    busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:'',readOnly:false},
   onLoad(query){
     const requested=positive(query&&query.page)?Number(query.page):1;
     this.page=requested;
@@ -24,15 +24,14 @@ Page({
     this.page=page;
     // Drop the previous patient's notices and unread count before reading; a
     // denied or stale request must never leave another patient's row on screen.
-    this.setData({rows:[],unreadCount:null,error:'',requestId:'',busy:true,subjectInvalid:false});
-    api.showSubject(this);
+    this.setData({rows:[],unreadCount:null,...blankSubject,error:'',requestId:'',busy:true,subjectInvalid:false});
     try{
       const data=await api.request('report-notices/','GET',{page});
       if(generation!==this.generation)return;
       const list=buildNoticeList(data);
       this.page=list.page;
       api.showSubject(this);
-      this.setData({...list,busy:false,environmentLabel:api.sessionInfo().environment_label||''});
+      this.setData({...list,busy:false,readOnly:!!api.sessionInfo().read_only,environmentLabel:api.sessionInfo().environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
       const state=staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false});
@@ -63,18 +62,24 @@ Page({
   async markRead(e){
     const index=Number(e.currentTarget.dataset.index);
     const row=this.data.rows[index];
-    if(!row||!row.unread||this.data.busy)return;
+    if(!row||!row.unread||this.data.busy||this.data.readOnly)return;
+    const generation=this.generation;
     this.setData({busy:true,error:'',requestId:''});
     try{
       const r=await api.request(`report-notices/${row.id}/read/`,'POST',{});
+      if(generation!==this.generation)return;
       const rows=this.data.rows.map((item,i)=>i===index?Object.assign({},item,{
         unread:false,readAt:r.read_at||item.readAt,readLabel:'已读'}):item);
       const unread=Number.isInteger(r.unread_count)?r.unread_count:Math.max(0,(this.data.unreadCount||0)-1);
       this.setData({rows,unreadCount:unread,busy:false});
     }catch(error){
+      if(generation!==this.generation)return;
       // A corrected or withdrawn report can retire the old row; re-read the
       // list so the patient sees the current notice instead of a dead entry.
       if(error.status===404||error.status===409)return this.load(this.page||1);
+      if(staleSubject(error,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
+        this.setData({rows:[],unreadCount:null,...blankSubject,subjectInvalid:true});
+      }
       showError(this,error,{separateRequestId:true,stayOnPage:true});
     }
   },

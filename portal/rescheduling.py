@@ -37,6 +37,10 @@ def check_source(visit):
 def options(*, actor, visit_id, day, dentist_id=None):
     visit = owned_visit(actor, visit_id)
     check_source(visit)
+    from clinical.examination_followup import reschedule_window
+    window = reschedule_window(visit)
+    if window and not window[0] <= day <= window[1]:
+        raise RuleError('请选择复诊建议窗口内的日期；原预约仍保留。')
     return options_for_visit(visit=visit, day=day, dentist_id=dentist_id)
 
 
@@ -95,6 +99,10 @@ def prepare(*, actor, visit_id, expected_version, slot_id, start, reason, offer_
             plan, service, end = _arrangement(visit, slot, start)
             bundle = choose_bundle(slot=slot, start=start, end=end, service_id=service.pk if service else None,
                 ignore_visit=visit.pk)
+        from clinical.examination_followup import reschedule_window
+        window = reschedule_window(visit)
+        if window and not window[0] <= timezone.localdate(start) <= window[1]:
+            raise RuleError('请选择复诊建议窗口内的日期；原预约仍保留。')
         data = dict(access=access.pk, patient=access.patient_id, visit=visit.pk, version=visit.lock_version,
             source_plan=plan.pk if plan else None, slot=slot.pk, intake_revision=slot.intake_revision,
             start=start.isoformat(), end=end.isoformat(), reason=reason.strip(),
@@ -135,6 +143,10 @@ def confirm(*, actor, visit_id, proposal_token, confirmed):
         pk=visit_id, patient_id=access.patient_id)
     check_source(visit)
     assert_revision(visit, d['version'])
+    from clinical.examination_followup import reschedule_window
+    window = reschedule_window(visit, lock=True)
+    if window and not window[0] <= timezone.localdate(datetime.fromisoformat(d['start'])) <= window[1]:
+        raise RuleError('目标日期已超出复诊建议窗口；原预约仍保留。')
     slot = slots[d['slot']]
     if slot.clinic_id != visit.clinic_id or (not d['offer'] and slot.intake_revision != d['intake_revision']):
         raise RuleError('目标诊所或接收状态已经变化，请重新选择；本次没有改约。')

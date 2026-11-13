@@ -99,3 +99,47 @@ class ExaminationEvent(models.Model):
             models.UniqueConstraint(fields=['report', 'action'], condition=Q(report__isnull=False),
                 name='examination_report_event_unique'),
         ]
+
+
+class ExaminationFollowup(models.Model):
+    """A clinician's disposition for a particular released report."""
+
+    class Kind(models.TextChoices):
+        NONE = 'NONE', '仅提供报告查阅'
+        BOOK = 'BOOK', '按指示安排复诊'
+        CONTACT = 'CONTACT', '需门店联系'
+
+    release = models.ForeignKey(ExaminationEvent, on_delete=models.PROTECT, related_name='followup_decisions')
+    actor = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
+    kind = models.CharField(max_length=8, choices=Kind.choices)
+    instruction = models.ForeignKey('clinical.NextVisitInstruction', null=True, on_delete=models.PROTECT)
+    due_at = models.DateTimeField(null=True)
+    operation_id = models.UUIDField(unique=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'adc_examination_followup'
+        constraints = [models.CheckConstraint(
+            condition=Q(kind='NONE', instruction__isnull=True, due_at__isnull=True)
+            | Q(kind='BOOK', instruction__isnull=False, due_at__isnull=True)
+            | Q(kind='CONTACT', instruction__isnull=True, due_at__isnull=False),
+            name='examination_followup_kind_fields',
+        )]
+
+
+class ExaminationNotice(models.Model):
+    """An in-app notice of a committed publication or withdrawal."""
+
+    class Kind(models.TextChoices):
+        RELEASED = 'RELEASED', '检查报告已发布'
+        CORRECTED = 'CORRECTED', '检查报告已更新'
+        WITHDRAWN = 'WITHDRAWN', '检查报告已撤回'
+
+    event = models.OneToOneField(ExaminationEvent, on_delete=models.PROTECT, related_name='patient_notice')
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    read_at = models.DateTimeField(null=True)
+
+    class Meta:
+        db_table = 'adc_examination_notice'
+        constraints = [models.CheckConstraint(condition=Q(kind__in=['RELEASED', 'CORRECTED', 'WITHDRAWN']),
+            name='examination_notice_kind_valid')]
