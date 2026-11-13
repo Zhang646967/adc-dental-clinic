@@ -142,8 +142,10 @@ def available_actions(actor, order, report, decision):
 
 
 def _independent(actor, order, report):
-    if actor.pk == order.requested_by_id or report.events.filter(action=Action.SUBMIT, actor=actor).exists():
-        raise PermissionDenied('请由申请人与结果登记人以外的具备职责医师独立审核。')
+    if actor.pk in (order.requested_by_id, order.performed_by_id) or report.events.filter(
+        action=Action.SUBMIT, actor=actor,
+    ).exists():
+        raise PermissionDenied('请由申请、执行及该版结果登记人以外的具备职责医师独立审核。')
 
 
 def _text(value, limit, label, *, optional=False):

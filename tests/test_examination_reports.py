@@ -19,7 +19,7 @@ from care.services import complete_visit
 from clinical import archive_generation, examinations as cmd, preflight
 from clinical.archive_models import ArchivePackage
 from clinical.authority_services import confirm_authority, prepare_authority
-from clinical.examination_models import ExaminationProject
+from clinical.examination_models import ExaminationDuty, ExaminationProject
 from clinical.models import SensitiveReadEvent
 from registry.models import TreatmentType
 from scheduling.resource_models import BookingService, Department
@@ -243,6 +243,14 @@ class ExaminationReportsTests(ExaminationFixture, TransactionTestCase):
         with override_settings(ADC_CLINICAL_SYNTHETIC=False):
             self.assertEqual(self.native_report(order).status_code, 404)
             self.assertEqual(case.mini.get(reverse('mini_visit', args=[case.v.pk])).json()['data']['examinations'], [])
+
+        execution = case.open_order()
+        ExaminationDuty.objects.create(project=case.project, user=case.reviewer, kind=cmd.Kind.EXECUTE)
+        case.step(execution, 'EXECUTE', case.reviewer,
+            performed_at=case.v.attended_at.isoformat(), source_reference=SOURCE)
+        case.step(execution, 'SUBMIT', body=BODY1)
+        with self.assertRaises(PermissionDenied):
+            case.prepare_step(execution, 'APPROVE', case.reviewer)
 
     def test_late_release_retains_invoice_archive_and_exact_followup_link(self):
         case = self
