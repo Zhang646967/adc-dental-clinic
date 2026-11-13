@@ -4,15 +4,17 @@ const {positive}=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {buildReview}=require('../../utils/visit-review');
+const examModule=require('../../utils/examinations');
+const buildExaminations=examModule&&typeof examModule.buildExaminations==='function'?examModule.buildExaminations:()=>[];
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
-  data:{visit:null,reviewView:null,...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false},
+  data:{visit:null,reviewView:null,examinations:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false},
   onLoad(q){this.id=Number(q.id);this.generation=0;},
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    this.setData({visit:null,reviewView:null,...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false});
+    this.setData({visit:null,reviewView:null,examinations:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false});
     try{
       const visit=arrangement(await api.request(`visits/${this.id}/`));
       if(generation!==this.generation)return;
@@ -24,6 +26,7 @@ Page({
       this.context=context;
       api.showSubject(this);
       this.setData({visit,reviewView:buildReview(visit,{delegated:session.delegated}),
+        examinations:buildExaminations(visit,{delegated:session.delegated}),
         readOnly:session.read_only,environmentLabel:session.environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
@@ -36,7 +39,7 @@ Page({
     if(staleSubject(error,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
       getApp().globalData.review=null;
       this.context=null;
-      this.setData({visit:null,reviewView:null,...blankSubject,...blankDraft,subjectInvalid:true});
+      this.setData({visit:null,reviewView:null,examinations:[],...blankSubject,...blankDraft,subjectInvalid:true});
     }
     showError(this,error,{separateRequestId:true,stayOnPage:true});
   },
@@ -55,6 +58,14 @@ Page({
   contactClinic(){
     if(!this.data.visit)return;
     navigation.navigateTo({url:`/pages/help/index?visit=${this.id}`});
+  },
+  openExamination(e){
+    const id=Number(e.currentTarget.dataset.id);
+    const revision=Number(e.currentTarget.dataset.revision);
+    if(!Number.isSafeInteger(id)||id<=0)return;
+    // Always pass the exact published version shown in the list.
+    const version=Number.isSafeInteger(revision)&&revision>0?`&revision=${revision}`:'';
+    navigation.navigateTo({url:`/pages/examination/index?visit=${this.id}&id=${id}${version}`});
   },
   canChange(){return !!this.data.visit&&this.data.visit.can_change&&!this.data.readOnly;},
   reschedule(){if(this.canChange())navigation.navigateTo({url:`/pages/booking/index?visit=${this.id}`});},

@@ -14,6 +14,7 @@
     "pages/service/index",
     "pages/booking/index",
     "pages/visit/index",
+    "pages/examination/index",
     "pages/confirm/index",
     "pages/help/index",
     "pages/waitlist/index",

@@ -58,6 +58,15 @@
       </view>
     </block>
   </view>
+  <view wx:if="{{examinations.length}}" class="card">
+    <view class="section-title">检查与报告</view>
+    <view wx:for="{{examinations}}" wx:key="id" class="offer-block">
+      <view class="section-label">{{item.project}}</view>
+      <view class="prose">{{item.number}}</view>
+      <view class="muted">{{item.label}}<text wx:if="{{item.revisionLabel}}"> · {{item.revisionLabel}}</text><text wx:if="{{item.releasedLabel}}"> · 发布 {{item.releasedLabel}}</text></view>
+      <button wx:if="{{item.canOpen}}" class="secondary" data-id="{{item.id}}" data-revision="{{item.revision}}" bindtap="openExamination">查看检查报告</button>
+    </view>
+  </view>
   <view wx:if="{{reviewView && reviewView.settlement}}" class="card">
     <view class="section-title">本次结算</view>
     <view class="invoice-line">

@@ -1,0 +1,19 @@
+<view class="page">
+  <view wx:if="{{report}}" class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view></view>
+  <view class="title">检查报告</view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text></view>
+  <button wx:if="{{subjectInvalid}}" class="primary" bindtap="recoverSubject" disabled="{{busy}}" loading="{{busy}}">核对账号与就诊人</button>
+  <view wx:if="{{busy}}" class="notice">正在读取检查报告…</view>
+  <view wx:if="{{report}}" class="card">
+    <view class="section-label">{{report.project}}</view>
+    <view class="invoice-line"><view class="muted">检查编号</view><view class="prose">{{report.number}}</view></view>
+    <view class="invoice-line"><view class="muted">原就诊编号</view><view class="prose">{{report.visitNo}}</view></view>
+    <view class="fact-row"><text>报告版本</text><text>第 {{report.revision}} 版</text></view>
+    <view class="fact-row"><text>实际检查时间</text><text>{{report.performedLabel}}</text></view>
+    <view class="fact-row"><text>发布时间</text><text>{{report.releasedLabel}}</text></view>
+    <view class="divider"></view>
+    <view class="prose">{{report.body}}</view>
+  </view>
+  <button wx:if="{{report||error}}" class="secondary" bindtap="back">返回原就诊</button>
+  <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+</view>
