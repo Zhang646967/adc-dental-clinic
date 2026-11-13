@@ -1,0 +1,17 @@
+{% extends 'portal/base.html' %}
+{% block content %}
+<p><a href="{% url 'portal_visit' report.visit_id %}">← 返回本次就诊</a></p>
+<h1>检查报告</h1>
+<section class="panel">
+  <h2>{{ report.project }}</h2>
+  <dl class="detail-grid">
+    <dt>检查编号</dt><dd>{{ report.number }}</dd>
+    <dt>原就诊编号</dt><dd>{{ report.visit_no }}</dd>
+    <dt>报告版本</dt><dd>第 {{ report.revision }} 版</dd>
+    <dt>实际检查</dt><dd>{{ report.performed_at|date:'Y-m-d H:i' }}</dd>
+    <dt>发布时间</dt><dd>{{ report.released_at|date:'Y-m-d H:i' }}（北京时间）</dd>
+  </dl>
+  <h3>检查结果</h3>
+  {{ report.body|linebreaks }}
+</section>
+{% endblock %}

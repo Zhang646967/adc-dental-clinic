@@ -1,5 +1,5 @@
 // Current database ER source; selected view diagrams are projections.
-// All 187 ORM tables; django_migrations is a framework migration journal.
+// All 192 ORM tables; django_migrations is a framework migration journal.
 // Partial uniqueness, exclusions and triggers are documented separately.
 
 Table adc_account_identity_event {
@@ -877,6 +877,66 @@ Table adc_equipment_event {
   recorded_at "timestamp with time zone" [not null]
   indexes {
     (asset_id, sequence) [unique, name: 'equipment_event_sequence_unique']
+  }
+}
+
+Table adc_examination_duty {
+  id "bigint" [pk, not null]
+  project_id "bigint" [not null]
+  user_id "bigint" [not null]
+  kind "character varying(12)" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (project_id, user_id, kind) [unique, name: 'examination_duty_unique']
+  }
+}
+
+Table adc_examination_event {
+  id "bigint" [pk, not null]
+  order_id "bigint" [not null]
+  report_id "bigint" [null]
+  action "character varying(12)" [not null]
+  actor_id "bigint" [not null]
+  occurred_at "timestamp with time zone" [not null]
+  reason "character varying(500)" [not null]
+  operation_id "uuid" [unique, not null]
+}
+
+Table adc_examination_order {
+  id "bigint" [pk, not null]
+  source_record_id "bigint" [not null]
+  project_id "bigint" [not null]
+  project_name "character varying(100)" [not null]
+  number "character varying(35)" [unique, not null]
+  requested_by_id "bigint" [not null]
+  requested_at "timestamp with time zone" [not null]
+  purpose "character varying(500)" [not null]
+  performed_at "timestamp with time zone" [null]
+  performed_by_id "bigint" [null]
+  source_reference "character varying(120)" [not null]
+  active_release_id "bigint" [null]
+  revision "integer" [not null]
+}
+
+Table adc_examination_project {
+  id "bigint" [pk, not null]
+  service_id "bigint" [not null]
+  code "character varying(40)" [not null]
+  name "character varying(100)" [not null]
+  is_active "boolean" [not null]
+  indexes {
+    (service_id, code) [unique, name: 'examination_project_code']
+  }
+}
+
+Table adc_examination_report {
+  id "bigint" [pk, not null]
+  order_id "bigint" [not null]
+  number "integer" [not null]
+  body "character varying(2000)" [not null]
+  correction_reason "character varying(500)" [not null]
+  indexes {
+    (order_id, number) [unique, name: 'examination_report_version']
   }
 }
 
@@ -2792,6 +2852,18 @@ Ref: adc_equipment_cost_amendment.prepared_by_id > adc_user.id
 Ref: adc_equipment_cost_amendment.reviewed_by_id > adc_user.id
 Ref: adc_equipment_event.asset_id > adc_equipment_asset.id
 Ref: adc_equipment_event.recorded_by_id > adc_user.id
+Ref: adc_examination_duty.project_id > adc_examination_project.id
+Ref: adc_examination_duty.user_id > adc_user.id
+Ref: adc_examination_event.order_id > adc_examination_order.id
+Ref: adc_examination_event.report_id > adc_examination_report.id
+Ref: adc_examination_event.actor_id > adc_user.id
+Ref: adc_examination_order.active_release_id > adc_examination_event.id
+Ref: adc_examination_order.project_id > adc_examination_project.id
+Ref: adc_examination_order.source_record_id > adc_clinical_record_version.id
+Ref: adc_examination_order.performed_by_id > adc_user.id
+Ref: adc_examination_order.requested_by_id > adc_user.id
+Ref: adc_examination_project.service_id > adc_booking_service.id
+Ref: adc_examination_report.order_id > adc_examination_order.id
 Ref: adc_external_identity.user_id > adc_user.id
 Ref: adc_fund_allocation.prepared_by_id > adc_user.id
 Ref: adc_fund_allocation.reviewed_by_id > adc_user.id

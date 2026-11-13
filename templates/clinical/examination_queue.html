@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if frontdesk %}
+<p><a href="{% url 'frontdesk_home' %}">返回前台工作台</a></p>
+<h1>本店检查进度</h1>
+{% else %}
+<p><a href="{% url 'doctor_home' %}">返回医师工作台</a></p>
+<h1>检查执行与审核</h1>
+{% endif %}
+<section class="panel">
+  <ul class="worklist-items">
+    {% for row in rows %}
+    <li>
+      {% if frontdesk %}
+      <strong>{{ row.project }} · {{ row.number }}</strong>
+      <p>就诊 {{ row.visit_no }} · 申请 {{ row.requested_at|date:'Y-m-d H:i' }}</p>
+      {% else %}
+      <a href="{% url 'clinical_examination' row.order.pk %}">{{ row.order.project_name }} · {{ row.order.number }}</a>
+      <p>{{ row.visit.patient.name }} · {{ row.visit.clinic.name }} · 就诊 {{ row.visit.visit_no }}</p>
+      {% endif %}
+      <p>{{ row.progress }} · {{ row.publication }}</p>
+    </li>
+    {% empty %}<li>当前没有可办理的检查申请。</li>{% endfor %}
+  </ul>
+  {% if page.has_other_pages %}
+  <nav aria-label="检查列表分页">
+    {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">上一页</a>{% endif %}
+    <span>第 {{ page.number }} 页，共 {{ page.paginator.num_pages }} 页</span>
+    {% if page.has_next %}<a href="?page={{ page.next_page_number }}">下一页</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}

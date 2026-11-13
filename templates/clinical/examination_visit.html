@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block content %}
+<p><a href="{% url 'clinical_encounter' visit.pk %}">返回本次检查记录</a> · <a href="{% url 'clinical_examinations' %}">检查办理工作台</a></p>
+<h1>检查申请与报告</h1>
+<p>{{ visit.patient.name }} · {{ visit.clinic.name }} · 就诊 {{ visit.visit_no }}</p>
+<section class="panel">
+  <h2>本次检查申请</h2>
+  <ul class="worklist-items">
+    {% for row in rows %}
+    <li><a href="{% url 'clinical_examination' row.order.pk %}">{{ row.order.project_name }} · {{ row.order.number }}</a><p>{{ row.progress }} · {{ row.publication }}</p></li>
+    {% empty %}<li>本次就诊尚无检查申请。</li>{% endfor %}
+  </ul>
+  {% if form %}
+  <h3>开具检查申请</h3>
+  <p>本次依据为已确认的第 {{ record.revision }} 版检查记录。</p>
+  <form method="post">
+    {% csrf_token %}{% workspace_token %}
+    {{ form.as_p }}
+    <button type="submit">核对检查申请</button>
+  </form>
+  {% endif %}
+</section>
+{% if related_reports %}
+<section class="panel">
+  <h2>关联原就诊检查报告</h2>
+  {% for report in related_reports %}
+  <article class="clinical-history">
+    <h3>{{ report.project }} · 第 {{ report.revision }} 版</h3>
+    <p>{{ report.number }} · 原就诊 {{ report.visit_no }} · 发布 {{ report.released_at|date:'Y-m-d H:i' }}</p>
+    {{ report.body|linebreaks }}
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

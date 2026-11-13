@@ -1,4 +1,68 @@
 {
+  "er_examination_release": {
+    "title": "检查申请、独立审核与患者发布",
+    "tables": 10,
+    "relationships": 13,
+    "note": "申请关联准确检查记录及预约服务。实际执行时间和依据记录在申请。报告版本和办理事件追加保留。审核、发布、撤回分别登记，active_release 指向当前可查阅的发布事件。患者查阅逐次核对本人、原就诊和当前版本。",
+    "columns": {
+      "adc_visit": [
+        "id",
+        "clinic_id",
+        "patient_id"
+      ],
+      "adc_clinical_encounter": [
+        "id",
+        "visit_id"
+      ],
+      "adc_clinical_record_version": [
+        "id",
+        "encounter_id",
+        "revision"
+      ],
+      "adc_booking_service": [
+        "id",
+        "department_id"
+      ],
+      "adc_examination_project": [
+        "id",
+        "service_id",
+        "code",
+        "is_active"
+      ],
+      "adc_examination_duty": [
+        "id",
+        "project_id",
+        "user_id",
+        "kind",
+        "is_active"
+      ],
+      "adc_examination_order": [
+        "id",
+        "source_record_id",
+        "project_id",
+        "performed_by_id",
+        "performed_at",
+        "active_release_id"
+      ],
+      "adc_examination_report": [
+        "id",
+        "order_id",
+        "number",
+        "correction_reason"
+      ],
+      "adc_examination_event": [
+        "id",
+        "order_id",
+        "report_id",
+        "actor_id",
+        "action",
+        "occurred_at"
+      ],
+      "adc_user": [
+        "id"
+      ]
+    }
+  },
   "er_consent_versions": {
     "title": "医疗告知与准确步骤版本",
     "tables": 8,
@@ -2352,9 +2416,9 @@
   },
   "validation": {
     "passed": true,
-    "tables": 188,
-    "orm_tables": 187,
-    "columns_types_and_nullability_checked": 1847,
+    "tables": 193,
+    "orm_tables": 192,
+    "columns_types_and_nullability_checked": 1883,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2363,10 +2427,10 @@
         "database_type": "bigint"
       }
     ],
-    "orm_foreign_keys": 549,
-    "sql_foreign_keys": 550,
+    "orm_foreign_keys": 561,
+    "sql_foreign_keys": 562,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "1b6ac381f85069138d4cf3a65ab9cf49502973cafeaddab17ad86876d883ed95",
+    "snapshot_sha256": "af060ab57dd5417cc4f1e41b7d82c3d4aa192de518f483f7b0ad62484fad5108",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

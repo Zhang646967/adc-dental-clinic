@@ -29,6 +29,20 @@
   {% endif %}
 </section>
 {% if not patient_delegated %}{% include 'portal/visit_review.html' %}{% endif %}
+{% if examinations %}
+<section class="panel">
+  <h2>检查与报告</h2>
+  <ul class="worklist-items">
+    {% for item in examinations %}
+    <li>
+      <h3>{{ item.project }}</h3>
+      <p>{{ item.number }} · {{ item.label }}{% if item.revision %} · 第 {{ item.revision }} 版 · {{ item.released_at|date:'Y-m-d H:i' }}{% endif %}</p>
+      {% if item.revision %}<a class="button secondary" href="{% url 'portal_examination' visit.pk item.id %}?revision={{ item.revision }}">查看检查报告</a>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 <section id="frontdesk-help" class="panel" aria-labelledby="visit-frontdesk">
   <h2 id="visit-frontdesk">联系门店</h2>
   {% if needs_outcome_review %}<p class="notice"><strong>请联系门店核实。</strong> 本次安排已过计划结束时间，门店尚未登记到诊结果。</p>{% endif %}

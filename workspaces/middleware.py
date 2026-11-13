@@ -34,6 +34,9 @@ MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_me
     'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
 ALL=set(ROLES)
 ROUTES={
+ 'clinical_examinations':{'DENTIST'},'clinical_examination':{'DENTIST'},
+ 'clinical_examination_visit':{'DENTIST'},'clinical_examination_progress':{'FRONT_DESK'},
+ 'clinical_examination_order_confirm':{'DENTIST'},'clinical_examination_confirm':{'DENTIST'},
  'stock_queue':{'MANAGER','PHARMACIST'},'stock_receive':{'MANAGER','PHARMACIST'},
  'stock_detail':{'MANAGER','PHARMACIST'},'nursing_queue':{'NURSE'},'nursing_detail':{'NURSE'},'sterile_packs':{'NURSE'},
  'dispensing_queue':{'PHARMACIST'},'dispensing_detail':{'PHARMACIST'},'dispensing_confirm':{'PHARMACIST'},

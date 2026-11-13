@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-08。本目录列出187张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-13。本目录列出192张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -2472,6 +2472,176 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 跨表及历史触发器：
 
 - `equipment_event_history`：`CREATE TRIGGER equipment_event_history BEFORE INSERT OR DELETE OR UPDATE ON public.adc_equipment_event FOR EACH ROW EXECUTE FUNCTION adc_equipment_event_guard()`。
+
+## adc_examination_duty
+
+模型：`clinical.ExaminationDuty`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| project_id | bigint | FK | 否 | `adc_examination_project.id` |
+| user_id | bigint | FK | 否 | `adc_user.id` |
+| kind | character varying(12) | — | 否 | — |
+| is_active | boolean | — | 否 | — |
+
+数据库约束：
+
+- `adc_examination_duty_pkey`：`PRIMARY KEY (id)`。
+- `adc_examination_duty_project_id_f2d65bf4_fk_adc_exami`：`FOREIGN KEY (project_id) REFERENCES adc_examination_project(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_duty_user_id_054c984f_fk_adc_user_id`：`FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `examination_duty_unique`：`UNIQUE (project_id, user_id, kind)`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_duty_pkey`：`CREATE UNIQUE INDEX adc_examination_duty_pkey ON public.adc_examination_duty USING btree (id)`。
+- `adc_examination_duty_project_id_f2d65bf4`：`CREATE INDEX adc_examination_duty_project_id_f2d65bf4 ON public.adc_examination_duty USING btree (project_id)`。
+- `adc_examination_duty_user_id_054c984f`：`CREATE INDEX adc_examination_duty_user_id_054c984f ON public.adc_examination_duty USING btree (user_id)`。
+- `examination_duty_unique`：`CREATE UNIQUE INDEX examination_duty_unique ON public.adc_examination_duty USING btree (project_id, user_id, kind)`。
+
+跨表及历史触发器：
+
+
+## adc_examination_event
+
+模型：`clinical.ExaminationEvent`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| order_id | bigint | FK | 否 | `adc_examination_order.id` |
+| report_id | bigint | FK | 是 | `adc_examination_report.id` |
+| action | character varying(12) | — | 否 | — |
+| actor_id | bigint | FK | 否 | `adc_user.id` |
+| occurred_at | timestamp with time zone | — | 否 | — |
+| reason | character varying(500) | — | 否 | — |
+| operation_id | uuid | UK | 否 | — |
+
+数据库约束：
+
+- `adc_examination_even_order_id_442b5efd_fk_adc_exami`：`FOREIGN KEY (order_id) REFERENCES adc_examination_order(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_even_report_id_b7764eaf_fk_adc_exami`：`FOREIGN KEY (report_id) REFERENCES adc_examination_report(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_event_actor_id_20f70b22_fk_adc_user_id`：`FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_event_operation_id_key`：`UNIQUE (operation_id)`。
+- `adc_examination_event_pkey`：`PRIMARY KEY (id)`。
+- `examination_event_report`：`CHECK (((((action)::text = ANY ((ARRAY['ORDER'::character varying, 'EXECUTE'::character varying])::text[])) AND (report_id IS NULL)) OR (((action)::text = ANY ((ARRAY['SUBMIT'::character varying, 'APPROVE'::character varying, 'RETURN'::character varying, 'PUBLISH'::character varying, 'WITHDRAW'::character varying])::text[])) AND (report_id IS NOT NULL))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_event_actor_id_20f70b22`：`CREATE INDEX adc_examination_event_actor_id_20f70b22 ON public.adc_examination_event USING btree (actor_id)`。
+- `adc_examination_event_operation_id_key`：`CREATE UNIQUE INDEX adc_examination_event_operation_id_key ON public.adc_examination_event USING btree (operation_id)`。
+- `adc_examination_event_order_id_442b5efd`：`CREATE INDEX adc_examination_event_order_id_442b5efd ON public.adc_examination_event USING btree (order_id)`。
+- `adc_examination_event_pkey`：`CREATE UNIQUE INDEX adc_examination_event_pkey ON public.adc_examination_event USING btree (id)`。
+- `adc_examination_event_report_id_b7764eaf`：`CREATE INDEX adc_examination_event_report_id_b7764eaf ON public.adc_examination_event USING btree (report_id)`。
+- `examination_independent_decision`：`CREATE UNIQUE INDEX examination_independent_decision ON public.adc_examination_event USING btree (report_id) WHERE ((action)::text = ANY ((ARRAY['APPROVE'::character varying, 'RETURN'::character varying])::text[]))`。
+- `examination_report_event_unique`：`CREATE UNIQUE INDEX examination_report_event_unique ON public.adc_examination_event USING btree (report_id, action) WHERE (report_id IS NOT NULL)`。
+
+跨表及历史触发器：
+
+- `adc_examination_event_retained`：`CREATE TRIGGER adc_examination_event_retained BEFORE DELETE OR UPDATE ON public.adc_examination_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
+
+## adc_examination_order
+
+模型：`clinical.ExaminationOrder`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| source_record_id | bigint | FK | 否 | `adc_clinical_record_version.id` |
+| project_id | bigint | FK | 否 | `adc_examination_project.id` |
+| project_name | character varying(100) | — | 否 | — |
+| number | character varying(35) | UK | 否 | — |
+| requested_by_id | bigint | FK | 否 | `adc_user.id` |
+| requested_at | timestamp with time zone | — | 否 | — |
+| purpose | character varying(500) | — | 否 | — |
+| performed_at | timestamp with time zone | — | 是 | — |
+| performed_by_id | bigint | FK | 是 | `adc_user.id` |
+| source_reference | character varying(120) | — | 否 | — |
+| active_release_id | bigint | FK | 是 | `adc_examination_event.id` |
+| revision | integer | — | 否 | — |
+
+数据库约束：
+
+- `adc_examination_orde_active_release_id_ddb3ce2f_fk_adc_exami`：`FOREIGN KEY (active_release_id) REFERENCES adc_examination_event(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_orde_project_id_3718f592_fk_adc_exami`：`FOREIGN KEY (project_id) REFERENCES adc_examination_project(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_orde_source_record_id_c8af5439_fk_adc_clini`：`FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_order_number_key`：`UNIQUE (number)`。
+- `adc_examination_order_performed_by_id_7016e173_fk_adc_user_id`：`FOREIGN KEY (performed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_order_pkey`：`PRIMARY KEY (id)`。
+- `adc_examination_order_requested_by_id_7aeb6b31_fk_adc_user_id`：`FOREIGN KEY (requested_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_order_revision_check`：`CHECK ((revision >= 0))`。
+- `examination_execution_complete`：`CHECK ((((performed_at IS NULL) AND (performed_by_id IS NULL) AND ((source_reference)::text = ''::text)) OR ((performed_at IS NOT NULL) AND (performed_by_id IS NOT NULL) AND (NOT ((source_reference)::text = ''::text)))))`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_order_active_release_id_ddb3ce2f`：`CREATE INDEX adc_examination_order_active_release_id_ddb3ce2f ON public.adc_examination_order USING btree (active_release_id)`。
+- `adc_examination_order_number_a2f907da_like`：`CREATE INDEX adc_examination_order_number_a2f907da_like ON public.adc_examination_order USING btree (number varchar_pattern_ops)`。
+- `adc_examination_order_number_key`：`CREATE UNIQUE INDEX adc_examination_order_number_key ON public.adc_examination_order USING btree (number)`。
+- `adc_examination_order_performed_by_id_7016e173`：`CREATE INDEX adc_examination_order_performed_by_id_7016e173 ON public.adc_examination_order USING btree (performed_by_id)`。
+- `adc_examination_order_pkey`：`CREATE UNIQUE INDEX adc_examination_order_pkey ON public.adc_examination_order USING btree (id)`。
+- `adc_examination_order_project_id_3718f592`：`CREATE INDEX adc_examination_order_project_id_3718f592 ON public.adc_examination_order USING btree (project_id)`。
+- `adc_examination_order_requested_by_id_7aeb6b31`：`CREATE INDEX adc_examination_order_requested_by_id_7aeb6b31 ON public.adc_examination_order USING btree (requested_by_id)`。
+- `adc_examination_order_source_record_id_c8af5439`：`CREATE INDEX adc_examination_order_source_record_id_c8af5439 ON public.adc_examination_order USING btree (source_record_id)`。
+
+跨表及历史触发器：
+
+
+## adc_examination_project
+
+模型：`clinical.ExaminationProject`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| service_id | bigint | FK | 否 | `adc_booking_service.id` |
+| code | character varying(40) | — | 否 | — |
+| name | character varying(100) | — | 否 | — |
+| is_active | boolean | — | 否 | — |
+
+数据库约束：
+
+- `adc_examination_proj_service_id_1fce6bc8_fk_adc_booki`：`FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_project_pkey`：`PRIMARY KEY (id)`。
+- `examination_project_code`：`UNIQUE (service_id, code)`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_project_pkey`：`CREATE UNIQUE INDEX adc_examination_project_pkey ON public.adc_examination_project USING btree (id)`。
+- `adc_examination_project_service_id_1fce6bc8`：`CREATE INDEX adc_examination_project_service_id_1fce6bc8 ON public.adc_examination_project USING btree (service_id)`。
+- `examination_project_code`：`CREATE UNIQUE INDEX examination_project_code ON public.adc_examination_project USING btree (service_id, code)`。
+
+跨表及历史触发器：
+
+
+## adc_examination_report
+
+模型：`clinical.ExaminationReport`。
+
+| 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
+|---|---|---|---|---|
+| id | bigint | PK | 否 | — |
+| order_id | bigint | FK | 否 | `adc_examination_order.id` |
+| number | integer | — | 否 | — |
+| body | character varying(2000) | — | 否 | — |
+| correction_reason | character varying(500) | — | 否 | — |
+
+数据库约束：
+
+- `adc_examination_repo_order_id_2b1ccdda_fk_adc_exami`：`FOREIGN KEY (order_id) REFERENCES adc_examination_order(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_report_number_check`：`CHECK ((number >= 0))`。
+- `adc_examination_report_pkey`：`PRIMARY KEY (id)`。
+- `examination_correction_explained`：`CHECK (((((correction_reason)::text = ''::text) AND (number = 1)) OR ((number > 1) AND (NOT ((correction_reason)::text = ''::text)))))`。
+- `examination_report_version`：`UNIQUE (order_id, number)`。
+
+索引（含条件唯一索引）：
+
+- `adc_examination_report_order_id_2b1ccdda`：`CREATE INDEX adc_examination_report_order_id_2b1ccdda ON public.adc_examination_report USING btree (order_id)`。
+- `adc_examination_report_pkey`：`CREATE UNIQUE INDEX adc_examination_report_pkey ON public.adc_examination_report USING btree (id)`。
+- `examination_report_version`：`CREATE UNIQUE INDEX examination_report_version ON public.adc_examination_report USING btree (order_id, number)`。
+
+跨表及历史触发器：
+
+- `adc_examination_report_retained`：`CREATE TRIGGER adc_examination_report_retained BEFORE DELETE OR UPDATE ON public.adc_examination_report FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()`。
 
 ## adc_external_identity
 

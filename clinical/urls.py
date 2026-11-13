@@ -8,8 +8,15 @@ from clinical import consent_views as consents
 from clinical import preflight_views as preflight
 from portal import medical_views as medical
 from clinical import archive_views as archives
+from clinical import examination_views as examinations
 
 urlpatterns=[
+    path('clinical/examinations/', examinations.queue, name='clinical_examinations'),
+    path('clinical/examinations/progress/', examinations.frontdesk, name='clinical_examination_progress'),
+    path('clinical/examinations/<int:pk>/', examinations.detail, name='clinical_examination'),
+    path('clinical/encounters/<int:pk>/examinations/', examinations.visit_workspace, name='clinical_examination_visit'),
+    path('clinical/encounters/<int:pk>/examinations/confirm/', examinations.confirm, name='clinical_examination_order_confirm'),
+    path('clinical/encounters/<int:pk>/examinations/<int:order_id>/confirm/', examinations.confirm, name='clinical_examination_confirm'),
     path('clinical/archives/',archives.listing,name='clinical_archives'),
     path('clinical/archives/summary/',archives.summary,name='clinical_archive_summary'),
     path('clinical/encounters/<int:pk>/archive/',archives.workspace,name='clinical_archive'),

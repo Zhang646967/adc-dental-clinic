@@ -29,10 +29,10 @@ from tests.test_treatment_continuity import PlanFixture
 from tests.workspace_client import WorkspaceClient
 
 
-class VisitReviewWorkflowTests(PlanFixture, TransactionTestCase):
+class VisitReviewFixture(PlanFixture):
     password = 'synthetic-visit-review-only'
 
-    def setUp(self):
+    def setup_visit_review(self):
         self.setup_authority()
         self.authorize()
         self.item = TreatmentType.objects.create(code='VISIT-REVIEW', name='课程实际处置',
@@ -105,8 +105,8 @@ class VisitReviewWorkflowTests(PlanFixture, TransactionTestCase):
         reviewed = prepare_review(actor=self.finance, entry_id=entry.pk, decision='approve', reason='独立核对合成凭据')
         confirm_cash_review(actor=self.finance, proposal_token=reviewed['proposal_token'], confirmed=True)
 
-    def book_followup(self, instruction, *, hours=2):
-        followup = self.booking(start=self.t + timedelta(hours=hours))
+    def book_followup(self, instruction, *, hours=2, slot=None):
+        followup = self.booking(slot=slot, start=self.t + timedelta(hours=hours))
         url = reverse('clinical_next_link', args=[instruction.pk])
         preview = self.front_web.post(url, {'phase': 'preview', 'visit': followup.pk})
         self.assertEqual(preview.status_code, 200, preview.content)
@@ -146,6 +146,11 @@ class VisitReviewWorkflowTests(PlanFixture, TransactionTestCase):
         PatientAccess.objects.create(user=other, patient=self.p2)
         self.ctx(other, 'PATIENT')
         return other
+
+
+class VisitReviewWorkflowTests(VisitReviewFixture, TransactionTestCase):
+    def setUp(self):
+        self.setup_visit_review()
 
     def test_one_visit_from_booking_to_financial_and_followup_facts(self):
         self.book_and_arrive()

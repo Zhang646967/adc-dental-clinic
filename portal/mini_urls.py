@@ -82,6 +82,7 @@ urlpatterns = [
     path('candidates/', api.candidates, name='mini_candidates'),
     path('visits/', api.visits, name='mini_visits'),
     path('visits/<int:pk>/', api.detail, name='mini_visit'),
+    path('visits/<int:pk>/examinations/<int:order_id>/', api.examination, name='mini_examination'),
     path('invoices/<int:pk>/', invoices.detail, name='mini_invoice'),
     path('billing/', patient_billing.mini, name='mini_billing'),
     path('funds/', patient_funds.mini, name='mini_funds'),

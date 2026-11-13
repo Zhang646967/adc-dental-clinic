@@ -386,6 +386,20 @@
       "function_definition": "CREATE OR REPLACE FUNCTION public.adc_equipment_event_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE a adc_equipment_asset%ROWTYPE; p adc_equipment_event%ROWTYPE;\nBEGIN\n  IF TG_OP<>'INSERT' THEN\n    RAISE EXCEPTION 'equipment events are append-only' USING ERRCODE='23514';\n  END IF;\n  SELECT * INTO a FROM adc_equipment_asset WHERE id=NEW.asset_id FOR UPDATE;\n  IF NOT FOUND OR NEW.sequence<>a.lock_version OR NEW.next_state<>a.state\n      OR NEW.next_service_due IS DISTINCT FROM a.next_service_due\n      OR NEW.performed_on>(current_timestamp AT TIME ZONE 'Asia/Shanghai')::date THEN\n    RAISE EXCEPTION 'equipment event and current asset disagree' USING ERRCODE='23514';\n  END IF;\n  IF NEW.sequence=0 THEN\n    IF NEW.kind<>'REGISTER' OR NEW.previous_state<>'' OR NEW.next_state<>'IN_SERVICE'\n       OR NEW.performed_on<>a.acquired_on OR NEW.cost IS DISTINCT FROM a.acquisition_cost\n       OR NEW.recorded_by_id<>a.registered_by_id THEN\n      RAISE EXCEPTION 'invalid equipment registration event' USING ERRCODE='23514';\n    END IF;\n  ELSE\n    SELECT * INTO p FROM adc_equipment_event WHERE asset_id=a.id AND sequence=NEW.sequence-1;\n    IF NOT FOUND OR NEW.previous_state<>p.next_state OR NEW.performed_on<p.performed_on\n       OR NOT ((NEW.kind='MAINTENANCE' AND p.next_state='IN_SERVICE' AND NEW.next_state='MAINTENANCE')\n           OR (NEW.kind='SERVICE' AND p.next_state IN ('IN_SERVICE','MAINTENANCE') AND NEW.next_state='IN_SERVICE')\n           OR (NEW.kind='RETIRE' AND p.next_state IN ('IN_SERVICE','MAINTENANCE') AND NEW.next_state='RETIRED')) THEN\n      RAISE EXCEPTION 'invalid equipment transition history' USING ERRCODE='23514';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n"
     },
     {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_retained",
+      "definition": "CREATE TRIGGER adc_examination_event_retained BEFORE DELETE OR UPDATE ON public.adc_examination_event FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "adc_examination_report_retained",
+      "definition": "CREATE TRIGGER adc_examination_report_retained BEFORE DELETE OR UPDATE ON public.adc_examination_report FOR EACH ROW EXECUTE FUNCTION adc_clinical_history_guard()",
+      "function": "adc_clinical_history_guard",
+      "function_definition": "CREATE OR REPLACE FUNCTION public.adc_clinical_history_guard()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN RAISE EXCEPTION 'Clinical decision, activation and read evidence is append-only'; END $function$\n"
+    },
+    {
       "table": "adc_fund_allocation",
       "name": "fund_allocation_complete",
       "definition": "CREATE CONSTRAINT TRIGGER fund_allocation_complete AFTER INSERT ON public.adc_fund_allocation DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION adc_check_fund_allocation_complete()",
@@ -10080,6 +10094,519 @@
           "unique": false,
           "null": false,
           "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_examination_duty",
+      "model": "clinical.ExaminationDuty",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "project",
+          "column": "project_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_examination_project",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "user",
+          "column": "user_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "kind",
+          "column": "kind",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "is_active",
+          "column": "is_active",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_examination_event",
+      "model": "clinical.ExaminationEvent",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "order",
+          "column": "order_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_examination_order",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "report",
+          "column": "report_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_examination_report",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "action",
+          "column": "action",
+          "type": "CharField",
+          "db_type": "varchar(12)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 12,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "actor",
+          "column": "actor_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "occurred_at",
+          "column": "occurred_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "reason",
+          "column": "reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operation_id",
+          "column": "operation_id",
+          "type": "UUIDField",
+          "db_type": "uuid",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 32,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_examination_order",
+      "model": "clinical.ExaminationOrder",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "source_record",
+          "column": "source_record_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_clinical_record_version",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "project",
+          "column": "project_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_examination_project",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "project_name",
+          "column": "project_name",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "number",
+          "column": "number",
+          "type": "CharField",
+          "db_type": "varchar(35)",
+          "pk": false,
+          "unique": true,
+          "null": false,
+          "max_length": 35,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "requested_by",
+          "column": "requested_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "requested_at",
+          "column": "requested_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "purpose",
+          "column": "purpose",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "performed_at",
+          "column": "performed_at",
+          "type": "DateTimeField",
+          "db_type": "timestamp with time zone",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "performed_by",
+          "column": "performed_by_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_user",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "source_reference",
+          "column": "source_reference",
+          "type": "CharField",
+          "db_type": "varchar(120)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 120,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "active_release",
+          "column": "active_release_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": true,
+          "max_length": null,
+          "target_table": "adc_examination_event",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "revision",
+          "column": "revision",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_examination_project",
+      "model": "clinical.ExaminationProject",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "service",
+          "column": "service_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_booking_service",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "code",
+          "column": "code",
+          "type": "CharField",
+          "db_type": "varchar(40)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 40,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "name",
+          "column": "name",
+          "type": "CharField",
+          "db_type": "varchar(100)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 100,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "is_active",
+          "column": "is_active",
+          "type": "BooleanField",
+          "db_type": "boolean",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        }
+      ],
+      "unique_together": []
+    },
+    {
+      "table": "adc_examination_report",
+      "model": "clinical.ExaminationReport",
+      "app": "clinical",
+      "auto_created": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "BigAutoField",
+          "db_type": "bigint",
+          "pk": true,
+          "unique": true,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "order",
+          "column": "order_id",
+          "type": "ForeignKey",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": "adc_examination_order",
+          "target_column": "id",
+          "on_delete": "PROTECT"
+        },
+        {
+          "name": "number",
+          "column": "number",
+          "type": "PositiveIntegerField",
+          "db_type": "integer",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "body",
+          "column": "body",
+          "type": "CharField",
+          "db_type": "varchar(2000)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 2000,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "correction_reason",
+          "column": "correction_reason",
+          "type": "CharField",
+          "db_type": "varchar(500)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 500,
           "target_table": null,
           "target_column": null,
           "on_delete": null
@@ -27034,6 +27561,11 @@
     "adc_equipment_asset",
     "adc_equipment_cost_amendment",
     "adc_equipment_event",
+    "adc_examination_duty",
+    "adc_examination_event",
+    "adc_examination_order",
+    "adc_examination_project",
+    "adc_examination_report",
     "adc_external_identity",
     "adc_fund_allocation",
     "adc_fund_allocation_line",
@@ -30067,6 +30599,168 @@
       "name": "equipment_event_state_valid",
       "kind": "c",
       "definition": "CHECK (((next_state)::text = ANY ((ARRAY['IN_SERVICE'::character varying, 'MAINTENANCE'::character varying, 'RETIRED'::character varying])::text[])))"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "adc_examination_duty_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "adc_examination_duty_project_id_f2d65bf4_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (project_id) REFERENCES adc_examination_project(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "adc_examination_duty_user_id_054c984f_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "examination_duty_unique",
+      "kind": "u",
+      "definition": "UNIQUE (project_id, user_id, kind)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_even_order_id_442b5efd_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (order_id) REFERENCES adc_examination_order(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_even_report_id_b7764eaf_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (report_id) REFERENCES adc_examination_report(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_actor_id_20f70b22_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_operation_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (operation_id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "examination_event_report",
+      "kind": "c",
+      "definition": "CHECK (((((action)::text = ANY ((ARRAY['ORDER'::character varying, 'EXECUTE'::character varying])::text[])) AND (report_id IS NULL)) OR (((action)::text = ANY ((ARRAY['SUBMIT'::character varying, 'APPROVE'::character varying, 'RETURN'::character varying, 'PUBLISH'::character varying, 'WITHDRAW'::character varying])::text[])) AND (report_id IS NOT NULL))))"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_orde_active_release_id_ddb3ce2f_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (active_release_id) REFERENCES adc_examination_event(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_orde_project_id_3718f592_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (project_id) REFERENCES adc_examination_project(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_orde_source_record_id_c8af5439_fk_adc_clini",
+      "kind": "f",
+      "definition": "FOREIGN KEY (source_record_id) REFERENCES adc_clinical_record_version(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_number_key",
+      "kind": "u",
+      "definition": "UNIQUE (number)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_performed_by_id_7016e173_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (performed_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_requested_by_id_7aeb6b31_fk_adc_user_id",
+      "kind": "f",
+      "definition": "FOREIGN KEY (requested_by_id) REFERENCES adc_user(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "examination_execution_complete",
+      "kind": "c",
+      "definition": "CHECK ((((performed_at IS NULL) AND (performed_by_id IS NULL) AND ((source_reference)::text = ''::text)) OR ((performed_at IS NOT NULL) AND (performed_by_id IS NOT NULL) AND (NOT ((source_reference)::text = ''::text)))))"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "adc_examination_proj_service_id_1fce6bc8_fk_adc_booki",
+      "kind": "f",
+      "definition": "FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "adc_examination_project_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "examination_project_code",
+      "kind": "u",
+      "definition": "UNIQUE (service_id, code)"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "adc_examination_repo_order_id_2b1ccdda_fk_adc_exami",
+      "kind": "f",
+      "definition": "FOREIGN KEY (order_id) REFERENCES adc_examination_order(id) DEFERRABLE INITIALLY DEFERRED"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "adc_examination_report_number_check",
+      "kind": "c",
+      "definition": "CHECK ((number >= 0))"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "adc_examination_report_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "examination_correction_explained",
+      "kind": "c",
+      "definition": "CHECK (((((correction_reason)::text = ''::text) AND (number = 1)) OR ((number > 1) AND (NOT ((correction_reason)::text = ''::text)))))"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "examination_report_version",
+      "kind": "u",
+      "definition": "UNIQUE (order_id, number)"
     },
     {
       "table": "adc_external_identity",
@@ -37235,6 +37929,131 @@
       "definition": "CREATE UNIQUE INDEX equipment_event_sequence_unique ON public.adc_equipment_event USING btree (asset_id, sequence)"
     },
     {
+      "table": "adc_examination_duty",
+      "name": "adc_examination_duty_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_duty_pkey ON public.adc_examination_duty USING btree (id)"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "adc_examination_duty_project_id_f2d65bf4",
+      "definition": "CREATE INDEX adc_examination_duty_project_id_f2d65bf4 ON public.adc_examination_duty USING btree (project_id)"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "adc_examination_duty_user_id_054c984f",
+      "definition": "CREATE INDEX adc_examination_duty_user_id_054c984f ON public.adc_examination_duty USING btree (user_id)"
+    },
+    {
+      "table": "adc_examination_duty",
+      "name": "examination_duty_unique",
+      "definition": "CREATE UNIQUE INDEX examination_duty_unique ON public.adc_examination_duty USING btree (project_id, user_id, kind)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_actor_id_20f70b22",
+      "definition": "CREATE INDEX adc_examination_event_actor_id_20f70b22 ON public.adc_examination_event USING btree (actor_id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_operation_id_key",
+      "definition": "CREATE UNIQUE INDEX adc_examination_event_operation_id_key ON public.adc_examination_event USING btree (operation_id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_order_id_442b5efd",
+      "definition": "CREATE INDEX adc_examination_event_order_id_442b5efd ON public.adc_examination_event USING btree (order_id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_event_pkey ON public.adc_examination_event USING btree (id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "adc_examination_event_report_id_b7764eaf",
+      "definition": "CREATE INDEX adc_examination_event_report_id_b7764eaf ON public.adc_examination_event USING btree (report_id)"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "examination_independent_decision",
+      "definition": "CREATE UNIQUE INDEX examination_independent_decision ON public.adc_examination_event USING btree (report_id) WHERE ((action)::text = ANY ((ARRAY['APPROVE'::character varying, 'RETURN'::character varying])::text[]))"
+    },
+    {
+      "table": "adc_examination_event",
+      "name": "examination_report_event_unique",
+      "definition": "CREATE UNIQUE INDEX examination_report_event_unique ON public.adc_examination_event USING btree (report_id, action) WHERE (report_id IS NOT NULL)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_active_release_id_ddb3ce2f",
+      "definition": "CREATE INDEX adc_examination_order_active_release_id_ddb3ce2f ON public.adc_examination_order USING btree (active_release_id)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_number_a2f907da_like",
+      "definition": "CREATE INDEX adc_examination_order_number_a2f907da_like ON public.adc_examination_order USING btree (number varchar_pattern_ops)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_number_key",
+      "definition": "CREATE UNIQUE INDEX adc_examination_order_number_key ON public.adc_examination_order USING btree (number)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_performed_by_id_7016e173",
+      "definition": "CREATE INDEX adc_examination_order_performed_by_id_7016e173 ON public.adc_examination_order USING btree (performed_by_id)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_order_pkey ON public.adc_examination_order USING btree (id)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_project_id_3718f592",
+      "definition": "CREATE INDEX adc_examination_order_project_id_3718f592 ON public.adc_examination_order USING btree (project_id)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_requested_by_id_7aeb6b31",
+      "definition": "CREATE INDEX adc_examination_order_requested_by_id_7aeb6b31 ON public.adc_examination_order USING btree (requested_by_id)"
+    },
+    {
+      "table": "adc_examination_order",
+      "name": "adc_examination_order_source_record_id_c8af5439",
+      "definition": "CREATE INDEX adc_examination_order_source_record_id_c8af5439 ON public.adc_examination_order USING btree (source_record_id)"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "adc_examination_project_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_project_pkey ON public.adc_examination_project USING btree (id)"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "adc_examination_project_service_id_1fce6bc8",
+      "definition": "CREATE INDEX adc_examination_project_service_id_1fce6bc8 ON public.adc_examination_project USING btree (service_id)"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "examination_project_code",
+      "definition": "CREATE UNIQUE INDEX examination_project_code ON public.adc_examination_project USING btree (service_id, code)"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "adc_examination_report_order_id_2b1ccdda",
+      "definition": "CREATE INDEX adc_examination_report_order_id_2b1ccdda ON public.adc_examination_report USING btree (order_id)"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "adc_examination_report_pkey",
+      "definition": "CREATE UNIQUE INDEX adc_examination_report_pkey ON public.adc_examination_report USING btree (id)"
+    },
+    {
+      "table": "adc_examination_report",
+      "name": "examination_report_version",
+      "definition": "CREATE UNIQUE INDEX examination_report_version ON public.adc_examination_report USING btree (order_id, number)"
+    },
+    {
       "table": "adc_external_identity",
       "name": "adc_external_identity_pkey",
       "definition": "CREATE UNIQUE INDEX adc_external_identity_pkey ON public.adc_external_identity USING btree (id)"
@@ -44356,6 +45175,222 @@
     {
       "table": "adc_equipment_event",
       "column": "recorded_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_duty",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_duty",
+      "column": "kind",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_duty",
+      "column": "is_active",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_examination_duty",
+      "column": "user_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_duty",
+      "column": "project_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "action",
+      "db_type": "character varying(12)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "occurred_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "operation_id",
+      "db_type": "uuid",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "actor_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "order_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_event",
+      "column": "report_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "project_name",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "number",
+      "db_type": "character varying(35)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "requested_at",
+      "db_type": "timestamp with time zone",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "purpose",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "performed_at",
+      "db_type": "timestamp with time zone",
+      "null": true
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "source_reference",
+      "db_type": "character varying(120)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "revision",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "active_release_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "performed_by_id",
+      "db_type": "bigint",
+      "null": true
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "requested_by_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "source_record_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_order",
+      "column": "project_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_project",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_project",
+      "column": "code",
+      "db_type": "character varying(40)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_project",
+      "column": "name",
+      "db_type": "character varying(100)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_project",
+      "column": "is_active",
+      "db_type": "boolean",
+      "null": false
+    },
+    {
+      "table": "adc_examination_project",
+      "column": "service_id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_report",
+      "column": "id",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
+      "table": "adc_examination_report",
+      "column": "number",
+      "db_type": "integer",
+      "null": false
+    },
+    {
+      "table": "adc_examination_report",
+      "column": "body",
+      "db_type": "character varying(2000)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_report",
+      "column": "correction_reason",
+      "db_type": "character varying(500)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_report",
+      "column": "order_id",
       "db_type": "bigint",
       "null": false
     },
@@ -51832,6 +52867,10 @@
       "name": "0021_c5_batch_nursing"
     },
     {
+      "app": "clinical",
+      "name": "0022_examination_reports"
+    },
+    {
       "app": "contenttypes",
       "name": "0001_initial"
     },
@@ -52085,6 +53124,6 @@
     }
   ],
   "observed_database": "PostgreSQL 17.11 isolated synthetic",
-  "application_commit": "4e1abde5de559e55ebd01cf14458b5e055acabd9",
-  "observed_on": "2026-11-08"
+  "observed_on": "2026-11-13",
+  "source_migration": "clinical.0022_examination_reports"
 }

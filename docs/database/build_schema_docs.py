@@ -11,6 +11,22 @@ ROOT = Path(__file__).resolve().parent
 # Selected columns keep the printed views legible; schema_snapshot.json and
 # FIELD_CATALOG.md retain every ORM column and every actual SQL constraint.
 VIEWS = {
+    'er_examination_release': {
+        'title': '检查申请、独立审核与患者发布',
+        'tables': {
+            'adc_visit': ['id', 'clinic_id', 'patient_id'],
+            'adc_clinical_encounter': ['id', 'visit_id'],
+            'adc_clinical_record_version': ['id', 'encounter_id', 'revision'],
+            'adc_booking_service': ['id', 'department_id'],
+            'adc_examination_project': ['id', 'service_id', 'code', 'is_active'],
+            'adc_examination_duty': ['id', 'project_id', 'user_id', 'kind', 'is_active'],
+            'adc_examination_order': ['id', 'source_record_id', 'project_id', 'performed_by_id', 'performed_at', 'active_release_id'],
+            'adc_examination_report': ['id', 'order_id', 'number', 'correction_reason'],
+            'adc_examination_event': ['id', 'order_id', 'report_id', 'actor_id', 'action', 'occurred_at'],
+            'adc_user': ['id'],
+        },
+        'note': '申请关联准确检查记录及预约服务。实际执行时间和依据记录在申请。报告版本和办理事件追加保留。审核、发布、撤回分别登记，active_release 指向当前可查阅的发布事件。患者查阅逐次核对本人、原就诊和当前版本。',
+    },
     'er_consent_versions': {'title': '医疗告知与准确步骤版本', 'tables': {'adc_user': ['id', 'dentist_id'], 'adc_treatment_step': ['id', 'plan_id'], 'adc_plan_version': ['id', 'plan_id', 'source_record_id', 'revision'], 'adc_plan_step_version': ['id', 'version_id', 'step_id', 'tooth', 'surface'], 'adc_clinical_record_version': ['id', 'encounter_id', 'revision'], 'adc_medical_consent': ['id', 'step_id', 'opened_by_id', 'revision'], 'adc_consent_version': ['id', 'consent_id', 'previous_id', 'step_version_id', 'source_record_id', 'prepared_by_id', 'revision', 'scope_digest']}, 'note': '稳定步骤至多一个医疗告知入口；版本引用准确方案步骤和检查，previous为同入口的一对一追加链。原方案JSON保留当时八项说明，新表保留身份核对依据、患者快照与范围摘要。方案选择、告知和医疗决定分别办理；图中只绘制实际SQL外键，不把JSON内的编号画成数据库约束。'},
     'er_consent_events': {'title': '医疗问答与决定来源', 'tables': {'adc_patient': ['id', 'patient_no'], 'adc_user': ['id', 'dentist_id'], 'adc_patient_access': ['id', 'user_id', 'patient_id', 'is_active'], 'adc_medical_consent': ['id', 'step_id', 'revision'], 'adc_consent_version': ['id', 'consent_id', 'revision'], 'adc_consent_event': ['id', 'consent_id', 'version_id', 'actor_id', 'self_access_id', 'reply_to_id', 'action', 'source', 'occurred_at', 'recorded_at']}, 'note': '每个事件只能属于一份准确告知；本人来源引用自己的PatientAccess，纸质原件登记不冒充本人点击。reply_to为可空一对一答复关系，同一问题不能被重复覆盖，触发器核对同入口问题。历史事件不可改写；撤回另记事件，未答复问题和新版本待决定由事件推导。预约代办授权不作为临床读取或医疗代签依据。'},
     'er_clinical_documents': {'title': '初复诊文书版本与准确临床来源', 'tables': {'adc_visit': ['id', 'patient_id', 'clinic_id', 'dentist_id', 'status'], 'adc_clinical_encounter': ['id', 'visit_id'], 'adc_clinical_record_version': ['id', 'encounter_id', 'revision'], 'adc_visit_record_version': ['id', 'visit_id', 'revision_no'], 'adc_clinical_document': ['id', 'encounter_id', 'revision'], 'adc_clinical_document_draft': ['id', 'document_id', 'base_version_id', 'payload'], 'adc_clinical_document_version': ['id', 'document_id', 'previous_id', 'prior_visit_version_id', 'source_record_id', 'care_record_id', 'revision', 'content_digest']}, 'note': '一次实际接诊至多一个完整文书入口；草稿与确认版本分开。确认版本引用准确检查与接诊处置，previous为同文书的一对一追加链，prior_visit_version为同患者同店另一就诊的可空多对一复诊来源。正文及来源JSON冻结事实与当时身份，内容摘要不等于可靠电子签名。原金额由财务模块拥有；具体告知、医疗决定和固定归档分别见对应视图，不因文书确认而自动完成。'},
@@ -609,7 +625,9 @@ def build():
         for t,col,parent,pcol,child_mult,parent_mult in edges:
             parent_symbol='teeodot' if parent_mult=='0..1' else 'teetee'
             child_symbol='teeodot' if child_mult=='0..1' else 'crowodot'
-            layout=', constraint=false' if (t,col)==('adc_reception_case','visit_id') else ''
+            layout=', constraint=false' if (t,col) in (
+                ('adc_reception_case','visit_id'), ('adc_examination_order','active_release_id'),
+            ) else ''
             parts += ['"'+parent+'" -> "'+t+'" [arrowtail="'+parent_symbol+'", arrowhead="'+child_symbol+'"'+layout+', tooltip="'+t+'.'+col+' references '+parent+'.'+pcol+'; '+child_mult+':'+parent_mult+'"];']
         parts += ['}']
         (ROOT/(name+'.dot')).write_text('\n'.join(parts)+'\n')

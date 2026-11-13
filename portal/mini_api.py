@@ -24,6 +24,7 @@ from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
 from portal import mini_forms as forms, services, rescheduling
 from portal.availability_search import availability_result
+from portal.examination_review import examination_summaries, published_examination
 from portal.patient_dashboard import needs_outcome_review
 from portal.service_catalogue import public_profiles, public_profile, require_self_service
 from portal.service_projection import service_data
@@ -232,13 +233,22 @@ def visits(request):
 
 
 @endpoint()
+def examination(request, pk, order_id):
+    patient_access(request.user, self_only=True)
+    visit = rescheduling.owned_visit(request.user, pk)
+    return result(request, published_examination(visit, order_id, request.GET.get('revision')))
+
+
+@endpoint()
 def detail(request, pk):
     visit = rescheduling.owned_visit(request.user, pk)
     now = timezone.now()
     data = visit_data(visit, actor=request.user, now=now)
-    review = visit_review(visit, access=patient_access(request.user), now=now)
+    access = patient_access(request.user)
+    review = visit_review(visit, access=access, now=now)
     settlement = review['settlement']
     data.update(visit_no=visit.visit_no, review=review, invoice_id=settlement['invoice_id'] if settlement else None)
+    data['examinations'] = examination_summaries(visit, access)
     plan = current_plan(visit)
     # Own historical service, deliberately absent from the general catalogue.
     if plan:

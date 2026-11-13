@@ -56,6 +56,7 @@ def navigation(request):
     data={'can_front':has_role(user,'FRONT_DESK'),'can_manage':has_role(user,'MANAGER'),
       'is_dentist':has_role(user,'DENTIST'),'build_version':settings.ADC_VERSION,'adc_read_only':settings.ADC_READ_ONLY,
       'environment_label':settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
+      'exam_course_enabled':settings.ADC_CLINICAL_SYNTHETIC,
       'can_finance':bindings(user).filter(role__in=['FINANCE','HQ'],scope_kind='CHAIN').exists(),
       'can_operations':role in ('MANAGER','HQ') and not choose_clinic,
       'can_correct':role in ('DENTIST','FINANCE'),'can_assist':role in ('FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE'),

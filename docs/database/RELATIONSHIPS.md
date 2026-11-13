@@ -1,6 +1,6 @@
 # 当前数据库外键关系
 
-550条实际SQL外键，其中549条对应ORM单列关系，1条为账单同次就诊复合外键。
+562条实际SQL外键，其中561条对应ORM单列关系，1条为账单同次就诊复合外键。
 
 | 子表 | 外键列 | 父表 | 被引用列 |
 |---|---|---|---|
@@ -192,6 +192,18 @@
 | adc_equipment_cost_amendment | reviewed_by_id | adc_user | id |
 | adc_equipment_event | asset_id | adc_equipment_asset | id |
 | adc_equipment_event | recorded_by_id | adc_user | id |
+| adc_examination_duty | project_id | adc_examination_project | id |
+| adc_examination_duty | user_id | adc_user | id |
+| adc_examination_event | order_id | adc_examination_order | id |
+| adc_examination_event | report_id | adc_examination_report | id |
+| adc_examination_event | actor_id | adc_user | id |
+| adc_examination_order | active_release_id | adc_examination_event | id |
+| adc_examination_order | project_id | adc_examination_project | id |
+| adc_examination_order | source_record_id | adc_clinical_record_version | id |
+| adc_examination_order | performed_by_id | adc_user | id |
+| adc_examination_order | requested_by_id | adc_user | id |
+| adc_examination_project | service_id | adc_booking_service | id |
+| adc_examination_report | order_id | adc_examination_order | id |
 | adc_external_identity | user_id | adc_user | id |
 | adc_fund_allocation | prepared_by_id | adc_user | id |
 | adc_fund_allocation | reviewed_by_id | adc_user | id |

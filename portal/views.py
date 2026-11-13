@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 from adc_core.rules import RuleError
@@ -17,6 +18,7 @@ from scheduling.resources import service_for
 from scheduling.models import Visit
 from portal.forms import BookingConfirmationForm, CancelForm, SlotFilterForm
 from portal.availability_search import availability_result
+from portal.examination_review import examination_summaries, published_examination
 from portal.policies import patient_access, form_authority, read_form_authority
 from portal.services import public_options, preview_booking, confirm_booking, cancel_booking
 
@@ -212,8 +214,18 @@ def visit(request,pk):
     now = timezone.now()
     return render(request,"portal/visit.html",dict(related_context(request.user,v),visit=v,
         review=visit_review(v, access=access, now=now),
+        examinations=examination_summaries(v, access),
         can_cancel=v.status=="SCHEDULED" and v.scheduled_start>now,
         needs_outcome_review=needs_outcome_review(v, now)))
+
+@login_required(login_url="portal_login")
+@never_cache
+@require_GET
+def examination(request, pk, order_id):
+    access = patient_access(request.user, self_only=True)
+    visit = get_object_or_404(access.scope(Visit.objects.all()), pk=pk)
+    report = published_examination(visit, order_id, request.GET.get('revision'))
+    return render(request, 'portal/examination_report.html', {'report': report})
 
 @login_required(login_url="portal_login")
 @require_http_methods(["GET","POST"])

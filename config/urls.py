@@ -71,6 +71,7 @@ urlpatterns = [
     path("portal/slots/", portal_views.slots, name="portal_slots"),
     path("portal/book/confirm/", portal_views.booking_preview, name="portal_confirm"),
     path("portal/visits/<int:pk>/", portal_views.visit, name="portal_visit"),
+    path("portal/visits/<int:pk>/examinations/<int:order_id>/", portal_views.examination, name="portal_examination"),
     path("portal/visits/<int:pk>/cancel/", portal_views.cancel, name="portal_cancel"),
     path("portal/visits/<int:pk>/reschedule/", portal_reschedule_views.reschedule, name="portal_reschedule"),
     path("portal/invoices/<int:pk>/", care_views.portal_invoice, name="portal_invoice"),

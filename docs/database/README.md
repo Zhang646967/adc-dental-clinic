@@ -1,3 +1,7 @@
+# 检查申请、独立审核与患者发布
+
+独立 PostgreSQL 17.11 核对 97 份应用迁移、193 张 SQL 表、192 张 ORM 表、562 条外键及 180 项业务触发器。检查申请引用准确检查记录及本店服务，执行职责、报告版本和办理事件各自留存。原 96 份迁移保持原字节。[检查与发布 ER](er_examination_release.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../EXAMINATION_REPORTS.md)
+
 # C6 预收、抵扣撤销与原渠道退款
 
 独立 PostgreSQL 17.11 核对 96 份应用迁移、188 张 SQL 表、187 张 ORM 表、550 条外键及 178 项业务触发器。新增撤销表连接原抵扣明细、经办人与独立复核人。退款使用现金账现有的原条目自关联，保留独立渠道凭据。原 95 份迁移保持原字节。 [撤销与退款 ER](er_advance_dispositions.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../C6_PATIENT_ADVANCES.md)

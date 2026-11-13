@@ -1,0 +1,55 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block content %}
+<p><a href="{% url 'clinical_examinations' %}">返回检查办理工作台</a>{% if own_visit %} · <a href="{% url 'clinical_examination_visit' visit.pk %}">返回本次就诊检查</a>{% endif %}</p>
+<h1>{{ order.project_name }}</h1>
+<section class="panel">
+  <p>{{ visit.patient.name }} · {{ visit.clinic.name }} · 就诊 {{ visit.visit_no }}</p>
+  <dl class="detail-grid">
+    <dt>检查编号</dt><dd>{{ order.number }}</dd>
+    <dt>办理进度</dt><dd>{{ progress }}</dd>
+    <dt>患者查阅</dt><dd>{{ publication }}{% if release %} · 第 {{ release.report.number }} 版 · {{ release.occurred_at|date:'Y-m-d H:i' }}{% endif %}</dd>
+    <dt>申请依据</dt><dd>检查记录第 {{ order.source_record.revision }} 版</dd>
+    <dt>申请目的</dt><dd>{{ order.purpose }}</dd>
+    {% if order.performed_at %}
+    <dt>实际检查</dt><dd>{{ order.performed_at|date:'Y-m-d H:i' }} · {{ order.performed_by.username }}</dd>
+    <dt>检查依据编号</dt><dd>{{ order.source_reference }}</dd>
+    {% endif %}
+  </dl>
+</section>
+{% if reports %}
+<section class="panel">
+  <h2>结果版本</h2>
+  {% for version in reports %}
+  <article class="clinical-history">
+    <h3>第 {{ version.number }} 版{% if version.pk == release.report_id %} · 当前患者可查阅{% endif %}</h3>
+    {{ version.body|linebreaks }}
+    {% if version.correction_reason %}<p>更正依据：{{ version.correction_reason }}</p>{% endif %}
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+{% for item in action_forms %}
+<section class="panel">
+  <h2>{{ item.action.label }}</h2>
+  {% if item.action.value == 'PUBLISH' %}<p>确认后，患者可查阅第 {{ report.number }} 版。</p>{% endif %}
+  {% if item.action.value == 'WITHDRAW' %}<p>确认后，患者将无法继续查阅第 {{ release.report.number }} 版。</p>{% endif %}
+  <form method="post">
+    {% csrf_token %}{% workspace_token %}
+    <input type="hidden" name="action" value="{{ item.action.value }}">
+    {{ item.form.as_p }}
+    <button type="submit">核对{{ item.action.label }}</button>
+  </form>
+</section>
+{% endfor %}
+<section class="panel">
+  <h2>办理历史</h2>
+  <ol class="worklist-items">
+    {% for event in events %}
+    <li>{{ event.get_action_display }}{% if event.report %} · 第 {{ event.report.number }} 版{% endif %}
+      <p>{{ event.occurred_at|date:'Y-m-d H:i' }} · {{ event.actor.username }}</p>
+      {% if event.reason %}<p>{{ event.reason }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}
