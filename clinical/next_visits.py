@@ -208,6 +208,7 @@ def prepare_link(*,actor,instruction_id,visit_id):
     row=front_instructions(actor).get(pk=instruction_id)
     visit=Visit.objects.get(pk=visit_id,clinic_id=actor._adc_workspace.clinic_id)
     check_promise(row,visit)
+    if row.appointment_links.filter(visit=visit).exists():raise RuleError('这个预约已关联本指示，请查看已有结果。')
     from clinical.examination_followup import order_for_instruction, current_decision, current_plan_step, check_report_appointment
     order = order_for_instruction(row.pk)
     if order:

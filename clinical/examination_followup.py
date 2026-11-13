@@ -140,9 +140,9 @@ def current_plan_step(instruction):
 
 def check_report_appointment(order, visit=None):
     appointments = [row for row in report_appointments(order) if row.status in ('SCHEDULED', 'CHECKED_IN')]
-    if visit is not None and any(row.pk == visit.pk for row in appointments):
-        raise RuleError('该预约已关联本报告，请核对原安排。')
-    if appointments:
+    # Front desk can explicitly adopt the same suitable reservation after a
+    # revision. A different active reservation still blocks a second promise.
+    if any(visit is None or row.pk != visit.pk for row in appointments):
         raise RuleError('这张报告已有有效复诊，请核对原安排。')
 
 

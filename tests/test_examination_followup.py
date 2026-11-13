@@ -226,6 +226,25 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
         self.assertEqual(Visit.objects.count(), 1)
         self.assertFalse(PlanAppointment.objects.exists())
 
+    def test_frontdesk_can_adopt_existing_appointment_after_instruction_changes(self):
+        order = self.release(self.open_order())
+        visit = services.confirm_booking(actor=self.patient_user, token=self.scoped_preview(order),
+            require_published_service=True)
+        old = PlanAppointment.objects.get(visit=visit)
+        order = self.release(order, body=BODY2, reason='课程合成：更正报告并追加复诊目标')
+        updated = followups.current_decision(order)
+        self.assertNotEqual(old.instruction_id, updated.instruction_id)
+        blocked = self.report(order)['followup']
+        self.assertEqual((blocked['action'], blocked['appointment']['id']), ('CONTACT', visit.pk))
+        prepared = next_visits.prepare_link(actor=self.front, instruction_id=updated.instruction_id, visit_id=visit.pk)
+        row, replay = next_visits.confirm_link(actor=self.front, proposal_token=prepared['proposal_token'], confirmed=True)
+        self.assertFalse(replay)
+        self.assertEqual(row.report_followup_id, updated.pk)
+        self.assertEqual(PlanAppointment.objects.filter(visit=visit).count(), 2)
+        self.assertEqual(Visit.objects.count(), 2)
+        self.assertEqual(BookingReceipt.objects.filter(visit=visit).count(), 1)
+        self.assertEqual(self.report(order)['followup']['action'], 'VIEW_APPOINTMENT')
+
     def test_contact_attempts_and_append_decision_preserve_report(self):
         due = (timezone.now()+timedelta(hours=2)).isoformat()
         order = self.release(self.open_order(), kind='CONTACT', contact_due_at=due)
