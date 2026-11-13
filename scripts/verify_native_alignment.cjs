@@ -3,6 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const root=path.resolve(__dirname,'../clients/wechat/miniprogram');
 const patientAction=require(path.join(root,'utils/primary-action'));
 const subjectState=require(path.join(root,'utils/subject-state'));
+const visitReview=require(path.join(root,'utils/visit-review'));
 const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
@@ -38,7 +39,7 @@ async function verify(){
     vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
       Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
-        key.endsWith('/subject-state')?subjectState:key.endsWith('/format')?format:null});
+        key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
@@ -152,17 +153,55 @@ async function verify(){
     await d.p.recoverSubject();
     assert.equal(routes.at(-1).url,url,code);count++;
   }
-  const ownedVisit={...visit,can_change:true,version:3};
+  const summary={
+    attended_at:'2026-11-05T05:50:00Z',completed_at:'2026-11-05T06:35:00Z',
+    care:{outcome_label:'有治疗',treatments:[{name:'课程处置',quantity:'1.000',unit:'次',kind:'CHARGED'},
+      {name:'课程处置',quantity:'0.125',unit:'次',kind:'NO_CHARGE_STAGE'}],
+      medications:[{name:'课程条目',net_quantity:'0',amount:'0.00',unit:'份'}]},
+    settlement:{invoice_id:5,invoice_no:'SYNTHETIC-BILL',revision:2,total:'100.00',remaining:'60.00',refund_due:'0.00',review_pending:true},
+    followups:[
+      {id:1,status:'WAITING',label:'待重新安排',appointment:{id:21,status:'CANCELLED'}},
+      {id:2,status:'REVIEW',label:'待门店核对',appointment:{id:22,status:'SCHEDULED'}},
+      {id:3,status:'COMPLETED',label:'复诊目标已核对',appointment:{id:23,status:'CLOSED_NO_TREATMENT'}},
+      {id:4,status:'WITHDRAWN',label:'已撤回复诊指示',appointment:null}
+    ]
+  };
+  const closedVisit={...visit,status:'COMPLETED',can_change:false,invoice_id:5,review:summary};
+  d=page('visit',{responses:[closedVisit]});d.p.onLoad({id:visit.id});await d.p.onShow();
+  const view=d.p.data.reviewView;
+  assert.deepEqual([view.attendedLabel,view.completedLabel],['2026-11-05 13:50','2026-11-05 14:35']);
+  assert.deepEqual(view.care.treatments.map(r=>[r.key,r.quantity,r.noCharge]),[[0,'1',false],[1,'0.125',true]]);
+  assert.deepEqual([view.care.medications[0].netQuantity,view.care.medications[0].amount],['0','0.00']);
+  assert.equal(view.settlement.remaining,'60.00');assert.equal(view.settlement.reviewPending,true);
+  assert.deepEqual(view.followups.map(r=>r.needsContact),[true,true,false,false]);
+  d.p.openFollowup({currentTarget:{dataset:{id:22}}});
+  assert.equal(routes.at(-1).url,'/pages/visit/index?id=22');
+  d.p.contactClinic();assert.equal(routes.at(-1).url,'/pages/help/index?visit=12');
+  d.p.invoice();assert.equal(routes.at(-1).url,'/pages/invoice/index?id=5&visit=12');
+  d.p.home();assert.equal(navigation.consume('/pages/home/index').queue,'history');count++;
+
+  d=page('visit',{session:{delegated:true},responses:[closedVisit]});d.p.onLoad({id:visit.id});await d.p.onShow();
+  assert.deepEqual(d.p.data.reviewView,{attendedLabel:'2026-11-05 13:50',completedLabel:'',care:null,settlement:null,followups:[]});
+  const beforeInvoice=routes.length;
+  d.p.invoice();assert.equal(routes.length,beforeInvoice);count++;
+
+  const legacyVisit={...visit,status:'COMPLETED',can_change:false,invoice_id:5};
+  d=page('visit',{responses:[legacyVisit]});d.p.onLoad({id:visit.id});await d.p.onShow();
+  assert.equal(d.p.data.reviewView,null);
+  d.p.invoice();assert.equal(routes.at(-1).url,'/pages/invoice/index?id=5&visit=12');count++;
+
+  const ownedVisit={...visit,can_change:true,version:3,review:{attended_at:null,completed_at:null,followups:[]}};
   for(const {status,code,freshSession,url} of deniedConfirmations){
     const denied=Object.assign(Error('当前就诊人或授权已变化'),{status,code,requestId:'SYNTHETIC-VISIT-QUERY'});
     d=page('visit',{session:confirmSession,freshSession,review:confirmReview,responses:[ownedVisit,denied]});
     d.p.onLoad({id:visit.id});await d.p.onShow();
     assert.equal(d.p.data.patientName,priorSubject.patient_name,code);
+    assert(d.p.data.reviewView,code);
     d.p.cancel();d.p.reason({detail:{value:'PRIVATE_CANCEL_DRAFT'}});
     assert.equal(d.p.data.reason,'PRIVATE_CANCEL_DRAFT',code);
     await d.p.load();
     assert.equal(d.state.globalData.review,null,code);
-    for(const [field,value] of Object.entries({visit:null,patientName:'',patientCapacity:'',patientDelegated:false,
+    for(const [field,value] of Object.entries({visit:null,reviewView:null,patientName:'',patientCapacity:'',patientDelegated:false,
       reason:'',cancelOpen:false,subjectInvalid:true,requestId:'SYNTHETIC-VISIT-QUERY'})){
       assert.equal(d.p.data[field],value,code+': '+field);
     }

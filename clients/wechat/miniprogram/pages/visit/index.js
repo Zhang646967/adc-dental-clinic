@@ -1,9 +1,9 @@
 const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
+const {positive}=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
-const reviewModule=require('../../utils/visit-review');
-const buildReview=reviewModule&&typeof reviewModule.buildReview==='function'?reviewModule.buildReview:()=>null;
+const {buildReview}=require('../../utils/visit-review');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
@@ -23,7 +23,8 @@ Page({
       }
       this.context=context;
       api.showSubject(this);
-      this.setData({visit,reviewView:buildReview(visit),readOnly:session.read_only,environmentLabel:session.environment_label||''});
+      this.setData({visit,reviewView:buildReview(visit,{delegated:session.delegated}),
+        readOnly:session.read_only,environmentLabel:session.environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
       this.setData(blankDraft);
@@ -43,7 +44,7 @@ Page({
   invoice(){
     const visit=this.data.visit,review=this.data.reviewView;
     const id=(review&&review.settlement&&review.settlement.invoiceId)||(visit&&visit.invoice_id);
-    if(id)navigation.navigateTo({url:`/pages/invoice/index?id=${id}&visit=${this.id}`});
+    if(!this.data.patientDelegated&&positive(id))navigation.navigateTo({url:`/pages/invoice/index?id=${id}&visit=${this.id}`});
   },
   openFollowup(e){
     const id=Number(e.currentTarget.dataset.id);
@@ -72,5 +73,8 @@ Page({
     }catch(e){if(generation===this.generation)this.visitError(e);}
   },
   related(e){navigation.redirectTo({url:`/pages/visit/index?id=${e.currentTarget.dataset.id}`});},
-  home(){navigation.reLaunch({url:'/pages/home/index'});}
+  home(){
+    const queue=this.data.visit&&!['SCHEDULED','CHECKED_IN'].includes(this.data.visit.status)?'?queue=history':'';
+    navigation.reLaunch({url:`/pages/home/index${queue}`});
+  }
 });

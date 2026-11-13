@@ -64,7 +64,7 @@ def _published_result(invoice):
 
 def visit_review(visit, *, access, now):
     """The caller has already scoped this visit to the selected patient."""
-    summary = dict(attended_at=visit.attended_at, completed_at=visit.completed_at,
+    summary = dict(attended_at=visit.attended_at, completed_at=None if access.delegated else visit.completed_at,
         care=None, settlement=None, followups=[])
     if access.delegated or visit.status not in CLOSED_STATUSES:
         return summary

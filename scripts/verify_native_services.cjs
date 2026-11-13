@@ -7,6 +7,7 @@ const root=path.resolve(__dirname,'../clients/wechat/miniprogram');
 const {selectedCatalogue}=require(path.join(root,'utils/service-selection'));
 const patientAction=require(path.join(root,'utils/primary-action'));
 const subjectState=require(path.join(root,'utils/subject-state'));
+const visitReview=require(path.join(root,'utils/visit-review'));
 const session={authenticated:true,today:'2026-10-22',last_day:'2026-11-05',read_only:false,environment_label:'测试环境'};
 const dentists=[{id:5,name:'接诊医师'}];
 const offerings=[
@@ -22,7 +23,7 @@ function page(name,options={}){
   const calls=[],navigation=[],state={globalData:{review:null}};
   const wx=Object.fromEntries(['navigateTo','reLaunch','redirectTo'].map(method=>[method,data=>navigation.push({method,...data})]));
   const currentSession={...session,...options.session};
-  const api={selectSubject:async key=>{calls.push({route:'patients/select/',method:'POST',data:{subject:key}});state.globalData.review=null;},showSubject:p=>p.setData({patientName:currentSession.patient_name||'',patientCapacity:currentSession.acting_capacity||''}),bootstrap:async()=>currentSession,sessionInfo:()=>currentSession,request:async(route,method='GET',data)=>{
+  const api={selectSubject:async key=>{calls.push({route:'patients/select/',method:'POST',data:{subject:key}});state.globalData.review=null;},showSubject:p=>p.setData({patientName:currentSession.patient_name||'',patientCapacity:currentSession.acting_capacity||'',patientDelegated:!!currentSession.delegated}),bootstrap:async()=>currentSession,sessionInfo:()=>currentSession,request:async(route,method='GET',data)=>{
     calls.push({route,method,data});
     if(options.request)return options.request(route,method,data);
     if(route==='discovery/services/'){
@@ -39,7 +40,7 @@ function page(name,options={}){
   vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
   vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{
     Page:value=>{definition=value;},wx,getApp:()=>state,
-    require:module=>module.endsWith('/subject-state')?subjectState:
+    require:module=>module.endsWith('/subject-state')?subjectState:module.endsWith('/visit-review')?visitReview:
       module.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,returnTo:url=>navigation.push({method:'returnTo',url}),consume:()=>options.tabSelection||null}:module.endsWith('/api')?api:module.endsWith('/format')?format.exports:module.endsWith('/primary-action')?patientAction:module.endsWith('/booking-intent')?require(path.join(root,'utils/booking-intent')):module.endsWith('/nearby')?require(path.join(root,'utils/nearby')):{selectedCatalogue}
   });
   const instance={...definition,data:plain(definition.data),setData(values){Object.assign(this.data,values);}};
