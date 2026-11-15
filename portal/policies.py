@@ -7,6 +7,11 @@ from portal.models import PatientAccess, PatientAppointmentGrant, PatientRelatio
 class SubjectRequired(PermissionDenied):
     pass
 
+
+class PatientSelfRequired(PermissionDenied):
+    """The selected grant is valid but the current operation requires the patient."""
+
+
 def active_grants(user):
     now = timezone.now()
     return PatientAppointmentGrant.objects.filter(is_active=True, valid_from__lte=now, valid_until__gt=now,
@@ -68,14 +73,14 @@ def patient_access(user, *, lock=False, self_only=False):
     if getattr(ctx, 'medical_proxy_id', None):
         from portal.medical_authority import selected_proxy
         version = selected_proxy(user,lock=lock)
-        if self_only or not getattr(ctx,'patient_grant_id',None):
+        if self_only:
+            raise PatientSelfRequired('医疗授权不包含预约、完整病历或账单，请选择对应本人或独立代约权限。')
+        if not getattr(ctx,'patient_grant_id',None):
             raise PermissionDenied('医疗授权不包含预约、完整病历或账单，请选择对应本人或独立代约权限。')
         if ctx.patient_grant.relationship.patient_id!=version.proxy.patient_id or ctx.patient_grant.relationship.clinic_id!=version.proxy.clinic_id:
             raise PermissionDenied('就诊人与独立代约权限不一致。')
     grant_id = getattr(ctx, 'patient_grant_id', None)
     if grant_id:
-        if self_only:
-            raise PermissionDenied('预约代办不包含病历、结算单或知情同意权限。')
         # Verification changes and appointment effects serialize on case -> grant.
         if lock:
             case_id = PatientAppointmentGrant.objects.filter(pk=grant_id,
@@ -86,6 +91,8 @@ def patient_access(user, *, lock=False, self_only=False):
         grant = qs.filter(pk=grant_id).first()
         if grant is None:
             raise SubjectRequired('所选患者的代约授权已暂停、到期或撤销，请重新选择患者或联系前台。')
+        if self_only:
+            raise PatientSelfRequired('预约代办不包含病历、结算单或知情同意权限。')
         return PatientAuthority(grant.relationship.patient, grant, True)
     qs = PatientAccess.objects.filter(user_id=user.pk, user__is_active=True, is_active=True,
         patient__is_active=True).select_related('patient')

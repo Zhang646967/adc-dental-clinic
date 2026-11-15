@@ -12,7 +12,8 @@ from clinical.next_visits import has_completed_goal
 from clinical.plan_models import NextVisitInstruction
 from portal.policies import patient_access
 from portal.rules import HORIZON_DAYS
-from portal.service_catalogue import require_self_service
+from portal.service_catalogue import public_profile, require_self_service
+from scheduling.resource_models import ServicePresentation
 from scheduling.service_content import positive_id
 
 FIELDS = ('followup_visit', 'followup_examination', 'followup_revision')
@@ -82,6 +83,15 @@ def _appointment_data(visit):
         status=visit.status, status_label=visit.get_status_display()) if visit else None
 
 
+def _service_title(instruction):
+    if instruction is None:
+        return ''
+    try:
+        return public_profile(instruction.service_id).title
+    except ServicePresentation.DoesNotExist:
+        return instruction.service.name
+
+
 def projection(visit, report, actor):
     order = _order(visit.pk, report['id'], patient_id=visit.patient_id)
     if not _active_version(order, report['revision']):
@@ -116,7 +126,7 @@ def projection(visit, report, actor):
         message = '本报告供查阅。'
     return dict(action=action, label=CAPTIONS[action], message=message, clinic_id=visit.clinic_id,
         clinic=visit.clinic.public_contact['name'], service_id=instruction.service_id if instruction else None,
-        service=instruction.service.name if instruction else '', earliest_on=instruction.earliest_on if instruction else None,
+        service=_service_title(instruction), earliest_on=instruction.earliest_on if instruction else None,
         latest_on=instruction.latest_on if instruction else None, first_day=start if action == 'BOOK' else None,
         last_day=end if action == 'BOOK' else None, appointment=_appointment_data(latest))
 

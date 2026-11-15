@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import resolve, Resolver404
 from accounts.models import UserAccount
+from adc_core.rules import RuleError
 from workspaces.context import (ensure_context, attach, valid_context, check_token, SESSION_KEY)
 from workspaces.models import WorkspaceContext
 from workspaces.rules import CLINIC_ROLES, ROLES
@@ -32,6 +33,9 @@ MEDICAL_SUBJECT_ROUTES={'portal_home','portal_medical_authorizations','portal_me
     'mini_medical_authorizations','mini_medical_authorization','mini_medical_authorization_preview','mini_medical_authorization_confirm',
     'portal_plans','portal_plan','portal_plan_decision','mini_plans','mini_plan','mini_plan_decision_preview','mini_plan_decision_confirm',
     'portal_consent','mini_consent','mini_consent_preview','mini_consent_confirm'}
+SELF_REPORT_ROUTES = {'portal_examination', 'portal_report_notices', 'portal_report_notice_read',
+    'mini_examination', 'mini_report_notices', 'mini_report_notice_read'}
+SELF_REPORT_MESSAGE = '检查报告与提醒仅限患者本人查看。请由患者本人登录后办理。'
 ALL=set(ROLES)
 ROUTES={
  'clinical_examinations':{'DENTIST'},'clinical_examination':{'DENTIST'},
@@ -188,6 +192,29 @@ class WorkspaceMiddleware:
         if request.path.startswith('/api/'):
             return JsonResponse({'error':text},status=status)
         return render(request,'workspaces/error.html',{'problem':text},status=status)
+
+    def patient_scope(self, request, *, report_only=False):
+        from portal.policies import PatientSelfRequired, SubjectRequired, patient_access
+        try:
+            patient_access(request.user, self_only=report_only)
+        except PatientSelfRequired:
+            if request.path.startswith('/api/mini/'):
+                from portal.mini_api import result
+                return result(request, status=403, code='REPORT_SELF_REQUIRED', message=SELF_REPORT_MESSAGE)
+            return render(request, 'portal/report_self_required.html', {
+                'message': SELF_REPORT_MESSAGE, 'request_id': request.adc_request_id}, status=403)
+        except (SubjectRequired, RuleError) as exc:
+            if not report_only and isinstance(exc, RuleError):
+                raise
+            if request.path.startswith('/api/mini/'):
+                from portal.mini_api import result
+                return result(request, status=409, code='SUBJECT_REQUIRED', message=str(exc))
+            if request.method not in ('GET', 'HEAD', 'OPTIONS'):
+                return self.error(request, str(exc), 409)
+            return redirect('portal_subjects')
+        except PermissionDenied:
+            return self.error(request, '当前就诊权限不包含此项业务，请选择具有相应权限的就诊人。')
+
     def __call__(self,request):
         try: match=resolve(request.path_info)
         except Resolver404:return self.get_response(request)
@@ -212,19 +239,16 @@ class WorkspaceMiddleware:
             if ctx.role in CLINIC_ROLES and ctx.clinic_id is None and name not in ROLE_HOME and name not in {'dashboard','guide_index','guide_task'}:
                 if unsafe:return self.error(request,'尚未选择诊所；本次操作未执行。',409)
                 return redirect(ROLES[ctx.role][1])
-        if ctx.role=='PATIENT' and name not in ROLE_FREE | MEDICAL_SUBJECT_ROUTES | {'portal_subjects','mini_subjects','mini_subject_select'}:
-            from portal.policies import patient_access,SubjectRequired
-            try:patient_access(request.user)
-            except SubjectRequired as exc:
-                if request.path.startswith('/api/mini/'):
-                    from portal.mini_api import result
-                    return result(request,status=409,code='SUBJECT_REQUIRED',message=str(exc))
-                if unsafe:return self.error(request,str(exc),409)
-                return redirect('portal_subjects')
-            except PermissionDenied:
-                return self.error(request,'当前就诊权限不包含此项业务，请选择具有相应权限的就诊人。')
+        if ctx.role=='PATIENT' and name not in ROLE_FREE | MEDICAL_SUBJECT_ROUTES | SELF_REPORT_ROUTES | {'portal_subjects','mini_subjects','mini_subject_select'}:
+            denied = self.patient_scope(request)
+            if denied is not None:
+                return denied
         if unsafe:
             token=request.headers.get('X-ADC-Workspace','') if name=='assistant_api' or (name and name.startswith('mini_')) else request.POST.get('workspace_token','')
             if not check_token(ctx,token):
                 return self.error(request,'工作身份或诊所已切换，或页面已过期。本次操作未执行；请刷新后核对再提交。',409)
+        if name in SELF_REPORT_ROUTES:
+            denied = self.patient_scope(request, report_only=True)
+            if denied is not None:
+                return denied
         return self.get_response(request)

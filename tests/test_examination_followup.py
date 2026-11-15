@@ -9,12 +9,13 @@ from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.models import RoleAssignment, UserAccount
 from adc_core.rules import RuleError
 from care.services import complete_visit
 from clinical import examination_followup as followups, examinations, executions, next_visits, preflight, recall
 from clinical.examination_models import ExaminationFollowup, ExaminationNotice
 from clinical.plan_models import NextVisitInstruction, PlanAppointment, PerformedProcedure
-from portal import report_notices, rescheduling, services
+from portal import medical_proxies, relationships, report_notices, rescheduling, services
 from portal.models import BookingReceipt
 from registry.models import TreatmentType
 from scheduling.models import Visit
@@ -54,10 +55,104 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
     def setUp(self):
         self.setup_examinations()
 
-    def mini_post(self, route, payload, args=()):
-        session = self.mini.get(reverse('mini_session')).json()['data']
-        return self.mini.post(reverse(route, args=args), payload, HTTP_X_CSRFTOKEN=session['csrf_token'],
+    def mini_post(self, route, payload, args=(), *, client=None):
+        client = client or self.mini
+        session = client.get(reverse('mini_session')).json()['data']
+        return client.post(reverse(route, args=args), payload, HTTP_X_CSRFTOKEN=session['csrf_token'],
             HTTP_X_ADC_WORKSPACE=session['workspace_token'])
+
+    def test_report_uses_published_service_title_and_keeps_appointment_after_unpublishing(self):
+        order = self.release(self.open_order())
+        profile = self.service.patient_presentation
+        self.assertNotEqual(self.service.name, profile.title)
+        args = [self.v.pk, order.pk]
+        source = self.report(order)['followup']
+        self.assertEqual((source['action'], source['service_id'], source['service']),
+            ('BOOK', self.service.pk, profile.title))
+        self.assertContains(self.web.get(reverse('portal_examination', args=args)), profile.title)
+
+        fields = self.bound_fields(order) | dict(service=self.service.pk, slot=self.slot1.pk,
+            start=(self.t + timedelta(hours=2)).isoformat())
+        mini = self.mini_post('mini_book_preview', fields)
+        self.assertEqual(mini.status_code, 200, mini.content)
+        self.assertEqual(mini.json()['data']['service'], profile.title)
+        self.assertContains(self.web.get(reverse('portal_confirm'), fields), profile.title)
+        self.assertEqual(Visit.objects.count(), 1)
+
+        payload = dict(proposal_token=mini.json()['data']['proposal_token'], confirmed=True)
+        appointment = self.mini_post('mini_book_confirm', payload).json()['data']['id']
+        profile.is_published = False
+        profile.save(update_fields=['is_published'])
+        retained = self.report(order)['followup']
+        self.assertEqual((retained['action'], retained['service_id'], retained['service'],
+            retained['appointment']['id']), ('VIEW_APPOINTMENT', self.service.pk, self.service.name, appointment))
+        self.assertEqual(Visit.objects.get(pk=appointment).status, 'SCHEDULED')
+
+    def test_reports_require_self_for_valid_proxies_but_leave_other_scopes_active(self):
+        order = self.release(self.open_order(), kind='NONE')
+        notice = ExaminationNotice.objects.get(event__order=order)
+        delegate, relationship, grant = self.create_delegate()
+        step = self.publish_plan(self.new_plan()).steps.get()
+        medical = UserAccount.objects.create_user(username='report_medical_proxy', password=self.password)
+        RoleAssignment.objects.filter(user=self.front, clinic=self.a, role='FRONT_DESK').update(
+            can_verify_medical_proxy_identity=True)
+        prepared = medical_proxies.prepare_submit(actor=self.front, fields=dict(
+            patient_no=self.p1.patient_no, username=medical.username, delegate_name='课程合成代理人',
+            kind='WRITTEN', plan=step.version.plan_id, steps=[step.step_id],
+            identity_reference='SYNTHETIC-REPORT-ID', authority_reference='SYNTHETIC-REPORT-AUTHORITY',
+            applicability='课程合成：已核对本人书面委托及方案步骤。',
+            valid_from=(timezone.now() - timedelta(minutes=2)).isoformat(),
+            valid_until=(timezone.now() + timedelta(days=3)).isoformat()))
+        proxy, _ = medical_proxies.confirm(actor=self.front, **prepared, confirmed=True)
+        for action, actor in [('MATERIALS_OK', self.front), ('APPROVE', self.doc)]:
+            prepared = medical_proxies.prepare_action(actor=actor, case_id=proxy.pk, action=action,
+                note='课程合成：核对本次原件及授权范围。', applicable=True)
+            proxy, _ = medical_proxies.confirm(actor=actor, **prepared, confirmed=True)
+
+        report_args = [self.v.pk, order.pk]
+        for actor, subject, allowed_route, allowed_args in [
+            (delegate, f'grant:{grant.pk}', 'mini_visit', [self.v.pk]),
+            (medical, f'medical:{proxy.pk}', 'mini_medical_authorization', [proxy.pk]),
+        ]:
+            with self.subTest(subject=subject):
+                mini = self.mini_client(actor)
+                web = self.web_client(actor)
+                selected = self.mini_post('mini_subject_select', {'subject': subject}, client=mini)
+                self.assertEqual(selected.status_code, 200, selected.content)
+                self.assertEqual(web.post(reverse('portal_subjects'), {'subject': subject}).status_code, 302)
+                responses = [
+                    mini.get(reverse('mini_report_notices')),
+                    mini.get(reverse('mini_examination', args=report_args)),
+                    self.mini_post('mini_report_notice_read', {}, [notice.pk], client=mini),
+                ]
+                for response in responses:
+                    self.assertEqual(response.status_code, 403, response.content)
+                    detail = response.json()
+                    self.assertEqual(detail['code'], 'REPORT_SELF_REQUIRED')
+                    self.assertEqual(set(detail), {'ok', 'request_id', 'code', 'message'})
+                    self.assertTrue(detail['request_id'])
+                    self.assertIn('仅限患者本人查看', detail['message'])
+                for response in [
+                    web.get(reverse('portal_report_notices')),
+                    web.get(reverse('portal_examination', args=report_args)),
+                    web.post(reverse('portal_report_notice_read', args=[notice.pk]), {}),
+                ]:
+                    self.assertContains(response, '仅限患者本人查看', status_code=403)
+                    self.assertContains(response, '返回患者工作台', status_code=403)
+                    self.assertNotContains(response, BODY1, status_code=403)
+                self.assertEqual(mini.get(reverse(allowed_route, args=allowed_args)).status_code, 200)
+                if actor == delegate:
+                    revoked_client = mini
+
+        notice.refresh_from_db()
+        self.assertIsNone(notice.read_at)
+        token = relationships.prepare_action(actor=self.front, case_id=relationship.pk,
+            action='REVOKE', note='课程合成：结束试验代约授权。')
+        relationships.confirm(actor=self.front, token=token, confirmed=True)
+        stale = revoked_client.get(reverse('mini_report_notices'))
+        self.assertEqual(stale.status_code, 409)
+        self.assertIn(stale.json()['code'], ('SUBJECT_REQUIRED', 'WORKSPACE_CHANGED'))
+        self.assertEqual(self.mini.get(reverse('mini_report_notices')).status_code, 200)
 
     def test_notice_only_after_release_and_read_state_shared_with_web(self):
         order = self.execute(self.open_order())

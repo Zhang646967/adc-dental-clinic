@@ -1,0 +1,10 @@
+{% extends 'portal/base.html' %}
+{% block title %}检查报告查阅 · ADC 口腔{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>请由患者本人查看</h1>
+  <p role="alert">{{ message }}</p>
+  {% include 'release/request_reference.html' %}
+  <a class="button secondary" href="{% url 'portal_home' %}">返回患者工作台</a>
+</section>
+{% endblock %}
