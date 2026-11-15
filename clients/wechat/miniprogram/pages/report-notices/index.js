@@ -6,10 +6,11 @@ const {positive}=require('../../utils/booking-intent');
 const {buildNoticeList}=require('../../utils/report-notices');
 
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
+const blankNotices={rows:[],unreadCount:null,hasPrevious:false,hasNext:false,...blankSubject};
 
 Page({
-  data:{...blankSubject,rows:[],unreadCount:null,page:1,hasPrevious:false,hasNext:false,
-    busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:'',readOnly:false},
+  data:{...blankNotices,page:1,busy:false,error:'',requestId:'',subjectInvalid:false,
+    selfOnly:false,returnMedical:false,environmentLabel:'',readOnly:false},
   onLoad(query){
     const requested=positive(query&&query.page)?Number(query.page):1;
     this.page=requested;
@@ -17,14 +18,14 @@ Page({
     this.setData({page:requested});
   },
   onShow(){return this.load(this.page||1);},
-  onHide(){this.generation++;this.setData({rows:[],unreadCount:null,...blankSubject});},
+  onHide(){this.generation++;this.setData(blankNotices);},
   onUnload(){this.generation++;},
   async load(page=1){
     const generation=++this.generation;
     this.page=page;
     // Drop the previous patient's notices and unread count before reading; a
     // denied or stale request must never leave another patient's row on screen.
-    this.setData({rows:[],unreadCount:null,...blankSubject,error:'',requestId:'',busy:true,subjectInvalid:false});
+    this.setData({...blankNotices,error:'',requestId:'',busy:true,subjectInvalid:false,selfOnly:false,returnMedical:false});
     try{
       const data=await api.request('report-notices/','GET',{page});
       if(generation!==this.generation)return;
@@ -34,10 +35,16 @@ Page({
       this.setData({...list,busy:false,readOnly:!!api.sessionInfo().read_only,environmentLabel:api.sessionInfo().environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
-      const state=staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false});
-      this.setData({subjectInvalid:state.invalid});
-      showError(this,e,{separateRequestId:true,stayOnPage:true});
+      this.showNoticeError(e);
     }
+  },
+  showNoticeError(error){
+    const session=api.sessionInfo();
+    const selfOnly=error.status===403&&error.code==='REPORT_SELF_REQUIRED';
+    const subjectInvalid=!selfOnly&&staleSubject(error,session,{uncodedConflictIsStale:false}).invalid;
+    if(selfOnly||subjectInvalid)this.setData(blankNotices);
+    this.setData({selfOnly,subjectInvalid,returnMedical:selfOnly&&!!session.medical&&!session.can_book});
+    showError(this,error,{separateRequestId:true,stayOnPage:true});
   },
   retry(){return this.load(this.page||1);},
   turn(e){
@@ -77,12 +84,9 @@ Page({
       // A corrected or withdrawn report can retire the old row; re-read the
       // list so the patient sees the current notice instead of a dead entry.
       if(error.status===404||error.status===409)return this.load(this.page||1);
-      if(staleSubject(error,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
-        this.setData({rows:[],unreadCount:null,...blankSubject,subjectInvalid:true});
-      }
-      showError(this,error,{separateRequestId:true,stayOnPage:true});
+      this.showNoticeError(error);
     }
   },
   recoverSubject(){return recoverSubject(this,api.bootstrap,navigation.reLaunch);},
-  back(){navigation.returnTo('/pages/home/index');}
+  back(){navigation.returnTo(this.data.returnMedical?'/pages/medical-authorizations/index':'/pages/home/index');}
 });

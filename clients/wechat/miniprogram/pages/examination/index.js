@@ -9,7 +9,8 @@ const {buildFollowup}=require('../../utils/report-notices');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 
 Page({
-  data:{report:null,followup:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,environmentLabel:'',hasVisit:false},
+  data:{report:null,followup:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,
+    returnMedical:false,environmentLabel:'',hasVisit:false},
   onLoad(query){
     this.visitId=positive(query.visit)?Number(query.visit):null;
     this.id=positive(query.id)?Number(query.id):null;
@@ -20,7 +21,7 @@ Page({
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    this.setData({report:null,followup:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false});
+    this.setData({report:null,followup:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false,returnMedical:false});
     try{
       if(!this.visitId||!this.id||(this.revision!==undefined&&!positive(this.revision))){
         throw Error('报告链接无效，请从就诊详情进入。');
@@ -38,7 +39,10 @@ Page({
     }catch(e){
       if(generation!==this.generation)return;
       const session=api.sessionInfo();
-      if(e.status===404){
+      if(e.status===403&&e.code==='REPORT_SELF_REQUIRED'){
+        this.setData({returnMedical:!!session.medical&&!session.can_book});
+        showError(this,e,{separateRequestId:true,stayOnPage:true});
+      }else if(e.status===404){
         this.setData({error:'报告当前不可查看，请返回就诊核对',requestId:e.requestId||'',busy:false});
       }else if(e.status===403&&e.code==='ACCESS_DENIED'&&session.delegated){
         this.setData({error:'代约仅可查看预约与到诊信息，请由患者本人查看报告。',requestId:e.requestId||'',busy:false});
@@ -69,5 +73,8 @@ Page({
     navigation.navigateTo({url:followup&&followup.contactUrl?followup.contactUrl:`/pages/help/index?visit=${this.visitId}`});
   },
   recoverSubject(){return recoverSubject(this,api.bootstrap,navigation.reLaunch);},
-  back(){navigation.returnTo(this.visitId?`/pages/visit/index?id=${this.visitId}`:'/pages/home/index?queue=history');}
+  back(){
+    if(this.data.returnMedical)return navigation.returnTo('/pages/medical-authorizations/index');
+    return navigation.returnTo(this.visitId?`/pages/visit/index?id=${this.visitId}`:'/pages/home/index?queue=history');
+  }
 });

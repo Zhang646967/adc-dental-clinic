@@ -69,6 +69,23 @@ async function verify(){
   const hidden=page('report-notices',{responses:[notices]});
   hidden.p.onLoad({});const readingOld=hidden.p.onShow();hidden.p.onHide();await readingOld;
   assert.equal(hidden.p.data.rows.length,0);assert.equal(hidden.p.data.unreadCount,null);count++;
+  const reportDenial=Object.assign(Error('检查报告与提醒仅限患者本人查看。请由患者本人登录后办理。'),{
+    status:403,code:'REPORT_SELF_REQUIRED',requestId:'SYNTHETIC-REPORT-SELF'});
+  const proxySession={account_authenticated:true,authenticated:true,delegated:true,patient_name:'PRIVATE_OLD_SUBJECT'};
+  const manyNotices={...notices,page:2,pages:3};
+  const readDenied=page('report-notices',{session:proxySession,responses:[manyNotices,reportDenial]});
+  readDenied.p.onLoad({page:'2'});await readDenied.p.onShow();await readDenied.p.markRead(index);
+  assert.deepEqual(Array.from(readDenied.p.data.rows),[]);
+  for(const [key,expected] of Object.entries({patientName:'',patientCapacity:'',patientDelegated:false,
+    unreadCount:null,hasPrevious:false,hasNext:false,subjectInvalid:false,busy:false,requestId:reportDenial.requestId})){
+    assert.equal(readDenied.p.data[key],expected,key);
+  }
+  assert.equal(readDenied.p.data.error,reportDenial.message);count++;
+  const medicalProxy={...proxySession,medical:true,can_book:false};
+  const medicalNotices=page('report-notices',{session:medicalProxy,responses:[reportDenial]});
+  medicalNotices.p.onLoad({});await medicalNotices.p.onShow();medicalNotices.p.back();
+  assert.equal(medicalNotices.p.data.subjectInvalid,false);
+  assert.equal(routes.at(-1).url,'/pages/medical-authorizations/index');count++;
   const invoice=()=>({invoice_no:'SYNTHETIC-BILL',revision:2,total:'99.99',is_current:true,published_at:'2026-10-28',revisions:[{revision_no:2,published_at:'2026-10-28'},{revision_no:1,published_at:'2026-10-27'}],lines:[],cash_balance:{current_revision:2,remaining:'9.99'}});
   let d=page('invoice',{responses:[invoice()]});d.p.onLoad({id:5});await d.p.onShow();assert.equal(d.calls[0][0],'invoices/5/');assert.equal(d.p.data.invoice.total,'99.99');count++;
   assert.deepEqual(Array.from(d.p.data.invoice.treatment_lines),[]);
@@ -278,6 +295,18 @@ async function verify(){
     if(delegated)assert(d.p.data.error.includes('请由患者本人查看报告'));
   }
   count++;
+
+  for(const [session,expected] of [[proxySession,'/pages/visit/index?id=12'],
+    [medicalProxy,'/pages/medical-authorizations/index']]){
+    d=page('examination',{session,responses:[examReport,reportDenial]});
+    d.p.onLoad({visit:'12',id:'8',revision:'2'});await d.p.onShow();await d.p.load();
+    for(const [key,val] of Object.entries({report:null,followup:null,patientName:'',patientCapacity:'',
+      patientDelegated:false,subjectInvalid:false,busy:false,error:reportDenial.message,requestId:reportDenial.requestId})){
+      assert.equal(d.p.data[key],val,key);
+    }
+    global.getCurrentPages=()=>[{route:'pages/examination/index'}];
+    d.p.back();assert.equal(routes.at(-1).url,expected);count++;
+  }
 
   let oldExam;
   d=page('examination',{session:examSession,responses:[new Promise(resolve=>{oldExam=resolve;}),exam404]});
