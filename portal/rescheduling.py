@@ -113,6 +113,22 @@ def prepare(*, actor, visit_id, expected_version, slot_id, start, reason, offer_
             proposal_token=proposal(actor, CONTRACT, ('PATIENT',), data))
 
 
+def _reschedule_receipts(access, operation, source_id):
+    receipts = BookingReceipt.objects.filter(nonce=operation, **access.receipt_fields,
+        visit__replaces_visit_id=source_id)
+    return access.scope(receipts, patient_field='visit__patient_id', clinic_field='visit__clinic_id')
+
+
+def reschedule_result(*, actor, token, max_age):
+    access = patient_access(actor)
+    attempt = read_proposal(actor, CONTRACT, ('PATIENT',), token, max_age=max_age)
+    data = attempt['data']
+    if (data['access'], data['patient']) != (access.pk, access.patient_id):
+        raise RuleError('确认内容或患者授权已经变化，请重新打开本人预约。')
+    receipts = _reschedule_receipts(access, attempt['operation'], data['visit'])
+    return receipts.values_list('visit_id', flat=True).first()
+
+
 @business_errors
 @transaction.atomic
 def confirm(*, actor, visit_id, proposal_token, confirmed):
@@ -125,8 +141,7 @@ def confirm(*, actor, visit_id, proposal_token, confirmed):
     if (d['access'], d['patient'], d['visit']) != (access.pk, access.patient_id, visit_id):
         raise RuleError('确认内容或患者授权已经变化，请重新打开本人预约。')
     # A receipt proves this exact successful request, even if its result later changes.
-    prior = BookingReceipt.objects.select_related('visit').filter(nonce=p['operation'], **access.receipt_fields,
-        visit__replaces_visit_id=visit_id, visit__patient_id=access.patient_id).first()
+    prior = _reschedule_receipts(access, p['operation'], visit_id).select_related('visit').first()
     if prior:
         return prior.visit, True
     preview = owned_visit(actor, visit_id)

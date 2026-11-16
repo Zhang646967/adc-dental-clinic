@@ -72,6 +72,7 @@ urlpatterns = [
     path("portal/report-notices/<int:pk>/read/", portal_views.examination_notice_read, name="portal_report_notice_read"),
     path("portal/slots/", portal_views.slots, name="portal_slots"),
     path("portal/book/confirm/", portal_views.booking_preview, name="portal_confirm"),
+    path("portal/booking-result/", portal_views.booking_result, name="portal_booking_result"),
     path("portal/visits/<int:pk>/", portal_views.visit, name="portal_visit"),
     path("portal/visits/<int:pk>/examinations/<int:order_id>/", portal_views.examination, name="portal_examination"),
     path("portal/visits/<int:pk>/cancel/", portal_views.cancel, name="portal_cancel"),

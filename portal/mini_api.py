@@ -22,7 +22,7 @@ from adc_core.rules import RuleError
 from adc_core.snapshots import reporting_snapshot
 from portal.models import PatientAccess
 from portal.policies import patient_access, has_patient_access, subject_choices, SubjectRequired
-from portal import mini_forms as forms, services, rescheduling, report_followup, report_notices
+from portal import booking_recovery, mini_forms as forms, services, rescheduling, report_followup, report_notices
 from portal.availability_search import availability_result
 from portal.examination_review import examination_summaries, published_examination
 from portal.patient_dashboard import needs_outcome_review
@@ -303,6 +303,7 @@ def book_preview(request):
             preparation=offering['preparation'], patient_request=d['patient_request']))
 
 
+@sensitive_post_parameters('proposal_token')
 @endpoint(('POST',))
 def book_confirm(request):
     d = validated(forms.ConfirmationForm(request.POST))
@@ -310,6 +311,19 @@ def book_confirm(request):
     visit = services.confirm_booking(actor=request.user, token=p['data']['token'],
         patient_request=p['data'].get('patient_request', ''), require_published_service=True)
     return result(request, visit_data(visit,actor=request.user))
+
+
+@sensitive_post_parameters('proposal_token')
+@endpoint(('POST',))
+def book_result(request):
+    data = validated(booking_recovery.BookingResultForm(request.POST))
+    kind, token = data['kind'], data['proposal_token']
+    with reporting_snapshot():
+        if kind == 'booking':
+            attempt = read_proposal(request.user, BOOK, ('PATIENT',), token,
+                max_age=booking_recovery.RESULT_WINDOW_SECONDS)
+            token = attempt['data']['token']
+        return result(request, booking_recovery.outcome(request.user, kind, token))
 
 
 @endpoint(('POST',))

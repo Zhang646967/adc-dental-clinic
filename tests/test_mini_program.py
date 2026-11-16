@@ -244,6 +244,9 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         option = lookup.context['rows'][0]
         preview = web.get(reverse('portal_confirm'), dict(params, slot=option['slot'].pk, start=option['start_iso']))
         self.assertEqual(preview.status_code, 200)
+        self.assertContains(preview, '待确认，尚未预约')
+        self.assertNotContains(preview, '查询办理结果')
+        self.assertNotContains(preview, '查询本次预约结果')
         self.assertEqual(parse_qs(urlparse(preview.context['slots_url']).query), {k: [v] for k, v in params.items()})
         upcoming = web.get(lookup.context['future_url'])
         self.assertIsNone(upcoming.context['form'].cleaned_data['day'])
@@ -254,6 +257,46 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         before = (Visit.objects.count(), AuditEvent.objects.count(), ResourceClaim.objects.count())
         self.preview()
         self.assertEqual(before, (Visit.objects.count(), AuditEvent.objects.count(), ResourceClaim.objects.count()))
+
+    def test_booking_result_is_read_only_and_bound_to_exact_attempt(self):
+        token = self.preview()
+        unsent = self.preview()
+        lookup = dict(kind='booking', proposal_token=token)
+        self.assertEqual(self.post('mini_book_result', lookup).json()['data'], {'state': 'UNCONFIRMED'})
+        self.assertFalse(Visit.objects.exists())
+        saved = self.post('mini_book_confirm', dict(proposal_token=token, confirmed='on')).json()['data']['id']
+        before = (Visit.objects.count(), BookingReceipt.objects.count(), AuditEvent.objects.count())
+        self.assertEqual(self.post('mini_book_result', lookup).json()['data'],
+            {'state': 'SAVED', 'visit_id': saved})
+        self.assertEqual(self.post('mini_book_result', dict(lookup, proposal_token=unsent)).json()['data'],
+            {'state': 'UNCONFIRMED'})
+        foreign, foreign_session = self.login(self.other)
+        self.assertEqual(self.post('mini_book_result', lookup, client=foreign, session=foreign_session).status_code, 409)
+        new, new_session = self.login(self.user)
+        self.assertEqual(self.post('mini_book_result', lookup, client=new, session=new_session).status_code, 409)
+        self.assertEqual((Visit.objects.count(), BookingReceipt.objects.count(), AuditEvent.objects.count()), before)
+
+    def test_browser_result_lookup_and_confirmation_responses(self):
+        web = WorkspaceClient()
+        web.force_login(self.user)
+        url = reverse('portal_confirm')
+        preview = web.get(url, dict(slot=self.slot1.pk, start=self.t.isoformat(), service=self.service.pk))
+        token = preview.context['form'].initial['token']
+        lookup = dict(kind='booking', proposal_token=token)
+        recovery = reverse('portal_booking_result')
+        result = web.post(recovery, lookup)
+        self.assertEqual(result.json(), {'state': 'UNCONFIRMED'})
+        self.assertEqual(web.get(recovery).status_code, 405)
+        rejected = web.post(url, {'token': token}, HTTP_ACCEPT='application/json')
+        self.assertEqual(rejected.status_code, 409)
+        self.assertEqual(rejected.json()['state'], 'REJECTED')
+        self.assertFalse(Visit.objects.exists())
+        accepted = web.post(url, {'token': token, 'confirmed': 'on'}, HTTP_ACCEPT='application/json')
+        visit = Visit.objects.get()
+        expected = dict(state='SAVED', visit_id=visit.pk, url=reverse('portal_visit', args=[visit.pk]))
+        self.assertEqual(accepted.json(), expected)
+        self.assertEqual(web.post(recovery, lookup).json(), expected)
+        self.assertEqual(BookingReceipt.objects.count(), 1)
 
     def test_booking_confirmation_replay_one_effect(self):
         token = self.preview()
@@ -322,11 +365,16 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         response = self.post('mini_reschedule_preview', data, pk=visit.pk)
         self.assertEqual(response.status_code, 200, response.content)
         token = response.json()['data']['proposal_token']
+        lookup = dict(kind='reschedule', proposal_token=token)
+        self.assertEqual(self.post('mini_book_result', lookup).json()['data'], {'state': 'UNCONFIRMED'})
         responses = [self.post('mini_reschedule_confirm', dict(proposal_token=token, confirmed='on'), pk=visit.pk).json()['data'] for _ in range(2)]
         self.assertEqual(responses[0]['visit']['id'], responses[1]['visit']['id']); self.assertTrue(responses[1]['replayed'])
         visit.refresh_from_db(); self.assertEqual(visit.status, 'RESCHEDULED')
         detail = self.client.get(reverse('mini_visit', kwargs={'pk': visit.pk})).json()['data']
         self.assertEqual(detail['successor'], responses[0]['visit']['id'])
+        self.assertEqual(self.post('mini_book_result', lookup).json()['data'],
+            {'state': 'SAVED', 'visit_id': detail['successor']})
+        self.assertEqual(BookingReceipt.objects.count(), 2)
         self.assertFalse(Invoice.objects.exists()); self.assertFalse(CashEntry.objects.exists())
 
     def test_reschedule_candidates_and_foreign_source(self):

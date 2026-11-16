@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 from adc_core.rules import RuleError
@@ -22,7 +23,7 @@ from portal.availability_search import availability_result
 from portal.examination_review import examination_summaries, published_examination
 from portal.policies import patient_access, form_authority, read_form_authority
 from portal.services import public_options, preview_booking, confirm_booking, cancel_booking
-from portal import report_followup, report_notices
+from portal import booking_recovery, report_followup, report_notices
 
 class PortalLoginView(LoginView):
     login_channel='PATIENT'
@@ -200,6 +201,8 @@ def slots(request):
     })
 
 @login_required(login_url="portal_login")
+@never_cache
+@sensitive_post_parameters('token', 'patient_request')
 @require_http_methods(["GET","POST"])
 def booking_preview(request):
     patient_access(request.user)
@@ -207,13 +210,18 @@ def booking_preview(request):
     from scheduling.service_content import positive_id
     followup_visit = positive_id(request.GET.get('followup_visit'))
     if request.method=="POST":
+        wants_json = request.headers.get('Accept') == 'application/json'
         form=BookingConfirmationForm(request.POST)
         if form.is_valid():
             try: v=confirm_booking(actor=request.user,token=form.cleaned_data["token"],patient_request=form.cleaned_data['patient_request'],require_published_service=True)
             except EXPECTED_ERRORS as exc: add_error(form,exc)
             else:
-                messages.success(request,"预约已经保存。相同确认页的重复提交不会再建一条。")
+                messages.success(request, '预约已确认。请核对到诊时间和门店。')
+                if wants_json:
+                    return booking_recovery.web_reply({'state': 'SAVED', 'visit_id': v.pk})
                 return redirect("portal_visit",pk=v.pk)
+        if wants_json:
+            return booking_recovery.web_rejection(form)
         return render(request,"portal/confirm.html",{"form":form,"failed":True,"slots_url":slots_url,
             'followup_visit': followup_visit})
     try:
@@ -235,6 +243,24 @@ def booking_preview(request):
     return render(request,"portal/confirm.html",{"slot":slot,"start":start,"end":end,
         "service_label":profile.title,"selected_profile":profile,"slots_url":slots_url,'followup_visit': followup_visit,
         "form":BookingConfirmationForm(initial={"token":token})})
+
+@login_required(login_url='portal_login')
+@never_cache
+@sensitive_post_parameters('proposal_token')
+@require_POST
+def booking_result(request):
+    form = booking_recovery.BookingResultForm(request.POST)
+    if not form.is_valid():
+        return booking_recovery.web_rejection(form)
+    try:
+        with reporting_snapshot():
+            data = booking_recovery.outcome(request.user, form.cleaned_data['kind'],
+                form.cleaned_data['proposal_token'])
+    except RuleError as exc:
+        form.add_error(None, str(exc))
+        return booking_recovery.web_rejection(form)
+    return booking_recovery.web_reply(data)
+
 
 @login_required(login_url="portal_login")
 @require_GET

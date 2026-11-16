@@ -90,6 +90,7 @@ urlpatterns = [
     path('funds/', patient_funds.mini, name='mini_funds'),
     path('booking/preview/', api.book_preview, name='mini_book_preview'),
     path('booking/confirm/', api.book_confirm, name='mini_book_confirm'),
+    path('booking/result/', api.book_result, name='mini_book_result'),
     path('visits/<int:pk>/cancel/preview/', api.cancel_preview, name='mini_cancel_preview'),
     path('visits/<int:pk>/cancel/confirm/', api.cancel_confirm, name='mini_cancel_confirm'),
     path('visits/<int:pk>/reschedule/candidates/', api.reschedule_candidates, name='mini_reschedule_candidates'),

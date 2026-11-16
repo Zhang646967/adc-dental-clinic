@@ -11,6 +11,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_http_methods
 from adc_core.http_support import EXPECTED_ERRORS, add_error
 from portal import rescheduling as services
+from portal import booking_recovery
 from portal.reschedule_forms import SearchForm, PreviewForm, ConfirmForm
 from coordination.models import WaitOffer
 from scheduling.models import Visit
@@ -35,16 +36,25 @@ def reschedule(request, pk):
     try: visit = services.owned_visit(request.user, pk)
     except Visit.DoesNotExist: raise Http404
     context = _context(request.user, visit)
+    filters = {key: request.GET[key] for key in ('day', 'dentist') if key in request.GET}
+    context['reselect_url'] = reverse('portal_reschedule', args=[pk])
+    if filters:
+        context['reselect_url'] += '?' + urlencode(filters)
     if request.method == 'POST' and request.POST.get('action') == 'confirm':
+        wants_json = request.headers.get('Accept') == 'application/json'
         form = ConfirmForm(request.POST)
         if form.is_valid():
             try:
-                new, repeated = services.confirm(actor=request.user, visit_id=visit.pk,
+                new, _ = services.confirm(actor=request.user, visit_id=visit.pk,
                     proposal_token=form.cleaned_data['proposal_token'], confirmed=form.cleaned_data['confirmed'])
             except EXPECTED_ERRORS as exc: add_error(form, exc)
             else:
-                messages.success(request, '这次确认已经办妥，以下是已保存结果。' if repeated else '改期成功，原预约和资源历史已保留，请按新安排就诊。')
+                messages.success(request, '改期已确认。请按新安排就诊。')
+                if wants_json:
+                    return booking_recovery.web_reply({'state': 'SAVED', 'visit_id': new.pk})
                 return redirect('portal_visit', pk=new.pk)
+        if wants_json:
+            return booking_recovery.web_rejection(form)
         context['visit'].refresh_from_db()
         context.update(services.related_context(request.user, context['visit']), form=form)
         return render(request, 'portal/reschedule_recovery.html', context, status=409)

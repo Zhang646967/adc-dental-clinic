@@ -33,10 +33,10 @@ def proposal(actor, contract, roles, data):
         operation=str(uuid.uuid4()), data=data), salt=contract, compress=True)
 
 @sensitive_variables()
-def read_proposal(actor, contract, roles, token):
+def read_proposal(actor, contract, roles, token, *, max_age=900):
     try:
         if type(token) is not str or not 1 <= len(token) <= 16384: raise ValueError
-        payload = signing.loads(token, salt=contract, max_age=900)
+        payload = signing.loads(token, salt=contract, max_age=max_age)
         if type(payload) is not dict or set(payload) != {'contract','binding','operation','data'}:
             raise ValueError
         if payload['contract'] != contract or type(payload['data']) is not dict:

@@ -84,6 +84,14 @@
 .portal-slot-filter label { display: block; }
 .portal-slot-filter p { margin: 0; }
 .portal-slot-filter select, .portal-slot-filter input { min-width: 0; max-width: 100%; }
+.patient-task { max-width: 48rem; margin-inline: auto; min-width: 0; }
+.patient-task-lede { color: #31584e; margin-block: .4rem 1.1rem; }
+.patient-booking-summary dd { overflow-wrap: anywhere; }
+.patient-booking-summary dd > p { margin: .3rem 0 0; }
+.patient-booking-summary details { margin-top: 1rem; }
+.patient-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin-top: 1rem; }
+.patient-actions > a, .patient-actions > button { display: inline-flex; align-items: center; min-height: 44px; margin: 0; }
+.patient-actions > [hidden], .patient-confirm-form[hidden], .booking-feedback[hidden] { display: none; }
 .portal-doctor-slots { margin: 1.3rem 0; }
 .portal-empty h2 { margin-top: 0; }
 .billing-card { flex-wrap: wrap; }

@@ -111,27 +111,39 @@ def preview_booking(*, user, slot_id, start, service_id=None, followup=None):
         data['report_followup'] = report_stamp
     return slot, end, signing.dumps(data, salt=SALT, compress=True)
 
-def _read_token(token, user):
+def _booking_attempt(actor, access, token, *, max_age=600):
     try:
-        data = signing.loads(token, salt=SALT, max_age=600)
-        if type(data) is not dict or data.get("uid") != user.pk: raise ValueError()
+        data = signing.loads(token, salt=SALT, max_age=max_age)
+        if type(data) is not dict or data.get("uid") != actor.pk: raise ValueError()
         UUID(data["nonce"])
-        return data
     except (signing.BadSignature, ValueError, KeyError, TypeError) as exc:
         raise RuleError("确认页已失效或不属于当前账号，请重新选择时段。") from exc
+    if data.get("access") != access.pk: raise RuleError("患者端授权已变化，请重新确认。")
+    check_authority(access,data.get('authority'))
+    ctx=getattr(actor,'_adc_workspace',None)
+    if (data.get('context'),data.get('context_revision')) != ((str(ctx.pk),ctx.revision) if ctx else (None,None)):
+        raise RuleError('就诊人或工作台已切换，请重新核对预约。')
+    return data
+
+
+def _booking_receipts(access, nonce):
+    receipts = BookingReceipt.objects.filter(nonce=nonce, **access.receipt_fields)
+    return access.scope(receipts, patient_field='visit__patient_id', clinic_field='visit__clinic_id')
+
+
+def booking_result(*, actor, token, max_age):
+    access = patient_access(actor)
+    attempt = _booking_attempt(actor, access, token, max_age=max_age)
+    return _booking_receipts(access, attempt['nonce']).values_list('visit_id', flat=True).first()
+
 
 @business_errors
 @transaction.atomic
 def confirm_booking(*, actor, token, patient_request='', require_published_service=False):
     require_writable(actor)
     access = patient_access(actor, lock=True)
-    data = _read_token(token, actor)
-    if data.get("access") != access.pk: raise RuleError("患者端授权已变化，请重新确认。")
-    check_authority(access,data.get('authority'))
-    ctx=getattr(actor,'_adc_workspace',None)
-    if (data.get('context'),data.get('context_revision')) != ((str(ctx.pk),ctx.revision) if ctx else (None,None)):
-        raise RuleError('就诊人或工作台已切换，请重新核对预约。')
-    receipt = BookingReceipt.objects.filter(nonce=data["nonce"], **access.receipt_fields).select_related("visit").first()
+    data = _booking_attempt(actor, access, token)
+    receipt = _booking_receipts(access, data['nonce']).select_related('visit').first()
     if receipt: return receipt.visit
     from scheduling.service_content import patient_request as normalize_request
     try:reason=normalize_request(patient_request)

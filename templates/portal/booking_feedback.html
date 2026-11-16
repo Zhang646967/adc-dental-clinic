@@ -1,0 +1,13 @@
+<section class="panel booking-feedback" data-booking-feedback{% if source_visit %} data-source-visit{% endif %} hidden>
+  <h2 data-feedback-title tabindex="-1"></h2>
+  <p data-feedback-message role="status"></p>
+  <div class="patient-actions">
+    <button class="button" type="button" data-query-booking hidden></button>
+    <a class="button" data-reselect-booking href="{{ reselect_url }}" hidden>返回选时段</a>
+    {% if source_visit %}
+    <a data-visit-list href="{% url 'portal_visit' source_visit %}">{{ source_label|default:"返回原就诊" }}</a>
+    {% else %}
+    <a data-visit-list href="{% url 'portal_appointments' %}?queue=all">查看预约清单</a>
+    {% endif %}
+  </div>
+</section>
