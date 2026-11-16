@@ -40,6 +40,20 @@ between target requirements, implementation, actual verification and release.
   real-data import, live prescribing/payment or a previously rejected upload.
   Continue authorized implementation and record concrete environment blockers.
 
+## Spec-driven development in ADC
+
+- Start changes to business rules, permissions, stored data, or shared client
+  interfaces in the affected feature's specification under `specs/`. State the
+  actor, observable outcome, failure cases, and expected data effects.
+- Carry those requirements into the feature's existing plan, contracts, and
+  tasks. Use the [project constitution](.specify/memory/constitution.md) and
+  established module ownership. For mini-program work, hand WorkBuddy the exact
+  version, runnable samples, and acceptance cases from the same specification.
+- Link the affected requirements to the relevant checks and result in the
+  feature's tasks and release notes. Local copy or layout changes within an
+  existing contract can use the current task and focused checks. Use the
+  established CI and the actual test environment for the affected scope.
+
 ## C0 service-content source candidate
 
 - `docs/C0_SERVICE_RELEASE.md` and `docs/evidence_c0/verification.json` distinguish
