@@ -75,7 +75,8 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
     def test_detail_has_content_preparation_fee_and_only_public_clinician_fields(self):
         self.d1.home_address='PRIVATE-HOME-DO-NOT-PUBLISH';self.d1.phone='PRIVATE-PHONE';self.d1.save()
         response=self.client.get(reverse('public_service_detail',args=[self.service.pk]))
-        for text in ('适合什么需求','这次预约包含什么','到诊前','费用与包含范围',self.d1.name,self.a.postal_address):
+        for text in ('适合谁', '到店后会做什么', '到诊准备', '费用 ·', '登录并查询可约时间',
+                     self.d1.name, self.a.postal_address):
             self.assertContains(response,text)
         self.assertNotContains(response,'PRIVATE-HOME-DO-NOT-PUBLISH')
         self.assertNotContains(response,'PRIVATE-PHONE')
@@ -195,7 +196,7 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
         self.change(category='CHILDREN')
         response=self.client.get(reverse('public_service_detail',args=[self.service.pk]))
         self.assertContains(response,'核验监护')
-        self.assertNotContains(response,'登录并选择时间')
+        self.assertNotContains(response,'登录并查询可约时间')
         self.assertFalse(SlotFilterForm({'service':self.service.pk}).is_valid())
 
     def test_patient_can_read_service_choose_time_and_confirm_own_request(self):

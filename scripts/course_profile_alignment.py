@@ -84,7 +84,7 @@ def prepare_alignment(*,technical_actor,operator_password,manager,frontdesk):
         clinic=branch.clinic;workspace(manager,'MANAGER',clinic)
         department=Department.objects.get(clinic=clinic,code='P1_CARE')
         staff=[UserAccount.objects.select_related('dentist').get(username=f'p1_c{clinic.pk:03}_doctor{n}') for n in (1,2,3)]
-        desired=[('P15_RESTORE','RESTORATION','牙痛评估与基础修复预约',45,[staff[0],staff[2]],1,0)]
+        desired=[('P15_RESTORE','RESTORATION','牙痛初诊评估',45,[staff[0],staff[2]],1,0)]
         if branch.city=='长沙' and '星沙' in branch.display_name:
             desired.append(('P15_CHILD','CHILDREN','儿童口腔检查与护理咨询',30,[staff[1]],0,1))
         for code,category,title,duration,doctors,imaging,sterilizer in desired:
@@ -97,9 +97,8 @@ def prepare_alignment(*,technical_actor,operator_password,manager,frontdesk):
                         duration_minutes=duration,dentists=[d.dentist_id for d in doctors],is_active=True,
                         imaging=imaging,sterilizer=sterilizer,other=0)))
                     result['new_services'].append(service.pk)
-                values=draft_from_guide(category);values.update(service=service.pk,title=title,
-                    summary=f'{branch.display_name}的{title}，先核对需求，再说明检查与后续安排。',
-                    fee_mode='ASSESSED',fee_amount=None,fee_note='预约不扣款，具体治疗与费用在到诊评估后确认。',is_published=True)
+                values=draft_from_guide(category)
+                values.update(service=service.pk,title=title,is_published=True)
                 old=ServicePresentation.objects.filter(service=service).first()
                 config('service_profile',values,target=old.pk if old else None)
             for subject in doctors:

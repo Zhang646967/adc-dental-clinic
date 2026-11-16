@@ -1,0 +1,78 @@
+:root {
+  --patient-title: 2rem;
+  --patient-heading: 1.125rem;
+  --patient-body-size: 1rem;
+  --patient-small: .875rem;
+  --patient-space: clamp(1rem, 2vw, 1.5rem);
+}
+
+.patient-body, .care-site { font-size: var(--patient-body-size); line-height: 1.6; }
+.patient-main h1, .care-service-page h1 {
+  font-size: var(--patient-title);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.patient-main h2, .care-service-page h2 {
+  font-size: var(--patient-heading);
+  line-height: 1.4;
+}
+.patient-context {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: .25rem 1rem;
+  padding: .35rem 0;
+  border: 0;
+  border-bottom: 1px solid #d4e2db;
+  background: none;
+  border-radius: 0;
+}
+.patient-context > p { flex-basis: 100%; }
+.patient-context > a { display: inline-flex; min-height: 44px; align-items: center; }
+.patient-context-role, .portal-shortcut-grid span { font-size: var(--patient-small); }
+.patient-main .button, .portal-slot-filter button, .care-service-actions .care-button {
+  min-height: 44px;
+  white-space: normal;
+  max-width: 100%;
+}
+.patient-main :focus-visible, .care-service-page :focus-visible { outline: 2px solid #176354; outline-offset: 3px; }
+.patient-confirm-form label:has(input[type="checkbox"]), .patient-confirm-form div:has(> input[type="checkbox"]) > label {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+}
+.patient-confirm-form textarea { resize: vertical; }
+.portal-slot-filter { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr)); gap: .75rem; align-items: end; }
+.portal-slot-filter .errorlist { overflow-wrap: anywhere; }
+.portal-slot-filter button { justify-self: start; }
+.patient-task .detail-grid { grid-template-columns: minmax(4rem, max-content) minmax(0, 1fr); gap: .5rem 1rem; }
+.patient-task .detail-grid dt, .patient-task .detail-grid dd { margin: 0; }
+.patient-main .portal-comparison > *, .care-detail-layout > * { min-width: 0; }
+.care-service-page { overflow-wrap: anywhere; }
+.care-service-page .care-breadcrumb { margin-bottom: .75rem; }
+.care-service-intro { margin-bottom: var(--patient-space); }
+.care-service-intro .care-page-heading { margin: 0 0 1rem; }
+.care-service-intro .care-lede { margin: .5rem 0; font-size: var(--patient-body-size); max-width: 42rem; }
+.care-service-facts {
+  background: #eef5f1;
+  padding: var(--patient-space);
+  border-radius: .75rem;
+}
+.care-service-facts p { margin: 0; }
+.care-service-facts p + p { margin-top: .4rem; }
+.care-service-store { font-weight: 650; }
+.care-service-actions { display: flex; flex-wrap: wrap; gap: .5rem .8rem; align-items: center; margin-top: .9rem; }
+.care-service-page .care-content-section, .care-service-page .care-booking-card { padding: var(--patient-space); }
+.care-service-page .care-content-section > p:last-child { margin-bottom: 0; }
+
+@media (max-width: 680px) {
+  :root { --patient-title: 1.5rem; }
+  .portal-shortcut-grid { grid-template-columns: repeat(auto-fit, minmax(min(10.5rem, 100%), 1fr)); }
+  .patient-task .detail-grid { grid-template-columns: minmax(3.5rem, max-content) minmax(0, 1fr); gap: .5rem .65rem; }
+}
+
+@media (min-width: 900px) {
+  .care-service-intro { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 1fr); gap: var(--patient-space); align-items: start; }
+}
