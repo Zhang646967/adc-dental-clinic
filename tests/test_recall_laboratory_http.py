@@ -1,5 +1,6 @@
 """C2.3 website work, minimal projections and exact service authority over PG."""
 from datetime import timedelta
+from unittest.mock import patch
 from django.core.exceptions import PermissionDenied
 from django.test import TransactionTestCase,override_settings
 from django.urls import reverse
@@ -11,6 +12,7 @@ from clinical.continuity_models import RecallEpisode,LabCase,LabReview
 from clinical.models import SensitiveReadEvent
 from clinical.plan_models import PlanDecision
 from finance.cash_models import CashEntry
+from portal import rescheduling
 from scheduling.models import BookingService
 from tests.test_recall_laboratory import ContinuityFixture
 from tests.workspace_client import WorkspaceClient
@@ -26,6 +28,42 @@ class RecallLaboratoryHTTPTests(ContinuityFixture,TransactionTestCase):
         values=self.values(page.context['form']);values.update(phase='confirm',confirmed='on',**extra)
         return c.post(url,values)
     def future_due(self):return timezone.localtime(timezone.now()+timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M:%S')
+
+    def test_suggested_window_queue_excludes_current_promises_and_completed_goals(self):
+        day=timezone.localdate()
+        last=day+timedelta(days=2)
+        late=self.instruction(latest_on=last)
+        booked=self.instruction(latest_on=last)
+        original=self.scheduled_followup(booked)
+        proposal=rescheduling.prepare(actor=self.patient_user,visit_id=original.pk,
+            expected_version=original.lock_version,slot_id=original.availability_slot_id,
+            start=self.t+timedelta(hours=2),reason='课程合成改期')
+        successor,_=rescheduling.confirm(actor=self.patient_user,visit_id=original.pk,
+            proposal_token=proposal['proposal_token'],confirmed=True)
+        completed=self.instruction(latest_on=last)
+        self.close_followup(self.scheduled_followup(completed))
+        internally_due=self.instruction()
+        episode=self.open_recall(internally_due)
+
+        url=reverse('clinical_recalls')
+        client=self.client_for(self.front)
+        with patch.object(timezone,'now',return_value=timezone.now()+timedelta(days=3)):
+            suggested=client.get(url,{'queue':'past_unbooked'})
+            self.assertContains(suggested,'已过医师建议的最晚复诊日')
+            self.assertEqual([row['id'] for row in suggested.context['rows']],[late.pk])
+            self.assertContains(suggested,reverse('clinical_recall_claim',args=[late.pk]))
+            self.assertNotContains(suggested,'PRIVATE_NEXT_PURPOSE')
+            internal=client.get(url,{'queue':'overdue'})
+            self.assertEqual([row['id'] for row in internal.context['rows']],[internally_due.pk])
+            self.assertContains(internal,reverse('clinical_recall_detail',args=[episode.pk]))
+            self.assertEqual(self.client_for(self.patient_user).get(url,{'queue':'past_unbooked'}).status_code,403)
+            self.assertEqual(client.post(reverse('activate_clinic'),{'clinic':self.b.pk}).status_code,302)
+            foreign=client.get(url,{'queue':'past_unbooked'})
+            self.assertContains(foreign,'当前筛选下没有随访事项')
+        successor.refresh_from_db()
+        self.assertEqual(successor.status,'SCHEDULED')
+        self.assertEqual(RecallEpisode.objects.count(),1)
+
     def test_frontdesk_claim_preview_and_recorded_contact_are_separate(self):
         instruction=self.instruction();c=self.client_for(self.front);url=reverse('clinical_recall_claim',args=[instruction.pk])
         self.assertContains(c.get(reverse('frontdesk_home')),'复诊随访与责任')

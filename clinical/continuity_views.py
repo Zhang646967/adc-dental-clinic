@@ -41,7 +41,7 @@ def work_preview(request,title,p,back,*,instruction=None,case=None,visit=None):
 @require_GET
 def recalls(request):
     queue=request.GET.get('queue','active')
-    if queue not in ('active','unclaimed','overdue','completed','withdrawn','all'):queue='active'
+    if queue not in ('active','unclaimed','overdue','past_unbooked','completed','withdrawn','all'):queue='active'
     page=Paginator(recall_instructions(request.user,queue),20).get_page(request.GET.get('page'))
     return clinical_render(request,'clinical/recall_list.html',dict(page=page,rows=[recall_projection(i) for i in page],queue=queue,pagination_query='queue='+queue))
 

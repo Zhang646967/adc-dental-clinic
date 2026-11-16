@@ -9,6 +9,7 @@ const SPEC = {
   UPCOMING_VISIT: {label: '下一次就诊', hint: '打开安排与到诊提示。', target: 'visit', action: '查看安排与到诊提示'},
   CONTACT_CLINIC: {label: '请联系门店核实', hint: '请与门店前台核对这次办理结果。', target: 'contact', action: '查看门店联系方式'},
   WAITLIST: {label: '候补进度', hint: '查看等待、确认和成约结果。', target: 'waitlist', action: '查看候补进度'},
+  REPORT_FOLLOWUP: {label: '复诊待安排', hint: '查看检查报告与复诊建议。', target: 'report', action: '查看报告与复诊'},
   BOOK: {label: '预约就诊', hint: '从服务目录选择门店、服务与时段。', target: 'book', action: '预约就诊'}
 };
 
@@ -40,6 +41,10 @@ function primaryAction(overview) {
     url = '/pages/waitlist/index';
   } else if (spec.target === 'book') {
     url = '/pages/services/index';
+  } else if (spec.target === 'report') {
+    const report = raw.report;
+    if (!report || ![report.visit_id, report.id, report.revision].every(value => Number.isSafeInteger(value) && value > 0)) return null;
+    url = `/pages/examination/index?visit=${report.visit_id}&id=${report.id}&revision=${report.revision}`;
   } else {
     return null;
   }
@@ -51,12 +56,13 @@ function primaryAction(overview) {
   const detail = visit ? `${visit.clinic} · ${visit.dentist}` : '';
   const serviceLine = visit ? `${visit.service} · ${visit.status_label}` : '';
   const deadline = offer && offer.expires_at ? `请在 ${offer.expiresLabel} 前确认（北京时间）` : '';
+  const copy = spec.target === 'report' ? raw : {};
 
   return {
     kind: raw.kind,
-    label: review ? REVIEW_HINT : spec.label,
-    hint: review ? '预约状态仍以门店核实为准。' : spec.hint,
-    actionLabel: review ? '查看门店联系方式' : spec.action,
+    label: review ? REVIEW_HINT : copy.label || spec.label,
+    hint: review ? '预约状态仍以门店核实为准。' : copy.hint || spec.hint,
+    actionLabel: review ? '查看门店联系方式' : copy.button || spec.action,
     url,
     review,
     timeLabel,

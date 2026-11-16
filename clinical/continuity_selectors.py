@@ -21,9 +21,19 @@ def recall_instructions(actor,queue='active'):
     if queue=='active':rows=rows.filter(Q(state='OPEN',recall__isnull=True)|Q(recall__state__in=['OPEN','REVIEW']))
     elif queue=='unclaimed':rows=rows.filter(state='OPEN',recall__isnull=True)
     elif queue=='overdue':rows=rows.filter(recall__state__in=['OPEN','REVIEW'],recall__followup_due_at__lt=timezone.now())
+    elif queue=='past_unbooked':
+        candidates=rows.filter(state='OPEN',latest_on__lt=timezone.localdate()).filter(
+            Q(recall__isnull=True)|Q(recall__state__in=['OPEN','REVIEW']))
+        rows=rows.filter(pk__in=[
+            row.pk for row in candidates.iterator() if past_unbooked(instruction_booking_projection(row), getattr(row,'recall',None))])
     elif queue=='completed':rows=rows.filter(recall__state='COMPLETED')
     elif queue=='withdrawn':rows=rows.filter(recall__state='WITHDRAWN')
     return rows.order_by('latest_on','pk')
+
+
+def past_unbooked(data, episode):
+    return (data['overdue'] and data['needs_booking'] and not data['report_review']
+        and (episode is None or episode.state in ('OPEN','REVIEW')))
 
 
 def recall_projection(instruction):
@@ -32,6 +42,7 @@ def recall_projection(instruction):
     except RecallEpisode.DoesNotExist:episode=None
     source=instruction.source_record.encounter.visit
     data.update(completion_rule=instruction.completion_rule,completion_label=instruction.get_completion_rule_display(),episode=episode,
+        past_unbooked=past_unbooked(data,episode),
         owner_available=available_front(episode.owner_id,source.clinic_id) if episode else False,
         contact_overdue=bool(episode and episode.state in ('OPEN','REVIEW') and episode.followup_due_at<timezone.now()),
         evidence=recall.completion_candidates(instruction))

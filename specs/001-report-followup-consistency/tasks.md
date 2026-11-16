@@ -20,3 +20,10 @@
 
 - [x] T008 核对后端、网页、真实 HTTP、原生源码和 18540 数据，检查业务新增为零。Codex。
 - [x] T009 提交 `0c4c654` 的完整 CI 通过。已核对 11 个查询编号及 13 张业务表的逐表校验值，见 [18540 验收](../../docs/EXAMINATION_FOLLOWUP.md#18540-一致性验证)。
+
+## 18541 · 复诊待办与异常接续
+
+- [x] T010 [US3] 后端、网页、小程序使用同一复诊待办。FR-005、SC-004，见 `tests/test_examination_followup.py` 与 `scripts/verify_native_alignment.cjs`。
+- [x] T011 [US4] 前台建议期筛选与岗位验证。FR-006、SC-005，见 `tests/test_recall_laboratory_http.py`。
+- [ ] T012 18541 合成库对账、网页与真实接口回归、准确提交 CI。Codex。
+- [ ] T013 交接精确版本、样本、私有指南与验收路径，以 WorkBuddy 工具回传收口。SC-004。

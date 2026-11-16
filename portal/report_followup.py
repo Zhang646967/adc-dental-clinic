@@ -2,12 +2,13 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.db.models import F, OuterRef, Subquery
 from django.http import Http404
 from django.utils import timezone
 
 from adc_core.rules import RuleError
 from clinical import examination_followup as clinical
-from clinical.examination_models import ExaminationOrder
+from clinical.examination_models import ExaminationFollowup, ExaminationOrder
 from clinical.next_visits import has_completed_goal
 from clinical.plan_models import NextVisitInstruction
 from portal.policies import patient_access
@@ -17,6 +18,7 @@ from scheduling.resource_models import ServicePresentation
 from scheduling.service_content import positive_id
 
 FIELDS = ('followup_visit', 'followup_examination', 'followup_revision')
+SOURCE_VISIT = 'release__order__source_record__encounter__visit'
 CAPTIONS = {'BOOK': '按建议日期预约复诊', 'CONTACT': '联系原门店',
     'VIEW_APPOINTMENT': '查看复诊预约', 'NONE': '后续安排'}
 
@@ -92,18 +94,8 @@ def _service_title(instruction):
         return instruction.service.name
 
 
-def projection(visit, report, actor):
-    order = _order(visit.pk, report['id'], patient_id=visit.patient_id)
-    if not _active_version(order, report['revision']):
-        raise Http404
-    decision = clinical.current_decision(order)
-    if decision is None:
-        return None
+def _followup_action(order, decision, active, latest, actor):
     instruction = decision.instruction
-    appointments = clinical.report_appointments(order)
-    active = next((row for row in appointments if row.status in ('SCHEDULED', 'CHECKED_IN')), None)
-    latest = active or next(iter(appointments), None)
-    start, end = window(instruction) if instruction else (None, None)
     action, message = decision.kind, ''
     if active:
         if (instruction and instruction.state == 'OPEN' and clinical.current_plan_step(instruction)
@@ -124,11 +116,60 @@ def projection(visit, report, actor):
         message = '请联系原门店核对本报告的后续安排。'
     else:
         message = '本报告供查阅。'
+    return action, message
+
+
+def projection(visit, report, actor):
+    order = _order(visit.pk, report['id'], patient_id=visit.patient_id)
+    if not _active_version(order, report['revision']):
+        raise Http404
+    decision = clinical.current_decision(order)
+    if decision is None:
+        return None
+    instruction = decision.instruction
+    appointments = clinical.report_appointments(order)
+    active = next((row for row in appointments if row.status in ('SCHEDULED', 'CHECKED_IN')), None)
+    latest = active or next(iter(appointments), None)
+    action, message = _followup_action(order, decision, active, latest, actor)
+    start, end = window(instruction) if action == 'BOOK' else (None, None)
     return dict(action=action, label=CAPTIONS[action], message=message, clinic_id=visit.clinic_id,
         clinic=visit.clinic.public_contact['name'], service_id=instruction.service_id if instruction else None,
         service=_service_title(instruction), earliest_on=instruction.earliest_on if instruction else None,
-        latest_on=instruction.latest_on if instruction else None, first_day=start if action == 'BOOK' else None,
-        last_day=end if action == 'BOOK' else None, appointment=_appointment_data(latest))
+        latest_on=instruction.latest_on if instruction else None, first_day=start,
+        last_day=end, appointment=_appointment_data(latest))
+
+
+def next_pending(actor, access):
+    """Find an actionable current release independently of its notice read state."""
+    if access.delegated or not settings.ADC_CLINICAL_SYNTHETIC:
+        return None
+    latest = ExaminationFollowup.objects.filter(release_id=OuterRef('release_id')).order_by('-pk')
+    rows = (ExaminationFollowup.objects.filter(
+        release__order__active_release_id=F('release_id'), release__action='PUBLISH',
+        release__report__order_id=F('release__order_id'), kind__in=('BOOK', 'CONTACT'),
+        pk=Subquery(latest.values('pk')[:1]),
+        **{SOURCE_VISIT + '__patient_id': access.patient_id, SOURCE_VISIT + '__clinic__is_active': True})
+        .select_related(SOURCE_VISIT, 'release__report', 'instruction__step_version', 'instruction__recall')
+        .order_by('release__occurred_at', 'pk'))
+    for decision in rows.iterator():
+        order = decision.release.order
+        instruction = decision.instruction
+        if instruction:
+            if getattr(getattr(instruction, 'recall', None), 'state', '') == 'COMPLETED' or has_completed_goal(instruction):
+                continue
+        elif clinical.contact_progress(decision)['outcome'] == 'REACHED':
+            continue
+        appointments = clinical.report_appointments(order)
+        if any(row.status in ('SCHEDULED', 'CHECKED_IN') for row in appointments):
+            continue
+        action, message = _followup_action(order, decision, None, next(iter(appointments), None), actor)
+        if action in ('BOOK', 'CONTACT'):
+            return dict(
+                kind='REPORT_FOLLOWUP', label='复诊待安排' if action == 'BOOK' else '复诊待门店协助',
+                button='查看报告与复诊', hint=message,
+                report=dict(visit_id=order.source_record.encounter.visit_id, id=order.pk,
+                    revision=decision.release.report.number))
+    return None
 
 
 def selection(actor, fields, *, clinic_id, service_id, day=None, lock=False):

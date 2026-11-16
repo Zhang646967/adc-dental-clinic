@@ -32,3 +32,9 @@ FR 与验收见 [任务](tasks.md)。报告只改患者投影，预约编号和�
 ## Design
 
 [调查与决策](research.md) · [现有数据关系](data-model.md) · [接口合同](contracts/report-followup.md) · [试用流程](quickstart.md)
+
+## 18541 · 复诊待办与异常接续
+
+- 以 `4870a6e` 为基线，扩展 `portal/patient_dashboard.py` 的共用投影与原网页、小程序主行动。只查询本人最新有效发布决策，按原报告规则决定查号或联系，沿用改期链及实际完成依据。
+- 扩展 `clinical/continuity_selectors.py` 与现有前台清单，使用同一预约投影区分建议期与跟进期限。数据库结构和预约确认合同沿用现状。
+- 用独立 PostgreSQL 18541 准备已读未约、无号、超期和取消样本。Codex 核对网页、接口、岗位及准确提交 CI，WorkBuddy 独立完成工具正常点击复测。

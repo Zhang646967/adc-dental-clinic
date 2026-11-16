@@ -2,6 +2,7 @@
 from django.utils import timezone
 from coordination.models import WaitRequest, WaitOffer
 from coordination.presentation import active_offers
+from portal import report_followup
 from portal.policies import patient_access
 from portal.report_notices import unread_count
 from scheduling.models import Visit
@@ -49,6 +50,8 @@ def dashboard(actor, *, now=None):
     action = primary_action(visits, current, offers, waiting_count, now)
     label, button, hint = ACTION_COPY[action['kind']]
     action.update(label=label, button=button, hint=hint)
+    if action['kind'] == 'BOOK':
+        action.update(report_followup.next_pending(actor, access) or {})
     return dict(patient=access.patient, can_view_funds=not access.delegated, next_visit=current or upcoming,
         active_count=visits.filter(status__in=('SCHEDULED', 'CHECKED_IN')).count(),
         history_count=visits.exclude(status__in=('SCHEDULED', 'CHECKED_IN')).count(),

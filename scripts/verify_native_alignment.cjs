@@ -134,6 +134,16 @@ async function verify(){
   const offer=action('CONFIRM_OFFER',null,{id:4,expires_at:'2026-11-05T02:45:00Z'});
   assert.equal(offer.url,'/pages/offer/index?id=4');assert(offer.deadline.includes('2026-11-05 10:45'));count++;
   assert.equal(action('WAITLIST').url,'/pages/waitlist/index');assert.equal(action('BOOK').url,'/pages/services/index');count++;
+  const reportAction={kind:'REPORT_FOLLOWUP',report:{visit_id:12,id:7,revision:2},
+    label:'复诊待门店协助',button:'查看报告与复诊',hint:'请联系原门店。'};
+  const mappedReport=primary({primary_action:reportAction});
+  assert.equal(mappedReport.url,'/pages/examination/index?visit=12&id=7&revision=2');
+  assert.equal(mappedReport.label,reportAction.label);
+  assert.equal(mappedReport.hint,reportAction.hint);
+  assert.equal(mappedReport.actionLabel,reportAction.button);count++;
+  for(const report of [null,{visit_id:12,id:7},{visit_id:12,id:'7&next=other',revision:2}]){
+    assert.equal(primary({primary_action:{...reportAction,report}}),null);count++;
+  }
   assert.equal(primary({next_visit:visit}),null);assert.equal(action('UNKNOWN'),null);
   assert.equal(action('UPCOMING_VISIT',{...visit,id:'12&next=elsewhere'}),null);assert.equal(action('CONFIRM_OFFER'),null);count++;
   for(const [status,code] of [[403,'ACCESS_DENIED'],[409,'SUBJECT_REQUIRED'],[409,'SUBJECT_CHANGED'],[409,'WORKSPACE_CHANGED']]){

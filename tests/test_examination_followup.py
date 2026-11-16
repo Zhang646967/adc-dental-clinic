@@ -2,6 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from threading import Barrier
+from unittest.mock import patch
 
 from django.core.exceptions import PermissionDenied
 from django.db import close_old_connections
@@ -186,6 +187,57 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
         self.assertEqual((withdrawn['kind'], withdrawn['revision']), ('WITHDRAWN', None))
         self.assertEqual(ExaminationNotice.objects.count(), 3)
 
+    def test_next_action_follows_report_read_booking_cancellation_and_current_revision(self):
+        order = self.release(self.open_order())
+        self.v.refresh_from_db()
+        complete_visit(actor=self.doc, visit_id=self.v.pk, expected_version=self.v.lock_version,
+            outcome='NO_TREATMENT', reason='课程合成：单独核对报告复诊待办。')
+        notice = ExaminationNotice.objects.get(event__order=order)
+        report_link = reverse('portal_examination', args=[self.v.pk, order.pk])
+
+        def overview(client=self.mini):
+            response = client.get(reverse('mini_overview'))
+            self.assertEqual(response.status_code, 200, response.content)
+            return response.json()['data']
+
+        pending = overview()['primary_action']
+        self.assertEqual(pending['kind'], 'REPORT_FOLLOWUP')
+        self.assertEqual(pending['report'], {'visit_id': self.v.pk, 'id': order.pk, 'revision': 1})
+        self.assertContains(self.web.get(reverse('portal_home')), report_link + '?revision=1')
+        self.assertEqual(self.mini_post('mini_report_notice_read', {}, [notice.pk]).status_code, 200)
+        self.assertEqual(overview()['report_unread_count'], 0)
+        self.assertEqual(overview()['primary_action'], pending)
+        other = self.mini_client(self.create_other())
+        self.assertNotIn('report', overview(other)['primary_action'])
+        delegate, _, grant = self.create_delegate()
+        proxy = self.mini_client(delegate)
+        self.assertEqual(self.mini_post('mini_subject_select', {'subject': f'grant:{grant.pk}'}, client=proxy).status_code, 200)
+        self.assertNotIn('report', overview(proxy)['primary_action'])
+
+        visit = services.confirm_booking(actor=self.patient_user, token=self.scoped_preview(order), require_published_service=True)
+        self.assertEqual(overview()['primary_action']['visit']['id'], visit.pk)
+        self.assertNotContains(self.web.get(reverse('portal_home')), '查看报告与复诊')
+        services.cancel_booking(actor=self.patient_user, visit_id=visit.pk, expected_version=visit.lock_version,
+            reason='课程合成：取消复诊，保留原报告。')
+        self.assertEqual(overview()['primary_action'], pending)
+        self.assertEqual(self.report(order)['followup']['action'], 'BOOK')
+        with patch.object(timezone, 'now', return_value=timezone.now() + timedelta(days=6)):
+            client = self.mini_client(self.patient_user)
+            late = overview(client)['primary_action']
+            self.assertEqual(late['report'], pending['report'])
+            self.assertEqual(late['label'], '复诊待门店协助')
+            self.assertEqual(late['hint'], self.report(order, client=client)['followup']['message'])
+            self.assertContains(self.web_client(self.patient_user).get(reverse('portal_home')), late['hint'])
+
+        order = self.release(order, body=BODY2, reason='课程合成：更新报告和复诊建议。')
+        self.assertEqual(overview()['primary_action']['report']['revision'], 2)
+        self.assertContains(self.web.get(reverse('portal_home')), report_link + '?revision=2')
+        self.assertEqual(self.web.get(report_link + '?revision=1').status_code, 404)
+        self.step(order, 'WITHDRAW', reason='课程合成：撤回患者报告。')
+        self.assertEqual(overview()['primary_action']['kind'], 'BOOK')
+        self.assertEqual(Visit.objects.filter(patient=self.p1).count(), 2)
+        self.assertEqual(PlanAppointment.objects.filter(visit=visit).count(), 1)
+
     def test_report_linked_booking_web_and_mini_replay_and_successor(self):
         order = self.release(self.open_order())
         source = self.report(order)['followup']
@@ -344,20 +396,29 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
         due = (timezone.now()+timedelta(hours=2)).isoformat()
         order = self.release(self.open_order(), kind='CONTACT', contact_due_at=due)
         original = followups.current_decision(order)
+        self.v.refresh_from_db()
+        complete_visit(actor=self.doc, visit_id=self.v.pk, expected_version=self.v.lock_version,
+            outcome='NO_TREATMENT', reason='课程合成：核对门店联系待办。')
+        def primary():
+            return self.mini.get(reverse('mini_overview')).json()['data']['primary_action']
+        self.assertEqual(primary()['label'], '复诊待门店协助')
         self.assertEqual(self.report(order)['followup']['action'], 'CONTACT')
         self.assertContains(self.web_client(self.doc).get(reverse('clinical_examinations')+'?queue=contact'), '待联系')
         self.assertNotContains(self.front_web.get(reverse('clinical_examination_progress')), BODY1)
         self.step(order, 'CONTACT_RESULT', contact_outcome='NO_ANSWER',
             contact_due_at=(timezone.now()+timedelta(hours=3)).isoformat(), contact_note='课程合成联系未果')
         self.assertEqual(followups.contact_progress(original)['state'], '联系未果')
+        self.assertEqual(primary()['report']['id'], order.pk)
         token = self.prepare_step(order, 'CONTACT_RESULT', contact_outcome='REACHED', contact_note='已与本人核对课程安排')
         for replay in (False, True):
             self.assertEqual(examinations.confirm(actor=self.doc, proposal_token=token, confirmed=True)[1], replay)
         self.assertEqual(followups.contact_progress(original)['state'], '已联系')
+        self.assertEqual(primary()['kind'], 'BOOK')
         self.assertEqual(followups.contact_events(original).count(), 2)
         instruction = self.instruction()
         self.step(order, 'FOLLOWUP', followup_kind='BOOK', instruction=instruction.pk)
         self.assertEqual(self.report(order)['followup']['action'], 'BOOK')
+        self.assertEqual(primary()['label'], '复诊待安排')
         self.assertEqual(ExaminationFollowup.objects.filter(release=original.release).count(), 2)
         self.assertEqual(ExaminationNotice.objects.count(), 1)
 
