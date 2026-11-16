@@ -22,7 +22,8 @@
     <h2>改期原因</h2>
     <p class="patient-service-lines">{{ preview.reason }}</p>
     {% csrf_token %}{% workspace_token %}
-    {{ form.as_div }}
+    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+    <label class="patient-consent">{{ form.confirmed }}<span>{{ form.confirmed.label }}</span></label>
     <div class="patient-actions">
       <button type="submit"{% if read_only %} disabled{% endif %}>确认改期</button>
       <a data-confirm-back href="{{ reselect_url }}">返回选时段</a>

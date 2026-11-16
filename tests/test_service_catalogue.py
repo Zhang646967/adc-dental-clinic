@@ -75,7 +75,7 @@ class ServiceCatalogueTests(ResourceFixture, TransactionTestCase):
     def test_detail_has_content_preparation_fee_and_only_public_clinician_fields(self):
         self.d1.home_address='PRIVATE-HOME-DO-NOT-PUBLISH';self.d1.phone='PRIVATE-PHONE';self.d1.save()
         response=self.client.get(reverse('public_service_detail',args=[self.service.pk]))
-        for text in ('适合谁', '到店后会做什么', '到诊准备', '费用 ·', '登录并查询可约时间',
+        for text in ('适合谁', '到店后会做什么', '到诊准备', self.profile.fee_display, '登录并查询可约时间',
                      self.d1.name, self.a.postal_address):
             self.assertContains(response,text)
         self.assertNotContains(response,'PRIVATE-HOME-DO-NOT-PUBLISH')

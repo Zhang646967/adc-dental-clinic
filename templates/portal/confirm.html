@@ -34,7 +34,9 @@
   <form class="panel form-panel patient-confirm-form" method="post" data-booking-confirmation="booking"
         data-result-url="{% url 'portal_booking_result' %}" data-subject-url="{% url 'portal_subjects' %}">
     {% csrf_token %}{% workspace_token %}
-    {{ form.as_div }}
+    {{ form.token }}
+    {{ form.patient_request.as_field_group }}
+    <label class="patient-consent">{{ form.confirmed }}<span>{{ form.confirmed.label }}</span></label>
     <div class="patient-actions">
       <button class="button" type="submit"{% if read_only %} disabled{% endif %}>确认提交预约</button>
       <a data-confirm-back href="{{ slots_url }}">返回选时段</a>

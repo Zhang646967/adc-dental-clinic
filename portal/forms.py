@@ -5,7 +5,7 @@ class BookingConfirmationForm(forms.Form):
     patient_request = forms.CharField(label='这次主要想解决什么问题？（可选）', required=False,
         max_length=500, widget=forms.Textarea(attrs={'rows': 3, 'placeholder': '例如：想做一次口腔检查；或说明不适的位置、持续时间及希望医师了解的事项。'}),
         help_text='仅记录本次就诊需求，不用于在线诊断。紧急情况请及时就医。')
-    confirmed = forms.BooleanField(label="我已核对诊所、牙医和北京时间，确认提交此预约。")
+    confirmed = forms.BooleanField(label="我已核对就诊人、门店、服务、医师和预约时间，确认提交。")
 
 class CancelForm(forms.Form):
     patient_authority=forms.CharField(required=False,widget=forms.HiddenInput)

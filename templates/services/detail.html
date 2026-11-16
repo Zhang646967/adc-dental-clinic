@@ -21,7 +21,7 @@
     </div>
     <section class="care-service-facts" aria-label="门店、时长与费用">
       <p class="care-service-store">{{ profile.public_contact.name }} · {{ profile.service.duration_minutes }} 分钟预约时段</p>
-      <p class="care-lines" id="fees"><strong>费用 · {{ profile.fee_display }}</strong></p>
+      <p class="care-lines" id="fees"><strong>{{ profile.fee_display }}</strong></p>
       <p class="care-lines">{{ profile.fee_note }}</p>
       {% if not is_draft_preview %}
       <div class="care-service-actions">

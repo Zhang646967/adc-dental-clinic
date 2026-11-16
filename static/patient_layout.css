@@ -8,6 +8,8 @@
 
 .patient-body, .care-site { font-size: var(--patient-body-size); line-height: 1.6; }
 .patient-main h1, .care-service-page h1 {
+  font-family: inherit;
+  font-weight: 700;
   font-size: var(--patient-title);
   line-height: 1.3;
   overflow-wrap: anywhere;
@@ -37,12 +39,15 @@
   max-width: 100%;
 }
 .patient-main :focus-visible, .care-service-page :focus-visible { outline: 2px solid #176354; outline-offset: 3px; }
-.patient-confirm-form label:has(input[type="checkbox"]), .patient-confirm-form div:has(> input[type="checkbox"]) > label {
+.patient-confirm-form .patient-consent {
   min-height: 44px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: .55rem;
+  margin-top: .9rem;
+  cursor: pointer;
 }
+.patient-consent input { flex: 0 0 auto; }
 .patient-confirm-form textarea { resize: vertical; }
 .portal-slot-filter { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr)); gap: .75rem; align-items: end; }
 .portal-slot-filter .errorlist { overflow-wrap: anywhere; }
@@ -53,7 +58,7 @@
 .care-service-page { overflow-wrap: anywhere; }
 .care-service-page .care-breadcrumb { margin-bottom: .75rem; }
 .care-service-intro { margin-bottom: var(--patient-space); }
-.care-service-intro .care-page-heading { margin: 0 0 1rem; }
+.care-service-intro .care-page-heading { margin: 0 0 1rem; padding: 0; }
 .care-service-intro .care-lede { margin: .5rem 0; font-size: var(--patient-body-size); max-width: 42rem; }
 .care-service-facts {
   background: #eef5f1;
