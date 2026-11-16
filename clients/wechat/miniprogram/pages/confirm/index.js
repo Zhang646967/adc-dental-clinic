@@ -207,7 +207,7 @@ Page({
     getApp().globalData.bookingRefresh=true;
     const pages=typeof getCurrentPages==='function'?getCurrentPages():[];
     const previous=pages&&pages.length>1?pages[pages.length-2]:null;
-    if(previous&&previous.route==='pages/booking/index'){navigation.navigateBack({delta:1});return;}
+    if(previous){navigation.navigateBack({delta:1});return;}
     if(followupVisit){navigation.reLaunch({url:`/pages/visit/index?id=${followupVisit}`});return;}
     if(selection)navigation.reLaunch({url:`/pages/booking/index?clinic=${selection.clinic}&service=${selection.service}${selection.dentist?'&dentist='+selection.dentist:''}${selection.day?'&day='+selection.day:''}`});
     else navigation.reLaunch({url:'/pages/services/index'});
