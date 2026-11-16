@@ -35,4 +35,5 @@ function returnTo(url){
   return wx.redirectTo({url});
 }
 module.exports={consume,returnTo,navigateTo:options=>navigate(options,'navigateTo'),
-  redirectTo:options=>navigate(options,'redirectTo'),reLaunch:options=>navigate(options,'reLaunch')};
+  redirectTo:options=>navigate(options,'redirectTo'),reLaunch:options=>navigate(options,'reLaunch'),
+  navigateBack:options=>wx.navigateBack(options||{delta:1})};

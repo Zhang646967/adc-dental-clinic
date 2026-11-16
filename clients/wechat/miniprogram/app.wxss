@@ -25,3 +25,32 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 .result-success{background:#e7f2e9;color:#245c40}
 .patient-return{margin-top:36rpx;padding-top:16rpx;border-top:1rpx solid #dbe5dc}
 .patient-return navigator{display:block}
+
+/* 18542: one hierarchy across discovery, service, booking, confirm and visit.
+   At 390 logical px: title 24, section 18, body 16, auxiliary 14; tap areas 44+. */
+.patient-flow{font-size:31rpx;line-height:1.65}
+.patient-flow .title{font-size:47rpx;line-height:1.35;margin:14rpx 0 20rpx}
+.patient-flow .section-title{font-size:35rpx;line-height:1.45}
+.patient-flow .section-label{font-size:28rpx}
+.patient-flow .prose,.patient-flow .line,.patient-flow .label{font-size:31rpx}
+.patient-flow .muted,.patient-flow .small,.patient-flow .page-footnote{font-size:27rpx}
+.patient-flow .time{font-size:37rpx}
+.patient-flow .tz{font-size:27rpx;color:#536c75;font-weight:400}
+.patient-flow button{min-height:88rpx;font-size:31rpx}
+.patient-flow button.compact{min-height:88rpx;font-size:27rpx;padding:10rpx 20rpx}
+.patient-flow .check{min-height:88rpx;align-items:center;font-size:31rpx;gap:16rpx}
+.patient-flow .subject-banner{display:flex;align-items:center;gap:8rpx 16rpx;flex-wrap:wrap;padding:12rpx 18rpx;font-size:27rpx;margin-bottom:20rpx}
+.patient-flow .subject-banner text{font-weight:600}
+.patient-flow .subject-banner navigator,.patient-flow .subject-banner button{min-height:88rpx;line-height:88rpx;padding:0 10rpx;margin:0;width:auto;flex:none;background:transparent;color:#176454;text-decoration:underline;font-size:27rpx;font-weight:600}
+.patient-flow .identity-bar{display:flex;align-items:center;justify-content:space-between;gap:12rpx;flex-wrap:wrap;background:#e8f3ef;color:#173d35;border-radius:16rpx;padding:10rpx 18rpx;margin-bottom:18rpx;font-size:27rpx}
+.patient-flow .identity-main{display:flex;align-items:baseline;gap:10rpx;flex-wrap:wrap;min-width:0;flex:1}
+.patient-flow .identity-name{font-weight:700;font-size:31rpx}
+.patient-flow .identity-meta{color:#536c75;font-size:27rpx}
+.patient-flow .identity-actions{display:flex;gap:8rpx;flex-wrap:wrap}
+.patient-flow .identity-actions button{margin:0;width:auto;flex:none;padding:0 20rpx}
+.patient-flow .preview-state{display:inline-block;background:#e4f1ee;color:#145e53;border-radius:12rpx;padding:10rpx 18rpx;font-size:27rpx;font-weight:600;margin:0 0 10rpx}
+.patient-flow .service-hero .title{font-size:47rpx;margin:14rpx 0}
+.patient-flow .hero-facts{display:flex;flex-wrap:wrap;gap:8rpx 18rpx;font-size:27rpx;color:#dff0e7;margin:14rpx 0}
+.patient-flow .hero-fee{font-size:27rpx;color:#d8e9df;line-height:1.6;margin-top:14rpx}
+.patient-flow .hero-button{min-height:88rpx}
+.patient-flow .result-pending .section-title{margin-top:8rpx}

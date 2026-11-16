@@ -316,6 +316,112 @@ async function verify(){
   await test('read-only history client cannot issue a reporting write',async()=>{
     const {p,calls}=page('history',{session:{...historySession,read_only:true},request:async()=>historyList});await p.onShow();p.checked({detail:{value:['yes']}});await p.submit();assert.equal(calls.filter(c=>c.method==='POST').length,0);
   });
+
+  /* WB-PB03: confirmation transport states. The receipt lookup is a read of
+     the exact attempt; it never resends the confirmation. */
+  await test('confirmation preview states the business fact and offers no receipt lookup',()=>{
+    for(const [kind,note,back] of [['booking','待确认，尚未预约','返回选时段'],['reschedule','待确认，原预约仍保留','返回原页面']]){
+      const {p,state,calls}=page('confirm');
+      state.globalData.review={kind,path:kind==='booking'?'booking/confirm/':'visits/9/reschedule/confirm/',
+        preview:{proposal_token:'signed',clinic:'门店',dentist:'医师',start:slot.start,end:slot.end,service:'初诊',original:{id:9,clinic:'门店',startLabel:'2026-10-23 09:00'}}};
+      p.onLoad();
+      assert.equal(p.data.previewNote,note);assert.equal(p.data.backLabel,back);
+      assert.equal(p.data.uncertain,false);assert.equal(p.data.canQuery,false);assert.equal(p.data.review.preview.proposal_token,'signed');
+      assert.equal(calls.length,0);
+    }
+  });
+  await test('in-flight confirmation shows one submitting state and ignores duplicate taps',async()=>{
+    let release;const pending=new Promise(resolve=>{release=resolve;});
+    const {p,state,calls,navigation}=page('confirm',{request:async()=>pending});
+    state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});
+    const first=p.submit();
+    assert.equal(p.data.busy,true);assert.equal(p.data.uncertain,false);
+    await p.submit();await p.submit();
+    assert.equal(calls.length,1);
+    release({...slot,id:77,status_label:'已预约'});await first;
+    assert.equal(p.data.done.id,77);assert.equal(p.data.busy,false);
+    await p.submit();assert.equal(calls.length,1);
+    p.result();assert.equal(navigation.at(-1).url,'/pages/visit/index?id=77');
+  });
+  await test('a saved confirmation opens the exact receipt and never queries again',async()=>{
+    const {p,state,calls}=page('confirm',{request:async route=>{
+      assert.equal(route,'booking/confirm/');
+      return {...slot,id:88,status_label:'已预约'};
+    }});
+    state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();
+    assert.equal(p.data.done.id,88);assert.equal(p.data.uncertain,false);assert.equal(p.data.canQuery,false);
+    assert.equal(calls.length,1);assert(calls.every(c=>c.route!=='booking/result/'));
+  });
+  await test('an explicit occupied slot clears the proposal and keeps the original appointment readable',async()=>{
+    const error=Object.assign(Error('所选时段已占用，请重新选择。'),{status:409,code:'BUSINESS_CONFLICT',requestId:'REJECT-1'});
+    const {p,state,calls,navigation}=page('confirm',{request:async()=>{throw error;}});
+    state.globalData.review={kind:'reschedule',path:'visits/9/reschedule/confirm/',selection:{service:2,clinic:1,dentist:1,day:'2026-11-23'},
+      preview:{proposal_token:'signed',clinic:'门店',dentist:'医师',start:slot.start,end:slot.end,original:{id:9,clinic:'原门店',startLabel:'2026-10-23 09:00'}}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();
+    assert.equal(p.data.review,null);assert.equal(p.data.checked,false);assert.equal(p.data.conflict,true);
+    assert.equal(p.data.conflictOriginal.id,9);assert.match(p.data.conflictMessage,/占用/);
+    await p.submit();assert.equal(calls.length,1);
+    p.openOriginal();assert.equal(navigation.at(-1).url,'/pages/visit/index?id=9');
+    p.backToSelection();assert.equal(navigation.at(-1).url,'/pages/booking/index?clinic=1&service=2&dentist=1&day=2026-11-23');
+  });
+  await test('a request that never reaches the server recovers through a read-only lookup',async()=>{
+    let confirms=0;const reads=[];
+    const {p,state}=page('confirm',{request:async(route,method,data)=>{
+      if(route==='booking/confirm/'){confirms++;throw Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});}
+      assert.equal(route,'booking/result/');reads.push(plain(data));return {state:'UNCONFIRMED'};
+    }});
+    state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed-attempt'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();
+    assert.equal(p.data.uncertain,true);assert.equal(p.data.canQuery,true);assert.equal(p.data.resultToken,'signed-attempt');
+    await p.queryResult();
+    assert.deepEqual(reads,[{kind:'booking',proposal_token:'signed-attempt'}]);
+    assert.match(p.data.queryMessage,/暂未查到/);assert.equal(confirms,1);
+  });
+  await test('a committed confirmation whose response was lost returns its exact visit',async()=>{
+    let confirms=0;
+    const {p,state,navigation}=page('confirm',{request:async(route,method,data)=>{
+      if(route==='visits/9/reschedule/confirm/'){confirms++;throw Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});}
+      assert.equal(route,'booking/result/');assert.deepEqual(plain(data),{kind:'reschedule',proposal_token:'signed-reschedule'});
+      return {state:'SAVED',visit_id:91};
+    }});
+    state.globalData.review={kind:'reschedule',path:'visits/9/reschedule/confirm/',preview:{proposal_token:'signed-reschedule'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();await p.queryResult();
+    assert.equal(confirms,1);assert.equal(navigation.at(-1).method,'redirectTo');
+    assert.equal(navigation.at(-1).url,'/pages/visit/index?id=91');assert.equal(p.data.canQuery,false);
+  });
+  await test('a changed patient or workspace cannot query another attempt',async()=>{
+    let reads=0;
+    const {p,state,session}=page('confirm',{session:{subject_key:'self',workspace_id:'ctx',subject_revision:2},request:async(route)=>{
+      if(route==='booking/confirm/')throw Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});
+      reads++;return {state:'SAVED',visit_id:5};
+    }});
+    state.globalData.review={subjectKey:'self',workspaceKey:'ctx',subjectRevision:2,kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();
+    session.subject_key='grant:2';session.subject_revision=3;
+    await p.queryResult();
+    assert.equal(reads,0);assert.equal(p.data.subjectInvalid,true);assert.equal(p.data.canQuery,false);
+  });
+  await test('an expired receipt stops further lookups instead of resubmitting',async()=>{
+    let reads=0;
+    const {p,state}=page('confirm',{request:async(route)=>{
+      if(route==='booking/confirm/')throw Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});
+      reads++;throw Object.assign(Error('确认内容无效或已过期，请重新预览。'),{status:409,code:'BUSINESS_CONFLICT'});
+    }});
+    state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();await p.queryResult();
+    assert.equal(reads,1);assert.equal(p.data.canQuery,false);assert.equal(p.data.resultToken,'');
+    assert.match(p.data.queryMessage,/过期|未保存/);
+  });
+  await test('cancellation and waitlist outcomes go to their own record, not the booking lookup',async()=>{
+    const {p,state,navigation}=page('confirm',{request:async()=>{throw Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});}});
+    state.globalData.review={kind:'cancel',path:'visits/9/cancel/confirm/',preview:{proposal_token:'cancel-token',original:{id:9,clinic:'门店'}}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();
+    assert.equal(p.data.otherUnconfirmed,true);assert.equal(p.data.uncertain,false);assert.equal(p.data.canQuery,false);
+    assert.equal(p.data.recordUrl,'/pages/visit/index?id=9');
+    p.openRecord();assert.equal(navigation.at(-1).url,'/pages/visit/index?id=9');
+  });
   return {passed:true,cases:cases.length,case_names:cases,scope:'actual Page handlers with mocked API; not Django/PostgreSQL, official compilation or WeChat runtime'};
 }
 module.exports={verify,page};

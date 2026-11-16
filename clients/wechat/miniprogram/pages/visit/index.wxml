@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page patient-flow">
   <view wx:if="{{visit}}" class="subject-banner">
     <text>就诊人：{{patientName||'请先选择'}}</text>
     <view>{{patientCapacity}}</view>
@@ -22,7 +22,7 @@
       <view class="prose">{{visit.visit_no}}</view>
     </view>
     <view class="invoice-line">
-      <view class="muted">计划时间</view>
+      <view class="muted">计划时间（北京时间）</view>
       <view>{{visit.startLabel}} 至 {{visit.endLabel}}</view>
     </view>
     <view wx:if="{{reviewView}}" class="invoice-line">

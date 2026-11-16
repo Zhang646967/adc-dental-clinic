@@ -1,21 +1,32 @@
-<view class="page">
-  <view class="subject-banner">
-    <view wx:if="{{serviceState==='ready'}}"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}<text wx:if="{{patientDelegated}}"> · 代约身份</text></view><view class="row"><button class="compact secondary" bindtap="subjects">切换就诊人</button><button class="compact secondary" bindtap="logout">退出</button></view></view>
-    <view wx:if="{{serviceState==='loading'}}">正在核对当前就诊人…</view>
-    <view wx:if="{{serviceState==='guest'}}">登录后可查看本人的下一步与常用办理。<view class="row"><button class="compact secondary" bindtap="login">登录／注册</button></view></view>
-    <view wx:if="{{serviceState==='enrollment'}}">账号已登录，本人档案待前台核验。核验后可查看就诊与费用。<view class="row"><button class="compact secondary" bindtap="account">查看资料核验进度</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
-    <view wx:if="{{serviceState==='subject'}}">请选择本次要办理的就诊人。<view class="row"><button class="compact secondary" bindtap="subjects">选择就诊人</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
-    <view wx:if="{{serviceState==='medical'}}">当前为独立医疗代理，请从医疗授权入口办理。<view class="row"><button class="compact secondary" bindtap="medical">查看医疗授权</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
-    <view wx:if="{{serviceState==='error'}}">暂时无法核对就诊人，已清除原有就诊信息。<view class="row"><button class="compact secondary" bindtap="retryService">重新核对</button><button class="compact secondary" bindtap="logout">退出账号</button></view></view>
+<view class="page patient-flow">
+  <view class="identity-bar">
+    <view class="identity-main">
+      <block wx:if="{{serviceState==='ready'}}"><text class="identity-name">{{patientName||'请先选择'}}</text><text class="identity-meta">{{patientCapacity}}<text wx:if="{{patientDelegated}}"> · 代约</text></text></block>
+      <text wx:elif="{{serviceState==='loading'}}">正在核对就诊人…</text>
+      <text wx:elif="{{serviceState==='guest'}}">访客可先浏览公开门店与服务</text>
+      <text wx:elif="{{serviceState==='enrollment'}}">账号待前台核验</text>
+      <text wx:elif="{{serviceState==='subject'}}">请选择本次就诊人</text>
+      <text wx:elif="{{serviceState==='medical'}}">当前为独立医疗代理</text>
+      <text wx:else>暂时无法核对就诊人</text>
+    </view>
+    <view class="identity-actions">
+      <button wx:if="{{serviceState==='ready'}}" class="compact secondary" bindtap="subjects">切换</button>
+      <button wx:if="{{serviceState==='ready'}}" class="compact secondary" bindtap="account">我的</button>
+      <button wx:if="{{serviceState==='guest'}}" class="compact secondary" bindtap="login">登录／注册</button>
+      <button wx:if="{{serviceState==='enrollment'}}" class="compact secondary" bindtap="account">核验进度</button>
+      <button wx:if="{{serviceState==='subject'}}" class="compact secondary" bindtap="subjects">选择就诊人</button>
+      <button wx:if="{{serviceState==='medical'}}" class="compact secondary" bindtap="medical">医疗授权</button>
+      <button wx:if="{{serviceState==='error'}}" class="compact secondary" bindtap="retryService">重新核对</button>
+    </view>
   </view>
 
-  <view class="page-heading"><view class="title">患者服务中心</view><view class="muted">下一步、常用办理与公开门店资料。</view></view>
+  <view class="page-heading"><view class="title">患者服务中心</view></view>
 
   <view wx:if="{{serviceError}}" class="error" role="alert">{{serviceError}}<text wx:if="{{serviceRequestId}}" class="support-code" selectable>查询编号 {{serviceRequestId}}</text></view>
 
   <view wx:if="{{serviceState==='ready'&&primary}}" class="card next-card primary-card">
-    <view class="section-label">下一步 · {{primary.label}}</view>
-    <view wx:if="{{primary.timeLabel}}" class="time">{{primary.timeLabel}}</view>
+    <view class="section-label">{{primary.label}}</view>
+    <view wx:if="{{primary.timeLabel}}" class="time">{{primary.timeLabel}}<text class="tz"> 北京时间</text></view>
     <view wx:if="{{primary.detail}}">{{primary.detail}}</view>
     <view wx:if="{{primary.serviceLine}}" class="muted">{{primary.serviceLine}}</view>
     <view wx:if="{{primary.deadline}}" class="deadline">{{primary.deadline}}</view>
@@ -25,17 +36,11 @@
     <view class="muted">{{primary.hint}}</view>
     <button class="primary" bindtap="primaryTap">{{primary.actionLabel}}</button>
   </view>
-  <view wx:if="{{serviceState==='ready'&&!primary&&!serviceError}}" class="card"><view class="section-title">暂无待办</view><view class="muted">可从下方常用办理预约就诊或查看清单。</view></view>
+  <view wx:if="{{serviceState==='ready'&&!primary&&!serviceError}}" class="card"><view class="section-title">预约就诊</view><view class="muted">选择服务和时间，提交后可在这里查看到诊安排。</view><button class="primary" bindtap="book">预约就诊</button></view>
 
-  <view class="section-heading"><view class="section-title">常用办理</view></view>
-  <view class="quick-grid">
-    <view class="quick-item" bindtap="book"><view class="section-title">预约就诊</view><view class="muted">选择服务和时间</view></view>
-    <view class="quick-item" bindtap="arrangements"><view class="section-title">到诊安排</view><view class="muted">待到诊与已到诊记录</view></view>
-  </view>
-  <view class="quick-grid">
-    <view wx:if="{{canViewFunds}}" class="quick-item" bindtap="fees"><view class="section-title">费用查询</view><view class="muted">结算单和收退款</view></view>
-    <view class="quick-item" bindtap="records"><view class="section-title">就诊记录</view><view class="muted">历史就诊与改期结果</view></view>
-  </view>
+  <view wx:if="{{serviceState==='enrollment'}}" class="card"><view class="section-title">本人档案待前台核验</view><view class="muted">核验完成后可预约、查看到诊与费用。</view><button class="primary" bindtap="account">查看资料核验进度</button></view>
+  <view wx:if="{{serviceState==='subject'}}" class="card"><view class="section-title">请选择就诊人</view><view class="muted">选择本次要办理的已核验就诊人。</view><button class="primary" bindtap="subjects">选择就诊人</button></view>
+  <view wx:if="{{serviceState==='medical'}}" class="card"><view class="section-title">独立医疗代理</view><view class="muted">请从医疗授权入口查看可办理范围。</view><button class="primary" bindtap="medical">查看医疗授权</button></view>
 
   <view class="section-heading"><view class="section-title">找门店与医师</view></view>
   <view class="card"><view class="row"><button class="secondary" bindtap="stores">找门店</button><button class="secondary" bindtap="doctors">找医师</button><button class="secondary" bindtap="services">找服务</button></view><view class="muted small">无需登录即可浏览公开门店、医师与服务。</view></view>

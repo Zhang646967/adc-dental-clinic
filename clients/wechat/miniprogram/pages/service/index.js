@@ -29,5 +29,16 @@ Page({
       intent.remember(getApp(),s.id,s.clinic,null,s.default_day,s.category);navigation.navigateTo({url:!this.data.authenticated?'/pages/login/index':'/pages/patients/index'});return;
     }
     navigation.navigateTo({url:`/pages/booking/index?clinic=${s.clinic}&service=${s.id}${s.default_day?'&day='+s.default_day:''}`});
+  },
+  /* A service that needs clinic verification (children, guardian checks) uses
+     the published clinic contact instead of an unverified self-service booking. */
+  contact(){
+    const s=this.data.service;
+    if(!s||this.data.busy)return;
+    if(s.phone){
+      wx.makePhoneCall({phoneNumber:String(s.phone),fail:()=>navigation.navigateTo({url:'/pages/help/index'})});
+      return;
+    }
+    navigation.navigateTo({url:'/pages/help/index'});
   }
 });

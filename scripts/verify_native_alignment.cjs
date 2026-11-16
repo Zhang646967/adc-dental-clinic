@@ -375,7 +375,13 @@ async function verify(){
   d=page('confirm',{session:confirmSession,review:confirmReview,responses:[occupied]});
   d.p.onLoad();d.p.checked({detail:{value:['yes']}});await d.p.submit();
   assert.equal(d.p.data.subjectInvalid,false);
-  assert.equal(d.p.data.review.preview.proposal_token,'SYNTHETIC-PROPOSAL');count++;
+  assert.equal(d.p.data.review,null);
+  assert.equal(d.p.data.checked,false);
+  assert.equal(d.p.data.conflict,true);
+  assert.equal(d.p.data.conflictMessage,'所选时段已占用');
+  const rejectedCalls=d.calls.length;
+  await d.p.submit();
+  assert.equal(d.calls.length,rejectedCalls);count++;
   d=page('account',{session:{account_authenticated:false}});await d.p.onShow();assert.equal(d.p.data.guest,true);assert.equal(d.p.data.profile,null);count++;
   d.p.setData({newPassword:'SECRET',repeatPassword:'SECRET',smsCode:'SECRET',unlinkPassword:'SECRET'});d.p.onHide();assert.equal(d.p.data.newPassword,'');assert.equal(d.p.data.smsCode,'');count++;
   return {passed:true,cases:count,scope:'actual tab routing and patient Page handlers with controlled transport; not IDE/device acceptance'};

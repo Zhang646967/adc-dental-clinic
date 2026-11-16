@@ -47,6 +47,18 @@ Page({
     followup:false, followupWindow:'', followupService:'', followupBlocked:false, visitId:null},
   onLoad(query) { this.query=query;this.followup=readFollowupQuery(query);this.generation=0;return this.load(); },
   onShow(){
+    // Returning from a rejected or uncertain confirmation keeps every filter
+    // but drops the slot rows that produced the stale proposal.
+    const refresh=typeof getApp==='function'&&getApp().globalData?getApp().globalData.bookingRefresh:false;
+    if(refresh){
+      getApp().globalData.bookingRefresh=null;
+      if(this.data.ready){
+        if(this.followup){this.load();return;}
+        this.clearResults();
+        this.search();
+      }
+      return;
+    }
     if(this.followup&&this.wasHidden){this.wasHidden=false;return this.load();}
   },
   onHide(){

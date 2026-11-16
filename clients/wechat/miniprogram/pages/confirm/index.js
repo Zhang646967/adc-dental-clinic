@@ -12,8 +12,15 @@ const actions={
   offer_accept:['确认新增预约','我同意接受邀约并新增一次就诊，其他已有预约继续保留。','接受并新增预约','本次为新增安排；若需替换原约，请返回明确选择原预约。'],
   offer_decline:['确认拒绝邀约','我确认拒绝这次邀约，候补继续等待安排，已有预约保留。','确认拒绝本次邀约','本次临时保留将释放，前台可继续协调新的安排。']
 };
+/* Only an appointment or a replacement has a server-side receipt to look up.
+   Cancellation, waitlist and offer outcomes are read from their own records. */
+const RECEIPT_KINDS={booking:'booking',reschedule:'reschedule'};
 Page({
-  data:{review:null,checked:false,busy:false,error:'',done:null,subjectInvalid:false,followupVisit:null,followupBlocked:false},
+  data:{review:null,checked:false,busy:false,error:'',done:null,subjectInvalid:false,followupVisit:null,followupBlocked:false,
+    previewNote:'',backLabel:'返回原页面',uncertain:false,querying:false,queryMessage:'',canQuery:false,
+    resultKind:'',resultToken:'',resultSubjectKey:'',resultWorkspaceKey:'',resultSubjectRevision:0,
+    conflict:false,conflictMessage:'',conflictTitle:'本次预约未保存',conflictKind:'',conflictOriginal:null,conflictSelection:null,conflictFollowup:null,
+    otherUnconfirmed:false,otherFailed:false,recordLabel:'',recordUrl:''},
   onLoad(){ api.showSubject(this);
     const review=getApp().globalData.review;
     const session=api.sessionInfo();
@@ -27,57 +34,182 @@ Page({
     this.kind=review.kind;
     this.fromWaitlist=review.fromWaitlist;
     const copy=actions[review.kind];
-    this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],followupVisit:review.followupVisit||null});
+    // A receipt lookup exists only after an appointment confirmation has been
+    // sent without a definite outcome. It is never part of the first preview.
+    const previewNote=review.kind==='booking'?'待确认，尚未预约':review.kind==='reschedule'?'待确认，原预约仍保留':'';
+    this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],
+      followupVisit:review.followupVisit||null,previewNote,
+      backLabel:review.kind==='booking'?'返回选时段':'返回原页面'});
   },
   checked(e){if(this.data.review)this.setData({checked:e.detail.value.includes('yes')});},
   async submit(){
-    if(this.data.busy||this.data.uncertain||this.data.done||this.data.followupBlocked||!this.data.checked||!this.data.review)return;
+    if(this.data.busy||this.data.uncertain||this.data.done||this.data.conflict||this.data.followupBlocked||!this.data.checked||!this.data.review)return;
+    const review=this.data.review;
+    const token=review.preview.proposal_token;
+    const kind=review.kind;
     this.setData({busy:true,error:'',requestId:''});
-    try{const r=await api.request(this.data.review.path,'POST',{proposal_token:this.data.review.preview.proposal_token,confirmed:'on'});
+    try{
+      const r=await api.request(review.path,'POST',{proposal_token:token,confirmed:'on'});
       getApp().globalData.review=null;
-      this.setData({done:r.kind==='waitlist'?r.wait:arrangement(r.visit||r),doneType:r.kind==='waitlist'?'waitlist':'visit',busy:false});
+      this.setData({done:r.kind==='waitlist'?r.wait:arrangement(r.visit||r),doneType:r.kind==='waitlist'?'waitlist':'visit',busy:false,checked:false});
     }catch(e){
       if(staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
         this.invalidateSubject(e);
         return;
       }
-      if(e.code==='NETWORK_UNCONFIRMED'){
-        getApp().globalData.review=null;
-        this.setData({uncertain:true,review:null,checked:false});
+      if(e.code==='NETWORK_UNCONFIRMED'||this.ambiguous(e)){
+        if(RECEIPT_KINDS[kind])this.enterUncertain(e,token,kind);
+        else this.unconfirmedRecord(e,review);
+        return;
       }
-      // A follow-up booking that hits a conflict or an unconfirmed result can
-      // always go back to the original visit to read the real state.
-      if(this.data.followupVisit&&(e.status===409||e.code==='NETWORK_UNCONFIRMED'||e.code==='BUSINESS_CONFLICT'))this.setData({followupBlocked:true});
+      // An explicit business rejection (occupied slot, expired confirmation,
+      // changed report source) invalidates this proposal. Never resubmit it.
+      if(e.status===409&&e.code==='BUSINESS_CONFLICT'){
+        if(RECEIPT_KINDS[kind])this.rejected(e,review);
+        else this.failedRecord(e,review);
+        return;
+      }
+      // A definite 4xx keeps the proposal usable for one corrected attempt,
+      // except when the server says the receipt itself is no longer valid.
+      if(e.status===404||e.status===410){
+        if(RECEIPT_KINDS[kind])this.rejected(e,review);
+        else this.failedRecord(e,review);
+        return;
+      }
       showError(this,e,{separateRequestId:true});
+      this.setData({busy:false});
+    }
+  },
+  /* A 5xx, a timeout or a success body without a receipt means the command may
+     have committed. Only the receipt lookup can tell; never resend it. */
+  ambiguous(e){
+    return !e.status || e.status===408 || e.status>=500;
+  },
+  enterUncertain(error,token,kind){
+    getApp().globalData.review=null;
+    const session=api.sessionInfo();
+    this.setData({busy:false,uncertain:true,review:null,checked:false,conflict:false,done:null,otherUnconfirmed:false,otherFailed:false,
+      resultKind:RECEIPT_KINDS[kind]||'',resultToken:token||'',
+      resultSubjectKey:session.subject_key||'',resultWorkspaceKey:session.workspace_id||'',resultSubjectRevision:session.subject_revision||0,
+      canQuery:!!RECEIPT_KINDS[kind]&&!!token,queryMessage:'',querying:false,
+      error:error.requestId?(error.publicMessage||error.message||''):'',requestId:error.requestId||''});
+  },
+  /* Cancellation, waitlist and offer outcomes are not receipt lookups. Their
+     own records already show whether the command took effect. */
+  unconfirmedRecord(error,review){
+    this.otherRecord(error,review,false);
+  },
+  failedRecord(error,review){
+    this.otherRecord(error,review,true);
+  },
+  otherRecord(error,review,failed){
+    getApp().globalData.review=null;
+    const original=review.preview&&review.preview.original;
+    const wait=review.kind==='wait_join'||review.kind==='wait_withdraw'||review.kind==='offer_accept'||review.kind==='offer_decline';
+    this.setData({busy:false,otherUnconfirmed:true,otherFailed:!!failed,review:null,checked:false,uncertain:false,conflict:false,done:null,
+      recordLabel:wait?'查看候补与邀约记录':'查看原预约核对',
+      recordUrl:wait?'/pages/waitlist/index':original&&original.id?`/pages/visit/index?id=${original.id}`:'/pages/home/index?queue=all',
+      error:error.publicMessage||error.message||'',requestId:error.requestId||''});
+  },
+  rejected(error,review){
+    getApp().globalData.review=null;
+    const reschedule=review.kind==='reschedule';
+    const original=reschedule&&review.preview.original?{id:review.preview.original.id,clinic:review.preview.original.clinic,startLabel:review.preview.original.startLabel}:null;
+    this.setData({busy:false,checked:false,review:null,conflict:true,conflictKind:review.kind,
+      conflictMessage:error.publicMessage||error.message||'本次提交未保存，请重新核对。',
+      conflictTitle:reschedule?'本次改期未保存':'本次预约未保存',
+      conflictOriginal:original,conflictSelection:review.selection||null,conflictFollowup:review.followupVisit||null,
+      followupBlocked:!!review.followupVisit,
+      error:'',requestId:error.requestId||''});
+  },
+  /* Receipt recovery is a read: it must never create a second appointment.
+     The proposal belongs to this page, workspace and patient only. */
+  async queryResult(){
+    if(this.data.querying||!this.data.resultToken||!this.data.canQuery)return;
+    const session=api.sessionInfo();
+    if((session.subject_key||'')!==this.data.resultSubjectKey||(session.workspace_id||'')!==this.data.resultWorkspaceKey||(session.subject_revision||0)!==this.data.resultSubjectRevision){
+      this.invalidateSubject(new Error('就诊人已变化，请在当前患者页面重新核对结果。'));
+      return;
+    }
+    this.setData({querying:true,queryMessage:''});
+    try{
+      const r=await api.request('booking/result/','POST',{kind:this.data.resultKind,proposal_token:this.data.resultToken});
+      if(r&&r.state==='SAVED'&&r.visit_id){
+        getApp().globalData.bookingRefresh=true;
+        this.setData({querying:false,canQuery:false,resultToken:''});
+        navigation.redirectTo({url:`/pages/visit/index?id=${r.visit_id}`});
+        return;
+      }
+      this.setData({querying:false,queryMessage:'暂未查到本次提交的结果。可以稍后再查，或从原预约、原就诊和预约清单核对。'});
+    }catch(e){
+      if(staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
+        this.invalidateSubject(e);
+        return;
+      }
+      if(e.status===409&&e.code==='BUSINESS_CONFLICT'){
+        this.setData({querying:false,canQuery:false,resultToken:'',queryMessage:e.publicMessage||'本次提交未保存，请从预约清单重新核对。'});
+        return;
+      }
+      this.setData({querying:false,queryMessage:(e.publicMessage||e.message||'暂时无法连接。')+' 可以稍后再查。',requestId:e.requestId||''});
     }
   },
   invalidateSubject(error){
     getApp().globalData.review=null;
     this.setData({
-      review:null,checked:false,done:null,subjectInvalid:true,uncertain:error.code==='SUBJECT_CHANGED',
+      review:null,checked:false,done:null,subjectInvalid:true,uncertain:false,conflict:false,otherUnconfirmed:false,otherFailed:false,
+      canQuery:false,resultToken:'',queryMessage:'',querying:false,
       patientName:'',patientCapacity:'',patientDelegated:false
     });
     showError(this,error,{separateRequestId:true,stayOnPage:true});
   },
   recoverSubject(){return recoverSubject(this,api.bootstrap,navigation.reLaunch);},
   subjects(){
-    if(this.data.busy||this.data.subjectInvalid)return;
+    if(this.data.busy||this.data.querying||this.data.subjectInvalid)return;
     const selection=this.data.review&&this.data.review.selection;
     if(selection)intent.remember(getApp(),selection.service,selection.clinic,selection.dentist,selection.day,selection.category);
     getApp().globalData.review=null;
     navigation.reLaunch({url:'/pages/patients/index'});
   },
   home(){
-    if(this.data.subjectInvalid)return;
+    if(this.data.busy||this.data.querying||this.data.subjectInvalid)return;
     getApp().globalData.review=null;
     const waitlist=this.fromWaitlist||this.kind==='offer_accept'||this.kind==='wait_join'||this.kind==='wait_withdraw'||this.kind==='offer_decline';
-    const visits=this.data.uncertain?'/pages/home/index?queue=all':'/pages/home/index';
+    const visits=this.data.uncertain||this.data.conflict||this.data.otherUnconfirmed?'/pages/home/index?queue=all':'/pages/home/index';
     navigation.reLaunch({url:waitlist?'/pages/waitlist/index':visits});
+  },
+  openRecord(){
+    if(this.data.busy||this.data.querying)return;
+    getApp().globalData.review=null;
+    navigation.reLaunch({url:this.data.recordUrl||'/pages/home/index?queue=all'});
   },
   result(){navigation.redirectTo({url:this.data.doneType==='waitlist'?'/pages/waitlist/index':`/pages/visit/index?id=${this.data.done.id}`});},
   visitCheck(){
     if(!this.data.followupVisit)return;
     getApp().globalData.review=null;
     navigation.reLaunch({url:`/pages/visit/index?id=${this.data.followupVisit}`});
+  },
+  openOriginal(){
+    const original=this.data.conflictOriginal;
+    if(!original||!original.id)return;
+    getApp().globalData.review=null;
+    navigation.reLaunch({url:`/pages/visit/index?id=${original.id}`});
+  },
+  /* Returning keeps the clinic, service, dentist, day and report binding that
+     produced this proposal. The booking page refreshes its slot list so a slot
+     that just became occupied cannot be selected again. */
+  backToSelection(){
+    if(this.data.busy||this.data.querying)return;
+    const review=this.data.review;
+    const selection=review?review.selection:this.data.conflictSelection;
+    const followupVisit=review?review.followupVisit:this.data.conflictFollowup;
+    getApp().globalData.review=null;
+    if(selection)intent.remember(getApp(),selection.service,selection.clinic,selection.dentist,selection.day,selection.category);
+    getApp().globalData.bookingRefresh=true;
+    const pages=typeof getCurrentPages==='function'?getCurrentPages():[];
+    const previous=pages&&pages.length>1?pages[pages.length-2]:null;
+    if(previous&&previous.route==='pages/booking/index'){navigation.navigateBack({delta:1});return;}
+    if(followupVisit){navigation.reLaunch({url:`/pages/visit/index?id=${followupVisit}`});return;}
+    if(selection)navigation.reLaunch({url:`/pages/booking/index?clinic=${selection.clinic}&service=${selection.service}${selection.dentist?'&dentist='+selection.dentist:''}${selection.day?'&day='+selection.day:''}`});
+    else navigation.reLaunch({url:'/pages/services/index'});
   }
 });
