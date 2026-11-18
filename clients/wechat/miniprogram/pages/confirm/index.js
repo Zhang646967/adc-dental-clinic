@@ -50,15 +50,20 @@ Page({
     this.setData({busy:true,error:'',requestId:''});
     try{
       const r=await api.request(review.path,'POST',{proposal_token:token,confirmed:'on'});
+      const waitlist=r&&r.kind==='waitlist';
+      const receipt=r&&(waitlist?r.wait:r.visit||r);
+      if(!receipt||!Number.isSafeInteger(receipt.id)||receipt.id<1){
+        throw new Error('没有收到带编号的办理回执。');
+      }
       getApp().globalData.review=null;
-      this.setData({done:r.kind==='waitlist'?r.wait:arrangement(r.visit||r),doneType:r.kind==='waitlist'?'waitlist':'visit',busy:false,checked:false});
+      this.setData({done:waitlist?receipt:arrangement(receipt),doneType:waitlist?'waitlist':'visit',busy:false,checked:false});
     }catch(e){
       if(staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
         this.invalidateSubject(e);
         return;
       }
       if(e.code==='NETWORK_UNCONFIRMED'||this.ambiguous(e)){
-        if(RECEIPT_KINDS[kind])this.enterUncertain(e,token,kind);
+        if(RECEIPT_KINDS[kind])this.enterUncertain(e,review);
         else this.unconfirmedRecord(e,review);
         return;
       }
@@ -85,13 +90,14 @@ Page({
   ambiguous(e){
     return !e.status || e.status===408 || e.status>=500;
   },
-  enterUncertain(error,token,kind){
+  enterUncertain(error,review){
     getApp().globalData.review=null;
-    const session=api.sessionInfo();
+    const kind=RECEIPT_KINDS[review.kind];
+    const token=review.preview.proposal_token;
     this.setData({busy:false,uncertain:true,review:null,checked:false,conflict:false,done:null,otherUnconfirmed:false,otherFailed:false,
-      resultKind:RECEIPT_KINDS[kind]||'',resultToken:token||'',
-      resultSubjectKey:session.subject_key||'',resultWorkspaceKey:session.workspace_id||'',resultSubjectRevision:session.subject_revision||0,
-      canQuery:!!RECEIPT_KINDS[kind]&&!!token,queryMessage:'',querying:false,
+      resultKind:kind,resultToken:token||'',
+      resultSubjectKey:review.subjectKey||'',resultWorkspaceKey:review.workspaceKey||'',resultSubjectRevision:review.subjectRevision||0,
+      canQuery:!!token,queryMessage:'',querying:false,
       error:error.requestId?(error.publicMessage||error.message||''):'',requestId:error.requestId||''});
   },
   /* Cancellation, waitlist and offer outcomes are not receipt lookups. Their
@@ -134,7 +140,7 @@ Page({
     this.setData({querying:true,queryMessage:''});
     try{
       const r=await api.request('booking/result/','POST',{kind:this.data.resultKind,proposal_token:this.data.resultToken});
-      if(r&&r.state==='SAVED'&&r.visit_id){
+      if(r&&r.state==='SAVED'&&Number.isSafeInteger(r.visit_id)&&r.visit_id>0){
         getApp().globalData.bookingRefresh=true;
         this.setData({querying:false,canQuery:false,resultToken:''});
         navigation.redirectTo({url:`/pages/visit/index?id=${r.visit_id}`});
@@ -147,10 +153,12 @@ Page({
         return;
       }
       if(e.status===409&&e.code==='BUSINESS_CONFLICT'){
-        this.setData({querying:false,canQuery:false,resultToken:'',queryMessage:e.publicMessage||'本次提交未保存，请从预约清单重新核对。'});
+        this.setData({querying:false,canQuery:false,resultToken:'',requestId:e.requestId||'',
+          queryMessage:'本次结果查询已失效，请从原预约、原就诊或预约清单核对。'});
         return;
       }
-      this.setData({querying:false,queryMessage:(e.publicMessage||e.message||'暂时无法连接。')+' 可以稍后再查。',requestId:e.requestId||''});
+      const message=e.code==='NETWORK_UNCONFIRMED'?'暂时无法连接。':e.publicMessage||e.message||'暂时无法查询。';
+      this.setData({querying:false,queryMessage:message+' 可以稍后再查。',requestId:e.requestId||''});
     }
   },
   invalidateSubject(error){

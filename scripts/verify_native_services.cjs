@@ -354,6 +354,19 @@ async function verify(){
     assert.equal(p.data.done.id,88);assert.equal(p.data.uncertain,false);assert.equal(p.data.canQuery,false);
     assert.equal(calls.length,1);assert(calls.every(c=>c.route!=='booking/result/'));
   });
+  await test('a successful response without a receipt number keeps the appointment unconfirmed',async()=>{
+    const {p,state,calls,navigation}=page('confirm',{request:async route=>{
+      if(route==='booking/confirm/')return {status_label:'已预约'};
+      assert.equal(route,'booking/result/');
+      return {state:'SAVED',visit_id:103};
+    }});
+    state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();
+    assert.equal(p.data.done,null);assert.equal(p.data.canQuery,true);
+    await p.submit();await p.queryResult();
+    assert.deepEqual(calls.map(call=>call.route),['booking/confirm/','booking/result/']);
+    assert.equal(navigation.at(-1).url,'/pages/visit/index?id=103');
+  });
   await test('an explicit occupied slot clears the proposal and keeps the original appointment readable',async()=>{
     const error=Object.assign(Error('所选时段已占用，请重新选择。'),{status:409,code:'BUSINESS_CONFLICT',requestId:'REJECT-1'});
     const {p,state,calls,navigation}=page('confirm',{request:async()=>{throw error;}});
@@ -403,6 +416,22 @@ async function verify(){
     await p.queryResult();
     assert.equal(reads,0);assert.equal(p.data.subjectInvalid,true);assert.equal(p.data.canQuery,false);
   });
+  await test('a connection failure after a patient switch keeps the original scope',async()=>{
+    let rejectConfirmation;
+    const response=new Promise((_resolve,reject)=>{rejectConfirmation=reject;});
+    const {p,state,calls,session}=page('confirm',{
+      session:{subject_key:'self',workspace_id:'ctx',subject_revision:2},request:()=>response
+    });
+    state.globalData.review={subjectKey:'self',workspaceKey:'ctx',subjectRevision:2,kind:'booking',
+      path:'booking/confirm/',preview:{proposal_token:'signed'}};
+    p.onLoad();p.checked({detail:{value:['yes']}});
+    const submit=p.submit();
+    session.subject_key='grant:2';session.subject_revision=3;
+    rejectConfirmation(Object.assign(Error('连接中断'),{code:'NETWORK_UNCONFIRMED'}));
+    await submit;await p.queryResult();
+    assert.deepEqual(calls.map(call=>call.route),['booking/confirm/']);
+    assert.equal(p.data.subjectInvalid,true);assert.equal(p.data.resultToken,'');
+  });
   await test('an expired receipt stops further lookups instead of resubmitting',async()=>{
     let reads=0;
     const {p,state}=page('confirm',{request:async(route)=>{
@@ -412,7 +441,7 @@ async function verify(){
     state.globalData.review={kind:'booking',path:'booking/confirm/',preview:{proposal_token:'signed'}};
     p.onLoad();p.checked({detail:{value:['yes']}});await p.submit();await p.queryResult();
     assert.equal(reads,1);assert.equal(p.data.canQuery,false);assert.equal(p.data.resultToken,'');
-    assert.match(p.data.queryMessage,/过期|未保存/);
+    assert.match(p.data.queryMessage,/已失效/);
   });
   await test('cancellation and waitlist outcomes go to their own record, not the booking lookup',async()=>{
     const {p,state,navigation}=page('confirm',{request:async()=>{throw Object.assign(Error('连接中断，结果尚未确认。'),{code:'NETWORK_UNCONFIRMED'});}});
