@@ -1,10 +1,16 @@
 """Actual CSRF/session/channel HTTP paths before and after identity review."""
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timedelta
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from threading import Barrier
+import hashlib
+import json
 from django.core.exceptions import PermissionDenied
 from django.db import close_old_connections
 from django.test import Client,TransactionTestCase,override_settings
 from django.urls import reverse
+from django.utils import timezone
 from accounts.models import UserAccount,RoleAssignment
 from accounts import external_identity as identity
 from accounts.external_models import AccountPhone,AccountIdentityEvent
@@ -49,6 +55,44 @@ class PatientAccountHttpTests(FixtureMixin,TransactionTestCase):
     def test_guest_session_exposes_only_local_provider_availability(self):
         self.assertEqual(self.state['identity_provider'],'local');self.assertFalse(self.state['authenticated']);self.assertFalse(self.state['account_authenticated'])
         self.assertNotIn('account_token',self.state)
+
+    def test_course_prefill_only_discloses_selected_synthetic_role_before_normal_login(self):
+        invite = 'C' * 43
+        password = 'fixture-only-course-login'
+        owner = UserAccount.objects.create_user(username='course-owner', password=password)
+        PatientAccess.objects.create(user=owner, patient=self.p1)
+        self.front.set_password(password)
+        self.front.save(update_fields=['password'])
+        roles = {
+            'owner': {'username': owner.username, 'password': password},
+            'front': {'username': self.front.username, 'password': password},
+        }
+        config = {'invite_sha256': hashlib.sha256(invite.encode()).hexdigest(),
+                  'expires_at': (timezone.now() + timedelta(hours=1)).isoformat(), 'roles': roles}
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'private-course-roles.json'
+            path.write_text(json.dumps(config))
+            with override_settings(ADC_COURSE_ROLE_FILE=str(path)):
+                self.assertEqual(self.browser.post(reverse('mini_course_role'), {'invite': invite}).status_code, 403)
+                self.assertEqual(self.post('mini_course_role', {'invite': 'D' * 43}).status_code, 404)
+                listing = self.post('mini_course_role', {'invite': invite})
+                self.assertEqual(listing.json()['data']['roles'], [{'id': 'owner', 'label': '患者本人'}])
+                self.assertNotIn(password, listing.content.decode())
+                self.assertEqual(self.post('mini_course_role', {'invite': invite, 'role': 'front'}).status_code, 404)
+                self.assertEqual(self.post('staff_course_role', {'invite': invite, 'role': 'owner'}).status_code, 404)
+                self.assertEqual(self.post('staff_course_role', {'invite': invite, 'role': 'front'}).json()['data'], roles['front'])
+                with override_settings(ADC_CLINICAL_SYNTHETIC=False):
+                    self.assertEqual(self.post('mini_course_role', {'invite': invite}).status_code, 404)
+                payload = self.post('mini_course_role', {'invite': invite, 'role': 'owner'})
+                self.assertEqual(payload['Cache-Control'], 'no-store')
+                self.assertEqual(payload.json()['data'], roles['owner'])
+                self.assertFalse(self.browser.get(reverse('mini_session')).json()['data']['authenticated'])
+                config['expires_at'] = (timezone.now() - timedelta(seconds=1)).isoformat()
+                path.write_text(json.dumps(config))
+                self.assertEqual(self.post('mini_course_role', {'invite': invite, 'role': 'owner'}).status_code, 404)
+                logged_in = self.post('mini_login', roles['owner'])
+                self.assertTrue(logged_in.json()['data']['authenticated'])
+                self.assertFalse(Visit.objects.exists())
 
     def test_local_login_creates_pending_channel_without_business_authority(self):
         user=self.login_local();self.assertTrue(self.state['account_authenticated']);self.assertFalse(self.state['authenticated'])

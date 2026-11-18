@@ -4,7 +4,7 @@ from workspaces.views import WorkspaceLoginView
 from adc_core import views
 from adc_core.entry_views import system_entry
 from portal import views as portal_views
-from portal import patient_billing, patient_funds
+from portal import course_roles, patient_billing, patient_funds
 from portal import service_views
 from scheduling import service_content_views
 from registry import branch_views
@@ -89,6 +89,7 @@ urlpatterns = [
     path("invoices/<int:pk>/", care_views.invoice_detail, name="invoice_detail"),
     path("health/", views.health, name="health"),
     path("accounts/login/", WorkspaceLoginView.as_view(template_name="registration/login.html"), name="login"),
+    path("accounts/course-role/", course_roles.prefill, {"channel": "staff"}, name="staff_course_role"),
     path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path('workspace/', views.dashboard, name='dashboard'),
     path('', service_views.landing, name='public_home'),

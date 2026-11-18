@@ -12,6 +12,7 @@ from portal import mini_account as account
 from portal import mini_invoices as invoices
 from portal import patient_billing, patient_funds
 from portal import auth_views as auth
+from portal import course_roles
 from portal import web_login_views as qr
 
 urlpatterns = [
@@ -32,6 +33,7 @@ urlpatterns = [
     path('account/web-login/',qr.mini,name='mini_web_login'),
     path('auth/sms/captcha/',qr.captcha,name='mini_sms_captcha'),
     path('auth/wechat/',auth.mini_wechat_login,name='mini_wechat_login'),
+    path('auth/course-role/', course_roles.prefill, {'channel': 'patient'}, name='mini_course_role'),
     path('account/wechat/bind/',auth.mini_wechat_login,{'binding':True},name='mini_wechat_bind'),
     path('auth/sms/send/',auth.mini_sms_send,name='mini_sms_send'),
     path('auth/sms/confirm/',auth.mini_sms_confirm,name='mini_sms_confirm'),

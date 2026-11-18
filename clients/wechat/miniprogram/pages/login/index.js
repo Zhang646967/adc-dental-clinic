@@ -3,11 +3,64 @@ const api = require('../../utils/api');
 const {showError: presentError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
 function showError(page,error){presentError(page,error,{stayOnLogin:true});}
+const courseInvitePattern = /^[A-Za-z0-9_-]{43}$/;
 Page({
-  data: {smsMode:false,realSmsAvailable:false,captchaKey:'',captchaImage:'',passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: ''},
-  async onLoad() {
-    try { const session=await api.bootstrap();const auth=session.auth_capabilities||{},realSmsAvailable=!!(auth.sms_enabled&&!auth.sms_demo);this.setData({auth,realSmsAvailable,smsMode:!auth.wechat_mini&&realSmsAvailable,passwordMode:!(realSmsAvailable||auth.wechat_mini),environmentLabel:session.environment_label||'',identityProvider:session.identity_provider});if(session.authenticated||session.account_authenticated)navigation.reLaunch({url:intent.destination(getApp(),session)}); }
+  data: {smsMode:false,realSmsAvailable:false,captchaKey:'',captchaImage:'',passwordMode:false,username: '', password: '', localCode:'',localConfirmed:false,authConfirmed:false,auth:{},phone:'',smsCode:'',smsChallenge:'',smsNotice:'',identityProvider:'disabled',busy: false, error: '',
+    courseRoles: [], selectedCourseRole: '', courseBusy: false, courseMessage: ''},
+  async onLoad(options = {}) {
+    const app = getApp();
+    if (typeof options.course === 'string' && courseInvitePattern.test(options.course)) {
+      app.globalData.courseInvite = options.course;
+    }
+    this.courseInvite = app.globalData.courseInvite || '';
+    try {
+      const session = await api.bootstrap();
+      const auth = session.auth_capabilities || {};
+      const realSmsAvailable = !!(auth.sms_enabled && !auth.sms_demo);
+      this.setData({auth, realSmsAvailable, smsMode: !auth.wechat_mini && realSmsAvailable,
+        passwordMode: !(realSmsAvailable || auth.wechat_mini),
+        environmentLabel: session.environment_label || '', identityProvider: session.identity_provider});
+      if (session.authenticated || session.account_authenticated) {
+        navigation.reLaunch({url:intent.destination(app,session)});
+        return;
+      }
+      if (this.courseInvite) await this.loadCourseRoles();
+    }
     catch (e) { showError(this, e); }
+  },
+  async loadCourseRoles() {
+    const invite = this.courseInvite;
+    try {
+      const response = await api.request('auth/course-role/', 'POST', {invite});
+      if (this.courseInvite === invite) this.setData({courseRoles: response.roles});
+    } catch (error) {
+      if (this.courseInvite !== invite) return;
+      if (error.status === 404) {
+        this.courseInvite = '';
+        getApp().globalData.courseInvite = '';
+      }
+      this.setData({courseMessage: error.status === 404
+        ? '体验入口无效或已过期。你可以手动登录。'
+        : '暂时无法读取体验角色。你可以使用原账号登录。'});
+    }
+  },
+  async fillCourseRole(event) {
+    const role = event.currentTarget.dataset.role;
+    const invite = this.courseInvite;
+    if (this.data.busy || this.data.courseBusy || !invite || !this.data.courseRoles.some(item => item.id === role)) return;
+    this.setData({courseBusy: true, courseMessage: '', selectedCourseRole: '', username: '', password: '', error: ''});
+    try {
+      const fields = await api.request('auth/course-role/', 'POST', {invite, role});
+      if (this.courseInvite !== invite) return;
+      this.setData({selectedCourseRole: role, passwordMode: true, username: fields.username,
+        password: fields.password, courseMessage: '已填好账号和密码。请点「登录原账号」。'});
+    } catch (error) {
+      if (this.courseInvite === invite) this.setData({courseMessage: error.status === 404
+        ? '这个体验账号暂不可用。你可以选择其他角色或手动登录。'
+        : '暂时无法填入账号。请重试或手动登录。'});
+    } finally {
+      if (this.courseInvite === invite) this.setData({courseBusy: false});
+    }
   },
   field(e) { this.setData({[e.currentTarget.dataset.field]: e.detail.value}); },
   toggleSms(){this.setData({smsMode:!this.data.smsMode});},
@@ -67,7 +120,7 @@ Page({
     finally{this.setData({localCode:'',password:'',busy:false});}
   },
   async login() {
-    if (this.data.busy) return;
+    if (this.data.busy || this.data.courseBusy) return;
     if (!this.data.username.trim() || !this.data.password) { this.setData({error:'请填写原患者账号和密码。'}); return; }
     this.setData({busy:true, error:''});
     try {
@@ -75,5 +128,5 @@ Page({
       this.setData({password:''}); navigation.reLaunch({url:intent.destination(getApp(),session)});
     } catch (e) { this.setData({password:''}); showError(this, e); }
   },
-  onUnload(){this.setData({password:'',localCode:'',smsCode:'',smsChallenge:'',smsNotice:''});}
+  onUnload(){this.courseInvite='';this.setData({password:'',localCode:'',smsCode:'',smsChallenge:'',smsNotice:''});}
 });

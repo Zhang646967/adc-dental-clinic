@@ -40,6 +40,43 @@ async function verify(){
   const d=page('login',{session:{account_authenticated:false},loginError:new Error('核对未通过')});d.p.setData({localCode:'private-code',password:'private-password'});
   await d.p.localLogin();assert.equal(d.calls.length,0);d.p.consent({detail:{value:['agree']}});await d.p.localLogin();assert.equal(d.calls.length,1);assert.equal(d.p.data.localCode,'');assert.equal(d.p.data.password,'');
  });
+ await test('course role changes prefill the regular login and require a separate submit', async () => {
+  const invite = 'A'.repeat(43);
+  const d = page('login', {session: {account_authenticated: false}, request: async (route, method, fields) => {
+   assert.equal(route, 'auth/course-role/');
+   assert.equal(method, 'POST');
+   assert.equal(fields.invite, invite);
+   if (!fields.role) return {roles: [{id: 'owner', label: '患者本人'}, {id: 'delegate', label: '预约代办'}]};
+   return {username: fields.role, password: 'fixture-password-' + fields.role};
+  }});
+  await d.p.onLoad({course: invite});
+  assert.equal(d.p.data.courseRoles.length, 2);
+  for (const role of ['owner', 'delegate']) {
+   await d.p.fillCourseRole({currentTarget: {dataset: {role}}});
+   assert.equal(d.p.data.username, role);
+   assert.equal(d.p.data.password, 'fixture-password-' + role);
+  }
+  assert.equal(d.calls.length, 3);
+  assert.equal(d.navigation.length, 0);
+  await d.p.login();
+  assert.equal(d.calls[3].route, 'login/');
+  assert.equal(d.calls[3].data.username, 'delegate');
+  assert.equal(d.p.data.password, '');
+ });
+ await test('manual login remains available with a missing or expired course invitation', async () => {
+  const denied = Object.assign(new Error('expired'), {status: 404});
+  for (const options of [{}, {course: 'B'.repeat(43)}]) {
+   const d = page('login', {session: {account_authenticated: false}, request: async () => { throw denied; }});
+   await d.p.onLoad(options);
+   assert.equal(d.p.data.courseRoles.length, 0);
+   assert.equal(d.calls.length, options.course ? 1 : 0);
+   d.p.field(input('username', 'manual-user'));
+   d.p.field(input('password', 'manual-password'));
+   await d.p.login();
+   assert.equal(d.calls.at(-1).route, 'login/');
+   assert.equal(d.calls.at(-1).data.username, 'manual-user');
+  }
+ });
  await test('profile refresh failure clears previously displayed private account',async()=>{
   let failed=false;const d=page('account',{request:async()=>{if(failed)throw Error('授权已变化');return plain(profile);}});
   await d.p.onShow();assert(d.p.data.profile);failed=true;await d.p.load();assert.equal(d.p.data.profile,null);

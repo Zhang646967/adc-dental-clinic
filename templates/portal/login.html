@@ -3,6 +3,7 @@
 <body class="login-body patient-auth-page"><a class="skip" href="#patient-auth-main">跳到登录表单</a><main id="patient-auth-main" tabindex="-1" class="login-card patient-auth-card">
 <a class="auth-brand" href="{% url 'public_home' %}" aria-label="ADC 口腔首页"><span class="auth-brand-mark" aria-hidden="true">A</span>ADC 口腔</a>
 <h1>登录与注册</h1><p class="auth-intro">使用微信或手机号码，管理你和家人的就诊安排。</p>
+{% url 'mini_course_role' as course_role_endpoint %}{% include 'portal/course-role-picker.html' %}
 {% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
 {% if booking_service %}<div class="auth-service"><strong>继续预约：{{ booking_service.title }}</strong><span>{{ booking_service.public_contact.name }}</span></div>{% endif %}
 {% if auth.wechat_qr %}

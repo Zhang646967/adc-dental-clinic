@@ -10,6 +10,7 @@
 <p class="login-intro-note">ADC · 连锁口腔诊所工作平台</p></section>
 <section class="login-card"><div class="login-card-heading"><span class="eyebrow">欢迎回来</span></div>
 <h1>登录运营工作台</h1><p class="muted">使用分配给你的账号，进入对应工作台。</p>
+{% url 'staff_course_role' as course_role_endpoint %}{% include 'portal/course-role-picker.html' %}
 <form method="post" id="login-form">{% csrf_token %}{% workspace_token %}{{ form.non_field_errors }}
 {% for field in form %}<div class="field">{{ field.label_tag }}{% if field.name == 'password' %}<div class="password-control">{{ field }}<button class="password-toggle secondary" type="button" data-password-toggle aria-controls="{{ field.id_for_label }}" aria-pressed="false" hidden>显示密码</button></div>{% else %}{{ field }}{% endif %}{{ field.errors }}</div>{% endfor %}
 <input type="hidden" name="next" value="{{ next }}"><button class="login-submit" type="submit">登录工作台 <span aria-hidden="true">→</span></button></form>

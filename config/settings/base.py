@@ -65,6 +65,7 @@ ADC_STOCK_REHEARSAL = os.environ.get("ADC_STOCK_REHEARSAL", "0") == "1"
 ADC_PATIENT_AUTH_MODE = os.environ.get('ADC_PATIENT_AUTH_MODE', 'demo' if ADC_CLINICAL_SYNTHETIC else 'live')
 ADC_PATIENT_IDENTITY_PROVIDER = os.environ.get('ADC_PATIENT_IDENTITY_PROVIDER', 'local' if ADC_CLINICAL_SYNTHETIC and ADC_PATIENT_AUTH_MODE=='demo' else 'disabled')
 ADC_TEACHER_TEST_MODE = os.environ.get('ADC_TEACHER_TEST_MODE') == '1'
+ADC_COURSE_ROLE_FILE = os.environ.get('ADC_COURSE_ROLE_FILE', '')
 ADC_SMS_PROVIDER = os.environ.get('ADC_SMS_PROVIDER', 'disabled')
 ADC_SMS_SECRET_ID = os.environ.get('ADC_SMS_SECRET_ID', '')
 ADC_SMS_SECRET_KEY = os.environ.get('ADC_SMS_SECRET_KEY', '')
