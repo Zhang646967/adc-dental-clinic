@@ -75,7 +75,7 @@
   </view>
   <view wx:if="{{reviewView && reviewView.showCheckout}}" class="card">
     <view class="section-title">本次费用与下次安排</view>
-    <view class="section-label">本次费用</view>
+    <view class="section-label">本次结算</view>
     <block wx:if="{{reviewView.settlementState === 'AWAITING_PUBLICATION'}}">
       <view class="notice">结算单待发布</view>
       <view class="muted">门店发布结算单后可在这里查看费用和余额。</view>
@@ -91,13 +91,13 @@
         <text>{{reviewView.headline.label}}</text>
         <text class="fee">¥{{reviewView.headline.amount}}</text>
       </view>
-      <view class="fact-row"><text>账单总额</text><text>¥{{reviewView.settlement.total}}</text></view>
+      <view class="fact-row"><text>本次账单金额</text><text>¥{{reviewView.settlement.total}}</text></view>
       <view wx:if="{{reviewView.settlement.receipts}}" class="fact-row"><text>已记账收款</text><text>¥{{reviewView.settlement.receipts}}</text></view>
-      <view wx:if="{{reviewView.settlement.refunds}}" class="fact-row"><text>已退金额</text><text>¥{{reviewView.settlement.refunds}}</text></view>
+      <view wx:if="{{reviewView.settlement.refunds}}" class="fact-row"><text>已记账退款</text><text>¥{{reviewView.settlement.refunds}}</text></view>
       <view wx:if="{{reviewView.settlement.netReceived}}" class="fact-row"><text>已记账净收款</text><text>¥{{reviewView.settlement.netReceived}}</text></view>
-      <view wx:if="{{reviewView.settlement.advanceApplied}}" class="fact-row"><text>预收抵扣</text><text>¥{{reviewView.settlement.advanceApplied}}</text></view>
-      <view wx:if="{{reviewView.settlement.insuranceFund}}" class="fact-row"><text>医保基金承担</text><text>¥{{reviewView.settlement.insuranceFund}}</text></view>
-      <view wx:if="{{reviewView.settlement.insurancePersonalAccount}}" class="fact-row"><text>医保个人账户</text><text>¥{{reviewView.settlement.insurancePersonalAccount}}</text></view>
+      <view wx:if="{{reviewView.settlement.advanceApplied}}" class="fact-row"><text>已抵扣预收款</text><text>¥{{reviewView.settlement.advanceApplied}}</text></view>
+      <view wx:if="{{reviewView.settlement.insuranceFund}}" class="fact-row"><text>已核对医保基金承担</text><text>¥{{reviewView.settlement.insuranceFund}}</text></view>
+      <view wx:if="{{reviewView.settlement.insurancePersonalAccount}}" class="fact-row"><text>已核对医保个人账户承担</text><text>¥{{reviewView.settlement.insurancePersonalAccount}}</text></view>
       <view wx:if="{{reviewView.settlement.pendingRefundDue}}" class="fact-row"><text>待审核退款</text><text>¥{{reviewView.settlement.pendingRefundDue}}</text></view>
       <view wx:if="{{reviewView.settlement.reviewPending}}" class="notice">有结算事项待复核，余额按当前已确认结果显示。</view>
       <button class="secondary" bindtap="invoice">查看本次结算单</button>
@@ -131,7 +131,7 @@
           </view>
           <view class="muted">{{item.historical.startLabel}}（北京时间） · {{item.historical.clinic}} · {{item.historical.statusLabel}}</view>
         </block>
-        <button wx:if="{{item.canBook}}" class="primary" data-key="{{item.key}}" bindtap="bookFollowup">按报告建议预约</button>
+        <button wx:if="{{item.canBook}}" class="primary" data-key="{{item.key}}" bindtap="bookFollowup">查看复诊可约时段</button>
         <button wx:if="{{item.canContact}}" class="secondary" data-key="{{item.key}}" bindtap="contactFollowup">联系原门店</button>
       </view>
     </block>
