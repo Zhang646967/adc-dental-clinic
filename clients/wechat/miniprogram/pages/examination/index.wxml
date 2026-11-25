@@ -26,6 +26,6 @@
     <button wx:if="{{followup.appointment}}" class="secondary" bindtap="openAppointment">查看复诊预约</button>
     <button wx:if="{{followup.showContact}}" class="secondary" bindtap="contactClinic">联系原门店</button>
   </view>
-  <button class="secondary" bindtap="back">{{returnMedical?'返回医疗授权':hasVisit?'返回原就诊':'返回就诊清单'}}</button>
+  <button class="secondary" bindtap="back">{{returnMedical?'返回医疗授权':returnVisit?'返回这次复诊':hasVisit?'返回原就诊':'返回就诊清单'}}</button>
   <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

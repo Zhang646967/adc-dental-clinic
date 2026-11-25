@@ -37,9 +37,9 @@ function request(path, method = 'GET', data = {}) {
         const body = response.data || {};
         if (response.statusCode >= 200 && response.statusCode < 300 && body.ok === true) {
           if (body.data && body.data.csrf_token) {
-            if(session.workspace_id!==body.data.workspace_id || session.subject_revision!==body.data.subject_revision || session.authenticated!==body.data.authenticated || session.account_name!==body.data.account_name || session.account_authenticated!==body.data.account_authenticated){epoch+=1;getApp().globalData.review=null;}
+            if(session.workspace_id!==body.data.workspace_id || session.subject_revision!==body.data.subject_revision || session.authenticated!==body.data.authenticated || session.account_name!==body.data.account_name || session.account_authenticated!==body.data.account_authenticated){epoch+=1;getApp().globalData.review=null;getApp().globalData.returnSource=null;}
             session = body.data;
-            if (!session.authenticated) getApp().globalData.review = null;
+            if (!session.authenticated) { getApp().globalData.review = null; getApp().globalData.returnSource = null; }
           }
           resolve(body.data);
         } else {
@@ -68,7 +68,7 @@ async function localSignIn(code,username,password,confirmed){
   return request('account/local-login/','POST',{code,username,password,confirmed:confirmed?'on':''});
 }
 async function signOut() {
-  await request('logout/', 'POST'); reset(); getApp().globalData.review = null;getApp().globalData.bookingIntent=null;
+  await request('logout/', 'POST'); reset(); getApp().globalData.review = null;getApp().globalData.bookingIntent=null;getApp().globalData.returnSource=null;
 }
 function sessionInfo() { return session; }
 function downloadRecordCopy(ticket) {
@@ -90,6 +90,6 @@ function showSubject(page){
 }
 async function selectSubject(subject){
   const next=await request('patients/select/','POST',{subject});
-  getApp().globalData.review=null;return next;
+  getApp().globalData.review=null;getApp().globalData.returnSource=null;return next;
 }
 module.exports = {request, bootstrap, signIn, localSignIn, signOut, sessionInfo, reset, showSubject, selectSubject, downloadRecordCopy};

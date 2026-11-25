@@ -35,6 +35,21 @@
     </view>
   </view>
 
+  <view wx:if="{{returnSources.length}}" class="card">
+    <view class="section-title">这次复诊的安排</view>
+    <view wx:for="{{returnSources}}" wx:key="key" class="offer-block">
+      <view class="section-label">{{item.service}}</view>
+      <view class="invoice-line">
+        <view class="muted">原就诊编号</view>
+        <navigator wx:if="{{item.canOpenSource}}" class="link" aria-label="查看原就诊编号 {{item.sourceLabel}}" url="/pages/visit/index?id={{item.sourceVisitId}}"><text class="prose visit-source">{{item.sourceLabel}}</text></navigator>
+        <view wx:else class="prose">{{item.sourceLabel}}</view>
+      </view>
+      <view wx:if="{{item.label}}" class="muted">{{item.label}}</view>
+      <button wx:if="{{item.report}}" class="secondary" data-key="{{item.key}}" bindtap="openSourceReport">{{item.report.actionLabel}}</button>
+      <button wx:if="{{item.canContact}}" class="secondary" data-key="{{item.key}}" bindtap="contactSource">联系原门店</button>
+    </view>
+  </view>
+
   <view wx:if="{{visit.patient_request}}" class="card">
     <view class="section-title">本次就诊需求</view>
     <view class="prose">{{visit.patient_request}}</view>
