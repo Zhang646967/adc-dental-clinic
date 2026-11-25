@@ -5,15 +5,16 @@ const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {buildReview}=require('../../utils/visit-review');
 const {buildExaminations}=require('../../utils/examinations');
+const {buildReturnSources}=require('../../utils/return-sources');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
-  data:{visit:null,reviewView:null,examinations:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false},
+  data:{visit:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false},
   onLoad(q){this.id=Number(q.id);this.generation=0;},
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    this.setData({visit:null,reviewView:null,examinations:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false});
+    this.setData({visit:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false});
     try{
       const visit=arrangement(await api.request(`visits/${this.id}/`));
       if(generation!==this.generation)return;
@@ -26,6 +27,7 @@ Page({
       api.showSubject(this);
       this.setData({visit,reviewView:buildReview(visit,{delegated:session.delegated}),
         examinations:buildExaminations(visit,{delegated:session.delegated}),
+        returnSources:buildReturnSources(visit,{delegated:session.delegated}),
         readOnly:session.read_only,environmentLabel:session.environment_label||''});
     }catch(e){
       if(generation!==this.generation)return;
@@ -38,7 +40,7 @@ Page({
     if(staleSubject(error,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
       getApp().globalData.review=null;
       this.context=null;
-      this.setData({visit:null,reviewView:null,examinations:[],...blankSubject,...blankDraft,subjectInvalid:true});
+      this.setData({visit:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,subjectInvalid:true});
     }
     showError(this,error,{separateRequestId:true,stayOnPage:true});
   },
@@ -53,6 +55,26 @@ Page({
     if(!Number.isSafeInteger(id)||id<=0)return;
     // Keep the original visit on the page stack so a normal back returns to it.
     navigation.navigateTo({url:`/pages/visit/index?id=${id}`});
+  },
+  sourceRow(e){
+    const key=e.currentTarget.dataset.key;
+    return this.data.returnSources.find(row=>row.key===key)||null;
+  },
+  openSourceReport(e){
+    const row=this.sourceRow(e);
+    if(!row||!row.report||this.data.patientDelegated||!this.data.visit||!positive(this.id))return;
+    const session=api.sessionInfo();
+    // Handoff for the report page. The URL alone can never create 返回这次复诊.
+    getApp().globalData.returnSource={visitId:this.id,sourceVisitId:row.sourceVisitId,
+      reportId:row.report.id,revision:row.report.revision,
+      subjectKey:session.subject_key,workspaceKey:session.workspace_id,
+      subjectRevision:session.subject_revision,expires:Date.now()+10*60000};
+    navigation.navigateTo({url:`/pages/examination/index?visit=${row.sourceVisitId}&id=${row.report.id}&revision=${row.report.revision}&from=${this.id}`});
+  },
+  contactSource(e){
+    const row=this.sourceRow(e);
+    if(!row||!row.canContact||this.data.patientDelegated)return;
+    navigation.navigateTo({url:`/pages/help/index?visit=${row.sourceVisitId}`});
   },
   contactClinic(){
     if(!this.data.visit)return;
