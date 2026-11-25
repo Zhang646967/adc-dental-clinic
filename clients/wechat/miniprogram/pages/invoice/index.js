@@ -24,6 +24,8 @@ Page({
       invoice.treatment_lines=invoice.treatment_lines||invoice.lines;
       invoice.medication_lines=invoice.medication_lines||[];
       if(invoice.cash_activity)invoice.cash_activity.entries=invoice.cash_activity.entries.map(row=>({...row,postedLabel:dateTime(row.posted_at)}));
+      const pending=invoice.cash_balance&&Number(invoice.cash_balance.pending_refunds);
+      invoice.pendingRefunds=Number.isFinite(pending)&&pending>0?pending.toFixed(2):'';
       this.setData({invoice,versions,revisionIndex:Math.max(0,versions.findIndex(r=>r.revision_no===invoice.revision)),busy:false});
     }catch(e){showError(this,e,{separateRequestId:true});}
   },

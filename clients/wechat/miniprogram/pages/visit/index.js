@@ -50,11 +50,26 @@ Page({
     const id=(review&&review.settlement&&review.settlement.invoiceId)||(visit&&visit.invoice_id);
     if(!this.data.patientDelegated&&positive(id))navigation.navigateTo({url:`/pages/invoice/index?id=${id}&visit=${this.id}`});
   },
-  openFollowup(e){
+  followupRow(e){
+    const key=Number(e.currentTarget.dataset.key);
+    const rows=(this.data.reviewView&&this.data.reviewView.followups)||[];
+    return rows.find(row=>row.key===key)||null;
+  },
+  openActive(e){
     const id=Number(e.currentTarget.dataset.id);
-    if(!Number.isSafeInteger(id)||id<=0)return;
-    // Keep the original visit on the page stack so a normal back returns to it.
+    if(this.data.patientDelegated||!positive(id))return;
+    // Keep this visit on the page stack so a normal back returns to it.
     navigation.navigateTo({url:`/pages/visit/index?id=${id}`});
+  },
+  bookFollowup(e){
+    const row=this.followupRow(e);
+    if(!row||!row.canBook||this.data.patientDelegated)return;
+    navigation.navigateTo({url:row.bookingUrl});
+  },
+  contactFollowup(e){
+    const row=this.followupRow(e);
+    if(!row||!row.canContact||this.data.patientDelegated||!positive(this.id))return;
+    navigation.navigateTo({url:`/pages/help/index?visit=${this.id}`});
   },
   sourceRow(e){
     const key=e.currentTarget.dataset.key;

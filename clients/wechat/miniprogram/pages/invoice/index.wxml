@@ -26,6 +26,7 @@
       <block wx:if="{{invoice.cash_activity}}">
         <view class="fact-row"><text>已记账收款合计</text><text>¥{{invoice.cash_activity.receipts}}</text></view>
         <view class="fact-row"><text>已记账退款合计</text><text>¥{{invoice.cash_activity.refunds}}</text></view>
+        <view wx:if="{{invoice.pendingRefunds}}" class="fact-row"><text>待复核退款</text><text>¥{{invoice.pendingRefunds}}</text></view>
       </block>
       <view class="fact-row"><text>已记账净收款</text><text>¥{{invoice.cash_balance.net_received}}</text></view>
       <view class="fact-row"><text>已抵扣预收款</text><text>¥{{invoice.cash_balance.advance_applied||'0.00'}}</text></view>
