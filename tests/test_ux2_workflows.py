@@ -2,6 +2,7 @@
 from urllib.parse import parse_qs, urlsplit
 from django.test import SimpleTestCase, TransactionTestCase
 from django.urls import reverse
+from adc_core.context import NAV, desk_sections
 from care.models import Invoice, AuditEvent, VisitRecordVersion
 from finance.cash_models import CashEntry
 from scheduling.worklists import visit_filter_navigation
@@ -10,6 +11,24 @@ from tests.workspace_client import WorkspaceClient
 
 
 class QueueNavigationTests(SimpleTestCase):
+    def test_menu_groups_only_granted_routes_and_opens_the_current_group(self):
+        names = ('visits', 'clinical_worklist', 'staff_assistant')
+        items = [(name, name) for name in names]
+        links = [dict(url=reverse(name), active=name == 'staff_assistant') for name in names]
+        groups = desk_sections(items, links)
+        self.assertEqual([link for group in groups for link in group['links']], links)
+        self.assertEqual([group['expanded'] for group in groups], [True, False, True])
+        self.assertEqual(desk_sections([], []), [])
+
+    def test_all_grouped_workspaces_preserve_every_permitted_shortcut(self):
+        for role in ('FRONT_DESK', 'DENTIST', 'MANAGER', 'FINANCE', 'HQ'):
+            with self.subTest(role=role):
+                items = NAV[role]
+                links = [dict(url=reverse(name), active=False) for name, _ in items]
+                groups = desk_sections(items, links)
+                self.assertCountEqual((item['url'] for group in groups for item in group['links']),
+                                      (item['url'] for item in links))
+
     def test_query_navigation_keeps_search_and_removes_only_explicit_conditions(self):
         data = dict(queue='outcome', day='2026-10-18', status='SCHEDULED', q='A & 患者+?', clinic='999')
         shortcuts, chips = visit_filter_navigation(data)

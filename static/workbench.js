@@ -17,8 +17,26 @@
     toggle.addEventListener("click", function () {
       setNavigation(toggle.getAttribute("aria-expanded") !== "true");
     });
+    nav.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && narrow.matches) {
+        setNavigation(false);
+        toggle.focus();
+      }
+    });
     narrow.addEventListener("change", resizeNavigation);
     resizeNavigation();
+  }
+  var account = document.querySelector(".desk-account");
+  if (account) {
+    document.addEventListener("click", function (event) {
+      if (!account.contains(event.target)) account.open = false;
+    });
+    account.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && account.open) {
+        account.open = false;
+        account.querySelector("summary").focus();
+      }
+    });
   }
   document.querySelectorAll("[data-password-toggle]").forEach(function (button) {
     var input = document.getElementById(button.getAttribute("aria-controls"));

@@ -5,6 +5,7 @@
   const status=document.getElementById('clinic-location-status'),button=document.getElementById('clinic-locate');
   const limit=Number(document.querySelector('.clinic-discovery').dataset.limit)||0;
   const cards=new Map([...list.querySelectorAll('[data-clinic]')].map(c=>[Number(c.dataset.clinic),c]));
+  const count = document.getElementById('clinic-match-count');
   let origin=null;
   const service=document.getElementById('clinic-service'),online=document.getElementById('clinic-online');
   const categories=new Map(data.offerings.map(s=>[s.category,s.category_label]));
@@ -14,7 +15,12 @@
     for(const c of cards.values())c.hidden=true;
     const selected=nearby.select(rows,{city:city.value,keyword:area.value,origin}).filter(row=>(!online||!online.checked||row.online_booking)&&(!service||!service.value||row.services.some(s=>s.category===service.value)));
     for(const row of (limit?selected.slice(0,limit):selected)){const c=cards.get(row.id);if(!c)continue;c.hidden=false;c.querySelector('.clinic-distance').textContent=nearby.distanceLabel(row.distance);list.append(c);}
-    document.getElementById('clinic-empty').hidden=selected.length!==0;
+    if (count) {
+      count.textContent = limit && selected.length > limit
+        ? '找到 ' + selected.length + ' 家门店，先显示 ' + limit + ' 家'
+        : '找到 ' + selected.length + ' 家门店';
+    }
+    document.getElementById('clinic-empty').hidden = selected.length !== 0 || rows.length === 0;
   }
   if(service)service.addEventListener('change',render);if(online)online.addEventListener('change',render);
   city.addEventListener('change',render);area.addEventListener('input',render);
@@ -29,4 +35,6 @@
     },()=>{button.disabled=false;status.textContent='未取得位置权限或定位暂不可用，仍可手动选择城市和浏览门店。';},{enableHighAccuracy:false,timeout:10000,maximumAge:60000});
   });
   render();
+  document.querySelector('.clinic-search').hidden = false;
+  status.hidden = false;
 })();

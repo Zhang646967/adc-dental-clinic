@@ -86,6 +86,8 @@ def home(request):
     if ctx.role=='PHARMACIST':return redirect('prescription_review_queue')
     if ctx.role=='NURSE':return redirect('nursing_queue')
     data={'worklist':workspace_worklist(request.user)}
+    if ctx.role in ('FRONT_DESK', 'DENTIST'):
+        data['queue_counts'] = {group['key']: group['total'] for group in data['worklist']['groups']}
     if ctx.role=='FRONT_DESK':
         from clinical.continuity_selectors import coordination_counts
         data['continuity']=coordination_counts(request.user)

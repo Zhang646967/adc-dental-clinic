@@ -41,6 +41,35 @@ NAV['FRONT_DESK'].append(('profile_coordination','医师任职与原约协调'))
 NAV['MANAGER'].append(('profile_coordination','接诊范围协调'))
 for _role in ('FINANCE','HQ'):NAV[_role].append(('management_chain','全链经营汇总'))
 
+# Organize only the links already available in the active workspace.
+DESK_SECTIONS = (
+    ('常用工作', ('frontdesk_home', 'doctor_home', 'manager_home', 'hq_home', 'finance_home', 'visits',
+                 'visit_create', 'schedule_calendar', 'patients', 'operations_dashboard', 'finance_quarters')),
+    ('排班与协调', ('availability_list', 'schedule_plans', 'waitlist', 'reception_list', 'resource_candidates',
+                  'resource_coordination_list', 'front_coordination_list', 'coordination_task_list',
+                  'clinical_next_list', 'clinical_recalls', 'clinical_labs', 'clinical_referrals', 'profile_coordination')),
+    ('诊疗与档案', ('clinical_documents', 'clinical_worklist', 'clinical_doctor_lab_queue', 'clinical_authority_home',
+                  'patient_relationships', 'patient_lookup', 'profile_home', 'corrections')),
+    ('收支与对账', ('cash_receivables', 'cash_list', 'reconciliation_home', 'payment_accounts', 'daily_close_list',
+                 'insurance_home', 'equipment_expenses', 'equipment_cost_queue', 'catalogue_list')),
+    ('门店运营', ('branch_directory_maintain', 'service_content_home', 'resource_summary', 'resource_catalogue',
+                'maintenance_list', 'equipment_list', 'stock_queue', 'clinical_coordination_summary',
+                'management_home', 'management_chain')),
+)
+
+def desk_sections(items, links):
+    remaining = {name: link for (name, _), link in zip(items, links)}
+    sections = []
+    for title, names in DESK_SECTIONS:
+        entries = [remaining.pop(name) for name in names if name in remaining]
+        if entries:
+            sections.append({'title': title, 'links': entries})
+    if remaining:
+        sections.append({'title': '其他业务', 'links': list(remaining.values())})
+    for index, section in enumerate(sections):
+        section['expanded'] = index == 0 or any(link['active'] for link in section['links'])
+    return sections
+
 def navigation(request):
     user=request.user;ctx=getattr(request,'workspace',None)
     role=ctx.role if ctx else '';clinic=ctx.clinic if ctx and ctx.clinic_id else None
@@ -69,6 +98,8 @@ def navigation(request):
       'workspace_home':reverse(ROLES[role][1]) if role in ROLES else reverse('select_role'),
       'workspace_nav':[{'url':reverse(n),'label':label,'active':getattr(request,'resolver_match',None) and request.resolver_match.url_name==n} for n,label in items],
       'base_template':'portal/base.html' if role=='PATIENT' else 'base.html'}
+    if role in ('FRONT_DESK', 'DENTIST', 'MANAGER', 'FINANCE', 'HQ'):
+        data['workspace_nav_sections'] = desk_sections(items, data['workspace_nav'])
     if role=='PATIENT':
         from portal.policies import patient_access
         from django.core.exceptions import PermissionDenied

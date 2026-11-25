@@ -113,7 +113,7 @@ def visit_list(request):
     page = Paginator(qs, 20).get_page(request.GET.get("page"))
     # Metadata-only for managers/HQ: never render patient identity or free text there.
     rows = [{"id": v.pk, "visit_no": v.visit_no, "clinic": v.clinic.name, "dentist": v.dentist.name,
-             "start": v.scheduled_start, "end": v.scheduled_end, "status": v.get_status_display(),
+             "start": v.scheduled_start, "end": v.scheduled_end, "status": v.get_status_display(), "status_key": v.status,
              "patient": v.patient.name if has_details else "受限",
              "has_details": has_details} for v in page]
     query = {k: str(v) for k, v in form.cleaned_data.items() if v} if valid else {}

@@ -81,3 +81,76 @@
 @media (min-width: 900px) {
   .care-service-intro { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 1fr); gap: var(--patient-space); align-items: start; }
 }
+
+/* Public directory and patient account use the same reading scale. */
+.care-site .care-header { min-height: 4.5rem; }
+.care-header nav { align-items: center; }
+.care-header nav a { display: inline-flex; min-height: 44px; align-items: center; }
+.care-header nav a[aria-current=page] { color: var(--care-teal); font-weight: 700; box-shadow: inset 0 -2px currentColor; }
+.care-main > .care-page-heading { padding: clamp(1.15rem,3vw,2.3rem) 0 1rem; }
+.care-main > .care-page-heading h1 { font-family: inherit; font-size: clamp(1.55rem,2.6vw,2.15rem); line-height: 1.25; font-weight: 700; margin: 0 0 .5rem; }
+.care-main > .care-page-heading p { margin: 0; }
+.care-arrival {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem 2rem;
+  margin-top: clamp(1rem,2.5vw,2rem); padding: clamp(1.1rem,3vw,2.5rem);
+  border-radius: .85rem; background: #153e38; color: #fff;
+}
+.care-arrival h1 { font-family: inherit; font-size: clamp(1.65rem,3.15vw,2.8rem); letter-spacing: -.035em; font-weight: 700; line-height: 1.22; margin: 0; }
+.care-arrival p { color: #d3e5dd; margin: .6rem 0 0; line-height: 1.55; }
+.care-arrival-actions { display: flex; flex-wrap: wrap; gap: .45rem 1.25rem; align-items: center; }
+.care-arrival-actions .care-button, .patient-main .portal-next-actions .button { color: #173e32; background: #e0f0da; border-color: #e0f0da; }
+.care-arrival-actions a { display: inline-flex; align-items: center; min-height: 44px; }
+.care-arrival :focus-visible, .portal-next :focus-visible { outline: 3px solid #f6ce76; outline-offset: 3px; }
+.care-site .clinic-discovery { margin-top: clamp(1.25rem,2.7vw,2.25rem); }
+.clinic-directory-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem 1rem; margin-bottom: .65rem; }
+.clinic-directory-heading h2, .care-site .care-section-title h2 { font-size: clamp(1.16rem,2vw,1.45rem); font-weight: 700; margin: 0; }
+.clinic-directory-heading span, .clinic-discovery #clinic-location-status { color: var(--care-muted); font-size: .875rem; }
+.clinic-discovery .clinic-search { grid-template-columns: repeat(auto-fit,minmax(min(10rem,100%),1fr)); gap: .75rem 1rem; padding: 1rem; border: 1px solid var(--care-line); background: #eef4f0; border-radius: .7rem; }
+.clinic-search .care-button { white-space: normal; }
+.clinic-discovery [hidden] { display: none !important; }
+.clinic-search .field { min-width: 0; }
+.clinic-search label { font-size: .9rem; }
+.clinic-discovery #clinic-location-status { margin: .5rem 0 1rem; }
+.clinic-discovery .care-branch-card { padding: clamp(1rem,2vw,1.4rem); border-top: 3px solid #98b9a9; }
+.clinic-discovery .care-branch-card h2 { font-size: 1.2rem; }
+.clinic-discovery .care-branch-card dl { display: grid; grid-template-columns: max-content minmax(0,1fr); align-items: baseline; gap: .4rem .75rem; margin: .65rem 0; }
+.clinic-discovery .care-branch-card dt, .clinic-discovery .care-branch-card dd { margin: 0; }
+.clinic-discovery .care-branch-card dt { font-size: .875rem; }
+.clinic-discovery .care-branch-card p { margin-bottom: .6rem; }
+.clinic-discovery .clinic-services { border-top: 1px solid var(--care-line); margin-bottom: 0; }
+.clinic-services summary { display: list-item; line-height: 44px; min-height: 44px; color: var(--care-teal); font-weight: 600; cursor: pointer; }
+.care-site .care-section-title { margin-bottom: 1rem; }
+.care-guide-card p { min-height: 0; margin: 0; }
+.care-site .care-filter { margin-bottom: .85rem; }
+.patient-main .portal-hub-heading { margin: .9rem 0; }
+.patient-main .portal-next { background: #153e38; color: #fff; border: 1px solid #153e38; border-radius: .8rem; }
+.patient-main .portal-next h2 { color: #fff; font-size: clamp(1.35rem,2.25vw,1.85rem); }
+.portal-next .portal-next-hint { color: #d3e5dd; }
+.portal-next-actions a:not(.button) { color: white; }
+.portal-more-title { margin: 1.4rem 0 .35rem; }
+.portal-more-title + .portal-more { margin-top: 0; }
+.patient-main .patient-context-summary { flex: 1 1 10rem; }
+.patient-main .patient-context { margin: 0 0 .7rem; }
+.patient-main .portal-hub-heading { margin: .65rem 0 .8rem; }
+
+@media (max-width:1000px) {
+  .clinic-discovery .clinic-search { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width:680px) {
+  .care-site .care-header { padding: .55rem 0 0; gap: .15rem .7rem; }
+  .care-header nav { gap: .2rem .55rem; padding: 0; }
+  .care-header nav a { font-size: .875rem; }
+  .care-arrival { gap: .65rem; }
+  .care-arrival p { margin-top: .4rem; font-size: .94rem; }
+  .care-arrival-actions .care-button { min-height: 44px; padding: .5rem .8rem; }
+  .clinic-discovery .clinic-search { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .45rem .7rem; padding: .75rem; }
+  .clinic-search .clinic-keyword { grid-column: 1 / -1; }
+  .clinic-discovery .clinic-search label { margin-bottom: .2rem; }
+  .clinic-search input:not([type=checkbox]), .clinic-search select { min-height: 44px; }
+  .clinic-discovery .clinic-search .care-button { min-height: 44px; padding: .4rem .55rem; }
+  .care-site .care-guide-grid { grid-template-columns: repeat(auto-fit,minmax(min(10rem,100%),1fr)); }
+}
+@media print {
+  .care-arrival, .patient-main .portal-next { background: #fff; color: #153e38; border-color: #999; }
+  .care-arrival p, .patient-main .portal-next h2, .portal-next .portal-next-hint { color: #153e38; }
+}

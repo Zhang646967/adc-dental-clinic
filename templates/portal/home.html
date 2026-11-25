@@ -1,7 +1,7 @@
 {% extends 'portal/base.html' %}
 {% block title %}患者服务中心 · ADC 口腔{% endblock %}
 {% block content %}
-<div class="portal-page-heading">
+<div class="portal-page-heading portal-hub-heading">
   <h1>患者服务中心</h1>
 </div>
 
@@ -55,7 +55,8 @@
   </section>
 </div>
 
-<nav class="portal-more" aria-label="其他患者服务">
+<h2 class="portal-more-title" id="other-patient-services">更多服务</h2>
+<nav class="portal-more" aria-labelledby="other-patient-services">
   {% if primary_action.kind != 'BOOK' and primary_action.kind != 'WAITLIST' and not offer_count %}<a href="{% url 'waitlist' %}">我的候补{% if waiting_count %}（{{ waiting_count }}）{% endif %}</a>{% endif %}
   {% if can_view_funds or patient_medical %}<a href="{% url 'portal_plans' %}">治疗方案</a>{% endif %}
   {% if can_view_funds %}

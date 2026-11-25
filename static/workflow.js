@@ -1,6 +1,8 @@
 /* Error navigation only: native forms and all business values remain untouched. */
 (function () {
   'use strict';
+  var filters = document.querySelector('[data-compact-filters]');
+  if (filters && window.matchMedia('(max-width: 650px)').matches) filters.open = false;
   var summary = document.querySelector('[data-error-summary]');
   if (!summary) return;
   function reveal(element) {

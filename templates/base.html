@@ -3,19 +3,52 @@
 <title>{% block title %}ADC · {{ workspace_label }}工作台{% endblock %}</title>
 <link rel="stylesheet" href="{% static 'app.css' %}"><link rel="stylesheet" href="{% static 'experience.css' %}"><link rel="stylesheet" href="{% static 'management.css' %}"><link rel="stylesheet" href="{% static 'workspace.css' %}"><link rel="stylesheet" href="{% static 'availability.css' %}"><link rel="stylesheet" href="{% static 'scheduling_calendar.css' %}"><link rel="stylesheet" href="{% static 'front_coordination.css' %}"><link rel="stylesheet" href="{% static 'coordination_tasks.css' %}"><link rel="stylesheet" href="{% static 'notifications.css' %}"><link rel="stylesheet" href="{% static 'release-ui.css' %}"><link rel="stylesheet" href="{% static 'business_flow.css' %}"><link rel="stylesheet" href="{% static 'workbench.css' %}"><link rel="stylesheet" href="{% static 'workflow.css' %}">
 <script defer src="{% static 'experience.js' %}"></script><script defer src="{% static 'guidance.js' %}"></script><script defer src="{% static 'release-ui.js' %}"></script><script defer src="{% static 'workbench.js' %}"></script><script defer src="{% static 'workflow.js' %}"></script><link rel="stylesheet" href="{% static 'clinical_workspace.css' %}"><script defer src="{% static 'clinical_workspace.js' %}"></script></head>
-<body class="staff-body"><a class="skip" href="#main">跳到主要内容</a>
-<div class="shell"><aside class="sidebar">
-<a class="brand" href="{{ workspace_home }}"><span class="brand-symbol" aria-hidden="true">A</span><span>ADC<small>牙科连锁运营</small></span></a>
-<div class="nav-caption">{{ workspace_label }}工作台</div>
-<button class="nav-toggle secondary" type="button" aria-controls="workspace-navigation" aria-expanded="true" hidden>功能导航 <span aria-hidden="true">☰</span></button>
-<nav id="workspace-navigation" aria-label="当前身份导航">{% for item in workspace_nav %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}{% if workspace_role %}<a href="{% url 'guide_index' %}">逐步操作指南</a>{% endif %}</nav>
-<div class="scope-note"><strong>ADC 诊所工作台</strong><p>按当前身份和诊所办理业务。</p>{% if environment_label %}<small>{{ environment_label }}</small>{% endif %}</div>
-</aside>
-<div class="workspace"><header class="topbar"><div class="current-scope"><small>当前工作范围</small><strong>{{ workspace_label }}</strong><span class="scope-badge">{{ workspace_scope }}</span></div>
-{% if user.is_authenticated %}<div class="user-menu">
-{% if workspace_can_switch_role %}<a class="utility-link" href="{% url 'select_role' %}" data-switch>切换身份</a>{% endif %}{% if workspace_has_clinics %}<a class="utility-link" href="{% url 'select_clinic' %}" data-switch>切换诊所</a>{% endif %}
-<a href="{% url 'public_home' %}">患者服务网站</a><span class="signed-user">{{ user.username }}</span><a class="utility-link" href="{% url 'own_password_change' %}">修改我的密码</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}{% workspace_token %}<button class="quiet" type="submit">退出</button></form>
-</div>{% endif %}</header>
-<main id="main" tabindex="-1">{% for message in messages %}<div class="notice" role="status">{{ message }}</div>{% endfor %}{% include 'release/read_only.html' %}{% include 'guidance/panel.html' %}{% block content %}{% endblock %}</main>
-<footer>北京时间（UTC+8） · 业务操作由你明确确认，助手不会代为提交。</footer>
-</div></div></body></html>
+<body class="staff-body">
+<a class="skip" href="#main">跳到主要内容</a>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ workspace_home }}"><span class="brand-symbol" aria-hidden="true">A</span><span>ADC 口腔<small>门诊工作台</small></span></a>
+    <button class="nav-toggle secondary" type="button" aria-controls="workspace-navigation" aria-expanded="true" hidden>功能导航 <span aria-hidden="true">☰</span></button>
+    <nav id="workspace-navigation" aria-label="当前身份导航">
+      {% if workspace_nav_sections %}
+        {% for group in workspace_nav_sections %}
+          <details class="desk-nav-group"{% if group.expanded %} open{% endif %}>
+            <summary>{{ group.title }}</summary>
+            {% for item in group.links %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+          </details>
+        {% endfor %}
+      {% else %}
+        {% for item in workspace_nav %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+      {% endif %}
+      {% if workspace_role %}<a class="desk-guide-link" href="{% url 'guide_index' %}">逐步操作指南</a>{% endif %}
+    </nav>
+    {% if environment_label %}<div class="scope-note"><small>{{ environment_label }}</small></div>{% endif %}
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="current-scope" aria-label="当前身份和工作范围">
+        <a href="{{ workspace_home }}">{{ workspace_label }}</a>
+        {% if workspace_scope %}<span class="scope-badge">{{ workspace_scope }}</span>{% endif %}
+      </div>
+      {% if user.is_authenticated %}
+        <details class="desk-account">
+          <summary>我的账号</summary>
+          <div class="desk-account-links">
+            <strong>{{ user.username }}</strong>
+            {% if workspace_can_switch_role %}<a href="{% url 'select_role' %}" data-switch>切换身份</a>{% endif %}
+            {% if workspace_has_clinics %}<a href="{% url 'select_clinic' %}" data-switch>切换诊所</a>{% endif %}
+            <a href="{% url 'public_home' %}">患者服务网站</a>
+            <a href="{% url 'own_password_change' %}">修改我的密码</a>
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}{% workspace_token %}<button class="quiet" type="submit">退出</button></form>
+          </div>
+        </details>
+      {% endif %}
+    </header>
+    <main id="main" tabindex="-1">
+      {% for message in messages %}<div class="notice" role="status">{{ message }}</div>{% endfor %}
+      {% include 'release/read_only.html' %}{% include 'guidance/panel.html' %}{% block content %}{% endblock %}
+    </main>
+    <footer>ADC 口腔 · 北京时间（UTC+8）</footer>
+  </div>
+</div>
+</body></html>

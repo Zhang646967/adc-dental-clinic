@@ -55,3 +55,38 @@
 .worklist-filters > .form-error-summary { grid-column: 1 / -1; }
 
 .document-body dd,.document-body p{overflow-wrap:anywhere}.document-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.document-comparison pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}.document-body dt{font-weight:650;margin-top:.75rem}.document-body dd{margin-left:0}.document-print .mono{overflow-wrap:anywhere}@media(max-width:640px){.document-comparison{grid-template-columns:1fr}}@media print{header,footer,nav,.no-print{display:none!important}.document-print .panel{box-shadow:none;border:0;padding:0}.document-print{max-width:none}}
+
+.visit-register { min-width: 0; border: 1px solid var(--line); border-radius: .8rem; background: #fff; padding: 0 clamp(.85rem,1.8vw,1.5rem) 1rem; }
+.visit-register .queue-tabs { margin: 0; padding: .55rem 0; border-bottom: 1px solid var(--line); gap: .25rem; }
+.visit-register .queue-tabs a { color: #3f5853; background: transparent; border-color: transparent; border-radius: .4rem; font-size: .94rem; }
+.visit-register .queue-tabs a[aria-current=page] { background: #e2f0e9; color: #155746; box-shadow: inset 0 -3px #176354; }
+.visit-refine { padding: .45rem 0; border-bottom: 1px solid var(--line); }
+.visit-refine summary { width: fit-content; padding: .5rem .25rem; color: var(--teal); font-size: .94rem; }
+.visit-refine .worklist-filters { grid-template-columns: minmax(9rem,1.5fr) minmax(9rem,1fr) minmax(8rem,1fr) auto; gap: .85rem; align-items: end; padding: .15rem 0 .65rem; }
+.visit-refine .form-field, .visit-refine .actions { margin: 0; }
+.visit-refine label { font-size: .875rem; }
+.visit-refine .actions { grid-column: auto; display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.visit-refine .actions a { display: inline-flex; align-items: center; min-height: 44px; }
+.visit-refine input:not([type=hidden]), .visit-refine select, .visit-refine button { min-height: 44px; }
+.visit-result-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem; margin: .8rem 0; font-size: .95rem; }
+.visit-result-summary span { margin-left: auto; font-size: .875rem; color: var(--muted); }
+.visit-register .appointment-table { white-space: normal; }
+.visit-register .visit-reference { font-variant-numeric: tabular-nums; max-width: 23rem; }
+.visit-register .visit-state { line-height: 1.45; font-size: .875rem; font-weight: 650; }
+.visit-state[data-state="CHECKED_IN"] { color: #135946; background: #deefe5; border-color: #adcebc; }
+.visit-state[data-state="SCHEDULED"] { color: #285772; background: #eaf2f8; border-color: #c2d9e7; }
+.visit-state[data-state="NO_SHOW"] { color: #78471d; background: #fbf1df; border-color: #e3cc9c; }
+.visit-state[data-state="CANCELLED"], .visit-state[data-state="RESCHEDULED"] { color: #53616a; background: #f0f2f4; border-color: #ced7dc; }
+.visit-register .visit-empty td { text-align: center; padding: 1.5rem .75rem; }
+@media (max-width: 1150px) {
+  .visit-refine .worklist-filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 650px) {
+  .visit-register .queue-tabs a { flex: 1 1 auto; padding-inline: .5rem; font-size: .875rem; }
+  .visit-refine .worklist-filters { grid-template-columns: minmax(0,1fr); }
+  .visit-register .table-scroll { overflow: visible; }
+  .visit-register .appointment-table thead { margin: -1px; padding: 0; }
+  .visit-register .appointment-table td:first-child { background: #f2f6f4; border-radius: .3rem; }
+  .visit-register .appointment-table .visit-empty td { background: transparent; }
+  .visit-register td:not([data-label])::before { display: none; }
+}
