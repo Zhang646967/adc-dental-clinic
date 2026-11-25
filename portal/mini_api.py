@@ -267,7 +267,7 @@ def detail(request, pk):
     now = timezone.now()
     data = visit_data(visit, actor=request.user, now=now)
     access = patient_access(request.user)
-    review = visit_review(visit, access=access, now=now)
+    review = visit_review(visit, actor=request.user, now=now)
     settlement = review['settlement']
     data.update(visit_no=visit.visit_no, review=review, invoice_id=settlement['invoice_id'] if settlement else None)
     data['examinations'] = examination_summaries(visit, access)

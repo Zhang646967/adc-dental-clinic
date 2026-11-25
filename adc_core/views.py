@@ -185,12 +185,15 @@ def visit_detail(request, pk):
             else:
                 messages.success(request, "预约结果已更新。")
                 return redirect(reverse("visit_detail", args=[v.pk]) + ("?"+urlencode({"coord_slot":origin}) if origin else ""))
+    from care.checkout import checkout_origin, front_checkout
     from scheduling.resources import current_plan
     events = v.events.only('recorded_at', 'event_type', 'reason').order_by('-recorded_at', '-pk')
     if can_act:
         events = events.filter(event_type__in=('VISIT_CREATED', 'VISIT_CHECKED_IN', 'VISIT_CANCELLED',
                                               'VISIT_NO_SHOW', 'VISIT_RESCHEDULED'))
     return render(request, "visit_detail.html", {"visit": v, "resource_plan": current_plan(v), "form": form, "can_act": can_act,
+                  "checkout": front_checkout(request.user, v.pk, timezone.now()) if can_act and v.status in ("CHECKED_IN", "COMPLETED", "CLOSED_NO_TREATMENT") else None,
+                  "checkout_origin": checkout_origin(v, request.GET.get('checkout_from')) if can_act else None,
                   "can_care": bindings(request.user).filter(role="DENTIST",scope_kind="SELF_DENTIST",user__dentist_id=v.dentist_id).exists(),
                   "events": events[:15], "requests": v.requests.all(), **return_context(origin), **visit_chain_context(request.user, v, origin)})
 

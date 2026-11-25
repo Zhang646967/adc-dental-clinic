@@ -1,6 +1,7 @@
 {% extends 'portal/base.html' %}
 {% block content %}
 <div class="patient-task">
+{% if checkout_origin %}<p><a href="{% url 'portal_visit' checkout_origin %}#checkout-money-heading">← 返回原就诊</a></p>{% endif %}
 <a href="{% url 'portal_appointments' %}{% if visit.status != 'SCHEDULED' and visit.status != 'CHECKED_IN' %}?queue=history{% endif %}">← 返回我的预约</a>
 <h1>{% if review.completed_at %}就诊详情{% else %}预约详情{% endif %}</h1>
 <section class="panel patient-booking-summary">

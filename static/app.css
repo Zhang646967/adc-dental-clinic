@@ -2,3 +2,14 @@
 
 /* SU-26: long contact strings must reflow at narrow widths. */
 .contact-value { overflow-wrap: anywhere; white-space: pre-wrap; }
+
+/* Departure summaries use the same reading order on the patient and desk pages. */
+.checkout { overflow-wrap: anywhere; }
+.checkout-balance { font-size: 1.125rem; }
+.checkout-balance strong { font-size: 1.25em; font-variant-numeric: tabular-nums; }
+.checkout-followup + .checkout-followup { margin-block-start: 1rem; padding-block-start: 1rem; border-top: 1px solid var(--line, #ced9d6); }
+.checkout .detail-grid dd { min-width: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 34rem) {
+  .checkout .detail-grid { grid-template-columns: minmax(0, 1fr) auto; }
+  .checkout .detail-grid dd { max-width: 48vw; }
+}

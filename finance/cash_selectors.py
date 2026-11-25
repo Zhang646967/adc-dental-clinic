@@ -62,6 +62,7 @@ def invoice_balance(invoice):
     insurance=invoice_insurance_facts(invoice.pk)
     balance = patient_balance(total,net,personal_account=insurance['personal_account'],fund_amount=insurance['fund_amount'])
     return dict(**with_advance_credit(balance, invoice_advance_facts(invoice.pk)[0]),
+        receipts=values['receipts'] or ZERO, refunds=values['refunds'] or ZERO,
         insurance_pending=insurance['unresolved'],pending=values['pending'],
         pending_receipts=values['pending_receipts'] or ZERO,pending_refunds=values['pending_refunds'] or ZERO,
         current_revision=invoice.current_record_version.revision_no)

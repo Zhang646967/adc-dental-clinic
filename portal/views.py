@@ -265,6 +265,7 @@ def booking_result(request):
 @login_required(login_url="portal_login")
 @require_GET
 def visit(request,pk):
+    from care.checkout import checkout_origin
     access=patient_access(request.user)
     v=get_object_or_404(access.scope(Visit.objects.select_related("clinic","dentist")),pk=pk)
     from portal.rescheduling import related_context
@@ -272,7 +273,8 @@ def visit(request,pk):
     from portal.visit_review import visit_review
     now = timezone.now()
     return render(request,"portal/visit.html",dict(related_context(request.user,v),visit=v,
-        review=visit_review(v, access=access, now=now),
+        checkout_origin=None if access.delegated else checkout_origin(v, request.GET.get('checkout_from')),
+        review=visit_review(v, actor=request.user, now=now),
         examinations=examination_summaries(v, access),
         can_cancel=v.status=="SCHEDULED" and v.scheduled_start>now,
         needs_outcome_review=needs_outcome_review(v, now)))

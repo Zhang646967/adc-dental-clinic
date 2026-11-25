@@ -139,6 +139,28 @@ def projection(visit, report, actor):
         last_day=end, appointment=_appointment_data(latest))
 
 
+def checkout_booking_source(visit, instruction, actor):
+    """Use the current published report and the ordinary report booking gate."""
+    if not settings.ADC_CLINICAL_SYNTHETIC:
+        return None
+    order = clinical.order_for_instruction(instruction.pk)
+    if not order or order.source_record.encounter.visit_id != visit.pk or not order.active_release_id:
+        return None
+    release = order.active_release
+    if not _active_version(order, release.report.number):
+        return None
+    decision = clinical.current_decision(order)
+    if not decision or decision.kind != 'BOOK' or decision.instruction_id != instruction.pk:
+        return None
+    appointments = clinical.report_appointments(order)
+    if any(v.status in ('SCHEDULED', 'CHECKED_IN') for v in appointments):
+        return None
+    if _booking_reason(order, instruction, actor):
+        return None
+    return dict(clinic=visit.clinic_id, service=instruction.service_id, followup_visit=visit.pk,
+        followup_examination=order.pk, followup_revision=release.report.number)
+
+
 def next_pending(actor, access):
     """Find an actionable current release independently of its notice read state."""
     if access.delegated or not settings.ADC_CLINICAL_SYNTHETIC:
