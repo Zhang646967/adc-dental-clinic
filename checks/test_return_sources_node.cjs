@@ -85,4 +85,5 @@ check(()=>{
   assert.equal(row.sourceLabel,'#1');
   assert.equal(row.service,'复诊来源');
 });
-console.log(JSON.stringify({layer:'Node JS contract assertions (no Django/DB)',passed:count,total:count}));
+module.exports={layer:'Node JS contract assertions (no Django/DB)',passed:count,total:count};
+if(require.main===module)console.log(JSON.stringify(module.exports));

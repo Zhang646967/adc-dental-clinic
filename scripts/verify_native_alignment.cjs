@@ -228,15 +228,23 @@ async function verify(){
   assert.deepEqual(view.care.treatments.map(r=>[r.key,r.quantity,r.noCharge]),[[0,'1',false],[1,'0.125',true]]);
   assert.deepEqual([view.care.medications[0].netQuantity,view.care.medications[0].amount],['0','0.00']);
   assert.equal(view.settlement.remaining,'60.00');assert.equal(view.settlement.reviewPending,true);
-  assert.deepEqual(view.followups.map(r=>r.needsContact),[true,true,false,false]);
-  d.p.openFollowup({currentTarget:{dataset:{id:22}}});
+  assert.deepEqual(view.followups.map(r=>r.canContact),[true,true,false,false]);
+  assert(view.followups.every(r=>!r.showActive));
+  assert.deepEqual(view.followups.map(r=>r.historical&&r.historical.id),[21,null,23,null]);
+  d.p.openAppointment({currentTarget:{dataset:{key:2,kind:'linked'}}});
   assert.equal(routes.at(-1).url,'/pages/visit/index?id=22');
-  d.p.contactClinic();assert.equal(routes.at(-1).url,'/pages/help/index?visit=12');
+  d.p.openAppointment({currentTarget:{dataset:{key:1,kind:'historical'}}});
+  assert.equal(routes.at(-1).url,'/pages/visit/index?id=21');
+  const linksBeforeStale=routes.length;
+  d.p.openAppointment({currentTarget:{dataset:{key:99,kind:'historical'}}});
+  assert.equal(routes.length,linksBeforeStale);
+  d.p.contactFollowup({currentTarget:{dataset:{key:2}}});assert.equal(routes.at(-1).url,'/pages/help/index?visit=12');
   d.p.invoice();assert.equal(routes.at(-1).url,'/pages/invoice/index?id=5&visit=12');
   d.p.home();assert.equal(navigation.consume('/pages/home/index').queue,'history');count++;
 
   d=page('visit',{session:{delegated:true},responses:[closedVisit]});d.p.onLoad({id:visit.id});await d.p.onShow();
-  assert.deepEqual(d.p.data.reviewView,{attendedLabel:'2026-11-05 13:50',completedLabel:'',care:null,settlement:null,followups:[]});
+  assert.deepEqual(d.p.data.reviewView,{attendedLabel:'2026-11-05 13:50',completedLabel:'',care:null,
+    settlementState:null,settlement:null,headline:null,showCheckout:false,showFollowups:false,followups:[]});
   const beforeInvoice=routes.length;
   d.p.invoice();assert.equal(routes.length,beforeInvoice);count++;
 

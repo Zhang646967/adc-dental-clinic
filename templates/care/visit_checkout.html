@@ -25,7 +25,7 @@
     <h4>{{ item.service }}</h4>
     <p><strong>{{ item.label }}</strong> · {{ item.clinic }}</p>
     <p>建议日期 {{ item.earliest_on|date:'Y年n月j日' }} 至 {{ item.latest_on|date:'Y年n月j日' }}</p>
-    {% if item.active_appointment %}{% with appt=item.active_appointment %}
+    {% if item.active_appointment and item.action != 'NONE' %}{% with appt=item.active_appointment %}
     <p>{{ appt.start|date:'Y年n月j日 H:i' }}（北京时间） · {{ appt.status_label }}<br>
     <a href="{% if front %}{% url 'visit_detail' appt.id %}{% else %}{% url 'portal_visit' appt.id %}{% endif %}?checkout_from={{ visit.pk }}">查看复诊预约 {{ appt.visit_no }}</a></p>
     {% endwith %}{% endif %}
