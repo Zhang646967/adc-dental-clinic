@@ -54,6 +54,12 @@
 .portal-slot-filter button { justify-self: start; }
 .patient-task .detail-grid { grid-template-columns: minmax(4rem, max-content) minmax(0, 1fr); gap: .5rem 1rem; }
 .patient-task .detail-grid dt, .patient-task .detail-grid dd { margin: 0; }
+.patient-task, .patient-main .detail-grid dd { overflow-wrap: anywhere; }
+.patient-booking-summary { container-type: inline-size; }
+@container (max-width: 18em) {
+  .patient-booking-summary .detail-grid { display: block; }
+  .patient-booking-summary .detail-grid dt:not(:first-child) { margin-block-start: .6em; }
+}
 .patient-main .portal-comparison > *, .care-detail-layout > * { min-width: 0; }
 .care-service-page { overflow-wrap: anywhere; }
 .care-service-page .care-breadcrumb { margin-bottom: .75rem; }
