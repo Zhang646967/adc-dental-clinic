@@ -28,7 +28,7 @@ def _own_visit(user,pk):
 @require_http_methods(["GET","POST"])
 def workspace(request,pk):
     _own_visit(request.user,pk)
-    progress=care_progress(request.user,pk)
+    progress=care_progress(request.user,pk,include_return_sources=True)
     v=progress['visit'];version=progress['record']
     initial={"expected_version":v.lock_version,"patient_version":v.patient.allergy_info_version,
              "status":v.patient.allergy_status,"allergy_ids":list(v.patient.allergy_links.filter(is_active=True).values_list("allergy_id",flat=True))}

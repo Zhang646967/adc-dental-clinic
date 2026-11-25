@@ -1,6 +1,7 @@
 {% extends 'portal/base.html' %}
 {% block content %}
-<p><a href="{% url 'portal_visit' report.visit_id %}">← 返回本次就诊</a></p>
+{% if return_visit_id %}<p><a href="{% url 'portal_visit' return_visit_id %}#return-sources-title">← 返回这次复诊</a></p>
+{% else %}<p><a href="{% url 'portal_visit' report.visit_id %}">← 返回本次就诊</a></p>{% endif %}
 <h1>检查报告</h1>
 <section class="panel">
   <h2>{{ report.project }}</h2>

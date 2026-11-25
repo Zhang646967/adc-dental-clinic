@@ -9,6 +9,14 @@
   --soft: #eaf3ef;
   --focus: #a3530b;
 }
+
+.return-brief { min-width: 0; overflow-wrap: anywhere; }
+.return-brief header p, .return-brief .return-ref { color: var(--muted, #405958); }
+.return-allergies { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem 1rem; padding: .7rem 1rem; border-inline-start: .25rem solid #8b611e; background: #fbf6eb; }
+.return-source + .return-source { border-block-start: 1px solid #d6e3df; margin-block-start: 1.25rem; }
+.return-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .85rem 1.2rem; margin-block: 1rem; }
+.return-facts dt { color: #48635d; font-size: .925rem; }
+.return-facts dd { margin: .2rem 0 0; font-weight: 600; }
 [hidden] { display: none !important; }
 body { line-height: 1.65; }
 h1, h2, h3 { letter-spacing: -.025em; }

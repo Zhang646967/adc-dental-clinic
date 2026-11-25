@@ -1,0 +1,25 @@
+<section class="panel return-brief" aria-labelledby="return-brief-heading">
+  <header><h2 id="return-brief-heading">本次复诊交接</h2>
+    <p>以下资料来自与本次复诊明确关联的原就诊。</p></header>
+  <div class="return-allergies">
+    <strong>本次过敏复核</strong>
+    {% if published and not editable %}<span>接诊已关闭，请查阅本次归档记录。</span>
+    {% else %}<span>{% if visit.patient.allergy_status == 'UNKNOWN' %}过敏情况未知{% elif return_allergies %}已登记：{{ return_allergies|join:'、' }}{% else %}{{ visit.patient.get_allergy_status_display }}{% endif %} · {% if allergy_current %}本次已核对{% else %}本次仍需复核{% endif %}</span>
+    {% if editable %}<a href="#care-allergy">核对过敏信息</a>{% endif %}{% endif %}
+  </div>
+  {% for source in return_sources %}<article class="return-source">
+    <h3>{{ source.service }}</h3>
+    <p class="return-ref">原就诊 {{ source.source_visit_no }} · <a href="{% url 'clinical_encounter' source.source_visit_id %}?revision={{ source.record_revision }}">查看原检查第 {{ source.record_revision }} 版</a></p>
+    {% if source.state == 'CONTACT' %}<p class="notice">复诊依据已变化，请先核对原就诊与当前安排。{% if source.record_revision != source.latest_record %}原检查已更新至第 {{ source.latest_record }} 版。{% endif %}</p>{% endif %}
+    <dl class="return-facts">
+      <div><dt>原指示牙位与牙面</dt><dd>{{ source.location }}</dd></div>
+      <div><dt>当时约定的治疗步骤</dt><dd>{% if source.stage %}{{ source.stage }} · 方案第 {{ source.plan_revision }} 版{% else %}原指示未关联治疗步骤{% endif %}</dd></div>
+      <div><dt>原就诊实际执行</dt><dd>{% if source.actual %}{{ source.actual.label }} · {{ source.actual.location }}{% elif source.stage %}原就诊未见该步骤的有效执行记录{% else %}无指定步骤可对照{% endif %}</dd></div>
+      <div><dt>复诊所依据的报告</dt><dd>{% if source.report %}{{ source.report.project }} · 第 {{ source.report.revision }} 版{% elif source.state == 'CONTACT' %}请重新核对依据{% else %}无可列示的关联报告{% endif %}</dd></div>
+    </dl>
+    {% if source.findings %}<details><summary>原检查记录中的牙位（{{ source.findings|length }} 项）</summary>
+      <ul>{% for finding in source.findings %}<li>{{ finding }}</li>{% endfor %}</ul></details>{% endif %}
+    {% if source.report %}<details><summary>查阅此次依据的报告正文</summary>
+      <p class="return-ref">{{ source.report.number }} · 第 {{ source.report.revision }} 版</p>{{ source.report.body|linebreaks }}</details>{% endif %}
+  </article>{% endfor %}
+</section>

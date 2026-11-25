@@ -53,6 +53,16 @@ rescheduling. Its initial source/rule/Page-handler checks were followed by [C0.3
 
 The staff front door opens into that person's work: today's schedule, waiting patients, unsigned records, orders awaiting action, exceptions and responsible colleagues. The patient front door offers clinic/service selection, appointments, treatment progress, approved documents, balances and a contact path. An owner or platform evaluator is not the default persona for either interface.
 
+### Patient mini-program and staff web in parallel
+
+| Patient journey | Native entry and priority | Shared fact to verify with the clinic |
+| --- | --- | --- |
+| Prepare for a return visit (18547) | In the appointment the patient already knows, show the linked original visit and an exact published report, or how to contact the branch when the basis changes. Return to the same appointment. | The dentist sees the same source visit and effective report version, plus the authorized tooth, surface, prior execution and allergy review. A new booking alone establishes no relation. |
+| Leave the clinic and prepare the next visit | Start from the completed visit. Show the published bill, actual receipts and balance, the dentist's next-visit window and exactly one action appropriate to the current appointment state. | The same visit, current bill revision and appointment agree with reception. Exercise a corrected bill, staged treatment with no additional fee, cancellation and a rescheduled successor. |
+| Recover a missed follow-up | Surface an actionable in-app reminder for the selected patient; preserve access to history and the responsible branch after reading it. | Distinguish a notice issued, a patient reading it, a completed booking and an actual return. Test stale releases and switching accounts. External WeChat delivery requires an authorized subscription and observed delivery on a phone. |
+
+Use the existing home, appointments, visits and account navigation. Put each new action in the task the patient is already doing. Codex owns the shared contracts and web/HTTP checks, WorkBuddy owns the native interaction and developer-tool evidence. Use the same cases for both. Before changing the public trial entry, recheck on a physical phone with debugging off, approved HTTPS, normal text and enlarged text.
+
 The visual system covers typography, spacing, form controls, tables, status wording, tooth-chart symbols, keyboard operation and narrow layouts. Clinical alerts such as unreviewed allergies or unsigned prescriptions remain prominent. Their purpose is specific action and patient safety, rather than a generic product disclaimer. No fake certifications, clinic addresses, testimonials, uptime figures or clinical capability claims may appear in sales or product pages.
 
 The previous public six-route acceptance entry becomes internal operator material. `/start/` must become a normal product entry, and ordinary login/workspace navigation must stop directing patients and staff to developer verification. Access to any internal acceptance tool is explicitly authorized at its own route.

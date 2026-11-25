@@ -29,6 +29,15 @@
   </div>
   {% endif %}
 </section>
+{% if review.return_sources %}<section class="panel" aria-labelledby="return-sources-title" data-return-sources>
+  <h2 id="return-sources-title">这次复诊的安排</h2>
+  {% for source in review.return_sources %}<article>
+    <h3>{{ source.service }}</h3>
+    <p>原就诊编号 <a href="{% url 'portal_visit' source.source_visit_id %}">{{ source.source_visit_no }}</a></p>
+    {% if source.state == 'CONTACT' %}<p>{{ source.label }}</p><a href="#frontdesk-help">联系原门店</a>
+    {% elif source.report %}<a class="button secondary" href="{% url 'portal_examination' source.source_visit_id source.report.id %}?revision={{ source.report.revision }}&amp;from_visit={{ visit.pk }}">查看{{ source.report.project }} · 第 {{ source.report.revision }} 版</a>{% endif %}
+  </article>{% endfor %}
+</section>{% endif %}
 {% if not patient_delegated %}{% include 'portal/visit_review.html' %}{% endif %}
 {% if examinations %}
 <section class="panel">

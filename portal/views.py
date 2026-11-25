@@ -281,12 +281,22 @@ def visit(request,pk):
 @never_cache
 @require_GET
 def examination(request, pk, order_id):
+    from clinical.return_visits import patient_sources
+    from scheduling.service_content import positive_id
+    return_visit_id = None
     with reporting_snapshot():
         access = patient_access(request.user, self_only=True)
         visit = get_object_or_404(access.scope(Visit.objects.select_related('clinic__public_directory')), pk=pk)
         report = published_examination(visit, order_id, request.GET.get('revision'))
         report['followup'] = report_followup.projection(visit, report, request.user)
-    return render(request, 'portal/examination_report.html', {'report': report})
+        candidate_id = positive_id(request.GET.get('from_visit'))
+        if candidate_id:
+            candidate = access.scope(Visit.objects.all()).filter(pk=candidate_id, clinic_id=visit.clinic_id).first()
+            if candidate and any(row['source_visit_id'] == pk and row['report'] and
+                                 row['report']['id'] == order_id and row['report']['revision'] == report['revision']
+                                 for row in patient_sources(candidate, access)):
+                return_visit_id = candidate.pk
+    return render(request, 'portal/examination_report.html', {'report': report, 'return_visit_id': return_visit_id})
 
 
 @login_required(login_url='portal_login')

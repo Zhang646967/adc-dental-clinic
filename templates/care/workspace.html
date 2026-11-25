@@ -9,6 +9,7 @@
   <span>到诊登记 <time datetime="{{ visit.attended_at|date:'c' }}">{{ visit.attended_at|date:'Y-m-d H:i' }}</time></span>
   {% include 'components/handoff_stage.html' with started=visit.record_started_at only %}
 </div>{% endif %}
+{% if return_sources %}{% include 'care/return_sources.html' %}{% endif %}
 <nav class="action-row" aria-label="本次就诊相关记录">
   <a href="{% url 'visit_detail' visit.pk %}">预约记录</a>
   {% if clinical_available %}<a href="{% url 'clinical_encounter' visit.pk %}">核对本次检查记录</a><a href="{% url 'clinical_document' visit.pk %}">完善病历文书</a>{% endif %}

@@ -7,7 +7,7 @@ from scheduling.models import Visit
 from scheduling.worklists import with_record_start
 from care.models import Invoice
 
-def care_progress(actor, visit_id):
+def care_progress(actor, visit_id, *, include_return_sources=False):
     with reporting_snapshot():
         visit = with_record_start(Visit.objects.select_related('patient','dentist','clinic')).get(pk=visit_id)
         if not bindings(actor).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=visit.dentist_id).exists():
@@ -54,6 +54,14 @@ def care_progress(actor, visit_id):
             medicine=preview_charges(pending_charges(visit))
         if pharmacy_blocker: treated_blockers.append(pharmacy_blocker)
         display_record=draft or published
+        sources = []
+        if clinical_available and include_return_sources:
+            from clinical.return_visits import chairside_sources
+            sources = chairside_sources(actor, visit)
+        allergies = []
+        if sources and visit.patient.allergy_status == 'KNOWN':
+            allergies = list(visit.patient.allergy_links.filter(is_active=True).order_by('allergy__name')
+                             .values_list('allergy__name', flat=True))
         display_lines=lines if draft else list(published.treatment_lines.order_by('line_no')) if published else []
         bind_performed_sources(display_lines)
         from clinical.authority import may_refer
@@ -61,6 +69,7 @@ def care_progress(actor, visit_id):
         nursing=visit.nursing_executions.select_related('actor','stock_movement__lot','sterile_pack','issue__line').order_by('-pk')[:20]
         return dict(visit=visit,nursing_history=list(nursing), clinical_started=structured,clinical_available=clinical_available,clinical_record=clinical_record,record=display_record, lines=display_lines, invoice=invoice, published=published, can_refer=may_refer(actor,visit),
             editable=editable, allergy_current=allergy_current, treated_blockers=treated_blockers,
+            return_sources=sources, return_allergies=allergies,
             actual=actual,medication_lines=medicine,pharmacy_blocker=pharmacy_blocker,
             completion_total=published.total_amount if published else sum(row.line_amount for row in lines)+sum(row['line_amount'] for row in medicine),
             no_treatment_allowed=not blockers and not clinical_blockers and not pharmacy_blocker and not lines and not actual['provided'] and not medicine,

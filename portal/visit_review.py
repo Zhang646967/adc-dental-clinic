@@ -4,6 +4,7 @@ from adc_core.snapshots import reporting_snapshot
 from care.medication_charges import charge_projection
 from care.models import Invoice
 from clinical.next_visits import instruction_booking_projection
+from clinical.return_visits import patient_sources
 from clinical.plan_models import NextVisitInstruction, PerformedProcedure
 from finance.cash_selectors import invoice_balance
 from portal.patient_dashboard import needs_outcome_review
@@ -65,11 +66,14 @@ def _published_result(invoice):
 def visit_review(visit, *, access, now):
     """The caller has already scoped this visit to the selected patient."""
     summary = dict(attended_at=visit.attended_at, completed_at=None if access.delegated else visit.completed_at,
-        care=None, settlement=None, followups=[])
-    if access.delegated or visit.status not in CLOSED_STATUSES:
+        care=None, settlement=None, followups=[], return_sources=[])
+    if access.delegated:
         return summary
 
     with reporting_snapshot():
+        summary['return_sources'] = patient_sources(visit, access)
+        if visit.status not in CLOSED_STATUSES:
+            return summary
         invoice = Invoice.objects.select_related('current_record_version').filter(
             visit_id=visit.pk, current_record_version__state='PUBLISHED').first()
         if invoice:
