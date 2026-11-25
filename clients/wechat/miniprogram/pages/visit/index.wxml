@@ -138,6 +138,10 @@
     <view wx:else class="muted">本次未记录复诊安排</view>
   </view>
 
+  <view wx:if="{{visit && !patientDelegated && !reviewView && visit.invoice_id}}" class="card">
+    <button class="secondary" bindtap="invoice">查看本人结算单</button>
+  </view>
+
   <view wx:if="{{examinations.length}}" class="card">
     <view class="section-title">检查与报告</view>
     <view wx:for="{{examinations}}" wx:key="id" class="offer-block">
