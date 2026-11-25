@@ -3,7 +3,7 @@
   <view class="page-heading"><view class="title">本人结算单</view><view class="muted">按已发布账单核对，网站与小程序使用同一份记录。</view></view>
   <template is="patient-results" data="{{busy, error, requestId, done}}"/><button wx:if="{{error}}" class="secondary" bindtap="load" disabled="{{busy}}">重新读取结算单</button>
   <block wx:if="{{invoice}}">
-    <view class="card"><view class="section-title">{{invoice.invoice_no}}</view><view class="pill">{{invoice.is_current?'当前发布版本':'历史发布版本'}}</view><view class="muted line">第{{invoice.revision}}版 · {{invoice.publishedLabel}}</view>
+    <view class="card"><view class="section-title invoice-id">{{invoice.invoice_no}}</view><view class="pill">{{invoice.is_current?'当前发布版本':'历史发布版本'}}</view><view class="muted line">第{{invoice.revision}}版 · {{invoice.publishedLabel}}</view>
       <view class="label">查看发布历史</view><picker range="{{versions}}" range-key="label" value="{{revisionIndex}}" bindchange="version"><view class="picker">{{versions[revisionIndex].label}} ▾</view></picker>
     </view>
     <view class="card"><view class="section-title">收费明细</view>

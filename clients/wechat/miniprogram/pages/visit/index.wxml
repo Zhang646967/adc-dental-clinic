@@ -83,11 +83,13 @@
     <block wx:elif="{{reviewView.settlement}}">
       <view class="invoice-line">
         <view class="muted">结算单</view>
-        <view class="prose">{{reviewView.settlement.invoiceNo}} · 第 {{reviewView.settlement.revision}} 版</view>
+        <view class="prose checkout-id">{{reviewView.settlement.invoiceNo}}</view>
+        <view class="muted">第 {{reviewView.settlement.revision}} 版</view>
       </view>
-      <view class="fact-row">
+      <view wx:if="{{reviewView.headline.kind === 'settled'}}" class="pill">已结清</view>
+      <view wx:else class="fact-row">
         <text>{{reviewView.headline.label}}</text>
-        <text wx:if="{{reviewView.headline.amount}}" class="fee">¥{{reviewView.headline.amount}}</text>
+        <text class="fee">¥{{reviewView.headline.amount}}</text>
       </view>
       <view class="fact-row"><text>账单总额</text><text>¥{{reviewView.settlement.total}}</text></view>
       <view wx:if="{{reviewView.settlement.receipts}}" class="fact-row"><text>已记账收款</text><text>¥{{reviewView.settlement.receipts}}</text></view>
@@ -114,7 +116,8 @@
         <block wx:if="{{item.showActive}}">
           <view class="invoice-line">
             <view class="muted">下次预约</view>
-            <view class="prose">{{item.active.visitNo}} · #{{item.active.id}}</view>
+            <view class="prose checkout-id">{{item.active.visitNo}}</view>
+            <view class="muted">预约 #{{item.active.id}}</view>
           </view>
           <view>{{item.active.startLabel}}（北京时间）</view>
           <view class="muted">{{item.active.clinic}} · {{item.active.statusLabel}}</view>
@@ -123,7 +126,8 @@
         <block wx:if="{{item.historical}}">
           <view class="invoice-line">
             <view class="muted">历史预约</view>
-            <view class="prose">{{item.historical.visitNo}} · #{{item.historical.id}}</view>
+            <view class="prose checkout-id">{{item.historical.visitNo}}</view>
+            <view class="muted">预约 #{{item.historical.id}}</view>
           </view>
           <view class="muted">{{item.historical.startLabel}}（北京时间） · {{item.historical.clinic}} · {{item.historical.statusLabel}}</view>
         </block>
@@ -131,7 +135,7 @@
         <button wx:if="{{item.canContact}}" class="secondary" data-key="{{item.key}}" bindtap="contactFollowup">联系原门店</button>
       </view>
     </block>
-    <view wx:else class="muted">本次未记录复诊安排。</view>
+    <view wx:else class="muted">本次未记录复诊安排</view>
   </view>
 
   <view wx:if="{{examinations.length}}" class="card">

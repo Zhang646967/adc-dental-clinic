@@ -56,4 +56,7 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 .patient-flow .result-pending .section-title{margin-top:8rpx}
 
 /* Keep a long source visit number compact and break it at any character. */
-.patient-flow .visit-source{font-size:28rpx;word-break:break-all}
+.patient-flow .visit-source,.patient-flow .checkout-id{font-size:28rpx;word-break:break-all}
+
+/* Long invoice numbers stay readable without breaking the layout. */
+.invoice-id{font-size:30rpx;line-height:1.4;word-break:break-all}
