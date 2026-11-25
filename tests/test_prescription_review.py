@@ -130,7 +130,9 @@ class PrescriptionReviewTests(PrescriptionFixture, TransactionTestCase):
         self.assertContains(doctor.get(first.url), '待审核')
 
         reviewer, choice = self.login(self.rx_user, 'synthetic-rx-test-123')
-        self.assertContains(choice, '请选择本次要处理的诊所')
+        self.assertTemplateUsed(choice, 'workspaces/clinics.html')
+        self.assertContains(choice, f'action="{reverse("activate_clinic")}"')
+        self.assertContains(choice, f'<input type="hidden" name="clinic" value="{self.a.pk}">', html=True)
         queue = self.post(reviewer, reverse('activate_clinic'), choice, {'clinic': self.a.pk}, 302)
         self.assertContains(reviewer.get(queue.url), '处方 #')
         old = reviewer.get(first.url)
