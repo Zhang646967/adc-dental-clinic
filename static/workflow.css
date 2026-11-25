@@ -62,7 +62,7 @@
 .visit-register .queue-tabs a[aria-current=page] { background: #e2f0e9; color: #155746; box-shadow: inset 0 -3px #176354; }
 .visit-refine { padding: .45rem 0; border-bottom: 1px solid var(--line); }
 .visit-refine summary { width: fit-content; padding: .5rem .25rem; color: var(--teal); font-size: .94rem; }
-.visit-refine .worklist-filters { grid-template-columns: minmax(9rem,1.5fr) minmax(9rem,1fr) minmax(8rem,1fr) auto; gap: .85rem; align-items: end; padding: .15rem 0 .65rem; }
+.visit-refine .worklist-filters { grid-template-columns: repeat(auto-fit, minmax(min(100%,12rem),1fr)); gap: .85rem; align-items: end; padding: .15rem 0 .65rem; }
 .visit-refine .form-field, .visit-refine .actions { margin: 0; }
 .visit-refine label { font-size: .875rem; }
 .visit-refine .actions { grid-column: auto; display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
@@ -90,9 +90,6 @@
 .encounter-heading > div { min-width: 0; }
 .encounter-heading .visit-state { vertical-align: middle; font-size: 1rem; }
 .encounter-handoff { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding: .8rem 1rem; border-inline-start: 3px solid var(--teal); background: var(--soft); }
-@media (max-width: 1150px) {
-  .visit-refine .worklist-filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
-}
 @media (max-width: 650px) {
   .visit-register .queue-tabs a { flex: 1 1 auto; padding-inline: .5rem; font-size: .875rem; }
   .visit-refine .worklist-filters { grid-template-columns: minmax(0,1fr); }

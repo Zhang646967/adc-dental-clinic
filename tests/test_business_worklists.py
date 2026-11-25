@@ -204,6 +204,23 @@ class WorkspaceWorklistTests(BusinessFixture, TransactionTestCase):
 class VisitWorklistFilterTests(BusinessFixture, TransactionTestCase):
     def setUp(self): self.setup_business()
 
+    def test_handoff_arrival_day_uses_clinic_midnight_and_keeps_old_appointment_date_filter(self):
+        day = datetime(2026, 11, 24).date()
+        start, end = day_bounds(day)
+        late = self.visit_at(start - timedelta(hours=5), status='CHECKED_IN', attended_at=start)
+        tomorrow = self.visit_at(start + timedelta(hours=3), status='CHECKED_IN', attended_at=end)
+        self.login(self.front, 'FRONT_DESK', self.a)
+        path = reverse('visits')
+        response = self.c.get(path, {'queue': 'care', 'arrival_day': day, 'handoff': 'unrecorded'})
+        self.assertContains(response, late.visit_no)
+        self.assertNotContains(response, tomorrow.visit_no)
+        self.assertTrue(all('arrival_day=2026-11-24' in entry['url'] for entry in response.context['handoff_links']))
+        existing_link = self.c.get(path, {'queue': 'care', 'day': day})
+        self.assertContains(existing_link, tomorrow.visit_no)
+        self.assertNotContains(existing_link, late.visit_no)
+        self.assertContains(existing_link, '预约开始日期')
+        self.assertEqual(self.c.get(path, {'queue': 'care', 'arrival_day': 'bad-date'}).status_code, 400)
+
     def test_china_day_is_half_open_at_utc_boundary(self):
         day = datetime(2026, 10, 14).date()
         start, end = day_bounds(day)

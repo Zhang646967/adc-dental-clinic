@@ -21,12 +21,12 @@ HANDOFF_CHOICES = (('unrecorded', '仅有到诊登记'), ('recorded', '已有接
 
 def visit_filter_navigation(data, *, handoff_available=False):
     """Links carry only validated display filters, never workspace authority."""
-    query = {key: str(data[key]) for key in ('queue', 'day', 'status', 'q', 'handoff') if data.get(key)}
+    query = {key: str(data[key]) for key in ('queue', 'day', 'arrival_day', 'status', 'q', 'handoff') if data.get(key)}
     queue = query.get('queue', 'all')
     search = {'q': query['q']} if query.get('q') else {}
     shortcuts = [dict(label='到诊交接' if handoff_available and value == 'care' else label, active=value == queue,
                       url='?' + urlencode(dict(queue=value, **search))) for value, label in QUEUE_CHOICES]
-    labels = {'queue': '清单', 'day': '日期', 'status': '状态', 'q': '搜索', 'handoff': '交接进度'}
+    labels = {'queue': '清单', 'day': '日期', 'arrival_day': '到诊日期', 'status': '状态', 'q': '搜索', 'handoff': '交接进度'}
     choices = {'queue': dict(QUEUE_CHOICES), 'status': dict(STATUS_CHOICES), 'handoff': dict(HANDOFF_CHOICES)}
     chips = []
     for key, value in query.items():
@@ -35,13 +35,14 @@ def visit_filter_navigation(data, *, handoff_available=False):
         remaining = {k: v for k, v in query.items() if k != key}
         if key == 'queue':
             remaining.pop('handoff', None)
+            remaining.pop('arrival_day', None)
         chips.append(dict(key=key, label=labels[key], value=choices.get(key, {}).get(value, value),
                           url='?' + urlencode(remaining)))
     return shortcuts, chips
 
 
 def handoff_navigation(cleaned):
-    query = {key: str(cleaned[key]) for key in ('day', 'status', 'q') if cleaned.get(key)}
+    query = {key: str(cleaned[key]) for key in ('arrival_day', 'day', 'status', 'q') if cleaned.get(key)}
     query['queue'] = 'care'
     return [dict(label=label, active=value == (cleaned.get('handoff') or ''),
                  url='?' + urlencode(dict(query, handoff=value) if value else query))
@@ -111,10 +112,12 @@ class VisitFilterForm(forms.Form):
             if self.data.get('queue') == 'care':
                 self.fields['handoff'] = forms.ChoiceField(label='交接进度', choices=HANDOFF_CHOICES,
                                                           required=False, widget=forms.HiddenInput)
+                self.fields['arrival_day'] = forms.DateField(label='实际到诊日期（北京时间）', required=False,
+                                                            widget=forms.DateInput(attrs={'type': 'date'}))
 
     def clean(self):
         cleaned = super().clean()
-        if self.data.get('handoff') and 'handoff' not in self.fields:
+        if (self.data.get('handoff') or self.data.get('arrival_day')) and 'handoff' not in self.fields:
             raise forms.ValidationError('请在当前身份可查看的到诊交接清单中筛选进度。')
         return cleaned
 
@@ -132,6 +135,9 @@ def filtered_visits(actor, data, now=None):
     visits = visible_visits(actor)
     if data.get('queue') == 'care' and context.role in ('DENTIST', 'FRONT_DESK'):
         visits = arrival_handoffs(actor, visits)
+        if data.get('arrival_day'):
+            start, end = day_bounds(data['arrival_day'])
+            visits = visits.filter(attended_at__gte=start, attended_at__lt=end)
         if data.get('handoff'):
             visits = visits.filter(record_started_at__isnull=data['handoff'] == 'unrecorded')
     else:
