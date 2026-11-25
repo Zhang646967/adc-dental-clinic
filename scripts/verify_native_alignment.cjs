@@ -6,6 +6,7 @@ const subjectState=require(path.join(root,'utils/subject-state'));
 const visitReview=require(path.join(root,'utils/visit-review'));
 const examinations=require(path.join(root,'utils/examinations'));
 const reportNotices=require(path.join(root,'utils/report-notices'));
+const returnSources=require(path.join(root,'utils/return-sources'));
 const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
@@ -42,7 +43,7 @@ async function verify(){
       Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
         key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/examinations')?examinations:
-        key.endsWith('/report-notices')?reportNotices:key.endsWith('/format')?format:null});
+        key.endsWith('/return-sources')?returnSources:key.endsWith('/report-notices')?reportNotices:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
   const notice={id:19,kind:'CORRECTED',visit_id:7,examination_id:8,revision:2,occurred_at:'2026-11-13T16:30:00Z',read_at:null};
