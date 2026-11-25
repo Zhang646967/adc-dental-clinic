@@ -32,6 +32,18 @@ The requirements structure follows the uploaded requirements/design notes: obser
 
 ## Customer experience and onboarding
 
+### Chairside and cross-role benchmark · 2026-11-25
+
+The benchmark is a working dental practice. Use the same patient journeys, permissions and failure cases when comparing ADC with another product. Observe a receptionist, a dentist and a patient completing the tasks unaided. Record time to the correct next action, unnecessary page changes, recovery after interruption, wrong-patient or wrong-visit errors and any disclosure outside the role. Report the comparator version, sample and limitations with the results.
+
+| Priority | Task at the clinic | Evidence required |
+| --- | --- | --- |
+| 1. Arrival handoff | Reception locates the checked-in patient and responsible dentist. The dentist opens the same visit in one action. Both can distinguish arrival registration from the first saved clinical work. | Match the visit number and recorded times across both desks, including overnight visits and older records. Opening a page creates no clinical event. Limit every view to its permitted scope. |
+| 2. Chairside continuity | On a repeat visit, the dentist locates the correct tooth and surface, relevant imaging or report version, allergy review and current treatment phase before recording the next intervention. | Trace the exact patient, tooth, evidence version and action. Exercise corrections, missing evidence, expired authority and interrupted work. |
+| 3. Checkout and recall | Reception reconciles the published amount, actual receipts, outstanding balance and clinician-agreed follow-up. A patient can recover the appointment or reach its responsible branch. | Reconcile the same visit to the financial ledger and next appointment. Assign unresolved recalls or overdue prosthetic lab orders to named staff, with a deadline and resolution history. |
+
+The [Dentrix Ascend patient routing workflow](https://hsps.pro/DentrixAscend/Help/Routing_patients.htm) separates reception, chairside and checkout actions. The [Open Dental appointment workspace](https://www.opendental.com/manual/appointments.html) distinguishes an arrival from seating and organizes the schedule by operatory. [West China Hospital of Stomatology's patient instructions](https://hxkq.org/Html/News/Articles/4169.html) also distinguish booking from arrival and department check-in. ADC's first saved clinical record is a documentation milestone. Actual seating, time with a clinician and chair occupancy require their own observed events.
+
 The [C0 service-centre implementation](C0_SERVICE_RELEASE.md) now provides patient needs, clinic-published service content, fee terms and service-first booking continuation. Manager readiness and draft preview are implemented. Initial source checks were followed by C0.3 local PostgreSQL/browser/recovery acceptance and protected synthetic installation. These results do not establish commercial clinical qualification or a completed clinical scope contract.
 
 The [C0.2 native service journey](C02_NATIVE_SERVICE_RELEASE.md) brings those

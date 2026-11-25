@@ -26,7 +26,7 @@ from patients.services import create_patient, PATIENT_FIELDS
 from scheduling.selectors import visible_visits, can_read_visit_details, booking_slots
 from scheduling.services import create_appointment, change_appointment, reschedule, create_slot
 from scheduling.models import Visit
-from scheduling.worklists import VisitFilterForm, filtered_visits, visit_filter_navigation
+from scheduling.worklists import VisitFilterForm, filtered_visits, handoff_navigation, visit_filter_navigation, with_record_start
 from scheduling.reschedule_forms import ReplacementSearchForm, RescheduleConfirmForm
 from scheduling.reschedule_selectors import replacement_options, check_target, HORIZON_DAYS
 from scheduling.reschedule_services import prepare_reschedule, confirm_reschedule
@@ -109,17 +109,22 @@ def visit_list(request):
     valid = form.is_valid()
     qs = filtered_visits(request.user, form.cleaned_data) if valid else Visit.objects.none()
     has_details = request.workspace.role in ('FRONT_DESK', 'DENTIST')
+    handoff = has_details and request.GET.get('queue') == 'care'
     qs = qs.select_related('clinic', 'dentist', *(['patient'] if has_details else []))
     page = Paginator(qs, 20).get_page(request.GET.get("page"))
     # Metadata-only for managers/HQ: never render patient identity or free text there.
     rows = [{"id": v.pk, "visit_no": v.visit_no, "clinic": v.clinic.name, "dentist": v.dentist.name,
              "start": v.scheduled_start, "end": v.scheduled_end, "status": v.get_status_display(), "status_key": v.status,
              "patient": v.patient.name if has_details else "受限",
-             "has_details": has_details} for v in page]
+             "has_details": has_details, "arrival": v.attended_at if handoff else None,
+             "record_started_at": v.record_started_at if handoff else None} for v in page]
     query = {k: str(v) for k, v in form.cleaned_data.items() if v} if valid else {}
-    queue_shortcuts, filter_chips = visit_filter_navigation(form.cleaned_data if valid else {})
+    queue_shortcuts, filter_chips = visit_filter_navigation(form.cleaned_data if valid else {}, handoff_available=has_details)
+    if handoff:
+        filter_chips = [chip for chip in filter_chips if chip['key'] not in ('queue', 'handoff')]
     return render(request, "visits.html", {"page": page, "rows": rows, "filter_form": form,
                   "queue_shortcuts": queue_shortcuts, "filter_chips": filter_chips,
+                  "handoff": handoff, "handoff_links": handoff_navigation(form.cleaned_data) if handoff and valid else (),
                   "pagination_query": urlencode(query), "filters_valid": valid}, status=200 if valid else 400)
 
 @login_required
@@ -160,12 +165,12 @@ def visit_create(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def visit_detail(request, pk):
-    v = get_object_or_404(visible_visits(request.user).select_related("clinic", "dentist", "patient"), pk=pk)
+    v = get_object_or_404(with_record_start(visible_visits(request.user).select_related("clinic", "dentist", "patient")), pk=pk)
     if not can_read_visit_details(request.user, v):
         raise PermissionDenied("此页面包含受限业务详情。")
     if bindings(request.user).filter(role='DENTIST',scope_kind='SELF_DENTIST').exists():
         from clinical.authority import require_visit_authority
-        require_visit_authority(request.user,v,'READ')
+        require_visit_authority(request.user,v,'READ',always=v.structured_opened_at is not None)
     origin = visit_return_slot(request.user, request.GET.get("coord_slot"), v)
     can_act = bindings(request.user).filter(role="FRONT_DESK", scope_kind="CLINIC", clinic_id=v.clinic_id).exists()
     form = ActionForm(request.POST or None, initial={"expected_version": v.lock_version})
@@ -181,9 +186,13 @@ def visit_detail(request, pk):
                 messages.success(request, "预约结果已更新。")
                 return redirect(reverse("visit_detail", args=[v.pk]) + ("?"+urlencode({"coord_slot":origin}) if origin else ""))
     from scheduling.resources import current_plan
+    events = v.events.only('recorded_at', 'event_type', 'reason').order_by('-recorded_at', '-pk')
+    if can_act:
+        events = events.filter(event_type__in=('VISIT_CREATED', 'VISIT_CHECKED_IN', 'VISIT_CANCELLED',
+                                              'VISIT_NO_SHOW', 'VISIT_RESCHEDULED'))
     return render(request, "visit_detail.html", {"visit": v, "resource_plan": current_plan(v), "form": form, "can_act": can_act,
                   "can_care": bindings(request.user).filter(role="DENTIST",scope_kind="SELF_DENTIST",user__dentist_id=v.dentist_id).exists(),
-                  "events": v.events.order_by("-recorded_at")[:15], "requests": v.requests.all(), **return_context(origin), **visit_chain_context(request.user, v, origin)})
+                  "events": events[:15], "requests": v.requests.all(), **return_context(origin), **visit_chain_context(request.user, v, origin)})
 
 @login_required
 @never_cache

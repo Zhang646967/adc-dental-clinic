@@ -4,7 +4,7 @@
 <header class="desk-mast">
   <div><h1>医师工作台</h1><p>{{ worklist.as_of|date:'n月j日' }} · 本人接诊与诊疗记录</p></div>
   <nav class="desk-actions" aria-label="医师快捷办理">
-    {% if queue_counts.care %}<a class="button" href="{% url 'visits' %}?queue=care">查看待接诊患者</a>{% endif %}
+    {% if queue_counts.care %}<a class="button" href="{% url 'visits' %}?queue=care">查看到诊交接</a>{% endif %}
     <a class="button{% if queue_counts.care %} secondary{% endif %}" href="{% url 'visits' %}">全部本人接诊</a>
   </nav>
 </header>

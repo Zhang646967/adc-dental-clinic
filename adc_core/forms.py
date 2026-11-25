@@ -66,7 +66,7 @@ class RescheduleForm(forms.Form):
 
 class ActionForm(forms.Form):
     expected_version = forms.IntegerField(min_value=0, widget=forms.HiddenInput)
-    action = forms.ChoiceField(choices=[("check_in", "登记到诊"), ("cancel", "取消预约"), ("no_show", "核实爽约")])
+    action = forms.ChoiceField(label="登记事项", choices=[("check_in", "登记到诊"), ("cancel", "取消预约"), ("no_show", "核实爽约")])
     party = forms.ChoiceField(label="取消发起方", choices=[("", "请选择（取消时必填）"), ("PATIENT", "患者"), ("CLINIC", "诊所")], required=False)
     reason = forms.CharField(label="原因/核实说明", required=False, max_length=500)
 

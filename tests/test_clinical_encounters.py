@@ -57,6 +57,35 @@ class ClinicalEncounterTests(AuthorityFixture,TransactionTestCase):
     def test_duplicate_start_keeps_one_actual_encounter(self):
         op=uuid.uuid4();a=self.start(operation_id=op);b=self.start(operation_id=op)
         self.assertEqual(a.pk,b.pk);self.assertEqual(ClinicalEncounter.objects.count(),1)
+
+    def test_handoff_follows_first_documented_work_and_current_authority(self):
+        from care.services import save_clinical_note
+        from scheduling.worklists import filtered_visits
+        self.ctx(self.front, 'FRONT_DESK', self.a)
+        def queue(actor, state):
+            return filtered_visits(actor, {'queue': 'care', 'handoff': state})
+        self.assertTrue(queue(self.doc, 'unrecorded').filter(pk=self.v.pk).exists())
+        draft = save_clinical_note(actor=self.doc, visit_id=self.v.pk, expected_version=self.v.lock_version,
+                                   clinical_note='PRIVATE LEGACY NOTE')
+        self.v.refresh_from_db()
+        head = self.start()
+        self.assertLessEqual(draft.created_at, head.opened_at)
+        for actor in (self.front, self.doc):
+            self.assertEqual(queue(actor, 'recorded').get(pk=self.v.pk).record_started_at, draft.created_at)
+        self.decide(self.authority, 'REVOKE')
+        self.ctx(self.doc, 'DENTIST')
+        self.assertFalse(queue(self.doc, 'recorded').exists())
+        self.assertTrue(queue(self.front, 'recorded').filter(pk=self.v.pk).exists())
+
+    def test_opening_the_record_is_distinct_from_viewing_the_visit(self):
+        from care.progress import care_progress
+        from scheduling.worklists import filtered_visits
+        before = ClinicalRecordEvent.objects.count()
+        self.assertIsNone(care_progress(self.doc, self.v.pk)['visit'].record_started_at)
+        self.assertEqual(ClinicalRecordEvent.objects.count(), before)
+        head = self.start()
+        self.assertEqual(filtered_visits(self.doc, {'queue': 'care'}).get(pk=self.v.pk).record_started_at,
+                         head.opened_at)
     def test_frontdesk_cannot_record_even_when_responsible_for_booking(self):
         with self.assertRaises(PermissionDenied):self.start(actor=self.front)
     def test_c2_requires_scope_even_before_synthetic_legacy_activation(self):

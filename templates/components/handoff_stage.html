@@ -1,0 +1,3 @@
+{% if started %}<span class="handoff-state recorded">已有接诊记录</span>
+<small>首次建档 <time datetime="{{ started|date:'c' }}">{{ started|date:'Y-m-d H:i' }}</time></small>
+{% else %}<span class="handoff-state awaiting">仅有到诊登记</span>{% endif %}

@@ -19,7 +19,7 @@ from finance.models import Quarter
 from finance.selectors import _quarter_work_rows
 from scheduling.models import AvailabilitySlot,Visit
 from scheduling.selectors import visible_visits
-from scheduling.worklists import visit_queue
+from scheduling.worklists import arrival_handoffs, visit_queue
 from workspaces.context import valid_context
 from workspaces.models import WorkspaceContext
 
@@ -37,12 +37,20 @@ def _group(key, title, query, mapper, all_url, note):
             'all_url': all_url, 'note': note, 'limit': PREVIEW_LIMIT}
 
 
-def _visit_item(visit, *, clinical=False, metadata=False):
+def _visit_item(visit, *, metadata=False):
     return {'title': visit.visit_no if metadata else visit.patient.name,
             'detail': f'{visit.clinic.name} · {visit.dentist.name}', 'when': visit.scheduled_start,
             'url': (_url('visits', q=visit.visit_no) if metadata else
-                    reverse('care_workspace' if clinical else 'visit_detail', args=[visit.pk])),
-            'action': '核对业务状态' if metadata else ('进入接诊' if clinical else '打开预约核实')}
+                    reverse('visit_detail', args=[visit.pk])),
+            'action': '核对业务状态' if metadata else '打开预约核实'}
+
+
+def _handoff_item(visit, role):
+    doctor = role == 'DENTIST'
+    return {'title': visit.patient.name, 'detail': f'{visit.clinic.name} · {visit.dentist.name}',
+            'visit_no': visit.visit_no, 'when': visit.attended_at, 'record_started_at': visit.record_started_at,
+            'url': reverse('care_workspace' if doctor else 'visit_detail', args=[visit.pk]),
+            'action': '进入接诊' if doctor else '核对到诊'}
 
 
 def _task_item(task):
@@ -134,11 +142,11 @@ def workspace_worklist(actor):
                     ('arrival', '今日待办理到诊', '按预约开始时间排序；到诊须由前台核实，打开页面不会登记。')):
                     groups.append(_group(key, title, visit_queue(visits, key, now).order_by('scheduled_start', 'pk'),
                                          _visit_item, _url('visits', queue=key), note))
-            elif role == 'DENTIST':
-                groups.append(_group('care', '已到诊，等待本人接诊或关闭',
-                    visit_queue(visits, 'care', now).order_by('attended_at', 'scheduled_start', 'pk'),
-                    lambda row: _visit_item(row, clinical=True), _url('visits', queue='care'),
-                    '按实际到诊时间排序，包含以前日期仍未关闭的就诊；请核对治疗与结算后分别确认。'))
+            if role in ('FRONT_DESK', 'DENTIST'):
+                groups.append(_group('care', '本店到诊交接' if role == 'FRONT_DESK' else '本人到诊交接',
+                    arrival_handoffs(actor, visits), lambda row: _handoff_item(row, role),
+                    _url('visits', queue='care'), '按实际到诊先后排列，跨日未结束的就诊也在此处。'))
+            if role == 'DENTIST':
                 groups.append(_correction_group(actor, finance=False))
             elif role in ('MANAGER', 'HQ'):
                 overdue = visit_queue(visits, 'outcome', now)

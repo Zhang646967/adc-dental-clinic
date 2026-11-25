@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from accounts.models import RoleAssignment
 from care.models import CorrectionRequest, Invoice, AuditEvent
+from care.services import save_clinical_note
 from coordination import services as coordination
 from coordination.models import CoordinationTask, WaitOffer, WaitRequest
 from finance.models import Quarter
@@ -74,6 +75,64 @@ class WorkspaceWorklistTests(BusinessFixture, TransactionTestCase):
         result = self.groups(self.worklist(self.doctor, 'DENTIST'))['care']
         self.assertEqual(result['total'], 1)
         self.assertEqual(result['items'][0]['url'], reverse('care_workspace', args=[own.pk]))
+
+    def test_handoff_uses_actual_arrival_and_first_saved_record_across_desks(self):
+        earlier = self.now - timedelta(days=1)
+        first = self.visit_at(earlier, status='CHECKED_IN', attended_at=earlier - timedelta(minutes=20))
+        second = self.visit_at(earlier - timedelta(hours=1), status='CHECKED_IN', attended_at=earlier)
+        self.visit_at(earlier + timedelta(hours=1))  # still scheduled
+        self.visit_at(earlier, status='CHECKED_IN', clinic=self.b, dentist=self.d2, patient=self.p2)
+        self.attach(self.front, 'FRONT_DESK', self.a)
+        self.attach(self.doctor, 'DENTIST')
+        draft = save_clinical_note(actor=self.doctor, visit_id=second.pk, expected_version=second.lock_version,
+                                   clinical_note='PRIVATE HANDOFF NOTE')
+        event_count = AuditEvent.objects.count()
+        for actor in (self.front, self.doctor):
+            self.assertEqual(list(filtered_visits(actor, {'queue': 'care'}).values_list('pk', flat=True)),
+                             [first.pk, second.pk])
+            group = self.groups(workspace_worklist(actor))['care']
+            self.assertEqual([(v['visit_no'], v['when'], v['record_started_at']) for v in group['items']],
+                             [(first.visit_no, first.attended_at, None), (second.visit_no, second.attended_at, draft.created_at)])
+            self.assertEqual(filtered_visits(actor, {'queue': 'care', 'handoff': 'unrecorded'}).get().pk, first.pk)
+            self.assertEqual(filtered_visits(actor, {'queue': 'care', 'handoff': 'recorded'}).get().pk, second.pk)
+        self.login(self.front, 'FRONT_DESK', self.a)
+        for url, args in ((reverse('visits'), {'queue': 'care', 'handoff': 'recorded'}),
+                          (reverse('visit_detail', args=[second.pk]), {})):
+            response = self.c.get(url, args)
+            self.assertContains(response, second.visit_no)
+            self.assertContains(response, '已有接诊记录')
+            self.assertNotContains(response, first.visit_no)
+            self.assertNotContains(response, 'PRIVATE HANDOFF NOTE')
+            self.assertNotContains(response, 'CARE_NOTE_SAVED')
+        self.assertEqual(AuditEvent.objects.count(), event_count)
+
+    def test_handoff_filters_do_not_expose_recording_progress_to_operational_managers(self):
+        v = self.visit_at(self.now - timedelta(hours=1), status='CHECKED_IN')
+        self.login(self.manager, 'MANAGER', self.a)
+        page = self.c.get(reverse('visits'), {'queue': 'care'})
+        self.assertContains(page, v.visit_no)
+        self.assertNotContains(page, '仅有到诊登记')
+        self.assertNotContains(page, self.p1.name)
+        invalid = self.c.get(reverse('visits'), {'queue': 'care', 'handoff': 'recorded'})
+        self.assertEqual(invalid.status_code, 400)
+        self.assertNotIn(v.visit_no, invalid.content.decode())
+
+    def test_handoff_reads_only_operational_metadata_with_constant_query_count(self):
+        start = self.now - timedelta(days=1)
+        self.attach(self.front, 'FRONT_DESK', self.a)
+        self.visit_at(start, status='CHECKED_IN')
+        def read():
+            with CaptureQueriesContext(connection) as queries:
+                group = self.groups(workspace_worklist(self.front))['care']
+            sql = next(q['sql'] for q in queries if ' AS "record_started_at"' in q['sql'])
+            for private_column in ('"clinical_note"', '"allergy_review_snapshot"', '"chief_complaint"', '"total_amount"'):
+                self.assertNotIn(private_column, sql)
+            return len(queries), len(group['items'])
+        one, n = read()
+        self.assertEqual(n, 1)
+        for i in range(1, 5):
+            self.visit_at(start + timedelta(hours=i), status='CHECKED_IN')
+        self.assertEqual(read(), (one, 5))
 
     def test_preview_is_bounded_but_total_is_exact(self):
         for n in range(8): self.visit_at(self.now - timedelta(days=2) + timedelta(minutes=15*n))

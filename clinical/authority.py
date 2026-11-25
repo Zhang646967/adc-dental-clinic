@@ -77,7 +77,7 @@ def require_patient_read(actor, patient):
     raise PermissionDenied('当前没有对此患者的有效负责医师查阅范围。')
 
 
-def readable_assigned_visits(actor, dentist_id, *, strict=False):
+def readable_assigned_visits(actor, dentist_id, *, strict=False, strict_for_structured=False):
     """Set-based list boundary, so an expired scope cannot leak allergy status."""
     from django.db.models import Q, OuterRef, Subquery
     from scheduling.models import Visit
@@ -96,7 +96,10 @@ def readable_assigned_visits(actor, dentist_id, *, strict=False):
     legacy_scope=Q(clinic_id__in=scopes.filter(service__isnull=True).values('clinic_id')) & ~Q(pk__in=plans.values('visit_id'))
     readable=Q(pk__in=permitted_plans.values('visit_id')) | legacy_scope
     if settings.ADC_CLINICAL_SYNTHETIC and not strict:
-        readable |= ~Q(clinic_id__in=ClinicalAuthorityPolicy.objects.values('clinic_id'))
+        fallback = ~Q(clinic_id__in=ClinicalAuthorityPolicy.objects.values('clinic_id'))
+        if strict_for_structured:
+            fallback &= Q(clinical_encounter__isnull=True)
+        readable |= fallback
     return visits.filter(readable)
 
 

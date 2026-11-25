@@ -4,16 +4,17 @@ from django.utils import timezone
 from adc_core.snapshots import reporting_snapshot
 from accounts.policies import bindings
 from scheduling.models import Visit
+from scheduling.worklists import with_record_start
 from care.models import Invoice
 
 def care_progress(actor, visit_id):
     with reporting_snapshot():
-        visit = Visit.objects.select_related('patient','dentist','clinic').get(pk=visit_id)
+        visit = with_record_start(Visit.objects.select_related('patient','dentist','clinic')).get(pk=visit_id)
         if not bindings(actor).filter(role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=visit.dentist_id).exists():
             raise PermissionDenied('仅负责牙医可以查看接诊记录。')
         from clinical.authority import require_visit_authority
-        from clinical.models import ClinicalEncounter,ClinicalRecordVersion
-        structured=ClinicalEncounter.objects.filter(visit=visit).exists()
+        from clinical.models import ClinicalRecordVersion
+        structured=visit.structured_opened_at is not None
         require_visit_authority(actor,visit,'READ',always=structured)
         clinical_available=True
         try:require_visit_authority(actor,visit,'READ',always=True)

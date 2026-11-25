@@ -4,7 +4,8 @@ from urllib.parse import urlencode
 
 from django import forms
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import F, OuterRef, Q, Subquery
+from django.db.models.functions import Least
 from django.utils import timezone
 
 from adc_core.rules import BUSINESS_TZ, STATUS_CHOICES
@@ -15,25 +16,36 @@ QUEUE_CHOICES = (
     ('arrival', '今日待到诊'), ('outcome', '到期结果待核实'),
     ('care', '已到诊，接诊未关闭'),
 )
+HANDOFF_CHOICES = (('unrecorded', '仅有到诊登记'), ('recorded', '已有接诊记录'))
 
 
-def visit_filter_navigation(data):
+def visit_filter_navigation(data, *, handoff_available=False):
     """Links carry only validated display filters, never workspace authority."""
-    query = {key: str(data[key]) for key in ('queue', 'day', 'status', 'q') if data.get(key)}
+    query = {key: str(data[key]) for key in ('queue', 'day', 'status', 'q', 'handoff') if data.get(key)}
     queue = query.get('queue', 'all')
     search = {'q': query['q']} if query.get('q') else {}
-    shortcuts = [dict(label=label, active=value == queue,
+    shortcuts = [dict(label='到诊交接' if handoff_available and value == 'care' else label, active=value == queue,
                       url='?' + urlencode(dict(queue=value, **search))) for value, label in QUEUE_CHOICES]
-    labels = {'queue': '清单', 'day': '日期', 'status': '状态', 'q': '搜索'}
-    choices = {'queue': dict(QUEUE_CHOICES), 'status': dict(STATUS_CHOICES)}
+    labels = {'queue': '清单', 'day': '日期', 'status': '状态', 'q': '搜索', 'handoff': '交接进度'}
+    choices = {'queue': dict(QUEUE_CHOICES), 'status': dict(STATUS_CHOICES), 'handoff': dict(HANDOFF_CHOICES)}
     chips = []
     for key, value in query.items():
         if key == 'queue' and value == 'all':
             continue
         remaining = {k: v for k, v in query.items() if k != key}
-        chips.append(dict(label=labels[key], value=choices.get(key, {}).get(value, value),
+        if key == 'queue':
+            remaining.pop('handoff', None)
+        chips.append(dict(key=key, label=labels[key], value=choices.get(key, {}).get(value, value),
                           url='?' + urlencode(remaining)))
     return shortcuts, chips
+
+
+def handoff_navigation(cleaned):
+    query = {key: str(cleaned[key]) for key in ('day', 'status', 'q') if cleaned.get(key)}
+    query['queue'] = 'care'
+    return [dict(label=label, active=value == (cleaned.get('handoff') or ''),
+                 url='?' + urlencode(dict(query, handoff=value) if value else query))
+            for value, label in (('', '全部在诊'), *HANDOFF_CHOICES)]
 
 
 def day_bounds(day):
@@ -57,6 +69,33 @@ def visit_queue(visits, queue, now):
     return visits
 
 
+def with_record_start(visits):
+    """First saved clinical work across both record formats, with no clinical content."""
+    from care.models import VisitRecordVersion
+    original_record = VisitRecordVersion.objects.filter(visit_id=OuterRef('pk'), revision_no=1,
+                                                       correction_request__isnull=True).values('created_at')
+    # PostgreSQL LEAST takes the earliest available timestamp if either source exists.
+    return visits.annotate(structured_opened_at=F('clinical_encounter__opened_at'),
+                           record_started_at=Least('structured_opened_at', Subquery(original_record)))
+
+
+def arrival_handoffs(actor, visits):
+    """Project only operational fields from the caller's scoped visits."""
+    from clinical.authority import readable_assigned_visits
+
+    role = actor._adc_workspace.role
+    if role == 'DENTIST':
+        readable = readable_assigned_visits(actor, actor.dentist_id, strict_for_structured=True)
+        visits = visits.filter(pk__in=readable.values('pk'))
+    elif role != 'FRONT_DESK':
+        raise PermissionDenied('到诊交接仅向本店前台和负责医师开放。')
+    return (with_record_start(visits.filter(status='CHECKED_IN'))
+            .select_related('clinic', 'dentist', 'patient')
+            .only('visit_no', 'attended_at', 'scheduled_start', 'scheduled_end', 'status',
+                  'clinic__name', 'dentist__name', 'patient__name')
+            .order_by('attended_at', 'scheduled_start', 'pk'))
+
+
 class VisitFilterForm(forms.Form):
     queue = forms.ChoiceField(label='办理清单', choices=QUEUE_CHOICES, required=False)
     day = forms.DateField(label='预约开始日期（北京时间，可不填）', required=False,
@@ -69,6 +108,15 @@ class VisitFilterForm(forms.Form):
         super().__init__(*args, **kwargs)
         if role in ('FRONT_DESK', 'DENTIST'):
             self.fields['q'].label = '就诊编号、患者编号或姓名'
+            if self.data.get('queue') == 'care':
+                self.fields['handoff'] = forms.ChoiceField(label='交接进度', choices=HANDOFF_CHOICES,
+                                                          required=False, widget=forms.HiddenInput)
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.data.get('handoff') and 'handoff' not in self.fields:
+            raise forms.ValidationError('请在当前身份可查看的到诊交接清单中筛选进度。')
+        return cleaned
 
 
 def filtered_visits(actor, data, now=None):
@@ -81,7 +129,13 @@ def filtered_visits(actor, data, now=None):
             not WorkspaceContext.objects.filter(pk=context.pk, user_id=actor.pk, role=context.role,
                 clinic_id=context.clinic_id, revision=context.revision).exists()):
         raise PermissionDenied('请先选择有权限的工作身份和诊所。')
-    visits = visit_queue(visible_visits(actor), data.get('queue') or 'all', now or timezone.now())
+    visits = visible_visits(actor)
+    if data.get('queue') == 'care' and context.role in ('DENTIST', 'FRONT_DESK'):
+        visits = arrival_handoffs(actor, visits)
+        if data.get('handoff'):
+            visits = visits.filter(record_started_at__isnull=data['handoff'] == 'unrecorded')
+    else:
+        visits = visit_queue(visits, data.get('queue') or 'all', now or timezone.now())
     if data.get('day'):
         start, end = day_bounds(data['day'])
         visits = visits.filter(scheduled_start__gte=start, scheduled_start__lt=end)

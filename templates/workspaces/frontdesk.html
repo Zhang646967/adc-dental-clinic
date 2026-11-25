@@ -5,8 +5,9 @@
   <div><h1>前台工作台</h1><p>{{ worklist.as_of|date:'n月j日' }} · 到诊接待与预约协调</p></div>
   <nav class="desk-actions" aria-label="前台快捷办理">
     {% if queue_counts.arrival %}<a class="button" href="{% url 'visits' %}?queue=arrival">办理今日到诊</a>
+    {% elif queue_counts.care %}<a class="button" href="{% url 'visits' %}?queue=care">查看到诊交接</a>
     {% elif queue_counts.outcome %}<a class="button" href="{% url 'visits' %}?queue=outcome">核实逾期预约结果</a>{% endif %}
-    <a class="button{% if queue_counts.arrival or queue_counts.outcome %} secondary{% endif %}" href="{% url 'visit_create' %}">创建预约</a>
+    <a class="button{% if queue_counts.arrival or queue_counts.care or queue_counts.outcome %} secondary{% endif %}" href="{% url 'visit_create' %}">创建预约</a>
   </nav>
 </header>
 {% include 'workspaces/business_worklist.html' %}

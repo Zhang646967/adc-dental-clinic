@@ -1,47 +1,55 @@
 {% extends 'base.html' %}
-{% block title %}预约与到诊 · ADC 口腔{% endblock %}
+{% block title %}{% if handoff %}到诊交接{% else %}预约与到诊{% endif %} · ADC 口腔{% endblock %}
 {% block content %}
 <header class="desk-mast">
-  <h1>预约与到诊</h1>
-  {% if can_front %}<a class="button" href="{% url 'visit_create' %}">创建预约</a>{% endif %}
+  {% if handoff %}
+    <div><h1>到诊交接</h1><p>{% if workspace_role == 'DENTIST' %}您负责的在诊患者{% else %}本店在诊患者{% endif %} · 按实际到诊先后排列</p></div>
+    <a class="button secondary" href="{% if workspace_role == 'DENTIST' %}{% url 'doctor_home' %}{% else %}{% url 'frontdesk_home' %}{% endif %}">返回工作台</a>
+  {% else %}<h1>预约与到诊</h1>
+    {% if can_front %}<a class="button" href="{% url 'visit_create' %}">创建预约</a>{% endif %}
+  {% endif %}
 </header>
 <section class="visit-register" aria-label="预约清单">
   <nav class="queue-tabs" aria-label="预约办理清单">
     {% for item in queue_shortcuts %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
   </nav>
+  {% if handoff_links %}<nav class="handoff-filters" aria-label="筛选交接进度">
+    {% for item in handoff_links %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+  </nav>{% endif %}
   <details class="visit-refine" open{% if not filter_chips and filters_valid %} data-compact-filters{% endif %}>
     <summary>筛选预约</summary>
     <form method="get" class="worklist-filters">
       {% include 'components/form_errors.html' with form=filter_form error_heading='筛选未应用，请修正以下内容' %}
       {% if filter_form.queue.errors %}{% include 'components/form_field.html' with field=filter_form.queue %}{% else %}{{ filter_form.queue.as_hidden }}{% endif %}
+      {% if filter_form.handoff and not filter_form.handoff.errors %}{{ filter_form.handoff }}{% endif %}
       {% include 'components/form_field.html' with field=filter_form.q %}
       {% include 'components/form_field.html' with field=filter_form.day %}
       {% include 'components/form_field.html' with field=filter_form.status %}
-      <div class="actions"><button type="submit">筛选预约</button><a href="{% url 'visits' %}">清除筛选</a></div>
+      <div class="actions"><button type="submit">筛选预约</button><a href="{% url 'visits' %}{% if handoff %}?queue=care{% endif %}">清除筛选</a></div>
     </form>
   </details>
   {% if filter_chips %}<nav class="filter-chips" aria-label="当前筛选，点击移除该条件">
     {% for item in filter_chips %}<a href="{{ item.url }}" aria-label="移除{{ item.label }}条件：{{ item.value }}">{{ item.label }} · {{ item.value }} <span aria-hidden="true">×</span></a>{% endfor %}
   </nav>{% endif %}
   {% if filters_valid %}
-  <p class="visit-result-summary">共 <strong>{{ page.paginator.count }}</strong> 条预约
+  <p class="visit-result-summary">共 <strong>{{ page.paginator.count }}</strong> {% if handoff %}条在诊记录{% else %}条预约{% endif %}
       <span>北京时间 · {% if filter_form.queue.value == 'care' %}按实际到诊时间{% else %}按预约时间{% endif %}</span></p>
   {% else %}<p class="notice" role="alert">请修正筛选条件后查询。</p>{% endif %}
   <div class="table-scroll" tabindex="0" aria-label="预约结果">
     <table class="appointment-table" role="table">
       <caption class="desk-sr">仅当前身份和诊所授权范围内的预约</caption>
       <thead role="rowgroup"><tr role="row">
-        <th scope="col">预约时间 / 就诊编号</th><th scope="col">诊所 / 医师</th><th scope="col">患者</th><th scope="col">业务状态</th><th scope="col">操作</th>
+        <th scope="col">{% if handoff %}到诊登记 / 就诊编号{% else %}预约时间 / 就诊编号{% endif %}</th><th scope="col">诊所 / 医师</th><th scope="col">患者</th><th scope="col">{% if handoff %}交接进度{% else %}业务状态{% endif %}</th><th scope="col">操作</th>
       </tr></thead>
       <tbody role="rowgroup">
         {% for r in rows %}<tr role="row">
-          <td role="cell" data-label="预约时间 / 就诊编号"><time datetime="{{ r.start|date:'c' }}">{{ r.start|date:'Y-m-d H:i' }}</time> – {% if r.start|date:'Ymd' != r.end|date:'Ymd' %}{{ r.end|date:'Y-m-d' }} {% endif %}{{ r.end|date:'H:i' }}<span class="visit-reference">{{ r.visit_no }}</span></td>
+          <td role="cell" data-label="{% if handoff %}到诊登记 / 就诊编号{% else %}预约时间 / 就诊编号{% endif %}">{% if handoff %}<time datetime="{{ r.arrival|date:'c' }}">{{ r.arrival|date:'Y-m-d H:i' }}</time><small>原预约 {{ r.start|date:'Y-m-d H:i' }}</small>{% else %}<time datetime="{{ r.start|date:'c' }}">{{ r.start|date:'Y-m-d H:i' }}</time> – {% if r.start|date:'Ymd' != r.end|date:'Ymd' %}{{ r.end|date:'Y-m-d' }} {% endif %}{{ r.end|date:'H:i' }}{% endif %}<span class="visit-reference">{{ r.visit_no }}</span></td>
           <td role="cell" data-label="诊所 / 医师">{{ r.clinic }}<small>{{ r.dentist }}</small></td>
           <td role="cell" data-label="患者">{{ r.patient }}</td>
-          <td role="cell" data-label="业务状态"><span class="badge visit-state" data-state="{{ r.status_key }}">{{ r.status }}</span></td>
-          <td role="cell" data-label="操作">{% if r.has_details %}<a class="row-action" aria-label="打开就诊 {{ r.visit_no }}" href="{% url 'visit_detail' r.id %}">打开记录</a>{% else %}运营范围{% endif %}</td>
+          <td role="cell" data-label="{% if handoff %}交接进度{% else %}业务状态{% endif %}">{% if handoff %}{% include 'components/handoff_stage.html' with started=r.record_started_at only %}{% else %}<span class="badge visit-state" data-state="{{ r.status_key }}">{{ r.status }}</span>{% endif %}</td>
+          <td role="cell" data-label="操作">{% if handoff and workspace_role == 'DENTIST' %}<a class="row-action" href="{% url 'care_workspace' r.id %}">进入接诊<span class="desk-sr"> · {{ r.patient }} · {{ r.visit_no }}</span></a>{% elif r.has_details %}<a class="row-action" href="{% url 'visit_detail' r.id %}">{% if handoff %}核对到诊{% else %}打开记录{% endif %}<span class="desk-sr"> · {{ r.visit_no }}</span></a>{% else %}运营范围{% endif %}</td>
         </tr>{% empty %}
-          <tr class="visit-empty"><td colspan="5" class="empty">{% if filters_valid %}没有符合筛选的授权记录。{% if filter_chips %}<a href="{% url 'visits' %}">清除筛选</a>{% endif %}{% else %}筛选条件无效，未展示记录。{% endif %}</td></tr>
+          <tr class="visit-empty"><td colspan="5" class="empty">{% if handoff and filters_valid %}当前清单没有符合条件的在诊记录。{% if filter_form.handoff.value or filter_form.day.value or filter_form.q.value or filter_form.status.value %}<a href="?queue=care">查看全部在诊</a>{% endif %}{% elif filters_valid %}没有符合筛选的授权记录。{% if filter_chips %}<a href="{% url 'visits' %}">清除筛选</a>{% endif %}{% else %}筛选条件无效，未展示记录。{% endif %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

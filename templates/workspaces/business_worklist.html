@@ -10,7 +10,7 @@
       {% for group in worklist.groups %}
         {% if group.key == 'arrival' or group.key == 'outcome' or group.key == 'my_tasks' or group.key == 'care' or group.key == 'corrections' %}
           <a href="{{ group.all_url }}" data-queue="{{ group.key }}">
-            <span>{% if group.key == 'arrival' %}今日待到诊{% elif group.key == 'outcome' %}逾期结果待核实{% elif group.key == 'my_tasks' %}我在跟进{% elif group.key == 'care' %}待本人接诊或关闭{% else %}更正申请待审核{% endif %}</span>
+            <span>{% if group.key == 'arrival' %}今日待到诊{% elif group.key == 'outcome' %}逾期结果待核实{% elif group.key == 'my_tasks' %}我在跟进{% elif group.key == 'care' %}到诊交接{% else %}更正申请待审核{% endif %}</span>
             <strong>{{ group.total }}</strong>
           </a>
         {% endif %}
@@ -31,8 +31,9 @@
       <p class="muted">{{ group.note }}</p>
       <ol class="worklist-items">
         {% for item in group.items %}<li>
-          <div><strong>{{ item.title }}</strong><p>{{ item.detail }}</p></div>
-          {% if item.when %}<time datetime="{{ item.when|date:'c' }}">{{ item.when|date:'Y-m-d H:i' }}（北京时间）</time>{% endif %}
+          <div><strong>{{ item.title }}</strong><p>{{ item.detail }}</p>{% if group.key == 'care' %}<small class="handoff-reference">{{ item.visit_no }}</small>{% endif %}</div>
+          {% if group.key == 'care' %}<div class="handoff-times"><span>到诊 <time datetime="{{ item.when|date:'c' }}">{{ item.when|date:'Y-m-d H:i' }}</time></span>{% include 'components/handoff_stage.html' with started=item.record_started_at only %}</div>
+          {% elif item.when %}<time datetime="{{ item.when|date:'c' }}">{{ item.when|date:'Y-m-d H:i' }}（北京时间）</time>{% endif %}
           <a class="button secondary" href="{{ item.url }}">{{ item.action }}</a>
         </li>{% endfor %}
       </ol>
