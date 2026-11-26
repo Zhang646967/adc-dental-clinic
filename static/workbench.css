@@ -269,3 +269,32 @@ tbody tr:hover { background: #f6faf7; }
   .recall-tabs { gap: .15rem; }
   .recall-tabs a { padding-inline: .6rem; }
 }
+
+/* Native disclosures retain normal keyboard, screen reader and no-script operation. */
+.task-disclosure { min-width: 0; overflow-wrap: anywhere; }
+.task-disclosure > summary {
+  display: list-item;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding-block: .65rem;
+  color: #205a4d;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.task-disclosure > summary::marker { color: #437a6b; }
+.task-disclosure > summary:focus-visible { outline: 3px solid #226652; outline-offset: 2px; }
+.task-disclosure.compact > summary { font-size: .9375rem; }
+.task-disclosure.compact p { margin: .15rem 0 .7rem; }
+.directory-more, .hub-more { border-top: 1px solid #c9d9d0; margin-top: .8rem; }
+.directory-more nav { display: grid; gap: 0 1.25rem; grid-template-columns: repeat(auto-fit,minmax(min(13rem,100%),1fr)); }
+.directory-more nav a, .desk-open-task a { display: flex; align-items: center; gap: .6em; min-height: 44px; }
+.desk-open-task { margin: .1rem 0; }
+.desk-directory-grid section { border-top: 3px solid #9ab9ac; }
+.desk-directory-grid a { justify-content: space-between; }
+.desk-directory-grid h3, .worklist-group h3 { font-size: 1.125rem; line-height: 1.45; }
+.checkout .task-disclosure { border-bottom: 1px solid #d8e2dc; margin-bottom: .75rem; }
+.checkout .task-disclosure > dl { margin-top: 0; }

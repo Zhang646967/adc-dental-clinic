@@ -2,31 +2,31 @@
 {% block title %}医师工作台 · ADC 口腔{% endblock %}
 {% block content %}
 <header class="desk-mast">
-  <div><h1>医师工作台</h1><p>{{ worklist.as_of|date:'n月j日' }} · 本人接诊与诊疗记录</p></div>
+  <div><h1>医师工作台</h1><p>{{ worklist.as_of|date:'n月j日' }} · 我的接诊</p></div>
   <nav class="desk-actions" aria-label="医师快捷办理">
     {% if queue_counts.care %}<a class="button" href="{% url 'visits' %}?queue=care">查看到诊交接</a>{% endif %}
-    <a class="button{% if queue_counts.care %} secondary{% endif %}" href="{% url 'visits' %}">全部本人接诊</a>
+    <a class="button{% if queue_counts.care %} secondary{% endif %}" href="{% url 'visits' %}">我的就诊清单</a>
   </nav>
 </header>
 {% include 'workspaces/business_worklist.html' %}
-<section class="desk-directory" aria-label="医师业务">
-  <h2>诊疗与审核</h2>
+<section class="desk-directory" aria-labelledby="doctor-tools">
+  <h2 id="doctor-tools">诊疗待办</h2>
   <div class="desk-directory-grid">
-    <section><h3>接诊准备</h3>
-      {% if exam_course_enabled %}<a href="{% url 'clinical_examinations' %}">检查执行与审核</a>{% endif %}
+    <section><h3>复诊与加工验收</h3>
       <a href="{% url 'clinical_dentist_recalls' %}">复诊暂缓核对 <small>待我核对 {{ recall_review_count }} 项</small></a>
       <a href="{% url 'clinical_doctor_lab_queue' %}">加工验收 <small>已返回待验收 {{ lab_review_count }} 项</small></a>
+    </section>
+    <section><h3>检查与授权</h3>
+      {% if exam_course_enabled %}<a href="{% url 'clinical_examinations' %}">检查执行与审核</a>{% endif %}
       <a href="{% url 'medical_proxies' %}">医疗代理适用性待办</a>
     </section>
-    <section><h3>诊疗记录与审核</h3>
-      <a href="{% url 'clinical_archives' %}">病历归档与独立审核</a>
-      <a href="{% url 'record_copies' %}">病历副本独立医务审核</a>
-      <a href="{% url 'corrections' %}">我的更正申请</a>
-    </section>
-    <section><h3>治疗前核对</h3>
-      <a href="{% url 'clinical_control_rules' %}">临床规则与启用</a>
-      <a href="{% url 'clinical_gaps' %}">独立缺口复核</a>
-    </section>
   </div>
+  <details class="task-disclosure directory-more"><summary>病历归档、更正与规则审核</summary><nav aria-label="病历与规则审核">
+    <a href="{% url 'clinical_archives' %}">病历归档与独立审核</a>
+    <a href="{% url 'record_copies' %}">病历副本独立医务审核</a>
+    <a href="{% url 'corrections' %}">我的更正申请</a>
+    <a href="{% url 'clinical_control_rules' %}">临床规则与启用</a>
+    <a href="{% url 'clinical_gaps' %}">独立缺口复核</a>
+  </nav></details>
 </section>
 {% endblock %}

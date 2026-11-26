@@ -16,19 +16,25 @@
   {% if handoff_links %}<nav class="handoff-filters" aria-label="筛选交接进度">
     {% for item in handoff_links %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
   </nav>{% endif %}
-  <details class="visit-refine"{% if not handoff or filter_chips or not filters_valid %} open{% endif %}{% if not handoff and not filter_chips and filters_valid %} data-compact-filters{% endif %}>
-    <summary>{% if handoff %}按患者或到诊日期查找{% else %}筛选预约{% endif %}</summary>
-    <form method="get" class="worklist-filters">
-      {% include 'components/form_errors.html' with form=filter_form error_heading='筛选未应用，请修正以下内容' %}
-      {% if filter_form.queue.errors %}{% include 'components/form_field.html' with field=filter_form.queue %}{% else %}{{ filter_form.queue.as_hidden }}{% endif %}
-      {% if filter_form.handoff and not filter_form.handoff.errors %}{{ filter_form.handoff }}{% endif %}
+  <form method="get" class="visit-search">
+    {% include 'components/form_errors.html' with form=filter_form error_heading='筛选未应用，请修正以下内容' %}
+    {% if filter_form.queue.errors %}{% include 'components/form_field.html' with field=filter_form.queue %}{% else %}{{ filter_form.queue.as_hidden }}{% endif %}
+    {% if filter_form.handoff %}{{ filter_form.handoff }}{% endif %}
+    <div class="visit-search-line">
       {% include 'components/form_field.html' with field=filter_form.q %}
-      {% if handoff %}{% include 'components/form_field.html' with field=filter_form.arrival_day %}{% endif %}
-      {% if not handoff or filter_form.day.value %}{% include 'components/form_field.html' with field=filter_form.day %}{% endif %}
-      {% if not handoff or filter_form.status.value %}{% include 'components/form_field.html' with field=filter_form.status %}{% endif %}
-      <div class="actions"><button type="submit">{% if handoff %}查找在诊患者{% else %}筛选预约{% endif %}</button><a href="{% url 'visits' %}{% if handoff %}?queue=care{% endif %}">清除筛选</a></div>
-    </form>
-  </details>
+      <button type="submit">{% if handoff %}查找在诊患者{% else %}筛选预约{% endif %}</button>
+    </div>
+    <details class="visit-refine task-disclosure compact"{% if filter_form.arrival_day.value or filter_form.day.value or filter_form.status.value or not filters_valid %} open{% endif %}>
+      <summary>{% if handoff %}按日期筛选{% else %}按日期或状态筛选{% endif %}</summary>
+      <div class="worklist-filters">
+        {% if handoff %}{% include 'components/form_field.html' with field=filter_form.arrival_day %}{% endif %}
+        {% if not handoff or filter_form.day.value %}{% include 'components/form_field.html' with field=filter_form.day %}{% endif %}
+        {% if not handoff or filter_form.status.value %}{% include 'components/form_field.html' with field=filter_form.status %}{% endif %}
+        <div class="actions"><button class="secondary" type="submit">应用筛选</button></div>
+      </div>
+    </details>
+    {% if filter_chips or not filters_valid %}<a class="visit-clear" href="{% url 'visits' %}{% if handoff %}?queue=care{% endif %}">清除筛选</a>{% endif %}
+  </form>
   {% if filter_chips %}<nav class="filter-chips" aria-label="当前筛选，点击移除该条件">
     {% for item in filter_chips %}<a href="{{ item.url }}" aria-label="移除{{ item.label }}条件：{{ item.value }}">{{ item.label }} · {{ item.value }} <span aria-hidden="true">×</span></a>{% endfor %}
   </nav>{% endif %}

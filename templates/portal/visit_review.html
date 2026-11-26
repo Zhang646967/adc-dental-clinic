@@ -1,3 +1,4 @@
+{% include "care/visit_checkout.html" with checkout=review %}
 {% if review.care %}
 <section class="panel" aria-labelledby="visit-result-title">
   <h2 id="visit-result-title">本次就诊结果</h2>
@@ -20,4 +21,3 @@
   {% endif %}
 </section>
 {% endif %}
-{% include "care/visit_checkout.html" with checkout=review %}

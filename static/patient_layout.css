@@ -160,3 +160,23 @@
   .care-arrival, .patient-main .portal-next { background: #fff; color: #153e38; border-color: #999; }
   .care-arrival p, .patient-main .portal-next h2, .portal-next .portal-next-hint { color: #153e38; }
 }
+
+.patient-main .patient-appointments h1 { margin: 0; }
+.patient-appointments .heading-row { margin-block: .9rem; }
+.appointment-list-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .25rem 1rem; color: #50665c; font-size: .875rem; }
+.appointment-list-meta a { display: inline-flex; align-items: center; min-height: 44px; }
+.patient-appointments .appointment-card { align-items: flex-start; gap: .65rem 1.3rem; padding: clamp(.9rem,2vw,1.4rem); }
+.patient-appointments .appointment-card > div { min-width: 0; }
+.patient-appointments .appointment-card h2 { font-size: clamp(1.125rem,1.6vw,1.375rem); margin: .35rem 0 .15rem; font-variant-numeric: tabular-nums; }
+.patient-appointments .appointment-card p { margin: .2rem 0; overflow-wrap: anywhere; }
+.patient-appointments .appointment-card .button { align-self: flex-start; }
+.patient-main .hub-more { margin: 1.25rem 0 .5rem; padding-top: .25rem; }
+.hub-more .portal-more { margin-top: .25rem; }
+.patient-task :is(.checkout, .patient-booking-summary) { line-height: 1.6; }
+.patient-task .checkout h3 { margin-block: 1.25rem .4rem; }
+.patient-task .checkout h2 + h3 { margin-top: .5rem; }
+.patient-booking-summary > .task-disclosure { border-top: 1px solid #d8e2dc; }
+@media (max-width: 38rem) {
+  .patient-appointments .appointment-card { display: grid; grid-template-columns: minmax(0,1fr); }
+  .patient-appointments .appointment-card .button { justify-self: start; }
+}

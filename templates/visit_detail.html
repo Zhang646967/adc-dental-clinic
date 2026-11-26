@@ -35,9 +35,9 @@
   {% if coordination_successor %}<p>后继预约：<a href="{{ coordination_successor.url }}">{{ coordination_successor.visit_no }}</a> · {{ coordination_successor.status }} · {{ coordination_successor.start }} – {{ coordination_successor.end }}</p>{% endif %}
 </section>{% endif %}
 {% if checkout %}{% include "care/visit_checkout.html" with front=True %}{% elif visit.invoice %}<section class="panel"><a class="button" href="{% url 'invoice_detail' visit.invoice.pk %}">查看已发布结算单</a></section>{% endif %}
-<section class="panel"><h2>{% if can_act %}预约办理记录{% else %}最近业务事件{% endif %}</h2>
+<details class="panel task-disclosure"><summary>{% if can_act %}预约办理记录{% else %}最近业务事件{% endif %}</summary>
   {% for e in events %}<p><time datetime="{{ e.recorded_at|date:'c' }}">{{ e.recorded_at|date:'Y-m-d H:i' }}</time> ·
     {% if e.event_type == 'VISIT_CREATED' %}建立预约{% elif e.event_type == 'VISIT_CHECKED_IN' %}登记到诊{% elif e.event_type == 'VISIT_CANCELLED' %}取消预约{% elif e.event_type == 'VISIT_RESCHEDULED' %}办理改期{% elif e.event_type == 'VISIT_NO_SHOW' %}核实未到诊{% else %}{{ e.event_type }}{% endif %}
     {% if e.reason %}<small>{{ e.reason }}</small>{% endif %}</p>{% empty %}<p class="muted">尚无办理记录。</p>{% endfor %}
-</section>
+</details>
 {% endblock %}

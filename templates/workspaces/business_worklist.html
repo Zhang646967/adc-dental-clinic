@@ -1,7 +1,7 @@
 {% if worklist.role != 'SYSADMIN' %}
 <section class="business-worklist panel" aria-labelledby="business-worklist-heading">
   <div class="desk-section-head">
-    <h2 id="business-worklist-heading">业务跟进清单</h2>
+    <h2 id="business-worklist-heading">{% if worklist.role == 'FRONT_DESK' %}接待待办{% elif worklist.role == 'DENTIST' %}我的待办{% else %}业务跟进清单{% endif %}</h2>
     <div><time datetime="{{ worklist.as_of|date:'c' }}">{{ worklist.as_of|date:'m-d H:i' }} 北京时间</time>
       <a href="{{ request.path }}">刷新清单</a></div>
   </div>
@@ -10,7 +10,7 @@
       {% for group in worklist.groups %}
         {% if group.key == 'arrival' or group.key == 'outcome' or group.key == 'my_tasks' or group.key == 'care' or group.key == 'corrections' %}
           <a href="{{ group.all_url }}" data-queue="{{ group.key }}">
-            <span>{% if group.key == 'arrival' %}今日待到诊{% elif group.key == 'outcome' %}逾期结果待核实{% elif group.key == 'my_tasks' %}我在跟进{% elif group.key == 'care' %}到诊交接{% else %}更正申请待审核{% endif %}</span>
+            <span>{% if group.key == 'arrival' %}办理今日到诊{% elif group.key == 'outcome' %}核实逾期预约结果{% elif group.key == 'my_tasks' %}我在跟进{% elif group.key == 'care' %}到诊交接{% else %}更正申请待审核{% endif %}</span>
             <strong>{{ group.total }}</strong>
           </a>
         {% endif %}
@@ -28,7 +28,7 @@
     <section class="worklist-group" aria-labelledby="worklist-{{ group.key }}">
       <div class="heading-row"><h3 id="worklist-{{ group.key }}">{{ group.title }} <span class="badge">{{ group.total }}</span></h3>
         <a href="{{ group.all_url }}">查看全部<span class="desk-sr"> · {{ group.title }}</span></a></div>
-      <p class="muted">{{ group.note }}</p>
+      {% if worklist.role != 'FRONT_DESK' and worklist.role != 'DENTIST' %}<p class="muted">{{ group.note }}</p>{% elif group.key == 'outcome' %}<p class="muted">到诊情况待核实后登记。</p>{% endif %}
       <ol class="worklist-items">
         {% for item in group.items %}<li>
           <div><strong>{{ item.title }}</strong><p>{{ item.detail }}</p>{% if group.key == 'care' %}<small class="handoff-reference">{{ item.visit_no }}</small>{% endif %}</div>
@@ -37,16 +37,24 @@
           <a class="button secondary" href="{{ item.url }}">{{ item.action }}</a>
         </li>{% endfor %}
       </ol>
+      {% if group.note and worklist.role == 'FRONT_DESK' or group.note and worklist.role == 'DENTIST' %}
+      <details class="task-disclosure compact"><summary>{{ group.title }}说明</summary><p>{{ group.note }}</p></details>
+      {% endif %}
       {% if group.total > group.limit %}<p class="muted">显示前 {{ group.limit }} 条，共 {{ group.total }} 条。</p>{% endif %}
     </section>
   {% endif %}{% endfor %}
   {% if not worklist.has_items %}<p class="worklist-empty">当前范围暂无待办或近期记录。</p>{% endif %}
   {% if worklist.cards and worklist.role == 'FRONT_DESK' %}
-    <details class="desk-follow-counts"><summary>其他待核对事项</summary>
-      <div class="worklist-metrics">{% for card in worklist.cards %}<article class="worklist-metric">
-        <h3><a href="{{ card.url }}">{{ card.label }}</a></h3><strong>{{ card.count }}</strong><p>{{ card.note }}</p>
-      </article>{% endfor %}</div>
-    </details>
+    <div class="desk-follow-counts">
+      {% for card in worklist.cards %}{% if card.count %}
+      <p class="desk-open-task"><a href="{{ card.url }}">{{ card.label }} <strong>{{ card.count }} 项</strong></a></p>
+      {% endif %}{% endfor %}
+      <details class="task-disclosure compact"><summary>全部协调事项与统计说明</summary>
+        <div class="worklist-metrics">{% for card in worklist.cards %}<article class="worklist-metric">
+          <h3><a href="{{ card.url }}">{{ card.label }}</a></h3><strong>{{ card.count }}</strong><p>{{ card.note }}</p>
+        </article>{% endfor %}</div>
+      </details>
+    </div>
   {% endif %}
 </section>
 {% endif %}

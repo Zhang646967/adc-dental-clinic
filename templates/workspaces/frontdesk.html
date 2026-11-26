@@ -2,7 +2,7 @@
 {% block title %}前台工作台 · ADC 口腔{% endblock %}
 {% block content %}
 <header class="desk-mast">
-  <div><h1>前台工作台</h1><p>{{ worklist.as_of|date:'n月j日' }} · 到诊接待与预约协调</p></div>
+  <div><h1>前台工作台</h1><p>{{ worklist.as_of|date:'n月j日' }} · 门店接待</p></div>
   <nav class="desk-actions" aria-label="前台快捷办理">
     {% if queue_counts.arrival %}<a class="button" href="{% url 'visits' %}?queue=arrival">办理今日到诊</a>
     {% elif queue_counts.care %}<a class="button" href="{% url 'visits' %}?queue=care">查看到诊交接</a>
@@ -11,38 +11,37 @@
   </nav>
 </header>
 {% include 'workspaces/business_worklist.html' %}
-<section class="desk-directory" aria-label="前台业务">
-  <h2>门店业务</h2>
+<section class="desk-directory" aria-labelledby="reception-tools">
+  <h2 id="reception-tools">门店办理</h2>
   <div class="desk-directory-grid">
-    <section><h3>预约与排班</h3>
+    <section><h3>接待与排班</h3>
       <a href="{% url 'visits' %}">预约与到诊</a>
-      <a href="{% url 'visits' %}?queue=arrival">办理今日到诊</a>
-      <a href="{% url 'visits' %}?queue=outcome">核实逾期预约结果</a>
-      <a href="{% url 'schedule_calendar' %}">日周排班</a>
-      <a href="{% url 'front_coordination_list' %}">出诊协调</a>
-    </section>
-    <section><h3>候补与回访</h3>
-      <a href="{% url 'schedule_plans' %}">安排待匹配候补</a>
-      <a href="{% url 'waitlist' %}">候补协调</a>
-      <a href="{% url 'waitlist' %}#recycle-expired-offers">核对到期邀约</a>
-      <a href="{% url 'cancellation_followups' %}">跟进取消回访</a>
-      <a href="{% url 'appointment_improvements' %}">我的改进措施</a>
-    </section>
-    <section><h3>接诊与复诊</h3>
-      <a href="{% url 'clinical_recalls' %}?queue=mine">复诊随访与责任 <small>今天我应跟进 {{ continuity.my_recalls }} 项</small></a>
-      <a href="{% url 'clinical_recalls' %}?queue=unclaimed">待认领 {{ continuity.unclaimed_recalls }} 项</a>
-      <a href="{% url 'clinical_recalls' %}?queue=review">暂缓后内部核对 {{ continuity.review_recalls }} 项</a>
-      <a href="{% url 'clinical_labs' %}">加工件送返 <small>待认领 {{ continuity.unclaimed_lab }} · 待验收 {{ continuity.lab_to_review }} · 待继续办理 {{ continuity.lab_pending }}</small></a>
-      {% if exam_course_enabled %}<a href="{% url 'clinical_examination_progress' %}">本店检查进度</a>{% endif %}
-    </section>
-    <section><h3>患者与档案</h3>
       <a href="{% url 'patients' %}">查询患者</a>
       <a href="{% url 'patient_create' %}">新患者建档</a>
-      {% if can_verify_identity %}<a href="{% url 'patient_enrollment_list' %}">本人档案开通核验 <small>待本店核验 {{ enrollment_pending_count }} 项</small></a>{% endif %}
-      {% if can_verify_medical_proxy %}<a href="{% url 'medical_proxies' %}">医疗代理资料核验</a>{% endif %}
-      <a href="{% url 'clinical_archive_summary' %}">病历归档协调</a>
-      {% if can_verify_record_copies %}<a href="{% url 'record_copies' %}">病历副本受理</a>{% endif %}
+      <a href="{% url 'schedule_calendar' %}">日周排班</a>
+    </section>
+    <section><h3>复诊与交接</h3>
+      <a href="{% url 'clinical_recalls' %}?queue=mine">复诊随访与责任 <small>我应跟进 {{ continuity.my_recalls }} 项</small></a>
+      <a href="{% url 'clinical_recalls' %}?queue=unclaimed">待认领随访 <small>{{ continuity.unclaimed_recalls }} 项</small></a>
+      <a href="{% url 'clinical_recalls' %}?queue=review">暂缓后内部核对 <small>{{ continuity.review_recalls }} 项</small></a>
+      <a href="{% url 'clinical_labs' %}">加工件送返 <small>待认领 {{ continuity.unclaimed_lab }} · 待验收 {{ continuity.lab_to_review }} · 待继续办理 {{ continuity.lab_pending }}</small></a>
+      {% if exam_course_enabled %}<a href="{% url 'clinical_examination_progress' %}">本店检查进度</a>{% endif %}
+      {% if can_verify_identity and enrollment_pending_count %}<a href="{% url 'patient_enrollment_list' %}">本人档案开通核验 <small>{{ enrollment_pending_count }} 项待核验</small></a>{% endif %}
     </section>
   </div>
+  <details class="task-disclosure directory-more"><summary>候补、预约协调与回访</summary><nav aria-label="预约协调与回访">
+    <a href="{% url 'schedule_plans' %}">安排待匹配候补</a>
+    <a href="{% url 'waitlist' %}">候补协调</a>
+    <a href="{% url 'waitlist' %}#recycle-expired-offers">核对到期邀约</a>
+    <a href="{% url 'front_coordination_list' %}">出诊协调</a>
+    <a href="{% url 'cancellation_followups' %}">跟进取消回访</a>
+    <a href="{% url 'appointment_improvements' %}">我的改进措施</a>
+  </nav></details>
+  <details class="task-disclosure directory-more"><summary>档案与授权核验</summary><nav aria-label="档案与授权核验">
+    {% if can_verify_identity and not enrollment_pending_count %}<a href="{% url 'patient_enrollment_list' %}">本人档案开通核验</a>{% endif %}
+    {% if can_verify_medical_proxy %}<a href="{% url 'medical_proxies' %}">医疗代理资料核验</a>{% endif %}
+    <a href="{% url 'clinical_archive_summary' %}">病历归档协调</a>
+    {% if can_verify_record_copies %}<a href="{% url 'record_copies' %}">病历副本受理</a>{% endif %}
+  </nav></details>
 </section>
 {% endblock %}

@@ -42,23 +42,24 @@
     <h2 id="patient-shortcuts">常用办理</h2>
     <div class="portal-shortcut-grid">
       {% if primary_action.kind != 'BOOK' %}
-        <a href="{% url 'public_services' %}"><strong>预约就诊</strong><span>选择服务和时间</span></a>
+        <a href="{% url 'public_services' %}"><strong>预约就诊</strong></a>
       {% endif %}
-      <a href="{% url 'portal_appointments' %}"><strong>到诊安排</strong><span>{{ active_count }} 条待到诊与已到诊记录</span></a>
+      <a href="{% url 'portal_appointments' %}"><strong>到诊安排</strong><span>{{ active_count }} 条记录</span></a>
       {% if report_unread_count != None %}<a href="{% url 'portal_report_notices' %}"><strong>报告与复诊</strong><span>{{ report_unread_count }} 条未读</span></a>{% endif %}
       {% if can_view_funds %}
-        <a href="{% url 'portal_billing' %}"><strong>我的账单</strong><span>查看已发布结算单和收退款</span></a>
+        <a href="{% url 'portal_billing' %}"><strong>我的账单</strong></a>
       {% endif %}
-      <a href="{% url 'portal_appointments' %}?queue=history"><strong>{% if can_view_funds %}就诊记录{% else %}预约记录{% endif %}</strong><span>查看已结束的就诊和预约变更</span></a>
+      <a href="{% url 'portal_appointments' %}?queue=history"><strong>{% if can_view_funds %}就诊记录{% else %}预约记录{% endif %}</strong></a>
       {% if primary_action.kind == 'BOOK' %}
-        <a href="{% url 'waitlist' %}"><strong>我的候补</strong><span>登记偏好和查看邀约</span></a>
+        <a href="{% url 'waitlist' %}"><strong>我的候补</strong>{% if waiting_count %}<span>{{ waiting_count }} 条登记</span>{% endif %}</a>
       {% endif %}
     </div>
   </section>
 </div>
 
-<h2 class="portal-more-title" id="other-patient-services">更多服务</h2>
-<nav class="portal-more" aria-labelledby="other-patient-services">
+<details class="task-disclosure hub-more">
+  <summary id="other-patient-services">更多服务与帮助</summary>
+  <nav class="portal-more" aria-labelledby="other-patient-services">
   {% if primary_action.kind != 'BOOK' and primary_action.kind != 'WAITLIST' and not offer_count %}<a href="{% url 'waitlist' %}">我的候补{% if waiting_count %}（{{ waiting_count }}）{% endif %}</a>{% endif %}
   {% if can_view_funds or patient_medical %}<a href="{% url 'portal_plans' %}">治疗方案</a>{% endif %}
   {% if can_view_funds %}
@@ -72,5 +73,6 @@
   <a href="{% url 'portal_help' %}">就诊帮助</a>
   <a href="{% url 'portal_assistant' %}">操作问答</a>
   <a href="{% url 'guide_index' %}">操作指南</a>
-</nav>
+  </nav>
+</details>
 {% endblock %}

@@ -7,20 +7,22 @@
 <section class="panel patient-booking-summary">
   <span class="badge">{{ visit.get_status_display }}</span>
   <dl class="detail-grid">
+    <dt>预约时间</dt><dd><strong>{{ visit.scheduled_start|date:'Y年m月d日 H:i' }}–{% if visit.scheduled_start|date:'Ymd' != visit.scheduled_end|date:'Ymd' %}{{ visit.scheduled_end|date:'Y年m月d日' }} {% endif %}{{ visit.scheduled_end|date:'H:i' }}</strong>（北京时间）</dd>
     <dt>门店</dt><dd>{{ visit.public_contact.name }}</dd>
     {% if source_plan %}<dt>预约服务</dt><dd>{{ source_plan.snapshot.service.name }}</dd>{% endif %}
     <dt>医师</dt><dd>{{ visit.dentist.name }}</dd>
-    <dt>预约时间</dt><dd><strong>{{ visit.scheduled_start|date:'Y年m月d日 H:i' }}–{{ visit.scheduled_end|date:'H:i' }}</strong>（北京时间）</dd>
     <dt>地址</dt><dd>{{ visit.public_contact.address }}</dd>
-    <dt>{% if review.completed_at %}就诊编号{% else %}预约编号{% endif %}</dt><dd>#{{ visit.pk }} · {{ visit.visit_no }}</dd>
-    {% if not patient_delegated %}
-    <dt>本次就诊需求</dt><dd class="patient-service-lines">{{ visit.chief_complaint|default:'尚未填写，可到诊后向接诊人员说明。' }}</dd>
-    {% endif %}
     <dt>实际到诊</dt><dd>{% if review.attended_at %}已登记 · {{ review.attended_at|date:'Y年m月d日 H:i' }}{% else %}尚未登记{% endif %}</dd>
     {% if review.completed_at %}
     <dt>就诊结束</dt><dd>{{ review.completed_at|date:'Y年m月d日 H:i' }}</dd>
     {% endif %}
   </dl>
+  <details class="task-disclosure compact">
+    <summary>{% if review.completed_at %}就诊编号{% else %}预约编号{% endif %}{% if not patient_delegated and visit.chief_complaint %}与填写的就诊需求{% endif %}</summary>
+    <p>#{{ visit.pk }} · <bdi>{{ visit.visit_no }}</bdi></p>
+    {% if not patient_delegated and visit.chief_complaint %}<p class="patient-service-lines">{{ visit.chief_complaint }}</p>{% endif %}
+  </details>
+  {% if needs_outcome_review %}<p class="notice"><strong>到诊结果待核实。</strong> <a href="#frontdesk-help">请联系门店核实</a></p>{% endif %}
   {% if previous_visit %}<p>本次由 <a href="{% url 'portal_visit' previous_visit.pk %}">原预约 {{ previous_visit.visit_no }}</a> 改期而来。</p>{% endif %}
   {% if next_visit %}<p class="notice">此记录已改期。<a href="{% url 'portal_visit' next_visit.pk %}">查看后继预约 {{ next_visit.visit_no }}（{{ next_visit.get_status_display }}）</a></p>{% endif %}
   {% if can_cancel %}
@@ -56,7 +58,7 @@
 {% endif %}
 <section id="frontdesk-help" class="panel" aria-labelledby="visit-frontdesk">
   <h2 id="visit-frontdesk">联系门店</h2>
-  {% if needs_outcome_review %}<p class="notice"><strong>请联系门店核实。</strong> 本次安排已过计划结束时间，门店尚未登记到诊结果。</p>{% endif %}
+  {% if needs_outcome_review %}<p>预约时间已过，门店尚未登记到诊结果。</p>{% endif %}
   <p>前台电话 {{ visit.public_contact.phone|default:'请在门店页面核对' }}</p>
   <a href="{% url 'portal_help' %}?visit={{ visit.pk }}#frontdesk-help">查看原诊所到诊协助</a>
 </section>

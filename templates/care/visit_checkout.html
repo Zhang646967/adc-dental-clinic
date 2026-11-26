@@ -5,15 +5,18 @@
   {% if bill %}
   <h3>本次结算</h3>
   <p class="checkout-balance">{% if bill.remaining %}尚需支付 <strong>¥{{ bill.remaining|floatformat:2 }}</strong>{% elif bill.refund_due %}应退余额 <strong>¥{{ bill.refund_due|floatformat:2 }}</strong>{% else %}<strong>已结清</strong>{% endif %}</p>
-  <p class="muted">{{ bill.invoice_no }} · 第 {{ bill.revision }} 版</p>
-  <dl class="detail-grid">
-    <dt>本次账单金额</dt><dd>¥{{ bill.total|floatformat:2 }}</dd>
+  <p>本次账单金额 <strong>¥{{ bill.total|floatformat:2 }}</strong> · 第 {{ bill.revision }} 版</p>
+  <details class="task-disclosure compact">
+    <summary>收款和退款明细</summary>
+    <dl class="detail-grid">
+    <dt>账单编号</dt><dd><bdi>{{ bill.invoice_no }}</bdi></dd>
     <dt>已记账收款</dt><dd>¥{{ bill.receipts|floatformat:2 }}</dd>
     <dt>已记账退款</dt><dd>¥{{ bill.refunds|floatformat:2 }}</dd>
     {% if bill.advance_applied %}<dt>已抵扣预收款</dt><dd>¥{{ bill.advance_applied|floatformat:2 }}</dd>{% endif %}
     {% if bill.insurance_fund %}<dt>已核对医保基金承担</dt><dd>¥{{ bill.insurance_fund|floatformat:2 }}</dd>{% endif %}
     {% if bill.insurance_personal_account %}<dt>已核对医保个人账户承担</dt><dd>¥{{ bill.insurance_personal_account|floatformat:2 }}</dd>{% endif %}
-  </dl>
+    </dl>
+  </details>
   {% if bill.pending_refunds %}<p class="notice">退款申请 ¥{{ bill.pending_refunds|floatformat:2 }} 待复核。审核记账后将更新已退金额。</p>
   {% elif bill.review_pending %}<p class="notice">有结算事项待复核，金额按当前已记账结果显示。</p>{% endif %}
   <a class="button secondary" href="{% if front %}{% url 'invoice_detail' bill.invoice_id %}{% else %}{% url 'portal_invoice' bill.invoice_id %}{% endif %}">查看本次结算单</a>

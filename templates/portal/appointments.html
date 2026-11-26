@@ -1,1 +1,38 @@
-{% extends 'portal/base.html' %}{% block content %}<div class="heading-row"><div><h1>{% if queue == "history" %}就诊记录{% else %}我的预约{% endif %}</h1></div><a class="button" href="{% url 'portal_slots' %}">预约新时间</a></div><p class="muted">全部时间采用北京时间；历史与改期记录单独保留。已开始的预约请联系前台核对。</p>{% if report_unread_count != None %}<p><a class="button secondary" href="{% url 'portal_report_notices' %}">报告与复诊 · {{ report_unread_count }} 条未读</a></p>{% endif %}<nav class="queue-tabs" aria-label="本人预约范围">{% for key,label,count in queues %}<a href="?queue={{ key }}"{% if queue == key %} aria-current="page"{% endif %}>{{ label }} <span>{{ count }}</span></a>{% endfor %}</nav><div class="appointment-cards">{% for v in page %}<article class="appointment-card"><div><span class="badge">{{ v.get_status_display }}</span><h2>{{ v.scheduled_start|date:'Y年m月d日 H:i' }}</h2><p>{{ v.public_contact.name }} · {{ v.dentist.name }}</p><small>#{{ v.pk }} · {{ v.visit_no }}</small></div><a class="button secondary" href="{% url 'portal_visit' v.pk %}">查看详情</a></article>{% empty %}<section class="panel"><h2>这个范围没有预约记录</h2><p>请选择其他记录范围，或预约新的就诊时间。</p></section>{% endfor %}</div><nav class="pagination" aria-label="预约分页">{% if page.has_previous %}<a class="button secondary" href="?queue={{ queue }}&amp;page={{ page.previous_page_number }}">上一页</a>{% endif %}<span>第 {{ page.number }} 页 / 共 {{ page.paginator.num_pages }} 页</span>{% if page.has_next %}<a class="button secondary" href="?queue={{ queue }}&amp;page={{ page.next_page_number }}">下一页</a>{% endif %}</nav>{% endblock %}
+{% extends 'portal/base.html' %}
+{% block title %}{% if queue == 'history' %}就诊记录{% else %}我的预约{% endif %} · ADC 口腔{% endblock %}
+{% block content %}
+<div class="patient-appointments">
+  <header class="heading-row">
+    <h1>{% if queue == 'history' %}就诊记录{% else %}我的预约{% endif %}</h1>
+    <a class="button" href="{% url 'portal_slots' %}">预约就诊</a>
+  </header>
+  <nav class="queue-tabs" aria-label="预约范围">
+    {% for key,label,count in queues %}<a href="?queue={{ key }}"{% if queue == key %} aria-current="page"{% endif %}>{{ label }} <span>{{ count }}</span></a>{% endfor %}
+  </nav>
+  <div class="appointment-list-meta"><span>北京时间</span>
+    {% if report_unread_count != None %}<a href="{% url 'portal_report_notices' %}">报告与复诊{% if report_unread_count %} · {{ report_unread_count }} 条未读{% endif %}</a>{% endif %}
+  </div>
+  <div class="appointment-cards">
+    {% for v in page %}
+    <article class="appointment-card" aria-labelledby="appointment-time-{{ v.pk }}">
+      <div>
+        <span class="badge">{{ v.get_status_display }}</span>
+        <h2 id="appointment-time-{{ v.pk }}"><time datetime="{{ v.scheduled_start|date:'c' }}">{{ v.scheduled_start|date:'Y年n月j日 H:i' }}</time></h2>
+        <p>{{ v.public_contact.name }} · {{ v.dentist.name }}</p>
+        <details class="task-disclosure compact"><summary>预约编号</summary><p>#{{ v.pk }} · <bdi>{{ v.visit_no }}</bdi></p></details>
+      </div>
+      <a class="button secondary" href="{% url 'portal_visit' v.pk %}" aria-describedby="appointment-time-{{ v.pk }}">{% if v.status == 'COMPLETED' or v.status == 'CLOSED_NO_TREATMENT' %}{% if not patient_delegated and not patient_medical %}查看就诊与结算{% else %}查看预约详情{% endif %}{% else %}查看预约详情{% endif %}</a>
+    </article>
+    {% empty %}
+    <section class="panel"><h2>{% if queue == 'history' %}暂无历史记录{% else %}暂无预约记录{% endif %}</h2><p>可切换上方清单查看其他记录。</p></section>
+    {% endfor %}
+  </div>
+  {% if page.has_other_pages %}
+  <nav class="pagination" aria-label="预约分页">
+    {% if page.has_previous %}<a class="button secondary" href="?queue={{ queue }}&amp;page={{ page.previous_page_number }}">上一页</a>{% endif %}
+    <span>第 {{ page.number }} 页，共 {{ page.paginator.num_pages }} 页</span>
+    {% if page.has_next %}<a class="button secondary" href="?queue={{ queue }}&amp;page={{ page.next_page_number }}">下一页</a>{% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

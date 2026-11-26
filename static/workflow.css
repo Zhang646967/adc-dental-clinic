@@ -99,3 +99,21 @@
   .visit-register .appointment-table .visit-empty td { background: transparent; }
   .visit-register td:not([data-label])::before { display: none; }
 }
+
+.visit-search { padding: .85rem 0 .2rem; }
+.visit-search-line { display: flex; align-items: end; flex-wrap: wrap; gap: .5rem .75rem; }
+.visit-search-line .form-field { flex: 1 1 14rem; max-width: 34rem; min-width: 0; margin: 0; }
+.visit-search-line label { display: block; margin: 0 0 .3rem; font-weight: 600; }
+.visit-search-line input, .visit-search-line button { min-height: 44px; }
+.visit-search .visit-refine { border: 0; }
+.visit-search .worklist-filters { display: grid; }
+.visit-clear { display: inline-flex; align-items: center; min-height: 44px; }
+.encounter-heading + .encounter-handoff { margin-bottom: .9rem; }
+.care-overview { border-inline-start: .3rem solid #558b74; }
+.care-overview h2 { font-size: 1.25rem; margin-top: 0; }
+.care-overview .care-status p { font-size: 1rem; }
+.care-overview .care-status strong { color: var(--ink); }
+.care-jumps { gap: .3rem .9rem; margin-block: .7rem; }
+.care-jumps a { color: #205a4d; border: 0; border-radius: 0; background: transparent; padding-inline: .15rem; text-decoration: underline; text-underline-offset: .22em; }
+.appointment-table .visit-reference { font-size: .875rem; }
+.visit-register .appointment-table .row-action { white-space: normal; }
