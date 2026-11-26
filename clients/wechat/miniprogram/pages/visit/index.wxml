@@ -73,6 +73,15 @@
       </view>
     </block>
   </view>
+  <view wx:if="{{examinations.length}}" class="card">
+    <view class="section-title">检查与报告</view>
+    <view wx:for="{{examinations}}" wx:key="id" class="offer-block">
+      <view class="section-label">{{item.project}}</view>
+      <view class="prose">{{item.number}}</view>
+      <view class="muted">{{item.label}}<text wx:if="{{item.revisionLabel}}"> · {{item.revisionLabel}}</text><text wx:if="{{item.releasedLabel}}"> · 发布 {{item.releasedLabel}}</text></view>
+      <button wx:if="{{item.canOpen}}" class="secondary" data-id="{{item.id}}" data-revision="{{item.revision}}" bindtap="openExamination">查看检查报告</button>
+    </view>
+  </view>
   <view wx:if="{{reviewView && reviewView.showCheckout}}" class="card">
     <view class="section-title">本次费用与下次安排</view>
     <view class="section-label">本次结算</view>
@@ -110,18 +119,19 @@
       <view class="divider"></view>
       <view class="section-label">下次安排</view>
       <block wx:if="{{reviewView.followups.length}}">
-        <view wx:for="{{reviewView.followups}}" wx:key="key" class="offer-block">
-          <view class="pill">{{item.label}}</view>
+        <view wx:for="{{reviewView.followups}}" wx:key="key" id="followup-{{item.id}}" class="offer-block {{item.selected ? 'followup-selected' : ''}}">
+          <view class="row"><view class="pill">{{item.label}}</view><view wx:if="{{item.selected}}" class="pill">本次查看</view></view>
           <view class="line">{{item.service}}</view>
           <view wx:if="{{item.rangeLabel}}" class="muted">建议日期 {{item.rangeLabel}}</view>
+          <view wx:if="{{item.message}}" class="notice">{{item.message}}</view>
           <view wx:if="{{item.overdue}}" class="notice">建议日期已过，请联系门店核对后续安排。</view>
           <block wx:if="{{item.showActive}}">
             <view class="invoice-line">
-              <view class="muted">下次预约</view>
+              <view class="muted">预约编号</view>
               <view class="prose checkout-id">{{item.active.visitNo}}</view>
               <view class="muted">预约 #{{item.active.id}}</view>
             </view>
-            <view>{{item.active.startLabel}}（北京时间）</view>
+            <view><text class="muted">已确认到店时间</text> {{item.active.startLabel}}（北京时间）</view>
             <view class="muted">{{item.active.clinic}} · {{item.active.statusLabel}}</view>
             <button class="secondary" data-key="{{item.key}}" data-kind="active" bindtap="openAppointment">查看这次预约</button>
           </block>
@@ -150,15 +160,6 @@
     <button class="secondary" bindtap="invoice">查看本人结算单</button>
   </view>
 
-  <view wx:if="{{examinations.length}}" class="card">
-    <view class="section-title">检查与报告</view>
-    <view wx:for="{{examinations}}" wx:key="id" class="offer-block">
-      <view class="section-label">{{item.project}}</view>
-      <view class="prose">{{item.number}}</view>
-      <view class="muted">{{item.label}}<text wx:if="{{item.revisionLabel}}"> · {{item.revisionLabel}}</text><text wx:if="{{item.releasedLabel}}"> · 发布 {{item.releasedLabel}}</text></view>
-      <button wx:if="{{item.canOpen}}" class="secondary" data-id="{{item.id}}" data-revision="{{item.revision}}" bindtap="openExamination">查看检查报告</button>
-    </view>
-  </view>
   <view wx:if="{{visit.can_change && !readOnly}}">
     <button class="primary" bindtap="reschedule">选择新的就诊安排</button>
     <button class="danger" bindtap="cancel">{{cancelOpen?'保留预约，收起取消':'需要取消这次预约'}}</button>
