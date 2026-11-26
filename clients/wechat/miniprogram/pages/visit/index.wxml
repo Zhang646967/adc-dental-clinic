@@ -11,19 +11,16 @@
   <button wx:if="{{subjectInvalid}}" class="primary" bindtap="recoverSubject" disabled="{{busy}}" loading="{{busy}}">核对账号与就诊人</button>
 
   <view wx:if="{{visit}}" class="card">
-    <view class="pill">{{visit.status_label}} · #{{visit.id}}</view>
-    <view class="line">{{visit.clinic}} · {{visit.dentist}}</view>
-    <view>{{visit.service}}</view>
-    <view class="divider"></view>
-    <view>{{visit.address}}</view>
-    <view class="line">前台电话 {{visit.phone}}</view>
-    <view wx:if="{{visit.visit_no}}" class="invoice-line">
-      <view class="muted">就诊编号</view>
-      <view class="prose">{{visit.visit_no}}</view>
+    <view class="record-head">
+      <view class="pill status-{{record.kind}}">{{visit.status_label}}</view>
+      <view wx:if="{{reviewView && reviewView.settlementState === 'AWAITING_PUBLICATION'}}" class="pill status-rescheduled">结算单待发布</view>
+      <view wx:elif="{{reviewView && reviewView.settlement && reviewView.settlement.reviewPending}}" class="pill status-rescheduled">待复核</view>
     </view>
+    <view class="section-title">{{visit.clinic}}</view>
+    <view class="muted">{{visit.dentist}} · {{visit.service}}</view>
     <view class="invoice-line">
-      <view class="muted">计划时间（北京时间）</view>
-      <view>{{visit.startLabel}} 至 {{visit.endLabel}}</view>
+      <view class="muted">预约时间（北京时间）</view>
+      <view class="time">{{record.whenLabel}}</view>
     </view>
     <view wx:if="{{reviewView}}" class="invoice-line">
       <view class="muted">实际到诊</view>
@@ -32,6 +29,23 @@
     <view wx:if="{{reviewView && reviewView.completedLabel}}" class="invoice-line">
       <view class="muted">就诊结束</view>
       <view>{{reviewView.completedLabel}}</view>
+    </view>
+    <view class="line">{{visit.address}}</view>
+    <view wx:if="{{visit.needs_outcome_review}}" class="notice">到诊结果待核实，请联系门店。</view>
+    <button class="disclosure" bindtap="toggleInfo" aria-expanded="{{infoOpen}}" aria-label="{{infoOpen ? infoCloseLabel : infoOpenLabel}}">{{infoOpen ? infoCloseLabel : infoOpenLabel}}</button>
+    <view wx:if="{{infoOpen}}" class="detail-panel">
+      <view class="invoice-line">
+        <view class="muted">{{reviewView && reviewView.completedLabel ? '就诊编号' : '预约编号'}}</view>
+        <view class="prose checkout-id">#{{visit.id}}{{visit.visit_no ? ' · ' + visit.visit_no : ''}}</view>
+      </view>
+      <view wx:if="{{visit.patient_request && !patientDelegated}}" class="invoice-line">
+        <view class="muted">本人填写的就诊需求</view>
+        <view class="prose">{{visit.patient_request}}</view>
+      </view>
+      <view class="invoice-line">
+        <view class="muted">前台电话</view>
+        <view>{{visit.phone}}</view>
+      </view>
     </view>
   </view>
 
@@ -50,11 +64,79 @@
     </view>
   </view>
 
-  <view wx:if="{{visit.patient_request}}" class="card">
-    <view class="section-title">本次就诊需求</view>
-    <view class="prose">{{visit.patient_request}}</view>
+  <view wx:if="{{reviewView && reviewView.showCheckout}}" class="card">
+    <view class="section-title">本次费用与下次安排</view>
+    <block wx:if="{{reviewView.settlementState === 'AWAITING_PUBLICATION'}}">
+      <view class="notice">结算单待发布</view>
+      <view class="muted">门店发布结算单后可在这里查看费用和余额。</view>
+    </block>
+    <block wx:elif="{{reviewView.settlement}}">
+      <view class="fact-row"><text>本次账单金额</text><text>¥{{reviewView.settlement.total}}</text></view>
+      <view wx:if="{{!reviewView.headline}}" class="notice">当前余额暂不可读，请查看结算单核对。</view>
+      <view wx:elif="{{reviewView.headline.kind === 'settled'}}" class="pill">已结清</view>
+      <view wx:else class="fact-row"><text>{{reviewView.headline.label}}</text><text class="fee">¥{{reviewView.headline.amount}}</text></view>
+      <view wx:if="{{reviewView.settlement.reviewPending}}" class="notice">有结算事项待复核，余额按当前已确认结果显示。</view>
+      <button class="disclosure" bindtap="toggleMoney" aria-expanded="{{moneyOpen}}" aria-label="{{moneyOpen ? moneyCloseLabel : moneyOpenLabel}}">{{moneyOpen ? moneyCloseLabel : moneyOpenLabel}}</button>
+      <view wx:if="{{moneyOpen}}" class="detail-panel">
+        <view wx:if="{{reviewView.settlement.receipts}}" class="fact-row"><text>已记账收款</text><text>¥{{reviewView.settlement.receipts}}</text></view>
+        <view wx:if="{{reviewView.settlement.refunds}}" class="fact-row"><text>已记账退款</text><text>¥{{reviewView.settlement.refunds}}</text></view>
+        <view wx:if="{{reviewView.settlement.netReceived}}" class="fact-row"><text>已记账净收款</text><text>¥{{reviewView.settlement.netReceived}}</text></view>
+        <view wx:if="{{reviewView.settlement.advanceApplied}}" class="fact-row"><text>已抵扣预收款</text><text>¥{{reviewView.settlement.advanceApplied}}</text></view>
+        <view wx:if="{{reviewView.settlement.insuranceFund}}" class="fact-row"><text>已核对医保基金承担</text><text>¥{{reviewView.settlement.insuranceFund}}</text></view>
+        <view wx:if="{{reviewView.settlement.insurancePersonalAccount}}" class="fact-row"><text>已核对医保个人账户承担</text><text>¥{{reviewView.settlement.insurancePersonalAccount}}</text></view>
+        <view wx:if="{{reviewView.settlement.pendingRefundDue}}" class="fact-row"><text>待审核退款</text><text>¥{{reviewView.settlement.pendingRefundDue}}</text></view>
+        <view class="invoice-line">
+          <view class="muted">结算单编号</view>
+          <view class="prose checkout-id">{{reviewView.settlement.invoiceNo}}</view>
+          <view class="muted">第 {{reviewView.settlement.revision}} 版</view>
+        </view>
+      </view>
+      <button wx:if="{{reviewView.settlement.invoiceId || visit.invoice_id}}" class="secondary" bindtap="invoice">查看本次结算单</button>
+    </block>
+    <view wx:else class="muted">结算单信息暂不可读，请刷新核对。</view>
+    <button wx:if="{{reviewView.settlementState === 'PUBLISHED' && !reviewView.settlement && visit.invoice_id}}" class="secondary" bindtap="invoice">查看本人结算单</button>
+
+    <block wx:if="{{reviewView.showFollowups}}">
+      <view class="divider"></view>
+      <view class="section-label">下次安排</view>
+      <block wx:if="{{reviewView.followups.length}}">
+        <view wx:for="{{reviewView.followups}}" wx:key="key" id="followup-{{item.id}}" class="offer-block {{item.selected ? 'followup-selected' : ''}}">
+          <view class="record-head"><view class="pill">{{item.label}}</view><view wx:if="{{item.selected}}" class="pill">本次查看</view></view>
+          <view class="line">{{item.service}}</view>
+          <view wx:if="{{item.rangeLabel}}" class="muted">建议窗口 {{item.rangeLabel}}</view>
+          <view wx:if="{{item.message}}" class="notice">{{item.message}}</view>
+          <view wx:if="{{item.overdue}}" class="notice">建议窗口已过，请联系门店核对后续安排。</view>
+          <block wx:if="{{item.showActive}}">
+            <view class="invoice-line">
+              <view class="muted">预约编号</view>
+              <view class="prose checkout-id">{{item.active.visitNo}}</view>
+              <view class="muted">预约 #{{item.active.id}}</view>
+            </view>
+            <view><text class="muted">已确认到店时间</text> {{item.active.startLabel}}（北京时间）</view>
+            <view class="muted">{{item.active.clinic}} · {{item.active.statusLabel}}</view>
+            <button class="secondary" data-key="{{item.key}}" data-kind="active" bindtap="openAppointment">查看复诊预约</button>
+          </block>
+          <block wx:if="{{item.historical}}">
+            <view class="invoice-line">
+              <view class="muted">历史预约</view>
+              <view class="prose checkout-id">{{item.historical.visitNo}}</view>
+              <view class="muted">预约 #{{item.historical.id}}</view>
+            </view>
+            <view class="muted">{{item.historical.startLabel}}（北京时间） · {{item.historical.clinic}} · {{item.historical.statusLabel}}</view>
+            <button class="secondary" data-key="{{item.key}}" data-kind="historical" bindtap="openAppointment">查看历史预约</button>
+          </block>
+          <block wx:if="{{item.linked}}">
+            <view class="muted">关联预约 #{{item.linked.id}} · {{item.linked.statusLabel}}</view>
+            <button class="secondary" data-key="{{item.key}}" data-kind="linked" bindtap="openAppointment">查看关联预约</button>
+          </block>
+          <button wx:if="{{item.canBook}}" class="primary" data-key="{{item.key}}" bindtap="bookFollowup">查看复诊可约时段</button>
+          <button wx:if="{{item.canContact}}" class="secondary" data-key="{{item.key}}" bindtap="contactFollowup">联系原门店</button>
+        </view>
+      </block>
+      <view wx:else class="muted">本次未记录复诊安排</view>
+    </block>
   </view>
-  <view wx:if="{{visit.needs_outcome_review}}" class="notice">预约时间已过，请联系门店核实。</view>
+
   <view wx:if="{{reviewView && reviewView.care}}" class="card">
     <view class="section-title">本次就诊结果</view>
     <view class="pill">{{reviewView.care.outcomeLabel}}</view>
@@ -81,79 +163,6 @@
       <view class="muted">{{item.label}}<text wx:if="{{item.revisionLabel}}"> · {{item.revisionLabel}}</text><text wx:if="{{item.releasedLabel}}"> · 发布 {{item.releasedLabel}}</text></view>
       <button wx:if="{{item.canOpen}}" class="secondary" data-id="{{item.id}}" data-revision="{{item.revision}}" bindtap="openExamination">查看检查报告</button>
     </view>
-  </view>
-  <view wx:if="{{reviewView && reviewView.showCheckout}}" class="card">
-    <view class="section-title">本次费用与下次安排</view>
-    <view class="section-label">本次结算</view>
-    <block wx:if="{{reviewView.settlementState === 'AWAITING_PUBLICATION'}}">
-      <view class="notice">结算单待发布</view>
-      <view class="muted">门店发布结算单后可在这里查看费用和余额。</view>
-    </block>
-    <block wx:elif="{{reviewView.settlement}}">
-      <view class="invoice-line">
-        <view class="muted">结算单</view>
-        <view class="prose checkout-id">{{reviewView.settlement.invoiceNo}}</view>
-        <view class="muted">第 {{reviewView.settlement.revision}} 版</view>
-      </view>
-      <view wx:if="{{!reviewView.headline}}" class="notice">当前余额暂不可读，请查看结算单核对。</view>
-      <view wx:elif="{{reviewView.headline.kind === 'settled'}}" class="pill">已结清</view>
-      <view wx:else class="fact-row">
-        <text>{{reviewView.headline.label}}</text>
-        <text class="fee">¥{{reviewView.headline.amount}}</text>
-      </view>
-      <view wx:if="{{reviewView.settlement.total}}" class="fact-row"><text>本次账单金额</text><text>¥{{reviewView.settlement.total}}</text></view>
-      <view wx:if="{{reviewView.settlement.receipts}}" class="fact-row"><text>已记账收款</text><text>¥{{reviewView.settlement.receipts}}</text></view>
-      <view wx:if="{{reviewView.settlement.refunds}}" class="fact-row"><text>已记账退款</text><text>¥{{reviewView.settlement.refunds}}</text></view>
-      <view wx:if="{{reviewView.settlement.netReceived}}" class="fact-row"><text>已记账净收款</text><text>¥{{reviewView.settlement.netReceived}}</text></view>
-      <view wx:if="{{reviewView.settlement.advanceApplied}}" class="fact-row"><text>已抵扣预收款</text><text>¥{{reviewView.settlement.advanceApplied}}</text></view>
-      <view wx:if="{{reviewView.settlement.insuranceFund}}" class="fact-row"><text>已核对医保基金承担</text><text>¥{{reviewView.settlement.insuranceFund}}</text></view>
-      <view wx:if="{{reviewView.settlement.insurancePersonalAccount}}" class="fact-row"><text>已核对医保个人账户承担</text><text>¥{{reviewView.settlement.insurancePersonalAccount}}</text></view>
-      <view wx:if="{{reviewView.settlement.pendingRefundDue}}" class="fact-row"><text>待审核退款</text><text>¥{{reviewView.settlement.pendingRefundDue}}</text></view>
-      <view wx:if="{{reviewView.settlement.reviewPending}}" class="notice">有结算事项待复核，余额按当前已确认结果显示。</view>
-      <button wx:if="{{reviewView.settlement.invoiceId || visit.invoice_id}}" class="secondary" bindtap="invoice">查看本次结算单</button>
-    </block>
-    <view wx:else class="muted">结算单信息暂不可读，请刷新核对。</view>
-    <button wx:if="{{reviewView.settlementState === 'PUBLISHED' && !reviewView.settlement && visit.invoice_id}}" class="secondary" bindtap="invoice">查看本人结算单</button>
-
-    <block wx:if="{{reviewView.showFollowups}}">
-      <view class="divider"></view>
-      <view class="section-label">下次安排</view>
-      <block wx:if="{{reviewView.followups.length}}">
-        <view wx:for="{{reviewView.followups}}" wx:key="key" id="followup-{{item.id}}" class="offer-block {{item.selected ? 'followup-selected' : ''}}">
-          <view class="row"><view class="pill">{{item.label}}</view><view wx:if="{{item.selected}}" class="pill">本次查看</view></view>
-          <view class="line">{{item.service}}</view>
-          <view wx:if="{{item.rangeLabel}}" class="muted">建议日期 {{item.rangeLabel}}</view>
-          <view wx:if="{{item.message}}" class="notice">{{item.message}}</view>
-          <view wx:if="{{item.overdue}}" class="notice">建议日期已过，请联系门店核对后续安排。</view>
-          <block wx:if="{{item.showActive}}">
-            <view class="invoice-line">
-              <view class="muted">预约编号</view>
-              <view class="prose checkout-id">{{item.active.visitNo}}</view>
-              <view class="muted">预约 #{{item.active.id}}</view>
-            </view>
-            <view><text class="muted">已确认到店时间</text> {{item.active.startLabel}}（北京时间）</view>
-            <view class="muted">{{item.active.clinic}} · {{item.active.statusLabel}}</view>
-            <button class="secondary" data-key="{{item.key}}" data-kind="active" bindtap="openAppointment">查看这次预约</button>
-          </block>
-          <block wx:if="{{item.historical}}">
-            <view class="invoice-line">
-              <view class="muted">历史预约</view>
-              <view class="prose checkout-id">{{item.historical.visitNo}}</view>
-              <view class="muted">预约 #{{item.historical.id}}</view>
-            </view>
-            <view class="muted">{{item.historical.startLabel}}（北京时间） · {{item.historical.clinic}} · {{item.historical.statusLabel}}</view>
-            <button class="secondary" data-key="{{item.key}}" data-kind="historical" bindtap="openAppointment">查看历史预约</button>
-          </block>
-          <block wx:if="{{item.linked}}">
-            <view class="muted">关联预约 #{{item.linked.id}} · {{item.linked.statusLabel}}</view>
-            <button class="secondary" data-key="{{item.key}}" data-kind="linked" bindtap="openAppointment">查看关联预约</button>
-          </block>
-          <button wx:if="{{item.canBook}}" class="primary" data-key="{{item.key}}" bindtap="bookFollowup">查看复诊可约时段</button>
-          <button wx:if="{{item.canContact}}" class="secondary" data-key="{{item.key}}" bindtap="contactFollowup">联系原门店</button>
-        </view>
-      </block>
-      <view wx:else class="muted">本次未记录复诊安排</view>
-    </block>
   </view>
 
   <view wx:if="{{visit && !patientDelegated && !reviewView && visit.invoice_id}}" class="card">

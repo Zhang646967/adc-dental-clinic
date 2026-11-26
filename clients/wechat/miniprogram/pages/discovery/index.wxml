@@ -44,6 +44,29 @@
   <view wx:if="{{serviceState==='subject'}}" class="card"><view class="section-title">请选择就诊人</view><view class="muted">选择本次要办理的已核验就诊人。</view><button class="primary" bindtap="subjects">选择就诊人</button></view>
   <view wx:if="{{serviceState==='medical'}}" class="card"><view class="section-title">独立医疗代理</view><view class="muted">请从医疗授权入口查看可办理范围。</view><button class="primary" bindtap="medical">查看医疗授权</button></view>
 
+  <block wx:if="{{serviceState==='ready'&&!serviceError}}">
+    <view class="section-heading"><view class="section-title">常用办理</view></view>
+    <view class="card shortcut-grid">
+      <button wx:if="{{primary&&primary.kind!=='BOOK'}}" class="shortcut" bindtap="book">预约就诊</button>
+      <button class="shortcut" bindtap="arrangements">到诊安排</button>
+      <button wx:if="{{reportEntry}}" class="shortcut" bindtap="reports">报告与复诊<text wx:if="{{reportUnread}}"> · {{reportUnread}}</text></button>
+      <button wx:if="{{canViewFunds}}" class="shortcut" bindtap="fees">我的账单</button>
+      <button class="shortcut" bindtap="records">{{patientDelegated?'预约记录':'就诊记录'}}</button>
+    </view>
+    <view class="card more-card">
+      <button class="disclosure" bindtap="toggleMore" aria-expanded="{{moreOpen}}" aria-label="{{moreOpen?'收起更多服务与帮助':'展开更多服务与帮助'}}">更多服务与帮助 {{moreOpen?'收起':'展开'}}</button>
+      <view wx:if="{{moreOpen}}" class="task-links more-links">
+        <navigator url="/pages/waitlist/index">我的候补<text wx:if="{{overview.waiting_count}}"> · {{overview.waiting_count}} 条</text></navigator>
+        <navigator wx:if="{{!patientDelegated&&canViewFunds}}" url="/pages/plans/index">治疗方案与本人决定</navigator>
+        <navigator wx:if="{{!patientDelegated&&canViewFunds}}" url="/pages/funds/index">预收与资金流水</navigator>
+        <navigator wx:if="{{!patientDelegated&&canViewFunds}}" url="/pages/record-copies/index">病历副本申请与领取</navigator>
+        <navigator wx:if="{{!patientDelegated}}" url="/pages/history/index">健康自述与过敏复核</navigator>
+        <navigator wx:if="{{!patientDelegated}}" url="/pages/referrals/index">跨店转诊与披露</navigator>
+        <navigator url="/pages/help/index">就诊帮助</navigator>
+      </view>
+    </view>
+  </block>
+
   <view class="section-heading"><view class="section-title">找门店与医师</view></view>
   <view class="card"><view class="row"><button class="secondary" bindtap="stores">找门店</button><button class="secondary" bindtap="doctors">找医师</button><button class="secondary" bindtap="services">找服务</button></view><view class="muted small">无需登录即可浏览公开门店、医师与服务。</view></view>
 

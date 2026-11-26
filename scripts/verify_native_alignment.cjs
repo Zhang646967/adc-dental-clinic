@@ -7,6 +7,7 @@ const visitReview=require(path.join(root,'utils/visit-review'));
 const examinations=require(path.join(root,'utils/examinations'));
 const reportNotices=require(path.join(root,'utils/report-notices'));
 const returnSources=require(path.join(root,'utils/return-sources'));
+const visitRecord=require(path.join(root,'utils/visit-record'));
 const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
@@ -43,7 +44,7 @@ async function verify(){
       Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
         key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/examinations')?examinations:
-        key.endsWith('/return-sources')?returnSources:key.endsWith('/report-notices')?reportNotices:key.endsWith('/format')?format:null});
+        key.endsWith('/return-sources')?returnSources:key.endsWith('/report-notices')?reportNotices:key.endsWith('/visit-record')?visitRecord:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
   const notice={id:19,kind:'CORRECTED',visit_id:7,examination_id:8,revision:2,occurred_at:'2026-11-13T16:30:00Z',read_at:null};
@@ -124,11 +125,29 @@ async function verify(){
   d.p.setData({queue:'active',page:4});
   await d.p.onShow();
   assert.deepEqual({...d.calls[0][2]},{queue:'history',page:1});count++;
+  navigation.navigateTo({url:'/pages/home/index?queue=active'});
+  d=page('home',{session:{authenticated:true},responses:[{rows:[],page:1,pages:1},{}]});
+  d.p.setData({queue:'history',page:2});
+  await d.p.onShow();
+  assert.deepEqual({...d.calls[0][2]},{queue:'active',page:1});count++;
+  let finishList;
+  const delayedList=new Promise(resolve=>{finishList=resolve;});
+  d=page('home',{session:{authenticated:true},responses:[delayedList,{}]});
+  const loading=d.p.onShow();
+  await Promise.resolve();
+  d.p.onHide();
+  finishList({rows:[{id:2,status:'SCHEDULED'}],page:1,pages:1});
+  await loading;
+  assert.equal(d.p.data.rows.length,0);
+  assert.equal(d.p.data.overview,null);count++;
   d=page('home',{session:{authenticated:false,account_authenticated:false}});d.p.data.rows=[{patient:'OLD_PRIVATE'}];await d.p.onShow();assert.equal(d.p.data.guest,true);assert.equal(d.calls.length,0);assert.equal(d.p.data.rows.length,0);count++;
   const primary=patientAction.primaryAction;
   const action=(kind,visit=null,offer=null)=>primary({primary_action:{kind,visit,offer}});
   const visit={id:12,clinic:'合成门店',dentist:'合成医师',service:'初诊',status_label:'已预约',start:'2026-11-05T06:00:00Z'};
   assert.equal(action('CHECKED_IN',visit).url,'/pages/visit/index?id=12');count++;
+  assert.equal(action('CHECKED_IN',visit).label,'已到诊');
+  const frontDeskCheckIn=primary({primary_action:{kind:'CHECKED_IN',visit,label:'已到诊',button:'查看到诊安排',hint:'已在前台登记。'}});
+  assert.equal(frontDeskCheckIn.hint,'已在前台登记。');count++;
   assert.equal(action('UPCOMING_VISIT',visit).timeLabel,'2026-11-05 14:00');count++;
   const review=action('CONTACT_CLINIC',{...visit,needs_outcome_review:true});
   assert.equal(review.url,'/pages/help/index?visit=12');assert(review.serviceLine.endsWith('已预约'));count++;

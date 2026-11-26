@@ -66,3 +66,21 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 
 /* The next-visit number stays on one line without competing with the action. */
 .primary-visit-no{font-size:28rpx;word-break:break-all}
+
+/* 18550: one disclosure per record, status tones and patient short names.
+   Status stays readable in the pill; the four kinds only change its tone. */
+.patient-flow .record-head{display:flex;align-items:center;gap:12rpx;flex-wrap:wrap;margin:0 0 10rpx}
+.patient-flow .status-upcoming{background:#e4f1ee;color:#145e53}
+.patient-flow .status-arrived{background:#e6f0fa;color:#1d4f7c}
+.patient-flow .status-finished,.patient-flow .status-missed,.patient-flow .status-unknown{background:#edf0ee;color:#40564d}
+.patient-flow .status-rescheduled{background:#fff4dd;color:#7b4c08}
+.patient-flow .status-cancelled{background:#fbece8;color:#8e291b}
+.patient-flow button.disclosure{background:transparent;color:#0b6a5e;text-align:left;padding:10rpx 0;margin:6rpx 0 0;min-height:88rpx;font-size:27rpx;font-weight:600;line-height:1.45}
+.patient-flow button.disclosure::after{border:0}
+.patient-flow .detail-panel{background:#f6faf7;border-left:8rpx solid #cfe3d8;border-radius:12rpx;padding:6rpx 20rpx 16rpx;margin:6rpx 0 14rpx}
+.patient-flow .detail-panel .fact-row{padding:10rpx 0}
+.patient-flow .detail-panel .invoice-line:last-child{border-bottom:0}
+.patient-flow .shortcut-grid{display:flex;flex-wrap:wrap;gap:14rpx}
+.patient-flow .shortcut-grid .shortcut{flex:1 1 46%;margin:0;min-height:96rpx;background:#e4f1ee;color:#145e53;border:2rpx solid #b8d5ce;font-size:29rpx;font-weight:600;padding:16rpx}
+.patient-flow .more-card{padding:6rpx 26rpx 10rpx}
+.patient-flow .more-links navigator:last-child{border-bottom:0}

@@ -4,6 +4,7 @@ const nearby=require('../../utils/nearby');
 const config=require('../../config');
 const {showError, dateTime}=require('../../utils/format');
 const actionModule=require('../../utils/primary-action');
+const {reportEntry}=require('../../utils/report-notices');
 const mapPrimary=actionModule&&typeof actionModule.primaryAction==='function'?actionModule.primaryAction:()=>null;
 
 /* Prefer the server's label/button/hint. Older backends omit them, in which
@@ -28,7 +29,7 @@ function composePrimary(overview){
 
 Page({
   data:{all:[],rows:[],cities:['全部城市'],cityIndex:0,categories:[{id:'',name:'全部服务'}],categoryIndex:0,keyword:'',onlineOnly:false,busy:false,error:'',locating:false,origin:null,limit:10,count:0,hasMore:false,locationNote:'可直接浏览；主动使用定位后，按直线距离由近到远排序。',
-    serviceState:'loading',patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false,environmentLabel:'',serviceError:'',serviceRequestId:''},
+    serviceState:'loading',patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false,reportEntry:null,reportUnread:0,moreOpen:false,environmentLabel:'',serviceError:'',serviceRequestId:''},
   async onShow(){await this.load();},
   onHide(){this.clearPrivate({keepReview:true});},
   async load(){
@@ -80,15 +81,19 @@ Page({
     }
     if(sequence!==this.serviceSequence)return;
     const canViewFunds=!!overview.can_view_funds&&!session.delegated;
+    // The report shortcut exists only for the patient themself and only when
+    // the overview carries the capability; the money entries follow funds.
+    const entry=reportEntry(overview,{delegated:!!session.delegated});
     this.setData({serviceState:'ready',patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated,
-      overview,primary:composePrimary(overview),canViewFunds});
+      overview,primary:composePrimary(overview),canViewFunds,reportEntry:entry,reportUnread:entry?entry.unread:0});
   },
   /* Switching subject, signing out or losing authority invalidates in-flight
      reads. Bumping the sequence makes a late response unable to refill the
      page with the previous patient's private data. */
   clearPrivate({keepReview=false}={}){
     this.serviceSequence=(this.serviceSequence||0)+1;
-    this.setData({patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false});
+    this.setData({patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false,
+      reportEntry:null,reportUnread:0,moreOpen:false});
     if(!keepReview&&typeof getApp==='function')getApp().globalData.review=null;
   },
   filter(){
@@ -130,7 +135,11 @@ Page({
   retryService(){this.clearPrivate();return this.loadService();},
   primaryTap(){const p=this.data.primary;if(p&&p.url)navigation.navigateTo({url:p.url});},
   book(){navigation.navigateTo({url:'/pages/services/index'});},
-  arrangements(){navigation.navigateTo({url:'/pages/home/index'});},
+  arrangements(){navigation.navigateTo({url:'/pages/home/index?queue=active'});},
   records(){navigation.navigateTo({url:'/pages/home/index?queue=history'});},
-  fees(){navigation.navigateTo({url:'/pages/billing/index'});}
+  reports(){navigation.navigateTo({url:'/pages/report-notices/index'});},
+  fees(){navigation.navigateTo({url:'/pages/billing/index'});},
+  // Secondary tools live behind one named disclosure; it only renders for a
+  // signed-in subject and its entries still follow the capability flags.
+  toggleMore(){this.setData({moreOpen:!this.data.moreOpen});}
 });
