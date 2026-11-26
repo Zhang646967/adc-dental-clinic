@@ -29,7 +29,8 @@
     <view wx:if="{{primary.timeLabel}}" class="time">{{primary.timeLabel}}<text class="tz"> 北京时间</text></view>
     <view wx:if="{{primary.detail}}">{{primary.detail}}</view>
     <view wx:if="{{primary.serviceLine}}" class="muted">{{primary.serviceLine}}</view>
-    <view wx:if="{{primary.visitNo}}" class="muted primary-visit-no">预约编号 {{primary.visitNo}}</view>
+    <view wx:if="{{primary.visitNo}}" class="muted">预约编号</view>
+    <view wx:if="{{primary.visitNo}}" class="muted primary-visit-no">{{primary.visitNo}}</view>
     <view wx:if="{{primary.deadline}}" class="deadline">{{primary.deadline}}</view>
     <view wx:if="{{primary.arrived}}" class="notice">已到诊表示前台完成登记；医师实际接诊与治疗进展以现场指引和已发布的诊疗记录为准。</view>
     <view wx:if="{{primary.contact}}" class="notice">本次办理结果需由门店核实，请通过下方入口联系本单门店。</view>
