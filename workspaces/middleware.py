@@ -73,6 +73,7 @@ ROUTES={
  'patient_enrollment_list':{'FRONT_DESK'},'patient_enrollment_detail':{'FRONT_DESK'},'patient_enrollment_review_confirm':{'FRONT_DESK'},
  'branch_directory_maintain':{'MANAGER'},
  'clinical_recalls':{'FRONT_DESK'},'clinical_recall_claim':{'FRONT_DESK'},'clinical_recall_detail':{'FRONT_DESK'},'clinical_recall_action':{'FRONT_DESK'},
+ 'clinical_dentist_recalls':{'DENTIST'},'clinical_dentist_recall':{'DENTIST'},
  'clinical_labs':{'FRONT_DESK'},'clinical_lab_detail':{'FRONT_DESK'},'clinical_lab_action':{'FRONT_DESK'},
  'clinical_doctor_labs':{'DENTIST'},'clinical_doctor_lab_action':{'DENTIST'},'clinical_doctor_lab_queue':{'DENTIST'},'clinical_coordination_summary':{'MANAGER','HQ'},
  'clinical_plans':{'DENTIST'},'clinical_plan_detail':{'DENTIST'},'clinical_plan_preview':{'DENTIST'},

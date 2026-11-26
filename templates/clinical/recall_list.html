@@ -1,3 +1,34 @@
-{% extends 'base.html' %}{% block content %}<div class="business-flow"><div class="eyebrow">前台 · 联系与内部协调</div><h1>复诊随访与责任</h1><p>联系、预约与实际完成分别记录。未取得回复或原约取消时，后续目标继续保留。</p><nav class="actions" aria-label="随访清单筛选"><a href="?queue=active">待继续办理</a><a href="?queue=unclaimed">待认领</a><a href="?queue=past_unbooked">超建议期未约</a><a href="?queue=overdue">内部跟进逾期</a><a href="?queue=completed">实际已完成</a><a href="?queue=withdrawn">医师已撤回</a><a href="?queue=all">全部</a><a href="{% url 'clinical_next_list' %}">后续预约关联</a></nav>
-{% if queue == "past_unbooked" %}<p>以下事项已过医师建议的最晚复诊日，尚无接续预约或实际完成依据。</p>{% elif queue == "overdue" %}<p>以下事项已过前台记录的下次内部跟进期限。</p>{% endif %}
-{% for row in rows %}<section class="panel"><h2>{{ row.patient.name }} · {{ row.service.name }}</h2><p>{{ row.patient.patient_no }} · 建议 {{ row.earliest_on|date:'Y-m-d' }} 至 {{ row.latest_on|date:'Y-m-d' }}</p>{% if row.past_unbooked %}<p class="notice">超建议期未约</p>{% endif %}<p>完成目标：{{ row.completion_label }}</p><p>{{ row.booking_note|default:'无额外安排说明' }}</p>{% if row.episode %}<p><strong>{{ row.episode.get_state_display }}</strong> · 负责人 {{ row.episode.owner.username }} · 下次内部跟进 {{ row.episode.followup_due_at|date:'Y-m-d H:i' }}{% if row.contact_overdue %} · <strong>已逾期</strong>{% endif %}{% if not row.owner_available %} · 需明确接续责任{% endif %}</p>{% if row.completion_available and row.episode.state != 'COMPLETED' %}<p class="notice">已有可核对的实际完成依据，请明确核对后关闭随访。</p>{% endif %}<a class="button secondary" href="{% url 'clinical_recall_detail' row.episode.pk %}">查看责任、联系与结果</a>{% else %}<p>尚待前台认领并明确下次跟进期限。</p>{% if row.completion_rule == 'UNSPECIFIED' %}<p class="notice">原记录尚未明确完成目标，请医师重新确认后续指示。</p>{% else %}<a class="button" href="{% url 'clinical_recall_claim' row.id %}">认领联系责任</a>{% endif %}{% endif %}</section>{% empty %}<p class="notice">当前筛选下没有随访事项。</p>{% endfor %}{% include '_pagination.html' %}</div>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}复诊随访 · 前台工作台{% endblock %}
+{% block content %}
+<div class="business-flow recall-desk">
+  <a href="{% url 'frontdesk_home' %}">返回前台工作台</a>
+  <header><h1>复诊随访与责任</h1><p>{{ request.workspace.clinic.name }} · {{ today|date:'Y年n月j日' }}</p></header>
+  <nav class="recall-tabs" aria-label="随访清单筛选">
+    {% for key,caption in primary_filters %}<a href="?queue={{ key }}"{% if queue == key %} aria-current="page"{% endif %}>{{ caption }}</a>{% endfor %}
+  </nav>
+  <details class="recall-filters"{% if queue != 'mine' and queue != 'later' and queue != 'unclaimed' and queue != 'review' %} open{% endif %}>
+    <summary>日期、完成情况与历史</summary><nav class="recall-tabs" aria-label="其他随访筛选">{% for key,caption in history_filters %}<a href="?queue={{ key }}"{% if queue == key %} aria-current="page"{% endif %}>{{ caption }}</a>{% endfor %}</nav>
+  </details>
+  <section aria-labelledby="recall-selection"><h2 id="recall-selection">{{ filter_title }} <small>{{ page.paginator.count }} 项</small></h2>
+    {% if queue == 'past_unbooked' %}<p>以下事项已过医师建议的最晚复诊日，尚无接续预约或实际完成依据。</p>{% elif queue == 'overdue' %}<p>以下事项已过前台记录的下次内部跟进期限。</p>{% elif queue == 'mine' %}<p>按跟进期限排序，最早到期的事项在前。</p>{% elif queue == 'review' %}<p>患者已表示暂缓。这里记录原负责医师的意见。</p>{% endif %}
+  {% for row in rows %}<article class="panel recall-row"><h3>{{ row.patient.name }} · {{ row.service.name }}</h3>
+    <dl class="recall-facts">
+      <div><dt>医师建议复诊</dt><dd>{{ row.earliest_on|date:'n月j日' }} 至 {{ row.latest_on|date:'n月j日' }}</dd></div>
+      <div><dt>实际预约</dt><dd>{% if row.appointment %}{{ row.appointment.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间） · {{ row.appointment.get_status_display }}{% else %}暂无有效关联预约{% endif %}</dd></div>
+      {% if row.episode %}<div><dt>跟进责任人</dt><dd>{{ row.episode.owner.username }}{% if not row.owner_available %} · 需接续责任{% endif %}</dd></div>
+        <div><dt>内部跟进期限</dt><dd>{{ row.episode.followup_due_at|date:'n月j日 H:i' }}（北京时间）</dd></div>
+        <div><dt>最近联系</dt><dd>{% if row.last_contact %}{{ row.last_contact }} · {{ row.contact_at|date:'n月j日 H:i' }}{% else %}尚无联系记录{% endif %}</dd></div>
+      {% endif %}
+    </dl>
+    {% if row.episode %}
+      {% if row.completion_available and row.episode.state != 'COMPLETED' %}<p>已有可核对的实际完成依据，请核对后结案。</p>{% endif %}
+      {% if row.episode.state == 'REVIEW' %}<p class="notice">{% if row.review_label %}医师已核对 · {{ row.review_label }}{% else %}待原负责医师核对{% endif %}</p>{% endif %}
+      <a class="button secondary" href="{% url 'clinical_recall_detail' row.episode.pk %}">查看责任、联系与结果</a>
+    {% elif row.completion_rule == 'UNSPECIFIED' %}<p>原记录尚未明确完成目标，请医师核对。</p>
+    {% else %}<a class="button" href="{% url 'clinical_recall_claim' row.id %}">认领联系责任</a>{% endif %}
+  </article>{% empty %}<p class="notice">当前筛选下没有随访事项。</p>{% endfor %}
+  {% include '_pagination.html' %}</section>
+  <a href="{% url 'clinical_next_list' %}">核对后续预约关联</a>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% load workspace_tags %}
+{% block title %}复诊暂缓核对 · 医师工作台{% endblock %}
+{% block content %}<div class="business-flow recall-desk">
+  <a href="{% url 'clinical_dentist_recalls' %}">返回暂缓核对清单</a>
+  <header><h1>{{ visit.patient.name }}的复诊安排</h1><p>{{ row.service.name }} · {{ visit.clinic.name }}</p></header>
+  <section class="panel"><h2>原就诊与指示</h2>
+    <p>原就诊 {{ visit.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间）</p>
+    <p>建议复诊 {{ row.earliest_on|date:'n月j日' }} 至 {{ row.latest_on|date:'n月j日' }}</p>
+    <p>{{ row.clinical_purpose }}</p>
+    <a href="{% url 'clinical_encounter' visit.pk %}">查看原接诊记录</a>
+  </section>
+  {% if form %}<form class="panel form-panel" method="post"><h2>处理本次暂缓</h2>
+    <p>患者主动要求恢复安排时，由前台另行登记。</p>
+    {% csrf_token %}{% workspace_token %}<input type="hidden" name="phase" value="preview">
+    {% include 'components/form_errors.html' %}{{ form.patient_binding }}
+    {% for field in form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+    <button>预览处理意见</button></form>
+  {% else %}<p class="notice">{% if review_label %}本次核对意见 · {{ review_label }}{% else %}{{ row.recall.get_state_display }}{% endif %}</p>{% endif %}
+  {% if history %}<section class="panel"><h2>历次核对意见</h2>
+    {% for e in history %}<article><h3>{{ e.recorded_at|date:'Y年n月j日 H:i' }} · {{ e.actor.username }}</h3>
+    <p>{% if e.snapshot.decision == 'HOLD' %}继续暂缓，由患者主动联系{% else %}门店内部核对后续安排{% endif %}</p><p>{{ e.note }}</p></article>{% endfor %}
+  </section>{% endif %}
+</div>{% endblock %}

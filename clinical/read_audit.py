@@ -62,6 +62,7 @@ ROUTES = {
     'clinical_labs':('LAB_LIST','COORDINATION'),'clinical_lab_detail':('LAB','COORDINATION'),'clinical_lab_action':('LAB','COORDINATION'),
     'clinical_doctor_labs':('CARE','CARE'),'clinical_doctor_lab_action':('LAB','CARE','case_id'),
     'clinical_doctor_lab_queue':('LAB_LIST','CARE'),
+    'clinical_dentist_recalls':('RECALL_LIST','CARE'),'clinical_dentist_recall':('NEXT_VISIT','CARE'),
     'clinical_plans':('PLAN_LIST','CARE'),'clinical_plan_detail':('PLAN','CARE'),
     'clinical_plan_preview':('PLAN','CARE'),'clinical_plan_decision':('PLAN','CARE'),
     'clinical_actual':('ACTUAL','CARE'),'clinical_actual_void':('ACTUAL','CARE'),

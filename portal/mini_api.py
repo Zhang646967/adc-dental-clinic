@@ -204,6 +204,8 @@ def overview(request):
                    offer=dict(id=offer.pk, expires_at=offer.expires_at.isoformat()) if offer else None)
     if action.get('report'):
         primary['report'] = action['report']
+    if action.get('followup'):
+        primary['followup'] = action['followup']
     return result(request, dict(next_visit=visit_data(d['next_visit'],actor=request.user,now=now) if d['next_visit'] else None,
         active_count=d['active_count'], history_count=d['history_count'],
         waiting_count=d['waiting_count'], offer_count=d['offer_count'], primary_action=primary,

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}复诊暂缓核对 · 医师工作台{% endblock %}
+{% block content %}
+<div class="business-flow recall-desk">
+  <a href="{% url 'doctor_home' %}">返回医师工作台</a>
+  <header><h1>复诊暂缓核对</h1><p>患者已表示暂缓。请核对原就诊指示，给前台留下接续意见。</p></header>
+  <nav class="actions" aria-label="医师核对清单">
+    <a href="?queue=pending"{% if not reviewed %} aria-current="page"{% endif %}>待我核对</a>
+    <a href="?queue=reviewed"{% if reviewed %} aria-current="page"{% endif %}>已核对</a>
+  </nav>
+  {% for item in page %}<article class="panel recall-row">
+    <h2>{{ item.source_record.encounter.visit.patient.name }} · {{ item.service.name }}</h2>
+    <p>{{ item.source_record.encounter.visit.clinic.name }} · 原就诊 {{ item.source_record.encounter.visit.scheduled_start|date:'n月j日 H:i' }}</p>
+    <p>建议复诊 {{ item.earliest_on|date:'n月j日' }} 至 {{ item.latest_on|date:'n月j日' }}</p>
+    <a class="button secondary" href="{% url 'clinical_dentist_recall' item.pk %}">{% if reviewed %}查看处理意见{% else %}核对本次暂缓{% endif %}</a>
+  </article>{% empty %}<p class="notice">{% if reviewed %}当前没有已核对的暂缓事项。{% else %}当前没有需要您核对的暂缓事项。{% endif %}</p>{% endfor %}
+  {% include '_pagination.html' %}
+</div>{% endblock %}

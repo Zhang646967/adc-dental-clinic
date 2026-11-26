@@ -11,7 +11,7 @@ from clinical.encounter_selectors import encounter_details
 from clinical.next_visits import instruction_booking_projection,current_promise
 from clinical.plan_models import NextVisitInstruction
 from clinical.plan_locks import readable_services
-from clinical import recall,laboratory
+from clinical import recall,laboratory,recall_worklist
 from registry.models import Clinic
 from workspaces.context import require_active
 
@@ -22,10 +22,14 @@ def recall_instructions(actor,queue='active'):
     elif queue=='unclaimed':rows=rows.filter(state='OPEN',recall__isnull=True)
     elif queue=='overdue':rows=rows.filter(recall__state__in=['OPEN','REVIEW'],recall__followup_due_at__lt=timezone.now())
     elif queue=='past_unbooked':
-        candidates=rows.filter(state='OPEN',latest_on__lt=timezone.localdate()).filter(
-            Q(recall__isnull=True)|Q(recall__state__in=['OPEN','REVIEW']))
-        rows=rows.filter(pk__in=[
-            row.pk for row in candidates.iterator() if past_unbooked(instruction_booking_projection(row), getattr(row,'recall',None))])
+        rows=recall_worklist.available_instructions(rows).filter(latest_on__lt=timezone.localdate())
+    elif queue in ('mine','later'):
+        rows=recall_worklist.available_instructions(rows).filter(recall__owner=actor)
+        tomorrow=recall_worklist.due_tomorrow(timezone.now())
+        if queue=='mine':
+            return rows.filter(recall__followup_due_at__lt=tomorrow).order_by('recall__followup_due_at','pk')
+        return rows.filter(recall__followup_due_at__gte=tomorrow).order_by('recall__followup_due_at','pk')
+    elif queue=='review':rows=rows.filter(state='OPEN',recall__state='REVIEW')
     elif queue=='completed':rows=rows.filter(recall__state='COMPLETED')
     elif queue=='withdrawn':rows=rows.filter(recall__state='WITHDRAWN')
     return rows.order_by('latest_on','pk')
@@ -33,7 +37,7 @@ def recall_instructions(actor,queue='active'):
 
 def past_unbooked(data, episode):
     return (data['overdue'] and data['needs_booking'] and not data['report_review']
-        and (episode is None or episode.state in ('OPEN','REVIEW')))
+        and (episode is None or episode.state=='OPEN'))
 
 
 def recall_projection(instruction):
@@ -47,6 +51,39 @@ def recall_projection(instruction):
         contact_overdue=bool(episode and episode.state in ('OPEN','REVIEW') and episode.followup_due_at<timezone.now()),
         evidence=recall.completion_candidates(instruction))
     return data
+
+
+def recall_page_rows(page):
+    from clinical.plan_models import PlanAppointment
+    from scheduling.models import Visit
+    rows=list(page)
+    appointments={}
+    sources={r.pk:r.source_record.encounter.visit for r in rows}
+    links=PlanAppointment.objects.filter(instruction_id__in=sources).select_related('visit').order_by('-pk')
+    pending=[(link.instruction_id,link.visit) for link in links]
+    seen=set()
+    while pending:
+        rescheduled={}
+        for instruction_id,current in pending:
+            source=sources[instruction_id]
+            key=instruction_id,current.pk
+            if key in seen or (source.patient_id,source.clinic_id)!=(current.patient_id,current.clinic_id):
+                continue
+            seen.add(key)
+            if current.status in ('SCHEDULED','CHECKED_IN'):
+                appointments.setdefault(instruction_id,current)
+            elif current.status=='RESCHEDULED':
+                rescheduled.setdefault(current.pk,[]).append(instruction_id)
+        pending=[(instruction_id,v) for v in Visit.objects.filter(replaces_visit_id__in=rescheduled)
+            for instruction_id in rescheduled[v.replaces_visit_id]]
+    for row in rows:
+        episode=getattr(row,'recall',None)
+        yield dict(id=row.pk,patient=row.source_record.encounter.visit.patient,service=row.service,
+            earliest_on=row.earliest_on,latest_on=row.latest_on,episode=episode,completion_rule=row.completion_rule,
+            booking_note=row.booking_note,completion_label=row.get_completion_rule_display(),owner_available=row.front_available,
+            last_contact=recall_worklist.CONTACT_LABELS.get(row.contact_result),contact_at=row.contact_at,
+            review_label=recall_worklist.review_label(row),appointment=appointments.get(row.pk),
+            completion_available=row.goal_covered and row.pk not in appointments and row.completion_rule!='UNSPECIFIED')
 
 
 def lab_projection(case):
@@ -88,7 +125,8 @@ def doctor_lab_queue(actor):
 def coordination_counts(actor):
     clinic=actor._adc_workspace.clinic_id
     require_active(actor,('FRONT_DESK',));require_clinic(actor,clinic)
-    return dict(unclaimed_recalls=recall_instructions(actor,'unclaimed').count(),
+    return dict(my_recalls=recall_instructions(actor,'mine').count(),review_recalls=recall_instructions(actor,'review').count(),
+        unclaimed_recalls=recall_instructions(actor,'unclaimed').count(),
         overdue_recalls=recall_instructions(actor,'overdue').count(),
         unclaimed_lab=laboratory.front_cases(actor).filter(coordinator__isnull=True,state='REQUESTED').count(),
         lab_to_review=laboratory.front_cases(actor).filter(state='RECEIVED').count(),

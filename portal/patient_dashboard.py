@@ -6,6 +6,9 @@ from portal import report_followup
 from portal.policies import patient_access
 from portal.report_notices import unread_count
 from scheduling.models import Visit
+from adc_core.rules import CLOSED_STATUSES
+from clinical.plan_models import NextVisitInstruction
+from clinical.recall_worklist import available_instructions
 
 
 ACTION_COPY = {
@@ -38,6 +41,25 @@ def primary_action(visits, current, offers, waiting_count, now):
     return dict(kind='WAITLIST' if waiting_count else 'BOOK', visit=None, offer=None)
 
 
+def ordinary_followup(access, now):
+    if access.delegated:
+        return None
+    today = timezone.localdate(now)
+    rows = NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=access.patient_id,
+        source_record__encounter__visit__status__in=CLOSED_STATUSES, source_record__encounter__visit__clinic__is_active=True,
+        earliest_on__lte=today).exclude(completion_rule='UNSPECIFIED')
+    item = available_instructions(rows, ordinary_only=True).order_by('latest_on','pk').select_related(
+        'source_record__encounter__visit__clinic__public_directory','service').first()
+    if item is None:
+        return None
+    source = item.source_record.encounter.visit
+    clinic = source.public_contact['name']
+    hint = (f'建议日期已过，您尚未预约。可联系{clinic}核对时间。' if item.latest_on < today
+        else f'{item.service.name}尚未预约，可联系{clinic}安排时间。')
+    return dict(kind='VISIT_FOLLOWUP', label='复诊时间待安排', button='查看下次安排', hint=hint,
+        followup=dict(visit_id=source.pk, instruction_id=item.pk))
+
+
 def dashboard(actor, *, now=None):
     access = patient_access(actor)
     visits = access.scope(Visit.objects.all())
@@ -51,7 +73,7 @@ def dashboard(actor, *, now=None):
     label, button, hint = ACTION_COPY[action['kind']]
     action.update(label=label, button=button, hint=hint)
     if action['kind'] == 'BOOK':
-        action.update(report_followup.next_pending(actor, access) or {})
+        action.update(report_followup.next_pending(actor, access) or ordinary_followup(access, now) or {})
     return dict(patient=access.patient, can_view_funds=not access.delegated, next_visit=current or upcoming,
         active_count=visits.filter(status__in=('SCHEDULED', 'CHECKED_IN')).count(),
         history_count=visits.exclude(status__in=('SCHEDULED', 'CHECKED_IN')).count(),

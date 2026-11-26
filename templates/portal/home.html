@@ -24,6 +24,8 @@
         <a class="button" href="{% url 'portal_visit' action.visit.pk %}{% if action.kind == 'CONTACT_CLINIC' %}#frontdesk-help{% endif %}">{{ action.button }}</a>
       {% elif action.report %}
         <a class="button" href="{% url 'portal_examination' action.report.visit_id action.report.id %}?revision={{ action.report.revision }}">{{ action.button }}</a>
+      {% elif action.followup %}
+        <a class="button" href="{% url 'portal_visit' action.followup.visit_id %}#followup-{{ action.followup.instruction_id }}">{{ action.button }}</a>
       {% elif action.kind == 'WAITLIST' %}
         <a class="button" href="{% url 'waitlist' %}">{{ action.button }}</a>
       {% else %}

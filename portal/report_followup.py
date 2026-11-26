@@ -97,6 +97,8 @@ def _service_title(instruction):
 def _followup_action(order, decision, active, latest, actor):
     instruction = decision.instruction
     action, message = decision.kind, ''
+    if instruction and getattr(getattr(instruction, 'recall', None), 'state', '') == 'REVIEW':
+        return 'CONTACT', '复诊安排已暂缓。需要继续安排时，可联系原门店。'
     if active:
         if (instruction and instruction.state == 'OPEN' and clinical.current_plan_step(instruction)
                 and getattr(getattr(instruction, 'recall', None), 'state', '') not in ('REVIEW', 'WITHDRAWN')
@@ -177,7 +179,8 @@ def next_pending(actor, access):
         order = decision.release.order
         instruction = decision.instruction
         if instruction:
-            if getattr(getattr(instruction, 'recall', None), 'state', '') == 'COMPLETED' or has_completed_goal(instruction):
+            if (instruction.state != 'OPEN' or getattr(getattr(instruction, 'recall', None), 'state', '') in
+                    ('COMPLETED', 'REVIEW', 'WITHDRAWN') or has_completed_goal(instruction)):
                 continue
         elif clinical.contact_progress(decision)['outcome'] == 'REACHED':
             continue

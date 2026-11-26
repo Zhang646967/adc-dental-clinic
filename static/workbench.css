@@ -231,3 +231,27 @@ tbody tr:hover { background: #f6faf7; }
 @media print {
   .desk-actions, .desk-account { display: none; }
 }
+
+/* Follow-up handover uses the same text sizes and focus treatment as the clinical workbench. */
+.recall-desk { max-width: 64rem; margin-inline: auto; overflow-wrap: anywhere; }
+.recall-desk header > p, .checkout-window { color: var(--muted); }
+.recall-desk h1 { margin-block: .5rem .25rem; }
+.recall-desk h2 small { font-size: 1rem; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.recall-tabs { display: flex; gap: .25rem .5rem; flex-wrap: wrap; align-items: center; }
+.recall-tabs a { display: inline-flex; align-items: center; min-height: 44px; padding: .45rem .8rem; border-radius: .45rem; }
+.recall-tabs [aria-current="page"] { background: var(--teal); color: #fff; text-decoration: none; font-weight: 650; }
+.recall-filters { margin-block: .4rem 1.25rem; border-bottom: 1px solid var(--line); padding-bottom: .35rem; }
+.recall-filters summary { width: fit-content; padding-block: .55rem; }
+.recall-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .7rem 1.2rem; margin-block: .8rem; }
+.recall-facts dt { color: var(--muted); font-size: .9375rem; }
+.recall-facts dd { margin: .15rem 0 0; font-weight: 600; line-height: 1.45; }
+.recall-row :is(h2,h3) { margin-block: 0 .5rem; }
+.recall-row { padding: clamp(.9rem,2vw,1.4rem); }
+.checkout-followup:target { scroll-margin-block-start: 1.5rem; outline: 2px solid var(--teal); outline-offset: .15rem; }
+.checkout-arrival { border-inline-start: 3px solid var(--teal); padding-inline-start: .8rem; }
+.checkout-arrival strong { font-size: 1.15rem; }
+@media (max-width: 38rem) {
+  .recall-facts { grid-template-columns: minmax(0,1fr); }
+  .recall-tabs { gap: .15rem; }
+  .recall-tabs a { padding-inline: .6rem; }
+}

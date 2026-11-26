@@ -1,6 +1,14 @@
 from django import forms
 from clinical.plan_forms import current_steps
 from clinical.continuity_models import LabCase
+from clinical.recall_worklist import DECISIONS
+
+
+class RecallDentistForm(forms.Form):
+    patient_binding=forms.CharField(widget=forms.HiddenInput,max_length=4096)
+    decision=forms.ChoiceField(label='本次处理意见',choices=[('', '请选择'), *DECISIONS.items()])
+    note=forms.CharField(label='医师核对依据',max_length=500,widget=forms.Textarea(attrs={'rows':3}),
+        help_text='仅供有权医师查阅。前台只看到所选处理意见。')
 
 
 def due_field():return forms.DateTimeField(label='下次内部跟进期限（北京时间）',widget=forms.DateTimeInput(attrs={'type':'datetime-local','step':'1'},format='%Y-%m-%dT%H:%M:%S'))

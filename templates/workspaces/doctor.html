@@ -14,6 +14,7 @@
   <div class="desk-directory-grid">
     <section><h3>接诊准备</h3>
       {% if exam_course_enabled %}<a href="{% url 'clinical_examinations' %}">检查执行与审核</a>{% endif %}
+      <a href="{% url 'clinical_dentist_recalls' %}">复诊暂缓核对 <small>待我核对 {{ recall_review_count }} 项</small></a>
       <a href="{% url 'clinical_doctor_lab_queue' %}">加工验收 <small>已返回待验收 {{ lab_review_count }} 项</small></a>
       <a href="{% url 'medical_proxies' %}">医疗代理适用性待办</a>
     </section>

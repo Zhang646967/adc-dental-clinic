@@ -46,7 +46,9 @@ def _followup(row, source, clinic, now, patient_actor):
         status, label, action = 'WITHDRAWN', '已撤回复诊指示', 'NONE'
     elif recall_state == 'COMPLETED':
         status, label, action = 'COMPLETED', '复诊目标已核对', 'NONE'
-    elif (booking['report_review'] or recall_state == 'REVIEW' or not current_plan_step(row)
+    elif recall_state == 'REVIEW':
+        status, label, action = 'REVIEW', '复诊安排已暂缓', 'CONTACT'
+    elif (booking['report_review'] or not current_plan_step(row)
             or (active and needs_outcome_review(active, now))):
         status, label, action = 'REVIEW', '待门店核对', 'CONTACT'
     elif active:
@@ -71,6 +73,8 @@ def _followup(row, source, clinic, now, patient_actor):
         appointment=active_info or history_info)
     if patient_actor:
         result['booking_source'] = booking_source
+    if recall_state == 'REVIEW' and status == 'REVIEW':
+        result['message'] = '需要继续安排时，可联系原门店。'
     return result
 
 

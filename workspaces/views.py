@@ -100,6 +100,8 @@ def home(request):
             data['enrollment_pending_count']=PatientEnrollment.objects.filter(clinic_id=ctx.clinic_id,state='PENDING').count()
     if ctx.role=='DENTIST':
         from clinical.continuity_selectors import doctor_lab_queue
+        from clinical.recall_reviews import queue as recall_reviews
+        data['recall_review_count']=recall_reviews(request.user).count()
         data['lab_review_count']=doctor_lab_queue(request.user).filter(state='RECEIVED').count()
     return render(request,{'DENTIST':'workspaces/doctor.html','FRONT_DESK':'workspaces/frontdesk.html',
         'MANAGER':'workspaces/manager.html','HQ':'workspaces/hq.html','FINANCE':'workspaces/finance.html',

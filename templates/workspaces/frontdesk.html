@@ -29,7 +29,9 @@
       <a href="{% url 'appointment_improvements' %}">我的改进措施</a>
     </section>
     <section><h3>接诊与复诊</h3>
-      <a href="{% url 'clinical_recalls' %}">复诊随访 <small>待认领 {{ continuity.unclaimed_recalls }} · 跟进逾期 {{ continuity.overdue_recalls }}</small></a>
+      <a href="{% url 'clinical_recalls' %}?queue=mine">复诊随访与责任 <small>今天我应跟进 {{ continuity.my_recalls }} 项</small></a>
+      <a href="{% url 'clinical_recalls' %}?queue=unclaimed">待认领 {{ continuity.unclaimed_recalls }} 项</a>
+      <a href="{% url 'clinical_recalls' %}?queue=review">暂缓后内部核对 {{ continuity.review_recalls }} 项</a>
       <a href="{% url 'clinical_labs' %}">加工件送返 <small>待认领 {{ continuity.unclaimed_lab }} · 待验收 {{ continuity.lab_to_review }} · 待继续办理 {{ continuity.lab_pending }}</small></a>
       {% if exam_course_enabled %}<a href="{% url 'clinical_examination_progress' %}">本店检查进度</a>{% endif %}
     </section>

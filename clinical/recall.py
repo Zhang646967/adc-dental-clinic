@@ -76,6 +76,14 @@ def selected_evidence(instruction,values):
     return item
 
 
+def appointment_cursor(instruction):
+    cursor=[]
+    for link in instruction.appointment_links.select_related('visit').order_by('pk'):
+        current=current_promise(link.visit)
+        cursor.append([link.pk,current.pk,current.status,current.lock_version])
+    return cursor
+
+
 def prepare_recall(*,actor,action,instruction_id=None,episode_id=None,fields=None):
     if action not in ('OPEN','CONTACT','REASSIGN','RESUME','COMPLETE','WITHDRAW'):raise RuleError('未知复诊协调操作。')
     values=fields_for(action,fields or {})
@@ -85,6 +93,8 @@ def prepare_recall(*,actor,action,instruction_id=None,episode_id=None,fields=Non
     if instruction.completion_rule=='UNSPECIFIED':raise RuleError('原指示尚无明确完成目标，请医师确认新的后续指示；不推断旧记录。')
     data=dict(action=action,instruction=instruction.pk,instruction_revision=instruction.revision,episode=episode.pk if episode else None,
         revision=episode.revision if episode else None,values=values)
+    if action in ('OPEN','CONTACT','RESUME'):
+        data['appointments']=appointment_cursor(instruction)
     evidence=selected_evidence(instruction,values) if action=='COMPLETE' else None
     if evidence:data['evidence']=evidence
     return dict(proposal_token=proposal(actor,CONTRACT,('FRONT_DESK',),data),instruction=instruction,episode=episode,values=values,evidence=evidence)
@@ -98,6 +108,8 @@ def confirm_recall(*,actor,proposal_token,confirmed):
     p=read_proposal(actor,CONTRACT,('FRONT_DESK',),proposal_token);data=p['data'];clinic=front_clinic(actor)
     lock_clinic_grant(actor,clinic)
     preview=scoped_instructions(actor).get(pk=data['instruction']);source=preview.source_record.encounter.visit
+    from coordination.reservations import lock_resources
+    lock_resources(patients=[source.patient_id])
     Patient.objects.select_for_update().get(pk=source.patient_id,is_active=True)
     instruction=NextVisitInstruction.objects.select_for_update().get(pk=preview.pk)
     episode=RecallEpisode.objects.select_for_update().filter(instruction=instruction).first();op=operation(p['operation'])
@@ -109,6 +121,8 @@ def confirm_recall(*,actor,proposal_token,confirmed):
     if instruction.revision!=data['instruction_revision']:raise RuleError('后续指示或预约关联已有变化，请核对当前安排。')
     if instruction.completion_rule=='UNSPECIFIED':raise RuleError('需要医师明确后续完成目标，不能推断旧指示。')
     action=data['action'];values=fields_for(action,data['values']);evidence=None
+    if action in ('OPEN','CONTACT','RESUME') and data.get('appointments')!=appointment_cursor(instruction):
+        raise RuleError('关联预约已有变化，请先核对最新到店安排，再记录本次随访。')
     due=moment(values['followup_due_at'],'下次内部跟进期限',future=True) if 'followup_due_at' in values else None
     if action=='OPEN':
         if episode is not None:raise RuleError('已有联系责任，请查看原复诊任务，不能重复建单。')
