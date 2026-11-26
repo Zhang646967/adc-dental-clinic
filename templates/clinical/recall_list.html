@@ -12,14 +12,18 @@
   </details>
   <section aria-labelledby="recall-selection"><h2 id="recall-selection">{{ filter_title }} <small>{{ page.paginator.count }} 项</small></h2>
     {% if queue == 'past_unbooked' %}<p>以下事项已过医师建议的最晚复诊日，尚无接续预约或实际完成依据。</p>{% elif queue == 'overdue' %}<p>以下事项已过前台记录的下次内部跟进期限。</p>{% elif queue == 'mine' %}<p>按跟进期限排序，最早到期的事项在前。</p>{% elif queue == 'review' %}<p>患者已表示暂缓。这里记录原负责医师的意见。</p>{% endif %}
-  {% for row in rows %}<article class="panel recall-row"><h3>{{ row.patient.name }} · {{ row.service.name }}</h3>
+  {% for row in rows %}<article class="panel recall-row"><header class="recall-row-head"><h3>{{ row.patient.name }} · {{ row.service.name }}</h3>
+    {% if queue == 'mine' and row.episode.owner_id == user.pk and row.episode.state == 'OPEN' and not row.appointment and not row.completion_available %}
+    <a class="button" href="{% url 'clinical_recall_action' row.episode.pk 'contact' %}" aria-label="记录本次联系，{{ row.patient.name }}，{{ row.service.name }}">记录本次联系</a>
+    {% endif %}</header>
     <dl class="recall-facts">
-      <div><dt>医师建议复诊</dt><dd>{{ row.earliest_on|date:'n月j日' }} 至 {{ row.latest_on|date:'n月j日' }}</dd></div>
-      <div><dt>实际预约</dt><dd>{% if row.appointment %}{{ row.appointment.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间） · {{ row.appointment.get_status_display }}{% else %}暂无有效关联预约{% endif %}</dd></div>
-      {% if row.episode %}<div><dt>跟进责任人</dt><dd>{{ row.episode.owner.username }}{% if not row.owner_available %} · 需接续责任{% endif %}</dd></div>
-        <div><dt>内部跟进期限</dt><dd>{{ row.episode.followup_due_at|date:'n月j日 H:i' }}（北京时间）</dd></div>
-        <div><dt>最近联系</dt><dd>{% if row.last_contact %}{{ row.last_contact }} · {{ row.contact_at|date:'n月j日 H:i' }}{% else %}尚无联系记录{% endif %}</dd></div>
+      {% if row.episode %}
+      <div><dt>内部跟进期限</dt><dd>{{ row.episode.followup_due_at|date:'Y年n月j日 H:i' }}（北京时间）</dd></div>
+      <div><dt>跟进责任人</dt><dd>{% if row.episode.owner_id == user.pk %}我{% else %}{{ row.episode.owner.get_full_name|default:row.episode.owner.username }}{% endif %}{% if not row.owner_available %} · 需接续责任{% endif %}</dd></div>
       {% endif %}
+      <div><dt>实际预约</dt><dd>{% if row.appointment %}{{ row.appointment.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间） · {{ row.appointment.get_status_display }}{% else %}暂无有效关联预约{% endif %}</dd></div>
+      <div><dt>医师建议复诊</dt><dd>{{ row.earliest_on|date:'Y年n月j日' }}{% if row.latest_on != row.earliest_on %} 至 {{ row.latest_on|date:'Y年n月j日' }}{% endif %}</dd></div>
+      {% if row.episode %}<div><dt>最近联系</dt><dd>{% if row.last_contact %}{{ row.last_contact }} · {{ row.contact_at|date:'n月j日 H:i' }}{% else %}尚无联系记录{% endif %}</dd></div>{% endif %}
     </dl>
     {% if row.episode %}
       {% if row.completion_available and row.episode.state != 'COMPLETED' %}<p>已有可核对的实际完成依据，请核对后结案。</p>{% endif %}

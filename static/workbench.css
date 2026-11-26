@@ -247,7 +247,21 @@ tbody tr:hover { background: #f6faf7; }
 .recall-facts dd { margin: .15rem 0 0; font-weight: 600; line-height: 1.45; }
 .recall-row :is(h2,h3) { margin-block: 0 .5rem; }
 .recall-row { padding: clamp(.9rem,2vw,1.4rem); }
-.checkout-followup:target { scroll-margin-block-start: 1.5rem; outline: 2px solid var(--teal); outline-offset: .15rem; }
+.recall-row-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .35rem 1rem; }
+.recall-row-head .button { min-height: 44px; }
+/* Departure summaries use the same reading order on the patient and desk pages. */
+.checkout { overflow-wrap: anywhere; }
+.checkout-balance { font-size: 1.125rem; }
+.checkout-balance strong { font-size: 1.25em; font-variant-numeric: tabular-nums; }
+.checkout-followup + .checkout-followup { margin-block-start: 1rem; padding-block-start: 1rem; border-top: 1px solid var(--line, #ced9d6); }
+.checkout .detail-grid dd { min-width: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 34rem) {
+  .checkout .detail-grid { grid-template-columns: minmax(0, 1fr) auto; }
+  .checkout .detail-grid dd { max-width: 48vw; }
+}
+.checkout-reference { display: block; color: var(--muted); font-size: .875rem; }
+.checkout-reference bdi { display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
+.checkout-followup:target { scroll-margin-block-start: 1.5rem; outline: 2px solid var(--teal); outline-offset: .15rem; border-radius: .4rem; padding: .75rem; }
 .checkout-arrival { border-inline-start: 3px solid var(--teal); padding-inline-start: .8rem; }
 .checkout-arrival strong { font-size: 1.15rem; }
 @media (max-width: 38rem) {

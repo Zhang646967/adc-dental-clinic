@@ -21,21 +21,23 @@
   {% endwith %}
   {% if visit.status == 'COMPLETED' or visit.status == 'CLOSED_NO_TREATMENT' %}
   <h3>下次安排</h3>
-  {% for item in checkout.followups %}<article class="checkout-followup" id="followup-{{ item.id }}" tabindex="-1">
-    <h4>{{ item.service }}</h4>
+  {% for item in checkout.followups %}<article class="checkout-followup" id="followup-{{ item.id }}" tabindex="-1" aria-labelledby="followup-name-{{ item.id }}">
+    <h4 id="followup-name-{{ item.id }}">{{ item.service }}</h4>
     <p><strong>{{ item.label }}</strong> · {{ item.clinic }}</p>
     {% if item.message and not front %}<p>{{ item.message }}</p>{% endif %}
-    <p class="checkout-window">建议日期 {{ item.earliest_on|date:'Y年n月j日' }}{% if item.latest_on != item.earliest_on %} 至 {{ item.latest_on|date:'Y年n月j日' }}{% endif %}</p>
     {% if item.active_appointment %}{% with appt=item.active_appointment %}
-    <p class="checkout-arrival">已确认的到店时间<br><strong>{{ appt.start|date:'Y年n月j日 H:i' }}</strong>（北京时间） · {{ appt.status_label }}<br>
-    <a href="{% if front %}{% url 'visit_detail' appt.id %}{% else %}{% url 'portal_visit' appt.id %}{% endif %}?checkout_from={{ visit.pk }}">查看复诊预约 {{ appt.visit_no }}</a></p>
+    <p class="checkout-arrival">已确认的到店时间<br><strong><time datetime="{{ appt.start|date:'c' }}">{{ appt.start|date:'Y年n月j日 H:i' }}</time></strong>（北京时间） · {{ appt.status_label }}<br>
+    <a href="{% if front %}{% url 'visit_detail' appt.id %}{% else %}{% url 'portal_visit' appt.id %}{% endif %}?checkout_from={{ visit.pk }}">查看复诊预约</a>
+    <span class="checkout-reference">预约编号 <bdi>{{ appt.visit_no }}</bdi></span></p>
     {% endwith %}{% endif %}
+    <p class="checkout-window">建议日期 {{ item.earliest_on|date:'Y年n月j日' }}{% if item.latest_on != item.earliest_on %} 至 {{ item.latest_on|date:'Y年n月j日' }}{% endif %}</p>
     {% if item.overdue %}<p>建议日期已过，请和原门店商定新的复诊时间。</p>{% endif %}
     {% if item.action == 'BOOK' %}{% with source=item.booking_source %}
     <a class="button secondary" href="{% url 'portal_slots' %}?clinic={{ source.clinic }}&amp;service={{ source.service }}&amp;followup_visit={{ source.followup_visit }}&amp;followup_examination={{ source.followup_examination }}&amp;followup_revision={{ source.followup_revision }}">查看复诊可约时段</a>
     {% endwith %}{% elif item.action == 'CONTACT' %}{% if front %}<p>请前台核对本店后续安排。</p>{% else %}<a href="#frontdesk-help">联系原门店</a>{% endif %}{% endif %}
     {% if item.historical_appointment %}{% with old=item.historical_appointment %}
-    <p class="muted">历史预约 · {{ old.status_label }} · <a href="{% if front %}{% url 'visit_detail' old.id %}{% else %}{% url 'portal_visit' old.id %}{% endif %}?checkout_from={{ visit.pk }}">{{ old.visit_no }}</a></p>
+    <p class="muted">历史预约 · {{ old.status_label }} · <a href="{% if front %}{% url 'visit_detail' old.id %}{% else %}{% url 'portal_visit' old.id %}{% endif %}?checkout_from={{ visit.pk }}">查看历史预约</a>
+    <span class="checkout-reference">预约编号 <bdi>{{ old.visit_no }}</bdi></span></p>
     {% endwith %}{% endif %}
   </article>{% empty %}<p>本次未记录复诊安排。</p>{% endfor %}
   {% endif %}

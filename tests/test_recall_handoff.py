@@ -52,8 +52,11 @@ class RecallHandoffTests(ChairsideFixture, ContinuityFixture, TransactionTestCas
         self.assertEqual(list(recall_instructions(self.front,'past_unbooked').values_list('pk',flat=True)),[first.pk])
         self.v.refresh_from_db()
         before=self.v.lock_version
-        self.open_recall(future)
-        self.assertIn(future,recall_instructions(self.front,'mine'))
+        episode=self.open_recall(future)
+        contact_path=reverse('clinical_recall_action',args=[episode.pk,'contact'])
+        with patch.object(timezone,'now',return_value=episode.followup_due_at):
+            self.assertIn(future,recall_instructions(self.front,'mine'))
+            self.assertContains(self.front_web.get(reverse('clinical_recalls'),{'queue':'mine'}),contact_path)
         self.v.refresh_from_db()
         self.assertEqual(self.v.lock_version,before)
         delegate,_,grant=self.create_delegate()
@@ -69,6 +72,8 @@ class RecallHandoffTests(ChairsideFixture, ContinuityFixture, TransactionTestCas
         self.close_origin()
         self.assertNotIn(row, recall_instructions(self.front,'mine'))
         self.assertIn(row, recall_instructions(self.front,'review'))
+        self.assertNotContains(self.front_web.get(reverse('clinical_recalls'),{'queue':'review'}),
+            reverse('clinical_recall_action',args=[ep.pk,'contact']))
         self.assertEqual(self.mini.get(reverse('mini_overview')).json()['data']['primary_action']['kind'],'BOOK')
         self.assertContains(self.web.get(reverse('portal_visit',args=[self.v.pk])),'复诊安排已暂缓')
         url=reverse('clinical_dentist_recall',args=[row.pk]); staff=self.web_client(self.doc)
