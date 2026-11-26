@@ -60,3 +60,6 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 
 /* Long invoice numbers stay readable without breaking the layout. */
 .invoice-id{font-size:30rpx;line-height:1.4;word-break:break-all}
+
+/* The instruction opened from the primary action stays visibly selected. */
+.patient-flow .followup-selected{border-left:8rpx solid #0c6d60;background:#e8f3ef}

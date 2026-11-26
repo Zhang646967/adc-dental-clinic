@@ -10,7 +10,13 @@ const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
   data:{visit:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false},
-  onLoad(q){this.id=Number(q.id);this.generation=0;},
+  onLoad(q){
+    this.id=Number(q.id);
+    // Only a numeric instruction id from the current visit response can be
+    // located; a missing or stale id never reuses cached instructions.
+    this.instructionId=positive(q.instruction)?Number(q.instruction):null;
+    this.generation=0;
+  },
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
@@ -25,10 +31,11 @@ Page({
       }
       this.context=context;
       api.showSubject(this);
-      this.setData({visit,reviewView:buildReview(visit,{delegated:session.delegated}),
+      const reviewView=buildReview(visit,{delegated:session.delegated,instruction:this.instructionId});
+      this.setData({visit,reviewView,
         examinations:buildExaminations(visit,{delegated:session.delegated}),
         returnSources:buildReturnSources(visit,{delegated:session.delegated}),
-        readOnly:session.read_only,environmentLabel:session.environment_label||''});
+        readOnly:session.read_only,environmentLabel:session.environment_label||''},()=>this.focusInstruction());
     }catch(e){
       if(generation!==this.generation)return;
       this.setData(blankDraft);
@@ -36,6 +43,16 @@ Page({
     }
   },
   onUnload(){this.generation++;},
+  focusInstruction(){
+    const review=this.data.reviewView;
+    if(!review||!this.instructionId)return;
+    const row=(review.followups||[]).find(item=>item.selected);
+    if(!row)return;
+    // Leave a small gap above the located instruction so its own label and
+    // service stay visible under the navigation bar.
+    const locate=()=>wx.pageScrollTo({selector:`#followup-${row.id}`,offsetTop:-16,duration:250});
+    if(typeof wx.nextTick==='function')wx.nextTick(locate);else locate();
+  },
   visitError(error){
     if(staleSubject(error,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
       getApp().globalData.review=null;

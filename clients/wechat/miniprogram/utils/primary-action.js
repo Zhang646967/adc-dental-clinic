@@ -10,6 +10,7 @@ const SPEC = {
   CONTACT_CLINIC: {label: '请联系门店核实', hint: '请与门店前台核对这次办理结果。', target: 'contact', action: '查看门店联系方式'},
   WAITLIST: {label: '候补进度', hint: '查看等待、确认和成约结果。', target: 'waitlist', action: '查看候补进度'},
   REPORT_FOLLOWUP: {label: '复诊待安排', hint: '查看检查报告与复诊建议。', target: 'report', action: '查看报告与复诊'},
+  VISIT_FOLLOWUP: {label: '复诊时间待安排', hint: '查看这次就诊的建议复诊安排。', target: 'followup', action: '查看下次安排'},
   BOOK: {label: '预约就诊', hint: '从服务目录选择门店、服务与时段。', target: 'book', action: '预约就诊'}
 };
 
@@ -45,6 +46,13 @@ function primaryAction(overview) {
     const report = raw.report;
     if (!report || ![report.visit_id, report.id, report.revision].every(value => Number.isSafeInteger(value) && value > 0)) return null;
     url = `/pages/examination/index?visit=${report.visit_id}&id=${report.id}&revision=${report.revision}`;
+  } else if (spec.target === 'followup') {
+    // Only the two numeric ids are trusted; no server-supplied URL is opened.
+    const followup = raw.followup;
+    const visitId = followup && id(followup.visit_id);
+    const instructionId = followup && id(followup.instruction_id);
+    if (!visitId || !instructionId) return null;
+    url = `/pages/visit/index?id=${visitId}&instruction=${instructionId}`;
   } else {
     return null;
   }
@@ -56,7 +64,7 @@ function primaryAction(overview) {
   const detail = visit ? `${visit.clinic} · ${visit.dentist}` : '';
   const serviceLine = visit ? `${visit.service} · ${visit.status_label}` : '';
   const deadline = offer && offer.expires_at ? `请在 ${offer.expiresLabel} 前确认（北京时间）` : '';
-  const copy = spec.target === 'report' ? raw : {};
+  const copy = (spec.target === 'report' || spec.target === 'followup') ? raw : {};
 
   return {
     kind: raw.kind,

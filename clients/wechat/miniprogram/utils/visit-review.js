@@ -59,7 +59,7 @@ function bookingUrl(source) {
 
 // An older server supplies a single linked record. Its link remains available
 // without labelling it as the patient's next appointment.
-function followup(item) {
+function followup(item, selectedInstruction = null) {
   if (!item || !positive(item.id)) return null;
   const legacy = !['action', 'active_appointment', 'historical_appointment', 'booking_source']
     .some(field => Object.prototype.hasOwnProperty.call(item, field));
@@ -80,6 +80,8 @@ function followup(item) {
     action,
     rangeLabel: (item.earliest_on || item.latest_on)
       ? `${item.earliest_on || ''} 至 ${item.latest_on || ''}` : '',
+    message: item.message || '',
+    selected: selectedInstruction !== null && Number(item.id) === Number(selectedInstruction),
     overdue: !!item.overdue,
     active,
     historical,
@@ -91,7 +93,7 @@ function followup(item) {
   };
 }
 
-function buildReview(visit, {delegated = false} = {}) {
+function buildReview(visit, {delegated = false, instruction = null} = {}) {
   // Older backends omit review entirely; the original detail and invoice_id
   // entry remain available in that case.
   if (!visit || !visit.review) return null;
@@ -103,7 +105,7 @@ function buildReview(visit, {delegated = false} = {}) {
       ? raw.settlement_state
       : (settlement || positive(visit.invoice_id) ? 'PUBLISHED' : (raw.completed_at ? 'AWAITING_PUBLICATION' : null)));
   const instructions = (delegated ? [] : (Array.isArray(raw.followups) ? raw.followups : []))
-    .map(followup).filter(Boolean);
+    .map(item => followup(item, delegated ? null : instruction)).filter(Boolean);
 
   const settlementView = settlement ? {
     invoiceId: positive(settlement.invoice_id) ? Number(settlement.invoice_id) : null,
