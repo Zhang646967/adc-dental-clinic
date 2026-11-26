@@ -26,6 +26,17 @@ check(()=>{
   const r=primaryAction(raw);
   assert.equal(r.url,'/pages/visit/index?id=1&instruction=2');
 });
+check(()=>assert.equal(primaryAction({}),null));
+check(()=>assert.equal(primaryAction({primary_action:{kind:'VISIT_FOLLOWUP'}}),null));
+check(()=>{
+  const r=primaryAction({primary_action:{kind:'UPCOMING_VISIT',label:'下一次就诊',button:'查看到诊安排',
+    hint:'核对时间和门店。',visit:{id:6,visit_no:'V-E81063EB831F4A67997AB9A5430BF899',
+      start:'2026-11-28T02:00:00Z',end:'2026-11-28T02:30:00Z',status:'SCHEDULED',status_label:'已预约',
+      clinic:'云庭口腔 · 江畔门诊',dentist:'演示医生1',service:'修复评估与复查'},offer:null}});
+  assert.equal(r.url,'/pages/visit/index?id=6');
+  assert.equal(r.visitNo,'V-E81063EB831F4A67997AB9A5430BF899');
+  assert.equal(r.timeLabel,'2026-11-28 10:00');
+});
 check(()=>assert.equal(primaryAction(overview(null)),null));
 check(()=>assert.equal(primaryAction(overview({visit_id:1})),null));
 check(()=>assert.equal(primaryAction(overview({visit_id:0,instruction_id:1})),null));

@@ -78,7 +78,8 @@ function primaryAction(overview) {
     serviceLine,
     deadline,
     offerId: offer ? id(offer.id) : null,
-    visitId: visit ? id(visit.id) : null
+    visitId: visit ? id(visit.id) : null,
+    visitNo: visit ? (visit.visit_no || '') : ''
   };
 }
 
