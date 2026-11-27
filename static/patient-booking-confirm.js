@@ -72,7 +72,8 @@
     back.hidden = true;
 
     try {
-      const result = await send(form.action, fields);
+      // The reschedule form has a hidden input named "action".
+      const result = await send(form.getAttribute('action') || location.href, fields);
       if (result === null || openVisit(result)) return;
       if (result.state === 'REJECTED') {
         const original = kind === 'reschedule' ? ' 原预约可从原就诊详情核对。' : '';
