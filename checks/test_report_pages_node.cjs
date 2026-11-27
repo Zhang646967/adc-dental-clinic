@@ -284,6 +284,19 @@ async function verify() {
   ok(rejectedReturn.page.data.focusId === null && rejectedReturn.scrolls.length === 0, 'a rejected refresh keeps no anchor');
   ok(rejectedReturn.page.data.selfOnly === true, 'the rejection still shows its own path');
 
+  // An expired session rejects the re-read before any anchor is applied.
+  const expiredSession = load('report-notices', { session: { ...auth }, responses: [
+    pageOf([notice(11)]), Object.assign(new Error('请先登录'), { status: 401 })
+  ] });
+  expiredSession.page.onLoad({});
+  await expiredSession.page.onShow();
+  expiredSession.page.open(tapAt(0));
+  await expiredSession.page.onHide();
+  await expiredSession.page.onShow();
+  ok(expiredSession.page.data.focusId === null && expiredSession.scrolls.length === 0,
+    'an expired session keeps no anchor');
+  ok(expiredSession.page.data.rows.length === 0, 'an expired session leaves no old row');
+
   // Acknowledge is not navigation and must not create an anchor.
   const ack = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), { id: 11, read_at: '2026-11-27T02:00:00Z', unread_count: 7 }] });
   ack.page.onLoad({});
