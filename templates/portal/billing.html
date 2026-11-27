@@ -7,10 +7,10 @@
 </div>
 <div class="appointment-cards">
   {% for bill in rows %}
-  <article class="appointment-card bill-list-row" id="bill-{{ bill.id }}">
+  <article class="appointment-card bill-list-row" id="bill-{{ bill.id }}" tabindex="-1" aria-labelledby="bill-clinic-{{ bill.id }} bill-date-{{ bill.id }}">
     <div>
-      <h2>{{ bill.clinic }}</h2>
-      <p>{{ bill.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间）</p>
+      <h2 id="bill-clinic-{{ bill.id }}">{{ bill.clinic }}</h2>
+      <p id="bill-date-{{ bill.id }}">{{ bill.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间）</p>
     </div>
     <div>
       {% include 'components/bill_balance.html' with pending=bill.review_pending %}
@@ -18,7 +18,7 @@
       {% if bill.insurance_pending %}<p>医保分担待复核</p>{% elif bill.review_pending %}<p>收退款申请待复核</p>{% endif %}
       {% if bill.advance_excess %}<p>待核对的预收抵扣 ¥{{ bill.advance_excess|floatformat:2 }}</p>{% endif %}
     </div>
-    <a class="button secondary" href="{% url 'portal_invoice' bill.id %}?billing_page={{ page }}" aria-label="查看{{ bill.scheduled_start|date:'n月j日 H:i' }}{{ bill.clinic }}的结算单">查看结算单</a>
+    <a class="button secondary" id="bill-{{ bill.id }}-open" href="{% url 'portal_invoice' bill.id %}?billing_page={{ page }}" aria-label="查看{{ bill.scheduled_start|date:'n月j日 H:i' }}{{ bill.clinic }}的结算单">查看结算单</a>
   </article>
   {% empty %}
   <section class="panel portal-empty"><h2>暂无已发布的结算单</h2>

@@ -188,6 +188,7 @@
 .bill-list-row > *, .bill-list-row p { min-width: 0; overflow-wrap: anywhere; }
 .bill-list-row h2, .bill-list-row p { margin-block: .25rem; }
 .bill-list-row .button, .bill-versions .button { min-height: 44px; }
+.bill-list-row a:target { scroll-margin-block-start: min(38vh, 18rem); }
 @media (max-width: 52em) {
   .appointment-card.bill-list-row { grid-template-columns: minmax(0, 1fr); }
   .bill-list-row > a { justify-self: start; }

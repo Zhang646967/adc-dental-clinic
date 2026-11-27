@@ -51,9 +51,9 @@ class CheckoutTests(VisitReviewFixture, TransactionTestCase):
         url = reverse('portal_invoice', args=[invoice.pk])
         billing = reverse('portal_billing')
         page = self.web.get(billing)
-        self.assertContains(page, f'{url}?billing_page=1')
+        self.assertContains(page, f'id="bill-{invoice.pk}-open" href="{url}?billing_page=1"')
         detail = self.web.get(url, {'billing_page': 1, 'cash_page': 1, 'revision': 1})
-        self.assertContains(detail, f'{billing}?page=1#bill-{invoice.pk}')
+        self.assertContains(detail, f'href="{billing}?page=1#bill-{invoice.pk}-open"')
         self.assertContains(detail, 'id="cash-activity" open')
         self.assertContains(detail, '¥100.00')
         for params in ({}, {'billing_page': 'bad'}):

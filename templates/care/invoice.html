@@ -1,7 +1,7 @@
 {% extends base_template %}
 {% block content %}
 {% if billing_page %}
-<p class="no-print"><a href="{% url 'portal_billing' %}?page={{ billing_page }}#bill-{{ invoice_id }}">← 返回费用清单</a></p>
+<p class="no-print"><a href="{% url 'portal_billing' %}?page={{ billing_page }}#bill-{{ invoice_id }}-open">← 返回费用清单</a></p>
 {% elif patient_portal or can_request_cash %}
 <p class="no-print"><a href="{% if patient_portal %}{% url 'portal_visit' visit_id %}{% else %}{% url 'visit_detail' visit_id %}{% endif %}#checkout-money-heading">← 返回原就诊</a></p>
 {% endif %}
