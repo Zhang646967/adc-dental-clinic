@@ -327,7 +327,7 @@ tbody tr:hover { background: #f6faf7; }
 .report-flow :focus-visible { outline: 3px solid #226652; outline-offset: 2px; }
 .report-flow .report-operation :is(input, select, textarea, button) { min-width: 0; max-width: 100%; }
 @media (max-width: 42em) {
-  .report-flow .report-facts { display: block; }
-  .report-facts dd { margin-bottom: .5em; }
+  .report-flow :is(.report-facts, .report-states) { display: block; }
+  .report-flow :is(.report-facts, .report-states) dd { margin-bottom: .5em; }
   .report-flow .portal-page-heading { flex-wrap: wrap; }
 }
