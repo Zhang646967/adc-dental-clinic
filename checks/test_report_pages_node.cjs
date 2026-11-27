@@ -214,6 +214,26 @@ async function verify() {
   await switched.page.onShow();
   ok(switched.page.data.focusId === null && switched.scrolls.length === 0, 'a changed subject drops the old anchor');
 
+  // A workspace change or a signed-out session drops the anchor as well.
+  const workspace = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
+  workspace.page.onLoad({});
+  await workspace.page.onShow();
+  workspace.page.open(tapAt(0));
+  workspace.page.returnTarget.context.workspaceId = 'w2';
+  await workspace.page.onHide();
+  await workspace.page.onShow();
+  ok(workspace.page.data.focusId === null && workspace.scrolls.length === 0, 'a changed workspace drops the old anchor');
+
+  const revised = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
+  revised.page.onLoad({});
+  await revised.page.onShow();
+  revised.page.open(tapAt(0));
+  revised.page.returnTarget.context.revision = 2;
+  await revised.page.onHide();
+  await revised.page.onShow();
+  ok(revised.page.data.focusId === null && revised.scrolls.length === 0, 'a changed subject revision drops the old anchor');
+
+
   // Expired anchors and unloads never apply later.
   const expired = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
   expired.page.onLoad({});
