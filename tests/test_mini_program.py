@@ -72,6 +72,10 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         p = self.post('mini_reschedule_preview', dict(action='preview', expected_version=0,
             slot_id=self.slot2.pk, start=(self.t+timedelta(hours=1)).isoformat(), reason='更换课程合成时段'), pk=original.pk)
         self.assertEqual(p.status_code, 200, p.content)
+        preview = p.json()['data']
+        self.assertEqual(preview['original']['id'], original.pk)
+        self.assertEqual(preview['service_name'], self.service.name)
+        self.assertEqual(preview['duration_minutes'], self.service.duration_minutes)
         confirm = dict(proposal_token=p.json()['data']['proposal_token'], confirmed='on')
         first = self.post('mini_reschedule_confirm', confirm, pk=original.pk)
         repeated = self.post('mini_reschedule_confirm', confirm, pk=original.pk)

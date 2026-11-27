@@ -6,7 +6,7 @@
 <div class="patient-task">
   <h1>核对后确认改期</h1>
   <p class="patient-task-lede">待确认，原预约仍保留。以下均为北京时间。</p>
-  {% include 'portal/reschedule_pair.html' with target=preview clinic_name=preview.destination.clinic.public_contact.name dentist_name=preview.destination.dentist.name service_name=preview.resources.service.name minutes=preview.resources.service.duration %}
+  {% include 'portal/reschedule_pair.html' with target=preview clinic_name=preview.clinic_name dentist_name=preview.destination.dentist.name service_name=preview.service_name minutes=preview.minutes %}
   <form class="panel patient-confirm-form" method="post" data-booking-confirmation="reschedule"
         data-result-url="{% url 'portal_booking_result' %}" data-subject-url="{% url 'portal_subjects' %}">
     <h2>改期原因</h2>

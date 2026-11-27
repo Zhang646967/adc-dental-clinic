@@ -356,7 +356,8 @@ def reschedule_candidates(request, pk):
     d = validated(SearchForm(request.GET, visit=visit))
     observation = rescheduling.options(actor=request.user, visit_id=pk, day=d['day'],
         dentist_id=d['dentist'].pk if d['dentist'] else None)
-    return result(request, dict(rows=[option_data(r) for r in observation['rows']], limited=observation['limited'],
+    return result(request, dict(rows=[dict(option_data(row), service_name=row['service'].name if row.get('service') else None)
+                                    for row in observation['rows']], limited=observation['limited'],
         note=observation['limit_reason'], original=visit_data(visit,actor=request.user)))
 
 
@@ -366,7 +367,8 @@ def reschedule_preview(request, pk):
     prepared = rescheduling.prepare(actor=request.user, visit_id=pk, expected_version=d['expected_version'],
         slot_id=d['slot_id'], start=d['start'], reason=d['reason'], offer_id=d['offer_id'])
     return result(request, dict(original=visit_data(prepared['original'],actor=request.user), proposal_token=prepared['proposal_token'],
-        clinic=(prepared.get('resources') or {}).get('public_clinic',prepared['destination'].clinic.public_contact)['name'], dentist=prepared['destination'].dentist.name,
+        clinic=prepared['clinic_name'], dentist=prepared['destination'].dentist.name,
+        service_name=prepared['service_name'], duration_minutes=prepared['minutes'],
         start=prepared['start'].isoformat(), end=prepared['end'].isoformat(), reason=prepared['reason'],
         duration_changed=prepared['duration_changed']))
 

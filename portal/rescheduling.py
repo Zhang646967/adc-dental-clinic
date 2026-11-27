@@ -108,7 +108,11 @@ def prepare(*, actor, visit_id, expected_version, slot_id, start, reason, offer_
             start=start.isoformat(), end=end.isoformat(), reason=reason.strip(),
             service=service.pk if service else None, resources=bundle, offer=offer.pk if offer else None,
             offer_revision=offer.request.revision if offer else None, offer_plan=offer_plan.pk if offer_plan else None)
+        display = bundle or {}
+        clinic_name = (display.get('public_clinic') or slot.clinic.public_contact)['name']
+        service_name = (display.get('service') or {}).get('name')
         return dict(original=visit, destination=slot, start=start, end=end, reason=reason.strip(),
+            clinic_name=clinic_name, service_name=service_name, minutes=int((end-start).total_seconds() // 60),
             service=service, resources=bundle, offer=offer, duration_changed=end-start != visit.scheduled_end-visit.scheduled_start,
             proposal_token=proposal(actor, CONTRACT, ('PATIENT',), data))
 

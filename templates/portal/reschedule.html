@@ -8,7 +8,7 @@
   <p class="patient-task-lede">待确认，原预约仍保留。以下均为北京时间。</p>
   {% if selection %}
     <div id="selected-arrangement" tabindex="-1">
-      {% include 'portal/reschedule_pair.html' with target=selection clinic_name=visit.clinic.public_contact.name dentist_name=selection.dentist service_name=selection.service_name minutes=selection.minutes %}
+      {% include 'portal/reschedule_pair.html' with target=selection clinic_name=selection.clinic_name dentist_name=selection.dentist service_name=selection.service_name minutes=selection.minutes %}
       <form method="post" class="panel">
         {% csrf_token %}{% workspace_token %}{{ form.as_div }}
         <div class="patient-actions"><button type="submit"{% if read_only %} disabled{% endif %}>核对原安排与新安排</button>
