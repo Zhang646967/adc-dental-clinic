@@ -109,9 +109,15 @@ class TreatmentContinuityHTTPTests(PlanFixture,TransactionTestCase):
         step=self.publish_plan(self.new_plan(charge_basis='ON_COMPLETION')).steps.get();self.decision(step)
         self.actual(step,progress='PARTIAL',charge_mode='NO_CHARGE',reason='明确分阶段治疗，完成时计费')
         self.review();c=self.client_for(self.doc);r=c.get(reverse('care_complete',args=[self.v.pk]))
-        self.assertEqual(r.context['form']['outcome'].value(),'TREATED');self.assertContains(r,'不是未治疗')
+        self.assertEqual(r.context['form']['outcome'].value(),'TREATED')
+        self.assertContains(r,'本次已实施阶段治疗，请按「有治疗」完成接诊。')
         data=self.values(r.context['form']);data.update(confirmed='on',outcome='TREATED');r=c.post(reverse('care_complete',args=[self.v.pk]),data)
         self.assertEqual(r.status_code,302,r.content);invoice=Invoice.objects.get();r=c.get(reverse('invoice_detail',args=[invoice.pk]))
+        version = invoice.current_record_version
+        self.assertEqual(version.outcome, 'TREATED')
+        self.assertEqual(version.total_amount, 0)
+        self.assertFalse(version.treatment_lines.exists())
+        self.assertFalse(CashEntry.objects.filter(invoice=invoice).exists())
         self.assertContains(r,'本次已提供阶段治疗');self.assertNotContains(r,'未实施治疗');self.assertNotContains(r,'PRIVATE_PLAN_EXAM');self.assertNotContains(r,'申请数量／单价更正')
     def test_frontdesk_can_link_without_reading_clinical_target(self):
         row=self.instruction();later=self.booking(start=self.t+timedelta(hours=1));c=self.client_for(self.front);url=reverse('clinical_next_link',args=[row.pk])

@@ -23,7 +23,7 @@
       <dt>已记账净收款</dt><dd>¥ {{ cash_balance.net_received }}</dd>
       <dt>医保个人账户承担</dt><dd>¥ {{ cash_balance.insurance_personal_account }}</dd>
       <dt>基金承担（应收）</dt><dd>¥ {{ cash_balance.insurance_fund }}</dd>
-      <dt>患者应承担</dt><dd>¥ {{ cash_balance.patient_responsibility }}</dd>
+      <dt>患者现金责任（预收抵扣前）</dt><dd>¥ {{ cash_balance.patient_responsibility }}</dd>
       <dt>已抵扣预收</dt><dd>¥ {{ cash_balance.advance_applied }}</dd>
     </dl>
     {% if is_current and can_request_cash and not cash_balance.insurance_pending %}{% if cash_balance.pending or cash_balance.advance_excess or not cash_balance.remaining and not cash_balance.refund_due %}<a href="{% url 'cash_invoice_request' invoice_id %}">申请模拟收款或退款</a>{% endif %}{% endif %}

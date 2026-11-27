@@ -17,18 +17,27 @@ def visible_words(node):
 
 class RoleGuiTests(SimpleTestCase):
     def test_payment_state_and_review_stay_visible_while_posted_history_can_be_opened(self):
-        for remaining, refund, expected in [("70.00", "0", "尚需支付"), ("0", "15.00", "应退余额"), ("0", "0", "已结清")]:
+        states = [
+            ("70.00", "0", True, "尚需支付"), ("0", "15.00", True, "应退余额"),
+            ("0", "0", True, "款项待复核"), ("0", "0", False, "已结清"),
+        ]
+        for remaining, refund, pending, expected in states:
             with self.subTest(expected=expected):
                 bill = dict(invoice_id=1, invoice_no="SYNTHETIC-INVOICE", revision=2, total=Decimal("100"),
-                            receipts=Decimal("30"), refunds=Decimal("0"), remaining=Decimal(remaining),
-                            refund_due=Decimal(refund), review_pending=True)
+                            receipts=Decimal("100") - Decimal(remaining) + Decimal(refund), refunds=Decimal("0"),
+                            remaining=Decimal(remaining), refund_due=Decimal(refund), review_pending=pending)
                 page = render_to_string("care/visit_checkout.html", {
                     "checkout": {"settlement_state": "PUBLISHED", "settlement": bill},
                     "visit": {"pk": 9, "status": "COMPLETED"},
                 })
                 visible = visible_words(parse_html(page))
-                for text in [expected, "本次账单金额", "待复核", "查看本次结算单", "下次安排", "收款和退款明细"]:
+                for text in [expected, "本次账单金额", "查看本次结算单", "下次安排", "收款和退款明细"]:
                     self.assertIn(text, visible)
+                if pending:
+                    self.assertIn("待复核", visible)
+                    self.assertNotIn("已结清", visible)
+                else:
+                    self.assertNotIn("待复核", visible)
                 for text in ["SYNTHETIC-INVOICE", "已记账收款", "已记账退款"]:
                     self.assertNotIn(text, visible)
                     self.assertIn(text, page)

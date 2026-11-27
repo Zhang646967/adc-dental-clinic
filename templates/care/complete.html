@@ -11,7 +11,11 @@
     <h3>实际治疗项目</h3>
     {% for line in lines %}<p><strong>{{ line.name_snapshot }}</strong> · {{ line.quantity }} {{ line.unit_snapshot }} × ¥{{ line.unit_price }} = ¥{{ line.line_amount }}</p>
     {% empty %}<p>{% if actual.no_charge_stages %}本次阶段治疗不另计费。{% elif medication_lines %}本次仅有实际发退药费用。{% elif published.outcome == 'NO_TREATMENT' %}本次未实施治疗。{% else %}没有本次牙科治疗收费明细。{% endif %}</p>{% endfor %}
-    {% if actual.no_charge_stages %}<h3>实际阶段治疗（本次不另计费）</h3>{% for stage in actual.no_charge_stages %}<p>{{ stage.name_snapshot }} · {{ stage.quantity }} {{ stage.unit_snapshot }}</p>{% endfor %}{% endif %}
+    {% if actual.no_charge_stages %}
+      <h3>实际阶段治疗（本次不另计费）</h3>
+      {% for stage in actual.no_charge_stages %}<p>{{ stage.name_snapshot }} · {{ stage.quantity }} {{ stage.unit_snapshot }}</p>{% endfor %}
+      {% if editable %}<p>本次已实施阶段治疗，请按「有治疗」完成接诊。</p>{% endif %}
+    {% endif %}
     {% include 'care/medication_table.html' %}
     {% if pharmacy_blocker %}<p class="notice">{{ pharmacy_blocker }} <a href="{% url 'prescription_visit' visit.pk %}">查看本次处方</a></p>{% endif %}
   </section>
