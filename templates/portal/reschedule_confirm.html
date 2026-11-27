@@ -5,18 +5,8 @@
 {% block content %}
 <div class="patient-task">
   <h1>核对后确认改期</h1>
-  <p class="patient-task-lede">待确认，原预约仍保留</p>
-  <div class="portal-comparison">
-    {% include 'portal/reschedule_source.html' %}
-    <section class="panel">
-      <h2>拟改为</h2>
-      <p>{{ preview.destination.clinic.public_contact.name }} · {{ preview.destination.dentist.name }}</p>
-      <p><strong>{{ preview.start|date:'Y-m-d H:i' }}–{{ preview.end|date:'H:i' }}</strong>（北京时间）</p>
-      {% if preview.resources %}<p>{{ preview.resources.service.name }} · {{ preview.resources.service.duration }} 分钟</p>{% endif %}
-      {% if preview.offer %}<p>本次使用候补邀约 #{{ preview.offer.pk }}。确认后按新时间到诊。</p>{% endif %}
-      {% if preview.duration_changed %}<p class="notice">新安排的时长有变化，请核对结束时间。</p>{% endif %}
-    </section>
-  </div>
+  <p class="patient-task-lede">待确认，原预约仍保留。以下均为北京时间。</p>
+  {% include 'portal/reschedule_pair.html' with target=preview clinic_name=preview.destination.clinic.public_contact.name dentist_name=preview.destination.dentist.name service_name=preview.resources.service.name minutes=preview.resources.service.duration %}
   <form class="panel patient-confirm-form" method="post" data-booking-confirmation="reschedule"
         data-result-url="{% url 'portal_booking_result' %}" data-subject-url="{% url 'portal_subjects' %}">
     <h2>改期原因</h2>

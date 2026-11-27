@@ -1,10 +1,37 @@
-{% extends 'portal/base.html' %}{% load workspace_tags %}{% block title %}调整我的预约 · ADC{% endblock %}{% block content %}
-<a href="{% url 'portal_visit' visit.pk %}">返回原预约详情</a><div class="eyebrow">本人预约 · 先选择，再核对</div><h1>调整这次预约</h1>
-{% include 'portal/reschedule_source.html' %}
-<p class="notice">原预约仍保留。查询和选择不占位；只有最后确认成功，才换成新的安排。同店、同服务开放未来十四天；跨店或更换服务请联系前台。</p>
-<section class="panel"><h2>查找新时间</h2><form method="get" class="portal-reschedule-filter">{{ search.as_div }}<button type="submit">查看可改时段</button></form>
-{% if result %}<p class="muted">按服务完整时长、科室开放、医师和椅位设备核对；实际确认时会再核对。{% if result.limited %}{{ result.limit_reason }}{% endif %}</p>{% endif %}</section>
-{% if offers %}<section class="panel"><h2>你还有可核对的候补邀约</h2><p>如要用邀约替代本预约，请在这里选择；不会另建一条并行预约。</p>{% for offer in offers %}<p>{{ offer.slot.dentist.name }} · {{ offer.starts_at|date:'Y-m-d H:i' }} — {{ offer.ends_at|date:'H:i' }}；确认期限 {{ offer.expires_at|date:'m-d H:i' }}</p><a class="button secondary" href="{% url 'portal_reschedule' visit.pk %}?offer={{ offer.pk }}">用这条邀约改期</a>{% endfor %}</section>{% endif %}
-{% if selection %}<section class="panel" id="selected-arrangement"><h2>拟选安排</h2><p><strong>{{ selection.dentist }}</strong> · {{ selection.start|date:'Y-m-d H:i' }} — {{ selection.end|date:'H:i' }}（北京时间）</p>{% if selection.offer %}<p>将接受本人邀约 #{{ selection.offer.pk }} 并替代原约；以邀约原定时长和资源为准。</p>{% endif %}<form method="post">{% csrf_token %}{% workspace_token %}{{ form.as_div }}<button type="submit"{% if read_only %} disabled{% endif %}>核对原安排与新安排</button></form></section>{% endif %}
-<div class="slot-grid">{% if result %}{% for row in result.rows %}<section class="slot-card"><h2>{{ row.start|date:'H:i' }} — {{ row.end|date:'H:i' }}</h2><p>{{ row.dentist }}</p><p>{{ row.start|date:'Y年m月d日' }} · 北京时间</p><a class="button secondary" href="{{ row.choose_url }}#selected-arrangement">选择这个时间</a></section>{% empty %}<section class="panel"><h2>这一天未找到可改时段</h2><p>可以换日期或医师继续查找；未返回候选不表示所有时间都不可用。原预约仍保留。</p></section>{% endfor %}{% endif %}</div>
-{% include 'portal/reschedule_help.html' %}{% endblock %}
+{% extends 'portal/base.html' %}
+{% load workspace_tags %}
+{% block title %}调整我的预约 · ADC 口腔{% endblock %}
+{% block content %}
+<div class="patient-task reschedule-task">
+  <a href="{% url 'portal_visit' visit.pk %}">返回原预约详情</a>
+  <h1>调整这次预约</h1>
+  <p class="patient-task-lede">待确认，原预约仍保留。以下均为北京时间。</p>
+  {% if selection %}
+    <div id="selected-arrangement" tabindex="-1">
+      {% include 'portal/reschedule_pair.html' with target=selection clinic_name=visit.clinic.public_contact.name dentist_name=selection.dentist service_name=selection.service_name minutes=selection.minutes %}
+      <form method="post" class="panel">
+        {% csrf_token %}{% workspace_token %}{{ form.as_div }}
+        <div class="patient-actions"><button type="submit"{% if read_only %} disabled{% endif %}>核对原安排与新安排</button>
+        <a href="{{ reselect_url }}#new-time">重新选择时段</a></div>
+      </form>
+    </div>
+  {% else %}{% include 'portal/reschedule_source.html' %}{% endif %}
+  <section class="panel" id="new-time"><h2>查找新时间</h2>
+    <form method="get" class="portal-reschedule-filter">{{ search.as_div }}<button type="submit">查看可改时段</button></form>
+    {% if result.limited %}<p>{{ result.limit_reason }}</p>{% endif %}
+  </section>
+  {% if result %}<div class="slot-grid">{% for row in result.rows %}
+    <section class="slot-card"><h2>{{ row.start|date:'H:i' }} 至 {{ row.end|date:'H:i' }}</h2><p>{{ row.start|date:'Y年m月d日' }} · {{ row.dentist }}</p>
+      <a class="button secondary" href="{{ row.choose_url }}#selected-arrangement" aria-label="选择 {{ row.start|date:'m月d日 H:i' }} {{ row.dentist }}的时段">选择这个时间</a>
+    </section>
+    {% empty %}<p class="notice">这一天未找到可改时段。可以换日期或医师，原预约仍保留。</p>{% endfor %}</div>{% endif %}
+  {% if offers %}<section class="panel"><h2>可选的候补邀约</h2>
+    {% for offer in offers %}<p>{{ offer.slot.dentist.name }} · {% include 'portal/reschedule_time.html' with start=offer.starts_at end=offer.ends_at only %}。请在 {{ offer.expires_at|date:'m-d H:i' }} 前确认。</p>
+      <a class="button secondary" href="{% url 'portal_reschedule' visit.pk %}?offer={{ offer.pk }}#selected-arrangement">用这条邀约改期</a>{% endfor %}
+  </section>{% endif %}
+  <details class="panel"><summary>改期范围与门店协助</summary>
+    <p>可选择本店同一服务未来十四天内的可用时段。跨店或更换服务请联系前台。</p>
+    {% include 'portal/reschedule_help.html' %}
+  </details>
+</div>
+{% endblock %}

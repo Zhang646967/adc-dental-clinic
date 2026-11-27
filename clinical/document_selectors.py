@@ -70,6 +70,7 @@ def document_worklist(actor):
         'encounter__visit__patient', 'encounter__visit__clinic', 'responsible').annotate(
         has_draft=Exists(ClinicalDocumentDraft.objects.filter(document_id=OuterRef('pk'))),
         has_confirmed=Exists(ClinicalDocumentVersion.objects.filter(document_id=OuterRef('pk'))),
+        confirmed_revision=Subquery(ClinicalDocumentVersion.objects.filter(document_id=OuterRef('pk')).order_by('-revision').values('revision')[:1]),
         deadline=Coalesce('review_due_at', 'due_at'),
         current_record_id=Subquery(ClinicalRecordVersion.objects.filter(encounter_id=OuterRef('encounter_id')).order_by('-revision').values('pk')[:1]),
         confirmed_record_id=Subquery(ClinicalDocumentVersion.objects.filter(document_id=OuterRef('pk')).order_by('-revision').values('source_record_id')[:1]),

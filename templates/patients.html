@@ -1,1 +1,23 @@
-{% extends 'base.html' %}{% block content %}<div class="eyebrow">患者资料</div><div class="heading-row"><h1>患者档案</h1>{% if can_front %}<a class="button" href="{% url 'patient_create' %}">新建患者</a>{% endif %}</div><p class="lede">只展示授权业务关联的患者。跨店查重请使用精确编号识别入口。</p><section class="panel"><form class="search" method="get"><label for="q">姓名或完整患者编号</label><input id="q" name="q" maxlength="80" value="{{ q }}"><button type="submit">查询</button></form><div class="table-scroll"><table><thead><tr><th>姓名</th><th>患者编号</th><th>过敏信息</th><th>操作</th></tr></thead><tbody>{% for p in page %}<tr><td>{{ p.name }}</td><td class="mono">{{ p.patient_no }}</td><td>{{ p.get_allergy_status_display }}</td><td><a href="{% url 'patient_detail' p.pk %}">查看档案</a></td></tr>{% empty %}<tr><td colspan="4" class="empty">未找到可见患者。</td></tr>{% endfor %}</tbody></table></div>{% include '_pagination.html' %}</section>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="identity-list">
+  <div class="heading-row"><h1>患者档案</h1>{% if can_front %}<a class="button secondary" href="{% url 'patient_create' %}">新建患者</a>{% endif %}</div>
+  <form class="panel search" method="get" role="search">
+    <label for="q">姓名或完整患者编号</label><input id="q" name="q" maxlength="80" value="{{ q }}">
+    <button type="submit">查询</button>{% if q %}<a href="{% url 'patients' %}">清除筛选</a>{% endif %}
+  </form>
+  {% if page.object_list %}
+  <h2>{% if q %}查询结果{% else %}可见档案{% endif %} · {{ page.paginator.count }} 份</h2>
+  {% if can_front %}<p>打开档案前，请与患者核对完整患者编号。</p>{% endif %}
+  <ul class="identity-results">{% for p in page %}<li class="panel identity-row">
+    <div><h3>{{ p.name }}{% if p.same_name %} <span class="name-match">同名 · 请核对编号</span>{% endif %}</h3>
+      <p>患者编号 <strong class="mono">{{ p.patient_no }}</strong></p>
+      {% if not can_front %}<p>过敏信息：{{ p.get_allergy_status_display }}</p>{% endif %}
+    </div>
+    <a id="patient-{{ p.pk }}" class="button secondary" href="{% url 'patient_detail' p.pk %}?list_page={{ page.number }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}" aria-label="查看{{ p.name }}的档案，患者编号 {{ p.patient_no }}">查看档案</a>
+  </li>{% endfor %}</ul>
+  {% else %}<p class="panel">未找到可见患者。请核对姓名或完整患者编号。</p>{% endif %}
+  {% include '_pagination.html' %}
+  {% if can_front %}<details class="panel"><summary>患者在其他门店建过档案？</summary><p>请向患者核对完整编号，前往<a href="{% url 'patient_lookup' %}">跨店精确查找</a>。</p></details>{% endif %}
+</div>
+{% endblock %}

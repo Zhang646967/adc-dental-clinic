@@ -1,1 +1,13 @@
 .clinical-workspace .care-notes,.clinical-finding,.clinical-history{overflow-wrap:anywhere;white-space:normal}.clinical-workspace .care-notes{white-space:pre-wrap}.clinical-history,.clinical-finding{padding:1rem 0;border-bottom:1px solid var(--line,#d8e2df)}.clinical-history summary{padding:.8rem 0;cursor:pointer}.clinical-workspace form>div{margin:.8rem 0}.tooth-chart{margin:1rem 0;padding:1rem;border:1px solid var(--line,#d8e2df);border-radius:.6rem}.tooth-quadrant{min-width:0;margin:1rem 0;padding:.7rem}.tooth-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.4rem}.tooth-grid button{min-width:0;min-height:44px;padding:.5rem .2rem}.tooth-grid button[aria-pressed=true]{outline:3px solid var(--teal,#22675c);outline-offset:2px}.clinical-workspace input,.clinical-workspace select,.clinical-workspace textarea{max-width:100%;min-width:0}.clinical-workspace .mono{white-space:normal;overflow-wrap:anywhere}@media(max-width:650px){.tooth-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.tooth-chart{padding:.6rem}.tooth-quadrant{padding:.5rem}.clinical-workspace .care-jumps{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}}
+
+.identity-list { max-inline-size: 65rem; }
+.identity-results { list-style: none; margin: 0; padding: 0; }
+.identity-row, .record-choice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.25rem; }
+.identity-row > div, .record-choice > div { min-width: 0; }
+.identity-row p, .identity-row h3, .record-choice p { overflow-wrap: anywhere; margin-block: .4rem; }
+.name-match { display: inline-block; color: #704814; background: #fcf1d9; padding: .2em .55em; border-radius: .35em; font-size: .875rem; }
+.identity-row a, .record-choice a { min-height: 2.75rem; }
+.identity-list input { min-width: 0; max-width: 100%; }
+.identity-row a:target, .clinical-flow [tabindex="-1"]:target { outline: 3px solid #23675a; outline-offset: .2rem; }
+.record-choices { display: flex; gap: .55rem; flex-wrap: wrap; align-items: center; }
+@media (max-width: 40rem) { .identity-list .search { display: grid; grid-template-columns: minmax(0,1fr); } }

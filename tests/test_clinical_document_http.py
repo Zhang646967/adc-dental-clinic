@@ -26,6 +26,23 @@ class ClinicalDocumentHTTPTests(DocumentFixture, TransactionTestCase):
         values.update({key: value if value is not None else '' for key, value in self.values().items()}, action='SAVE'); values.update(extra)
         return values
 
+    def test_draft_and_exact_confirmed_version_are_independent_entries(self):
+        client = self.client_for(self.doc)
+        self.save()
+        current = self.confirm_doc()
+        self.act('AMEND', {'reason': '补充复核本次文书内容'})
+        self.save(instructions='DOCUMENT_DRAFT_ONLY')
+        document = reverse('clinical_document', args=[self.v.pk])
+        for queue in ('draft', 'versions'):
+            response = client.get(reverse('clinical_documents'), {'queue': queue})
+            self.assertContains(response, document + '#document-draft')
+            self.assertContains(response, f'{document}?revision={current.revision}#document-version')
+        confirmed = client.get(document, {'revision': current.revision})
+        self.assertContains(confirmed, '当前确认版')
+        self.assertNotContains(confirmed, 'DOCUMENT_DRAFT_ONLY')
+        self.assertNotContains(confirmed, '保存文书草稿')
+        self.assertContains(client.get(document), 'DOCUMENT_DRAFT_ONLY')
+
     def test_complete_http_document_confirmation_and_private_print(self):
         client = self.client_for(self.doc)
         self.assertEqual(client.post(reverse('clinical_document', args=[self.v.pk]), self.save_values(client)).status_code, 302)

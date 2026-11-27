@@ -1,0 +1,1 @@
+<time datetime="{{ start|date:'c' }}">{{ start|date:'Y-m-d H:i' }}</time> 至 <time datetime="{{ end|date:'c' }}">{% if start|date:'Y-m-d' != end|date:'Y-m-d' %}{{ end|date:'Y-m-d' }} {% endif %}{{ end|date:'H:i' }}</time>

@@ -1,7 +1,26 @@
-{% extends 'base.html' %}{% block content %}<div class="clinical-flow">
-<div class="eyebrow">负责医师 · 连续诊疗</div><h1>检查记录工作台</h1><p><a class="button secondary" href="{% url 'clinical_consents' %}">医疗告知与疑问待办</a></p>
-<p><a class="button secondary" href="{% url 'clinical_documents' %}">病历文书与待办</a></p><p>按本人的实际接诊继续检查、核对患者自述和完善记录。预约须由前台登记实际到诊后才能开始检查记录。</p>
-<nav class="queue-tabs" aria-label="检查记录筛选"><a href="?queue=active"{% if queue == 'active' %} aria-current="page"{% endif %}>待接诊与在诊</a><a href="?queue=draft"{% if queue == 'draft' %} aria-current="page"{% endif %}>待确认草稿</a><a href="?queue=confirmed"{% if queue == 'confirmed' %} aria-current="page"{% endif %}>已有确认版本</a><a href="?queue=all"{% if queue == 'all' %} aria-current="page"{% endif %}>本人授权记录</a></nav>
-{% for visit in page %}<article class="panel appointment-card"><div><h2>{{ visit.patient.name }} · {{ visit.clinic.name }}</h2><p class="mono">患者编号 {{ visit.patient.patient_no }}</p><p>{{ visit.scheduled_start|date:'Y-m-d H:i' }} · {{ visit.get_status_display }}</p><p>{% if visit.clinical_draft %}<strong>有草稿待核对</strong>{% elif visit.clinical_revision %}已确认第 {{ visit.clinical_revision }} 版{% elif visit.status == 'CHECKED_IN' %}已到诊，可开始检查{% else %}尚未开始检查记录{% endif %}</p></div><a class="button secondary" href="{% url 'clinical_encounter' visit.pk %}">核对本次就诊</a></article>{% empty %}<div class="notice">当前筛选下没有本人具有有效专业查阅范围的就诊。可切换筛选，或联系本店主管核对服务和专业范围。</div>{% endfor %}
-{% if page.has_other_pages %}<nav class="pagination" aria-label="检查记录分页">{% if page.has_previous %}<a href="?queue={{ queue }}&amp;page={{ page.previous_page_number }}">上一页</a>{% endif %}<span>第 {{ page.number }} / {{ page.paginator.num_pages }} 页</span>{% if page.has_next %}<a href="?queue={{ queue }}&amp;page={{ page.next_page_number }}">下一页</a>{% endif %}</nav>{% endif %}
-</div>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="clinical-flow">
+  <h1>检查记录工作台</h1>
+  <nav class="queue-tabs" aria-label="检查记录筛选">
+    <a href="?queue=active"{% if queue == 'active' %} aria-current="page"{% endif %}>待接诊与在诊</a>
+    <a href="?queue=draft"{% if queue == 'draft' %} aria-current="page"{% endif %}>待确认草稿</a>
+    <a href="?queue=confirmed"{% if queue == 'confirmed' %} aria-current="page"{% endif %}>已有确认版本</a>
+    <a href="?queue=all"{% if queue == 'all' %} aria-current="page"{% endif %}>本人授权记录</a>
+  </nav>
+  {% for visit in page %}<article class="panel record-choice">
+    <div><h2>{{ visit.patient.name }} · {{ visit.clinic.name }}</h2>
+      <p>{{ visit.scheduled_start|date:'Y-m-d H:i' }} · {{ visit.get_status_display }}</p>
+      <p class="mono">患者编号 {{ visit.patient.patient_no }}</p>
+      {% if not visit.clinical_draft and not visit.clinical_revision %}<p>{% if visit.status == 'CHECKED_IN' %}已到诊，可开始检查{% else %}尚未开始检查记录{% endif %}</p>{% endif %}
+    </div>
+    <div class="record-choices">
+      {% if visit.clinical_draft %}<a class="button" href="{% url 'clinical_encounter' visit.pk %}#clinical-notes">打开检查草稿</a>{% endif %}
+      {% if visit.clinical_revision %}<a class="button{% if visit.clinical_draft %} secondary{% endif %}" href="{% url 'clinical_encounter' visit.pk %}?revision={{ visit.clinical_revision }}#clinical-notes">查看当前确认版 · 第 {{ visit.clinical_revision }} 版</a>{% endif %}
+      {% if not visit.clinical_revision and not visit.clinical_draft %}<a class="button secondary" href="{% url 'clinical_encounter' visit.pk %}">核对本次就诊</a>{% endif %}
+    </div>
+  </article>{% empty %}<p class="notice">当前筛选下没有可查阅的就诊。可以切换上方筛选。</p>{% endfor %}
+  {% if page.has_other_pages %}<nav class="pagination" aria-label="检查记录分页">{% if page.has_previous %}<a href="?queue={{ queue }}&amp;page={{ page.previous_page_number }}">上一页</a>{% endif %}<span>第 {{ page.number }} / {{ page.paginator.num_pages }} 页</span>{% if page.has_next %}<a href="?queue={{ queue }}&amp;page={{ page.next_page_number }}">下一页</a>{% endif %}</nav>{% endif %}
+  <p><a href="{% url 'clinical_documents' %}">病历文书与待办</a> · <a href="{% url 'clinical_consents' %}">医疗告知与疑问待办</a></p>
+</div>
+{% endblock %}

@@ -91,12 +91,18 @@ def reschedule(request, pk):
             if request.GET.get('offer'):
                 offer, plan = services._offer(visit, int(request.GET['offer']))
                 selection = dict(slot_id=offer.slot_id, start=offer.starts_at, end=offer.ends_at,
-                    dentist=offer.slot.dentist.name, offer_id=offer.pk, offer=offer)
+                    dentist=offer.slot.dentist.name, offer_id=offer.pk, offer=offer,
+                    service_name=plan.snapshot['service']['name'] if plan else None)
             elif request.GET.get('slot'):
                 selection = next((r for r in result['rows'] if str(r['slot_id']) == request.GET['slot'] and r['start_iso'] == request.GET.get('start')), None)
                 if selection is None:
                     search.add_error(None, '刚才选择的时段已不可用，请重新查询；原预约保留。')
             if selection:
+                if not selection.get('offer') and context['source_plan']:
+                    selection['service_name'] = context['source_plan'].service.name
+                duration = selection['end'] - selection['start']
+                selection['minutes'] = int(duration.total_seconds() // 60)
+                selection['duration_changed'] = duration != visit.scheduled_end - visit.scheduled_start
                 form = PreviewForm(initial=dict(expected_version=visit.lock_version, slot_id=selection['slot_id'],
                     start=selection['start'], offer_id=selection.get('offer_id')))
         except (ValueError, *EXPECTED_ERRORS) as exc:

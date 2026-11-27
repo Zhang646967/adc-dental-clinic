@@ -28,6 +28,10 @@ def worklist(request):
     queue = request.GET.get('queue', 'pending')
     if queue == 'overdue':
         rows = rows.filter(deadline__lt=timezone.now()).filter(Q(has_confirmed=False) | Q(has_draft=True) | Q(needs_source_review=True))
+    elif queue == 'draft':
+        rows = rows.filter(has_draft=True)
+    elif queue == 'versions':
+        rows = rows.filter(has_confirmed=True)
     elif queue == 'confirmed':
         rows = rows.filter(has_confirmed=True, has_draft=False, needs_source_review=False)
     elif queue != 'all':

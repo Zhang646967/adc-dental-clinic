@@ -53,6 +53,7 @@ def _encounter_details(actor,visit_id,*,revision=None):
     can_open_prescription = bool(rehearsal_enabled() and can_record and current and revision is None and
                                  active_duties(actor.pk, 'PRESCRIBE').filter(clinic_id=visit.clinic_id).exists())
     return dict(visit=visit,encounter=head,draft=working_draft,clinical_record=displayed,current_record=current,payload=payload,
+        viewing_version=revision is not None,
         can_open_prescription=can_open_prescription,
         can_record=can_record,can_edit=can_edit,can_start=can_record and visit.patient.is_active and head is None and visit.status=='CHECKED_IN',
         can_amend=can_record and visit.patient.is_active and current is not None and draft is None and revision is None,

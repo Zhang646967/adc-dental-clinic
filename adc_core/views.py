@@ -8,7 +8,7 @@ from django.core.exceptions import PermissionDenied, ValidationError, ObjectDoes
 from django.core.paginator import Paginator
 from django.db import connection
 from django.db import DatabaseError
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Exists, OuterRef
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_http_methods
@@ -53,6 +53,10 @@ def dashboard(request):
 @require_GET
 def patient_list(request):
     qs = visible_patients(request.user)
+    if request.workspace.role == "FRONT_DESK":
+        # Compare against every permitted record, including the other pages of this search.
+        other_visible = qs.filter(name=OuterRef("name")).exclude(pk=OuterRef("pk"))
+        qs = qs.annotate(same_name=Exists(other_visible))
     q = request.GET.get("q", "").strip()[:80]
     if q:
         qs = qs.filter(Q(patient_no=q) | Q(name__icontains=q))
@@ -76,7 +80,12 @@ def patient_detail(request, pk):
     p = get_object_or_404(visible_patients(request.user), pk=pk)
     from clinical.authority import require_patient_read
     require_patient_read(request.user, p)
-    return render(request, "patient_detail.html", {"patient": p, "allergies": p.allergy_links.filter(is_active=True).select_related("allergy")})
+    list_url = reverse("patients")
+    page = request.GET.get("list_page", "")
+    if page.isascii() and page.isdigit() and 0 < len(page) <= 9:
+        query = urlencode({"q": request.GET.get("q", "").strip()[:80], "page": page})
+        list_url += f"?{query}#patient-{p.pk}"
+    return render(request, "patient_detail.html", {"patient": p, "patient_list_url": list_url, "allergies": p.allergy_links.filter(is_active=True).select_related("allergy")})
 
 @login_required
 @require_http_methods(["GET", "POST"])

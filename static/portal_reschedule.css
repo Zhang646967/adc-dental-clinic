@@ -4,3 +4,9 @@
 .portal-reschedule-filter label{display:block}.portal-reschedule-filter select,.portal-reschedule-filter input{width:100%;min-width:0}
 .patient-main .errorlist{overflow-wrap:anywhere}.patient-main .actions{flex-wrap:wrap}
 @media(max-width:650px){.portal-comparison,.portal-reschedule-filter{grid-template-columns:1fr}.patient-main .actions .button{width:100%}}
+
+.reschedule-task .portal-comparison, .portal-comparison section { min-width: 0; }
+.portal-comparison .portal-target { border-inline-start: .28rem solid #176955; overflow-wrap: anywhere; }
+.arrangement-time { font-size: 1.125rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.45; }
+.portal-source summary, .reschedule-task summary { cursor: pointer; padding-block: .55rem; }
+#selected-arrangement, #new-time { scroll-margin-block-start: 1rem; }

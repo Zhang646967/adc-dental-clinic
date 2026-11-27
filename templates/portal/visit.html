@@ -23,8 +23,8 @@
     {% if not patient_delegated and visit.chief_complaint %}<p class="patient-service-lines">{{ visit.chief_complaint }}</p>{% endif %}
   </details>
   {% if needs_outcome_review %}<p class="notice"><strong>到诊结果待核实。</strong> <a href="#frontdesk-help">请联系门店核实</a></p>{% endif %}
-  {% if previous_visit %}<p>本次由 <a href="{% url 'portal_visit' previous_visit.pk %}">原预约 {{ previous_visit.visit_no }}</a> 改期而来。</p>{% endif %}
-  {% if next_visit %}<p class="notice">此记录已改期。<a href="{% url 'portal_visit' next_visit.pk %}">查看后继预约 {{ next_visit.visit_no }}（{{ next_visit.get_status_display }}）</a></p>{% endif %}
+  {% if previous_visit %}<p>改期前：{% include 'portal/reschedule_time.html' with start=previous_visit.scheduled_start end=previous_visit.scheduled_end only %}（北京时间）。 <a href="{% url 'portal_visit' previous_visit.pk %}">原预约 {{ previous_visit.visit_no }}</a></p>{% endif %}
+  {% if next_visit %}<p class="notice">此记录已改期。改期后：{% include 'portal/reschedule_time.html' with start=next_visit.scheduled_start end=next_visit.scheduled_end only %}（北京时间） · {{ next_visit.get_status_display }}。 <a href="{% url 'portal_visit' next_visit.pk %}">查看后继预约 {{ next_visit.visit_no }}（{{ next_visit.get_status_display }}）</a></p>{% endif %}
   {% if can_cancel %}
   <div class="actions">
     <a class="button" href="{% url 'portal_reschedule' visit.pk %}">调整这次预约</a>

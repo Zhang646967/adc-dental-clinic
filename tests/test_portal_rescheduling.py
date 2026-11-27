@@ -217,6 +217,25 @@ class PatientRescheduleTests(ResourceFixture,TransactionTestCase):
         r=c.post(url,dict(action='confirm',proposal_token=p.context['preview']['proposal_token'],confirmed='on'))
         self.assertEqual(r.status_code,302);self.assertEqual(Visit.objects.count(),2)
         self.assertContains(c.get(reverse('portal_visit',args=[self.v.pk])),'查看后继预约')
+    def test_source_and_selected_time_stay_together_before_confirmation(self):
+        client = WorkspaceClient()
+        client.force_login(self.u)
+        route = reverse('portal_reschedule', args=[self.v.pk])
+        result = client.get(route, {'day': self.t.date().isoformat(), 'dentist': self.d2.pk})
+        self.assertNotContains(result, 'aria-label="拟选新时间"')
+        choice = next(row for row in result.context['result']['rows'] if row['slot_id'] == self.slot2.pk)
+        selected = client.get(choice['choose_url'])
+        preview = client.post(route, dict(action='preview', expected_version=0, slot_id=choice['slot_id'],
+            start=choice['start_iso'], reason='核对本人可选时间'))
+        for page in (selected, preview):
+            self.assertContains(page, 'aria-label="原预约"', count=1)
+            self.assertContains(page, 'aria-label="拟选新时间"', count=1)
+            self.assertContains(page, choice['dentist'])
+            self.assertContains(page, '待确认，原预约仍保留')
+        self.v.refresh_from_db()
+        self.assertEqual(self.v.status, 'SCHEDULED')
+        self.assertFalse(Visit.objects.filter(replaces_visit=self.v).exists())
+
     def test_http_offer_selection_without_date_uses_retained_promise(self):
         o=self.offer();self.slot2.booking_paused=True;self.slot2.save()
         c=WorkspaceClient();c.force_login(self.u);r=c.get(reverse('portal_reschedule',args=[self.v.pk])+'?offer='+str(o.pk))

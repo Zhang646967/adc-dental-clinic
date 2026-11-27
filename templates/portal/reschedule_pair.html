@@ -1,0 +1,11 @@
+<div class="portal-comparison" aria-label="改期时间对照">
+  {% include 'portal/reschedule_source.html' %}
+  <section class="panel portal-target" aria-label="拟选新时间">
+    <h2>拟选新时间</h2>
+    <p class="arrangement-time">{% include 'portal/reschedule_time.html' with start=target.start end=target.end only %}</p>
+    <p>{{ clinic_name }} · {{ dentist_name }}</p>
+    {% if service_name %}<p>{{ service_name }}{% if minutes %} · {{ minutes }} 分钟{% endif %}</p>{% endif %}
+    {% if target.duration_changed %}<p class="notice">新安排的时长有变化，请核对结束时间。</p>{% endif %}
+    {% if target.offer %}<p>确认改期时将接受本人邀约 #{{ target.offer.pk }}。</p>{% endif %}
+  </section>
+</div>
