@@ -5,8 +5,8 @@
   <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text></view>
   <button wx:if="{{subjectInvalid}}" class="primary" bindtap="recoverSubject" disabled="{{busy}}" loading="{{busy}}">核对账号与就诊人</button>
   <view wx:if="{{busy}}" class="notice">正在读取报告提醒…</view>
-  <view wx:for="{{rows}}" wx:key="id" class="card">
-    <view aria-label="{{item.ariaLabel}}">
+  <view wx:for="{{rows}}" wx:key="id" id="notice-{{item.id}}" class="card {{focusId===item.id?'notice-return':''}}" aria-current="{{focusId===item.id?'true':''}}">
+    <view aria-label="{{focusId===item.id?'刚才查看的提醒，':''}}{{item.ariaLabel}}">
       <view class="section-title">{{item.heading}}</view>
       <view class="record-head">
         <view wx:if="{{item.showStatus}}" class="pill {{item.tone}}">{{item.statusLabel}}</view>
@@ -15,11 +15,11 @@
       <view class="fact-row"><text>{{item.clinic}}</text><text wx:if="{{item.occurredLabel}}">{{item.occurredLabel}}（北京时间）</text></view>
     </view>
     <view class="action-row">
-      <button wx:if="{{item.canOpen}}" class="primary" data-index="{{index}}" bindtap="open" aria-label="{{item.heading}}，{{item.actionLabel}}">{{item.actionLabel}}</button>
-      <button wx:else class="secondary" data-index="{{index}}" bindtap="contact" aria-label="{{item.heading}}，联系原门店">联系门店</button>
+      <button wx:if="{{item.canOpen}}" class="primary" data-index="{{index}}" bindtap="open" aria-label="{{focusId===item.id?'刚才查看的提醒，':''}}{{item.heading}}，{{item.actionLabel}}">{{item.actionLabel}}</button>
+      <button wx:else class="secondary" data-index="{{index}}" bindtap="contact" aria-label="{{focusId===item.id?'刚才查看的提醒，':''}}{{item.heading}}，联系原门店">联系门店</button>
       <button wx:if="{{item.unread && !readOnly}}" class="secondary" data-index="{{index}}" bindtap="markRead" disabled="{{busy}}" aria-label="{{item.heading}}，标记已读">标记已读</button>
     </view>
-    <navigator wx:if="{{item.visitUrl}}" class="link" url="{{item.visitUrl}}" aria-label="{{item.heading}}，查看原就诊">查看原就诊</navigator>
+    <navigator wx:if="{{item.visitUrl}}" class="link" url="{{item.visitUrl}}" bindtap="rememberVisit" data-index="{{index}}" aria-label="{{focusId===item.id?'刚才查看的提醒，':''}}{{item.heading}}，查看原就诊">查看原就诊</navigator>
   </view>
   <view wx:if="{{!busy && !rows.length && !error && !subjectInvalid}}" class="card empty"><view class="section-title">暂无报告提醒</view><view>报告发布、更正或撤回后，会在这里提醒。</view></view>
   <view wx:if="{{hasPrevious || hasNext}}" class="row"><button disabled="{{!hasPrevious || busy}}" data-step="-1" bindtap="turn">上一页</button><view>{{page}}</view><button disabled="{{!hasNext || busy}}" data-step="1" bindtap="turn">下一页</button></view>

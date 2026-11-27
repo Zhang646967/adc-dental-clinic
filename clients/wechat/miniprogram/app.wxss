@@ -89,3 +89,8 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
    long report text wrap at any character; the body keeps its own paragraphs. */
 .patient-report .report-body{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;margin:4rpx 0 8rpx}
 .patient-report .fact-row text:last-child{overflow-wrap:anywhere;text-align:right}
+
+/* 18551: the row that opened the report keeps a visible return anchor after
+   the list is re-read; the border is the only decoration it adds. */
+.patient-report .notice-return{border-color:#0c6d60;box-shadow:0 0 0 4rpx #0c6d601f}
+.patient-report .notice-return .section-title{color:#0b5f54}

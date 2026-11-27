@@ -20,7 +20,23 @@ function load(name, { session = {}, responses = [] } = {}) {
   let definition;
   const calls = [];
   const routes = [];
+  const scrolls = [];
   const state = { globalData: { returnSource: null } };
+  // The page computes the absolute offset from the viewport and the row box.
+  const wx = {
+    nextTick: fn => fn(),
+    pageScrollTo: options => scrolls.push(options),
+    createSelectorQuery: () => {
+      const query = {
+        selectViewport() { return query; },
+        select() { return query; },
+        scrollOffset() { return query; },
+        boundingClientRect() { return query; },
+        exec(callback) { callback([{ scrollTop: 120 }, { top: 300 }]); }
+      };
+      return query;
+    }
+  };
   const api = {
     async bootstrap() { return session; },
     sessionInfo: () => session,
@@ -45,7 +61,7 @@ function load(name, { session = {}, responses = [] } = {}) {
     Page: d => { definition = d; },
     getApp: () => state,
     getCurrentPages: () => [],
-    wx: {},
+    wx,
     require: key => key.endsWith('/api') ? api
       : key.endsWith('/navigation') ? navigation
       : key.endsWith('/subject-state') ? subjectState
@@ -59,7 +75,7 @@ function load(name, { session = {}, responses = [] } = {}) {
       data: JSON.parse(JSON.stringify(definition.data)),
       setData(v) { Object.assign(this.data, v); }
     }),
-    calls, routes, state
+    calls, routes, scrolls, state
   };
 }
 
@@ -127,6 +143,133 @@ async function verify() {
   await readOnly.page.markRead({ currentTarget: { dataset: { index: 0 } } });
   ok(readOnly.calls.length === 1, 'a read-only session performs no acknowledgement write');
   ok(readOnly.page.data.readOnly === true, 'the page knows it is read-only');
+
+  // --- report notices: the row that opened a report stays the anchor --------
+  const auth = { authenticated: true, subject_key: 'self', workspace_id: 'w1', subject_revision: 1 };
+  const notice = (id, extra = {}) => ({ id, kind: 'RELEASED', title: '检查报告已发布',
+    project: '课程文本检查', clinic: '演示甲店', occurred_at: '2026-11-27T01:20:00Z',
+    read_at: null, visit_id: 1, examination_id: id, revision: 1, ...extra });
+  const pageOf = (rows, number = 1, hasNext = false, hasPrevious = false) =>
+    ({ rows, unread_count: 8, page: number, has_next: hasNext, has_previous: hasPrevious });
+  const tapAt = i => ({ currentTarget: { dataset: { index: i } } });
+
+  // First entry never invents a position.
+  const firstEntry = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)])] });
+  firstEntry.page.onLoad({});
+  await firstEntry.page.onShow();
+  ok(firstEntry.scrolls.length === 0 && firstEntry.page.data.focusId === null, 'first entry keeps the normal start');
+
+  // Opening a row remembers its id and action; the back gesture re-reads and
+  // scrolls to that same row, not to the first one.
+  const same = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11), notice(2)]), pageOf([notice(11), notice(2)])] });
+  same.page.onLoad({});
+  await same.page.onShow();
+  same.page.open(tapAt(1));
+  ok(same.routes.at(-1)[1] === '/pages/examination/index?visit=1&id=2&revision=1', 'the row opens its exact report');
+  await same.page.onHide();
+  await same.page.onShow();
+  ok(same.page.data.focusId === 2, 'return focuses the notice that opened the report');
+  ok(same.scrolls.length === 1 && same.scrolls[0].scrollTop === 404,
+    'the page restores the reading position of that row');
+  ok(same.page.data.rows[1].actionLabel === '查看第 1 版报告', 'the row still carries its action after the re-read');
+  ok(same.page.data.unreadCount === 8, 'the unread count is unchanged');
+
+  // A second back gesture does not reuse the consumed anchor.
+  await same.page.onHide();
+  await same.page.onShow();
+  ok(same.page.data.focusId === null && same.scrolls.length === 1, 'the anchor is consumed by one return');
+
+  // Sorting moved the row to the second page: the current list is searched.
+  const moved = load('report-notices', { session: { ...auth }, responses: [
+    pageOf([notice(11)], 1, true), pageOf([notice(12)], 1, true), pageOf([notice(11)], 2, false, true)
+  ] });
+  moved.page.onLoad({});
+  await moved.page.onShow();
+  moved.page.open(tapAt(0));
+  await moved.page.onHide();
+  await moved.page.onShow();
+  ok(moved.calls.some(c => c[0] === 'report-notices/' && c[2] && c[2].page === 2), 'a moved row is looked up on the next page');
+  ok(moved.page.data.focusId === 11 && moved.page.data.page === 2, 'the moved row is shown and focused');
+  ok(moved.scrolls.length === 1, 'the moved row is scrolled into view');
+
+  // The row disappeared: fall back to the current first page without a jump.
+  const gone = load('report-notices', { session: { ...auth }, responses: [
+    pageOf([notice(11)], 1, true), pageOf([notice(12)], 1, true), pageOf([notice(13)], 2, false, true)
+  ] });
+  gone.page.onLoad({});
+  await gone.page.onShow();
+  gone.page.open(tapAt(0));
+  await gone.page.onHide();
+  await gone.page.onShow();
+  ok(gone.page.data.focusId === null && gone.scrolls.length === 0, 'a missing row returns to the valid list');
+  ok(gone.page.data.page === 1 && gone.page.data.rows.length === 1, 'the fallback list is the current first page');
+
+  // Another patient or workspace must not inherit the anchor.
+  const switched = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
+  switched.page.onLoad({});
+  await switched.page.onShow();
+  switched.page.open(tapAt(0));
+  switched.page.returnTarget.context.subjectKey = 'grant:1';
+  await switched.page.onHide();
+  await switched.page.onShow();
+  ok(switched.page.data.focusId === null && switched.scrolls.length === 0, 'a changed subject drops the old anchor');
+
+  // Expired anchors and unloads never apply later.
+  const expired = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
+  expired.page.onLoad({});
+  await expired.page.onShow();
+  expired.page.open(tapAt(0));
+  expired.page.returnTarget.expires = Date.now() - 1;
+  await expired.page.onHide();
+  await expired.page.onShow();
+  ok(expired.page.data.focusId === null && expired.scrolls.length === 0, 'an expired anchor is ignored');
+
+  const unloaded = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
+  unloaded.page.onLoad({});
+  await unloaded.page.onShow();
+  unloaded.page.open(tapAt(0));
+  unloaded.page.onUnload();
+  await unloaded.page.onShow();
+  ok(unloaded.page.data.focusId === null && unloaded.scrolls.length === 0, 're-entering after unload starts fresh');
+
+  // Contact and the original visit set their own anchor action.
+  const contactAnchor = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11, { kind: 'WITHDRAWN', revision: null })]), pageOf([notice(11, { kind: 'WITHDRAWN', revision: null })])] });
+  contactAnchor.page.onLoad({});
+  await contactAnchor.page.onShow();
+  contactAnchor.page.contact(tapAt(0));
+  ok(contactAnchor.page.returnTarget.action === 'contact' && contactAnchor.routes.at(-1)[1] === '/pages/help/index?visit=1',
+    'contact keeps both its destination and its action');
+  await contactAnchor.page.onHide();
+  await contactAnchor.page.onShow();
+  ok(contactAnchor.page.data.focusId === 11, 'returning from contact focuses the withdrawn row');
+
+  const visitAnchor = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), pageOf([notice(11)])] });
+  visitAnchor.page.onLoad({});
+  await visitAnchor.page.onShow();
+  visitAnchor.page.rememberVisit(tapAt(0));
+  ok(visitAnchor.page.returnTarget.action === 'visit', 'the original-visit link sets its own action');
+  await visitAnchor.page.onHide();
+  await visitAnchor.page.onShow();
+  ok(visitAnchor.page.data.focusId === 11, 'returning from the original visit focuses the same row');
+
+  // A refresh that the server rejects must not restore an old position.
+  const rejectedReturn = load('report-notices', { session: { ...auth }, responses: [
+    pageOf([notice(11)]), Object.assign(new Error('检查报告与提醒仅限患者本人查看。'), { status: 403, code: 'REPORT_SELF_REQUIRED' })
+  ] });
+  rejectedReturn.page.onLoad({});
+  await rejectedReturn.page.onShow();
+  rejectedReturn.page.open(tapAt(0));
+  await rejectedReturn.page.onHide();
+  await rejectedReturn.page.onShow();
+  ok(rejectedReturn.page.data.focusId === null && rejectedReturn.scrolls.length === 0, 'a rejected refresh keeps no anchor');
+  ok(rejectedReturn.page.data.selfOnly === true, 'the rejection still shows its own path');
+
+  // Acknowledge is not navigation and must not create an anchor.
+  const ack = load('report-notices', { session: { ...auth }, responses: [pageOf([notice(11)]), { id: 11, read_at: '2026-11-27T02:00:00Z', unread_count: 7 }] });
+  ack.page.onLoad({});
+  await ack.page.onShow();
+  await ack.page.markRead(tapAt(0));
+  ok(ack.page.returnTarget === null, 'marking a row read creates no return anchor');
 
   // --- examination: disclosure and stale responses -------------------------
   const reportBody = '第一段。\n第二段，用于核对长正文与换行。';
