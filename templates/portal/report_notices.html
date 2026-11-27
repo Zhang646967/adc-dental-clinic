@@ -1,7 +1,8 @@
-{% extends 'portal/base.html' %}{% load workspace_tags %}
+{% extends 'portal/base.html' %}{% load static workspace_tags %}
 {% block title %}报告与复诊 · ADC 口腔{% endblock %}
 {% block content %}
-<div class="report-flow">
+<script defer src="{% static 'report-notice-return.js' %}"></script>
+<div class="report-flow" data-report-notices>
   <header class="portal-page-heading">
     <div><h1>报告与复诊</h1><p>{{ unread_count }} 条未读</p></div>
     <a href="{% url 'portal_appointments' %}">返回就诊清单</a>
@@ -12,9 +13,9 @@
     <p class="report-status">{% if row.project %}{{ row.title }} · {% endif %}{% if row.read_at %}已读{% else %}未读{% endif %}</p>
     <p class="report-meta">{{ row.clinic }} · <time datetime="{{ row.occurred_at|date:'c' }}">{{ row.occurred_at|date:'Y-m-d H:i' }}</time>（北京时间）</p>
     <div class="report-actions">
-      {% if row.revision %}<a class="button" aria-describedby="notice-{{ row.id }}" href="{% url 'portal_examination' row.visit_id row.examination_id %}?revision={{ row.revision }}">查看第 {{ row.revision }} 版报告</a>
-      {% else %}<a class="button" aria-describedby="notice-{{ row.id }}" href="{% url 'portal_visit' row.visit_id %}#frontdesk-help">联系门店</a>{% endif %}
-      <a href="{% url 'portal_visit' row.visit_id %}" aria-describedby="notice-{{ row.id }}">查看原就诊</a>
+      {% if row.revision %}<a class="button" id="notice-report-{{ row.id }}" aria-describedby="notice-{{ row.id }}" href="{% url 'portal_examination' row.visit_id row.examination_id %}?revision={{ row.revision }}">查看第 {{ row.revision }} 版报告</a>
+      {% else %}<a class="button" id="notice-contact-{{ row.id }}" aria-describedby="notice-{{ row.id }}" href="{% url 'portal_visit' row.visit_id %}#frontdesk-help">联系门店</a>{% endif %}
+      <a id="notice-visit-{{ row.id }}" href="{% url 'portal_visit' row.visit_id %}" aria-describedby="notice-{{ row.id }}">查看原就诊</a>
       {% if not row.read_at and not read_only %}<form method="post" action="{% url 'portal_report_notice_read' row.id %}">{% csrf_token %}{% workspace_token %}<button class="secondary" type="submit" aria-describedby="notice-{{ row.id }}">标记已读</button></form>{% endif %}
     </div>
     {% if row.read_at %}<details class="task-disclosure compact"><summary>查看已读时间</summary><p>{{ row.read_at|date:'Y-m-d H:i' }}（北京时间）</p></details>{% endif %}

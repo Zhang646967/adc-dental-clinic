@@ -173,6 +173,9 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
         notices_page = self.web.get(reverse('portal_report_notices'))
         self.assertContains(notices_page, '1 条未读')
         self.assertContains(notices_page, order.project_name)
+        self.assertContains(notices_page, f'id="notice-report-{row["id"]}"', count=1)
+        self.assertContains(notices_page, f'id="notice-visit-{row["id"]}"', count=1)
+        self.assertNotContains(notices_page, f'id="notice-contact-{row["id"]}"')
         response = self.mini_post('mini_report_notice_read', {}, [row['id']])
         self.assertEqual(response.status_code, 200, response.content)
         read = response.json()['data']
