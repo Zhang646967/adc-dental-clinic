@@ -1,132 +1,19 @@
-当前部署方向：[统一系统与服务器上线计划](SERVER_DEPLOYMENT_PLAN.md)。取消单独教师上线版，最终在GitHub首页公布统一系统的地址、患者／小程序与员工入口及登录步骤。开发和预发布继续隔离验证，现有实例与历史资料保留。
+# 项目文档导览
 
-当前C3.3B：[正常申请入口官方工具收口](WORKBUDDY_C33B_ENTRY_CLOSURE.md) · [执行证据](evidence_c33b/README.md)。四项专项结果通过，picker原生手势单列；无新增业务记录，不要求重复编译或微信重登。报告仅更新PDF，293页及44实际ER保持。以下旧导航保留原时点。
+第一次接触 ADC，可以先走一遍患者、前台和医师的实际操作，再按兴趣读设计或代码。
 
-当前C3.3A：[独立归档与追加补正](evidence_c33a/README.md) · [业务指南](C33_ARCHIVE_GUIDE.md) · [WorkBuddy边界](WORKBUDDY_C33A_STATUS.md)。准确完整CI及原系统保护更新通过，版本与范围见执行清单。报告281页、140业务用例加SF01、41实际ER。以下保留旧期导航。
+| 阅读目的 | 入口 | 可以找到什么 |
+| --- | --- | --- |
+| 体验系统 | [三岗位试用指南](TEACHER_WALKTHROUGH.md) | 正常登录入口、各岗位的操作顺序和可观察的结果 |
+| 了解整体设计 | [课程报告 PDF](../课程报告/课程报告_张加良_8210241102.pdf) · [报告说明](../课程报告/README.md) | 业务用例、岗位边界、系统模型与图表 |
+| 查业务和技术实现 | [产品主计划](COMMERCIAL_V2_MASTER_PLAN.md) · [分项规格](../specs/) | 已实现的范围、岗位权限、失败分支和验收条件 |
+| 看数据如何关联 | [数据库设计](database/README.md) · [系统图](diagrams/README.md) | 预约、病历、检查、结算和复诊之间的关系 |
+| 验证或部署 | [macOS 安装](MACOS.md) · [统一部署包](C5_UNIFIED_DEPLOYMENT.md) · [测试目录](../tests/) | 本地合成库、安装升级、恢复和业务回归 |
 
-当前系统本体：[患者收退款展示](evidence_patient_cash/README.md) · [WorkBuddy新费用页回归](WORKBUDDY_C32C1_TASK.md) · [C3.3归档与受控复制草案](C33_ARCHIVE_IMPLEMENTATION_PLAN.md)。75迁移／158SQL表／38实际ER；正式报告266页、133业务＋SF01。旧医疗及新费用数据／分页／隔离工具场景已收口；原生picker手势、设备矩阵与手机另验。[回传审核](WORKBUDDY_C32C1_REVIEW.md)。以下保留各旧期导航和原范围，以顶部当前记录为准。
+## 顺着一次就诊读代码
 
-当前系统本体：[C3.2B1本人医疗决定](C32B1_MEDICAL_DECISIONS.md) · [实际验收与保护交付](evidence_c32b1/README.md) · [WorkBuddy冻结包任务](WORKBUDDY_C32B1_TASK.md)。67份迁移、149表、35实际ER；报告250页、125业务＋SF01。下方为前批交付记录。
+1. 患者在[网页](../portal/)或[微信小程序](../clients/wechat/)选择服务与时段。[排班与预约](../scheduling/)核对资源，保留改期前后的关联。
+2. [工作区](../workspaces/)确定当前角色和门店。[患者档案](../patients/)与[前台接待](../reception/)支持身份核对和到诊。
+3. 医师从[临床记录](../clinical/)核对自述、检查、文书和版本。[实际处置](../care/)与[财务](../finance/)分别记录完成的业务与收退款。
 
-当前系统本体：[C3.2A治疗说明](C32_TREATMENT_EXPLANATIONS.md) · [验收](evidence_c32a/README.md) · [WorkBuddy新任务](WORKBUDDY_C32A_TASK.md) · [下一批规格](C32_NEXT_INCREMENT.md)。
-
-当前反馈收口：[候补发布与密钥文件化](evidence_wb_p4/README.md) · [WorkBuddy确切入口与复测](WORKBUDDY_P4_PUBLISHING.md) · [C3.2下一阶段任务](NEXT_STAGE_C32_TASKS.md)。65份迁移／146表／33实际ER保持，课程报告固定文件名。
-
-[WorkBuddy小程序部署交接](WORKBUDDY_MINIPROGRAM_HANDOFF.md) · [登录入口整改与分项证据](evidence_workbuddy/README.md)。WorkBuddy仅负责小程序部署，后端与数据库由主系统维护方负责。
-
-**当前D1已完成上线包准备与本地保护交付。** [部署操作](D1_CLOUD_RELEASE.md) · [准确CI、恢复、安装与待办](evidence_d1/README.md) · [需求到执行追踪](evidence_d1/requirements_trace.md)。服务器未购买，云端与真实平台待验收。下方历史条目保留原日期和范围。
-
-[D1 独立上线准备](D1_CLOUD_RELEASE.md) · [分项演练](evidence_d1/README.md)。
-
-当前P1.5：[患者小程序指南](P15_MINIPROGRAM_GUIDE.md) · [完整画像与业务对齐](P15_PATIENT_ALIGNMENT.md) · [准确CI、实际微信工具、容量、恢复及两套系统交付](evidence_p15/README.md)。正式报告227页、113项业务用例、31幅实际ER；手机实机由用户后续统一验收，真实平台和云端独立保留。
-
-P1历史：[选诊及经营试用](P1_TRIAL_GUIDE.md) · [画像与月度核算设计](P1_PROFILE_MANAGEMENT.md) · [准确CI、两组容量、恢复及两套实例交付](evidence_p1/README.md)。正式报告224页、112项业务用例、31幅实际ER；真实平台与云端验收独立保留。
-
-WX1历史：[业务合同](WX1_IMPLEMENTATION.md) · [使用与平台联调](WX1_GUIDE.md) · [完整CI、更新、恢复和真实平台待办](evidence_wx1/README.md)。
-
-**当前患者入口修正：** [直接登录、私有账号与小程序导入](PATIENT_ENTRY_GUIDE.md) · [原本机及教师HTTPS验证](evidence_patient_entry/README.md)。
-
-**前轮教师试用历史：** [准确CI及原地址的执行记录](evidence_patient_auth/README.md) · [微信／短信与合成注册办理](WECHAT_SMS_TEACHER_TEST.md)。
-
-当前新增：[本地模拟结算与基金清算](C61BC_LOCAL_GUIDE.md) · [业务合同与需求追踪](C61BC_SETTLEMENT_CONTRACT.md) · [分项执行证据](evidence_c61bc/README.md)。准确CI、完整1,935项PG、同镜像浏览器／容量／恢复及原系统保护更新通过，正式报告和实际ER已同步。
-
-**C6.1A 资料准备历史：** [医保资料办理](C61A_LOCAL_GUIDE.md) · [规则与职责](C61A_PREPARATION_CONTRACT.md) · [准确CI、恢复与原系统更新](evidence_c61a/README.md)。费用分担及基金流程已在C6.1B/C完成本地交付。
-
-**C1-WX 历史本地交付：** [账号及本人申请](C1WX_ACCOUNT_CONTRACT.md) · [准确CI、跨端、恢复与更新](evidence_c1wx/README.md) · [私有本地试用](C1WX_LOCAL_GUIDE.md)。
-
-**C0.4 当前本地交付：** [找店与登录合同](C04_PATIENT_DISCOVERY_CONTRACT.md) · [准确CI、跨端、恢复及更新](evidence_c04/README.md) · [本地使用](C04_LOCAL_GUIDE.md)。
-
-**C2.2–C2.3 当前交付：** [连续方案与实际执行](C22_CONTINUITY_CONTRACT.md) · [复诊与加工就绪](C23_RECALL_LAB_CONTRACT.md) · [准确版本、容量、恢复与本机交付](evidence_c23/release.json)。
-
-**当前 C1.2：** [专业权限与限定转诊](C12_AUTHORITY_CONTRACT.md) · [本机交付证据](evidence_c12/release.json) · [C1–C2执行进度](C1_C2_PROGRESS.md)。
-
-# 项目文档分类导航
-
-当前产品方向：[商业V2总计划](COMMERCIAL_V2_MASTER_PLAN.md) → [代码与证据基线](COMMERCIAL_V2_BASELINE.md) → [分批需求及验收](COMMERCIAL_V2_BACKLOG.json)。首发采用单连锁独立部署，完整诊疗替代纳入目标；课程报告与旧执行记录继续作为来源保留。
-
-最新规划（2026-10-24）：[中国患者入口、连锁布局与医保研究](research/CHINA_PATIENT_ACCESS_STUDY_20261024.md) → [C0.4找店、C1-WX身份与C6医保实施安排](PATIENT_DISCOVERY_AND_INSURANCE_PLAN.md) → [C6.1本地合同](C61_LOCAL_INSURANCE_CONTRACT.md)。含八省会二十店合成设计、14项需求验收与[官方来源登记](research/china_patient_access_sources.json)，C0.4已本地交付，C1-WX本地流程已交付，C6.1A/B/C本地准备与资金已交付，真实微信与医保联网分别待验收。
-
-前阶段研究（2026-10-23）：[Open Dental 等六类系统调研](research/DENTAL_PRACTICE_STUDY_20261023.md) → [C1–C2 身份与连续诊疗](COMMERCIAL_V2_NEXT_STAGE.md) → [需求与验收追踪](research/NEXT_STAGE_TRACEABILITY.json)。[来源登记](research/dental_study_sources.json)区分官方手册、厂商声明、调查与法规；[规划模型](research/MODEL_NOTES.md)不替代实际数据库 ER。
-
-当前交付 → 业务与设计 → 运行与验证 → 历史来源。课程报告请从 [PDF](../课程报告/课程报告_张加良_8210241102.pdf) 或 [报告目录](../课程报告/README.md) 直接进入。
-
-## 业务流程
-
-| 范围 | 文档 |
-|---|---|
-| 连续诊疗、复诊与加工 | [方案与唯一收费](C22_CONTINUITY_CONTRACT.md)、[责任与具体版本就绪](C23_RECALL_LAB_CONTRACT.md)、[验证](evidence_c23/README.md)、[跨岗位演示](CONTINUING_CARE_DEMO.md) |
-| 患者关系与预约代办 | [C1.1业务流程](C11_PATIENT_RELATIONSHIPS.md)、[权限与数据合同](C11_IDENTITY_CONTRACT.md) |
-| 微信小程序与教师试用 | [原生工程与本地导入](../clients/wechat/README.md)、[本地／微信／云端交付](COURSE_TEACHER_DELIVERY.md) |
-| 业务演示、岗位与跟进 | [演示路线](DEMO_ROUTES_RC1.md)、[业务跟进](BUSINESS_FOLLOW_UP.md) |
-| 接诊、治疗、结算与设备衔接 | [完整流程](CARE_FINANCE_EQUIPMENT_WORKFLOWS.md)、[交接规则](FINANCE_EQUIPMENT_HANDOFFS.md) |
-| 收退款、资金凭据与逐笔对账 | [财务凭据](FINANCIAL_EVIDENCE_RECONCILIATION.md)、[账内日结](DAILY_RECONCILIATION.md) |
-| 设备费用及维护 | [费用更正](EQUIPMENT_COST_AMENDMENTS.md)、[维护工单](MAINTENANCE_WORK_ORDERS.md) |
-| 电话接待与统一资源 | [B1.2＋B1.3业务合同](B12_B13_RECEPTION_RESOURCES.md)、[场景追踪](evidence_b12_b13/traceability.md) |
-| 取消分析与服务改进 | [B1.1业务合同](B11_APPOINTMENT_IMPROVEMENT.md)、[领域及状态图](diagrams/)、[已执行追踪](evidence_b11/traceability.md) |
-| 患者自助改期 | [B1.4业务合同](B14_PATIENT_RESCHEDULING.md)、[执行证据](evidence_b14/README.md) |
-| 前台排班与数据库关系 | [B1.3.1实现及后续安排](FRONT_DESK_SCHEDULING_PLAN.md)、[预约业务总计划](APPOINTMENT_BUSINESS_PLAN.md) |
-| 预约与排班 | [预约改期](RESCHEDULING_OPTIMIZATION.md)、[出诊维护](SU29_SU30_AVAILABILITY.md)、[前台协调](SU31_FRONT_COORDINATION.md) |
-| 接诊控制、任务和通知 | [接诊控制](SU32_SU33_INTAKE_CONTROL.md)、[协调任务](SU34_SU35_SU36_COORDINATION_TASKS.md)、[通知](SU37_SU38_NOTIFICATIONS.md) |
-| 基础目录与权限 | [目录规约](SU27_SU28_DIRECTORY.md)、[字段目录](FIELD_CATALOG.md) |
-
-## 系统分析与设计
-
-- [当前报告正文](report-source/REPORT.md)；[模型与用例的冻结来源](release_report/README.md)。
-- [当前数据库ER与字段目录](database/README.md)、[489条实际外键](database/RELATIONSHIPS.md)、[领域与状态图](diagrams/)。
-- [需求追踪](TRACEABILITY.md)、[历史v0.3物理设计](PHYSICAL_DESIGN.md)、[SQL 参考](sql/)。
-- [页面美观与实用性调研](UI_UX_STUDY.md)、[首批界面与浏览器验证](evidence_ux1/README.md)。
-- [2026-10-23 成熟系统与诊所业务调研](research/DENTAL_PRACTICE_STUDY_20261023.md)、[下一阶段实施计划](COMMERCIAL_V2_NEXT_STAGE.md)；[历史成熟系统学习](MATURE_SYSTEM_STUDY.md)、[历史后续方向](COMMERCIAL_DEVELOPMENT.md)。
-- [AI 接口与边界](AI_INTERFACE.md)、[版本范围](V1_SCOPE_AND_REMAINING.md)。
-
-## 部署与运行保障
-
-- [Mac 使用与数据保护](MACOS.md)、[课程上线与备份恢复](COURSE_ONLINE.md)、[部署配置](../deployment/README.md)。
-- [R2 阶段规划](R2_OPERATIONAL_ASSURANCE_PLAN.md)、[R2.1 请求编号和安全日志](R21_SAFE_DIAGNOSTICS.md)、[R2.2 通知与监测](R22_OPERATIONS_OBSERVATION.md)、[R2.3 恢复点新鲜度](R23_RECOVERY_FRESHNESS.md)、[R2.4 本地验收计划](R24_ACCEPTANCE_PLAN.md)。
-- [R2.4.1 主机事件与故障处置](R241_HOST_EVENTS.md)、[R2.4.2 业务依赖演练与处置手册](R242_DEPENDENCY_DRILLS.md)。
-- [安全差距登记](SECURITY_ASVS_GAP_REGISTER.md)、[通知进程运维](WORKER_PROCESS_ACCEPTANCE.md)。
-
-## 测试与验收
-
-当前[C6.1B/C本地结算与基金清算](evidence_c61bc/README.md)；历史[C6.1A医保资料准备](evidence_c61a/README.md)；历史[C1-WX账号与本人核验](evidence_c1wx/README.md)；历史[C2.2–C2.3连续诊疗与加工](evidence_c23/README.md)；历史[C1.1患者关系与预约代办](evidence_c11/README.md)；历史[C0.3患者渠道验证与交付](evidence_c03/README.md)；历史[B1.5.3页面与候补衔接](evidence_b153/README.md)；[B1.5.1原生小程序本地联调](evidence_b15/README.md)；[B1.4患者改期、容量与恢复](evidence_b14/README.md)及此前各阶段按原范围保留。微信开发者工具、真机、体验版和云端仍待独立验收。
-
-| 验证范围 | 实际记录 |
-|---|---|
-| B1.2＋B1.3 电话、资源与维修协调 | [执行证据](evidence_b12_b13/README.md)、[场景追踪](evidence_b12_b13/traceability.md)、[容量边界](evidence_b12_b13/capacity.json)、[本机交付](evidence_b12_b13/delivery.json) |
-| B1.1 取消分析、原因跟进与措施复核 | [执行证据](evidence_b11/README.md)、[需求追踪](evidence_b11/traceability.md)、[恢复范围](evidence_b11/recovery.md) |
-| R2.4.3 等价容量与UX2 | [执行证据](evidence_r243/README.md)、[需求追踪](evidence_r243/requirement_trace.json)、[页面与浏览器](evidence_ux2/README.md)、[Mac交付](evidence_r243/delivery.json) |
-| R2.4.2 依赖恢复及UX1界面 | [执行证据](evidence_r242/README.md)、[需求追踪](evidence_r242/requirement_trace.json)、[界面验证](evidence_ux1/README.md)、[Mac交付](evidence_r242/delivery.json) |
-| R2.4.1 主机事件与故障处置 | [执行证据](evidence_r241/README.md)、[需求追踪](evidence_r241/requirement_trace.json)、[Mac 交付](evidence_r241/delivery.json) |
-| R2.3 备份与独立恢复工具 | [记录与范围](evidence_r23/README.md) |
-| R2.2 心跳、积压与监测失效 | [证据说明](evidence_r22/README.md)、[需求到测试](evidence_r22/requirement_trace.json)、[Mac 交付](evidence_r22/delivery.json) |
-| R2.1 请求追踪与安全日志 | [证据目录](evidence_r21/README.md) |
-| R1 财务闭环及加密恢复 | [证据目录](evidence_financial_evidence/README.md) |
-| 多诊所隔离与容量 | [历史容量基线](evidence_multiclinic/README.md)、[范围说明](MULTICLINIC_CAPACITY.md) |
-| 浏览器业务验收与公网演示 | [G3](G3_BROWSER_ACCEPTANCE.md)、[G4 历史结果](evidence_g4/) |
-| 既有系统测试 | [测试报告索引](TEST_REPORT.md)、[RC 验收](evidence_rc1/) |
-
-每次验证按自己的日期、提交与环境解释。历史通过不代表后续版本已重新执行，也不代表云端或商业上线通过。
-
-## 报告源文件
-
-[report-source/](report-source/README.md) 存放可编辑正文、生成器、格式说明、目录映射和验证摘要。正式 Word/PDF 只放在顶层 [课程报告/](../课程报告/)，避免多个“最新版”。历史格式来源和模型保留原路径，以维持原始证据及复现依赖。
-
-## 源码与资源
-
-| 职责 | 目录 |
-|---|---|
-| 账号、岗位、诊所与基础目录 | [accounts](../accounts/)、[workspaces](../workspaces/)、[registry](../registry/) |
-| 患者、排班、治疗与协调 | [reception](../reception/)、[patients](../patients/)、[scheduling](../scheduling/)、[care](../care/)、[clinical](../clinical/)、[coordination](../coordination/) |
-| 财务与设备 | [finance](../finance/)、[equipment](../equipment/) |
-| 通知和业务操作 | [notifications](../notifications/)、[operations](../operations/) |
-| 门户、辅助和无障碍引导 | [portal](../portal/)、[assistants](../assistants/)、[guidance](../guidance/) |
-| 公共运行能力、配置与界面 | [adc_core](../adc_core/)、[config](../config/)、[templates](../templates/)、[static](../static/) |
-| 自动验证、运维脚本和部署 | [tests](../tests/)、[checks](../checks/)、[scripts](../scripts/)、[deployment](../deployment/) |
-
-## 历史材料
-
-- [R5/RC1 冻结报告](release_report/README.md)、[早期 R1.0 提交](submission_R1/README.md)、[v0.7 提交](teacher_submission/README.md)。均不是当前提交版。
-- `archive_*`、`history/`、`increments/`：历史设计、版本说明及增量原文。
-- `evidence_*`：各阶段验收证据；按目录名称和内部提交号定位，不覆盖历史结果。
-- [历史 Windows 指南](history/README_RC1_WINDOWS.md)、[原始迁移校验](original_migration_hashes.json)、[更早版本记录](../history/)。
-
-仓库不收录私有账号指南、密码、密钥或数据库备份；运行时私有目录的用途见部署指南。
+历次验证以报告日期及所列环境为准。[版本记录](../RELEASE_CURRENT.md) · [早期仓库首页](https://github.com/Zhang646967/adc-dental-clinic/blob/f2fabe2cdcac6ee14db1d0b368613488c1b5249c/README.md) · [历次文档索引](https://github.com/Zhang646967/adc-dental-clinic/blob/f2fabe2cdcac6ee14db1d0b368613488c1b5249c/docs/README.md)
