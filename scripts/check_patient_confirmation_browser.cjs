@@ -15,7 +15,7 @@ async function verify(browser, { kind, pagePath, action }) {
     const input = kind === 'reschedule'
       ? '<input type="hidden" name="action" value="confirm"><input name="proposal_token" value="fixture">'
       : '<input name="token" value="fixture">';
-    const form = '<form method="post" data-booking-confirmation="' + kind + '"' +
+    const form = '<!doctype html><meta charset="utf-8"><form method="post" data-booking-confirmation="' + kind + '"' +
       (action ? ' action="' + action + '"' : '') + '>' + input +
       '<button type="submit">确认</button><a data-confirm-back>返回</a></form>' +
       '<section data-booking-feedback hidden><h2 data-feedback-title></h2><p data-feedback-message></p>' +
