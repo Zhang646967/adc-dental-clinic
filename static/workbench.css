@@ -331,3 +331,17 @@ tbody tr:hover { background: #f6faf7; }
   .report-flow :is(.report-facts, .report-states) dd { margin-bottom: .5em; }
   .report-flow .portal-page-heading { flex-wrap: wrap; }
 }
+
+/* Current posted balance and the selected bill's charges have different meanings. */
+.bill-balance, .bill-version-total { margin: .25rem 0; line-height: 1.5; overflow-wrap: anywhere; }
+.bill-balance strong, .bill-version-total strong { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.bill-versions [aria-current="page"] { font-weight: 700; border: 2px solid currentColor; }
+.bill-paper dd, .bill-facts dd, .charge-review p { min-width: 0; overflow-wrap: anywhere; }
+.bill-print-only { display: none; }
+@media print {
+  .bill-print-only { display: block; }
+  .bill-paper { break-inside: auto; }
+}
+.bill-paper .table-scroll caption, .charge-review .table-scroll caption { white-space: normal; }
+.bill-paper .table-scroll th, .charge-review .table-scroll th { white-space: normal; }
+.bill-paper .table-scroll td:first-child, .charge-review .table-scroll td:first-child { white-space: normal; overflow-wrap: anywhere; }

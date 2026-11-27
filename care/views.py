@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render,redirect,get_object_or_404
@@ -14,6 +15,7 @@ from care.progress import care_progress
 from adc_core.snapshots import reporting_snapshot
 from finance.cash_selectors import invoice_balance
 from scheduling.models import Visit
+from scheduling.service_content import positive_id
 from scheduling.selectors import visible_visits,can_read_visit_details
 
 def _own_visit(user,pk):
@@ -91,6 +93,9 @@ def invoice_context(invoice,request,*,portal=False):
 def _invoice_context(invoice,request,*,portal=False):
     from care.invoice_queries import published_invoice
     data=published_invoice(invoice,revision=request.GET.get('revision'),cash_page=request.GET.get('cash_page',1))
+    data['billing_page'] = positive_id(request.GET.get('billing_page')) if portal else None
+    data['show_cash_activity'] = portal and 'cash_page' in request.GET
+    data['synthetic_statement'] = settings.ADC_CLINICAL_SYNTHETIC
     doctor=not portal and bindings(request.user).filter(
         role='DENTIST',scope_kind='SELF_DENTIST',user__dentist_id=invoice.visit.dentist_id).exists()
     from care.medication_charges import pending_charges, saved_charges

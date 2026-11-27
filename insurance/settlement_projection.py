@@ -1,6 +1,6 @@
 """Insurance-owned read contract for finance and care, without patient identity."""
 from decimal import Decimal
-from django.db.models import Count, Max, Sum, Q, OuterRef, Subquery, DecimalField, Value
+from django.db.models import Count, Max, Sum, Q, OuterRef, Subquery, DecimalField, IntegerField, Value
 from django.db.models.functions import Coalesce
 from adc_core.rules import RuleError
 from insurance.settlement_models import SettlementRequest, ACTIVE_SETTLEMENT_STATES, CREDIT_STATES
@@ -41,3 +41,9 @@ def credit_expressions():
     return {label: Coalesce(Subquery(rows.annotate(value=Sum(source)).values('value'), output_field=field),
             Value(ZERO), output_field=field)
         for label, source in [('insurance_personal_account', 'personal_account'), ('insurance_fund', 'fund_amount')]}
+
+
+def unresolved_count_expression():
+    rows = SettlementRequest.objects.filter(invoice_id=OuterRef('pk'), state__in=UNRESOLVED).order_by()
+    count = rows.values('invoice_id').annotate(total=Count('pk')).values('total')
+    return Coalesce(Subquery(count, output_field=IntegerField()), Value(0))

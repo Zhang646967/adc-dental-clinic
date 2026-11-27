@@ -1,0 +1,9 @@
+<dl class="detail-grid">
+  <dt>单号</dt><dd><bdi>{{ invoice_no }}</bdi></dd>
+  <dt>患者</dt><dd>{{ header.patient_name }}</dd>
+  <dt>账单地址</dt><dd>{{ header.billing_address }}</dd>
+  <dt>诊所</dt><dd>{{ header.clinic_name }}</dd>
+  <dt>负责牙医</dt><dd>{{ header.dentist_name }}</dd>
+  <dt>本版本发布时间</dt><dd>{{ published_at|date:'Y-m-d H:i' }}（北京时间）</dd>
+  <dt>首次开单时间</dt><dd>{{ issued_at|date:'Y-m-d H:i' }}（北京时间）</dd>
+</dl>

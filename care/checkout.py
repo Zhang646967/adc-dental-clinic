@@ -17,7 +17,7 @@ from scheduling.service_content import positive_id
 def settlement_summary(invoice):
     balance = invoice_balance(invoice)
     fields = ('receipts', 'refunds', 'net_received', 'advance_applied', 'insurance_fund',
-        'insurance_personal_account', 'remaining', 'refund_due', 'pending_refunds')
+        'insurance_personal_account', 'remaining', 'refund_due', 'pending_refunds', 'advance_excess', 'insurance_pending')
     return dict(invoice_id=invoice.pk, invoice_no=invoice.invoice_no,
         revision=balance['current_revision'], total=balance['billed'],
         review_pending=bool(balance['pending'] or balance['insurance_pending']),

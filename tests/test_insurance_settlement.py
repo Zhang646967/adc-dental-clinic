@@ -83,6 +83,21 @@ class SettlementFixture(CFEFixture):
 class InsuranceSettlementTests(SettlementFixture,TransactionTestCase):
     def setUp(self): self.setup_settlement()
 
+    def test_invoice_list_unresolved_insurance_matches_the_detail_after_review(self):
+        from insurance.settlement_projection import unresolved_count_expression
+        from finance.cash_selectors import invoice_balance, with_invoice_balances
+        from care.checkout import settlement_summary
+        claim = self.settlement()
+        for pending in (1, 0):
+            row = with_invoice_balances(Invoice.objects.filter(pk=self.invoice.pk)).annotate(
+                insurance_pending=unresolved_count_expression()).get()
+            balance = invoice_balance(self.invoice)
+            self.assertEqual((row.insurance_pending, balance['insurance_pending']), (pending, pending))
+            self.assertEqual(row.remaining, balance['remaining'])
+            self.assertEqual(settlement_summary(self.invoice)['review_pending'], bool(pending))
+            if pending:
+                self.review_settlement(claim)
+
     def test_preview_does_not_create_claim_money_or_treatment(self):
         counts=(Invoice.objects.count(),TreatmentRecord.objects.count(),CashEntry.objects.count())
         p=self.request_preview()

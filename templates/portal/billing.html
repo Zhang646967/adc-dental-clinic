@@ -2,24 +2,23 @@
 {% block title %}费用查询 · ADC 口腔{% endblock %}
 {% block content %}
 <div class="portal-page-heading">
-  <div><h1>费用查询</h1><p>查看本人已发布的结算单、当前应付和退费余额。</p></div>
+  <div><h1>费用查询</h1><p>已发布的结算单 · 共 {{ count }} 张</p></div>
   <a class="button secondary" href="{% url 'portal_funds' %}">预收与资金流水</a>
 </div>
 <div class="appointment-cards">
   {% for bill in rows %}
-  <article class="appointment-card billing-card">
+  <article class="appointment-card bill-list-row" id="bill-{{ bill.id }}">
     <div>
       <h2>{{ bill.clinic }}</h2>
-      <p>{{ bill.scheduled_start|date:'Y年m月d日 H:i' }} · 第 {{ bill.revision }} 版</p>
-      <p class="muted">{{ bill.invoice_no }} · 就诊 #{{ bill.visit_id }}</p>
-      {% if bill.review_pending %}<p class="muted">有款项待复核，余额按已记账金额计算。</p>{% endif %}
+      <p>{{ bill.scheduled_start|date:'Y年n月j日 H:i' }}（北京时间）</p>
     </div>
-    <dl class="billing-amounts">
-      <div><dt>结算金额</dt><dd>¥{{ bill.total|floatformat:2 }}</dd></div>
-      <div><dt>尚需支付</dt><dd>¥{{ bill.remaining|floatformat:2 }}</dd></div>
-      <div><dt>应退余额</dt><dd>¥{{ bill.refund_due|floatformat:2 }}</dd></div>
-    </dl>
-    <a class="button secondary" href="{% url 'portal_invoice' bill.id %}">查看结算单</a>
+    <div>
+      {% include 'components/bill_balance.html' with pending=bill.review_pending %}
+      <p>第 {{ bill.revision }} 版 · 结算金额 ¥{{ bill.total|floatformat:2 }}</p>
+      {% if bill.insurance_pending %}<p>医保分担待复核</p>{% elif bill.review_pending %}<p>收退款申请待复核</p>{% endif %}
+      {% if bill.advance_excess %}<p>待核对的预收抵扣 ¥{{ bill.advance_excess|floatformat:2 }}</p>{% endif %}
+    </div>
+    <a class="button secondary" href="{% url 'portal_invoice' bill.id %}?billing_page={{ page }}" aria-label="查看{{ bill.scheduled_start|date:'n月j日 H:i' }}{{ bill.clinic }}的结算单">查看结算单</a>
   </article>
   {% empty %}
   <section class="panel portal-empty"><h2>暂无已发布的结算单</h2>

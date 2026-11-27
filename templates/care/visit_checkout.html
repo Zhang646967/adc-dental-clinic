@@ -4,7 +4,7 @@
   {% with bill=checkout.settlement %}
   {% if bill %}
   <h3>本次结算</h3>
-  <p class="checkout-balance">{% if bill.remaining %}尚需支付 <strong>¥{{ bill.remaining|floatformat:2 }}</strong>{% elif bill.refund_due %}应退余额 <strong>¥{{ bill.refund_due|floatformat:2 }}</strong>{% else %}<strong>已结清</strong>{% endif %}</p>
+  {% include 'components/bill_balance.html' with pending=bill.review_pending %}
   <p>本次账单金额 <strong>¥{{ bill.total|floatformat:2 }}</strong> · 第 {{ bill.revision }} 版</p>
   <details class="task-disclosure compact">
     <summary>收款和退款明细</summary>
@@ -19,6 +19,13 @@
   </details>
   {% if bill.pending_refunds %}<p class="notice">退款申请 ¥{{ bill.pending_refunds|floatformat:2 }} 待复核。审核记账后将更新已退金额。</p>
   {% elif bill.review_pending %}<p class="notice">有结算事项待复核，金额按当前已记账结果显示。</p>{% endif %}
+  {% if bill.advance_excess %}<p class="notice">预收抵扣有 ¥{{ bill.advance_excess|floatformat:2 }} 待原门店核对。</p>{% endif %}
+  {% if front %}
+    {% if bill.insurance_pending %}<a class="button" href="{% url 'insurance_settlements' %}?invoice={{ bill.invoice_id }}">核对医保原申请</a>
+    {% elif bill.review_pending %}<a class="button" href="{% url 'cash_list' %}?invoice={{ bill.invoice_id }}">核对本单收退款申请</a>
+    {% elif bill.advance_excess %}<a class="button" href="{% url 'invoice_detail' bill.invoice_id %}">核对预收抵扣</a>
+    {% elif bill.remaining or bill.refund_due %}<a class="button" href="{% url 'cash_invoice_request' bill.invoice_id %}">{% if bill.remaining %}核对待收款{% else %}核对待退款{% endif %}</a>{% endif %}
+  {% endif %}
   <a class="button secondary" href="{% if front %}{% url 'invoice_detail' bill.invoice_id %}{% else %}{% url 'portal_invoice' bill.invoice_id %}{% endif %}">查看本次结算单</a>
   {% else %}<p>结算单待发布</p>{% endif %}
   {% endwith %}

@@ -1,1 +1,33 @@
-{% extends 'base.html' %}{% load workspace_tags %}{% block content %}<div class="business-flow"><a href="{% url 'care_workspace' visit.pk %}">← 返回检查治疗记录</a>{% if published and not editable %}<div class="eyebrow">已发布结果核对</div><h1>已发布接诊与结算结果</h1>{% else %}<div class="eyebrow">关闭前确认</div><h1>完成接诊并生成结算单</h1>{% endif %}{% include 'care/progress.html' %}<section class="panel"><h2>{{ visit.patient.name }} · {{ visit.clinic.name }}</h2><p>负责牙医：{{ visit.dentist.name }}</p>{% for line in record.treatment_lines.all %}<p>{{ line.name_snapshot }}：{{ line.quantity }} × ¥{{ line.unit_price }} = ¥{{ line.line_amount }}</p>{% empty %}<p>没有本次牙科治疗收费明细。</p>{% endfor %}{% include 'care/medication_table.html' %}{% if pharmacy_blocker %}<p class="notice">{{ pharmacy_blocker }} <a href="{% url 'prescription_visit' visit.pk %}">查看本次处方</a></p>{% endif %}{% if actual.no_charge_stages %}<h3>实际阶段治疗（本次不另计费）</h3>{% for stage in actual.no_charge_stages %}<p>{{ stage.name_snapshot }} · {{ stage.quantity }} {{ stage.unit_snapshot }}</p>{% endfor %}<p>已提供实际治疗，应按有治疗完成关闭；不是未治疗。</p>{% endif %}{% if clinical_started %}<p>本次结构化检查记录：</p>{% if clinical_record %}<p><a href="{% url 'clinical_encounter' visit.pk %}?revision={{ clinical_record.revision }}">已确认第 {{ clinical_record.revision }} 版 · {{ clinical_record.recorded_at|date:'Y-m-d H:i' }}</a></p>{% else %}<p>尚无确认版本，请先返回检查工作台核对草稿。</p>{% endif %}{% else %}<p>接诊记录摘要：</p><p class="care-notes">{{ clinical_note|default:'尚无接诊备注。' }}</p>{% endif %}<p class="total">合计：¥ {{ completion_total|floatformat:2 }}</p><p>这是开单金额，不代表已收款。重复完成请求不会生成第二张单据。</p></section>{% if editable %}<form method="post" class="panel form-panel">{% csrf_token %}{% workspace_token %}{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{% include 'components/form_errors.html' %}{% for field in form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}<button class="button" type="submit">确认关闭并发布结算单</button></form>{% else %}<p class="notice">本次接诊已关闭或当前不可编辑。请核对保留的已发布结果。</p>{% if invoice %}<a class="button secondary" href="{% url 'invoice_detail' invoice.pk %}">查看已发布结算单</a>{% endif %}{% endif %}</div>{% endblock %}
+{% extends 'base.html' %}
+{% load workspace_tags %}
+{% block content %}
+<div class="business-flow charge-review">
+  <a href="{% url 'care_workspace' visit.pk %}">← 返回检查治疗记录</a>
+  <h1>{% if published and not editable %}已发布接诊与结算结果{% else %}完成接诊并生成结算单{% endif %}</h1>
+  <p>{{ visit.patient.name }} · {{ visit.clinic.name }} · 负责牙医 {{ visit.dentist.name }}</p>
+  <section class="panel" aria-labelledby="charge-review-heading">
+    <h2 id="charge-review-heading">{% if published and not editable %}已发布第 {{ published.revision_no }} 版{% else %}本次待核对费用{% endif %}</h2>
+    <p class="bill-version-total">本次开单金额 <strong>¥{{ completion_total|floatformat:2 }}</strong></p>
+    <h3>实际治疗项目</h3>
+    {% for line in lines %}<p><strong>{{ line.name_snapshot }}</strong> · {{ line.quantity }} {{ line.unit_snapshot }} × ¥{{ line.unit_price }} = ¥{{ line.line_amount }}</p>
+    {% empty %}<p>{% if actual.no_charge_stages %}本次阶段治疗不另计费。{% elif medication_lines %}本次仅有实际发退药费用。{% elif published.outcome == 'NO_TREATMENT' %}本次未实施治疗。{% else %}没有本次牙科治疗收费明细。{% endif %}</p>{% endfor %}
+    {% if actual.no_charge_stages %}<h3>实际阶段治疗（本次不另计费）</h3>{% for stage in actual.no_charge_stages %}<p>{{ stage.name_snapshot }} · {{ stage.quantity }} {{ stage.unit_snapshot }}</p>{% endfor %}{% endif %}
+    {% include 'care/medication_table.html' %}
+    {% if pharmacy_blocker %}<p class="notice">{{ pharmacy_blocker }} <a href="{% url 'prescription_visit' visit.pk %}">查看本次处方</a></p>{% endif %}
+  </section>
+  {% include 'care/progress.html' %}
+  {% if clinical_started %}
+    {% if clinical_record %}<p><a href="{% url 'clinical_encounter' visit.pk %}?revision={{ clinical_record.revision }}">查看已确认第 {{ clinical_record.revision }} 版检查记录</a> · {{ clinical_record.recorded_at|date:'Y-m-d H:i' }}</p>
+    {% else %}<p class="notice">检查记录尚无确认版本，请返回检查工作台核对草稿。</p>{% endif %}
+  {% else %}<details class="task-disclosure compact"><summary>接诊记录摘要</summary><p class="care-notes">{{ clinical_note|default:'尚无接诊备注。' }}</p></details>{% endif %}
+  {% if editable %}
+  <form method="post" class="panel form-panel">{% csrf_token %}{% workspace_token %}
+    {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+    {% include 'components/form_errors.html' %}
+    {% for field in form.visible_fields %}{% include 'components/form_field.html' %}{% endfor %}
+    <button class="button" type="submit">确认关闭并发布结算单</button>
+  </form>
+  {% elif invoice %}<a class="button secondary" href="{% url 'invoice_detail' invoice.pk %}">查看已发布结算单</a>
+  {% else %}<p class="notice">当前不可编辑，请返回检查治疗记录核对接诊状态。</p>{% endif %}
+</div>
+{% endblock %}

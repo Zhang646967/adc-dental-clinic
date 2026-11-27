@@ -1,0 +1,8 @@
+<p class="bill-balance" data-bill-balance>
+  {% if bill.remaining == None or bill.refund_due == None %}<strong>余额待核对</strong>
+  {% elif bill.remaining %}尚需支付 <strong>¥{{ bill.remaining|floatformat:2 }}</strong>
+  {% elif bill.refund_due %}应退余额 <strong>¥{{ bill.refund_due|floatformat:2 }}</strong>
+  {% elif bill.advance_excess %}<strong>预收抵扣待核对</strong>
+  {% elif pending or bill.insurance_pending %}<strong>款项待复核</strong>
+  {% else %}<strong>已结清</strong>{% endif %}
+</p>

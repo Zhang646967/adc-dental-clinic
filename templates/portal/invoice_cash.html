@@ -1,6 +1,12 @@
 <section class="panel no-print business-flow" aria-labelledby="patient-cash-heading">
   <h2 id="patient-cash-heading">费用与收退款</h2>
   {% if not is_current %}<p class="notice">本页收费项目为历史版本；以下收退款和余额对应当前第{{ cash_balance.current_revision }}版账单，不是历史时点余额。</p>{% endif %}
+  {% include 'components/bill_balance.html' with bill=cash_balance pending=cash_balance.pending %}
+  {% if cash_balance.advance_excess %}<p class="notice">预收款抵扣超出当前账单责任 ¥ {{ cash_balance.advance_excess }}。请联系原门店核对分配。</p>{% endif %}
+  {% if cash_balance.pending %}<p class="notice">有{{ cash_balance.pending }}笔收退款请求待复核。{% if cash_balance.pending_refunds %}其中申请退款 ¥{{ cash_balance.pending_refunds|floatformat:2 }}。{% endif %}审核记账后更新余额。</p>{% endif %}
+  {% if cash_balance.insurance_pending %}<p class="notice">有医保原请求待处理，请联系原门店核对分担进度。</p>{% endif %}
+  <details class="task-disclosure compact bill-facts" id="cash-activity"{% if show_cash_activity %} open{% endif %}>
+  <summary>查看收款、退款与抵扣明细</summary>
   <dl class="detail-grid">
     <dt>当前账单金额</dt><dd>¥ {{ cash_balance.billed }}</dd>
     <dt>已核对个人账户承担</dt><dd>¥ {{ cash_balance.insurance_personal_account }}</dd>
@@ -13,10 +19,8 @@
     <dt>尚需支付</dt><dd>¥ {{ cash_balance.remaining }}</dd>
     <dt>应退余额</dt><dd>¥ {{ cash_balance.refund_due }}</dd>
   </dl>
-  {% if cash_balance.advance_excess %}<p class="notice">预收款抵扣超出当前账单责任 ¥ {{ cash_balance.advance_excess }}。请联系原门店核对分配。</p>{% endif %}
+  {% if cash_balance.insurance_pending or cash_balance.insurance_personal_account or cash_balance.insurance_fund %}<p>医保分担单独核对，非现金承担不代表资金到账。</p>{% endif %}
   <p><a href="{% url 'portal_funds' %}">核对我的预收与资金流水 →</a></p>
-  {% if cash_balance.pending %}<p class="notice">有{{ cash_balance.pending }}笔收退款请求待复核，尚未计入已记账总额或下方明细。</p>{% endif %}
-  {% if cash_balance.insurance_pending %}<p class="notice">有医保原请求待处理，请联系原门店核对；非现金承担不代表资金到账。</p>{% endif %}
   <h3>已记账收退款明细</h3>
   <p class="muted">共{{ cash_activity.count }}笔 · 第{{ cash_activity.page }}／{{ cash_activity.pages }}页。净收款＝已记账收款－已记账退款；仅统计本单患者收退款，医保等非现金承担另行核对。</p>
   {% for entry in cash_activity.entries %}
@@ -27,8 +31,9 @@
   </article>
   {% empty %}<p>暂无已记账收退款。</p>{% endfor %}
   {% if cash_activity.previous or cash_activity.next %}<nav class="actions" aria-label="收退款明细翻页">
-    {% if cash_activity.previous %}<a class="button secondary" href="?revision={{ revision }}&amp;cash_page={{ cash_activity.previous }}#patient-cash-heading">上一页</a>{% endif %}
-    {% if cash_activity.next %}<a class="button secondary" href="?revision={{ revision }}&amp;cash_page={{ cash_activity.next }}#patient-cash-heading">下一页</a>{% endif %}
+    {% if cash_activity.previous %}<a class="button secondary" href="?revision={{ revision }}&amp;cash_page={{ cash_activity.previous }}{% if billing_page %}&amp;billing_page={{ billing_page }}{% endif %}#cash-activity">上一页</a>{% endif %}
+    {% if cash_activity.next %}<a class="button secondary" href="?revision={{ revision }}&amp;cash_page={{ cash_activity.next }}{% if billing_page %}&amp;billing_page={{ billing_page }}{% endif %}#cash-activity">下一页</a>{% endif %}
   </nav>{% endif %}
   <p class="muted">付款或退款请联系原门店前台；本页不发起支付。记账记录不代表外部支付渠道凭证。</p>
+  </details>
 </section>

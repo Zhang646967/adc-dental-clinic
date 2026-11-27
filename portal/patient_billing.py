@@ -8,6 +8,7 @@ from django.views.decorators.http import require_GET
 from adc_core.snapshots import reporting_snapshot
 from care.models import Invoice
 from finance.cash_selectors import with_invoice_balances
+from insurance.settlement_projection import unresolved_count_expression
 from portal.mini_api import endpoint, result
 from portal.policies import patient_access
 
@@ -18,7 +19,8 @@ def billing_page(actor, page_number):
         invoices = Invoice.objects.filter(
             visit__patient_id=access.patient_id, current_record_version__state='PUBLISHED',
         ).select_related('visit__clinic__public_directory', 'current_record_version')
-        page = Paginator(with_invoice_balances(invoices).order_by('-first_issued_at', '-pk'), 10).get_page(page_number)
+        balances = with_invoice_balances(invoices).annotate(insurance_pending=unresolved_count_expression())
+        page = Paginator(balances.order_by('-first_issued_at', '-pk'), 10).get_page(page_number)
         rows = []
         for bill in page:
             record = bill.current_record_version
@@ -27,7 +29,8 @@ def billing_page(actor, page_number):
                 clinic=record.billing_header_snapshot.get('clinic_name') or bill.visit.clinic.public_contact['name'],
                 scheduled_start=bill.visit.scheduled_start, published_at=record.published_at,
                 revision=record.revision_no, total=record.total_amount,
-                remaining=bill.remaining, refund_due=bill.refund_due, review_pending=bool(bill.pending_count),
+                remaining=bill.remaining, refund_due=bill.refund_due, advance_excess=bill.advance_excess,
+                insurance_pending=bill.insurance_pending, review_pending=bool(bill.pending_count or bill.insurance_pending),
             ))
         return dict(
             rows=rows, page=page.number, pages=page.paginator.num_pages, count=page.paginator.count,

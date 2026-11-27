@@ -46,6 +46,21 @@ class CheckoutTests(VisitReviewFixture, TransactionTestCase):
             self.assertNotContains(invalid, '#checkout-money-heading">← 返回原就诊')
         self.assertEqual([m.objects.count() for m in (Visit, Invoice, CashEntry)], counts)
 
+    def test_patient_bill_return_and_cash_paging_preserve_the_entry(self):
+        invoice, _ = self.complete_case()
+        url = reverse('portal_invoice', args=[invoice.pk])
+        billing = reverse('portal_billing')
+        page = self.web.get(billing)
+        self.assertContains(page, f'{url}?billing_page=1')
+        detail = self.web.get(url, {'billing_page': 1, 'cash_page': 1, 'revision': 1})
+        self.assertContains(detail, f'{billing}?page=1#bill-{invoice.pk}')
+        self.assertContains(detail, 'id="cash-activity" open')
+        self.assertContains(detail, '¥100.00')
+        for params in ({}, {'billing_page': 'bad'}):
+            direct = self.web.get(url, params)
+            self.assertContains(direct, reverse('portal_visit', args=[self.v.pk]) + '#checkout-money-heading')
+            self.assertNotContains(direct, 'id="cash-activity" open')
+
     def test_concurrent_correction_yields_one_bill_version_and_its_actual_balance(self):
         invoice, _ = self.complete_case()
         self.record_cash(invoice, amount='100')
