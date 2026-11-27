@@ -2011,7 +2011,7 @@
     "templates/portal/sms_captcha.html": "3ed9094076dd56f6fb7561fcd606b4726c8c2dc67310734e7c119b8e540fc22f",
     "templates/portal/sms_login.html": "f22b128ae38277b56f6222f6c83f3bad9e64633946d189dfa53ceea3bb892f18",
     "templates/portal/subjects.html": "9a4e972f51d310c2187a10d930eff2f034b94790f4873012484eb929a4099eae",
-    "templates/portal/visit.html": "e263b831d9fee78f249f1691ab5e7146e039fc57fb38245d13561bdd15d0d20e",
+    "templates/portal/visit.html": "ce6da7f7b218c693752e580fa5be8c1ccf805a1739b3df8bb99f80a6a77d5b57",
     "templates/portal/visit_review.html": "a560e6c73210ba6ed4f662813ff51ef03a46309f41710f8172c24476aa4b2ef1",
     "templates/reception/confirm.html": "61f0194d8ba0c86110432df89ec07eb95b683cf2cb1c0f03ce4f12f8d4e9068d",
     "templates/reception/detail.html": "841c2de709d8258d623250303470757d1eafdda3b2695e90bde0c9d611e5f5de",
