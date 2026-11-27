@@ -158,6 +158,19 @@ async function verify() {
   firstEntry.page.onLoad({});
   await firstEntry.page.onShow();
   ok(firstEntry.scrolls.length === 0 && firstEntry.page.data.focusId === null, 'first entry keeps the normal start');
+  const bookmark = load('report-notices', { session: auth, responses: [pageOf([notice(9)], 2)] });
+  bookmark.page.onLoad({page: '2'});
+  await bookmark.page.onShow();
+  ok(bookmark.calls[0][2].page === 2, 'a direct link retains the requested page on first entry');
+  const replaced = load('report-notices', { session: auth, responses: [pageOf([notice(2)]),
+    pageOf([notice(2, {kind:'WITHDRAWN', revision:null})])] });
+  replaced.page.onLoad({});
+  await replaced.page.onShow();
+  replaced.page.open(tapAt(0));
+  replaced.page.onHide();
+  await replaced.page.onShow();
+  ok(replaced.page.data.focusId === null && !replaced.scrolls.length && !replaced.page.data.rows[0].canOpen,
+    'a retired report action cannot restore the old destination');
 
   // Opening a row remembers its id and action; the back gesture re-reads and
   // scrolls to that same row, not to the first one.

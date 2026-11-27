@@ -6,12 +6,18 @@ const {positive}=require('../../utils/booking-intent');
 const {buildNoticeList}=require('../../utils/report-notices');
 
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
-const blankNotices={rows:[],unreadCount:null,hasPrevious:false,hasNext:false,...blankSubject};
+const blankNotices={rows:[],unreadCount:null,hasPrevious:false,hasNext:false,focusId:null,...blankSubject};
 // A row opened from this list stays the return anchor for one back gesture.
 // The window is short on purpose: a stale anchor must never move a later visit.
 const RETURN_TTL=10*60*1000;
 // Bounded lookup when sorting or pagination moved the row to another page.
 const LOOKUP_PAGES=4;
+
+function actionUrl(row,action){
+  if(action==='open')return row.url;
+  if(action==='visit')return row.visitUrl;
+  return row.canOpen?'':row.contactUrl;
+}
 
 Page({
   data:{...blankNotices,page:1,busy:false,error:'',requestId:'',subjectInvalid:false,
@@ -19,6 +25,7 @@ Page({
   onLoad(query){
     const requested=positive(query&&query.page)?Number(query.page):1;
     this.page=requested;
+    this.entryPage=requested;
     this.generation=0;
     this.returnTarget=null;
     this.setData({page:requested});
@@ -27,7 +34,9 @@ Page({
     // A back gesture returns here with the anchor set by the row action. It is
     // consumed once and only for the same patient and workspace that opened it.
     const target=this.consumeTarget();
-    return this.load(target?target.page:1,target);
+    const page=target?target.page:(this.entryPage||1);
+    this.entryPage=null;
+    return this.load(page,target);
   },
   onHide(){this.generation++;this.setData(blankNotices);},
   onUnload(){this.generation++;this.returnTarget=null;},
@@ -43,7 +52,7 @@ Page({
       stored.revision===current.revision;
   },
   remember(row,action){
-    const anchor=row&&positive(row.id)?{id:row.id,action,page:this.data.page||1,
+    const anchor=row&&positive(row.id)?{id:row.id,action,url:actionUrl(row,action),page:this.data.page||1,
       context:this.context(),expires:Date.now()+RETURN_TTL}:null;
     this.returnTarget=anchor&&api.sessionInfo().authenticated?anchor:null;
   },
@@ -68,14 +77,15 @@ Page({
       const data=await api.request('report-notices/','GET',{page});
       if(generation!==this.generation)return;
       const located=target?await this.locate(target,data,generation):{list:buildNoticeList(data),found:null};
-      if(!located||generation!==this.generation)return;
+      if(generation!==this.generation)return;
+      if(!located)return this.load(1);
       const list=located.list;
       this.page=list.page;
       api.showSubject(this);
       this.setData({...list,busy:false,readOnly:!!api.sessionInfo().read_only,
         environmentLabel:api.sessionInfo().environment_label||'',
         focusId:located.found?target.id:null});
-      if(located.found)this.scrollToNotice(target.id);
+      if(located.found)this.scrollToNotice(target,generation);
     }catch(e){
       if(generation!==this.generation)return;
       this.showNoticeError(e);
@@ -85,31 +95,38 @@ Page({
   // correction moved it to another page, the current authorized list is walked
   // a bounded number of pages; a missing row falls back to the first page.
   async locate(target,first,generation){
-    let list=buildNoticeList(first);
-    if(list.rows.some(row=>row.id===target.id))return {list,found:true};
-    for(let page=1;page<=LOOKUP_PAGES;page++){
-      if(page===list.page)continue;
-      if(page>list.page&&!list.hasNext)continue;
-      const data=await api.request('report-notices/','GET',{page});
+    const original=buildNoticeList(first);
+    let list=original;
+    let nextPage=1;
+    const visited=new Set();
+    while(!visited.has(list.page)&&visited.size<LOOKUP_PAGES){
+      if(!api.sessionInfo().authenticated||!this.sameContext(target.context))return null;
+      if(target.expires<=Date.now())break;
+      visited.add(list.page);
+      const row=list.rows.find(item=>item.id===target.id);
+      if(row)return {list,found:!!target.url&&actionUrl(row,target.action)===target.url};
+      while(visited.has(nextPage))nextPage++;
+      if(visited.size===LOOKUP_PAGES||(nextPage>list.page&&!list.hasNext))break;
+      const data=await api.request('report-notices/','GET',{page:nextPage++});
       if(generation!==this.generation)return null;
       list=buildNoticeList(data);
-      if(list.rows.some(row=>row.id===target.id))return {list,found:true};
-      if(!list.hasNext&&page>=list.page)break;
     }
-    return {list:buildNoticeList(first),found:false};
+    return {list:original,found:false};
   },
-  scrollToNotice(id){
+  scrollToNotice(target,generation){
     // Restore the reading position on the row itself, not on an index: the
     // list may have been re-read and re-sorted while the report was open.
-    const page=this.page;
+    const id=target.id;
+    const current=()=>this.generation===generation&&this.data.focusId===id&&
+      this.sameContext(target.context)&&!!api.sessionInfo().authenticated&&target.expires>Date.now();
     const run=()=>{
-      if(typeof wx==='undefined'||!wx.createSelectorQuery)return;
+      if(!current()||typeof wx==='undefined'||!wx.createSelectorQuery)return;
       const query=wx.createSelectorQuery();
       query.selectViewport().scrollOffset();
       query.select('#notice-'+id).boundingClientRect();
       query.exec(result=>{
         const viewport=result&&result[0], box=result&&result[1];
-        if(!box)return;
+        if(!box||!current())return;
         const top=Math.max(0,(viewport?viewport.scrollTop:0)+box.top-16);
         if(wx.pageScrollTo)wx.pageScrollTo({scrollTop:top,duration:0});
       });
