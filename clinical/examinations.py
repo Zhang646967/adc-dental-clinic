@@ -27,7 +27,7 @@ Action = ExaminationEvent.Action
 Kind = ExaminationDuty.Kind
 REVIEW = (Action.APPROVE, Action.RETURN)
 RELATED = 'source_record__encounter__visit'
-DECISIONS = {Action.APPROVE: '审核通过，待发布', Action.RETURN: '结果已退回'}
+DECISIONS = {Action.APPROVE: '审核通过', Action.RETURN: '结果已退回'}
 
 
 def require_course():

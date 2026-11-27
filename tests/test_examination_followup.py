@@ -167,9 +167,12 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
         first = self.mini.get(listing).json()['data']
         row, = first['rows']
         self.assertEqual((row['kind'], row['revision'], first['unread_count']), ('RELEASED', 1, 1))
-        self.assertEqual(set(row), {'id', 'kind', 'title', 'clinic', 'occurred_at', 'read_at', 'visit_id',
+        self.assertEqual(row['project'], order.project_name)
+        self.assertEqual(set(row), {'id', 'kind', 'title', 'project', 'clinic', 'occurred_at', 'read_at', 'visit_id',
             'examination_id', 'revision'})
-        self.assertContains(self.web.get(reverse('portal_report_notices')), '1 条未读')
+        notices_page = self.web.get(reverse('portal_report_notices'))
+        self.assertContains(notices_page, '1 条未读')
+        self.assertContains(notices_page, order.project_name)
         response = self.mini_post('mini_report_notice_read', {}, [row['id']])
         self.assertEqual(response.status_code, 200, response.content)
         read = response.json()['data']

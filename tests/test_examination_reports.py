@@ -144,6 +144,11 @@ class ExaminationReportsTests(ExaminationFixture, TransactionTestCase):
                 self.assertEqual(self.native_report(order).status_code, 404)
             client = case.web_client(actor)
             selected = next(item['form'] for item in client.get(detail).context['action_forms'] if item['action'] == action)
+            if action == 'SUBMIT':
+                invalid = client.post(detail, dict(selected.initial, action=action, body=''))
+                self.assertContains(invalid, '请检查填写内容', status_code=400)
+                self.assertContains(invalid, 'class="task-disclosure report-operation" open', status_code=400)
+                self.assertFalse(order.reports.exists())
             response = client.post(detail, dict(selected.initial, action=action, **fields))
             self.assertEqual(response.status_code, 200, response.content[:1000])
             self.assertRedirects(client.post(confirm, dict(response.context['form'].initial, confirmed='on')),
@@ -159,6 +164,7 @@ class ExaminationReportsTests(ExaminationFixture, TransactionTestCase):
         url = reverse('portal_visit', args=[case.v.pk])
         detail = reverse('portal_examination', args=[case.v.pk, order.pk])
         native = self.native_report(order, 1).json()['data']
+        self.assertNotContains(case.front_web.get(reverse('clinical_examination_progress')), '审核通过，待发布')
         web = case.web.get(detail, {'revision': 1})
         self.assertContains(web, BODY1)
         self.assertEqual(web['Cache-Control'], 'no-store')
@@ -167,6 +173,10 @@ class ExaminationReportsTests(ExaminationFixture, TransactionTestCase):
         for forbidden in (SOURCE, 'PRIVATE_EXAM_PURPOSE', 'reviewed_by', 'correction_reason'):
             self.assertNotIn(forbidden, json.dumps(native))
         case.step(order, 'SUBMIT', body='课程合成：待审核内容', reason='复核发现差异')
+        staff_page = case.web_client(case.doc).get(reverse('clinical_examination', args=[order.pk]))
+        self.assertContains(staff_page, '第 2 版 · 最新办理版本（患者不可查阅）')
+        self.assertContains(staff_page, '第 1 版 · 当前患者可查阅')
+        self.assertNotContains(case.web.get(detail), '课程合成：待审核内容')
         case.step(order, 'RETURN', case.reviewer, reason='请逐项核对检查依据')
         self.assertEqual(self.native_report(order).json()['data']['revision'], 1)
         case.publish(order, BODY2, reason='按退回意见完成复核')

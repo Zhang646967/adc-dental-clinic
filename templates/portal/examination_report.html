@@ -1,32 +1,45 @@
 {% extends 'portal/base.html' %}
+{% block title %}{{ report.project }} · 检查报告{% endblock %}
 {% block content %}
-{% if return_visit_id %}<p><a href="{% url 'portal_visit' return_visit_id %}#return-sources-title">← 返回这次复诊</a></p>
-{% else %}<p><a href="{% url 'portal_visit' report.visit_id %}">← 返回本次就诊</a></p>{% endif %}
-<h1>检查报告</h1>
-<section class="panel">
-  <h2>{{ report.project }}</h2>
-  <dl class="detail-grid">
-    <dt>检查编号</dt><dd>{{ report.number }}</dd>
-    <dt>原就诊编号</dt><dd>{{ report.visit_no }}</dd>
-    <dt>报告版本</dt><dd>第 {{ report.revision }} 版</dd>
-    <dt>实际检查</dt><dd>{{ report.performed_at|date:'Y-m-d H:i' }}</dd>
-    <dt>发布时间</dt><dd>{{ report.released_at|date:'Y-m-d H:i' }}（北京时间）</dd>
-  </dl>
-  <h3>检查结果</h3>
-  {{ report.body|linebreaks }}
-</section>
-{% with followup=report.followup %}
-{% if followup %}
-<section class="panel">
-  <h2>复诊安排</h2>
-  <p>{{ followup.message }}</p>
-  {% if followup.service %}<p>{{ followup.clinic }} · {{ followup.service }} · {{ followup.earliest_on|date:'Y-m-d' }} 至 {{ followup.latest_on|date:'Y-m-d' }}</p>{% endif %}
-  <div class="actions">
-    {% if followup.action == 'BOOK' %}<a class="button" href="{% url 'portal_slots' %}?clinic={{ followup.clinic_id }}&amp;service={{ followup.service_id }}&amp;followup_visit={{ report.visit_id }}&amp;followup_examination={{ report.id }}&amp;followup_revision={{ report.revision }}">预约复诊</a>{% endif %}
-    {% if followup.action == 'CONTACT' %}<a class="button secondary" href="{% url 'portal_visit' report.visit_id %}#frontdesk-help">联系原门店</a>{% endif %}
-    {% if followup.appointment %}<a class="button secondary" href="{% url 'portal_visit' followup.appointment.id %}">查看复诊预约 {{ followup.appointment.visit_no }} · {{ followup.appointment.status_label }}</a>{% endif %}
-  </div>
-</section>
-{% endif %}
-{% endwith %}
+<div class="report-flow">
+  <header class="portal-page-heading">
+    <div><h1>{{ report.project }}</h1><p class="report-status">检查报告 · 第 {{ report.revision }} 版</p>
+      <p class="report-meta">发布于 <time datetime="{{ report.released_at|date:'c' }}">{{ report.released_at|date:'Y-m-d H:i' }}</time>（北京时间）</p>
+    </div>
+    {% if return_visit_id %}<a href="{% url 'portal_visit' return_visit_id %}#return-sources-title">返回这次复诊</a>
+    {% else %}<a href="{% url 'portal_visit' report.visit_id %}">返回本次就诊</a>{% endif %}
+  </header>
+  {% if report.followup and report.followup.action != 'NONE' %}<a class="report-jump" href="#report-followup">跳到复诊安排</a>{% endif %}
+  <section class="panel report-card" aria-labelledby="report-result">
+    <h2 id="report-result">检查结果</h2>
+    <div class="report-text">{{ report.body|linebreaks }}</div>
+  </section>
+  {% with followup=report.followup %}{% if followup %}
+  <section class="panel report-card" aria-labelledby="report-followup">
+    <h2 id="report-followup" tabindex="-1">复诊安排</h2>
+    <p>{{ followup.message }}</p>
+    {% if followup.clinic %}<p>{{ followup.clinic }}{% if followup.service %} · {{ followup.service }}{% endif %}</p>{% endif %}
+    {% if followup.earliest_on and followup.latest_on and followup.action != 'VIEW_APPOINTMENT' %}
+    <p>建议日期　{{ followup.earliest_on|date:'Y-m-d' }}{% if followup.earliest_on != followup.latest_on %} 至 {{ followup.latest_on|date:'Y-m-d' }}{% endif %}</p>{% endif %}
+    {% if followup.appointment %}
+    <p class="report-status">复诊预约 · {{ followup.appointment.status_label }}　<time datetime="{{ followup.appointment.start|date:'c' }}">{{ followup.appointment.start|date:'Y-m-d H:i' }}</time>（北京时间）</p>
+    {% endif %}
+    <div class="report-actions">
+      {% if followup.action == 'BOOK' %}<a class="button" href="{% url 'portal_slots' %}?clinic={{ followup.clinic_id }}&amp;service={{ followup.service_id }}&amp;followup_visit={{ report.visit_id }}&amp;followup_examination={{ report.id }}&amp;followup_revision={{ report.revision }}">预约复诊</a>{% endif %}
+      {% if followup.action == 'CONTACT' %}<a class="button" href="{% url 'portal_visit' report.visit_id %}#frontdesk-help">联系原门店</a>{% endif %}
+      {% if followup.appointment %}<a {% if followup.action == 'VIEW_APPOINTMENT' %}class="button" {% endif %}href="{% url 'portal_visit' followup.appointment.id %}">查看复诊预约</a>{% endif %}
+    </div>
+  </section>
+  {% endif %}{% endwith %}
+  <details class="panel task-disclosure">
+    <summary>查看检查时间与编号</summary>
+    <dl class="report-facts">
+      <dt>实际检查</dt><dd>{{ report.performed_at|date:'Y-m-d H:i' }}（北京时间）</dd>
+      <dt>检查编号</dt><dd>{{ report.number }}</dd>
+      <dt>原就诊编号</dt><dd>{{ report.visit_no }}</dd>
+      {% if report.followup.appointment %}<dt>复诊预约编号</dt><dd>{{ report.followup.appointment.visit_no }}</dd>{% endif %}
+      {% if report.followup.action == 'VIEW_APPOINTMENT' and report.followup.earliest_on and report.followup.latest_on %}<dt>建议复诊日期</dt><dd>{{ report.followup.earliest_on|date:'Y-m-d' }} 至 {{ report.followup.latest_on|date:'Y-m-d' }}</dd>{% endif %}
+    </dl>
+  </details>
+</div>
 {% endblock %}

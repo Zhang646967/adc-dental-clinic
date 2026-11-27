@@ -42,7 +42,8 @@ def listing(actor, page_number):
         for row in page:
             event = row.event
             visit = event.order.source_record.encounter.visit
-            data.append(dict(id=row.pk, kind=row.kind, title=row.get_kind_display(), clinic=visit.clinic.public_contact['name'],
+            data.append(dict(id=row.pk, kind=row.kind, title=row.get_kind_display(), project=event.order.project_name,
+                clinic=visit.clinic.public_contact['name'],
                 occurred_at=event.occurred_at, read_at=row.read_at, visit_id=visit.pk, examination_id=event.order_id,
                 revision=event.report.number if row.kind != ExaminationNotice.Kind.WITHDRAWN else None))
         return dict(rows=data, unread_count=rows.filter(read_at__isnull=True).count(), page=page.number,

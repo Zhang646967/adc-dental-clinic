@@ -1,35 +1,43 @@
 {% extends 'base.html' %}
+{% block title %}{% if frontdesk %}本店检查进度{% else %}检查执行与审核{% endif %} · ADC 口腔{% endblock %}
 {% block content %}
-{% if frontdesk %}
-<p><a href="{% url 'frontdesk_home' %}">返回前台工作台</a></p>
-<h1>本店检查进度</h1>
-{% else %}
-<p><a href="{% url 'doctor_home' %}">返回医师工作台</a></p>
-<h1>检查执行与审核</h1>
-<nav aria-label="检查待办"><a href="{% url 'clinical_examinations' %}">全部检查</a> · <a href="?queue=contact">报告联系与期限</a></nav>
-{% endif %}
-<section class="panel">
-  <ul class="worklist-items">
+<div class="report-flow">
+  <header class="desk-mast">
+    {% if frontdesk %}<h1>本店检查进度</h1><a href="{% url 'frontdesk_home' %}">返回前台工作台</a>
+    {% else %}<h1>检查执行与审核</h1><a href="{% url 'doctor_home' %}">返回医师工作台</a>{% endif %}
+  </header>
+  {% if not frontdesk %}
+  <nav class="report-actions" aria-label="检查待办">
+    <a {% if not contact_only %}aria-current="page"{% endif %} href="{% url 'clinical_examinations' %}">全部检查</a>
+    <a {% if contact_only %}aria-current="page"{% endif %} href="?queue=contact">报告联系与期限</a>
+  </nav>
+  {% endif %}
+  <ul class="report-queue">
     {% for row in rows %}
-    <li>
-      {% if frontdesk %}
-      <strong>{{ row.project }} · {{ row.number }}</strong>
-      <p>就诊 {{ row.visit_no }} · 申请 {{ row.requested_at|date:'Y-m-d H:i' }}</p>
-      {% else %}
-      <a href="{% url 'clinical_examination' row.order.pk %}">{{ row.order.project_name }} · {{ row.order.number }}</a>
-      <p>{{ row.visit.patient.name }} · {{ row.visit.clinic.name }} · 就诊 {{ row.visit.visit_no }}</p>
-      {% endif %}
-      <p>{{ row.progress }} · {{ row.publication }}</p>
-      {% if row.contact %}<p>{{ row.contact.state }}{% if row.contact.overdue %} · 已逾期{% endif %} · {{ row.contact.due_at|date:'Y-m-d H:i' }}（北京时间）</p>{% endif %}
+    <li class="panel report-card">
+      {% if frontdesk %}<h2>{{ row.project }}</h2>
+      {% else %}<h2><a href="{% url 'clinical_examination' row.order.pk %}">{{ row.visit.patient.name }} · {{ row.order.project_name }}</a></h2><p class="report-meta">{{ row.visit.clinic.name }}</p>{% endif %}
+      <dl class="report-states">
+        <dt>最新检查进度</dt><dd>{{ row.progress }}</dd>
+        <dt>患者查阅</dt><dd>{{ row.publication }}</dd>
+      </dl>
+      {% if row.contact %}<p class="report-contact">{{ row.contact.state }}{% if row.contact.overdue %} · 已逾期{% endif %} · 联系期限 {{ row.contact.due_at|date:'Y-m-d H:i' }}（北京时间）</p>{% endif %}
+      <details class="task-disclosure compact"><summary>核对检查与就诊编号</summary>
+        <dl class="report-facts">
+          <dt>检查编号</dt><dd>{% if frontdesk %}{{ row.number }}{% else %}{{ row.order.number }}{% endif %}</dd>
+          <dt>就诊编号</dt><dd>{% if frontdesk %}{{ row.visit_no }}{% else %}{{ row.visit.visit_no }}{% endif %}</dd>
+          {% if frontdesk %}<dt>申请时间</dt><dd>{{ row.requested_at|date:'Y-m-d H:i' }}（北京时间）</dd>{% endif %}
+        </dl>
+      </details>
     </li>
-    {% empty %}<li>当前没有可办理的检查申请。</li>{% endfor %}
+    {% empty %}<li class="panel">{% if frontdesk %}本店暂无检查申请。{% elif contact_only %}暂无需要联系的检查报告。{% else %}当前没有可办理的检查申请。{% endif %}</li>{% endfor %}
   </ul>
   {% if page.has_other_pages %}
-  <nav aria-label="检查列表分页">
+  <nav class="report-actions" aria-label="检查列表分页">
     {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}{% if contact_only %}&amp;queue=contact{% endif %}">上一页</a>{% endif %}
     <span>第 {{ page.number }} 页，共 {{ page.paginator.num_pages }} 页</span>
     {% if page.has_next %}<a href="?page={{ page.next_page_number }}{% if contact_only %}&amp;queue=contact{% endif %}">下一页</a>{% endif %}
   </nav>
   {% endif %}
-</section>
+</div>
 {% endblock %}
