@@ -10,7 +10,10 @@ const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 
 Page({
   data:{report:null,followup:null,...blankSubject,busy:false,error:'',requestId:'',subjectInvalid:false,
-    returnMedical:false,returnVisit:null,environmentLabel:'',hasVisit:false},
+    returnMedical:false,returnVisit:null,environmentLabel:'',hasVisit:false,
+    // The identifiers only open on request; the report body and every follow-up
+    // conclusion stay readable without tapping anything.
+    infoOpen:false,infoOpenLabel:'查看检查时间与编号',infoCloseLabel:'收起检查时间与编号'},
   onLoad(query){
     this.visitId=positive(query.visit)?Number(query.visit):null;
     this.id=positive(query.id)?Number(query.id):null;
@@ -26,7 +29,8 @@ Page({
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    this.setData({report:null,followup:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false,returnMedical:false,returnVisit:null});
+    this.setData({report:null,followup:null,...blankSubject,busy:true,error:'',requestId:'',subjectInvalid:false,
+      returnMedical:false,returnVisit:null,infoOpen:false});
     try{
       if(!this.visitId||!this.id||(this.revision!==undefined&&!positive(this.revision))){
         throw Error('报告链接无效，请从就诊详情进入。');
@@ -63,9 +67,12 @@ Page({
     }
   },
   onHide(){
+    // Leaving the page drops the report, the follow-up block and the expanded
+    // identifiers so another report or identity never inherits them.
     this.generation++;
-    this.setData({report:null,followup:null,...blankSubject,returnVisit:null});
+    this.setData({report:null,followup:null,...blankSubject,returnVisit:null,infoOpen:false});
   },
+  toggleInfo(){this.setData({infoOpen:!this.data.infoOpen});},
   onUnload(){this.generation++;},
   bindReturn(){
     const none=()=>this.setData({returnVisit:null});

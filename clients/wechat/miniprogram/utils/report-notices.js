@@ -6,6 +6,7 @@ const {dateTime} = require('./format');
 const {positive} = require('./booking-intent');
 
 const KIND_LABELS = {RELEASED: '报告已发布', CORRECTED: '报告已更新', WITHDRAWN: '报告已撤回'};
+const KIND_TONES = {RELEASED: 'status-upcoming', CORRECTED: 'status-rescheduled', WITHDRAWN: 'status-cancelled'};
 const ACTIONS = ['BOOK', 'VIEW_APPOINTMENT', 'CONTACT', 'NONE'];
 
 function dayLabel(value) {
@@ -34,23 +35,46 @@ function buildNotice(row) {
   // A released or corrected notice opens the exact version it announced.
   // Without a version the row falls back to the original visit instead of
   // silently opening whatever version happens to be current.
-  const canOpen = !withdrawn && !!visitId && !!examinationId && !!revision;
+  const canOpen = (kind === 'RELEASED' || kind === 'CORRECTED') && !!visitId && !!examinationId && !!revision;
   const unread = !row.read_at;
+  // The clinic keeps the notice's own project name; an older backend omits it,
+  // so the row falls back to the existing server title instead of inventing one.
+  const project = typeof row.project === 'string' ? row.project.trim() : '';
+  const statusLabel = row.title || KIND_LABELS[kind] || '报告提醒';
+  const heading = project || statusLabel;
+  // With a project the server title becomes the status pill; without one the
+  // heading already is that title, so the pill would repeat it.
+  const showStatus = !!project && project !== statusLabel;
+  const clinic = row.clinic || '';
+  const occurredLabel = dateTime(row.occurred_at);
+  const readLabel = unread ? '未读' : '已读';
+  const actionLabel = canOpen ? `查看第 ${revision} 版报告` : '联系门店';
   return {
     id: row.id,
     kind,
     kindLabel: KIND_LABELS[kind] || '报告提醒',
+    tone: KIND_TONES[kind] || 'status-finished',
+    project,
+    heading,
+    statusLabel,
+    showStatus,
     title: row.title || KIND_LABELS[kind] || '检查报告提醒',
-    clinic: row.clinic || '',
-    occurredLabel: dateTime(row.occurred_at),
+    clinic,
+    occurredLabel,
     unread,
+    readLabel,
     readAt: row.read_at || null,
-    readLabel: unread ? '未读' : '已读' + (row.read_at ? ' ' + dateTime(row.read_at) : ''),
+    readLabelFull: unread ? '未读' : '已读' + (row.read_at ? ' ' + dateTime(row.read_at) : ''),
     withdrawn,
     canOpen,
     visitId,
     examinationId,
     revision,
+    actionLabel,
+    // One spoken summary per row: project, server status, read state, clinic
+    // and Beijing time. Buttons name their own action separately.
+    ariaLabel: [heading, showStatus ? statusLabel : '', readLabel, clinic, occurredLabel && occurredLabel + '（北京时间）']
+      .filter(Boolean).join('，'),
     url: canOpen ? `/pages/examination/index?visit=${visitId}&id=${examinationId}&revision=${revision}` : '',
     visitUrl: visitId ? `/pages/visit/index?id=${visitId}` : '',
     contactUrl: visitId ? `/pages/help/index?visit=${visitId}` : '/pages/help/index'
@@ -81,7 +105,11 @@ function buildFollowup(followup, {visitId = null, examinationId = null, revision
     visitNo: followup.appointment.visit_no || '',
     startLabel: dateTime(followup.appointment.start),
     status: followup.appointment.status || '',
-    statusLabel: followup.appointment.status_label || ''
+    statusLabel: followup.appointment.status_label || '',
+    // A cancelled or rescheduled predecessor keeps the server's own state so a
+    // historical record is never presented as the current appointment.
+    historical: typeof followup.appointment.historical === 'boolean' ? followup.appointment.historical
+      : ['CANCELLED', 'RESCHEDULED', 'COMPLETED', 'CLOSED_NO_TREATMENT', 'NO_SHOW'].includes(followup.appointment.status)
   } : null;
   const canBook = action === 'BOOK' && positive(followup.clinic_id) && positive(followup.service_id) &&
     positive(visitId) && positive(examinationId) && positive(revision);
@@ -98,9 +126,11 @@ function buildFollowup(followup, {visitId = null, examinationId = null, revision
     action = 'CONTACT';
     message = message || '复诊预约暂不可查看，请联系原门店核对。';
   }
+  const conclusionLabel = followup.label || (action === 'NONE' ? '后续安排' : '');
   return {
     action,
     label: followup.label || '',
+    conclusionLabel,
     message,
     clinic: followup.clinic || '',
     service: followup.service || '',
@@ -108,13 +138,19 @@ function buildFollowup(followup, {visitId = null, examinationId = null, revision
     serviceId: positive(followup.service_id) ? followup.service_id : null,
     firstDay,
     lastDay,
-    windowLabel: earliest && latest ? `${earliest} 至 ${latest}` : (earliest || latest),
+    // A one-day window is a date, not a range.
+    windowLabel: earliest && latest ? (earliest === latest ? earliest : `${earliest} 至 ${latest}`) : (earliest || latest),
     appointment,
     canBook,
     showContact: action === 'CONTACT',
     bookingUrl: canBook ? `/pages/booking/index?followup_visit=${visitId}&followup_examination=${examinationId}&followup_revision=${revision}` : '',
     appointmentUrl: appointment ? `/pages/visit/index?id=${appointment.id}` : '',
-    contactUrl: positive(visitId) ? `/pages/help/index?visit=${visitId}` : '/pages/help/index'
+    contactUrl: positive(visitId) ? `/pages/help/index?visit=${visitId}` : '/pages/help/index',
+    // The server caption names the next step; the buttons below use it too so
+    // the visible text and the spoken action never diverge.
+    bookLabel: '查看可约时段',
+    appointmentLabel: appointment && appointment.historical ? '查看历史预约' : '查看复诊预约',
+    contactLabel: '联系原门店'
   };
 }
 

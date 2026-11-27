@@ -1,6 +1,6 @@
 const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
-const {showError}=require('../../utils/format');
+const {showError,dateTime}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {positive}=require('../../utils/booking-intent');
 const {buildNoticeList}=require('../../utils/report-notices');
@@ -76,8 +76,14 @@ Page({
       const r=await api.request(`report-notices/${row.id}/read/`,'POST',{});
       if(generation!==this.generation)return;
       const rows=this.data.rows.map((item,i)=>i===index?Object.assign({},item,{
-        unread:false,readAt:r.read_at||item.readAt,readLabel:'已读'}):item);
-      const unread=Number.isInteger(r.unread_count)?r.unread_count:Math.max(0,(this.data.unreadCount||0)-1);
+        unread:false,readAt:r.read_at||item.readAt,readLabel:'已读',
+        readLabelFull:'已读'+(r.read_at||item.readAt?' '+dateTime(r.read_at||item.readAt):''),
+        ariaLabel:[item.heading,item.showStatus?item.statusLabel:'','已读',item.clinic,
+          item.occurredLabel&&item.occurredLabel+'（北京时间）']
+          .filter(Boolean).join('，')}):item);
+      let unread=this.data.unreadCount;
+      if(Number.isInteger(r.unread_count)&&r.unread_count>=0)unread=r.unread_count;
+      else if(Number.isInteger(unread))unread=Math.max(0,unread-1);
       this.setData({rows,unreadCount:unread,busy:false});
     }catch(error){
       if(generation!==this.generation)return;

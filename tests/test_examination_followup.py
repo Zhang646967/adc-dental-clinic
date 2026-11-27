@@ -219,11 +219,18 @@ class ExaminationFollowupTests(ReportFollowupFixture, TransactionTestCase):
 
         visit = services.confirm_booking(actor=self.patient_user, token=self.scoped_preview(order), require_published_service=True)
         self.assertEqual(overview()['primary_action']['visit']['id'], visit.pk)
+        self.assertIs(self.report(order)['followup']['appointment']['historical'], False)
+        self.assertContains(self.web.get(report_link), '预约到店时间')
         self.assertNotContains(self.web.get(reverse('portal_home')), '查看报告与复诊')
         services.cancel_booking(actor=self.patient_user, visit_id=visit.pk, expected_version=visit.lock_version,
             reason='课程合成：取消复诊，保留原报告。')
         self.assertEqual(overview()['primary_action'], pending)
         self.assertEqual(self.report(order)['followup']['action'], 'BOOK')
+        self.assertIs(self.report(order)['followup']['appointment']['historical'], True)
+        historical = self.web.get(report_link)
+        self.assertContains(historical, '原预约时间')
+        self.assertContains(historical, '查看历史预约')
+        self.assertNotContains(historical, '预约到店时间')
         with patch.object(timezone, 'now', return_value=timezone.now() + timedelta(days=6)):
             client = self.mini_client(self.patient_user)
             late = overview(client)['primary_action']

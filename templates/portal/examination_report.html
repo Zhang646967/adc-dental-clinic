@@ -22,12 +22,12 @@
     {% if followup.earliest_on and followup.latest_on and followup.action != 'VIEW_APPOINTMENT' %}
     <p>建议日期　{{ followup.earliest_on|date:'Y-m-d' }}{% if followup.earliest_on != followup.latest_on %} 至 {{ followup.latest_on|date:'Y-m-d' }}{% endif %}</p>{% endif %}
     {% if followup.appointment %}
-    <p class="report-status">复诊预约 · {{ followup.appointment.status_label }}　<time datetime="{{ followup.appointment.start|date:'c' }}">{{ followup.appointment.start|date:'Y-m-d H:i' }}</time>（北京时间）</p>
+    <p class="report-status">{{ followup.appointment.status_label }} · {% if followup.appointment.historical %}原预约时间{% else %}预约到店时间{% endif %}　<time datetime="{{ followup.appointment.start|date:'c' }}">{{ followup.appointment.start|date:'Y-m-d H:i' }}</time>（北京时间）</p>
     {% endif %}
     <div class="report-actions">
       {% if followup.action == 'BOOK' %}<a class="button" href="{% url 'portal_slots' %}?clinic={{ followup.clinic_id }}&amp;service={{ followup.service_id }}&amp;followup_visit={{ report.visit_id }}&amp;followup_examination={{ report.id }}&amp;followup_revision={{ report.revision }}">预约复诊</a>{% endif %}
       {% if followup.action == 'CONTACT' %}<a class="button" href="{% url 'portal_visit' report.visit_id %}#frontdesk-help">联系原门店</a>{% endif %}
-      {% if followup.appointment %}<a {% if followup.action == 'VIEW_APPOINTMENT' %}class="button" {% endif %}href="{% url 'portal_visit' followup.appointment.id %}">查看复诊预约</a>{% endif %}
+      {% if followup.appointment %}<a {% if followup.action == 'VIEW_APPOINTMENT' %}class="button" {% endif %}href="{% url 'portal_visit' followup.appointment.id %}">{% if followup.appointment.historical %}查看历史预约{% else %}查看复诊预约{% endif %}</a>{% endif %}
     </div>
   </section>
   {% endif %}{% endwith %}

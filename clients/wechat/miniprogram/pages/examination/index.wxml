@@ -1,30 +1,40 @@
-<view class="page">
+<view class="page patient-flow patient-report">
   <view wx:if="{{report}}" class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view></view>
   <view class="title">检查报告</view>
   <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text></view>
   <button wx:if="{{subjectInvalid}}" class="primary" bindtap="recoverSubject" disabled="{{busy}}" loading="{{busy}}">核对账号与就诊人</button>
   <view wx:if="{{busy}}" class="notice">正在读取检查报告…</view>
   <view wx:if="{{report}}" class="card">
-    <view class="section-label">{{report.project}}</view>
-    <view class="invoice-line"><view class="muted">检查编号</view><view class="prose">{{report.number}}</view></view>
-    <view class="invoice-line"><view class="muted">原就诊编号</view><view class="prose">{{report.visitNo}}</view></view>
-    <view class="fact-row"><text>报告版本</text><text>第 {{report.revision}} 版</text></view>
-    <view class="fact-row"><text>实际检查时间</text><text>{{report.performedLabel}}</text></view>
+    <view class="record-head">
+      <view class="pill status-upcoming">第 {{report.revision}} 版</view>
+      <view class="pill status-finished">已发布</view>
+    </view>
+    <view class="section-title">{{report.project || '检查报告'}}</view>
     <view class="fact-row"><text>发布时间</text><text>{{report.releasedLabel}}</text></view>
     <view class="divider"></view>
-    <view class="prose">{{report.body}}</view>
+    <view class="prose report-body">{{report.body}}</view>
+    <button class="disclosure" bindtap="toggleInfo" aria-expanded="{{infoOpen}}" aria-label="{{infoOpen?infoCloseLabel:infoOpenLabel}}">{{infoOpen?infoCloseLabel:infoOpenLabel}}</button>
+    <view wx:if="{{infoOpen}}" class="detail-panel">
+      <view class="invoice-line"><view class="muted">检查编号</view><view class="prose checkout-id">{{report.number}}</view></view>
+      <view wx:if="{{report.visitNo}}" class="invoice-line"><view class="muted">原就诊编号</view><view class="prose checkout-id">{{report.visitNo}}</view></view>
+      <view class="fact-row"><text>实际检查时间</text><text>{{report.performedLabel}}</text></view>
+    </view>
   </view>
   <view wx:if="{{followup}}" class="card">
     <view class="section-title">复诊安排</view>
-    <view wx:if="{{followup.label}}" class="pill">{{followup.label}}</view>
+    <view wx:if="{{followup.conclusionLabel}}" class="pill">{{followup.conclusionLabel}}</view>
     <view wx:if="{{followup.message}}" class="prose">{{followup.message}}</view>
     <view wx:if="{{followup.windowLabel}}" class="fact-row"><text>建议日期</text><text>{{followup.windowLabel}}</text></view>
     <view wx:if="{{followup.clinic}}" class="fact-row"><text>门店</text><text>{{followup.clinic}}</text></view>
     <view wx:if="{{followup.service}}" class="fact-row"><text>服务</text><text>{{followup.service}}</text></view>
-    <view wx:if="{{followup.appointment}}" class="invoice-line"><view class="muted">复诊预约 #{{followup.appointment.id}}</view><view wx:if="{{followup.appointment.visitNo}}" class="muted">就诊编号 {{followup.appointment.visitNo}}</view><view class="time">{{followup.appointment.startLabel}}</view><view>{{followup.appointment.statusLabel}}</view></view>
-    <button wx:if="{{followup.canBook}}" class="primary" bindtap="bookFollowup">预约复诊</button>
-    <button wx:if="{{followup.appointment}}" class="secondary" bindtap="openAppointment">查看复诊预约</button>
-    <button wx:if="{{followup.showContact}}" class="secondary" bindtap="contactClinic">联系原门店</button>
+    <block wx:if="{{followup.appointment}}">
+      <view wx:if="{{followup.appointment.visitNo}}" class="invoice-line"><view class="muted">复诊预约编号</view><view class="prose checkout-id">{{followup.appointment.visitNo}}</view></view>
+      <view class="fact-row"><text>预约状态</text><text>{{followup.appointment.statusLabel}}</text></view>
+      <view class="invoice-line"><view class="muted">{{followup.appointment.historical ? '原预约时间' : '预约到店时间'}}（北京时间）</view><view class="time">{{followup.appointment.startLabel}}</view></view>
+    </block>
+    <button wx:if="{{followup.canBook}}" class="primary" bindtap="bookFollowup" aria-label="{{followup.bookLabel}}">{{followup.bookLabel}}</button>
+    <button wx:if="{{followup.appointment}}" class="secondary" bindtap="openAppointment" aria-label="{{followup.appointmentLabel}}">{{followup.appointmentLabel}}</button>
+    <button wx:if="{{followup.showContact}}" class="secondary" bindtap="contactClinic" aria-label="{{followup.contactLabel}}">{{followup.contactLabel}}</button>
   </view>
   <button class="secondary" bindtap="back">{{returnMedical?'返回医疗授权':returnVisit?'返回这次复诊':hasVisit?'返回原就诊':'返回就诊清单'}}</button>
   <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>

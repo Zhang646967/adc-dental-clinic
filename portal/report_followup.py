@@ -19,6 +19,7 @@ from scheduling.service_content import positive_id
 
 FIELDS = ('followup_visit', 'followup_examination', 'followup_revision')
 SOURCE_VISIT = 'release__order__source_record__encounter__visit'
+CURRENT_APPOINTMENT_STATUSES = ('SCHEDULED', 'CHECKED_IN')
 CAPTIONS = {'BOOK': '按建议日期预约复诊', 'CONTACT': '联系原门店',
     'VIEW_APPOINTMENT': '查看复诊预约', 'NONE': '后续安排'}
 
@@ -82,7 +83,8 @@ def _booking_reason(order, instruction, actor):
 
 def _appointment_data(visit):
     return dict(id=visit.pk, visit_no=visit.visit_no, start=visit.scheduled_start,
-        status=visit.status, status_label=visit.get_status_display()) if visit else None
+        status=visit.status, status_label=visit.get_status_display(),
+        historical=visit.status not in CURRENT_APPOINTMENT_STATUSES) if visit else None
 
 
 def _service_title(instruction):
@@ -130,7 +132,7 @@ def projection(visit, report, actor):
         return None
     instruction = decision.instruction
     appointments = clinical.report_appointments(order)
-    active = next((row for row in appointments if row.status in ('SCHEDULED', 'CHECKED_IN')), None)
+    active = next((row for row in appointments if row.status in CURRENT_APPOINTMENT_STATUSES), None)
     latest = active or next(iter(appointments), None)
     action, message = _followup_action(order, decision, active, latest, actor)
     start, end = window(instruction) if action == 'BOOK' else (None, None)
@@ -155,7 +157,7 @@ def checkout_booking_source(visit, instruction, actor):
     if not decision or decision.kind != 'BOOK' or decision.instruction_id != instruction.pk:
         return None
     appointments = clinical.report_appointments(order)
-    if any(v.status in ('SCHEDULED', 'CHECKED_IN') for v in appointments):
+    if any(v.status in CURRENT_APPOINTMENT_STATUSES for v in appointments):
         return None
     if _booking_reason(order, instruction, actor):
         return None
@@ -185,7 +187,7 @@ def next_pending(actor, access):
         elif clinical.contact_progress(decision)['outcome'] == 'REACHED':
             continue
         appointments = clinical.report_appointments(order)
-        if any(row.status in ('SCHEDULED', 'CHECKED_IN') for row in appointments):
+        if any(row.status in CURRENT_APPOINTMENT_STATUSES for row in appointments):
             continue
         action, message = _followup_action(order, decision, None, next(iter(appointments), None), actor)
         if action in ('BOOK', 'CONTACT'):

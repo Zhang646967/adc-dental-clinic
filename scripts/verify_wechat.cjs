@@ -96,5 +96,7 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const visit_checkout=require('../checks/test_visit_checkout_node.cjs');
   const recall_handoff=require('../checks/test_recall_handoff_node.cjs');
   const role_gui=require('../checks/test_role_gui_node.cjs');
-  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,return_sources,visit_checkout,recall_handoff,role_gui,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const report_notices=require('../checks/test_report_notices_node.cjs');
+  const report_pages=await require('../checks/test_report_pages_node.cjs').verify();
+  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,return_sources,visit_checkout,recall_handoff,role_gui,report_notices,report_pages,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});
