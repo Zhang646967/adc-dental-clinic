@@ -1,7 +1,7 @@
 {% extends 'base.html' %}{% load workspace_tags %}{% block content %}
 <div class="business-flow"><p><a href="{% url 'invoice_detail' invoice.pk %}">← 返回原结算单</a></p>
-<div class="eyebrow">医保结算 · 本地模拟</div><h1>核对逐项费用分担</h1>
-<p>{{ invoice.invoice_no }}。只使用原账单实际收费，不会新增治疗或改变原价格。逐行填写明确的合成结果，不能把目录先自付比例当作最终报销比例。</p>
+<div class="eyebrow">医保费用测算 · 未接医保渠道</div><h1>核对逐项费用分担</h1>
+<p>{{ invoice.invoice_no }}。只使用原账单实际收费，不会新增治疗或改变原价格。逐行填写已核对的测算结果，不能把目录先自付比例当作最终报销比例。</p>
 {% if blocker %}<section class="panel"><h2>先完成资料核对</h2><p class="notice">{{ blocker }}</p><div class="actions"><a class="button secondary" href="{% url 'insurance_home' %}">核对医保资料</a><a class="button secondary" href="{% url 'insurance_settlements' %}?invoice={{ invoice.pk }}">查看原请求进度</a></div></section>{% else %}
 <p>接诊业务日 {{ source.service_on }} · 原费用 ¥ {{ source.total }}。基金承担是待核对责任，不代表已收到资金。</p>
 <form method="post" class="form-panel">{% csrf_token %}{% workspace_token %}<input type="hidden" name="action" value="preview">{% include 'components/form_errors.html' %}

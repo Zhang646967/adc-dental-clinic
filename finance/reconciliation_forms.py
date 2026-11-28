@@ -6,7 +6,7 @@ from registry.models import Clinic
 
 class AccountForm(forms.Form):
     clinic_id=forms.TypedChoiceField(label='诊所',coerce=int)
-    code=forms.CharField(label='合成渠道账户代码',max_length=40,help_text='2至40个英文字母、数字、下划线或短横线。不填写真实银行账号。')
+    code=forms.CharField(label='门店渠道代码',max_length=40,help_text='2至40个英文字母、数字、下划线或短横线。不填写真实银行账号。')
     method=forms.ChoiceField(label='收付款方式',choices=METHODS)
     def __init__(self,*a,**kw):
         super().__init__(*a,**kw)
@@ -16,7 +16,7 @@ class AccountStateForm(forms.Form):
     active=forms.TypedChoiceField(label='新的账户状态',choices=[('1','启用'),('0','停用')],coerce=lambda v:v=='1')
 
 class EvidenceForm(EvidenceFields):
-    reason=forms.CharField(label='补证／更正依据（仅合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
+    reason=forms.CharField(label='补证／更正依据（核对凭据）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
 
 class ImportForm(forms.Form):
     payment_account_id=forms.TypedChoiceField(label='本店渠道账户',coerce=int)

@@ -23,6 +23,11 @@ ROLE_OPTIONS = {
     'medical': ('patient', '医疗代理', 'PATIENT'),
     'front': ('staff', '前台', 'FRONT_DESK'),
     'dentist': ('staff', '医师', 'DENTIST'),
+    'nurse': ('staff', '护理', 'NURSE'),
+    'pharmacist': ('staff', '药房', 'PHARMACIST'),
+    'finance': ('staff', '财务', 'FINANCE'),
+    'manager': ('staff', '门店主管', 'MANAGER'),
+    'hq': ('staff', '总部管理', 'HQ'),
 }
 INVITE_PATTERN = re.compile(r'[A-Za-z0-9_-]{43}')
 
@@ -61,6 +66,19 @@ def assigned_to(role, user):
     return True
 
 
+@sensitive_variables()
+def permitted_entry(role, entry):
+    if not isinstance(entry, dict):
+        return False
+    username, password = entry.get('username'), entry.get('password')
+    if not isinstance(username, str) or not 0 < len(username) <= 150:
+        return False
+    if not isinstance(password, str) or not 0 < len(password) <= 128:
+        return False
+    user = UserAccount.objects.filter(username=username, is_active=True, is_staff=False, is_superuser=False).first()
+    return user is not None and user.has_usable_password() and assigned_to(role, user)
+
+
 @sensitive_post_parameters('invite')
 @endpoint(('POST',), public=True)
 @sensitive_variables()
@@ -68,20 +86,17 @@ def prefill(request, channel):
     unavailable = {'status': 404, 'code': 'COURSE_UNAVAILABLE',
                    'message': '体验入口无效或已过期。你可以继续手动登录。'}
     roles = invitation(request.POST.get('invite', ''))
-    choices = {key: label for key, (target, label, _) in ROLE_OPTIONS.items()
-               if target == channel and key in roles}
+    role = request.POST.get('role', '')
+    if role:
+        option = ROLE_OPTIONS.get(role)
+        entry = roles.get(role)
+        if option is None or option[0] != channel or not permitted_entry(role, entry):
+            return result(request, **unavailable)
+        return result(request, {'username': entry['username'], 'password': entry['password']})
+    choices = [
+        {'id': key, 'label': label} for key, (target, label, _) in ROLE_OPTIONS.items()
+        if target == channel and key in roles and permitted_entry(key, roles[key])
+    ]
     if not choices:
         return result(request, **unavailable)
-    role = request.POST.get('role', '')
-    if not role:
-        return result(request, {'roles': [{'id': key, 'label': label} for key, label in choices.items()]})
-    entry = roles.get(role)
-    if role not in choices or not isinstance(entry, dict):
-        return result(request, **unavailable)
-    username, password = entry.get('username'), entry.get('password')
-    if not isinstance(username, str) or not 0 < len(username) <= 150 or not isinstance(password, str) or not 0 < len(password) <= 128:
-        return result(request, **unavailable)
-    user = UserAccount.objects.filter(username=username, is_active=True, is_staff=False, is_superuser=False).first()
-    if user is None or not user.has_usable_password() or not assigned_to(role, user):
-        return result(request, **unavailable)
-    return result(request, {'username': username, 'password': password})
+    return result(request, {'roles': choices})

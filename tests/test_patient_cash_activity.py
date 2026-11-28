@@ -103,7 +103,7 @@ class PatientCashActivityTests(CFEFixture, TransactionTestCase):
         self.assertEqual(data['cash_activity']['entries'][0]['occurred_on'], self.today.isoformat())
         self.assertContains(web,'已记账收款合计');self.assertContains(web,'已记账退款合计')
         self.assertContains(web,'业务日期');self.assertContains(web,'记账时间')
-        self.assertNotContains(web,'申请模拟收款或退款')
+        self.assertNotContains(web,'申请登记线下收款或退款')
 
     def test_historical_bill_keeps_current_cash_history_and_labels_it(self):
         from care.corrections import request_line_correction, review_correction

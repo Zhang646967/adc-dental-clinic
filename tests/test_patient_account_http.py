@@ -63,9 +63,13 @@ class PatientAccountHttpTests(FixtureMixin,TransactionTestCase):
         PatientAccess.objects.create(user=owner, patient=self.p1)
         self.front.set_password(password)
         self.front.save(update_fields=['password'])
+        self.manager.set_password(password)
+        self.manager.save(update_fields=['password'])
         roles = {
             'owner': {'username': owner.username, 'password': password},
             'front': {'username': self.front.username, 'password': password},
+            'manager': {'username': self.manager.username, 'password': password},
+            'finance': {'username': self.front.username, 'password': password},
         }
         config = {'invite_sha256': hashlib.sha256(invite.encode()).hexdigest(),
                   'expires_at': (timezone.now() + timedelta(hours=1)).isoformat(), 'roles': roles}
@@ -81,6 +85,11 @@ class PatientAccountHttpTests(FixtureMixin,TransactionTestCase):
                 self.assertEqual(self.post('mini_course_role', {'invite': invite, 'role': 'front'}).status_code, 404)
                 self.assertEqual(self.post('staff_course_role', {'invite': invite, 'role': 'owner'}).status_code, 404)
                 self.assertEqual(self.post('staff_course_role', {'invite': invite, 'role': 'front'}).json()['data'], roles['front'])
+                staff_choices = self.post('staff_course_role', {'invite': invite}).json()['data']['roles']
+                self.assertEqual([item['id'] for item in staff_choices], ['front', 'manager'])
+                self.assertEqual(self.post('staff_course_role', {'invite': invite, 'role': 'manager'}).json()['data'], roles['manager'])
+                self.assertEqual(self.post('staff_course_role', {'invite': invite, 'role': 'finance'}).status_code, 404)
+                self.assertEqual(self.post('mini_course_role', {'invite': invite, 'role': 'manager'}).status_code, 404)
                 with override_settings(ADC_CLINICAL_SYNTHETIC=False):
                     self.assertEqual(self.post('mini_course_role', {'invite': invite}).status_code, 404)
                 payload = self.post('mini_course_role', {'invite': invite, 'role': 'owner'})

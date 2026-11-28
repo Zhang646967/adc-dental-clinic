@@ -1,32 +1,24 @@
-# ADC 口腔 · 连锁门诊系统
+# ADC 口腔门诊系统
 
-患者从这里找门店、约时间、查报告和费用。前台安排到诊，医师接诊并确认病历，三个岗位可以沿同一笔就诊核对进度。
+**[进入门诊系统](https://lijiahao.duckdns.org/)　｜　[阅读验收报告（PDF）](课程报告/课程报告_张加良_8210241102.pdf)**
 
-**[打开门诊首页](https://lijiahao.duckdns.org/)　·　[患者登录](https://lijiahao.duckdns.org/portal/login/)　·　[员工登录](https://lijiahao.duckdns.org/accounts/login/)**
+患者在门诊首页查找门店、预约和回查就诊。前台与医师从「员工登录」进入各自工作台。同一笔就诊的编号贯穿到诊、检查、病历及费用核对。
 
-## 第一次体验
+## 按岗位办理
 
-无需账号即可打开门诊首页。先选城市和门店，再选「本店服务」，看看这家店能办理什么、到诊需要准备什么。试用环境使用虚构门店、患者和业务记录。
-
-| 想体验的角色 | 从哪里开始 | 可以亲手核对什么 |
+| 岗位 | 从哪里开始 | 办完核对什么 |
 | --- | --- | --- |
-| 患者 | 患者登录 → 我的预约 → 打开一笔预约 | 预约的门店和时间；打开同一笔历史就诊，可查已发布的报告或结算单 |
-| 前台 | 员工登录 → 前台工作台 → 选择负责的门店 | 按姓名或编号查找患者，核对档案编号和当天预约，再查看到诊状态 |
-| 医师 | 员工登录 → 医师工作台 → 检查记录工作台 | 找到本人负责的就诊，查看检查草稿、已确认版本和相应病历文书 |
+| 患者 | 患者登录 → 我的预约 | 改期前后的门店与时间、当前预约状态 |
+| 前台 | 员工登录 → 选择门店 → 患者档案 | 同名患者的完整编号、对应预约与到诊状态 |
+| 医师 | 员工登录 → 检查记录工作台 | 本人负责的就诊、待确认草稿和当前确认版 |
 
-岗位账号随私有试用邀请提供。拿到带角色选择的邀请时，先选角色，再点登录；手头已有账号也可直接填写。患者微信小程序入口随邀请发放。
+持岗位邀请者可在邀请入口选择已获准的身份，再登录。其他已开通的护理、药房、财务及管理岗位使用分配的个人账号。验收环境采用虚构人物与业务记录，凭据随私有邀请交付。[岗位办理指南](docs/TEACHER_WALKTHROUGH.md)
 
-[按角色体验，一步一步操作](docs/TEACHER_WALKTHROUGH.md)　·　[阅读课程报告 PDF](课程报告/课程报告_张加良_8210241102.pdf)
+<details><summary>安装、数据设计与源代码</summary>
 
-![门诊公开首页，包含诊疗服务、门店区域与城市筛选](docs/images/clinic-entry.png)
+- [Linux 安装与恢复](deployment/clinic/OPERATIONS.md) · [部署包说明](docs/C5_UNIFIED_DEPLOYMENT.md) · [本机安装](docs/MACOS.md)
+- [数据库结构](docs/database/README.md) · [项目文档索引](docs/README.md)
+- [预约与排班](scheduling/) · [病历与诊疗](clinical/) · [患者服务](portal/) · [微信小程序](clients/wechat/)
+- [系统验证记录](https://github.com/Zhang646967/adc-dental-clinic/actions) · [历次版本](https://github.com/Zhang646967/adc-dental-clinic/tags)
 
-## 阅读项目
-
-| 想了解什么 | 建议先看 |
-| --- | --- |
-| 门诊的业务流程与岗位分工 | [项目文档导览](docs/README.md) · [商业产品范围](docs/COMMERCIAL_V2_MASTER_PLAN.md) |
-| 前后端如何共享一笔就诊 | [预约与排班](scheduling/) · [患者网页](portal/) · [医师病历](clinical/) · [微信小程序](clients/wechat/) |
-| 数据如何保存、系统如何验证 | [数据库设计与关系图](docs/database/README.md) · [业务回归测试](tests/) · [GitHub 验证记录](https://github.com/Zhang646967/adc-dental-clinic/actions) |
-| 在自己的电脑运行 | [macOS 本地安装与合成试用库](docs/MACOS.md) · [统一部署包](docs/C5_UNIFIED_DEPLOYMENT.md) |
-
-课程报告由张加良（信管 T2401）编写。仓库中的开发候选和已开放的试用入口分别验收，具体范围见各功能的[规格与验收记录](specs/)。
+</details>

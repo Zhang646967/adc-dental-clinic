@@ -18,7 +18,7 @@ from workspaces.context import available_roles
 from workspaces.rules import ROLES
 
 ACTION_LABELS={'copy_verifier':'登记病历副本材料核验职责','copy_reviewer':'登记独立病历副本审核职责','medical_proxy_reviewer':'配置医疗代理资料核验职责','grant':'授予身份','revoke':'撤回身份','reset_password':'重置密码','disable':'停用账号',
-               'security_suspend':'紧急安全封禁','enable':'启用账号','bind_patient':'绑定演示患者','disable_patient_access':'停用患者入口','identity_reviewer':'配置患者关系核验职责','clinical_reviewer':'登记机构专业审核职责','archive_reviewer':'登记独立医务归档审核职责'}
+               'security_suspend':'紧急安全封禁','enable':'启用账号','bind_patient':'关联患者入口','disable_patient_access':'停用患者入口','identity_reviewer':'配置患者关系核验职责','clinical_reviewer':'登记机构专业审核职责','archive_reviewer':'登记独立医务归档审核职责'}
 
 @login_required
 @require_GET
@@ -58,7 +58,7 @@ def create(request):
         else:
             messages.success(request,'账号已创建，尚未授予业务身份。请继续明确授权范围。')
             return redirect('account_manage_detail',pk=u.pk)
-    return render(request,'accounts/manage_form.html',{'title':'创建演示账号','form':form,'description':'没有默认管理员权限。密码只由你在本地设置，不会显示在成功页。'})
+    return render(request,'accounts/manage_form.html',{'title':'创建岗位账号','form':form,'description':'没有默认管理员权限。密码只由你在本地设置，不会显示在成功页。'})
 
 @sensitive_post_parameters('password1','password2','operator_password')
 @login_required

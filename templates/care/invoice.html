@@ -35,6 +35,6 @@
   {% if no_charge_stages %}<h3>本次阶段治疗（不另计费）</h3>{% for stage in no_charge_stages %}<p>{{ stage.name_snapshot }} · {{ stage.quantity }} {{ stage.unit_snapshot }}</p>{% endfor %}{% endif %}
   <p class="total">本版合计（CNY） <strong>¥ {{ total }}</strong></p>
   <p class="muted">业务结算单 · 非税务发票</p>
-  {% if synthetic_statement %}<p class="muted">合成演练账单 · 不可用于真实结算或报销</p>{% endif %}
+  {% if synthetic_statement %}<p class="muted">验收账单 · 不可作为付款或报销凭证</p>{% endif %}
 </article>
 {% endblock %}

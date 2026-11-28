@@ -226,7 +226,7 @@ class PatientLiveAuthTests(FixtureMixin,TransactionTestCase):
         self.assertFalse(SmsChallenge.objects.exists())
 
     def test_web_registration_and_account_open_without_patient_rights(self):
-        client=Client();response=client.get('/portal/auth/sms/');self.assertContains(response,'课程测试验证码')
+        client=Client();response=client.get('/portal/auth/sms/');self.assertContains(response,'本地验证码')
         sent=client.post('/portal/auth/sms/',{'phone':'00000000110','confirmed':'on','action':'send'})
         data=sent.context['sent'];self.assertIsNotNone(data)
         response=client.post('/portal/auth/sms/',{'phone':'00000000110','confirmed':'on','action':'confirm','code':data['test_code'],'challenge':data['challenge']})

@@ -42,7 +42,7 @@ class AccountActionForm(AuthorityForm):
             self.fields['grant'].label_from_instance=lambda o:o.clinic.name+' · 前台'
             self.fields['reviewer_enabled']=forms.BooleanField(label=('授予病历副本材料核验职责' if action=='copy_verifier' else '授予独立医疗代理资料核验职责' if action=='medical_proxy_reviewer' else '授予患者关系核验职责')+'（取消勾选则撤回）',required=False)
         elif action=='bind_patient':
-            self.fields['patient_no']=forms.CharField(label='已核对的演示患者业务编号',max_length=40,help_text='由获授权技术人员核对后绑定；这不构成真实患者身份认证。')
+            self.fields['patient_no']=forms.CharField(label='已核对的患者业务编号',max_length=40,help_text='由获授权技术人员核对后绑定；患者身份须另行核验。')
         elif action in ('archive_reviewer','copy_reviewer'):
             from clinical.models import ClinicalReviewerAppointment
             self.fields['clinic']=forms.ModelChoiceField(label='已有机构专业审核委任的诊所',queryset=Clinic.objects.filter(pk__in=ClinicalReviewerAppointment.objects.filter(user=target,is_active=True).values('clinic_id'),is_active=True))

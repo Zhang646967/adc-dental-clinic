@@ -13,7 +13,7 @@
 </section><details class="auth-phone"{% if sms_form.is_bound %} open{% endif %}><summary>手机号登录／注册</summary>
 {% endif %}
 {% if auth.sms_enabled %}
-{% if auth.sms_demo %}<p class="auth-test-note">试用环境：输入 0 开头的十一位测试号码（如 00000000201），验证码显示在本页，未发送真实短信。</p>{% endif %}
+{% if auth.sms_demo %}<p class="auth-test-note">此入口接受以 0 开头的 11 位验收专用号码。验证码在本页领取，不发送短信。</p>{% endif %}
 <form method="post" id="sms-auth-form">{% csrf_token %}{% if booking_service %}<input type="hidden" name="booking_service" value="{{ booking_service.service_id }}">{% if booking_day %}<input type="hidden" name="booking_day" value="{{ booking_day }}">{% endif %}{% if booking_dentist %}<input type="hidden" name="booking_dentist" value="{{ booking_dentist }}">{% endif %}{% endif %}{{ sms_form.challenge }}{{ sms_form.non_field_errors }}
 <div class="field"><label for="{{ sms_form.phone.id_for_label }}">手机号码</label>{{ sms_form.phone }}{{ sms_form.phone.errors }}</div>
 <div class="field"><label for="{{ sms_form.code.id_for_label }}">验证码</label><div class="auth-code-row">{{ sms_form.code }}<button class="button secondary" type="submit" name="action" value="send" formnovalidate>获取验证码</button></div>{{ sms_form.code.errors }}</div>

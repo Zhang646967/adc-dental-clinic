@@ -6,6 +6,7 @@
   <a href="{% url 'public_clinics' %}"{% if route == 'public_clinics' or route == 'public_clinic_detail' %} aria-current="page"{% endif %}>门店与到诊</a>
   <a href="{% url 'public_dentists' %}"{% if route == 'public_dentists' or route == 'public_dentist_detail' %} aria-current="page"{% endif %}>接诊医师</a>
   <a href="{% url 'portal_appointments' %}">我的预约</a>
+  {% if not signed_in %}<a href="{% url 'login' %}">员工登录</a>{% endif %}
 </nav>{% endwith %}<a class="care-button care-small" href="{% if signed_in %}{% url 'dashboard' %}{% else %}{% url 'portal_login' %}{% endif %}">{% if signed_in %}进入我的账户{% else %}患者登录{% endif %} <span aria-hidden="true">↗</span></a></header>
 <main id="main" tabindex="-1" class="care-main">{% block content %}{% endblock %}</main>
 <footer class="care-footer"><a class="care-brand" href="{% url 'public_home' %}">ADC 口腔</a><p>预约时间均为北京时间（UTC+8）。</p><div>{% if environment_label %}<span class="care-environment">{{ environment_label }}</span>{% endif %}</div></footer></body></html>

@@ -8,7 +8,7 @@
   {% if is_current %}
     <div class="actions">
       {% if can_request_cash and not cash_balance.insurance_pending and not cash_balance.pending and not cash_balance.advance_excess %}
-        {% if cash_balance.remaining or cash_balance.refund_due %}<a class="button" href="{% url 'cash_invoice_request' invoice_id %}">申请模拟收款或退款</a>{% endif %}
+        {% if cash_balance.remaining or cash_balance.refund_due %}<a class="button" href="{% url 'cash_invoice_request' invoice_id %}">申请登记线下收款或退款</a>{% endif %}
       {% endif %}
       {% if workspace_role == 'FRONT_DESK' or workspace_role == 'FINANCE' %}
         <a class="button secondary" href="{% url 'cash_list' %}?invoice={{ invoice_id }}">核对本单申请历史</a>
@@ -26,7 +26,7 @@
       <dt>患者现金责任（预收抵扣前）</dt><dd>¥ {{ cash_balance.patient_responsibility }}</dd>
       <dt>已抵扣预收</dt><dd>¥ {{ cash_balance.advance_applied }}</dd>
     </dl>
-    {% if is_current and can_request_cash and not cash_balance.insurance_pending %}{% if cash_balance.pending or cash_balance.advance_excess or not cash_balance.remaining and not cash_balance.refund_due %}<a href="{% url 'cash_invoice_request' invoice_id %}">申请模拟收款或退款</a>{% endif %}{% endif %}
+    {% if is_current and can_request_cash and not cash_balance.insurance_pending %}{% if cash_balance.pending or cash_balance.advance_excess or not cash_balance.remaining and not cash_balance.refund_due %}<a href="{% url 'cash_invoice_request' invoice_id %}">申请登记线下收款或退款</a>{% endif %}{% endif %}
     {% if is_current and workspace_role == 'FRONT_DESK' %}<a href="{% url 'insurance_settlement_new' invoice_id %}">核对逐项医保分担</a>{% endif %}
     <p class="muted">收退款按已记账金额统计。{% if synthetic_statement %}本演练环境未连接真实支付渠道。{% endif %}</p>
   </details>

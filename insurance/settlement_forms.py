@@ -4,9 +4,9 @@ from insurance.settlement_models import SIMULATION_MODES
 
 
 class SettlementForm(forms.Form):
-    simulation_mode = forms.ChoiceField(label='本地模拟响应', choices=SIMULATION_MODES)
+    simulation_mode = forms.ChoiceField(label='本地测算结果', choices=SIMULATION_MODES)
     reason = forms.CharField(label='逐项分担依据', max_length=500, widget=forms.Textarea(attrs={'rows': 3}),
-        help_text='明确记录合成结果的核对依据，不填写真实医保或支付凭证。')
+        help_text='明确记录测算结果的核对依据，不填写真实医保或支付凭证。')
 
     def __init__(self, source, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -527,5 +527,5 @@ class CFEHTTPTests(CFEFixture,TransactionTestCase):
         v,i=self.billed();self.approve(self.cash(i,amount=D('100')))
         self.client.force_login(self.pa)
         r=self.client.get(reverse('portal_invoice',args=[i.pk]))
-        self.assertEqual(r.status_code,200);self.assertContains(r,'100.00');self.assertNotContains(r,'申请模拟收款或退款')
+        self.assertEqual(r.status_code,200);self.assertContains(r,'100.00');self.assertNotContains(r,'申请登记线下收款或退款')
         self.client.force_login(self.pb);self.assertEqual(self.client.get(reverse('portal_invoice',args=[i.pk])).status_code,404)

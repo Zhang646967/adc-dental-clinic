@@ -34,7 +34,7 @@
       <button type="submit">预览处方</button>
     </form>
   </section>
-  {% elif not has_catalogue %}<p class="notice">本店尚未配置合成处方目录，请联系演练维护人员。</p>
+  {% elif not has_catalogue %}<p class="notice">本店尚未开通处方核对目录，请联系门店负责人。</p>
   {% elif not record %}<p class="notice">请返回检查记录，先确认本次病历版本。</p>
   {% elif visit.status != 'CHECKED_IN' %}<p class="notice">开方须在本次接诊期间办理。</p>{% endif %}
   {% if not editable %}{{ form.non_field_errors }}{% endif %}

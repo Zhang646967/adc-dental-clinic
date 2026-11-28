@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}ADC · 本店库存批次{% endblock %}
 {% block content %}
-<div class="workspace-heading"><p class="eyebrow">{{ workspace_scope }} · 合成库存演练</p><h1>本店库存批次</h1>
+<div class="workspace-heading"><p class="eyebrow">{{ workspace_scope }} · 库存核对（限验收）</p><h1>本店库存批次</h1>
   <p>按批号和有效期核对在库数量。退回药品单独登记隔离。</p>
 </div>
 {% if not adc_read_only %}<p><a class="button" href="{% url 'stock_receive' %}">登记到货</a></p>{% endif %}

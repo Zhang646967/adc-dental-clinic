@@ -18,7 +18,7 @@ class CatalogueResubmitForm(forms.Form):
 class DatesForm(forms.Form):
     starts_on = forms.DateField(label='有效起始日期', widget=forms.DateInput(attrs={'type': 'date'}))
     ends_on = forms.DateField(label='有效截止日期', widget=forms.DateInput(attrs={'type': 'date'}))
-    reference = forms.CharField(label='合成依据编号', max_length=80, help_text='以 SIM- 开头，例如 SIM-HN-COURSE-01；不填写真实医保、证件或卡号。')
+    reference = forms.CharField(label='测算依据编号', max_length=80, help_text='以 SIM- 开头，例如 SIM-HN-01；不填写真实医保、证件或卡号。')
 
 
 class ArrangementForm(DatesForm):
@@ -44,9 +44,9 @@ class MappingForm(forms.Form):
 
 class EligibilityForm(DatesForm):
     insured_region = forms.ChoiceField(label='患者参保地（独立于定位和就诊城市）', choices=REGIONS)
-    scheme = forms.ChoiceField(label='参保类型（课程模拟）', choices=SCHEMES)
-    state = forms.ChoiceField(label='本次模拟待遇核对结果', choices=ELIGIBILITY_STATES)
-    basis = forms.CharField(label='模拟核对依据及待办说明', max_length=500, widget=forms.Textarea(attrs={'rows': 3}), help_text='只记录合成场景；微信登录、手机号和患者自报均不等同于待遇核验。')
+    scheme = forms.ChoiceField(label='参保类型（费用测算）', choices=SCHEMES)
+    state = forms.ChoiceField(label='本次待遇测算结果', choices=ELIGIBILITY_STATES)
+    basis = forms.CharField(label='测算依据与待办说明', max_length=500, widget=forms.Textarea(attrs={'rows': 3}), help_text='本地测算专用；微信登录、手机号和患者自报均不等同于待遇核验。')
 
 
 class ReviewForm(forms.Form):
