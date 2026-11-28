@@ -99,8 +99,8 @@ def prepare(*, actor, visit_id, expected_version, slot_id, start, reason, offer_
             plan, service, end = _arrangement(visit, slot, start)
             bundle = choose_bundle(slot=slot, start=start, end=end, service_id=service.pk if service else None,
                 ignore_visit=visit.pk)
-        from clinical.examination_followup import reschedule_window
-        window = reschedule_window(visit)
+        from clinical.examination_followup import reschedule_basis
+        window, report_basis = reschedule_basis(visit)
         if window and not window[0] <= timezone.localdate(start) <= window[1]:
             raise RuleError('请选择复诊建议窗口内的日期；原预约仍保留。')
         data = dict(access=access.pk, patient=access.patient_id, visit=visit.pk, version=visit.lock_version,
@@ -108,6 +108,8 @@ def prepare(*, actor, visit_id, expected_version, slot_id, start, reason, offer_
             start=start.isoformat(), end=end.isoformat(), reason=reason.strip(),
             service=service.pk if service else None, resources=bundle, offer=offer.pk if offer else None,
             offer_revision=offer.request.revision if offer else None, offer_plan=offer_plan.pk if offer_plan else None)
+        if report_basis:
+            data['report_basis'] = report_basis
         display = bundle or {}
         clinic_name = (display.get('public_clinic') or slot.clinic.public_contact)['name']
         service_name = (display.get('service') or {}).get('name')
@@ -162,8 +164,10 @@ def confirm(*, actor, visit_id, proposal_token, confirmed):
         pk=visit_id, patient_id=access.patient_id)
     check_source(visit)
     assert_revision(visit, d['version'])
-    from clinical.examination_followup import reschedule_window
-    window = reschedule_window(visit, lock=True)
+    from clinical.examination_followup import reschedule_basis
+    window, report_basis = reschedule_basis(visit, lock=True)
+    if report_basis != d.get('report_basis', []):
+        raise RuleError('复诊依据已变化，请重新核对改期安排；原预约仍保留。')
     if window and not window[0] <= timezone.localdate(datetime.fromisoformat(d['start'])) <= window[1]:
         raise RuleError('目标日期已超出复诊建议窗口；原预约仍保留。')
     slot = slots[d['slot']]

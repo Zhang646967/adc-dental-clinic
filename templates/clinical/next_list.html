@@ -11,10 +11,12 @@
   <section class="panel">
     <h2>{{ row.patient.name }} · {{ row.service.name }}</h2>
     <p>{{ row.patient.patient_no }}</p>
+    <p>原就诊编号 {{ row.source_visit_no }}</p>
     <p>建议 {{ row.earliest_on|date:'Y-m-d' }} 至 {{ row.latest_on|date:'Y-m-d' }}{% if row.overdue %} · <strong>已超建议窗口，需联系协调</strong>{% endif %}</p>
     {% if row.booking_note %}<p>{{ row.booking_note }}</p>{% endif %}
     {% for promise in row.promises %}
-    <p>原关联 {{ promise.original.visit_no }} · 当前 <a href="{% url 'visit_detail' promise.current.pk %}">{{ promise.current.visit_no }}</a> · {{ promise.current.get_status_display }}</p>
+    <p>{% if promise.original.pk != promise.current.pk %}原关联 {{ promise.original.visit_no }} · 当前{% else %}复诊预约{% endif %}
+    <a href="{% url 'visit_detail' promise.current.pk %}">{{ promise.current.visit_no }}</a> · {{ promise.current.scheduled_start|date:'Y-m-d H:i' }}（北京时间） · {{ promise.current.get_status_display }}</p>
     {% endfor %}
     {% if row.report_review %}
     <p class="notice">报告或复诊安排已变化，请联系负责医师核对。原预约保留。</p>

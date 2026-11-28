@@ -1,5 +1,6 @@
 """A report-bound selection, projected identically for web and WeChat."""
-from datetime import timedelta
+from dataclasses import dataclass
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.db.models import F, OuterRef, Subquery
@@ -8,6 +9,7 @@ from django.utils import timezone
 
 from adc_core.rules import RuleError
 from clinical import examination_followup as clinical
+from clinical.examination_access import filter_orders, require_project
 from clinical.examination_models import ExaminationFollowup, ExaminationOrder
 from clinical.next_visits import has_completed_goal
 from clinical.plan_models import NextVisitInstruction
@@ -34,14 +36,21 @@ def binding(query):
 
 
 def _order(visit_id, order_id, *, patient_id=None, lock=False):
-    if not settings.ADC_CLINICAL_SYNTHETIC:
-        raise Http404
-    rows = ExaminationOrder.objects.filter(pk=order_id, source_record__encounter__visit_id=visit_id)
+    rows = filter_orders(ExaminationOrder.objects.filter(pk=order_id, source_record__encounter__visit_id=visit_id))
     if patient_id is not None:
         rows = rows.filter(source_record__encounter__visit__patient_id=patient_id)
-    rows = rows.select_related('source_record__encounter__visit__clinic__public_directory', 'active_release__report')
     if lock:
+        changed = '报告或门店项目已变化，请返回原就诊核对；本次没有预约。'
+        source = rows.values_list('source_record__encounter__visit__clinic_id', 'project_id').first()
+        if source is None:
+            raise RuleError(changed)
+        try:
+            require_project(*source, lock=True)
+        except Http404:
+            raise RuleError(changed) from None
         rows = rows.select_for_update(of=('self',))
+    rows = rows.select_related('source_record__encounter__visit__clinic__public_directory',
+        'active_release__report', 'project')
     row = rows.first()
     if row is None:
         raise Http404
@@ -145,10 +154,10 @@ def projection(visit, report, actor):
 
 def checkout_booking_source(visit, instruction, actor):
     """Use the current published report and the ordinary report booking gate."""
-    if not settings.ADC_CLINICAL_SYNTHETIC:
-        return None
-    order = clinical.order_for_instruction(instruction.pk)
-    if not order or order.source_record.encounter.visit_id != visit.pk or not order.active_release_id:
+    rows = ExaminationOrder.objects.filter(source_record__encounter__visit=visit,
+        events__followup_decisions__instruction_id=instruction.pk)
+    order = filter_orders(rows).select_related('active_release__report').first()
+    if not order or not order.active_release_id:
         return None
     release = order.active_release
     if not _active_version(order, release.report.number):
@@ -167,7 +176,7 @@ def checkout_booking_source(visit, instruction, actor):
 
 def next_pending(actor, access):
     """Find an actionable current release independently of its notice read state."""
-    if access.delegated or not settings.ADC_CLINICAL_SYNTHETIC:
+    if access.delegated:
         return None
     latest = ExaminationFollowup.objects.filter(release_id=OuterRef('release_id')).order_by('-pk')
     rows = (ExaminationFollowup.objects.filter(
@@ -177,7 +186,7 @@ def next_pending(actor, access):
         **{SOURCE_VISIT + '__patient_id': access.patient_id, SOURCE_VISIT + '__clinic__is_active': True})
         .select_related(SOURCE_VISIT, 'release__report', 'instruction__step_version', 'instruction__recall')
         .order_by('release__occurred_at', 'pk'))
-    for decision in rows.iterator():
+    for decision in filter_orders(rows, prefix='release__order__').iterator():
         order = decision.release.order
         instruction = decision.instruction
         if instruction:
@@ -197,6 +206,22 @@ def next_pending(actor, access):
                 report=dict(visit_id=order.source_record.encounter.visit_id, id=order.pk,
                     revision=decision.release.report.number))
     return None
+
+
+@dataclass(frozen=True)
+class ReportSelection:
+    decision: ExaminationFollowup
+    instruction: NextVisitInstruction
+    first_day: date
+    last_day: date
+    project_revision: int | None
+
+    def stamp(self, fields):
+        data = dict(fields, release=self.decision.release_id, decision=self.decision.pk,
+            instruction=self.instruction.pk, instruction_revision=self.instruction.revision)
+        if self.project_revision is not None:
+            data['project_revision'] = self.project_revision
+        return data
 
 
 def selection(actor, fields, *, clinic_id, service_id, day=None, lock=False):
@@ -221,19 +246,15 @@ def selection(actor, fields, *, clinic_id, service_id, day=None, lock=False):
     first, last = window(instruction)
     if day is not None and not first <= day <= last:
         raise RuleError('请选择建议窗口内可预约的日期。')
-    return decision, instruction, first, last
-
-
-def stamp(fields, decision, instruction):
-    return dict(fields, release=decision.release_id, decision=decision.pk, instruction=instruction.pk,
-        instruction_revision=instruction.revision)
+    revision = None if settings.ADC_CLINICAL_SYNTHETIC else order.project.operating_revision
+    return ReportSelection(decision, instruction, first, last, revision)
 
 
 def candidates(actor, fields, *, clinic_id, service_id, day=None, dentist_id=None):
     from portal.availability_search import future_options
     from portal.services import public_options
-    _, _, first, last = selection(actor, fields, clinic_id=clinic_id, service_id=service_id, day=day)
+    selected = selection(actor, fields, clinic_id=clinic_id, service_id=service_id, day=day)
     if day:
         return public_options(actor, clinic_id, day, service_id, dentist_id)
     return future_options(lambda date: public_options(actor, clinic_id, date, service_id, dentist_id),
-        first_day=first, horizon_days=(last - first).days)
+        first_day=selected.first_day, horizon_days=(selected.last_day - selected.first_day).days)

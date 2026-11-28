@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.urls import reverse
 from accounts.policies import has_role,bindings
+from clinical.examination_access import workflows_available
 from workspaces.rules import ROLES, CLINIC_ROLES
 from workspaces.context import token_for, available_roles,channel_roles
 
@@ -85,7 +86,6 @@ def navigation(request):
     data={'can_front':has_role(user,'FRONT_DESK'),'can_manage':has_role(user,'MANAGER'),
       'is_dentist':has_role(user,'DENTIST'),'build_version':settings.ADC_VERSION,'adc_read_only':settings.ADC_READ_ONLY,
       'environment_label':settings.ADC_PUBLIC_ENVIRONMENT_LABEL,
-      'exam_course_enabled':settings.ADC_CLINICAL_SYNTHETIC,
       'can_finance':bindings(user).filter(role__in=['FINANCE','HQ'],scope_kind='CHAIN').exists(),
       'can_operations':role in ('MANAGER','HQ') and not choose_clinic,
       'can_correct':role in ('DENTIST','FINANCE'),'can_assist':role in ('FRONT_DESK','DENTIST','MANAGER','HQ','FINANCE'),
@@ -98,6 +98,11 @@ def navigation(request):
       'workspace_home':reverse(ROLES[role][1]) if role in ROLES else reverse('select_role'),
       'workspace_nav':[{'url':reverse(n),'label':label,'active':getattr(request,'resolver_match',None) and request.resolver_match.url_name==n} for n,label in items],
       'base_template':'portal/base.html' if role=='PATIENT' else 'base.html'}
+    page = getattr(getattr(request, 'resolver_match', None), 'url_name', None)
+    if page == 'doctor_home' and role == 'DENTIST':
+        data['reports_enabled'] = workflows_available()
+    elif page == 'frontdesk_home' and role == 'FRONT_DESK' and clinic:
+        data['reports_enabled'] = workflows_available(clinic.pk)
     if role in ('FRONT_DESK', 'DENTIST', 'MANAGER', 'FINANCE', 'HQ'):
         data['workspace_nav_sections'] = desk_sections(items, data['workspace_nav'])
     if role=='PATIENT':

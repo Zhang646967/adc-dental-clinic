@@ -88,10 +88,10 @@ def preview_booking(*, user, slot_id, start, service_id=None, followup=None):
     access.require_clinic(slot.clinic_id)
     report_stamp = None
     if followup:
-        from portal.report_followup import selection, stamp
-        disposition, instruction, _, _ = selection(user, followup, clinic_id=slot.clinic_id,
+        from portal.report_followup import selection
+        selected = selection(user, followup, clinic_id=slot.clinic_id,
             service_id=service_id, day=timezone.localdate(start))
-        report_stamp = stamp(followup, disposition, instruction)
+        report_stamp = selected.stamp(followup)
     from scheduling.resources import policy,choose_bundle,service_for
     from adc_core.rules import validate_slot
     bundle=None
@@ -163,11 +163,11 @@ def confirm_booking(*, actor, token, patient_request='', require_published_servi
     try: start = datetime.fromisoformat(data["start"])
     except (ValueError, TypeError) as exc: raise RuleError("预约时间格式失效。") from exc
     if report_stamp:
-        from portal.report_followup import FIELDS, selection, stamp
+        from portal.report_followup import FIELDS, selection
         fields = {key: report_stamp[key] for key in FIELDS}
-        disposition, instruction, _, _ = selection(actor, fields, clinic_id=slot.clinic_id,
+        selected = selection(actor, fields, clinic_id=slot.clinic_id,
             service_id=data.get('service'), day=timezone.localdate(start), lock=True)
-        if report_stamp != stamp(fields, disposition, instruction):
+        if report_stamp != selected.stamp(fields):
             raise RuleError('报告或复诊安排已变化，请返回原就诊重新核对。')
     from scheduling.resources import policy
     if policy(slot.clinic_id):
@@ -181,9 +181,9 @@ def confirm_booking(*, actor, token, patient_request='', require_published_servi
     BookingReceipt.objects.create(nonce=data["nonce"], visit=visit, **access.receipt_fields)
     if report_stamp:
         from clinical.next_visits import check_promise, save_link
-        check_promise(instruction, visit)
-        save_link(actor=actor, instruction=instruction, visit=visit, operation_id=data['nonce'],
-            report_followup=disposition)
+        check_promise(selected.instruction, visit)
+        save_link(actor=actor, instruction=selected.instruction, visit=visit, operation_id=data['nonce'],
+            report_followup=selected.decision)
     emit(actor, "PORTAL_BOOKING_CONFIRMED", visit, visit=visit, summary={"source":"patient_portal"})
     return visit
 

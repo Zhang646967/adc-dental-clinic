@@ -19,9 +19,10 @@ from adc_core.http_support import EXPECTED_ERRORS, add_error
 from adc_core.rules import ATTENDED_STATUSES, RuleError
 from clinical import examinations as cmd
 from clinical import examination_followup as followup
+from clinical.examination_access import filter_orders, workflows_available
 from clinical.authority import professional_scope, require_reviewer, require_visit_authority
 from clinical.encounter_views import clinical_render
-from clinical.examination_models import ExaminationDuty, ExaminationEvent, ExaminationOrder, ExaminationProject
+from clinical.examination_models import ExaminationDuty, ExaminationEvent, ExaminationProject
 from clinical.form_binding import check_patient_form, patient_form_binding
 from clinical.plan_forms import ConfirmPlanActionForm, current_steps, services_for
 from clinical.plan_models import NextVisitInstruction
@@ -62,8 +63,8 @@ class ActionForm(forms.Form):
         if action in (Action.PUBLISH, followup.FOLLOWUP):
             self.fields['followup_kind'] = forms.ChoiceField(label='报告发布后的安排', choices=followup.Kind.choices)
             self.fields['instruction'] = forms.ModelChoiceField(label='采用已有复诊指示', required=False,
-                queryset=NextVisitInstruction.objects.filter(source_record__encounter__visit=visit, state='OPEN',
-                    latest_on__gte=timezone.localdate()).exclude(completion_rule='UNSPECIFIED').select_related('service'))
+                queryset=followup.visible_instructions(NextVisitInstruction.objects.filter(source_record__encounter__visit=visit,
+                    state='OPEN', latest_on__gte=timezone.localdate())).exclude(completion_rule='UNSPECIFIED').select_related('service'))
             self.fields['instruction'].label_from_instance = lambda row: (
                 f'{row.service.name} · {row.earliest_on} 至 {row.latest_on} · 指示 {row.pk}')
             self.fields['service'] = forms.ModelChoiceField(label='新指示的复诊服务', required=False,
@@ -157,8 +158,9 @@ def _preview(request, data, token, visit, *, order=None):
 @sensitive_post_parameters()
 @require_http_methods(['GET', 'POST'])
 def visit_workspace(request, pk):
-    cmd.require_course()
     visit = get_object_or_404(Visit.objects.select_related('clinic', 'patient'), pk=pk)
+    if not workflows_available(visit.clinic_id):
+        raise Http404
     require_visit_authority(request.user, visit, 'READ', always=True)
     record = cmd.visit_record(visit)
     projects = cmd.eligible_projects(visit)
@@ -187,7 +189,7 @@ def visit_workspace(request, pk):
     rows = list(_rows(cmd.orders().filter(**{cmd.RELATED + '_id': visit.pk}).order_by('-pk')))
     return clinical_render(request, 'clinical/examination_visit.html', dict(
         visit=visit, rows=rows, record=record, form=form, related_reports=list(_followup_reports(visit, request.user)),
-        report_recheck=followup.linked_orders(visit).exists(),
+        report_recheck=filter_orders(followup.linked_orders(visit)).exists(),
     ), status=status)
 
 
@@ -195,8 +197,9 @@ def visit_workspace(request, pk):
 @never_cache
 @require_GET
 def queue(request):
-    cmd.require_course()
     require_active(request.user, cmd.ROLES)
+    if not workflows_available():
+        raise Http404
     own = Q(**{cmd.RELATED + '__dentist_id': request.user.dentist_id})
     assigned = ExaminationDuty.objects.filter(user=request.user, is_active=True).values('project_id')
     candidates = cmd.orders().filter(
@@ -241,13 +244,14 @@ def queue(request):
 @never_cache
 @require_GET
 def frontdesk(request):
-    cmd.require_course()
     clinic_id = request.workspace.clinic_id
     require_active(request.user, ('FRONT_DESK',), clinic_id)
     require_clinic(request.user, clinic_id)
+    if not workflows_available(clinic_id):
+        raise Http404
     events = ExaminationEvent.objects.filter(order_id=OuterRef('pk'))
     latest = events.filter(action__in=(Action.SUBMIT, *cmd.REVIEW)).order_by('-pk').values('action')[:1]
-    data = ExaminationOrder.objects.filter(**{cmd.RELATED + '__clinic_id': clinic_id}).annotate(
+    data = cmd.orders().filter(**{cmd.RELATED + '__clinic_id': clinic_id}).annotate(
         latest=Subquery(latest), was_released=Exists(events.filter(action=Action.PUBLISH)),
         visit_no=F(cmd.RELATED + '__visit_no'),
     ).values('number', 'project_name', 'visit_no', 'requested_at', 'performed_at', 'latest',
@@ -309,13 +313,15 @@ def detail(request, pk):
     release = order.active_release
     own_visit = visit.dentist_id == request.user.dentist_id
     disposition = followup.current_decision(order) if own_visit else None
+    appointments = [appointment for appointment in followup.report_appointments(order)
+        if appointment.clinic_id == visit.clinic_id and appointment.patient_id == visit.patient_id] if disposition else []
     return clinical_render(request, 'clinical/examination_detail.html', dict(
         order=order, visit=visit, report=report, decision=decision, release=release,
         progress=cmd.progress(order, report, decision), publication=cmd.publication_status(order),
         reports=order.reports.order_by('-number'), events=order.events.select_related('actor', 'report').order_by('pk'),
         action_forms=[dict(action=action, label=ACTION_LABELS[action], form=form) for action, form in forms_by_action.items()
                       if action in ACTION_LABELS],
-        own_visit=own_visit, disposition=disposition,
+        own_visit=own_visit, disposition=disposition, followup_appointments=appointments,
         contact=followup.contact_progress(disposition) if disposition and disposition.kind == followup.Kind.CONTACT else None,
         contact_events=followup.contact_events(disposition).select_related('actor') if disposition and disposition.kind == followup.Kind.CONTACT else (),
     ), status=status)
@@ -326,8 +332,9 @@ def detail(request, pk):
 @sensitive_post_parameters()
 @require_POST
 def confirm(request, pk, order_id=None):
-    cmd.require_course()
     visit = get_object_or_404(Visit, pk=pk)
+    if not workflows_available(visit.clinic_id):
+        raise Http404
     expected = dict(visit=pk, patient=visit.patient_id)
     if order_id is None:
         expected['action'] = Action.ORDER

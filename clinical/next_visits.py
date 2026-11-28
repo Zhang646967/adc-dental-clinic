@@ -81,13 +81,15 @@ def prepare_instruction(*,actor,visit_id,fields):
 
 def prepare_withdrawal(*,actor,visit_id,instruction_id,reason):
     from clinical.encounter_selectors import encounter_details
+    from clinical.examination_followup import instruction_project_revision
     d=encounter_details(actor,visit_id)
     if not d['can_record']:raise PermissionDenied('没有当前患者的后续指示记录范围。')
     row=NextVisitInstruction.objects.get(pk=instruction_id,source_record__encounter__visit__patient_id=d['visit'].patient_id,
         source_record__encounter__visit__clinic_id=d['visit'].clinic_id)
     from clinical.authority import professional_scope
     professional_scope(actor.pk,d['visit'].clinic_id,row.service_id,'RECORD')
-    data=dict(action='WITHDRAW',visit=visit_id,instruction=row.pk,revision=row.revision,reason=text(reason,1000,'撤回指示依据',True))
+    data=dict(action='WITHDRAW',visit=visit_id,instruction=row.pk,revision=row.revision,reason=text(reason,1000,'撤回指示依据',True),
+        report_project_revision=instruction_project_revision(row.pk))
     return dict(proposal_token=proposal(actor,CONTRACT,('DENTIST',),data),instruction=row,reason=data['reason'])
 
 
@@ -111,6 +113,9 @@ def confirm_instruction(*,actor,proposal_token,confirmed):
         require_plan_service(actor,visit,service,lock=True)
         return record_instruction(actor=actor, record=record, service=service, values=values, operation_id=op),False
     else:
+        from clinical.examination_followup import instruction_project_revision
+        if instruction_project_revision(data['instruction'], lock=True) != data.get('report_project_revision'):
+            raise RuleError('检查项目的开通状态已变化，请重新核对复诊指示。')
         row=NextVisitInstruction.objects.select_for_update().get(pk=data['instruction'],source_record__encounter__visit__patient=patient,
             source_record__encounter__visit__clinic_id=visit.clinic_id)
         from clinical.authority import professional_scope
@@ -161,22 +166,25 @@ def save_link(*, actor, instruction, visit, operation_id, report_followup=None):
 
 
 def front_instructions(actor):
+    from clinical.examination_followup import visible_instructions
     require_active(actor,('FRONT_DESK',));clinic_id=actor._adc_workspace.clinic_id
     require_clinic(actor,clinic_id)
     # No clinical purpose, chart, plan estimate or tooth/surface field is projected.
-    return NextVisitInstruction.objects.filter(source_record__encounter__visit__clinic_id=clinic_id).select_related('service','source_record__encounter__visit__patient').order_by('latest_on','pk')
+    return visible_instructions(NextVisitInstruction.objects.filter(source_record__encounter__visit__clinic_id=clinic_id)).select_related('service','source_record__encounter__visit__patient').order_by('latest_on','pk')
 
 
 def instruction_booking_projection(row):
+    from clinical.examination_access import filter_orders
+    from clinical.examination_models import ExaminationOrder
     visit=row.source_record.encounter.visit
     links=list(row.appointment_links.select_related('visit').order_by('-pk'))
     promises=[dict(original=link.visit,current=current_promise(link.visit)) for link in links]
     fulfilled=has_completed_goal(row)
     from clinical.examination_followup import order_for_instruction, current_decision, current_plan_step
     order = order_for_instruction(row.pk)
-    decision = current_decision(order) if order else None
+    decision = current_decision(order) if order and filter_orders(ExaminationOrder.objects.filter(pk=order.pk)).exists() else None
     report_review = bool(order and (decision is None or decision.instruction_id != row.pk or not current_plan_step(row)))
-    return dict(id=row.pk,patient=visit.patient,service=row.service,earliest_on=row.earliest_on,latest_on=row.latest_on,
+    return dict(id=row.pk,patient=visit.patient,source_visit_no=visit.visit_no,service=row.service,earliest_on=row.earliest_on,latest_on=row.latest_on,
         booking_note=row.booking_note,state=row.state,revision=row.revision,promises=promises,
         completion_available=fulfilled, report_review=report_review,
         needs_booking=row.state=='OPEN' and not fulfilled and not any(p['current'].status in ('SCHEDULED','CHECKED_IN') or (row.completion_rule=='UNSPECIFIED' and p['current'].status in ('COMPLETED','CLOSED_NO_TREATMENT')) for p in promises),
@@ -204,6 +212,7 @@ def check_promise(row,visit):
 
 
 def prepare_link(*,actor,instruction_id,visit_id):
+    from clinical.examination_access import require_project
     require_active(actor,('FRONT_DESK',))
     row=front_instructions(actor).get(pk=instruction_id)
     visit=Visit.objects.get(pk=visit_id,clinic_id=actor._adc_workspace.clinic_id)
@@ -212,11 +221,14 @@ def prepare_link(*,actor,instruction_id,visit_id):
     from clinical.examination_followup import order_for_instruction, current_decision, current_plan_step, check_report_appointment
     order = order_for_instruction(row.pk)
     if order:
+        require_project(visit.clinic_id, order.project_id)
         decision = current_decision(order)
         if decision is None or decision.instruction_id != row.pk or not current_plan_step(row):
             raise RuleError('关联报告或复诊指示已变化，请由医师核对当前安排。')
         check_report_appointment(order, visit)
     data=dict(action='LINK',instruction=row.pk,revision=row.revision,visit=visit.pk,visit_revision=visit.lock_version)
+    if order:
+        data['report_project_revision'] = order.project.operating_revision
     return dict(proposal_token=proposal(actor,CONTRACT,('FRONT_DESK',),data),instruction=instruction_booking_projection(row),visit=visit)
 
 
@@ -247,6 +259,8 @@ def confirm_link(*,actor,proposal_token,confirmed):
     if row.appointment_links.filter(visit=visit).exists():raise RuleError('这个预约已关联本指示，请查看已有结果。')
     decision = None
     if report_order:
+        if report_order.project.operating_revision != data.get('report_project_revision'):
+            raise RuleError('检查项目启用范围已变化，请重新核对复诊安排。')
         decision = current_decision(report_order)
         if decision is None or decision.instruction_id != row.pk or not current_plan_step(row):
             raise RuleError('关联报告或复诊指示已变化，请由医师核对当前安排。')

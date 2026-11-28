@@ -1,10 +1,8 @@
-"""Transactional examination workflow for configured synthetic course cases."""
+"""Transactional examination workflow for the clinic's opened projects."""
 from uuid import uuid4
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.http import Http404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.debug import sensitive_variables
@@ -16,6 +14,7 @@ from adc_core.rules import RuleError
 from clinical.authority import professional_scope, require_reviewer, require_visit_authority, visit_service_id
 from clinical.authority_services import lock_people
 from clinical import examination_followup as followup
+from clinical.examination_access import filter_orders, filter_projects, require_project
 from clinical.examination_models import ExaminationDuty, ExaminationEvent, ExaminationOrder, ExaminationProject
 from clinical.locking import lock_clinical_visit
 from clinical.encounter_models import ClinicalRecordVersion
@@ -30,13 +29,8 @@ RELATED = 'source_record__encounter__visit'
 DECISIONS = {Action.APPROVE: '审核通过', Action.RETURN: '结果已退回'}
 
 
-def require_course():
-    if not settings.ADC_CLINICAL_SYNTHETIC:
-        raise Http404('检查结果流程尚未在此环境启用。')
-
-
 def orders():
-    return ExaminationOrder.objects.select_related(
+    return filter_orders(ExaminationOrder.objects.all()).select_related(
         RELATED + '__clinic', RELATED + '__patient', 'project__service__department',
     )
 
@@ -70,9 +64,9 @@ def publication_status(order):
 
 
 def eligible_projects(visit):
-    if not settings.ADC_CLINICAL_SYNTHETIC or visit.status != 'CHECKED_IN':
+    if visit.status != 'CHECKED_IN':
         return ExaminationProject.objects.none()
-    return ExaminationProject.objects.filter(service_id=visit_service_id(visit),
+    return filter_projects(ExaminationProject.objects.all()).filter(service_id=visit_service_id(visit),
         service__department__clinic_id=visit.clinic_id, service__is_active=True, is_active=True).order_by('name', 'pk')
 
 
@@ -91,9 +85,7 @@ def check_duty(actor, project, kind, *, lock=False):
 def _scope(actor, order, action=None, *, lock=False):
     require_active(actor, ROLES)
     visit = order.source_record.encounter.visit
-    project = order.project
-    if project.service.department.clinic_id != visit.clinic_id:
-        raise PermissionDenied('检查项目与原就诊门店不一致。')
+    project = require_project(visit.clinic_id, order.project_id, lock=lock)
     owner = actor.dentist_id == visit.dentist_id
     required = 'READ'
     if action in (Action.EXECUTE, Action.SUBMIT):
@@ -109,11 +101,11 @@ def _scope(actor, order, action=None, *, lock=False):
     elif not owner and not duties(actor, project, Kind.EXECUTE).exists():
         check_duty(actor, project, Kind.REVIEW)
         require_reviewer(actor, visit.clinic_id)
-    return professional_scope(actor.pk, visit.clinic_id, project.service_id, required, lock=lock)
+    scope = professional_scope(actor.pk, visit.clinic_id, project.service_id, required, lock=lock)
+    return scope, project
 
 
 def read_order(actor, order):
-    require_course()
     _scope(actor, order)
 
 
@@ -171,25 +163,24 @@ def _new_order_data(actor, visit, project_id, purpose, *, lock=False):
     if not project or not record or not visit.attended_at:
         raise RuleError('请核对本次到诊、已确认检查记录和开放的检查项目。')
     return dict(action=Action.ORDER, visit=visit.pk, patient=visit.patient_id, project=project.pk,
-        project_name=project.name, record=record.pk, record_number=record.revision,
+        project_name=project.name, project_revision=project.operating_revision, record=record.pk, record_number=record.revision,
         scope=scope.pk, scope_revision=scope.revision, purpose=_text(purpose, 500, '申请目的'))
 
 
 @sensitive_variables()
 def prepare_order(actor, visit, project_id, purpose):
-    require_course()
     data = _new_order_data(actor, visit, project_id, purpose)
     return data, proposal(actor, CONTRACT, ROLES, data)
 
 
 @sensitive_variables()
 def _action_data(actor, order, action, fields, *, lock=False):
-    scope = _scope(actor, order, action)
+    scope, project = _scope(actor, order, action)
     report = latest_report(order)
     decision = report_decision(report)
     visit = order.source_record.encounter.visit
     data = dict(action=action, order=order.pk, visit=visit.pk, patient=visit.patient_id,
-        revision=order.revision, scope=scope.pk, scope_revision=scope.revision,
+        revision=order.revision, project_revision=project.operating_revision, scope=scope.pk, scope_revision=scope.revision,
         report=report.pk if report else None)
     if action == Action.EXECUTE:
         if order.performed_at:
@@ -237,7 +228,6 @@ def _action_data(actor, order, action, fields, *, lock=False):
 
 @sensitive_variables()
 def prepare_action(actor, order, action, fields):
-    require_course()
     data = _action_data(actor, order, action, fields)
     return data, proposal(actor, CONTRACT, ROLES, data)
 
@@ -246,7 +236,6 @@ def prepare_action(actor, order, action, fields):
 @transaction.atomic
 @sensitive_variables()
 def confirm(*, actor, proposal_token, confirmed):
-    require_course()
     if not confirmed:
         raise RuleError('请核对本次办理内容后确认。')
     lock_people(actor)
@@ -255,6 +244,7 @@ def confirm(*, actor, proposal_token, confirmed):
     action = data['action']
     if action == Action.ORDER:
         visit = lock_clinical_visit(actor, data['visit'])
+        require_project(visit.clinic_id, data['project'], lock=True)
         replay = ExaminationEvent.objects.filter(operation_id=operation, actor=actor, action=action).first()
         if replay:
             return replay.order, True
@@ -267,7 +257,7 @@ def confirm(*, actor, proposal_token, confirmed):
         ExaminationEvent.objects.create(order=order, action=action, actor=actor, operation_id=operation)
         return order, False
 
-    order = orders().get(pk=data['order'])
+    order = ExaminationOrder.objects.select_related(RELATED).get(pk=data['order'])
     # Changes to the current clinical role serialize with its existing revocation flow.
     if not RoleAssignment.objects.select_for_update().filter(
         user=actor, role='DENTIST', scope_kind='SELF_DENTIST', is_active=True,

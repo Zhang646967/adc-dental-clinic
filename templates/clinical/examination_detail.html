@@ -54,6 +54,9 @@
     <p>{{ disposition.instruction.clinical_purpose }}</p>
     <details class="task-disclosure compact"><summary>查看复诊指示编号</summary><p>{{ disposition.instruction_id }}</p></details>
     {% endif %}
+    {% for appointment in followup_appointments %}
+    <p>关联复诊 {{ appointment.visit_no }} · {{ appointment.scheduled_start|date:'Y-m-d H:i' }}（北京时间） · {{ appointment.get_status_display }}</p>
+    {% endfor %}
     {% if contact %}<p class="report-contact">{{ contact.state }}{% if contact.overdue %} · 已逾期{% endif %} · 联系期限 {{ contact.due_at|date:'Y-m-d H:i' }}（北京时间）</p>{% endif %}
     {% if contact_events %}<details class="task-disclosure"><summary>查看联系记录</summary>
       {% for entry in contact_events %}<p>{{ entry.occurred_at|date:'Y-m-d H:i' }} · {{ entry.actor.username }} · {{ entry.reason }}</p>{% endfor %}

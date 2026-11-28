@@ -1,13 +1,13 @@
 """Facts carried from an explicitly linked visit. No writes or clinical inference."""
 from collections import defaultdict
 
-from django.conf import settings
 from django.db.models import Exists, F, OuterRef, Subquery
 
 from clinical.authority import readable_assigned_visits, visit_service_id
 from clinical.encounter_models import ClinicalRecordVersion, ToothFinding
+from clinical.examination_access import filter_orders
 from clinical.examination_followup import linked_instructions
-from clinical.examination_models import ExaminationFollowup, ExaminationReport
+from clinical.examination_models import ExaminationFollowup, ExaminationOrder, ExaminationReport
 from clinical.plan_locks import readable_services
 from clinical.plan_models import NextVisitInstruction, PerformedProcedure, PlanStepVersion, PlanVersion
 from clinical.tooth_rules import SURFACES
@@ -46,6 +46,7 @@ def _links(visit, *, origins=None):
         report_pk=F(RELEASE + '__report_id'), report_order=F(RELEASE + '__report__order_id'),
         report_revision=F(RELEASE + '__report__number'), bound_instruction=F('report_followup__instruction_id'),
         current_instruction=Subquery(decisions.values('instruction_id')[:1]),
+        report_enabled=Exists(filter_orders(ExaminationOrder.objects.filter(pk=OuterRef(ORDER + '_id')))),
         has_report=Exists(ExaminationFollowup.objects.filter(instruction_id=OuterRef('instruction_id')))))
 
 
@@ -55,7 +56,7 @@ def _patient_fields(row, visit_service):
                and row['record_revision'] == row['latest_record'] and row['plan_version'] == row['current_plan'])
     report = None
     if row['has_report'] or row['linked_release']:
-        current = bool(current and settings.ADC_CLINICAL_SYNTHETIC and row['linked_release']
+        current = bool(current and row['report_enabled'] and row['linked_release']
                        and row['linked_release'] == row['live_release'] and row['release_action'] == 'PUBLISH'
                        and row['report_origin'] == row['source_id'] and row['report_order'] == row['report_id']
                        and row['bound_instruction'] == row['current_instruction'] == row['instruction_id'])

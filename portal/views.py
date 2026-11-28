@@ -144,8 +144,8 @@ def slots(request):
     if followup:
         try:
             clinic_id, service_id = positive_id(query.get('clinic')), positive_id(query.get('service'))
-            _, _, first, last = report_followup.selection(request.user, followup, clinic_id=clinic_id, service_id=service_id)
-            dates = dict(first=first.isoformat(), last=last.isoformat())
+            available = report_followup.selection(request.user, followup, clinic_id=clinic_id, service_id=service_id)
+            dates = dict(first=available.first_day.isoformat(), last=available.last_day.isoformat())
             query.setdefault('day', dates['first'])
         except RuleError as exc:
             return render(request, 'portal/followup_recovery.html',

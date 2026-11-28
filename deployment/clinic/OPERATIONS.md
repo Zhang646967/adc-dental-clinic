@@ -102,3 +102,15 @@ python3 source/scripts/clinic_release.py --context default --output state/.g4 ro
 ```
 
 切换后从固定 HTTPS 入口检查门店、岗位登录、近期业务和审计记录；确认同一笔业务仅有一次有效写入，并将业务发生时间、检查点、恢复回执与对账记录一并留存。
+
+### 开通本店检查报告及复诊
+
+在可写的正式机构实例完成迁移。核对本店服务编号、负责医师的记录授权、执行医师的记录授权、独立审核医师的读取授权和本店审核委任。开通命令由持有主机管理权限的人员执行，经办技术账号须具备有效技术管理职责。每个服务分别开通，安装后默认无已开通的机构项目。
+
+```sh
+python manage.py configure_site_examination --operator "$OPERATOR" --service "$SERVICE_ID" --code "$PROJECT_CODE" provision --name "$PROJECT_NAME" --examiner "$EXAMINER" --reviewer "$REVIEWER"
+python manage.py configure_site_examination --operator "$OPERATOR" --service "$SERVICE_ID" --code "$PROJECT_CODE" revoke --user "$EXAMINER" --duty EXECUTE
+python manage.py configure_site_examination --operator "$OPERATOR" --service "$SERVICE_ID" --code "$PROJECT_CODE" suspend
+```
+
+第二、三条分别用于撤销个人职责和暂停整个项目。暂停立即停止该项目的报告办理和患者报告入口，原已成立的复诊预约可从预约记录回查。恢复时重行第一条核对人员与职责。机构须自行核验人员资质，保留院内业务交接安排。患者在系统内查看报告提醒；微信站外通知须另行开通。

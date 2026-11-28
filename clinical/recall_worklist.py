@@ -58,6 +58,7 @@ class CoveredInstruction(Func):
 
 
 def available_instructions(rows, *, ordinary_only=False):
+    from clinical.examination_access import filter_orders
     rows = rows.filter(state='OPEN').filter(Q(recall__isnull=True) | Q(recall__state='OPEN'))
     reports = ExaminationFollowup.objects.filter(instruction_id=OuterRef('pk'))
     current_plan = PlanVersion.objects.filter(plan_id=OuterRef('step_version__version__plan_id')).order_by('-revision')
@@ -68,6 +69,7 @@ def available_instructions(rows, *, ordinary_only=False):
         latest = ExaminationFollowup.objects.filter(release_id=OuterRef('release_id')).order_by('-pk')
         current = reports.filter(release_id=F('release__order__active_release_id'), release__action='PUBLISH',
             pk=Subquery(latest.values('pk')[:1]))
+        current = filter_orders(current, prefix='release__order__')
         rows = rows.filter(~Exists(reports) | Exists(current))
     return rows.filter(~CoveredInstruction(F('pk')))
 

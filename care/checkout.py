@@ -5,7 +5,7 @@ from accounts.policies import require_clinic
 from adc_core.rules import CLOSED_STATUSES
 from adc_core.snapshots import reporting_snapshot
 from care.models import Invoice
-from clinical.examination_followup import current_plan_step
+from clinical.examination_followup import current_plan_step, visible_instructions
 from clinical.next_visits import instruction_booking_projection, promise_ids
 from clinical.plan_models import NextVisitInstruction, PlanAppointment
 from finance.cash_selectors import invoice_balance
@@ -91,7 +91,7 @@ def checkout_facts(visit, now, *, patient_actor=None):
             'service', 'recall', 'step_version__version__plan', 'source_record__encounter__visit'
         ).order_by('earliest_on', 'pk')
         clinic = visit.public_contact['name']
-        followups = [_followup(row, visit, clinic, now, patient_actor) for row in rows]
+        followups = [_followup(row, visit, clinic, now, patient_actor) for row in visible_instructions(rows)]
     elif visit.status == 'CHECKED_IN':
         state = 'AWAITING_PUBLICATION'
     return dict(settlement_state=state, settlement=settlement_summary(invoice) if invoice else None,

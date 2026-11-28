@@ -1,5 +1,6 @@
 """Report decisions use existing instructions, appointments and clinical authority."""
-from django.db.models import Q
+from django.db.models import Exists, F, OuterRef, Q
+from django.http import Http404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
@@ -8,7 +9,8 @@ from care.audit import emit
 from care.models import AuditEvent
 from clinical.authority import professional_scope, visit_service_id
 from clinical.continuity_rules import moment
-from clinical.examination_models import ExaminationFollowup, ExaminationNotice, ExaminationOrder
+from clinical.examination_access import filter_orders, require_project
+from clinical.examination_models import ExaminationFollowup, ExaminationNotice, ExaminationOrder, ExaminationProject
 from clinical.next_visits import check_instruction_step, current_promise, instruction_fields, promise_ids, record_instruction
 from clinical.plan_locks import require_plan_service
 from clinical.plan_payload import text
@@ -30,10 +32,44 @@ def order_for_instruction(instruction_id, *, lock=False):
     order_id = ExaminationFollowup.objects.filter(instruction_id=instruction_id).values_list('release__order_id', flat=True).first()
     if order_id is None:
         return None
-    rows = ExaminationOrder.objects
+    rows = ExaminationOrder.objects.filter(pk=order_id)
     if lock:
-        rows = rows.select_for_update()
-    return rows.get(pk=order_id)
+        order = rows.select_related('source_record__encounter__visit').get()
+        rows = available_basis(rows, order.source_record.encounter.visit.clinic_id, lock=True)
+    return rows.get()
+
+
+def available_basis(orders, clinic_id, *, lock):
+    """A hidden report still binds its promise. Never treat it as an ordinary booking."""
+    for project_id in orders.order_by('project_id').values_list('project_id', flat=True).distinct():
+        try:
+            require_project(clinic_id, project_id, lock=lock)
+        except Http404:
+            raise RuleError('这项报告复诊暂时无法办理，请联系原门店核对已有安排。') from None
+    return orders.select_for_update(of=('self',)) if lock else orders
+
+
+def _instruction_origin(instruction_id):
+    # A doctor can attach an already issued independent instruction to a report.
+    # Only an instruction created by the release shares its creation operation.
+    return ExaminationFollowup.objects.filter(instruction_id=instruction_id, instruction__planevent__action='NEXT_VISIT_CREATED',
+        instruction__planevent__operation_id=F('operation_id'))
+
+
+def visible_instructions(instructions):
+    originated = _instruction_origin(OuterRef('pk'))
+    opened = filter_orders(originated, prefix='release__order__')
+    return instructions.filter(~Exists(originated) | Exists(opened))
+
+
+def instruction_project_revision(instruction_id, *, lock=False):
+    source = _instruction_origin(instruction_id).values_list(
+        'release__order__source_record__encounter__visit__clinic_id', 'release__order__project_id').first()
+    if source:
+        project = require_project(*source, lock=lock)
+        if project.operating_mode == ExaminationProject.Mode.SITE:
+            return project.operating_revision
+    return None
 
 
 def decision_values(actor, order, fields, *, lock=False):
@@ -157,13 +193,13 @@ def linked_orders(visit):
         linked_instructions(visit).values('instruction_id')).distinct()
 
 
-def reschedule_window(visit, *, lock=False):
-    """Only report-based promises inherit the report's clinical date window."""
+def reschedule_basis(visit, *, lock=False):
+    """Read the clinical window and the versions under which a change may proceed."""
     orders = linked_orders(visit)
     first, last = None, None
-    rows = ExaminationOrder.objects.filter(pk__in=orders.values('pk')).order_by('pk')
-    if lock:
-        rows = rows.select_for_update()
+    stamp = []
+    rows = ExaminationOrder.objects.filter(pk__in=orders.values('pk')).select_related('project').order_by('pk')
+    rows = available_basis(rows, visit.clinic_id, lock=lock)
     instructions = linked_instructions(visit).values('instruction_id')
     for order in rows:
         decision = current_decision(order)
@@ -179,7 +215,13 @@ def reschedule_window(visit, *, lock=False):
                 raise RuleError('复诊指示已撤回，请联系原门店协调改期。')
         first = max(first, row.earliest_on) if first else row.earliest_on
         last = min(last, row.latest_on) if last else row.latest_on
-    return (first, last) if first is not None else None
+        if order.project.operating_mode == ExaminationProject.Mode.SITE:
+            stamp.append([order.pk, order.project.operating_revision, order.active_release_id, decision.pk, row.pk])
+    return ((first, last) if first is not None else None), stamp
+
+
+def reschedule_window(visit, *, lock=False):
+    return reschedule_basis(visit, lock=lock)[0]
 
 
 def treatment_basis(visit, step, *, lock=False):
@@ -197,7 +239,7 @@ def treatment_basis(visit, step, *, lock=False):
         # Publication checks the same professional scopes before taking the order lock.
         for service_id in sorted(set(orders.values_list('project__service_id', flat=True))):
             professional_scope(visit.dentist.useraccount.pk, visit.clinic_id, service_id, 'READ', lock=True)
-        orders = orders.select_for_update(of=('self',))
+    orders = available_basis(orders, visit.clinic_id, lock=lock)
     basis = []
     for order in orders:
         professional_scope(visit.dentist.useraccount.pk, visit.clinic_id, order.project.service_id, 'READ')
@@ -210,6 +252,7 @@ def treatment_basis(visit, step, *, lock=False):
             instruction = NextVisitInstruction.objects.select_for_update().get(pk=decision.instruction_id)
             if instruction.state != 'OPEN':
                 raise RuleError('复诊指示已撤回，请核对当前安排。')
-        basis.append(dict(order=order.pk, release=order.active_release_id, revision=order.active_release.report.number,
+        basis.append(dict(order=order.pk, project_revision=order.project.operating_revision,
+            release=order.active_release_id, revision=order.active_release.report.number,
             decision=decision.pk, instruction=decision.instruction_id, number=order.number))
     return basis

@@ -25,7 +25,7 @@
       <a href="{% url 'clinical_recalls' %}?queue=unclaimed">待认领随访 <small>{{ continuity.unclaimed_recalls }} 项</small></a>
       <a href="{% url 'clinical_recalls' %}?queue=review">暂缓后内部核对 <small>{{ continuity.review_recalls }} 项</small></a>
       <a href="{% url 'clinical_labs' %}">加工件送返 <small>待认领 {{ continuity.unclaimed_lab }} · 待验收 {{ continuity.lab_to_review }} · 待继续办理 {{ continuity.lab_pending }}</small></a>
-      {% if exam_course_enabled %}<a href="{% url 'clinical_examination_progress' %}">本店检查进度</a>{% endif %}
+      {% if reports_enabled %}<a href="{% url 'clinical_examination_progress' %}">本店检查进度</a>{% endif %}
       {% if can_verify_identity and enrollment_pending_count %}<a href="{% url 'patient_enrollment_list' %}">本人档案开通核验 <small>{{ enrollment_pending_count }} 项待核验</small></a>{% endif %}
     </section>
   </div>

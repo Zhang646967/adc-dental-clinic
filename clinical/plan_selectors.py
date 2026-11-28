@@ -9,6 +9,7 @@ from clinical.plan_models import TreatmentPlan,PlanDraft,PlanVersion,PlanStepVer
 from clinical.plan_payload import estimate_totals
 from clinical.plans import current_version,version_payload
 from clinical.next_visits import instruction_booking_projection
+from clinical.examination_followup import visible_instructions
 from clinical.plan_locks import plan_services,readable_services,require_plan_scope
 from portal.policies import patient_access
 from workspaces.context import require_active
@@ -69,8 +70,8 @@ def self_plan_details(actor,plan_id,*,revision=None):
             return dict(plan=plan,version=version,steps=rows,versions=list(plan.versions.order_by('-revision')),is_current=version.pk==current_version(plan).pk,estimate={'total':None,'choice_required':False},instructions=[],medical_proxy=True)
         return dict(plan=plan,version=version,steps=plan_steps(version),versions=list(plan.versions.order_by('-revision')),
             is_current=version.pk==current_version(plan).pk,estimate=estimate_totals(version_payload(version)['steps']),
-            instructions=list(NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=plan.origin_encounter.visit.patient_id,
-                source_record__encounter__visit__clinic_id=plan.origin_encounter.visit.clinic_id,state='OPEN').select_related('service')))
+            instructions=list(visible_instructions(NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=plan.origin_encounter.visit.patient_id,
+                source_record__encounter__visit__clinic_id=plan.origin_encounter.visit.clinic_id,state='OPEN')).select_related('service')))
 
 
 def clinician_plans(actor,visit_id):
@@ -96,6 +97,6 @@ def clinician_plan_details(actor,visit_id,plan_id,*,revision=None):
 def actual_details(actor,visit_id):
     d=encounter_details(actor,visit_id);visit=d['visit']
     d['actual_rows']=list(PerformedProcedure.objects.filter(encounter__visit=visit).select_related('treatment_type','step_version__version','charge_line__record_version').order_by('-pk'))
-    d['instruction_rows']=list(NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=visit.patient_id,
-        source_record__encounter__visit__clinic_id=visit.clinic_id,service_id__in=readable_services(actor,visit.clinic_id)).select_related('service','step_version').order_by('-pk'))
+    d['instruction_rows']=list(visible_instructions(NextVisitInstruction.objects.filter(source_record__encounter__visit__patient_id=visit.patient_id,
+        source_record__encounter__visit__clinic_id=visit.clinic_id,service_id__in=readable_services(actor,visit.clinic_id))).select_related('service','step_version').order_by('-pk'))
     return d

@@ -16,6 +16,7 @@ from clinical.encounter_selectors import encounter_details,clinical_worklist
 from clinical.encounter_forms import HistoryForm,StartEncounterForm,ClinicalNotesForm,FindingForm,RemoveFindingForm,ClinicalReasonForm,ClinicalConfirmForm
 from clinical.models import ClinicalHistoryVersion
 from clinical.form_binding import patient_form_binding,check_patient_form
+from clinical.examination_access import workflows_available
 from clinical.tooth_rules import PERMANENT,PRIMARY,KINDS
 from portal.policies import patient_access
 from scheduling.models import Visit
@@ -99,6 +100,7 @@ def workspace(request,pk):
     remove_rows=[]
     for i,row in enumerate(details['findings'],1):
         row=dict(row);row['line_no']=i;row['kind_label']=KINDS.get(row['kind'],row['kind']);row['operation_id']=str(uuid.uuid4());remove_rows.append(row)
+    details['reports_enabled'] = workflows_available(details['visit'].clinic_id)
     return clinical_render(request,'clinical/encounter_workspace.html',dict(details,**forms,quadrants=quadrants,finding_rows=remove_rows,rebase_available=rebase_available,rebase_action=action,show_saved_comparison=rebase_available or resumed,observed_at_display=datetime.fromisoformat(details['payload']['observed_at']) if details['payload'].get('observed_at') else None),status=status)
 
 

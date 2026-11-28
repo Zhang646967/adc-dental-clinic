@@ -13,6 +13,7 @@ from adc_core.rules import RuleError
 from care.audit import emit
 from clinical.authority import professional_scope, readable_assigned_visits, require_visit_authority
 from clinical.continuity_models import RecallEpisode, RecallEvent
+from clinical.examination_followup import instruction_project_revision, visible_instructions
 from clinical.locking import lock_clinical_visit
 from clinical.models import ProfessionalAuthorization
 from clinical.plan_models import NextVisitInstruction
@@ -38,7 +39,7 @@ def authorized_instructions(actor):
     rows = NextVisitInstruction.objects.filter(Exists(scopes), source_record__encounter__visit_id__in=visits.values('pk'),
         recall__isnull=False).select_related('recall', 'source_record__encounter__visit__patient',
         'source_record__encounter__visit__clinic', 'service')
-    return review_facts(rows)
+    return review_facts(visible_instructions(rows))
 
 
 def queue(actor, reviewed=False):
@@ -71,7 +72,8 @@ def prepare(*, actor, instruction_id, decision, note):
         raise RuleError('请选择对本次暂缓的处理意见。')
     values = dict(decision=decision, decision_label=DECISIONS[decision], note=text(note, 500, '核对依据', True))
     data = dict(instruction=row.pk, visit=row.source_record.encounter.visit_id, episode=row.recall.pk,
-        instruction_revision=row.revision, revision=row.recall.revision, decline=row.decline_id, values=values)
+        instruction_revision=row.revision, revision=row.recall.revision, decline=row.decline_id, values=values,
+        report_project_revision=instruction_project_revision(row.pk))
     return dict(proposal_token=proposal(actor, CONTRACT, ROLES, data), values=values)
 
 
@@ -85,6 +87,7 @@ def confirm(*, actor, proposal_token, confirmed):
     data = signed['data']
     source = lock_clinical_visit(actor, data['visit'])
     Patient.objects.select_for_update().get(pk=source.patient_id, is_active=True)
+    project_revision = instruction_project_revision(data['instruction'], lock=True)
     row = NextVisitInstruction.objects.select_for_update(of=('self',)).get(pk=data['instruction'], source_record__encounter__visit=source)
     professional_scope(actor.pk, source.clinic_id, row.service_id, 'RECORD', lock=True)
     episode = RecallEpisode.objects.select_for_update().get(pk=data['episode'], instruction=row)
@@ -95,6 +98,8 @@ def confirm(*, actor, proposal_token, confirmed):
             raise RuleError('该操作已有其他处理记录。')
         return episode, True
     current = get_object_or_404(authorized_instructions(actor), pk=row.pk)
+    if project_revision != data.get('report_project_revision'):
+        raise RuleError('检查项目的开通状态已变化，请重新核对复诊指示。')
     check_pending(current)
     if (row.revision, episode.revision, current.decline_id) != (data['instruction_revision'], data['revision'], data['decline']):
         raise RuleError('随访情况已有变化，请重新核对本次暂缓。')

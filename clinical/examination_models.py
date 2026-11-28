@@ -4,6 +4,13 @@ from django.db.models import Q
 
 
 class ExaminationProject(models.Model):
+    class Mode(models.TextChoices):
+        REHEARSAL = 'REHEARSAL', '演练项目'
+        SITE = 'SITE', '门店已开通'
+        SUSPENDED = 'SUSPENDED', '门店已暂停'
+
+    operating_revision = models.PositiveBigIntegerField(default=1)
+    operating_mode = models.CharField(max_length=10, choices=Mode.choices, default=Mode.REHEARSAL)
     service = models.ForeignKey('scheduling.BookingService', on_delete=models.PROTECT)
     code = models.CharField(max_length=40)
     name = models.CharField(max_length=100)
@@ -11,7 +18,11 @@ class ExaminationProject(models.Model):
 
     class Meta:
         db_table = 'adc_examination_project'
-        constraints = [models.UniqueConstraint(fields=['service', 'code'], name='examination_project_code')]
+        constraints = [
+            models.UniqueConstraint(fields=['service', 'code'], name='examination_project_code'),
+            models.CheckConstraint(condition=Q(operating_mode__in=['REHEARSAL', 'SITE', 'SUSPENDED']),
+                                   name='examination_project_mode_valid'),
+        ]
 
     def __str__(self):
         return self.name

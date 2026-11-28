@@ -1,19 +1,19 @@
 """Read only the release currently selected for the patient's own visit."""
-from django.conf import settings
 from django.db.models import Exists, F, OuterRef
 from django.http import Http404
 
+from clinical.examination_access import filter_orders
 from clinical.examination_models import ExaminationEvent, ExaminationOrder
 
 PUBLISH = ExaminationEvent.Action.PUBLISH
 
 
 def _orders(visit):
-    return ExaminationOrder.objects.filter(source_record__encounter__visit=visit)
+    return filter_orders(ExaminationOrder.objects.filter(source_record__encounter__visit=visit))
 
 
 def examination_summaries(visit, access):
-    if access.delegated or not settings.ADC_CLINICAL_SYNTHETIC:
+    if access.delegated or access.patient_id != visit.patient_id:
         return []
     published = ExaminationEvent.objects.filter(order_id=OuterRef('pk'), action=PUBLISH)
     rows = _orders(visit).annotate(ever_released=Exists(published)).order_by('requested_at', 'pk').values(
@@ -36,8 +36,6 @@ def examination_summaries(visit, access):
 
 
 def published_examination(visit, order_id, revision=None):
-    if not settings.ADC_CLINICAL_SYNTHETIC:
-        raise Http404
     rows = _orders(visit).filter(pk=order_id, active_release__action=PUBLISH, active_release__order=F('pk'),
         active_release__report__order=F('pk')).values(
         'pk', 'number', 'project_name', 'performed_at', 'active_release__report__number',
