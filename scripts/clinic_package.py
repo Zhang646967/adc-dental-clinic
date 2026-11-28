@@ -20,6 +20,41 @@ PRIVATE_DIRS = {'.git', '.g4', '.rc', '.ssh', '.runtime', 'private_migration', '
 PRIVATE_NAMES = {'institution.json', 'demo-credentials.txt', 'credentials.json', 'identity.txt',
                  'project.private.config.json', 'operations.log', 'database.env', 'runtime.env', 'maintenance.env'}
 SECRET = re.compile(rb'(?m)^-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----\r?$|^AGE-SECRET-KEY-1[A-Z0-9]{58,}\r?$')
+REPORT_PDF = '课程报告/课程报告_张加良_8210241102.pdf'
+DIAGRAM_SOURCE = 'docs/report-source/acceptance/门诊模型.drawio'
+MIGRATION = re.compile(r'^[^/]+/migrations/[0-9][^/]*\.py$')
+
+
+def component_record(archive):
+    """Project-relative file names, sorted by UTF-8 bytes, bind names and contents."""
+    trees = {'patient_mini_program': {}, 'web_templates_and_assets': {}, 'database_migrations': {}}
+    documents = {}
+    for item in archive:
+        if not item.isfile():
+            continue
+        name = item.name
+        if name.startswith('clients/wechat/'):
+            group = trees['patient_mini_program']
+        elif name.startswith(('templates/', 'static/')):
+            group = trees['web_templates_and_assets']
+        elif MIGRATION.fullmatch(name):
+            group = trees['database_migrations']
+        elif name in (REPORT_PDF, DIAGRAM_SOURCE):
+            group = documents
+        else:
+            continue
+        with archive.extractfile(item) as stream:
+            group[name] = hashlib.file_digest(stream, 'sha256').hexdigest()
+    if set(documents) != {REPORT_PDF, DIAGRAM_SOURCE} or not all(trees.values()):
+        raise ValueError('Required application, migration or acceptance document missing from release.')
+    result = {}
+    for label, rows in trees.items():
+        tree = hashlib.sha256()
+        for name in sorted(rows, key=lambda path: path.encode('utf-8')):
+            tree.update(name.encode('utf-8') + b'\0' + rows[name].encode('ascii') + b'\n')
+        result[label] = {'files': len(rows), 'sha256': tree.hexdigest()}
+    return {'tree_algorithm': 'SHA-256 over sorted UTF-8 repository-relative path + NUL + lowercase file SHA-256 hex + LF',
+            'trees': result, 'documents': documents}
 
 
 def audit_source(source, commit):
@@ -42,8 +77,12 @@ def audit_source(source, commit):
                 raise ValueError('Private key in source archive.')
 
 
-def assemble(artifacts, output, commit, db_image, nginx_image, context):
+def assemble(artifacts, output, commit, db_image, nginx_image, context, evidence):
     meta = json.loads(private_file(artifacts / 'build.json').read_text())
+    observed = json.loads(private_file(evidence).read_text())
+    if (observed['installation'] != 'PASS' or observed['https_login_and_frontdesk_grant'] != 'PASS'
+            or observed['upgrade']['current'] != commit or observed['public_or_customer_deployment'] is not False):
+        raise ValueError('Installation evidence does not match the candidate.')
     if (meta['source_commit'] != commit or meta['architecture'] != 'amd64'
             or not re.fullmatch('sha256:[0-9a-f]{64}', meta['app_image'])
             or not all(pinned_image(x) for x in (db_image, nginx_image))
@@ -54,8 +93,10 @@ def assemble(artifacts, output, commit, db_image, nginx_image, context):
         if digest(private_file(artifacts / name)) != meta[field]:
             raise ValueError('Release artifact digest differs.')
     audit_source(artifacts / 'source.tar', commit)
+    with tarfile.open(artifacts / 'source.tar') as archive:
+        components = component_record(archive)
     image = json.loads(subprocess.check_output(['docker', '--context', context, 'image', 'inspect', meta['app_image']]))[0]
-    if (image['Architecture'] != 'amd64' or image['Config'].get('Labels',{}).get('org.opencontainers.image.revision') != commit
+    if (image['Os'] != 'linux' or image['Architecture'] != 'amd64' or image['Config'].get('Labels',{}).get('org.opencontainers.image.revision') != commit
             or any(re.match(r'(POSTGRES_PASSWORD|DJANGO_SECRET_KEY|ADC_WECHAT_MINI_APP_SECRET|ADC_MIGRATION_PASSWORD)=.+', e)
                    for e in image['Config']['Env'])):
         raise ValueError('Runtime image settings differ from the package contract.')
@@ -66,6 +107,15 @@ def assemble(artifacts, output, commit, db_image, nginx_image, context):
         deps = folder/'BASE_IMAGES.json'
         deps.write_text(json.dumps({'source_commit':commit, 'postgres':db_image, 'nginx':nginx_image}, indent=2)+'\n')
         files[deps.name] = deps
+        release = folder / 'RELEASE.json'
+        release.write_text(json.dumps({'schema': 1, 'source_commit': commit,
+                                      'source_archive_sha256': meta['source_sha256'], 'runtime_image': meta['app_image'],
+                                      'platform': 'linux/amd64', **components,
+                                      'installation_rehearsal': {'status': 'passed', 'previous_commit': observed['upgrade']['previous'],
+                                           'restore_to_staff_login_ms': observed['decrypt_through_staff_login_ms'], 'storage': observed['storage']},
+                                      'institutional_acceptance': 'awaiting_signed_acceptance'},
+                                     ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        files[release.name] = release
         checks = folder/'SHA256SUMS'
         checks.write_text(''.join(digest(path)+'  '+name+'\n' for name,path in files.items()))
         files[checks.name] = checks
@@ -85,9 +135,9 @@ def assemble(artifacts, output, commit, db_image, nginx_image, context):
 if __name__ == '__main__':
     os.umask(0o077)
     p = argparse.ArgumentParser(description=__doc__)
-    for s in ('artifacts','output'):
+    for s in ('artifacts','output','evidence'):
         p.add_argument('--'+s, type=Path, required=True)
     for s in ('source-commit','db-image','nginx-image','context'):
         p.add_argument('--'+s, required=True)
     a = p.parse_args()
-    print(json.dumps(assemble(a.artifacts, a.output, a.source_commit, a.db_image, a.nginx_image, a.context)))
+    print(json.dumps(assemble(a.artifacts, a.output, a.source_commit, a.db_image, a.nginx_image, a.context, a.evidence)))

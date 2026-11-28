@@ -55,8 +55,8 @@ jobs:
           nginx_digest="$(docker image inspect nginx:stable-alpine --format '{{index .RepoDigests 0}}' | cut -d@ -f2)"
           python scripts/clinic_release.py --context default build --source-commit "$PREVIOUS" --artifacts "$private/previous"
           python scripts/clinic_release.py --context default build --source-commit "$current" --artifacts "$private/current"
-          python checks/clinic_release_rehearsal.py --context default --architecture amd64 --workdir "$private/verification" --candidate "$private/current" --previous "$private/previous" --db-image "postgres:17@$pg_digest" --nginx-image "nginx:stable-alpine@$nginx_digest"
-          python scripts/clinic_package.py --context default --source-commit "$current" --artifacts "$private/current" --output "$RUNNER_TEMP/publish" --db-image "postgres:17@$pg_digest" --nginx-image "nginx:stable-alpine@$nginx_digest"
+          python checks/clinic_release_rehearsal.py --context default --architecture amd64 --workdir "$private/verification" --candidate "$private/current" --previous "$private/previous" --db-image "postgres:17@$pg_digest" --nginx-image "nginx:stable-alpine@$nginx_digest" | tee "$private/observations.json"
+          python scripts/clinic_package.py --context default --source-commit "$current" --artifacts "$private/current" --output "$RUNNER_TEMP/publish" --db-image "postgres:17@$pg_digest" --nginx-image "nginx:stable-alpine@$nginx_digest" --evidence "$private/observations.json"
           cat "$RUNNER_TEMP/publish/"*.sha256 >> "$GITHUB_STEP_SUMMARY"
       - name: Retain the verified Linux amd64 installation package
         uses: actions/upload-artifact@v4

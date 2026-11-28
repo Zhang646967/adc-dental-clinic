@@ -1,11 +1,15 @@
 """Boundaries of a new institution's installation profile."""
 import json
+import hashlib
+import io
 from pathlib import Path
+import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from scripts.clinic_release import ClinicInstallation
+from scripts.clinic_package import component_record, DIAGRAM_SOURCE, REPORT_PDF
 from scripts.g4_course import Course
 from scripts.g4_prepare import inspect_bundle, prepare, read_env
 
@@ -81,3 +85,28 @@ class ClinicProfileTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     inspect_bundle(self.bundle)
                 path.write_text(original)
+
+    def test_candidate_components_bind_paths_content_and_exact_report(self):
+        files = {REPORT_PDF: b'pdf', DIAGRAM_SOURCE: b'model', 'templates/clinic.html': b'page',
+                 'static/site.css': b'css', 'clients/wechat/app.json': b'pages',
+                 'patients/migrations/0001_initial.py': b'migration', 'patients/migrations/__init__.py': b''}
+        def describe(rows):
+            buf = io.BytesIO()
+            with tarfile.open(fileobj=buf, mode='w') as archive:
+                for name, content in rows.items():
+                    item = tarfile.TarInfo(name)
+                    item.size = len(content)
+                    archive.addfile(item, io.BytesIO(content))
+            buf.seek(0)
+            with tarfile.open(fileobj=buf) as archive:
+                return component_record(archive)
+        record = describe(files)
+        self.assertEqual(record, describe(dict(reversed(list(files.items())))))
+        self.assertEqual(record['trees']['web_templates_and_assets']['files'], 2)
+        self.assertEqual(record['trees']['database_migrations']['files'], 1)
+        self.assertEqual(record['documents'][REPORT_PDF], hashlib.sha256(b'pdf').hexdigest())
+        changed = files.copy()
+        changed['clients/wechat/pages.json'] = changed.pop('clients/wechat/app.json')
+        self.assertNotEqual(record['trees']['patient_mini_program'], describe(changed)['trees']['patient_mini_program'])
+        with self.assertRaisesRegex(ValueError, 'missing'):
+            describe({name: data for name, data in files.items() if name != DIAGRAM_SOURCE})
