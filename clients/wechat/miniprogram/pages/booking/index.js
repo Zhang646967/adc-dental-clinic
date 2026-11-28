@@ -6,6 +6,7 @@ const {selectedCatalogue}=require('../../utils/service-selection');
 const {buildFollowup}=require('../../utils/report-notices');
 const {staleSubject}=require('../../utils/subject-state');
 const {candidate}=require('../../utils/reschedule');
+const textScale=require('../../utils/text-scale');
 
 /* Follow-up booking is bound to the exact report version that produced the
    decision. The three parameters must arrive together; anything else returns
@@ -45,9 +46,12 @@ function groupByDentist(rows){
 Page({
   data:{clinics:[], services:[], doctors:[], allServices:[], clinicIndex:0, serviceIndex:0, doctorIndex:0,
     day:'', firstDay:'', lastDay:'', rows:[], groups:[], mode:'date', searchFailed:false, emptyReason:'', error:'', busy:false, searched:false, source:null, reason:'',patientRequest:'',selectedService:null,
-    followup:false, followupWindow:'', followupService:'', followupBlocked:false, visitId:null},
-  onLoad(query) { this.query=query;this.followup=readFollowupQuery(query);this.generation=0;return this.load(); },
+    followup:false, followupWindow:'', followupService:'', followupBlocked:false, visitId:null, textScale:''},
+  onLoad(query) { this.query=query;this.followup=readFollowupQuery(query);this.generation=0;textScale.apply(this);return this.load(); },
   onShow(){
+    // The date picker, the slot rows and the reason field all follow the
+    // current font size, including after a return from the confirmation page.
+    textScale.apply(this);
     // Returning from a rejected or uncertain confirmation keeps every filter
     // but drops the slot rows that produced the stale proposal.
     const refresh=typeof getApp==='function'&&getApp().globalData?getApp().globalData.bookingRefresh:false;

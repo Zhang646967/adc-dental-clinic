@@ -11,17 +11,23 @@ const KINDS = {
   COMPLETED: {kind: 'finished', note: '这次就诊已结束。'},
   CLOSED_NO_TREATMENT: {kind: 'finished', note: '这次就诊已结束。'},
   NO_SHOW: {kind: 'missed', note: '这次预约未到诊。'},
-  RESCHEDULED: {kind: 'rescheduled', note: '原预约已改期替代，请按有效预约到诊。'},
+  RESCHEDULED: {kind: 'rescheduled', note: '这次预约已改期。可在详情查看后续预约及其当前状态。'},
   CANCELLED: {kind: 'cancelled', note: '这次预约已取消。'}
 };
 const FALLBACK = {kind: 'unknown', note: ''};
 
-function record(visit, {delegated = false} = {}) {
+function canReschedule(visit, readOnly) {
+  return !!visit && !readOnly && visit.can_change === true &&
+    visit.status === 'SCHEDULED' && !visit.needs_outcome_review;
+}
+
+function record(visit, {delegated = false, readOnly = false} = {}) {
   if (!visit || !positive(visit.id)) return null;
   const start = dateTime(visit.start);
   const end = dateTime(visit.end);
   const meta = KINDS[visit.status] || FALLBACK;
   const finished = meta.kind === 'finished';
+  const changeAllowed = canReschedule(visit, readOnly);
   // A same-day slot reads as one line; a cross-day one keeps both dates.
   const whenLabel = start.slice(0, 10) === end.slice(0, 10)
     ? `${start}–${end.slice(11)}`
@@ -39,12 +45,16 @@ function record(visit, {delegated = false} = {}) {
     // keeps them in the disclosure so a long number never crowds the row.
     numberLabel: visit.visit_no ? `#${visit.id} · ${visit.visit_no}` : `#${visit.id}`,
     finished,
+    changeAllowed,
     // Mirrors the patient web: a finished record opens its result and bill.
-    actionLabel: finished && !delegated ? '查看就诊与结算' : '查看预约详情',
+    // The row names the reschedule only when the server allows it on this
+    // record; cancelled, replaced and finished rows keep the neutral action.
+    actionLabel: finished && !delegated ? '查看就诊与结算'
+      : (changeAllowed ? '查看预约与改期' : '查看预约详情'),
     detailLabel: finished ? '就诊编号与说明' : '预约编号与说明',
     hasRequest: !delegated && !!visit.patient_request,
     open: false
   });
 }
 
-module.exports = {record, KINDS};
+module.exports = {record, canReschedule, KINDS};

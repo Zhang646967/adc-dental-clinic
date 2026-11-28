@@ -7,11 +7,10 @@ const actionModule=require('../../utils/primary-action');
 const {reportEntry}=require('../../utils/report-notices');
 const mapPrimary=actionModule&&typeof actionModule.primaryAction==='function'?actionModule.primaryAction:()=>null;
 
-/* Prefer the server's label/button/hint. Older backends omit them, in which
-   case the mapped action and the original offer/next-visit entries still work. */
-function composePrimary(overview){
-  const mapped=mapPrimary(overview);
-  const raw=overview&&overview.primary_action;
+/* Both entry points use the same primary action. Older backends return only
+   an offer count or the next visit. */
+function composePrimary(overview,readOnly){
+  const mapped=mapPrimary(overview,{readOnly});
   if(!mapped){
     if(overview&&overview.offer_count)return {label:'待确认邀约',actionLabel:'查看邀约',hint:'时段为限时保留，请先查看截止时间。',url:'/pages/waitlist/index',timeLabel:'',detail:'',serviceLine:'',deadline:'',review:false,arrived:false,contact:false};
     const v=overview&&overview.next_visit;
@@ -19,9 +18,6 @@ function composePrimary(overview){
     return null;
   }
   return Object.assign({},mapped,{
-    label:(raw&&raw.label)||mapped.label,
-    actionLabel:(raw&&raw.button)||mapped.actionLabel,
-    hint:(raw&&raw.hint)||mapped.hint,
     arrived:mapped.kind==='CHECKED_IN',
     contact:mapped.kind==='CONTACT_CLINIC'
   });
@@ -29,7 +25,7 @@ function composePrimary(overview){
 
 Page({
   data:{all:[],rows:[],cities:['全部城市'],cityIndex:0,categories:[{id:'',name:'全部服务'}],categoryIndex:0,keyword:'',onlineOnly:false,busy:false,error:'',locating:false,origin:null,limit:10,count:0,hasMore:false,locationNote:'可直接浏览；主动使用定位后，按直线距离由近到远排序。',
-    serviceState:'loading',patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false,reportEntry:null,reportUnread:0,moreOpen:false,environmentLabel:'',serviceError:'',serviceRequestId:''},
+    serviceState:'loading',patientName:'',patientCapacity:'',patientDelegated:false,readOnly:false,primary:null,overview:null,canViewFunds:false,reportEntry:null,reportUnread:0,moreOpen:false,environmentLabel:'',serviceError:'',serviceRequestId:''},
   async onShow(){await this.load();},
   onHide(){this.clearPrivate({keepReview:true});},
   async load(){
@@ -85,14 +81,14 @@ Page({
     // the overview carries the capability; the money entries follow funds.
     const entry=reportEntry(overview,{delegated:!!session.delegated});
     this.setData({serviceState:'ready',patientName:session.patient_name||'',patientCapacity:session.acting_capacity||'',patientDelegated:!!session.delegated,
-      overview,primary:composePrimary(overview),canViewFunds,reportEntry:entry,reportUnread:entry?entry.unread:0});
+      overview,primary:composePrimary(overview,session.read_only),readOnly:!!session.read_only,canViewFunds,reportEntry:entry,reportUnread:entry?entry.unread:0});
   },
   /* Switching subject, signing out or losing authority invalidates in-flight
      reads. Bumping the sequence makes a late response unable to refill the
      page with the previous patient's private data. */
   clearPrivate({keepReview=false}={}){
     this.serviceSequence=(this.serviceSequence||0)+1;
-    this.setData({patientName:'',patientCapacity:'',patientDelegated:false,primary:null,overview:null,canViewFunds:false,
+    this.setData({patientName:'',patientCapacity:'',patientDelegated:false,readOnly:false,primary:null,overview:null,canViewFunds:false,
       reportEntry:null,reportUnread:0,moreOpen:false});
     if(!keepReview&&typeof getApp==='function')getApp().globalData.review=null;
   },

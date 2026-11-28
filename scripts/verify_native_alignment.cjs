@@ -10,6 +10,7 @@ const returnSources=require(path.join(root,'utils/return-sources'));
 const visitRecord=require(path.join(root,'utils/visit-record'));
 const billing=require(path.join(root,'utils/billing'));
 const reschedule=require(path.join(root,'utils/reschedule'));
+const textScale=require(path.join(root,'utils/text-scale'));
 const format=require(path.join(root,'utils/format'));
 async function verify(){
   let count=0;const app={globalData:{}},routes=[];
@@ -46,7 +47,7 @@ async function verify(){
       Page:d=>definition=d,getApp:()=>state,getCurrentPages:()=>global.getCurrentPages(),wx:global.wx,require:key=>key.endsWith('/api')?api:key.endsWith('/navigation')?navigation:
         key.endsWith('/booking-intent')?intent:key.endsWith('/primary-action')?patientAction:
         key.endsWith('/subject-state')?subjectState:key.endsWith('/visit-review')?visitReview:key.endsWith('/examinations')?examinations:
-        key.endsWith('/return-sources')?returnSources:key.endsWith('/report-notices')?reportNotices:key.endsWith('/visit-record')?visitRecord:key.endsWith('/billing')?billing:key.endsWith('/reschedule')?reschedule:key.endsWith('/format')?format:null});
+        key.endsWith('/return-sources')?returnSources:key.endsWith('/report-notices')?reportNotices:key.endsWith('/visit-record')?visitRecord:key.endsWith('/billing')?billing:key.endsWith('/reschedule')?reschedule:key.endsWith('/text-scale')?textScale:key.endsWith('/format')?format:null});
     return {p:{...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}},calls,state};
   }
   const notice={id:19,kind:'CORRECTED',visit_id:7,examination_id:8,revision:2,occurred_at:'2026-11-13T16:30:00Z',read_at:null};
@@ -151,6 +152,51 @@ async function verify(){
   const frontDeskCheckIn=primary({primary_action:{kind:'CHECKED_IN',visit,label:'已到诊',button:'查看到诊安排',hint:'已在前台登记。'}});
   assert.equal(frontDeskCheckIn.hint,'已在前台登记。');count++;
   assert.equal(action('UPCOMING_VISIT',visit).timeLabel,'2026-11-05 14:00');count++;
+  const scheduled={...visit,status:'SCHEDULED',can_change:true};
+  const upcoming={primary_action:{kind:'UPCOMING_VISIT',visit:scheduled,button:'查看到诊安排'}};
+  for(const readOnly of [true,false]){
+    const session={authenticated:true,read_only:readOnly};
+    const home=page('home',{session,responses:[{rows:[scheduled],page:1,pages:1},upcoming]});
+    const discovery=page('discovery',{session,responses:[upcoming]});
+    await home.p.onShow();
+    await discovery.p.loadService();
+    assert.equal(home.p.data.primary.actionLabel,readOnly?'查看到诊安排':'查看安排与改期');
+    assert.equal(discovery.p.data.primary.actionLabel,home.p.data.primary.actionLabel);
+    assert.equal(discovery.p.data.primary.hint,home.p.data.primary.hint);
+    assert.equal(discovery.p.data.primary.url,'/pages/visit/index?id=12');
+    assert.equal(home.p.data.rows[0].actionLabel,readOnly?'查看预约详情':'查看预约与改期');
+    assert.equal(discovery.p.data.readOnly,readOnly);count++;
+    const book={primary_action:{kind:'BOOK',label:'预约就诊',button:'选择门店和时间',hint:'先选门店和服务，再查看可约时间。'}};
+    const emptyHome=page('home',{session,responses:[{rows:[],page:1,pages:1},book]});
+    const emptyDiscovery=page('discovery',{session,responses:[book]});
+    await emptyHome.p.onShow();
+    await emptyDiscovery.p.loadService();
+    for(const view of [emptyHome,emptyDiscovery]){
+      assert.equal(view.p.data.primary.actionLabel,readOnly?'查看门诊服务':book.primary_action.button);
+      assert.equal(view.p.data.primary.url,'/pages/services/index');
+    }
+    count++;
+  }
+  for(const row of [{...scheduled,can_change:false},{...scheduled,can_change:'false'},{...scheduled,status:'CANCELLED'}]){
+    assert.equal(primary({primary_action:{...upcoming.primary_action,visit:row}}).actionLabel,'查看到诊安排');
+    assert.equal(visitRecord.record(row).actionLabel,'查看预约详情');count++;
+  }
+  const replaced=visitRecord.record({...scheduled,status:'RESCHEDULED',successor:16});
+  assert.equal(replaced.note,'这次预约已改期。可在详情查看后续预约及其当前状态。');
+  assert.equal(replaced.changeAllowed,false);count++;
+  for(const [readOnly,row] of [[true,scheduled],[false,{...scheduled,can_change:'false'}],
+    [false,{...scheduled,status:'RESCHEDULED'}],[false,{...scheduled,status:'CANCELLED'}],
+    [false,{...scheduled,status:'COMPLETED'}],[false,{...scheduled,needs_outcome_review:true}]]){
+    const detail=page('visit',{session:{authenticated:true,read_only:readOnly},responses:[row]});
+    detail.p.onLoad({id:row.id});
+    await detail.p.onShow();
+    assert.equal(detail.p.data.record.changeAllowed,false);
+    const before=routes.length;
+    detail.p.reschedule(); detail.p.cancel(); await detail.p.previewCancel();
+    assert.equal(detail.p.data.cancelOpen,false);
+    assert.equal(routes.length,before);
+    assert.deepEqual(detail.calls.map(call=>call[0]),['visits/12/']);count++;
+  }
   const review=action('CONTACT_CLINIC',{...visit,needs_outcome_review:true});
   assert.equal(review.url,'/pages/help/index?visit=12');assert(review.serviceLine.endsWith('已预约'));count++;
   const offer=action('CONFIRM_OFFER',null,{id:4,expires_at:'2026-11-05T02:45:00Z'});
@@ -356,7 +402,7 @@ async function verify(){
   assert.equal(d.p.data.report,null);assert.equal(d.p.data.patientName,'');
   assert.equal(d.p.data.requestId,'SYNTHETIC-EXAM-404');count++;
 
-  const ownedVisit={...visit,can_change:true,version:3,review:{attended_at:null,completed_at:null,followups:[]}};
+  const ownedVisit={...scheduled,version:3,review:{attended_at:null,completed_at:null,followups:[]}};
   for(const {status,code,freshSession,url} of deniedConfirmations){
     const denied=Object.assign(Error('当前就诊人或授权已变化'),{status,code,requestId:'SYNTHETIC-VISIT-QUERY'});
     d=page('visit',{session:confirmSession,freshSession,review:confirmReview,responses:[ownedVisit,denied]});

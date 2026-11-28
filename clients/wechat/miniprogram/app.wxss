@@ -97,3 +97,89 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 
 /* 18552: one bill per row; the number wraps without widening the card. */
 .patient-flow .billing-no{font-size:27rpx;word-break:break-all;margin:4rpx 0}
+
+/* The Beijing-time suffix stays one unit at every font size; without this it
+   can split into 北京 / 时间 once the time line wraps. */
+.patient-flow .tz{white-space:nowrap}
+.patient-flow .nowrap{white-space:nowrap}
+
+/* 18555: the appointment screens follow the WeChat font size setting.
+   The default tier keeps the existing hierarchy; larger steps raise every
+   patient-facing size, including the original and proposed times, helper
+   text, buttons and the consent label. Long text wraps and the page scrolls;
+   nothing is clipped or pushed sideways. */
+.patient-flow.text-scale-compact{font-size:28rpx}
+.patient-flow.text-scale-compact .title,.patient-flow.text-scale-compact .service-hero .title{font-size:42rpx}
+.patient-flow.text-scale-compact .section-title{font-size:32rpx}
+.patient-flow.text-scale-compact .section-label{font-size:25rpx}
+.patient-flow.text-scale-compact .prose,.patient-flow.text-scale-compact .line,.patient-flow.text-scale-compact .label{font-size:28rpx}
+.patient-flow.text-scale-compact .muted,.patient-flow.text-scale-compact .small,.patient-flow.text-scale-compact .page-footnote{font-size:24rpx}
+.patient-flow.text-scale-compact .time{font-size:33rpx}
+.patient-flow.text-scale-compact .tz{font-size:24rpx}
+.patient-flow.text-scale-compact button{font-size:28rpx}
+.patient-flow.text-scale-compact button.compact{font-size:24rpx}
+.patient-flow.text-scale-compact .check{font-size:28rpx}
+.patient-flow.text-scale-compact .subject-banner{font-size:24rpx}
+.patient-flow.text-scale-compact .subject-banner navigator,.patient-flow.text-scale-compact .subject-banner button{font-size:24rpx}
+.patient-flow.text-scale-compact .identity-name{font-size:28rpx}
+.patient-flow.text-scale-compact .identity-meta,.patient-flow.text-scale-compact .preview-state{font-size:24rpx}
+.patient-flow.text-scale-compact .visit-source,.patient-flow.text-scale-compact .checkout-id,.patient-flow.text-scale-compact .primary-visit-no{font-size:25rpx}
+.patient-flow.text-scale-compact .pill{font-size:25rpx}
+.patient-flow.text-scale-compact button.disclosure{font-size:24rpx}
+.patient-flow.text-scale-compact .shortcut{font-size:26rpx}
+.patient-flow.text-scale-compact .fee{font-size:32rpx}
+.patient-flow.text-scale-compact .hero-facts,.patient-flow.text-scale-compact .hero-fee{font-size:24rpx}
+.patient-flow.text-scale-compact .picker,.patient-flow.text-scale-compact textarea,.patient-flow.text-scale-compact .input{font-size:31rpx}
+
+.patient-flow.text-scale-large{font-size:37rpx}
+.patient-flow.text-scale-large .title,.patient-flow.text-scale-large .service-hero .title{font-size:56rpx}
+.patient-flow.text-scale-large .section-title{font-size:42rpx}
+.patient-flow.text-scale-large .section-label{font-size:33rpx}
+.patient-flow.text-scale-large .prose,.patient-flow.text-scale-large .line,.patient-flow.text-scale-large .label{font-size:37rpx}
+.patient-flow.text-scale-large .muted,.patient-flow.text-scale-large .small,.patient-flow.text-scale-large .page-footnote{font-size:32rpx}
+.patient-flow.text-scale-large .time{font-size:44rpx}
+.patient-flow.text-scale-large .tz{font-size:32rpx}
+.patient-flow.text-scale-large button{font-size:37rpx}
+.patient-flow.text-scale-large button.compact{font-size:32rpx}
+.patient-flow.text-scale-large .check{font-size:37rpx}
+.patient-flow.text-scale-large .subject-banner{font-size:32rpx}
+.patient-flow.text-scale-large .subject-banner navigator,.patient-flow.text-scale-large .subject-banner button{font-size:32rpx}
+.patient-flow.text-scale-large .identity-name{font-size:37rpx}
+.patient-flow.text-scale-large .identity-meta,.patient-flow.text-scale-large .preview-state{font-size:32rpx}
+.patient-flow.text-scale-large .visit-source,.patient-flow.text-scale-large .checkout-id,.patient-flow.text-scale-large .primary-visit-no{font-size:33rpx}
+.patient-flow.text-scale-large .pill{font-size:33rpx}
+.patient-flow.text-scale-large button.disclosure{font-size:32rpx}
+.patient-flow.text-scale-large .shortcut{font-size:34rpx}
+.patient-flow.text-scale-large .fee{font-size:43rpx}
+.patient-flow.text-scale-large .hero-facts,.patient-flow.text-scale-large .hero-fee{font-size:32rpx}
+.patient-flow.text-scale-large .picker,.patient-flow.text-scale-large textarea,.patient-flow.text-scale-large .input{font-size:40rpx}
+
+.patient-flow.text-scale-xlarge{font-size:50rpx}
+.patient-flow.text-scale-xlarge .title,.patient-flow.text-scale-xlarge .service-hero .title{font-size:76rpx}
+.patient-flow.text-scale-xlarge .section-title{font-size:57rpx}
+.patient-flow.text-scale-xlarge .section-label{font-size:46rpx}
+.patient-flow.text-scale-xlarge .prose,.patient-flow.text-scale-xlarge .line,.patient-flow.text-scale-xlarge .label{font-size:50rpx}
+.patient-flow.text-scale-xlarge .muted,.patient-flow.text-scale-xlarge .small,.patient-flow.text-scale-xlarge .page-footnote{font-size:44rpx}
+.patient-flow.text-scale-xlarge .time{font-size:60rpx}
+.patient-flow.text-scale-xlarge .tz{font-size:44rpx}
+.patient-flow.text-scale-xlarge button{font-size:50rpx}
+.patient-flow.text-scale-xlarge button.compact{font-size:44rpx}
+.patient-flow.text-scale-xlarge .check{font-size:50rpx}
+.patient-flow.text-scale-xlarge .subject-banner{font-size:44rpx}
+.patient-flow.text-scale-xlarge .subject-banner navigator,.patient-flow.text-scale-xlarge .subject-banner button{font-size:44rpx}
+.patient-flow.text-scale-xlarge .identity-name{font-size:50rpx}
+.patient-flow.text-scale-xlarge .identity-meta,.patient-flow.text-scale-xlarge .preview-state{font-size:44rpx}
+.patient-flow.text-scale-xlarge .visit-source,.patient-flow.text-scale-xlarge .checkout-id,.patient-flow.text-scale-xlarge .primary-visit-no{font-size:46rpx}
+.patient-flow.text-scale-xlarge .pill{font-size:46rpx}
+.patient-flow.text-scale-xlarge button.disclosure{font-size:44rpx}
+.patient-flow.text-scale-xlarge .shortcut{font-size:47rpx}
+.patient-flow.text-scale-xlarge .fee{font-size:59rpx}
+.patient-flow.text-scale-xlarge .hero-facts,.patient-flow.text-scale-xlarge .hero-fee{font-size:44rpx}
+.patient-flow.text-scale-xlarge .picker,.patient-flow.text-scale-xlarge textarea,.patient-flow.text-scale-xlarge .input{font-size:55rpx}
+.patient-flow.text-scale-xlarge textarea{height:300rpx}
+
+/* At the two larger steps the actions take the full content width: the native
+   button default (184px) is narrower than the enlarged label, and a full-width
+   target also keeps the last character off a line of its own. */
+.patient-flow.text-scale-large .card>button,.patient-flow.text-scale-xlarge .card>button,
+.patient-flow.text-scale-large>button,.patient-flow.text-scale-xlarge>button{width:100%;margin-left:0;margin-right:0}

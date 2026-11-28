@@ -136,7 +136,8 @@ check(()=>{
   const wxml=read('pages/discovery/index.wxml');
   assert.match(wxml,/bindtap="toggleMore"[^>]*aria-expanded="\{\{moreOpen\}\}"/);
   assert.match(wxml,/更多服务与帮助/);
-  assert.match(wxml,/wx:if="{{primary&&primary\.kind!=='BOOK'}}" class="shortcut" bindtap="book"/);
+  assert.match(wxml,/wx:if="{{!readOnly&&primary&&primary\.kind!=='BOOK'}}" class="shortcut" bindtap="book"/);
+  assert.match(wxml,/wx:if="{{serviceState==='ready'&&!primary&&!serviceError&&!readOnly}}" class="card"/);
   assert.match(wxml,/到诊安排/);
 });
 

@@ -8,13 +8,14 @@ const {record}=require('../../utils/visit-record');
 const {lineage}=require('../../utils/reschedule');
 const {buildExaminations}=require('../../utils/examinations');
 const {buildReturnSources}=require('../../utils/return-sources');
+const textScale=require('../../utils/text-scale');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
   data:{visit:null,record:null,lineage:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false,
     // Detail disclosures start closed; both reset on every read or subject change.
     infoOpen:false,moneyOpen:false,infoLabel:'就诊编号',infoOpenLabel:'展开就诊编号',infoCloseLabel:'收起就诊编号',
-    moneyOpenLabel:'展开收款与退款明细',moneyCloseLabel:'收起收款与退款明细'},
+    moneyOpenLabel:'展开收款与退款明细',moneyCloseLabel:'收起收款与退款明细',textScale:''},
   onLoad(q){
     this.id=Number(q.id);
     // Only a numeric instruction id from the current visit response can be
@@ -25,7 +26,7 @@ Page({
     this.returnQueue=['active','history','all'].includes(q.queue)?q.queue:null;
     this.generation=0;
   },
-  onShow(){return this.load();},
+  onShow(){textScale.apply(this);return this.load();},
   async load(){
     const generation=++this.generation;
     this.setData({visit:null,record:null,reviewView:null,lineage:null,examinations:[],returnSources:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false,infoOpen:false,moneyOpen:false});
@@ -34,13 +35,13 @@ Page({
       if(generation!==this.generation)return;
       const session=api.sessionInfo();
       const context=[session.workspace_id,session.subject_key,session.subject_revision];
-      if(!this.context||context.some((value,index)=>value!==this.context[index])||!visit.can_change||session.read_only){
+      const row=record(visit,{delegated:session.delegated,readOnly:session.read_only});
+      if(!this.context||context.some((value,index)=>value!==this.context[index])||!row||!row.changeAllowed){
         this.setData(blankDraft);
       }
       this.context=context;
       api.showSubject(this);
       const reviewView=buildReview(visit,{delegated:session.delegated,instruction:this.instructionId});
-      const row=record(visit,{delegated:session.delegated});
       const head=reviewView&&reviewView.completedLabel?'就诊编号':'预约编号';
       const label=(row&&row.hasRequest)?head+'与需求':head;
       this.setData({visit,record:row,reviewView,lineage:lineage(visit),
@@ -132,7 +133,7 @@ Page({
     if(!this.data.visit||this.data.patientDelegated||!positive(this.id)||!positive(id)||!positive(revision))return;
     navigation.navigateTo({url:`/pages/examination/index?visit=${this.id}&id=${id}&revision=${revision}`});
   },
-  canChange(){return !!this.data.visit&&this.data.visit.can_change&&!this.data.readOnly;},
+  canChange(){return !!(this.data.record&&this.data.record.changeAllowed);},
   reschedule(){if(this.canChange())navigation.navigateTo({url:`/pages/booking/index?visit=${this.id}`});},
   cancel(){if(this.canChange())this.setData({cancelOpen:!this.data.cancelOpen,error:'',requestId:''});},
   reason(e){if(this.canChange()&&this.data.cancelOpen)this.setData({reason:e.detail.value});},
