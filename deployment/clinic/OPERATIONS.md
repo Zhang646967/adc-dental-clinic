@@ -4,6 +4,8 @@
 
 ## 1　准备主机与发布包
 
+已通过安装演练的 Linux amd64 包在 GitHub 对应提交的「Clinic installation and recovery」运行页面底部，名称带有完整提交号，保留 14 天。下载并解开外层 ZIP，在私有目录执行 `sha256sum -c *.tar.sha256`，再将 tar 解包到仅所有者可访问的 `release/`。用 `sha256sum -c SHA256SUMS` 验证内部四项；`BASE_IMAGES.json` 给出本次实际使用的数据库和网关镜像摘要。机构正式签收时，把核定版本、同一安装包及其摘要归档到该版本长期保存的 Release 资产或机构制品库。
+
 正式环境使用 Linux amd64、Docker Engine 和 Compose V2、Python 3.13、OpenSSL、age；使用自动签发证书时还需 Certbot。Docker 必须指向本机 Unix socket。选定机构域名并将其解析到网关，公网开放 80 和 443，管理入口限制来源。数据库在私有容器网络，单独检查主机的磁盘加密、剩余空间、快照、日志权限及防火墙。
 
 在有 Git 仓库的发布机设置完整提交号。以下命令分行执行，变量使用运维人员核定的值。
