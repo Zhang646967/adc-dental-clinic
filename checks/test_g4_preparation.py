@@ -20,15 +20,21 @@ class G4PreparationTests(unittest.TestCase):
                            nginx_image='nginx:stable-alpine@sha256:' + 'd' * 64)
 
     def test_runtime_cannot_receive_owner_credentials_and_defaults_read_only(self):
-        prepare(self.folder, **self.inputs)
+        previous_mask = os.umask(0o077)
+        try:
+            prepare(self.folder, **self.inputs)
+        finally:
+            os.umask(previous_mask)
         runtime = read_env(self.folder / 'private/runtime.env')
         owner = read_env(self.folder / 'private/maintenance.env')
         self.assertEqual(runtime['ADC_READ_ONLY'], '1')
         self.assertNotIn('ADC_MIGRATION_PASSWORD', runtime)
         self.assertNotEqual(runtime['POSTGRES_PASSWORD'], owner['ADC_MIGRATION_PASSWORD'])
         self.assertEqual(runtime['AI_MODE'], 'disabled')
-        self.assertEqual((self.folder / 'acme/.well-known/acme-challenge').stat().st_mode & 0o777, 0o755)
-        self.assertEqual((self.folder / 'private').stat().st_mode & 0o077, 0)
+        for name in ('acme', 'acme/.well-known', 'acme/.well-known/acme-challenge'):
+            self.assertEqual((self.folder / name).stat().st_mode & 0o777, 0o755)
+        for name in ('.', 'private', 'tls', 'backups'):
+            self.assertEqual((self.folder / name).stat().st_mode & 0o777, 0o700)
         self.assertFalse(inspect_bundle(self.folder)['public_acceptance_executed'])
 
     def test_course_mode_requires_direct_tls_and_starts_separate_runtime_worker(self):

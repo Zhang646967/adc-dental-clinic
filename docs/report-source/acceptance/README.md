@@ -8,6 +8,7 @@
 
 | 报告位置 | 验收者核对的事项 | 同一业务的入口、凭据与边界 |
 | --- | --- | --- |
+| 第 1.2 节 | 从仓库进入患者或员工登录，选择岗位、登录并找到可办业务；患者预约回执对应就诊 #9 | [门诊入口](https://lijiahao.duckdns.org/experience/) · [按岗位核对](../../TEACHER_WALKTHROUGH.md) · [交付记录](../../../RELEASE_CURRENT.md) |
 | 第 3.2、5.1、5.6 节 | 原约与拟选时间各有起止和状态。确认后可回查后继 | [患者改期核对页](../../../templates/portal/reschedule_confirm.html) · [预约办理](../../../portal/rescheduling.py) · [本版两组连续改期及冲突记录](验收记录.json) |
 | 第 3.3、5.2 节 | 本店两个同名档案分别核对完整患者编号 | [前台档案清单](../../../templates/patients.html) · [本店同名清单画面](screens/identity.png) |
 | 第 3.4、5.3 节 | 一次就诊可同时有待确认草稿和当前确认版 | [医师检查记录工作台](../../../templates/clinical/encounter_worklist.html) · [第 2 版与草稿同页画面](screens/record.png) |

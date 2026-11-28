@@ -151,12 +151,14 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'G4_RUNTIME_DB_PASSWORD': runtime['POSTGRES_PASSWORD'],
     }
     output.mkdir(mode=0o700)
-    for directory in ('private', 'tls', 'acme', 'backups'):
-        (output / directory).mkdir(mode=0o755 if directory == 'acme' else 0o700)
+    for directory in ('private', 'tls', 'backups'):
+        (output / directory).mkdir(mode=0o700)
     # HTTP-01 challenge tokens are intentionally public, unlike certificates'
     # private keys and credentials. Nginx's worker must traverse these folders.
-    for directory in ('acme/.well-known', 'acme/.well-known/acme-challenge'):
-        (output / directory).mkdir(mode=0o755)
+    for directory in ('acme', 'acme/.well-known', 'acme/.well-known/acme-challenge'):
+        public_directory = output / directory
+        public_directory.mkdir(mode=0o755)
+        public_directory.chmod(0o755)
     write_env(output / 'private/runtime.env', runtime)
     write_env(output / 'private/maintenance.env', maintenance)
     write_env(output / 'private/database.env', database)
