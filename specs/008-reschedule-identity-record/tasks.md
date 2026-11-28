@@ -11,3 +11,5 @@
 - 在独立 PostgreSQL 17 副本中，患者通过 Chrome 确认一次改期。旧记录转为已改期，新记录为已预约，数据库只有一个后继和一份对应回执。新旧详情能相互打开，并能核对两次时间。
 - 患者、前台和医师的七个页面在 Chrome 和 WebKit 各完成 56 组页面、屏宽和字号组合。岗位权限、业务与页面相关的 109 项测试通过。
 - WorkBuddy 包冻结于 `a2731c42835a`。后续网页修复涉及浏览器表单提交地址。小程序和它调用的接口与交接包一致。小程序设备结果及老师入口更新仍待各自验收。
+
+连续改期已在独立 PostgreSQL 17 数据库通过正常确认两次改期、一次取消，并核对患者网页、当前门店前台及小程序接口的相邻编号和状态。回归用例见 `tests/test_mini_program.py` 的 `test_twice_rescheduled_then_cancelled_shares_both_links_across_channels` 与 `checks/test_reschedule_compare_node.cjs`。官方开发者工具在 390 宽下验证了两侧入口和系统返回，iPhone 的关闭调试、不同屏宽、大字及 VoiceOver 另行记录。

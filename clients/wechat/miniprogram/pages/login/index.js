@@ -111,7 +111,7 @@ Page({
   },
   async localLogin(){
     if(this.data.busy)return;
-    if(!this.data.localCode||!this.data.localConfirmed){this.setData({error:'请填写新签发的本地授权码，并明确同意模拟登录。'});return;}
+    if(!this.data.localCode||!this.data.localConfirmed){this.setData({error:'请输入新签发的验收专用授权码，并勾选同意登录。此方式未向微信或短信服务发起认证。'});return;}
     this.setData({busy:true,error:''});
     try{
       const session=await api.localSignIn(this.data.localCode,this.data.username.trim(),this.data.password,this.data.localConfirmed);

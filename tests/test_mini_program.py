@@ -101,6 +101,54 @@ class MiniProgramTests(ResourceFixture, TransactionTestCase):
         self.assertEqual(other.get(reverse('mini_visit', args=[visit.pk])).status_code, 404)
         self.assertEqual(other.get(reverse('mini_overview')).json()['data']['primary_action']['kind'], 'BOOK')
 
+    def test_twice_rescheduled_then_cancelled_shares_both_links_across_channels(self):
+        original = self.book()
+        visits = [original]
+        for hour, slot in [(1, self.slot2), (2, self.slot1)]:
+            source = visits[-1]
+            proposal = self.post('mini_reschedule_preview', {
+                'action': 'preview', 'expected_version': source.lock_version, 'slot_id': slot.pk,
+                'start': (self.t + timedelta(hours=hour)).isoformat(), 'reason': '调整就诊时间',
+            }, pk=source.pk)
+            self.assertEqual(proposal.status_code, 200, proposal.content)
+            saved = self.post('mini_reschedule_confirm', {
+                'proposal_token': proposal.json()['data']['proposal_token'], 'confirmed': 'on',
+            }, pk=source.pk)
+            self.assertEqual(saved.status_code, 200, saved.content)
+            visits.append(Visit.objects.get(pk=saved.json()['data']['visit']['id']))
+        middle, last = visits[1:]
+        proposal = self.post('mini_cancel_preview', {
+            'expected_version': last.lock_version, 'reason': '调整工作安排',
+        }, pk=last.pk)
+        self.assertEqual(proposal.status_code, 200, proposal.content)
+        saved = self.post('mini_cancel_confirm', {
+            'proposal_token': proposal.json()['data']['proposal_token'], 'confirmed': 'on',
+        }, pk=last.pk)
+        self.assertEqual(saved.status_code, 200, saved.content)
+
+        patient, front = WorkspaceClient(), WorkspaceClient()
+        patient.force_login(self.user)
+        front.force_login(self.front)
+        other, _ = self.login(self.other)
+        for visit, previous, following, status in [
+            (original, None, middle, 'RESCHEDULED'),
+            (middle, original, last, 'RESCHEDULED'),
+            (last, middle, None, 'CANCELLED'),
+        ]:
+            native_url = reverse('mini_visit', args=[visit.pk])
+            native = self.client.get(native_url).json()['data']
+            self.assertEqual((native['visit_no'], native['status'], native['predecessor'], native['successor']),
+                             (visit.visit_no, status, previous and previous.pk, following and following.pk))
+            self.assertEqual(other.get(native_url).status_code, 404)
+            patient_row = patient.get(reverse('portal_visit', args=[visit.pk])).context
+            self.assertEqual((patient_row['previous_visit'], patient_row['next_visit']), (previous, following))
+            reception = front.get(reverse('visit_detail', args=[visit.pk])).context
+            for key, linked in [('coordination_predecessor', previous), ('coordination_successor', following)]:
+                row = reception[key]
+                self.assertEqual(row and row['visit_no'], linked and linked.visit_no)
+        self.assertEqual(Visit.objects.count(), 3)
+        self.assertEqual(BookingReceipt.objects.count(), 3)
+
     def test_overdue_appointment_prompts_review_without_inferred_no_show(self):
         from types import SimpleNamespace
         from unittest.mock import patch

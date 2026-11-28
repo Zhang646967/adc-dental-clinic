@@ -14,9 +14,23 @@
   <view wx:elif="{{otherUnconfirmed}}" class="card"><view class="pill">{{otherFailed?'本次未保存':'结果暂未确认'}}</view><view class="section-title">{{otherFailed?'本次操作未保存':'本次操作结果暂未确认'}}</view><view class="prose">{{otherFailed?'提交没有保存，请到对应记录核对当前状态。':'提交已经发出，但没有收到明确结果。请到对应记录核对，不要重复提交。'}}</view><button class="primary" bindtap="openRecord">{{recordLabel}}</button><button class="secondary" bindtap="home">返回预约清单</button></view>
   <block wx:elif="{{review}}">
     <view wx:if="{{previewNote}}" class="preview-state">{{previewNote}}</view>
-    <view wx:if="{{review.preview.original}}" class="card"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}}</view><view>{{review.preview.original.clinic}} · {{review.preview.original.dentist}}</view><view>{{review.preview.original.startLabel}} 至 {{review.preview.original.endLabel}}<text class="tz"> 北京时间</text></view></view>
+    <view wx:if="{{comparison.original}}" class="card">
+      <view class="record-head"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}} #{{comparison.original.id}}</view><view class="pill status-upcoming">{{comparison.original.statusLabel||'已预约'}}</view></view>
+      <view class="section-title">{{comparison.original.clinic}}</view>
+      <view>{{comparison.original.dentist}}<text wx:if="{{comparison.original.serviceLabel}}"> · {{comparison.original.serviceLabel}}</text></view>
+      <view class="time">{{comparison.original.startLabel}} 至 {{comparison.original.endLabel}}<text class="tz"> 北京时间</text></view>
+      <view wx:if="{{comparison.original.visitNo}}" class="muted">预约编号</view><view wx:if="{{comparison.original.visitNo}}" class="prose checkout-id">{{comparison.original.visitNo}}</view>
+    </view>
+    <view wx:elif="{{review.preview.original}}" class="card"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}}</view><view>{{review.preview.original.clinic}} · {{review.preview.original.dentist}}</view><view>{{review.preview.original.startLabel}} 至 {{review.preview.original.endLabel}}<text class="tz"> 北京时间</text></view></view>
     <view wx:if="{{review.preview.wait}}" class="card"><view>{{review.preview.wait.clinic}} · {{review.preview.wait.service}}</view><view class="pill">候补 #{{review.preview.wait.id}} · {{review.preview.wait.status_label}}</view></view>
-    <view wx:elif="{{review.kind!=='cancel'}}" class="card"><view class="pill">{{review.kind==='reschedule'?'新的安排':review.kind==='wait_join'?'可接受范围':'本次安排'}}</view><view>{{review.preview.clinic}} · {{review.preview.dentist}}</view><view class="time">{{review.preview.startLabel}}</view><view>至 {{review.preview.endLabel}}<text class="tz"> 北京时间</text></view><view>{{review.preview.service}}</view></view>
+    <view wx:elif="{{review.kind!=='cancel'}}" class="card">
+      <view class="record-head"><view class="pill">{{review.kind==='reschedule'?'拟选的新安排':review.kind==='wait_join'?'可接受范围':'本次安排'}}</view><view wx:if="{{comparison.proposed.durationChanged}}" class="pill status-rescheduled">时长与原约不同</view></view>
+      <view class="section-title">{{comparison.proposed?comparison.proposed.clinic:review.preview.clinic}}</view>
+      <view>{{comparison.proposed?comparison.proposed.dentist:review.preview.dentist}}<text wx:if="{{comparison.proposed&&comparison.proposed.serviceLabel}}"> · {{comparison.proposed.serviceLabel}}</text><text wx:elif="{{review.preview.service}}"> · {{review.preview.service}}</text></view>
+      <view class="time">{{comparison.proposed?comparison.proposed.startLabel:review.preview.startLabel}}</view>
+      <view>至 {{comparison.proposed?comparison.proposed.endLabel:review.preview.endLabel}}<text class="tz"> 北京时间</text></view>
+      <view wx:if="{{comparison.proposed&&comparison.proposed.durationLabel}}" class="muted">预计 {{comparison.proposed.durationLabel}}</view>
+    </view>
     <view wx:if="{{review.kind==='booking' || review.kind==='wait_join'}}" class="card"><view class="label">费用说明</view><view class="fee">{{review.preview.fee_label}}</view><view class="prose">{{review.preview.fee_note}}</view><view class="label">到诊准备</view><view class="prose">{{review.preview.preparation}}</view><view wx:if="{{review.preview.patient_request}}" class="label">本次就诊需求</view><view wx:if="{{review.preview.patient_request}}" class="prose">{{review.preview.patient_request}}</view></view>
     <view wx:if="{{review.preview.reason}}" class="notice">办理原因：{{review.preview.reason}}</view>
     <view wx:if="{{review.preview.duration_changed}}" class="notice">当前服务时长与原预约不同，请特别核对结束时间。</view>

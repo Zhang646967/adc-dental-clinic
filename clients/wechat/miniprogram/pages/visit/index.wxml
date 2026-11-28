@@ -49,6 +49,17 @@
     </view>
   </view>
 
+  <view wx:if="{{lineage}}" class="card">
+    <view class="section-title">改期关系</view>
+    <view class="record-head"><view class="pill">{{lineage.title}}</view><view class="pill status-{{record.kind}}">{{visit.status_label}}</view></view>
+    <view class="muted">预约编号</view>
+    <view class="prose checkout-id">{{visit.visit_no}}</view>
+    <view class="time">{{record.whenLabel}}<text class="tz"> 北京时间</text></view>
+    <view wx:if="{{lineage.note}}" class="notice">{{lineage.note}}</view>
+    <button wx:if="{{lineage.previous}}" class="secondary" data-id="{{lineage.previous}}" bindtap="related">查看改期前的预约 #{{lineage.previous}}</button>
+    <button wx:if="{{lineage.next}}" class="secondary" data-id="{{lineage.next}}" bindtap="related">查看改期后的预约 #{{lineage.next}}</button>
+  </view>
+
   <view wx:if="{{returnSources.length}}" class="card">
     <view class="section-title">这次复诊的安排</view>
     <view wx:for="{{returnSources}}" wx:key="key" class="offer-block">
@@ -178,8 +189,6 @@
     <textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="取消原因"/>
     <button class="danger" bindtap="previewCancel" disabled="{{busy}}" loading="{{busy}}">核对取消内容</button>
   </view>
-  <button wx:if="{{visit.predecessor}}" class="secondary" data-id="{{visit.predecessor}}" bindtap="related">查看改期前的预约</button>
-  <button wx:if="{{visit.successor}}" class="secondary" data-id="{{visit.successor}}" bindtap="related">查看改期后的预约</button>
   <navigator wx:if="{{visit}}" class="link" url="/pages/help/index?visit={{visit.id}}">联系前台协助</navigator>
   <button wx:if="{{visit || (error && !subjectInvalid)}}" class="secondary" bindtap="load" disabled="{{busy}}">刷新预约详情</button>
   <button bindtap="home">返回我的预约</button>

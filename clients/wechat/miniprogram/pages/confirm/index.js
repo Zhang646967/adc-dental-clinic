@@ -3,6 +3,7 @@ const api=require('../../utils/api');
 const intent=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
+const {comparison}=require('../../utils/reschedule');
 const actions={
   booking:['确认就诊安排','我已核对诊所、服务、医师和起止时间，同意提交预约。','确认提交预约','确认成功后产生一次预约，接诊时再确认实际治疗。'],
   reschedule:['确认预约改期','我已核对原、新医师和时间，同意用新安排替代原预约。','确认改期','成功后替换指定原预约，其他候补不会自动退出。'],
@@ -31,13 +32,16 @@ Page({
     if(!review){this.setData({error:'核对内容已失效，请返回我的预约重新办理。'});return;}
     const display=Object.assign({},review,{preview:Object.assign({},review.preview)});
     if(display.preview.original)display.preview.original=arrangement(display.preview.original);
+    // Two groups of facts: what is retained, and what is proposed. Both are
+    // projected from the server response; a missing value stays empty.
+    const facts=comparison(display.preview);
     this.kind=review.kind;
     this.fromWaitlist=review.fromWaitlist;
     const copy=actions[review.kind];
     // A receipt lookup exists only after an appointment confirmation has been
     // sent without a definite outcome. It is never part of the first preview.
     const previewNote=review.kind==='booking'?'待确认，尚未预约':review.kind==='reschedule'?'待确认，原预约仍保留':'';
-    this.setData({review:display,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],
+    this.setData({review:display,comparison:facts,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],
       followupVisit:review.followupVisit||null,previewNote,
       backLabel:review.kind==='booking'?'返回选时段':'返回原页面'});
   },

@@ -50,7 +50,7 @@ Page({
   },
   async phone(){
     if(this.data.busy||this.data.readOnly||!this.data.phoneCode)return;
-    if(!await consent('确认绑定此授权码对应的合成号码？这是本地模拟，不会改变患者档案或合并家人。'))return;
+    if(!await consent('此授权码仅供验收，未向微信或短信服务发起认证。确认将验收号码绑定到当前账号？患者档案将保持原样。'))return;
     this.setData({busy:true,error:''});
     try{await api.request('account/phone/','POST',{code:this.data.phoneCode,confirmed:'on'});await this.load();}
     catch(e){showError(this,e);}finally{this.setData({phoneCode:'',busy:false});}

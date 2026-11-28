@@ -1,58 +1,86 @@
 <import src="../../templates/patient-results.wxml"/>
-<view class="page">
+<view class="page patient-flow">
   <view class="page-heading"><view class="title">本人结算单</view><view class="muted">按已发布账单核对，网站与小程序使用同一份记录。</view></view>
   <template is="patient-results" data="{{busy, error, requestId, done}}"/><button wx:if="{{error}}" class="secondary" bindtap="load" disabled="{{busy}}">重新读取结算单</button>
   <block wx:if="{{invoice}}">
-    <view class="card"><view class="section-title invoice-id">{{invoice.invoice_no}}</view><view class="pill">{{invoice.is_current?'当前发布版本':'历史发布版本'}}</view><view class="muted line">第{{invoice.revision}}版 · {{invoice.publishedLabel}}</view>
-      <view class="label">查看发布历史</view><picker range="{{versions}}" range-key="label" value="{{revisionIndex}}" bindchange="version"><view class="picker">{{versions[revisionIndex].label}} ▾</view></picker>
+    <view class="card">
+      <view class="record-head">
+        <view class="pill {{invoice.is_current?'status-upcoming':'status-finished'}}">{{invoice.is_current?'当前发布版本':'历史发布版本'}}</view>
+        <view class="pill">{{view.revisionLabel}}</view>
+      </view>
+      <view class="section-title invoice-id">{{view.invoiceNo}}</view>
+      <view class="muted line">第 {{invoice.revision}} 版 · 发布 {{invoice.publishedLabel}}（北京时间）</view>
+      <view class="label">查看发布历史</view>
+      <picker range="{{versions}}" range-key="label" value="{{revisionIndex}}" bindchange="version"><view class="picker">{{versions[revisionIndex].label}} ▾</view></picker>
     </view>
-    <view class="card"><view class="section-title">收费明细</view>
-      <view wx:for="{{invoice.treatment_lines}}" wx:key="index" class="invoice-line"><view class="label">{{item.name_snapshot}}</view><view class="row"><text>{{item.quantity}}{{item.unit_snapshot}} × ¥{{item.unit_price}}</text><text>¥{{item.line_amount}}</text></view></view>
-      <block wx:if="{{invoice.medication_lines.length}}">
+
+    <view class="card">
+      <view class="section-title">本版费用 · {{view.revisionLabel}}</view>
+      <view wx:if="{{view.special}}" class="notice">{{view.special.text}}</view>
+      <view wx:for="{{view.treatment}}" wx:key="key" class="invoice-line">
+        <view class="label">{{item.name}}</view>
+        <view class="row"><text>{{item.quantity}}{{item.unit}} × {{item.unitPriceLabel}}</text><text>{{item.amountLabel}}</text></view>
+      </view>
+      <block wx:if="{{view.medication.length}}">
         <view class="label line">实际发退药费用</view>
         <view class="muted">计费数量为实际发出减退回。</view>
-        <view wx:for="{{invoice.medication_lines}}" wx:key="index" class="invoice-line">
-          <view class="label">{{item.name_snapshot}}</view>
-          <view class="row"><text>{{item.quantity}}{{item.unit_snapshot}} × ¥{{item.unit_price}}</text><text>¥{{item.line_amount}}</text></view>
+        <view wx:for="{{view.medication}}" wx:key="key" class="invoice-line">
+          <view class="label">{{item.name}}</view>
+          <view class="row"><text>{{item.quantity}}{{item.unit}} × {{item.unitPriceLabel}}</text><text>{{item.amountLabel}}</text></view>
         </view>
       </block>
-      <view wx:if="{{!invoice.treatment_lines.length && !invoice.medication_lines.length}}" class="muted">本版没有收费项目，请结合就诊结果核对。</view><view class="invoice-total">本版账单金额 <text>¥{{invoice.total}}</text></view>
-    </view>
-    <view class="card"><view class="section-title">当前收退款与应付</view><view wx:if="{{!invoice.is_current}}" class="notice">以下余额对应当前第{{invoice.cash_balance.current_revision}}版，不是历史版本余额。</view>
-      <view class="fact-row"><text>当前账单金额</text><text>¥{{invoice.cash_balance.billed}}</text></view>
-      <view class="fact-row"><text>已核对个人账户承担</text><text>¥{{invoice.cash_balance.insurance_personal_account}}</text></view>
-      <view class="fact-row"><text>基金承担（应收）</text><text>¥{{invoice.cash_balance.insurance_fund}}</text></view>
-      <view class="fact-row"><text>患者应承担</text><text>¥{{invoice.cash_balance.patient_responsibility}}</text></view>
-      <block wx:if="{{invoice.cash_activity}}">
-        <view class="fact-row"><text>已记账收款合计</text><text>¥{{invoice.cash_activity.receipts}}</text></view>
-        <view class="fact-row"><text>已记账退款合计</text><text>¥{{invoice.cash_activity.refunds}}</text></view>
+      <block wx:if="{{view.stages.length}}">
+        <view class="label line">本次阶段治疗</view>
+        <view wx:for="{{view.stages}}" wx:key="key" class="invoice-line">
+          <view>{{item.name}}</view>
+          <view class="muted">{{item.quantity}}{{item.unit}} · 本次不另计费</view>
+        </view>
       </block>
-      <view wx:if="{{invoice.cash_balance.pending_refunds > 0}}" class="fact-row"><text>待复核退款</text><text>¥{{invoice.cash_balance.pending_refunds}}</text></view>
-      <view class="fact-row"><text>已记账净收款</text><text>¥{{invoice.cash_balance.net_received}}</text></view>
-      <view wx:if="{{invoice.cash_balance.advance_applied != null}}" class="fact-row"><text>已抵扣预收款</text><text>¥{{invoice.cash_balance.advance_applied}}</text></view>
-      <view class="fact-row"><text>尚需支付</text><text>¥{{invoice.cash_balance.remaining}}</text></view>
-      <view class="fact-row"><text>应退余额</text><text>¥{{invoice.cash_balance.refund_due}}</text></view>
-      <view wx:if="{{invoice.cash_balance.advance_excess > 0}}" class="notice">预收抵扣超额 ¥{{invoice.cash_balance.advance_excess}}，请联系原门店核对。</view>
-      <navigator class="link" url="/pages/funds/index">核对我的预收与资金流水 →</navigator>
-      <view wx:if="{{invoice.cash_balance.pending}}" class="notice">有{{invoice.cash_balance.pending}}笔收退款请求待复核，尚未计入已记账总额或明细。</view>
-      <view wx:if="{{invoice.cash_balance.insurance_pending}}" class="notice">有医保原请求待处理，请联系原门店核对；非现金承担不代表资金到账。</view>
-      <view class="muted line">付款或退款请联系原门店前台；本页不发起支付。医保处理中金额以原结算记录核对。</view>
+      <view wx:if="{{view.emptyFeeText}}" class="muted">{{view.emptyFeeText}}</view>
+      <view class="invoice-total">本版账单金额 <text>{{view.totalLabel}}</text></view>
     </view>
-    <view wx:if="{{invoice.cash_activity}}" class="card">
-      <view class="section-title">已记账收退款明细</view>
-      <view class="muted line">共{{invoice.cash_activity.count}}笔 · 第{{invoice.cash_activity.page}}／{{invoice.cash_activity.pages}}页</view>
-      <view class="muted line">净收款＝已记账收款－已记账退款。仅统计本单患者收退款，医保等非现金承担另行核对。</view>
-      <view wx:for="{{invoice.cash_activity.entries}}" wx:key="id" class="invoice-line">
-        <view class="fact-row"><text>{{item.label}}</text><text>¥{{item.amount}}</text></view>
-        <view>业务日期 {{item.occurred_on}} · {{item.status}}</view>
-        <view class="muted line">记账时间 {{item.postedLabel}}（北京时间）</view>
+
+    <view class="card">
+      <view class="section-title">当前余额</view>
+      <view class="muted">{{view.balanceLabel}}</view>
+      <view wx:if="{{view.staleBalance}}" class="notice">{{view.staleBalanceText}}</view>
+      <view wx:if="{{view.state.amount}}" class="invoice-total"><text>{{view.state.label}}</text><text>¥ {{view.state.amount}}</text></view>
+      <view wx:else class="pill {{view.state.tone}}">{{view.state.label}}</view>
+      <view wx:if="{{view.state.note}}" class="notice">{{view.state.note}}</view>
+      <view wx:for="{{view.notes}}" wx:key="key" class="notice">{{item.text}}</view>
+      <button class="disclosure" bindtap="toggleCash" aria-expanded="{{cashOpen}}" aria-label="{{cashOpen?cashCloseLabel:cashOpenLabel}}">{{cashOpen?cashCloseLabel:cashOpenLabel}}</button>
+      <view wx:if="{{cashOpen && view.cash}}" class="detail-panel">
+        <view class="fact-row"><text>当前账单金额</text><text>{{view.cash.billed}}</text></view>
+        <view class="fact-row"><text>患者应承担</text><text>{{view.cash.patientResponsibility}}</text></view>
+        <view class="fact-row"><text>已记账收款合计</text><text>{{view.cash.receipts}}</text></view>
+        <view class="fact-row"><text>已记账退款合计</text><text>{{view.cash.refunds}}</text></view>
+        <view class="fact-row"><text>待复核退款</text><text>{{view.cash.pendingRefunds}}</text></view>
+        <view class="fact-row"><text>已记账净收款</text><text>{{view.cash.netReceived}}</text></view>
+        <view class="fact-row"><text>已抵扣预收款</text><text>{{view.cash.advanceApplied}}</text></view>
+        <view class="fact-row"><text>预收抵扣超额</text><text>{{view.cash.advanceExcess}}</text></view>
+        <view class="fact-row"><text>已核对医保基金承担</text><text>{{view.cash.insuranceFund}}</text></view>
+        <view class="fact-row"><text>已核对医保个人账户承担</text><text>{{view.cash.insurancePersonal}}</text></view>
+        <view class="fact-row"><text>尚需支付</text><text>{{view.cash.remaining}}</text></view>
+        <view class="fact-row"><text>应退余额</text><text>{{view.cash.refundDue}}</text></view>
+        <view wx:if="{{invoice.cash_activity}}" class="invoice-line">
+          <view class="label line">已记账收退款明细</view>
+          <view class="muted line">共{{invoice.cash_activity.count}}笔 · 第{{invoice.cash_activity.page}}／{{invoice.cash_activity.pages}}页</view>
+          <view wx:for="{{invoice.cash_activity.entries}}" wx:key="id" class="invoice-line">
+            <view class="fact-row"><text>{{item.label}}</text><text>¥{{item.amount}}</text></view>
+            <view>业务日期 {{item.occurred_on}} · {{item.status}}</view>
+            <view class="muted line">记账时间 {{item.postedLabel}}（北京时间）</view>
+          </view>
+          <view wx:if="{{!invoice.cash_activity.entries.length}}" class="muted line">暂无已记账收退款。</view>
+          <view wx:if="{{invoice.cash_activity.previous || invoice.cash_activity.next}}" class="filter-actions">
+            <button class="secondary compact" disabled="{{busy || !invoice.cash_activity.previous}}" data-direction="previous" bindtap="cashPageChange">上一页</button>
+            <button class="secondary compact" disabled="{{busy || !invoice.cash_activity.next}}" data-direction="next" bindtap="cashPageChange">下一页</button>
+          </view>
+        </view>
       </view>
-      <view wx:if="{{!invoice.cash_activity.entries.length}}" class="muted line">暂无已记账收退款。</view>
-      <view wx:if="{{invoice.cash_activity.previous || invoice.cash_activity.next}}" class="filter-actions">
-        <button class="secondary compact" disabled="{{busy || !invoice.cash_activity.previous}}" data-direction="previous" bindtap="cashPageChange">上一页</button>
-        <button class="secondary compact" disabled="{{busy || !invoice.cash_activity.next}}" data-direction="next" bindtap="cashPageChange">下一页</button>
-      </view>
+      <navigator class="link" url="/pages/funds/index">核对我的预收与资金流水 →</navigator>
+      <view class="muted line">付款或退款请联系原门店前台；本页不发起支付。医保处理中金额以原结算记录核对。</view>
     </view>
   </block>
   <view class="patient-return"><button class="secondary" bindtap="back" disabled="{{busy}}">{{fromBilling?'返回费用清单':'返回就诊记录'}}</button></view>
+  <view class="page-footnote">结算金额以门店已发布版本为准。</view>
 </view>

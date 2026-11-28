@@ -2,6 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const file=path.resolve(__dirname,'../clients/wechat/miniprogram/pages/invoice/index.js');
 const fundsFile=path.resolve(__dirname,'../clients/wechat/miniprogram/pages/funds/index.js');
+const billing=require(path.resolve(__dirname,'../clients/wechat/miniprogram/utils/billing.js'));
 function fixture(options={}){
  let definition;const calls=[];
  const api={request:async(route,method,data)=>{
@@ -9,7 +10,7 @@ function fixture(options={}){
   const page=data.cash_page||1;
   return {revision:data.revision||2,revisions:[{revision_no:2,published_at:'2026-11-02T00:00:00Z'},{revision_no:1,published_at:'2026-11-01T00:00:00Z'}],published_at:'2026-11-02T00:00:00Z',cash_activity:{receipts:'200.00',refunds:'40.00',entries:[{id:page,posted_at:'2026-11-02T00:00:00Z'}],page,previous:page===2?1:null,next:page===1?2:null}};
  }};
- vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>definition=p,require:n=>n.endsWith('/api')?api:n.endsWith('/booking-intent')?{positive:v=>Number.isSafeInteger(Number(v))&&Number(v)>0}:{showError:(p,e)=>p.setData({invoice:null,error:e.message,busy:false}),dateTime:x=>'BJ '+x}});
+ vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>definition=p,require:n=>n.endsWith('/api')?api:n.endsWith('/booking-intent')?{positive:v=>Number.isSafeInteger(Number(v))&&Number(v)>0}:n.endsWith('/billing')?billing:{showError:(p,e)=>p.setData({invoice:null,view:null,error:e.message,busy:false}),dateTime:x=>'BJ '+x}});
  const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData:v=>Object.assign(p.data,v)};
  p.onLoad({id:'1'});return {p,calls,options};
 }

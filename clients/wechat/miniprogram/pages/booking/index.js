@@ -5,6 +5,7 @@ const intent=require('../../utils/booking-intent');
 const {selectedCatalogue}=require('../../utils/service-selection');
 const {buildFollowup}=require('../../utils/report-notices');
 const {staleSubject}=require('../../utils/subject-state');
+const {candidate}=require('../../utils/reschedule');
 
 /* Follow-up booking is bound to the exact report version that produced the
    decision. The three parameters must arrive together; anything else returns
@@ -245,7 +246,7 @@ Page({
       if(this.followup)Object.assign(params,{followup_visit:this.followup.visit,followup_examination:this.followup.examination,followup_revision:this.followup.revision});
       const data=await api.request(path,'GET',params);
       if(generation!==this.generation)return;
-      const rows=data.rows.map(arrangement);
+      const rows=data.rows.map(candidate).filter(Boolean);
       const status=data.status||'';
       const period=day?'当天':'未来14天';
       this.setData({rows,groups:mode==='dentist'?groupByDentist(rows):[],busy:false,searched:true,

@@ -5,12 +5,13 @@ const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {buildReview}=require('../../utils/visit-review');
 const {record}=require('../../utils/visit-record');
+const {lineage}=require('../../utils/reschedule');
 const {buildExaminations}=require('../../utils/examinations');
 const {buildReturnSources}=require('../../utils/return-sources');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
-  data:{visit:null,record:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false,
+  data:{visit:null,record:null,lineage:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false,
     // Detail disclosures start closed; both reset on every read or subject change.
     infoOpen:false,moneyOpen:false,infoLabel:'就诊编号',infoOpenLabel:'展开就诊编号',infoCloseLabel:'收起就诊编号',
     moneyOpenLabel:'展开收款与退款明细',moneyCloseLabel:'收起收款与退款明细'},
@@ -27,7 +28,7 @@ Page({
   onShow(){return this.load();},
   async load(){
     const generation=++this.generation;
-    this.setData({visit:null,record:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false,infoOpen:false,moneyOpen:false});
+    this.setData({visit:null,record:null,reviewView:null,lineage:null,examinations:[],returnSources:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false,infoOpen:false,moneyOpen:false});
     try{
       const visit=arrangement(await api.request(`visits/${this.id}/`));
       if(generation!==this.generation)return;
@@ -42,7 +43,7 @@ Page({
       const row=record(visit,{delegated:session.delegated});
       const head=reviewView&&reviewView.completedLabel?'就诊编号':'预约编号';
       const label=(row&&row.hasRequest)?head+'与需求':head;
-      this.setData({visit,record:row,reviewView,
+      this.setData({visit,record:row,reviewView,lineage:lineage(visit),
         infoLabel:label,infoOpenLabel:'展开'+label,infoCloseLabel:'收起'+label,
         examinations:buildExaminations(visit,{delegated:session.delegated}),
         returnSources:buildReturnSources(visit,{delegated:session.delegated}),
@@ -70,7 +71,7 @@ Page({
     if(staleSubject(error,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
       getApp().globalData.review=null;
       this.context=null;
-      this.setData({visit:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,subjectInvalid:true});
+      this.setData({visit:null,record:null,lineage:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,subjectInvalid:true});
     }
     showError(this,error,{separateRequestId:true,stayOnPage:true});
   },
@@ -151,7 +152,8 @@ Page({
     const id=Number(e.currentTarget.dataset.id);
     if(!positive(id))return;
     const queue=this.returnQueue?`&queue=${this.returnQueue}`:'';
-    navigation.redirectTo({url:`/pages/visit/index?id=${id}${queue}`});
+    // Push the related record so the system back returns to this one.
+    navigation.navigateTo({url:`/pages/visit/index?id=${id}${queue}`});
   },
   home(){
     // Prefer the range the list opened with; otherwise derive it from status.
