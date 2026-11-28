@@ -5,12 +5,16 @@ const {record} = require('../../utils/visit-record');
 const {primaryAction} = require('../../utils/primary-action');
 const {staleSubject} = require('../../utils/subject-state');
 const {reportEntry}=require('../../utils/report-notices');
+const textScale=require('../../utils/text-scale');
 const blankList = {rows:[], overview:null, primary:null, reportEntry:null, reportUnread:0};
 const blankSubject = {patient:'', patientName:'', patientCapacity:'', patientDelegated:false};
 Page({
   loadGeneration:0,
-  data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null, reportEntry:null, reportUnread:0},
+  data:{guest:false,needsSubject:false,needsEnrollment:false,subjectInvalid:false,rows:[], queue:'active', page:1, pages:1, busy:false, error:'', patient:'', readOnly:false, overview:null, primary:null, reportEntry:null, reportUnread:0, textScale:''},
   async onShow() {
+    // Read the WeChat font size on every entry, including a return from a
+    // detail page, so the list uses the step that is in effect now.
+    textScale.apply(this);
     const generation=++this.loadGeneration;
     this.sessionReady=false;
     const pending=navigation.consume('/pages/home/index');

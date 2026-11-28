@@ -40,7 +40,10 @@ function record(visit, {delegated = false} = {}) {
     numberLabel: visit.visit_no ? `#${visit.id} · ${visit.visit_no}` : `#${visit.id}`,
     finished,
     // Mirrors the patient web: a finished record opens its result and bill.
-    actionLabel: finished && !delegated ? '查看就诊与结算' : '查看预约详情',
+    // The row names the reschedule only when the server allows it on this
+    // record; cancelled, replaced and finished rows keep the neutral action.
+    actionLabel: finished && !delegated ? '查看就诊与结算'
+      : (visit.can_change === true && visit.status === 'SCHEDULED' ? '查看预约与改期' : '查看预约详情'),
     detailLabel: finished ? '就诊编号与说明' : '预约编号与说明',
     hasRequest: !delegated && !!visit.patient_request,
     open: false

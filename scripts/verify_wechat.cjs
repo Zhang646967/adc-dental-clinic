@@ -100,5 +100,6 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const report_pages=await require('../checks/test_report_pages_node.cjs').verify();
   const billing_pages=await require('../checks/test_billing_pages_node.cjs').verify();
   const reschedule_compare=require('../checks/test_reschedule_compare_node.cjs');
-  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,return_sources,visit_checkout,recall_handoff,role_gui,report_notices,report_pages,billing_pages,reschedule_compare,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  const text_scale=require('../checks/test_text_scale_node.cjs');
+  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,return_sources,visit_checkout,recall_handoff,role_gui,report_notices,report_pages,billing_pages,reschedule_compare,text_scale,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

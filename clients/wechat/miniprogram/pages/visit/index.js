@@ -8,13 +8,14 @@ const {record}=require('../../utils/visit-record');
 const {lineage}=require('../../utils/reschedule');
 const {buildExaminations}=require('../../utils/examinations');
 const {buildReturnSources}=require('../../utils/return-sources');
+const textScale=require('../../utils/text-scale');
 const blankSubject={patientName:'',patientCapacity:'',patientDelegated:false};
 const blankDraft={reason:'',cancelOpen:false};
 Page({
   data:{visit:null,record:null,lineage:null,reviewView:null,examinations:[],returnSources:[],...blankSubject,...blankDraft,busy:false,error:'',requestId:'',readOnly:false,subjectInvalid:false,
     // Detail disclosures start closed; both reset on every read or subject change.
     infoOpen:false,moneyOpen:false,infoLabel:'就诊编号',infoOpenLabel:'展开就诊编号',infoCloseLabel:'收起就诊编号',
-    moneyOpenLabel:'展开收款与退款明细',moneyCloseLabel:'收起收款与退款明细'},
+    moneyOpenLabel:'展开收款与退款明细',moneyCloseLabel:'收起收款与退款明细',textScale:''},
   onLoad(q){
     this.id=Number(q.id);
     // Only a numeric instruction id from the current visit response can be
@@ -25,7 +26,7 @@ Page({
     this.returnQueue=['active','history','all'].includes(q.queue)?q.queue:null;
     this.generation=0;
   },
-  onShow(){return this.load();},
+  onShow(){textScale.apply(this);return this.load();},
   async load(){
     const generation=++this.generation;
     this.setData({visit:null,record:null,reviewView:null,lineage:null,examinations:[],returnSources:[],...blankSubject,error:'',requestId:'',busy:false,subjectInvalid:false,infoOpen:false,moneyOpen:false});

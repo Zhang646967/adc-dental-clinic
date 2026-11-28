@@ -1,4 +1,4 @@
-<view class="page patient-flow"><view class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><button class="link-button" bindtap="subjects" disabled="{{busy}}">切换就诊人</button></view><view class="title">{{followup?'预约复诊':source?'预约改期':'预约就诊'}}</view><view class="steps">{{followup?'按建议日期选择时段':source?'选择新的就诊时间':'第 2 步 · 选时段'}}</view>
+<view class="page patient-flow {{textScale}}"><view class="subject-banner"><text>就诊人：{{patientName||'请先选择'}}</text><view>{{patientCapacity}}</view><button class="link-button" bindtap="subjects" disabled="{{busy}}">切换就诊人</button></view><view class="title">{{followup?'预约复诊':source?'预约改期':'预约就诊'}}</view><view class="steps">{{followup?'按建议日期选择时段':source?'选择新的就诊时间':'第 2 步 · 选时段'}}</view>
   <view wx:if="{{error}}" class="error" role="alert">{{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text></view>
   <button wx:if="{{followupBlocked}}" class="primary" bindtap="backToVisit">返回原就诊</button>
   <view wx:if="{{busy && !ready}}" class="notice">正在读取预约安排…</view>

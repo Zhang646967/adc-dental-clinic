@@ -6,7 +6,7 @@ const {arrangement, dateTime} = require('./format');
 const SPEC = {
   CHECKED_IN: {label: '已到诊', hint: '门店已登记到诊，请按现场指引就诊。', target: 'visit', action: '查看到诊安排'},
   CONFIRM_OFFER: {label: '待确认邀约', hint: '时段为限时保留，请先核对截止时间。', target: 'offer', action: '查看并决定'},
-  UPCOMING_VISIT: {label: '下一次就诊', hint: '打开安排与到诊提示。', target: 'visit', action: '查看安排与到诊提示'},
+  UPCOMING_VISIT: {label: '下一次就诊', hint: '打开安排与到诊提示。', target: 'visit', action: '查看安排与到诊提示', changeAction: '查看安排与改期', changeHint: '核对时间与门店；需要时可在详情更改预约时间。'},
   CONTACT_CLINIC: {label: '请联系门店核实', hint: '请与门店前台核对这次办理结果。', target: 'contact', action: '查看门店联系方式'},
   WAITLIST: {label: '候补进度', hint: '查看等待、确认和成约结果。', target: 'waitlist', action: '查看候补进度'},
   REPORT_FOLLOWUP: {label: '复诊待安排', hint: '查看检查报告与复诊建议。', target: 'report', action: '查看报告与复诊'},
@@ -65,11 +65,16 @@ function primaryAction(overview) {
   const serviceLine = visit ? `${visit.service} · ${visit.status_label}` : '';
   const deadline = offer && offer.expires_at ? `请在 ${offer.expiresLabel} 前确认（北京时间）` : '';
 
+  // Only the server's can_change makes the reschedule wording truthful; a
+  // patient who cannot adjust this visit still gets the neutral action.
+  const canChange = !!(visit && visit.can_change && !review);
+  const changeEntry = canChange && !!(spec.changeAction);
+
   return {
     kind: raw.kind,
     label: review ? REVIEW_HINT : raw.label || spec.label,
-    hint: review ? '预约状态仍以门店核实为准。' : raw.hint || spec.hint,
-    actionLabel: review ? '查看门店联系方式' : raw.button || spec.action,
+    hint: review ? '预约状态仍以门店核实为准。' : changeEntry ? spec.changeHint : raw.hint || spec.hint,
+    actionLabel: review ? '查看门店联系方式' : changeEntry ? spec.changeAction : raw.button || spec.action,
     url,
     review,
     timeLabel,

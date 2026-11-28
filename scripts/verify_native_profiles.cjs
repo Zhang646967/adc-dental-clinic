@@ -11,7 +11,7 @@ async function verify(){
     const wx={navigateTo:r=>navigations.push(r.url),makePhoneCall:()=>{throw Error('Synthetic clinic must not call');}};
     vm.runInNewContext(fs.readFileSync(path.join(root,`pages/${name}/index.js`),'utf8'),{
       Page:d=>{definition=d;},getApp:()=>app,wx,require:key=>key.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:key.endsWith('/api')?api:key.endsWith('/config')?{apiBase:'https://fixture.invalid'}:
-        key.endsWith('/booking-intent')?intent:key.endsWith('/format')?{showError:(p,e)=>p.setData({busy:false,error:e.message})}:null});
+        key.endsWith('/booking-intent')?intent:key.endsWith('/text-scale')?require(path.join(root,'utils/text-scale')):key.endsWith('/format')?{showError:(p,e)=>p.setData({busy:false,error:e.message})}:null});
     const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(d){Object.assign(this.data,d);}};
     return {p,calls,navigations,app};
   }

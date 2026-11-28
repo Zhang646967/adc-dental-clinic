@@ -11,6 +11,7 @@ const format = require(path.join(root, 'utils/format'));
 const bookingIntent = require(path.join(root, 'utils/booking-intent'));
 const subjectState = require(path.join(root, 'utils/subject-state'));
 const reschedule = require(path.join(root, 'utils/reschedule'));
+const textScale = require(path.join(root, 'utils/text-scale'));
 
 let checks = 0;
 const ok = (value, message) => { assert.ok(value, message); checks++; };
@@ -34,6 +35,7 @@ function confirmPage(review, { session = {} } = {}) {
       : key.endsWith('/booking-intent') ? bookingIntent
       : key.endsWith('/subject-state') ? subjectState
       : key.endsWith('/reschedule') ? reschedule
+      : key.endsWith('/text-scale') ? textScale
       : key.endsWith('/format') ? format : null
   });
   return Object.assign({}, definition, {

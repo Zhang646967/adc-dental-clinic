@@ -4,6 +4,7 @@ const intent=require('../../utils/booking-intent');
 const {arrangement,showError}=require('../../utils/format');
 const {staleSubject,recoverSubject}=require('../../utils/subject-state');
 const {comparison}=require('../../utils/reschedule');
+const textScale=require('../../utils/text-scale');
 const actions={
   booking:['确认就诊安排','我已核对诊所、服务、医师和起止时间，同意提交预约。','确认提交预约','确认成功后产生一次预约，接诊时再确认实际治疗。'],
   reschedule:['确认预约改期','我已核对原、新医师和时间，同意用新安排替代原预约。','确认改期','成功后替换指定原预约，其他候补不会自动退出。'],
@@ -21,8 +22,8 @@ Page({
     previewNote:'',backLabel:'返回原页面',uncertain:false,querying:false,queryMessage:'',canQuery:false,
     resultKind:'',resultToken:'',resultSubjectKey:'',resultWorkspaceKey:'',resultSubjectRevision:0,
     conflict:false,conflictMessage:'',conflictTitle:'本次预约未保存',conflictKind:'',conflictOriginal:null,conflictSelection:null,conflictFollowup:null,
-    otherUnconfirmed:false,otherFailed:false,recordLabel:'',recordUrl:''},
-  onLoad(){ api.showSubject(this);
+    otherUnconfirmed:false,otherFailed:false,recordLabel:'',recordUrl:'',textScale:''},
+  onLoad(){ api.showSubject(this); textScale.apply(this);
     const review=getApp().globalData.review;
     const session=api.sessionInfo();
     if(review && (review.subjectKey!==session.subject_key || review.workspaceKey!==session.workspace_id || review.subjectRevision!==session.subject_revision)){
@@ -45,6 +46,9 @@ Page({
       followupVisit:review.followupVisit||null,previewNote,
       backLabel:review.kind==='booking'?'返回选时段':'返回原页面'});
   },
+  // A return from the system menu re-reads the setting without rebuilding the
+  // preview or touching the consent checkbox.
+  onShow(){textScale.apply(this);},
   checked(e){if(this.data.review)this.setData({checked:e.detail.value.includes('yes')});},
   async submit(){
     if(this.data.busy||this.data.uncertain||this.data.done||this.data.conflict||this.data.followupBlocked||!this.data.checked||!this.data.review)return;
