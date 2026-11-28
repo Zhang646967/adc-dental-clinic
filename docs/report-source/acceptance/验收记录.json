@@ -15,7 +15,47 @@
     "business_table_differences": 0,
     "rescheduling_preview_count": 4,
     "new_confirmations": 0,
-    "client_commit": "2da8e56fcae9e43c24d7dc0f2add11768a3149d2"
+    "client_commit": "2da8e56fcae9e43c24d7dc0f2add11768a3149d2",
+    "screen_width_observations": [
+      {
+        "logical_width": 375,
+        "logical_content_height": 639,
+        "fontSizeSetting": 16,
+        "button_entirely_in_original_first_view": true,
+        "submit_disabled_before_consent": true,
+        "confirmed": false
+      },
+      {
+        "logical_width": 390,
+        "logical_content_height": 671,
+        "fontSizeSetting": 16,
+        "button_entirely_in_original_first_view": true,
+        "submit_disabled_before_consent": true,
+        "confirmed": false
+      },
+      {
+        "logical_width": 430,
+        "logical_content_height": 752,
+        "fontSizeSetting": 16,
+        "button_entirely_in_original_first_view": true,
+        "submit_disabled_before_consent": true,
+        "confirmed": false
+      },
+      {
+        "logical_width": 390,
+        "logical_content_height": 671,
+        "fontSizeSetting": 26,
+        "button_entirely_in_original_first_view": true,
+        "submit_disabled_before_consent": true,
+        "confirmed": false
+      }
+    ],
+    "reschedule_font_sizes_px_at_16_and_26": {
+      ".title": "24px",
+      ".time": "19px",
+      ".section-title": "18px",
+      ".tz": "14px"
+    }
   },
   "database": "PostgreSQL 17",
   "physical_fk_count_verified_in_figure_scope": 8,
@@ -140,5 +180,32 @@
       "native_date_picker",
       "other_iphone_widths"
     ]
+  },
+  "role_handoff": {
+    "runtime_commit": "f97a2110e87e9ae16933458e55580538cda46a58",
+    "same_visit_workflow": {
+      "source_visit": 2,
+      "rescheduled_visit": 5,
+      "followup_visit": 6,
+      "record_revision": 1,
+      "report_revision": 1,
+      "report_release": "经服务端业务命令独立审核并发布",
+      "browser": "Chrome",
+      "linked_role_actions": 11,
+      "database_crosschecks": 10
+    },
+    "production_settings": {
+      "synthetic_clinical": false,
+      "data_origin": "独立业务资料",
+      "new_visit": 5,
+      "replacement": 6,
+      "active_state": "CHECKED_IN",
+      "original_state": "RESCHEDULED",
+      "existing_synthetic_professional_scope": "403",
+      "tables_compared": 195,
+      "identical_tables": 186
+    },
+    "site_signoff": false,
+    "first_time_participant": false
   }
 }
