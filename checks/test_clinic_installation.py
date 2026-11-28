@@ -38,6 +38,22 @@ class ClinicProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'profiles differ'):
             clinic._restore_decrypted('missing', {}, schema_mode='migration-built')
 
+    def test_linux_image_inspection_uses_api_148_supported_arguments_and_actual_architecture(self):
+        plan = prepare(self.bundle, **self.inputs)
+        with patch('scripts.g4_course.docker_command', return_value=['docker']):
+            clinic = ClinicInstallation(self.bundle, context='unit', rehearsal=True)
+        def inspect(command, log):
+            self.assertEqual(command[:3], ['docker', 'image', 'inspect'])
+            self.assertEqual(len(command), 4)
+            return json.dumps([{'Os': 'linux', 'Architecture': 'amd64', 'Config': {
+                'Labels': {'org.opencontainers.image.revision': plan['requested_source_commit']}}}]).encode()
+        with patch('scripts.g4_course.run', side_effect=inspect) as calls:
+            clinic.images()
+        self.assertEqual(calls.call_count, 3)
+        for wrong in ({'Os': 'windows', 'Architecture': 'amd64'}, {'Os': 'linux', 'Architecture': 'arm64'}):
+            with patch('scripts.g4_course.run', return_value=json.dumps([wrong]).encode()), self.assertRaises(ValueError):
+                clinic.images()
+
     def test_recovery_requires_the_independent_custody_record(self):
         prepare(self.bundle, **self.inputs)
         with patch('scripts.g4_course.docker_command', return_value=[]):
