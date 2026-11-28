@@ -1,0 +1,635 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="Electron" version="32.7.4" type="device">
+  <diagram id="business" name="业务用例">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=none;">
+          <mxGeometry x="151" y="5" width="397" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" vertex="1" value="业务边界　连锁口腔门诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;">
+          <mxGeometry x="164" y="12" width="369" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;shape=umlActor;fillColor=none;">
+          <mxGeometry x="32" y="105" width="32" height="49" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" vertex="1" value="«业务执行者»&#10;患者" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="-15" y="157" width="125" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="66" y="132" as="sourcePoint" />
+            <mxPoint x="223" y="81" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7" parent="1" vertex="1" value="«业务用例»&#10;取得就诊安排" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="223" y="50" width="264" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="66" y="132" as="sourcePoint" />
+            <mxPoint x="223" y="157" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9" parent="1" vertex="1" value="«业务用例»&#10;接受门诊诊疗" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="223" y="126" width="264" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="66" y="132" as="sourcePoint" />
+            <mxPoint x="223" y="233" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="11" parent="1" vertex="1" value="«业务用例»&#10;取得结算凭据与后续安排" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="223" y="202" width="264" height="62" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="business-sequence" name="业务序列">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="«业务执行者»&#10;患者" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="7" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="77" y="59" as="sourcePoint" />
+            <mxPoint x="77" y="417" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="«业务工人»&#10;前台人员" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="163" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="233" y="59" as="sourcePoint" />
+            <mxPoint x="233" y="417" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6" parent="1" vertex="1" value="«业务工人»&#10;接诊医师" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="319" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="59" as="sourcePoint" />
+            <mxPoint x="389" y="417" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8" parent="1" vertex="1" value="«业务实体»&#10;本次就诊记录" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="475" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="545" y="59" as="sourcePoint" />
+            <mxPoint x="545" y="417" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="10" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="77" y="100" as="sourcePoint" />
+            <mxPoint x="233" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="11" parent="1" vertex="1" value="出示预约资料" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="77" y="75" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="233" y="146" as="sourcePoint" />
+            <mxPoint x="545" y="146" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="13" parent="1" vertex="1" value="核对并登记到诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="233" y="121" width="312" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="233" y="192" as="sourcePoint" />
+            <mxPoint x="389" y="192" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" parent="1" vertex="1" value="交接已到诊患者" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="233" y="167" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="16" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="238" as="sourcePoint" />
+            <mxPoint x="77" y="238" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" parent="1" vertex="1" value="问诊并检查" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="77" y="213" width="312" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="18" parent="1" edge="1" style="endArrow=open;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="77" y="284" as="sourcePoint" />
+            <mxPoint x="389" y="284" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="19" parent="1" vertex="1" value="说明主诉与病史" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="77" y="259" width="312" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="330" as="sourcePoint" />
+            <mxPoint x="545" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="21" parent="1" vertex="1" value="记录并确认检查结果" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="389" y="305" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="376" as="sourcePoint" />
+            <mxPoint x="77" y="376" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="23" parent="1" vertex="1" value="说明处置与后续安排" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="77" y="351" width="312" height="23" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="system" name="系统用例">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=none;">
+          <mxGeometry x="146" y="0" width="403" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" vertex="1" value="系统边界　门诊业务系统" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;">
+          <mxGeometry x="159" y="4" width="372" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="核对并确认改期" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="215" y="42" width="265" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" vertex="1" value="核对患者并登记到诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="215" y="114" width="265" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" vertex="1" value="维护检查草稿" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="215" y="186" width="265" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" vertex="1" value="确认或查阅病历版本" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#F3F7F7;">
+          <mxGeometry x="215" y="252" width="265" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;shape=umlActor;fillColor=none;">
+          <mxGeometry x="34" y="28" width="32" height="49" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" vertex="1" value="患者" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="-13" y="80" width="125" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;shape=umlActor;fillColor=none;">
+          <mxGeometry x="34" y="106" width="32" height="49" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" vertex="1" value="前台人员" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="-13" y="158" width="125" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;shape=umlActor;fillColor=none;">
+          <mxGeometry x="34" y="215" width="32" height="49" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" vertex="1" value="接诊医师" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="-13" y="267" width="125" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="67" y="54" as="sourcePoint" />
+            <mxPoint x="215" y="67" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="67" y="133" as="sourcePoint" />
+            <mxPoint x="215" y="139" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="16" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="67" y="243" as="sourcePoint" />
+            <mxPoint x="215" y="211" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="67" y="243" as="sourcePoint" />
+            <mxPoint x="215" y="277" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="classes" name="分析类">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="患者" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontStyle=1;fillColor=#e8f1f1;">
+          <mxGeometry x="4" y="8" width="142" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" vertex="1" value="患者编号&#10;档案状态" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;align=left;spacingLeft=10;">
+          <mxGeometry x="4" y="40" width="142" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="预约" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontStyle=1;fillColor=#e8f1f1;">
+          <mxGeometry x="225" y="8" width="156" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" vertex="1" value="预约编号、状态&#10;计划起止时间" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;align=left;spacingLeft=10;">
+          <mxGeometry x="225" y="40" width="156" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" vertex="1" value="门诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontStyle=1;fillColor=#e8f1f1;">
+          <mxGeometry x="463" y="8" width="148" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" vertex="1" value="门店编号&#10;营业安排" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;align=left;spacingLeft=10;">
+          <mxGeometry x="463" y="40" width="148" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" vertex="1" value="本次接诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontStyle=1;fillColor=#e8f1f1;">
+          <mxGeometry x="225" y="160" width="156" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" vertex="1" value="到诊事实&#10;负责医师" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;align=left;spacingLeft=10;">
+          <mxGeometry x="225" y="192" width="156" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" vertex="1" value="检查记录版本" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontStyle=1;fillColor=#e8f1f1;">
+          <mxGeometry x="463" y="160" width="148" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" vertex="1" value="版本号&#10;确认内容" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;align=left;spacingLeft=10;">
+          <mxGeometry x="463" y="192" width="148" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="146" y="53" as="sourcePoint" />
+            <mxPoint x="225" y="53" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="13" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="149" y="29" width="28" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" vertex="1" value="0..*" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="183" y="29" width="38" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="15" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="381" y="53" as="sourcePoint" />
+            <mxPoint x="463" y="53" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="16" parent="1" vertex="1" value="0..*" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="383" y="29" width="44" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="17" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="433" y="29" width="25" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="18" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="302" y="97" as="sourcePoint" />
+            <mxPoint x="302" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="19" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="305" y="99" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" vertex="1" value="0..1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="305" y="137" width="44" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="21" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="381" y="203" as="sourcePoint" />
+            <mxPoint x="463" y="203" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="22" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="383" y="180" width="28" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="23" parent="1" vertex="1" value="0..*" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="417" y="180" width="43" height="22" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="analysis-sequence" name="分析序列">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="患者" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="7" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="77" y="59" as="sourcePoint" />
+            <mxPoint x="77" y="463" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="«边界»&#10;改期核对页" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="163" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="233" y="59" as="sourcePoint" />
+            <mxPoint x="233" y="463" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6" parent="1" vertex="1" value="«控制»&#10;改期办理" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="319" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="59" as="sourcePoint" />
+            <mxPoint x="389" y="463" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8" parent="1" vertex="1" value="«实体»&#10;预约与回执" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fillColor=#EEF4F4;">
+          <mxGeometry x="475" y="5" width="140" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="545" y="59" as="sourcePoint" />
+            <mxPoint x="545" y="463" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="10" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="77" y="100" as="sourcePoint" />
+            <mxPoint x="233" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="11" parent="1" vertex="1" value="确认新安排" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="77" y="75" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="233" y="146" as="sourcePoint" />
+            <mxPoint x="389" y="146" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="13" parent="1" vertex="1" value="提交已核对的提案" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="233" y="121" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="192" as="sourcePoint" />
+            <mxPoint x="545" y="192" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" parent="1" vertex="1" value="读原约、资源与回执" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="389" y="167" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="16" parent="1" edge="1" style="endArrow=open;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="545" y="238" as="sourcePoint" />
+            <mxPoint x="389" y="238" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" parent="1" vertex="1" value="返回当前办理事实" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="389" y="213" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="18" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="284" as="sourcePoint" />
+            <mxPoint x="545" y="284" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="19" parent="1" vertex="1" value="登记替代关系和回执" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="389" y="259" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" edge="1" style="endArrow=open;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="545" y="330" as="sourcePoint" />
+            <mxPoint x="389" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="21" parent="1" vertex="1" value="返回新预约编号" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="389" y="305" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="1" edge="1" style="endArrow=open;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="389" y="376" as="sourcePoint" />
+            <mxPoint x="233" y="376" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="23" parent="1" vertex="1" value="返回对应预约" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="233" y="351" width="156" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="24" parent="1" edge="1" style="endArrow=open;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=1;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="233" y="422" as="sourcePoint" />
+            <mxPoint x="77" y="422" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="25" parent="1" vertex="1" value="显示改期后的安排" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="77" y="397" width="156" height="23" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="state" name="就诊状态">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;ellipse;fillColor=#233942;">
+          <mxGeometry x="6" y="112" width="16" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="22" y="120" as="sourcePoint" />
+            <mxPoint x="92" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="已预约" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="92" y="100" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" vertex="1" value="已到诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="313" y="100" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" vertex="1" value="治疗完成" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="517" y="42" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" vertex="1" value="无治疗关闭" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="517" y="157" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" vertex="1" value="已取消" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="16" y="255" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" vertex="1" value="已爽约" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="176" y="255" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" vertex="1" value="已改期替代" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;rounded=1;arcSize=45;fillColor=#EFF4F4;">
+          <mxGeometry x="336" y="255" width="120" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="212" y="119" as="sourcePoint" />
+            <mxPoint x="313" y="119" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="12" parent="1" vertex="1" value="登记到诊" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="213" y="87" width="99" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="433" y="119" as="sourcePoint" />
+            <mxPoint x="517" y="61" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="14" parent="1" vertex="1" value="完成处置" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="428" y="54" width="91" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="15" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="433" y="119" as="sourcePoint" />
+            <mxPoint x="517" y="176" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="16" parent="1" vertex="1" value="无治疗关闭" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="426" y="164" width="91" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="17" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="118" y="139" as="sourcePoint" />
+            <mxPoint x="76" y="255" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="118" y="195" />
+              <mxPoint x="76" y="195" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="18" parent="1" vertex="1" value="确认取消" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="12" y="164" width="100" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="19" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="153" y="139" as="sourcePoint" />
+            <mxPoint x="236" y="255" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="153" y="217" />
+              <mxPoint x="236" y="217" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="20" parent="1" vertex="1" value="核实爽约" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="154" y="189" width="87" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="21" parent="1" edge="1" style="endArrow=block;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="189" y="139" as="sourcePoint" />
+            <mxPoint x="394" y="255" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="189" y="173" />
+              <mxPoint x="394" y="173" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="22" parent="1" vertex="1" value="确认改期" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=14;fontStyle=0;">
+          <mxGeometry x="238" y="146" width="111" height="24" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="physical-er" name="物理ER">
+    <mxGraphModel dx="900" dy="550" grid="1" gridSize="10" page="0" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" vertex="1" value="adc_patient" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontStyle=1;fontSize=14;fillColor=#EAF1F2;">
+          <mxGeometry x="9" y="10" width="147" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" vertex="1" value="PK  id&#10;      patient_no" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontSize=14;align=left;spacingLeft=9;">
+          <mxGeometry x="9" y="40" width="147" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" vertex="1" value="adc_visit" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontStyle=1;fontSize=14;fillColor=#EAF1F2;">
+          <mxGeometry x="217" y="10" width="184" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" vertex="1" value="PK  id&#10;FK  patient_id&#10;FK, UQ  replaces_visit_id" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontSize=14;align=left;spacingLeft=9;">
+          <mxGeometry x="217" y="40" width="184" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" vertex="1" value="adc_portal_booking_receipt" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontStyle=1;fontSize=14;fillColor=#EAF1F2;">
+          <mxGeometry x="467" y="10" width="203" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" vertex="1" value="PK  id&#10;FK, UQ  visit_id" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontSize=14;align=left;spacingLeft=9;">
+          <mxGeometry x="467" y="40" width="203" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" vertex="1" value="adc_clinical_encounter" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontStyle=1;fontSize=14;fillColor=#EAF1F2;">
+          <mxGeometry x="217" y="195" width="184" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" vertex="1" value="PK  id&#10;FK, UQ  visit_id" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontSize=14;align=left;spacingLeft=9;">
+          <mxGeometry x="217" y="225" width="184" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" vertex="1" value="adc_clinical_draft" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontStyle=1;fontSize=14;fillColor=#EAF1F2;">
+          <mxGeometry x="0" y="195" width="177" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" vertex="1" value="PK  id&#10;FK, UQ  encounter_id&#10;FK  base_record_id" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontSize=14;align=left;spacingLeft=9;">
+          <mxGeometry x="0" y="225" width="177" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" vertex="1" value="adc_clinical_record_version" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontStyle=1;fontSize=14;fillColor=#EAF1F2;">
+          <mxGeometry x="450" y="195" width="226" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" vertex="1" value="PK  id&#10;FK  encounter_id, previous_id&#10;UQ  (encounter_id, revision)" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;fontFamily=Helvetica;fontSize=14;align=left;spacingLeft=9;">
+          <mxGeometry x="450" y="225" width="226" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="156" y="62" as="sourcePoint" />
+            <mxPoint x="217" y="62" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=13;fontStyle=0;">
+          <mxGeometry x="157" y="37" width="17" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="16" parent="1" vertex="1" value="0..*" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=13;fontStyle=0;">
+          <mxGeometry x="178" y="37" width="39" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="17" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="401" y="62" as="sourcePoint" />
+            <mxPoint x="467" y="62" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="18" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=13;fontStyle=0;">
+          <mxGeometry x="404" y="37" width="16" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="19" parent="1" vertex="1" value="0..1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=13;fontStyle=0;">
+          <mxGeometry x="431" y="37" width="36" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="304" y="105" as="sourcePoint" />
+            <mxPoint x="304" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="21" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=13;fontStyle=0;">
+          <mxGeometry x="309" y="112" width="20" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="1" vertex="1" value="0..1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=13;fontStyle=0;">
+          <mxGeometry x="307" y="170" width="39" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="23" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="177" y="249" as="sourcePoint" />
+            <mxPoint x="217" y="249" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="24" parent="1" vertex="1" value="0..1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=12;fontStyle=0;">
+          <mxGeometry x="173" y="220" width="32" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="25" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=12;fontStyle=0;">
+          <mxGeometry x="203" y="220" width="14" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="26" parent="1" edge="1" style="endArrow=none;endFill=1;strokeColor=#243944;strokeWidth=1.3;dashed=0;rounded=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="401" y="249" as="sourcePoint" />
+            <mxPoint x="450" y="249" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="27" parent="1" vertex="1" value="1" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=12;fontStyle=0;">
+          <mxGeometry x="402" y="220" width="17" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="28" parent="1" vertex="1" value="0..*" style="fontFamily=Songti SC;fontSize=15;whiteSpace=wrap;html=0;align=center;verticalAlign=middle;fillColor=#ffffff;fontColor=#172f39;strokeColor=#243944;text;strokeColor=none;fillColor=none;fontSize=12;fontStyle=0;">
+          <mxGeometry x="417" y="220" width="34" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

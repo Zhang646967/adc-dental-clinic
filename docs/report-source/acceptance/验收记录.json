@@ -1,0 +1,124 @@
+{
+  "iphone": "iPhone 交付范围内，须在微信的日常运行方式下核对本版扫码进入、原生选时段、字号放大、VoiceOver 焦点和返回原记录。本版尚缺相应的实机记录，以上项目保留待验。",
+  "web": {
+    "browsers": [
+      "Chrome",
+      "WebKit"
+    ],
+    "layout_checks_per_browser": 56,
+    "screens_width_px": 1280,
+    "scope": "患者原约与拟改时段、前台同名档案、医师草稿与确认版"
+  },
+  "wechat": {
+    "tool_width_px": 390,
+    "business_tables": 18,
+    "business_table_differences": 0,
+    "rescheduling_preview_count": 4,
+    "new_confirmations": 0,
+    "client_commit": "2da8e56fcae9e43c24d7dc0f2add11768a3149d2"
+  },
+  "database": "PostgreSQL 17",
+  "physical_fk_count_verified_in_figure_scope": 8,
+  "physical_foreign_keys": [
+    {
+      "table": "adc_clinical_draft",
+      "field": "base_record_id",
+      "target": "adc_clinical_record_version.id",
+      "nullable": true
+    },
+    {
+      "table": "adc_clinical_draft",
+      "field": "encounter_id",
+      "target": "adc_clinical_encounter.id",
+      "nullable": false
+    },
+    {
+      "table": "adc_clinical_encounter",
+      "field": "visit_id",
+      "target": "adc_visit.id",
+      "nullable": false
+    },
+    {
+      "table": "adc_clinical_record_version",
+      "field": "encounter_id",
+      "target": "adc_clinical_encounter.id",
+      "nullable": false
+    },
+    {
+      "table": "adc_clinical_record_version",
+      "field": "previous_id",
+      "target": "adc_clinical_record_version.id",
+      "nullable": true
+    },
+    {
+      "table": "adc_portal_booking_receipt",
+      "field": "visit_id",
+      "target": "adc_visit.id",
+      "nullable": false
+    },
+    {
+      "table": "adc_visit",
+      "field": "patient_id",
+      "target": "adc_patient.id",
+      "nullable": false
+    },
+    {
+      "table": "adc_visit",
+      "field": "replaces_visit_id",
+      "target": "adc_visit.id",
+      "nullable": true
+    }
+  ],
+  "observed_uniqueness": [
+    "CREATE UNIQUE INDEX adc_clinical_draft_encounter_id_key ON public.adc_clinical_draft USING btree (encounter_id)",
+    "CREATE UNIQUE INDEX adc_clinical_draft_pkey ON public.adc_clinical_draft USING btree (id)",
+    "CREATE UNIQUE INDEX adc_clinical_encounter_pkey ON public.adc_clinical_encounter USING btree (id)",
+    "CREATE UNIQUE INDEX adc_clinical_encounter_visit_id_key ON public.adc_clinical_encounter USING btree (visit_id)",
+    "CREATE UNIQUE INDEX adc_clinical_record_version_pkey ON public.adc_clinical_record_version USING btree (id)",
+    "CREATE UNIQUE INDEX adc_clinical_record_version_previous_id_key ON public.adc_clinical_record_version USING btree (previous_id)",
+    "CREATE UNIQUE INDEX clinical_record_revision_unique ON public.adc_clinical_record_version USING btree (encounter_id, revision)",
+    "CREATE UNIQUE INDEX adc_portal_booking_receipt_nonce_key ON public.adc_portal_booking_receipt USING btree (nonce)",
+    "CREATE UNIQUE INDEX adc_portal_booking_receipt_pkey ON public.adc_portal_booking_receipt USING btree (id)",
+    "CREATE UNIQUE INDEX adc_portal_booking_receipt_visit_id_key ON public.adc_portal_booking_receipt USING btree (visit_id)",
+    "CREATE UNIQUE INDEX adc_visit_pkey ON public.adc_visit USING btree (id)",
+    "CREATE UNIQUE INDEX adc_visit_replaces_visit_id_key ON public.adc_visit USING btree (replaces_visit_id)",
+    "CREATE UNIQUE INDEX adc_visit_visit_no_key ON public.adc_visit USING btree (visit_no)"
+  ],
+  "screen_sha256": {
+    "identity.png": "cc44c8dd27b59764cc35669454ab68e6f32bdf08068cffada7067efae12fc37a",
+    "record.png": "dfb14a33bb7eeddf124b45058488b41724d9abe32dae4322a04c17ef6426edd7",
+    "reschedule.png": "49fc02a2732c3de1e557481d4849c3b54b9f73e527de467ce68360c2479eb63f"
+  },
+  "integration": {
+    "application_commit": "13d3ba3c475e989bb2768e121289d58cb04254a6",
+    "copy_a": {
+      "chain": [
+        2,
+        5,
+        6
+      ],
+      "final_status": "CANCELLED"
+    },
+    "copy_b": {
+      "chain": [
+        6,
+        8,
+        9
+      ],
+      "final_status": "COMPLETED",
+      "saved_receipt_links_match": true
+    },
+    "conflict": {
+      "http_status": 409,
+      "original_unchanged": true
+    },
+    "read_only": {
+      "source_id": 2,
+      "existing_chain": [
+        3,
+        4
+      ],
+      "business_tables_unchanged": 18
+    }
+  }
+}

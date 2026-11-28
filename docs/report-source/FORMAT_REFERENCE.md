@@ -1,4 +1,8 @@
-# Course report format and content contract
+# 历次报告的格式记录
+
+本页保留以往交付时的格式依据。现行五章报告采用[正式排版和重建说明](acceptance/README.md)，当前入口为[固定名 PDF](../../课程报告/课程报告_张加良_8210241102.pdf)，原 Word 已按历史原件保全。
+
+## 原版格式依据
 
 Visual authority: the supplied 86-page university PDF, SHA256 ba3164113b097daa7be79251f540513fe181687e539e82821506a1671078e248. Reference materials and the frozen RC1 Word/PDF remain unchanged. The user explicitly requested a formal system report instead of development history.
 
