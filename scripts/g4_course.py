@@ -98,14 +98,18 @@ def exclusive(path):
         yield
 
 
-def build(artifacts, docker, context, architecture):
+def build(artifacts, docker, context, architecture, *, source_commit=None):
     artifacts = Path(artifacts).absolute()
     if artifacts.exists():
         raise ValueError('Build artifacts require a new private directory.')
     if architecture not in ('amd64', 'arm64'):
         raise ValueError('Unsupported image architecture.')
-    revision = subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip()
-    if subprocess.check_output(['git', '-C', str(ROOT), 'status', '--porcelain']):
+    if source_commit is not None and not re.fullmatch('[0-9a-f]{40}', source_commit):
+        raise ValueError('Pin the source by its complete Git commit.')
+    revision = subprocess.check_output(
+        ['git', '-C', str(ROOT), 'rev-parse', '--verify', (source_commit or 'HEAD') + '^{commit}'],
+        text=True).strip()
+    if source_commit is None and subprocess.check_output(['git', '-C', str(ROOT), 'status', '--porcelain']):
         raise ValueError('Build only an identified clean Git commit.')
     private_directory(artifacts)
     log = artifacts / 'operations.log'
@@ -148,6 +152,9 @@ class OriginHTTPS(http.client.HTTPSConnection):
 
 
 class Course:
+    access_mode = 'course-writable'
+    db_name = 'adc_rc_demo'
+
     def __init__(self, bundle, docker='docker', context=None, *, rehearsal=False,
                  architecture='amd64', ca_file=None, resume_additive=False):
         self.bundle = Path(bundle).absolute()
@@ -159,7 +166,7 @@ class Course:
                 resume_source = operation['to_source']
         inspect_bundle(self.bundle, resume_source=resume_source)
         self.plan = json.loads((self.bundle / 'plan.json').read_text())
-        if (self.plan.get('mode') != 'direct_tls' or self.plan.get('access_mode') != 'course-writable'
+        if (self.plan.get('mode') != 'direct_tls' or self.plan.get('access_mode') != self.access_mode
                 or self.plan['read_only']):
             raise ValueError('Use a separate reviewed course-writable direct HTTPS bundle.')
         if self.plan.get('architecture') != architecture:
@@ -196,7 +203,7 @@ class Course:
     def tables(self):
         sql = "SELECT count(*) FROM pg_tables WHERE schemaname='public';"
         value = self.dc('exec', '-T', 'db', 'psql', '--no-psqlrc', '-U', 'adc_g4_admin',
-                        '-d', 'adc_rc_demo', '-At', '-c', sql)
+                        '-d', self.db_name, '-At', '-c', sql)
         return int(value.strip())
 
     def start_database(self):
@@ -268,6 +275,8 @@ class Course:
         if self.dc('exec', '-T', 'web', 'id', '-u').strip() != b'10001':
             raise ValueError('Runtime application must use UID 10001.')
         self.dc('exec', '-T', 'web', 'python', 'manage.py', 'check_runtime_role')
+        if self.access_mode == 'clinic-writable':
+            return
         atomic_text(self.bundle / 'private/COURSE_ACCESS.md',
                     '# ADC 系统访问说明\n\n'
                     'Staff login: https://' + self.plan['host'] + '/accounts/login/\n\n'
@@ -406,7 +415,7 @@ class Course:
                     os.fchmod(stream.fileno(), 0o600)
                     self.dc('exec', '-T', 'db', 'sh', '-c',
                             'PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_dump -h 127.0.0.1 -U adc_g4_owner '
-                            '-d adc_rc_demo -Fc --no-owner --no-privileges --snapshot="$1"',
+                            '-d "$POSTGRES_DB" -Fc --no-owner --no-privileges --snapshot="$1"',
                             'recovery-dump', captured['snapshot'], output_file=stream, timeout=600)
                 atomic_text(temporary / 'facts.json', canonical(captured['facts']).decode() + '\n')
             observations = self.observations()
@@ -436,6 +445,8 @@ class Course:
                     'completed_at': datetime.now(timezone.utc).isoformat(),
                     'files': {key: {'sha256': digest(value), 'size': value.stat().st_size}
                               for key, value in files.items()}}
+            if self.access_mode == 'clinic-writable':
+                meta['installation_profile'] = 'clinic-writable'
             atomic_text(temporary / 'archive.json', json.dumps(meta, indent=2) + '\n')
             archive_path = temporary / 'backup.tar'
             with tarfile.open(archive_path, 'w') as archive:
@@ -534,6 +545,8 @@ class Course:
         # A Mac operator can transfer a verified dump through pinned SSH without
         # ever uploading the private decryption key. Its checksum remains bound
         # to the decrypted archive manifest.
+        if meta.get('installation_profile', 'course-writable') != self.access_mode:
+            raise ValueError('Source and target installation profiles differ.')
         if schema_mode not in ('pg-dump', 'migration-built'):
             raise ValueError('Unknown recovery schema mode.')
         if schema_mode == 'migration-built' and meta.get('format') != 2:
@@ -569,7 +582,7 @@ class Course:
                 raise ValueError('Recovery facts do not bind an exported snapshot.')
             observations = validate_observations(json.loads((dump.parent / 'observations.json').read_text()))
         restore_command = ('PGPASSWORD="$G4_OWNER_DB_PASSWORD" exec pg_restore -h 127.0.0.1 -U adc_g4_owner '
-                           '-d adc_rc_demo --no-owner --no-privileges --single-transaction --exit-on-error')
+                           '-d "$POSTGRES_DB" --no-owner --no-privileges --single-transaction --exit-on-error')
         if schema_mode == 'migration-built':
             self.dc('--profile', 'maintenance', 'run', '--rm', 'schema', timeout=300)
             code = Path(__file__).with_name('recovery_facts.py').read_text()
@@ -585,10 +598,10 @@ class Course:
             # migration rows are replaced by the authenticated snapshot too.
             truncate = ("DO $$ DECLARE names text; BEGIN SELECT string_agg(format('%I.%I',schemaname,tablename),',') "
                         "INTO names FROM pg_tables WHERE schemaname='public'; EXECUTE 'TRUNCATE '||names||' CASCADE'; END $$;")
-            self.dc('exec', '-T', 'db', 'psql', '-U', 'adc_g4_admin', '-d', 'adc_rc_demo',
+            self.dc('exec', '-T', 'db', 'psql', '-U', 'adc_g4_admin', '-d', self.db_name,
                     '-v', 'ON_ERROR_STOP=1', '-c', truncate, timeout=60)
             restore_command = ('PGPASSWORD="$POSTGRES_PASSWORD" exec pg_restore -h 127.0.0.1 -U adc_g4_admin '
-                               '-d adc_rc_demo --data-only --disable-triggers --no-owner --no-privileges '
+                               '-d "$POSTGRES_DB" --data-only --disable-triggers --no-owner --no-privileges '
                                '--single-transaction --exit-on-error')
         with dump.open('rb') as stream:
             self.dc('exec', '-T', 'db', 'sh', '-c', restore_command, input_file=stream, timeout=600)

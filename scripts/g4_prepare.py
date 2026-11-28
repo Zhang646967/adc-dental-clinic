@@ -72,10 +72,13 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         raise ValueError('Use a new private directory named .g4; existing state is never overwritten.')
     if mode not in ('direct_tls', 'mac_tunnel', 'teacher_tunnel'):
         raise ValueError('Unknown deployment mode.')
-    if access_mode not in ('read-only', 'course-writable'):
+    if access_mode not in ('read-only', 'course-writable', 'clinic-writable'):
         raise ValueError('Unknown access mode.')
-    writable = access_mode == 'course-writable'
-    if dataset not in ('rc', 'course-20') or dataset == 'course-20' and not writable:
+    clinic = access_mode == 'clinic-writable'
+    writable = clinic or access_mode == 'course-writable'
+    if clinic != (dataset == 'empty') or clinic and mode != 'direct_tls':
+        raise ValueError('Clinic installation requires an empty database and direct HTTPS.')
+    if dataset not in ('rc', 'course-20', 'empty') or dataset == 'course-20' and not writable:
         raise ValueError('The complete course dataset requires explicit course-writable access.')
     if writable and mode not in ('direct_tls', 'teacher_tunnel'):
         raise ValueError('Course writes require a separate direct HTTPS deployment.')
@@ -99,7 +102,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         raise ValueError('Two distinct valid gateway ports are required.')
     mini_secret = None
     if wechat_mini_app_id is not None or wechat_mini_secret_file is not None:
-        if (mode != 'direct_tls' or dataset != 'course-20' or not writable
+        if (mode != 'direct_tls' or dataset not in ('empty', 'course-20') or not writable
                 or not re.fullmatch(r'wx[0-9a-f]{16}', wechat_mini_app_id or '')
                 or wechat_mini_secret_file is None):
             raise ValueError('Provide the mini-program AppID and private AppSecret for direct course HTTPS.')
@@ -111,7 +114,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'DJANGO_SETTINGS_MODULE': 'config.settings.production',
         'ADC_DEPLOYMENT_STAGE': 'production' if writable else 'staging', 'ADC_PUBLIC_HOST': host,
         'DJANGO_SECRET_KEY': secrets.token_urlsafe(64),
-        'POSTGRES_DB': 'adc_rc_demo', 'POSTGRES_USER': 'adc_g4_runtime',
+        'POSTGRES_DB': 'adc_clinic' if clinic else 'adc_rc_demo', 'POSTGRES_USER': 'adc_g4_runtime',
         'POSTGRES_PASSWORD': secrets.token_urlsafe(48),
         'ADC_DATABASE_OWNER': 'adc_g4_owner', 'DB_HOST': 'db', 'DB_PORT': '5432',
         'ADC_DB_SSLMODE': 'disable', 'ADC_PRIVATE_DB_NETWORK_ACK': '1',
@@ -121,7 +124,11 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
     }
     checked = validate_production_inputs(runtime)
     runtime['ADC_PUBLIC_HOST'] = checked.host
-    if writable:
+    if clinic:
+        runtime.update(ADC_CLINIC_INSTALLATION=project, ADC_PATIENT_AUTH_MODE='live',
+                       ADC_PATIENT_IDENTITY_PROVIDER='disabled', ADC_SMS_PROVIDER='disabled',
+                       ADC_SOURCE_COMMIT=source_commit)
+    elif writable:
         runtime['ADC_COURSE_PROJECT'] = project
         runtime['ADC_COURSE_SYNTHETIC'] = '1'
     if dataset == 'course-20':
@@ -139,7 +146,7 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         'ADC_READ_ONLY': '0',
     }
     database = {
-        'POSTGRES_DB': 'adc_rc_demo', 'POSTGRES_USER': 'adc_g4_admin',
+        'POSTGRES_DB': 'adc_clinic' if clinic else 'adc_rc_demo', 'POSTGRES_USER': 'adc_g4_admin',
         'POSTGRES_PASSWORD': admin_password, 'G4_OWNER_DB_PASSWORD': owner_password,
         'G4_RUNTIME_DB_PASSWORD': runtime['POSTGRES_PASSWORD'],
     }
@@ -164,6 +171,12 @@ def prepare(output, *, host, source_commit, app_image, db_image, nginx_image,
         (output / target).write_bytes((templates / source).read_bytes())
     if writable:
         compose = (output / 'compose.yaml').read_text()
+        if clinic:
+            compose = compose.replace('adc_rc_demo', 'adc_clinic')
+            compose = compose.replace('    environment: {ADC_RC_SYNTHETIC: "1"}\n', '')
+            compose = compose.replace('bootstrap_release_demo', 'initialize_clinic')
+            init = output / 'init-db.sh'
+            init.write_text(init.read_text().replace('adc_rc_demo', 'adc_clinic'))
         platform = 'linux/' + architecture
         compose = compose.replace('x-app: &app\n', 'x-app: &app\n  platform: ' + platform + '\n')
         for service in ('db', 'gateway'):
@@ -247,7 +260,7 @@ def inspect_bundle(output, rendered=None, *, resume_source=None):
     if mini_id is not None:
         private = output / 'private'
         if (not re.fullmatch(r'wx[0-9a-f]{16}', mini_id) or plan.get('mode') != 'direct_tls'
-                or plan.get('dataset') != 'course-20' or private.is_symlink()
+                or plan.get('dataset') not in ('course-20', 'empty') or private.is_symlink()
                 or private.stat().st_mode & 0o077):
             raise ValueError('The Web-only secret requires a private direct HTTPS bundle.')
         if any(key in values for key in (MINI_ID_ENV, MINI_SECRET_ENV, 'ADC_WECHAT_MINI_APP_SECRET')
@@ -261,15 +274,29 @@ def inspect_bundle(output, rendered=None, *, resume_source=None):
         raise ValueError('Runtime, maintenance and plan hostname must agree.')
     inputs = validate_production_inputs(runtime)
     access_mode = plan.get('access_mode', 'read-only')
-    writable = access_mode == 'course-writable'
-    if (access_mode not in ('read-only', 'course-writable') or
+    clinic = access_mode == 'clinic-writable'
+    writable = clinic or access_mode == 'course-writable'
+    if (access_mode not in ('read-only', 'course-writable', 'clinic-writable') or
             plan['read_only'] != (not writable) or inputs.read_only != (not writable) or
             runtime['DJANGO_SETTINGS_MODULE'] != 'config.settings.production' or
-            (writable and (plan.get('mode') not in ('direct_tls','teacher_tunnel') or
+            (access_mode == 'course-writable' and (plan.get('mode') not in ('direct_tls','teacher_tunnel') or
                            runtime.get('ADC_DEPLOYMENT_STAGE') != 'production' or
                            runtime.get('ADC_COURSE_PROJECT') != plan['project'] or
                            runtime.get('ADC_COURSE_SYNTHETIC') != '1'))):
         raise ValueError('Reviewed access mode, deployment mode and runtime must agree.')
+    if clinic != (plan.get('dataset') == 'empty'):
+        raise ValueError('Clinic access requires the production installation profile.')
+    if clinic:
+        if (plan.get('mode') != 'direct_tls' or any(e.get('POSTGRES_DB') != 'adc_clinic'
+                for e in (runtime, maintenance, database)) or any(
+                    e.get('ADC_DEPLOYMENT_STAGE') != 'production'
+                    or e.get('ADC_CLINIC_INSTALLATION') != plan['project']
+                    or e.get('ADC_OPERATIONS_INSTANCE') != plan['project']
+                    or e.get('ADC_PATIENT_AUTH_MODE') != 'live'
+                    or any(k in e for k in ('ADC_COURSE_PROJECT', 'ADC_COURSE_SYNTHETIC',
+                             'ADC_RC_SYNTHETIC', 'ADC_CLINICAL_SYNTHETIC', 'ADC_TEACHER_TEST_MODE'))
+                    for e in (runtime, maintenance))):
+            raise ValueError('Clinic installation contains foreign installation or training configuration.')
     if plan.get('mode') == 'teacher_tunnel' and (not writable or runtime.get('ADC_RC_SYNTHETIC')!='1' or runtime.get('ADC_TEACHER_TEST_MODE')!='1'):
         raise ValueError('Teacher writes are limited to the separate synthetic trial.')
     if runtime['AI_MODE'] != 'disabled' or runtime.get('ADC_MIGRATION_PASSWORD') or runtime.get('ADC_G4_MAINTENANCE'):
@@ -322,6 +349,9 @@ def inspect_bundle(output, rendered=None, *, resume_source=None):
                         and mounts[0].get('target') == MINI_SECRET_TARGET
                         and Path(mounts[0]['source']).resolve() == secret_path):
                     raise ValueError('The Web secret requires its exact read-only file mount.')
+        if clinic and (services['bootstrap']['command'] != ['python', 'manage.py', 'initialize_clinic']
+                       or services['bootstrap']['environment'] != maintenance):
+            raise ValueError('Clinic initialization must use its reviewed maintenance environment.')
         worker = services['notification-worker']
         if writable and (worker.get('profiles') or worker.get('restart') != 'unless-stopped'):
             raise ValueError('The course writer must start automatically and recover after reboot.')
@@ -355,9 +385,9 @@ if __name__ == '__main__':
     prepare_parser.add_argument('--http-port', type=int, default=80)
     prepare_parser.add_argument('--https-port', type=int, default=443)
     prepare_parser.add_argument('--mode', choices=('direct_tls', 'mac_tunnel', 'teacher_tunnel'), default='direct_tls')
-    prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable'), default='read-only')
+    prepare_parser.add_argument('--access-mode', choices=('read-only', 'course-writable', 'clinic-writable'), default='read-only')
     prepare_parser.add_argument('--architecture', choices=('amd64', 'arm64'), default='amd64')
-    prepare_parser.add_argument('--dataset', choices=('rc', 'course-20'), default='rc')
+    prepare_parser.add_argument('--dataset', choices=('rc', 'course-20', 'empty'), default='rc')
     prepare_parser.add_argument('--wechat-mini-app-id')
     prepare_parser.add_argument('--wechat-mini-secret-file', type=Path)
     inspect_parser = sub.add_parser('inspect')

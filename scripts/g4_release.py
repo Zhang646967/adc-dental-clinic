@@ -131,14 +131,14 @@ def migration_names(files):
 
 def applied_migrations(course):
     return set(course.dc('exec', '-T', 'db', 'psql', '--no-psqlrc', '-U', 'adc_g4_admin',
-        '-d', 'adc_rc_demo', '-At', '-c',
+        '-d', course.db_name, '-At', '-c',
         "SELECT app || '.' || name FROM django_migrations "
         "WHERE app NOT IN ('auth','contenttypes','sessions','admin')").decode().splitlines())
 
 
 def check_upgrade_space(course):
     size = int(course.dc('exec', '-T', 'db', 'psql', '--no-psqlrc', '-U', 'adc_g4_admin',
-                        '-d', 'adc_rc_demo', '-At', '-c', 'SELECT pg_database_size(current_database())'))
+                        '-d', course.db_name, '-At', '-c', 'SELECT pg_database_size(current_database())'))
     pg_kib = int(course.dc('exec', '-T', 'db', 'df', '-Pk', '/var/lib/postgresql/data')
                  .decode().splitlines()[-1].split()[3])
     minimum = 2 * size + 128 * 1024 * 1024
