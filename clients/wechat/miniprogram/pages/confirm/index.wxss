@@ -1,0 +1,13 @@
+.reschedule-summary .compare-zone { margin-bottom: 10rpx; }
+.reschedule-summary .compare-row { padding: 16rpx 0; }
+.reschedule-summary .compare-new,
+.reschedule-summary .compare-shared { border-top: 1px solid #d9e4df; }
+.reschedule-summary .compare-shared { padding-top: 14rpx; }
+.reschedule-summary .compare-time { margin: 3rpx 0; overflow-wrap: anywhere; }
+.reschedule-summary .compare-row .label { margin: 0; }
+.reschedule-summary .compare-new .time { color: #075349; }
+.reschedule-summary .compare-label { margin-right: 18rpx; }
+.reschedule-summary .compare-fact,
+.compare-details .compare-fact { margin: 4rpx 0; overflow-wrap: anywhere; }
+.reschedule-summary .changed-duration { color: #764b13; font-weight: 600; }
+.compare-details .checkout-id { overflow-wrap: anywhere; }

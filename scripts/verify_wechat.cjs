@@ -72,12 +72,13 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   if(process.env.ADC_WECHAT_COMPILER_DIR){
     const os=require('node:os'),{spawnSync}=require('node:child_process');
     const output=fs.mkdtempSync(path.join(os.tmpdir(),'adc-wechat-compile-'));
+    const styles=['app.wxss', ...app.pages.map(page=>page+'.wxss').filter(file=>fs.existsSync(path.join(root,file)))];
     try{
-      for(const [binary,args] of [['wcc',['-o',path.join(output,'wxml.js'),...app.pages.map(p=>p+'.wxml')]],['wcsc',['-lc','-js','-o',path.join(output,'wxss.js'),'app.wxss']]]){
+      for(const [binary,args] of [['wcc',['-o',path.join(output,'wxml.js'),...app.pages.map(p=>p+'.wxml')]],['wcsc',['-lc','-js','-o',path.join(output,'wxss.js'),...styles]]]){
         const result=spawnSync(path.join(process.env.ADC_WECHAT_COMPILER_DIR,binary),args,{cwd:root,encoding:'utf8',timeout:30000});
         assert.equal(result.status,0,binary+': '+result.stderr);
       }
-      compiler={status:'passed',wxml_pages:app.pages.length,wxss_files:1,scope:'Official offline syntax only; not an IDE preview or WeChat runtime'};
+      compiler={status:'passed',wxml_pages:app.pages.length,wxss_files:styles.length,scope:'Official offline syntax only; not an IDE preview or WeChat runtime'};
     }finally{fs.rmSync(output,{recursive:true,force:true});}
   }
   const services=await require('./verify_native_services.cjs').verify();
@@ -100,6 +101,7 @@ const success=(data,cookies=[])=>last.success({statusCode:200,cookies,data:{ok:t
   const report_pages=await require('../checks/test_report_pages_node.cjs').verify();
   const billing_pages=await require('../checks/test_billing_pages_node.cjs').verify();
   const reschedule_compare=require('../checks/test_reschedule_compare_node.cjs');
+  const visit_detail_gui=await require('../checks/test_visit_detail_gui_node.cjs')();
   const text_scale=require('../checks/test_text_scale_node.cjs');
-  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,return_sources,visit_checkout,recall_handoff,role_gui,report_notices,report_pages,billing_pages,reschedule_compare,text_scale,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
+  console.log(JSON.stringify({passed:true,checks,services,plans,consents,medical,discovery,accounts,wechat,profiles,alignment,patient_cash,patient_funds,record_copies,return_sources,visit_checkout,recall_handoff,role_gui,report_notices,report_pages,billing_pages,reschedule_compare,visit_detail_gui,text_scale,compiler,scope:'native source, handlers, timezone, session/CSRF transport, expiry and uncertain-network response; not a WeChat-runtime execution'}));
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

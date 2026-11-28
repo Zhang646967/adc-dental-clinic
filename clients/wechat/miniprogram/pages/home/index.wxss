@@ -1,0 +1,20 @@
+.primary-card {
+  border-top: 6rpx solid #16675c;
+}
+.report-entry {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  min-height: 88rpx;
+  box-sizing: border-box;
+  padding-top: 16rpx;
+  padding-bottom: 16rpx;
+}
+.report-entry .section-label {
+  margin: 0;
+}
+.entry-chevron {
+  margin-left: auto;
+  color: #37665e;
+}

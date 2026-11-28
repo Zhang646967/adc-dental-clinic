@@ -1,0 +1,23 @@
+.directory-shortcuts {
+  display: flex;
+  gap: 12rpx;
+  margin: 8rpx 0 24rpx;
+}
+.directory-shortcuts button.secondary {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.branch-card .clinic-card-top {
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 18rpx;
+}
+.branch-card .section-title {
+  flex: 1 1 320rpx;
+  margin: 0;
+}
+.branch-card .distance {
+  color: #165f53;
+  font-weight: 600;
+}

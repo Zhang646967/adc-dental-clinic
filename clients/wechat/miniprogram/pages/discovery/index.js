@@ -1,10 +1,10 @@
 const navigation=require('../../utils/navigation');
 const api=require('../../utils/api');
 const nearby=require('../../utils/nearby');
-const config=require('../../config');
 const {showError, dateTime}=require('../../utils/format');
 const actionModule=require('../../utils/primary-action');
 const {reportEntry}=require('../../utils/report-notices');
+const locationPrompt='使用当前位置，可按直线距离查看门店。';
 const mapPrimary=actionModule&&typeof actionModule.primaryAction==='function'?actionModule.primaryAction:()=>null;
 
 /* Both entry points use the same primary action. Older backends return only
@@ -24,21 +24,45 @@ function composePrimary(overview,readOnly){
 }
 
 Page({
-  data:{all:[],rows:[],cities:['全部城市'],cityIndex:0,categories:[{id:'',name:'全部服务'}],categoryIndex:0,keyword:'',onlineOnly:false,busy:false,error:'',locating:false,origin:null,limit:10,count:0,hasMore:false,locationNote:'可直接浏览；主动使用定位后，按直线距离由近到远排序。',
+  data:{all:[],rows:[],cities:['全部城市'],cityIndex:0,categories:[{id:'',name:'全部服务'}],categoryIndex:0,keyword:'',onlineOnly:false,busy:false,error:'',locating:false,nearbyActive:false,locationDenied:false,filtersOpen:false,limit:10,count:0,hasMore:false,locationNote:locationPrompt,
     serviceState:'loading',patientName:'',patientCapacity:'',patientDelegated:false,readOnly:false,primary:null,overview:null,canViewFunds:false,reportEntry:null,reportUnread:0,moreOpen:false,environmentLabel:'',serviceError:'',serviceRequestId:''},
-  async onShow(){await this.load();},
-  onHide(){this.clearPrivate({keepReview:true});},
+  async onShow(){
+    if(this.locationOrigin && typeof wx.getSetting==='function'){
+      const request=this.locationRequest;
+      wx.getSetting({success:settings=>{
+        if(request===this.locationRequest && (!settings.authSetting || settings.authSetting['scope.userLocation']!==true))this.resetLocation();
+      },fail:()=>{if(request===this.locationRequest)this.resetLocation();}});
+    }
+    await this.load();
+  },
+  onHide(){
+    this.clearPrivate({keepReview:true});
+    if(!this.openingClinic || this.data.locating)this.resetLocation();
+    this.openingClinic=false;
+  },
+  onUnload(){this.locationRequest=(this.locationRequest||0)+1;this.locationOrigin=null;},
+  resetLocation(){
+    this.locationRequest=(this.locationRequest||0)+1;
+    this.locationOrigin=null;
+    this.setData({locating:false,nearbyActive:false,locationDenied:false,locationNote:locationPrompt});
+    this.filter();
+  },
   async load(){
     this.clearPrivate({keepReview:true});
     const sequence=this.serviceSequence;
     this.setData({serviceState:'loading',serviceError:'',serviceRequestId:''});
-    const previousCity=this.data.cities[this.data.cityIndex];this.setData({busy:true,error:'',rows:[],all:[]});
+    this.setData({busy:true,error:'',rows:[],all:[]});
     try{
       const data=await api.request('discovery/index/');
       if(!Array.isArray(data.clinics)||!Array.isArray(data.categories))throw Error('门店目录暂不可用，请稍后重试。');
       if(sequence!==this.serviceSequence)return;
-      const cities=['全部城市',...new Set(data.clinics.map(r=>r.city))];
-      this.setData({all:data.clinics.map(c=>({...c,cover:c.images.length?config.apiBase+c.images[0].url:''})),cities,categories:[{id:'',name:'全部服务'},...data.categories],cityIndex:Math.max(0,cities.indexOf(previousCity)),busy:false,environmentLabel:data.environment_label||''});this.filter();
+      const previousCity=this.data.cities[this.data.cityIndex];
+      const previousCategory=this.data.categories[this.data.categoryIndex];
+      const cities=['全部城市',...new Set(data.clinics.map(r=>r.city).filter(Boolean))];
+      const categories=[{id:'',name:'全部服务'},...data.categories];
+      this.setData({all:data.clinics,cities,categories,cityIndex:Math.max(0,cities.indexOf(previousCity)),
+        categoryIndex:Math.max(0,categories.findIndex(c=>previousCategory && c.id===previousCategory.id)),
+        busy:false,environmentLabel:data.environment_label||''});this.filter();
     }catch(e){
       if(sequence!==this.serviceSequence)return;
       showError(this,e,{stayOnPage:true});
@@ -94,23 +118,47 @@ Page({
   },
   filter(){
     const category=this.data.categories[this.data.categoryIndex].id;
-    const rows=nearby.select(this.data.all,{city:this.data.cityIndex?this.data.cities[this.data.cityIndex]:'',keyword:this.data.keyword,origin:this.data.origin}).filter(c=>(!category||c.service_categories.includes(category))&&(!this.data.onlineOnly||c.online_booking));
-    this.setData({rows:rows.slice(0,this.data.limit).map(r=>({...r,distanceLabel:nearby.distanceLabel(r.distance)})),count:rows.length,hasMore:rows.length>this.data.limit});
+    const rows=nearby.select(this.data.all,{city:this.data.cityIndex?this.data.cities[this.data.cityIndex]:'',keyword:this.data.keyword,origin:this.locationOrigin}).filter(c=>(!category||c.service_categories.includes(category))&&(!this.data.onlineOnly||c.online_booking));
+    this.setData({rows:rows.slice(0,this.data.limit).map(r=>({...r,distanceLabel:this.data.nearbyActive && r.distance===null?'距离未知':nearby.distanceLabel(r.distance)})),count:rows.length,hasMore:rows.length>this.data.limit});
   },
-  city(e){this.setData({cityIndex:Number(e.detail.value),limit:10});this.filter();},
+  toggleFilters(){this.setData({filtersOpen:!this.data.filtersOpen});},
+  city(e){this.resetLocation();this.setData({cityIndex:Number(e.detail.value),limit:10});this.filter();},
   category(e){this.setData({categoryIndex:Number(e.detail.value),limit:10});this.filter();},
   keyword(e){this.setData({keyword:e.detail.value,limit:10});this.filter();},
   online(e){this.setData({onlineOnly:e.detail.value,limit:10});this.filter();},
   more(){this.setData({limit:this.data.limit+10});this.filter();},
-  locate(){
-    if(this.data.locating)return;this.setData({locating:true});
-    wx.getLocation({type:'wgs84',success:p=>{
-      if(!nearby.point(p.latitude,p.longitude)){this.setData({locating:false,locationNote:'未取得有效位置，仍可手动选城市。'});return;}
-      this.setData({origin:{latitude:p.latitude,longitude:p.longitude},locating:false,locationNote:'已按全部匹配门店的直线距离排序，实际路程以导航为准。'});this.filter();
-    },fail:()=>this.setData({locating:false,locationNote:'定位未开启，仍可手动选择城市和区域。'})});
+  locate({allStores=false}={}){
+    if(this.data.locating)return;
+    this.resetLocation();
+    const request=this.locationRequest;
+    this.setData({locating:true,locationNote:'正在获取当前位置…'});
+    const failed=(error={})=>{
+      if(request!==this.locationRequest)return;
+      const denied=/auth(?:orize)?[^:]{0,20}den(?:y|ied)|permission denied/i.test(error.errMsg||'');
+      this.setData({locating:false,locationDenied:denied,filtersOpen:true,
+        locationNote:denied?'未授权定位，可手动选择城市。':'暂时无法定位，可手动选择城市或重新定位。'});
+    };
+    if(typeof wx.getLocation!=='function'){failed();return;}
+    wx.getLocation({type:'wgs84',success:position=>{
+      if(request!==this.locationRequest)return;
+      if(!position || !nearby.point(position.latitude,position.longitude)){failed();return;}
+      this.locationOrigin={latitude:position.latitude,longitude:position.longitude};
+      const filters=allStores?{cityIndex:0,categoryIndex:0,keyword:'',onlineOnly:false}:{};
+      this.setData({...filters,locating:false,nearbyActive:true,limit:10,locationNote:'按直线距离，从近到远排列。'});
+      this.filter();
+    },fail:failed});
   },
-  stores(){wx.pageScrollTo({selector:'#store-search'});},
-  clinic(e){navigation.navigateTo({url:'/pages/clinic/index?id='+e.currentTarget.dataset.id});},
+  locationSettings(e){
+    if(e.detail && e.detail.authSetting && e.detail.authSetting['scope.userLocation']===true)this.locate();
+  },
+  stores(){
+    wx.pageScrollTo({selector:'#store-search'});
+    this.locate({allStores:true});
+  },
+  clinic(e){
+    this.openingClinic=true;
+    navigation.navigateTo({url:'/pages/clinic/index?id='+e.currentTarget.dataset.id,fail:()=>{this.openingClinic=false;}});
+  },
   doctors(){const city=this.data.cityIndex?this.data.cities[this.data.cityIndex]:'';navigation.navigateTo({url:'/pages/dentists/index?city='+encodeURIComponent(city)});},
   services(){const city=this.data.cityIndex?this.data.cities[this.data.cityIndex]:'';navigation.navigateTo({url:'/pages/services/index?category='+this.data.categories[this.data.categoryIndex].id+'&city='+encodeURIComponent(city)});},
   account(){this.clearPrivate();navigation.navigateTo({url:'/pages/account/index'});},

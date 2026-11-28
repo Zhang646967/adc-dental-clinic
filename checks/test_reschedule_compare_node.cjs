@@ -40,7 +40,8 @@ function confirmPage(review, { session = {} } = {}) {
   });
   return Object.assign({}, definition, {
     data: JSON.parse(JSON.stringify(definition.data)),
-    setData(v) { Object.assign(this.data, v); }
+    setData(v) { Object.assign(this.data, v); },
+    replaceGlobalReview(next) { state.globalData.review = next; }
   });
 }
 
@@ -124,6 +125,50 @@ const missing = confirmPage(Object.assign({}, baseReview, {preview: Object.assig
   {session: {subject_key: 'self', workspace_id: 'w1', subject_revision: 1}});
 missing.onLoad();
 ok(missing.data.comparison.proposed.serviceLabel === '', 'the page leaves a missing new service empty');
+
+// The patient reads each date and unchanged service detail once.
+const compact = page.data.comparison.summary;
+ok(compact.originalTime === '2026-11-30 09:00–09:30' &&
+  compact.proposedTime === '2026-12-01 10:30–11:00' && compact.sharedDay === '', 'different days keep both dates');
+ok(compact.shared.map(f=>f.label).join() === '门店,服务' && !compact.originalOnly.length &&
+  compact.proposedOnly[0].label === '医师' && compact.originalDentistDetail === preview.original.dentist,
+  'same-name doctors without both IDs are shown separately, with the source doctor in details');
+const doctors = (before,after) => reschedule.comparison({...preview,original:{...preview.original,dentist_id:before},
+  dentist_id:after},true).summary;
+ok(doctors(4,4).shared.some(row=>row.label==='医师') && !doctors(4,4).originalDentistDetail && !doctors(4,4).doctorChanged,
+  'a shared name and shared stable clinician ID allow one combined fact');
+ok(doctors(4,5).doctorChanged && doctors(4,5).originalOnly[0].label==='医师' &&
+  doctors(4,5).proposedOnly[0].value===preview.dentist && !doctors(4,5).shared.some(row=>row.label==='医师'),
+  'two different doctors sharing a name remain attributed to their own appointments');
+ok(doctors(null,3).originalDentistDetail === preview.original.dentist && !doctors(null,3).doctorChanged,
+  'one missing clinician ID does not manufacture continuity or a change');
+const sameDay = reschedule.comparison({...preview, start:'2026-11-30T02:30:00Z', end:'2026-11-30T03:00:00Z'},true).summary;
+ok(sameDay.sharedDay === '2026-11-30' && sameDay.originalTime === '09:00–09:30' && sameDay.proposedTime === '10:30–11:00',
+  'the same Beijing date appears once above two clock ranges');
+const overnight = reschedule.comparison({...preview, start:'2026-12-31T15:45:00Z', end:'2026-12-31T16:30:00Z'},true).summary;
+ok(overnight.proposedTime === '2026-12-31 23:45 至 2027-01-01 00:30', 'a Beijing-midnight year change retains both dates');
+const revised = reschedule.comparison({...preview, dentist:'另一位医师',service_name:'',duration_minutes:45,duration_changed:true},true).summary;
+ok(revised.shared.length === 1 && revised.shared[0].label === '门店' &&
+  revised.originalOnly.map(f=>f.label).join() === '医师,服务' && revised.proposedOnly.length === 1 &&
+  revised.proposedOnly[0].value === '另一位医师', 'changed facts stay attached to their appointment and absent names remain absent');
+ok(revised.durationChanged && revised.originalDuration === '30 分钟' && revised.proposedDuration === '45 分钟',
+  'both known durations remain visible when the slot length changes');
+const partial = reschedule.comparison({original:preview.original,end:preview.end},true).summary;
+ok(partial.proposedTime === '至 2026-12-01 11:00' && partial.proposedOnly.length === 0, 'missing proposed start leaves only its own end');
+ok(!page.data.detailsOpen,'number and reason start collapsed');
+page.toggleRescheduleDetails();ok(page.data.detailsOpen,'the patient can expand the details');
+page.onHide();ok(!page.data.detailsOpen,'leaving folds the details without submitting or clearing consent');
+page.toggleRescheduleDetails();
+page.replaceGlobalReview({...baseReview,preview:{...preview, proposal_token:'next'}});
+page.onShow();
+ok(!page.data.detailsOpen && !page.data.comparison && !page.data.review, 'a new proposal cannot restore older private details');
+const session={subject_key:'self',workspace_id:'w1',subject_revision:1};
+const switched=confirmPage(baseReview,{session});switched.onLoad();switched.toggleRescheduleDetails();session.subject_revision=2;switched.onShow();
+ok(switched.data.subjectInvalid && !switched.data.detailsOpen && !switched.data.comparison && !switched.data.checked && !switched.sourceReview,
+  'a changed identity clears the whole comparison and the disclosure');
+const content=fs.readFileSync(path.join(root,'pages/confirm/index.wxml'),'utf8');
+ok(content.includes('aria-expanded="{{detailsOpen}}"') && content.includes('bindtap="toggleRescheduleDetails"') &&
+  content.includes('wx:if="{{detailsOpen}}"'), 'assistive technology receives the state of the dedicated disclosure');
 
 module.exports = {passed: checks, total: checks, layer: 'Node JS reschedule projection and confirm page'};
 if (require.main === module) console.log(JSON.stringify(module.exports));

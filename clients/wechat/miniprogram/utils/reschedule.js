@@ -39,6 +39,7 @@ function originalFacts(original) {
     visitNo: original.visit_no || '',
     clinic: original.clinic || '',
     dentist: original.dentist || '',
+    dentistId: positive(original.dentist_id) ? Number(original.dentist_id) : null,
     serviceLabel: original.service || '',
     statusLabel: original.status_label || '',
     startLabel: dateTime(original.start),
@@ -47,14 +48,17 @@ function originalFacts(original) {
   };
 }
 
-function proposedFacts(preview) {
-  if (!preview || typeof preview !== 'object' || !preview.start) return null;
+function proposedFacts(preview, includePartial) {
+  if (!preview || typeof preview !== 'object') return null;
+  if (!preview.start && !(includePartial && (preview.end || preview.clinic || preview.dentist ||
+      preview.service_name || positive(preview.duration_minutes)))) return null;
   const minutes = positive(preview.duration_minutes) ? Number(preview.duration_minutes)
     : minutesBetween(preview.start, preview.end);
   const name = typeof preview.service_name === 'string' ? preview.service_name.trim() : '';
   return {
     clinic: preview.clinic || '',
     dentist: preview.dentist || '',
+    dentistId: positive(preview.dentist_id) ? Number(preview.dentist_id) : null,
     // An older response has no service_name; fall back only to a readable
     // service string, never to the original appointment's name.
     serviceLabel: name || (typeof preview.service === 'string' ? preview.service : ''),
@@ -67,14 +71,66 @@ function proposedFacts(preview) {
   };
 }
 
-function comparison(preview) {
+// Both endpoints are already in Beijing time. Repeat the date only when
+// the interval crosses midnight, including across a year boundary.
+function clockRange(facts, sharedDay) {
+  if (!facts) return '';
+  const start = facts.startLabel;
+  const end = facts.endLabel;
+  if (!start) return end ? '至 ' + end : '';
+  const first = sharedDay ? start.slice(11) : start;
+  if (!end) return first;
+  return start.slice(0, 10) === end.slice(0, 10)
+    ? first + '–' + end.slice(11) : first + ' 至 ' + end;
+}
+
+function reviewSummary(original, proposed, originalMinutes) {
+  const sharedDay = original && proposed && original.dayLabel && original.dayLabel === proposed.dayLabel &&
+    original.endLabel.startsWith(original.dayLabel) && proposed.endLabel.startsWith(proposed.dayLabel)
+    ? original.dayLabel : '';
+  const shared = [];
+  const originalOnly = [];
+  const proposedOnly = [];
+  const doctorIdsKnown = !!(original && proposed && original.dentistId && proposed.dentistId);
+  const doctorChanged = doctorIdsKnown && original.dentistId !== proposed.dentistId;
+  let originalDentistDetail = '';
+  for (const [field, label] of [['clinic', '门店'], ['dentist', '医师'], ['serviceLabel', '服务']]) {
+    const before = original && original[field];
+    const after = proposed && proposed[field];
+    if (field === 'dentist' && before && before === after && !doctorIdsKnown) {
+      // A matching display name alone does not establish the clinician's identity.
+      proposedOnly.push({label, value: after});
+      originalDentistDetail = before;
+    } else if (before && before === after && !(field === 'dentist' && doctorChanged)) {
+      shared.push({label, value: before});
+    } else {
+      if (before) originalOnly.push({label, value: before});
+      if (after) proposedOnly.push({label, value: after});
+    }
+  }
+  const changed = !!(proposed && (proposed.durationChanged ||
+    (originalMinutes && proposed.durationMinutes && originalMinutes !== proposed.durationMinutes)));
+  return {
+    sharedDay,
+    originalTime: clockRange(original, sharedDay),
+    proposedTime: clockRange(proposed, sharedDay),
+    shared, originalOnly, proposedOnly, doctorChanged, originalDentistDetail,
+    durationChanged: changed,
+    originalDuration: changed ? durationLabel(originalMinutes) : '',
+    proposedDuration: proposed ? proposed.durationLabel : ''
+  };
+}
+
+function comparison(preview, forRescheduleReview = false) {
   if (!preview || typeof preview !== 'object') return null;
   const original = originalFacts(preview.original);
-  const proposed = proposedFacts(preview);
+  const proposed = proposedFacts(preview, forRescheduleReview);
   if (!original && !proposed) return null;
   return {
     original,
     proposed,
+    summary: forRescheduleReview ? reviewSummary(original, proposed,
+      original && minutesBetween(preview.original.start, preview.original.end)) : null,
     sameDay: !!(original && proposed && original.dayLabel === proposed.dayLabel),
     changedDay: !!(original && proposed && original.dayLabel !== proposed.dayLabel)
   };

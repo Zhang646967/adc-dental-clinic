@@ -9,10 +9,11 @@ const clinics=[
  {id:4,name:'尚未核对坐标',city:'长沙',district:'长沙县',address:'合成地址',latitude:null,longitude:null,synthetic:true}
 ].map(c=>({...c,images:[],services:[],service_categories:[],team_count:0,online_booking:false}));
 function page(options={}){
- let definition,geo,requests=[],navigation=[],dialogs=[],phone=0,map=0;
- const wx={getLocation(o){geo=o;},showModal(o){dialogs.push(o);},makePhoneCall(){phone++;},openLocation(){map++;},
+ let definition,geo,requests=[],network=[],navigation=[],dialogs=[],scrolls=[],phone=0,map=0;
+ const wx={pageScrollTo(o){scrolls.push(o.selector);},getSetting(o){o.success({authSetting:{'scope.userLocation':options.allowed!==false}});},getLocation(o){geo=o;},showModal(o){dialogs.push(o);},makePhoneCall(){phone++;},openLocation(){map++;},
    navigateTo(o){navigation.push(o);},reLaunch(o){navigation.push(o);}};
- const api={bootstrap:options.bootstrap,signOut:options.signOut,request:async route=>{
+ const api={bootstrap:options.bootstrap,signOut:options.signOut,request:async (route,...args)=>{
+   network.push([route,...args]);
    requests.push(route);
    if(options.fail)throw Error('暂时无法更新');
    if(route==='overview/')return options.overview;
@@ -25,7 +26,7 @@ function page(options={}){
    Page:d=>definition=d,wx,getApp:()=>app,require:name=>name.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,consume:()=>null}:name.endsWith('/config')?{apiBase:'https://fixture.invalid'}:name.endsWith('/api')?api:name.endsWith('/nearby')?nearby:module.exports
  });
  const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}};
- return {p,requests,navigation,dialogs,geo:()=>geo,external:()=>({phone,map})};
+ return {p,requests,network,scrolls,navigation,dialogs,geo:()=>geo,external:()=>({phone,map})};
 }
 async function verify(){
  const cases=[];async function test(name,run){await run();cases.push(name);}
@@ -52,6 +53,41 @@ async function verify(){
  await test('location success changes order without sending coordinates to the API',async()=>{
    const d=page();await d.p.onShow();d.p.locate();d.geo().success({latitude:28.18,longitude:112.9});
    assert.equal(d.p.data.rows[0].id,2);assert.equal(d.p.data.rows[0].distanceLabel,'约0米');assert.deepEqual(d.requests,['discovery/index/']);
+ });
+ await test('one tap on Find stores requests location and ranks all published matches',async()=>{
+   const d=page(); await d.p.onShow();
+   d.p.city({detail:{value:d.p.data.cities.indexOf('武汉')}});
+   d.p.stores(); const pending=d.geo(); d.p.stores();
+   assert.equal(d.geo(),pending); assert.equal(pending.type,'wgs84');
+   assert.equal(d.scrolls[0],'#store-search');
+   pending.success({latitude:28.18,longitude:112.9});
+   assert.deepEqual(Array.from(d.p.data.rows,r=>r.id),[2,1,3,4]);
+   assert.equal(d.p.data.rows[3].distanceLabel,'距离未知');
+   assert.equal(d.p.data.cityIndex,0);
+   assert.deepEqual(d.network,[['discovery/index/']]);
+ });
+ await test('denying permission opens manual filters and recovers only after permission is granted',async()=>{
+   const d=page(); await d.p.onShow(); d.p.stores(); const first=d.geo();
+   first.fail({errMsg:'getLocation:fail auth deny'});
+   assert.equal(d.p.data.filtersOpen,true); assert.equal(d.p.data.locationDenied,true);
+   assert(d.p.data.rows.every(r=>r.distanceLabel===''));
+   d.p.locationSettings({detail:{authSetting:{'scope.userLocation':false}}}); assert.equal(d.geo(),first);
+   d.p.locationSettings({detail:{authSetting:{'scope.userLocation':true}}}); assert.notEqual(d.geo(),first);
+   d.geo().success({latitude:28.18,longitude:112.9}); assert.equal(d.p.data.rows[0].id,2);
+ });
+ await test('manual city and page exit override late location results; invalid positions never create distances',async()=>{
+   const d=page(); await d.p.onShow();d.p.stores();const old=d.geo();
+   d.p.city({detail:{value:d.p.data.cities.indexOf('武汉')}});old.success({latitude:28.18,longitude:112.9});
+   assert.equal(d.p.data.rows.length,1);assert.equal(d.p.data.rows[0].city,'武汉');assert.equal(d.p.data.nearbyActive,false);
+   d.p.locate();d.geo().success({latitude:null,longitude:112.9});assert(d.p.data.rows.every(r=>r.distanceLabel===''));
+   d.p.locate();const late=d.geo();d.p.onHide();late.success({latitude:28.18,longitude:112.9});assert.equal(d.p.data.nearbyActive,false);
+ });
+ await test('return from a clinic keeps sorting only while permission remains available',async()=>{
+   for(const allowed of [true,false]){
+     const d=page({allowed});await d.p.onShow();d.p.stores();d.geo().success({latitude:28.18,longitude:112.9});
+     d.p.clinic({currentTarget:{dataset:{id:2}}});d.p.onHide();await d.p.onShow();
+     assert.equal(d.p.data.nearbyActive,allowed);assert.equal(d.p.data.rows[0].id,allowed?2:1);
+   }
  });
  await test('all synthetic contact actions stop before external calls',async()=>{
    const d=page();await d.p.onShow();

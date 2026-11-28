@@ -166,6 +166,13 @@ async function verify(){
     assert.equal(discovery.p.data.primary.url,'/pages/visit/index?id=12');
     assert.equal(home.p.data.rows[0].actionLabel,readOnly?'查看预约详情':'查看预约与改期');
     assert.equal(discovery.p.data.readOnly,readOnly);count++;
+    assert.equal(home.p.data.servicesOpen,false);
+    const readCount=home.calls.length;
+    home.p.toggleServices();
+    assert.equal(home.p.data.servicesOpen,true);
+    assert.equal(home.calls.length,readCount);
+    home.p.onHide();
+    assert.equal(home.p.data.servicesOpen,false);count++;
     const book={primary_action:{kind:'BOOK',label:'预约就诊',button:'选择门店和时间',hint:'先选门店和服务，再查看可约时间。'}};
     const emptyHome=page('home',{session,responses:[{rows:[],page:1,pages:1},book]});
     const emptyDiscovery=page('discovery',{session,responses:[book]});

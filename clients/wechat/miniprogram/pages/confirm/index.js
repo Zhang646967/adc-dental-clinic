@@ -22,9 +22,10 @@ Page({
     previewNote:'',backLabel:'返回原页面',uncertain:false,querying:false,queryMessage:'',canQuery:false,
     resultKind:'',resultToken:'',resultSubjectKey:'',resultWorkspaceKey:'',resultSubjectRevision:0,
     conflict:false,conflictMessage:'',conflictTitle:'本次预约未保存',conflictKind:'',conflictOriginal:null,conflictSelection:null,conflictFollowup:null,
-    otherUnconfirmed:false,otherFailed:false,recordLabel:'',recordUrl:'',textScale:''},
+    otherUnconfirmed:false,otherFailed:false,recordLabel:'',recordUrl:'',textScale:'',detailsOpen:false,comparison:null},
   onLoad(){ api.showSubject(this); textScale.apply(this);
     const review=getApp().globalData.review;
+    this.sourceReview=review && review.kind==='reschedule' ? review : null;
     const session=api.sessionInfo();
     if(review && (review.subjectKey!==session.subject_key || review.workspaceKey!==session.workspace_id || review.subjectRevision!==session.subject_revision)){
       this.invalidateSubject(new Error('就诊人已变化，请重新核对预约。'));
@@ -35,23 +36,48 @@ Page({
     if(display.preview.original)display.preview.original=arrangement(display.preview.original);
     // Two groups of facts: what is retained, and what is proposed. Both are
     // projected from the server response; a missing value stays empty.
-    const facts=comparison(display.preview);
+    const facts=comparison(display.preview, review.kind==='reschedule');
     this.kind=review.kind;
     this.fromWaitlist=review.fromWaitlist;
     const copy=actions[review.kind];
     // A receipt lookup exists only after an appointment confirmation has been
     // sent without a definite outcome. It is never part of the first preview.
     const previewNote=review.kind==='booking'?'待确认，尚未预约':review.kind==='reschedule'?'待确认，原预约仍保留':'';
-    this.setData({review:display,comparison:facts,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],
+    this.setData({review:display,comparison:facts,detailsOpen:false,title:copy[0],consent:copy[1],button:copy[2],note:copy[3],
       followupVisit:review.followupVisit||null,previewNote,
       backLabel:review.kind==='booking'?'返回选时段':'返回原页面'});
   },
   // A return from the system menu re-reads the setting without rebuilding the
   // preview or touching the consent checkbox.
-  onShow(){textScale.apply(this);},
+  onShow(){textScale.apply(this);this.currentReschedule();},
+  onHide(){if(this.data.detailsOpen)this.setData({detailsOpen:false});},
+  currentReschedule(){
+    const review=this.data.review;
+    if(!review || this.data.done || review.kind!=='reschedule')return true;
+    const session=api.sessionInfo();
+    if(review.subjectKey!==session.subject_key || review.workspaceKey!==session.workspace_id ||
+        review.subjectRevision!==session.subject_revision || session.read_only){
+      this.invalidateSubject(new Error('当前办理权限已变化，请重新核对就诊人。'));
+      return false;
+    }
+    const current=getApp().globalData.review;
+    if(!current || current!==this.sourceReview || current.kind!==review.kind ||
+        !current.preview || current.preview.proposal_token!==review.preview.proposal_token){
+      this.sourceReview=null;
+      this.setData({review:null,comparison:null,detailsOpen:false,checked:false,error:'核对内容已更新，请重新选择时段。'});
+      return false;
+    }
+    return true;
+  },
+  toggleRescheduleDetails(){
+    if(this.data.review && this.data.review.kind==='reschedule' && this.currentReschedule()){
+      this.setData({detailsOpen:!this.data.detailsOpen});
+    }
+  },
   checked(e){if(this.data.review)this.setData({checked:e.detail.value.includes('yes')});},
   async submit(){
     if(this.data.busy||this.data.uncertain||this.data.done||this.data.conflict||this.data.followupBlocked||!this.data.checked||!this.data.review)return;
+    if(!this.currentReschedule())return;
     const review=this.data.review;
     const token=review.preview.proposal_token;
     const kind=review.kind;
@@ -64,7 +90,8 @@ Page({
         throw new Error('没有收到带编号的办理回执。');
       }
       getApp().globalData.review=null;
-      this.setData({done:waitlist?receipt:arrangement(receipt),doneType:waitlist?'waitlist':'visit',busy:false,checked:false});
+      this.sourceReview=null;
+      this.setData({comparison:null,detailsOpen:false,done:waitlist?receipt:arrangement(receipt),doneType:waitlist?'waitlist':'visit',busy:false,checked:false});
     }catch(e){
       if(staleSubject(e,api.sessionInfo(),{uncodedConflictIsStale:false}).invalid){
         this.invalidateSubject(e);
@@ -99,10 +126,11 @@ Page({
     return !e.status || e.status===408 || e.status>=500;
   },
   enterUncertain(error,review){
+    this.sourceReview=null;
     getApp().globalData.review=null;
     const kind=RECEIPT_KINDS[review.kind];
     const token=review.preview.proposal_token;
-    this.setData({busy:false,uncertain:true,review:null,checked:false,conflict:false,done:null,otherUnconfirmed:false,otherFailed:false,
+    this.setData({busy:false,uncertain:true,review:null,comparison:null,detailsOpen:false,checked:false,conflict:false,done:null,otherUnconfirmed:false,otherFailed:false,
       resultKind:kind,resultToken:token||'',
       resultSubjectKey:review.subjectKey||'',resultWorkspaceKey:review.workspaceKey||'',resultSubjectRevision:review.subjectRevision||0,
       canQuery:!!token,queryMessage:'',querying:false,
@@ -117,19 +145,21 @@ Page({
     this.otherRecord(error,review,true);
   },
   otherRecord(error,review,failed){
+    this.sourceReview=null;
     getApp().globalData.review=null;
     const original=review.preview&&review.preview.original;
     const wait=review.kind==='wait_join'||review.kind==='wait_withdraw'||review.kind==='offer_accept'||review.kind==='offer_decline';
-    this.setData({busy:false,otherUnconfirmed:true,otherFailed:!!failed,review:null,checked:false,uncertain:false,conflict:false,done:null,
+    this.setData({busy:false,otherUnconfirmed:true,otherFailed:!!failed,review:null,comparison:null,detailsOpen:false,checked:false,uncertain:false,conflict:false,done:null,
       recordLabel:wait?'查看候补与邀约记录':'查看原预约核对',
       recordUrl:wait?'/pages/waitlist/index':original&&original.id?`/pages/visit/index?id=${original.id}`:'/pages/home/index?queue=all',
       error:error.publicMessage||error.message||'',requestId:error.requestId||''});
   },
   rejected(error,review){
+    this.sourceReview=null;
     getApp().globalData.review=null;
     const reschedule=review.kind==='reschedule';
     const original=reschedule&&review.preview.original?{id:review.preview.original.id,clinic:review.preview.original.clinic,startLabel:review.preview.original.startLabel}:null;
-    this.setData({busy:false,checked:false,review:null,conflict:true,conflictKind:review.kind,
+    this.setData({busy:false,checked:false,review:null,comparison:null,detailsOpen:false,conflict:true,conflictKind:review.kind,
       conflictMessage:error.publicMessage||error.message||'本次提交未保存，请重新核对。',
       conflictTitle:reschedule?'本次改期未保存':'本次预约未保存',
       conflictOriginal:original,conflictSelection:review.selection||null,conflictFollowup:review.followupVisit||null,
@@ -170,9 +200,13 @@ Page({
     }
   },
   invalidateSubject(error){
-    getApp().globalData.review=null;
+    const current=getApp().globalData.review;
+    if(!this.data.review || this.data.review.kind!=='reschedule' || !current || current===this.sourceReview){
+      getApp().globalData.review=null;
+    }
+    this.sourceReview=null;
     this.setData({
-      review:null,checked:false,done:null,subjectInvalid:true,uncertain:false,conflict:false,otherUnconfirmed:false,otherFailed:false,
+      review:null,comparison:null,detailsOpen:false,checked:false,done:null,subjectInvalid:true,uncertain:false,conflict:false,otherUnconfirmed:false,otherFailed:false,
       canQuery:false,resultToken:'',queryMessage:'',querying:false,
       patientName:'',patientCapacity:'',patientDelegated:false
     });

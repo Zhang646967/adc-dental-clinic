@@ -22,6 +22,11 @@
 
   <view class="page-heading"><view class="title">患者服务中心</view></view>
 
+  <view class="directory-shortcuts">
+    <button class="secondary" bindtap="stores" disabled="{{locating}}">找门店</button>
+    <button class="secondary" bindtap="doctors">找医师</button>
+    <button class="secondary" bindtap="services">找服务</button>
+  </view>
   <view wx:if="{{serviceError}}" class="error" role="alert">{{serviceError}}<text wx:if="{{serviceRequestId}}" class="support-code" selectable>查询编号 {{serviceRequestId}}</text></view>
 
   <view wx:if="{{serviceState==='ready'&&primary}}" class="card next-card primary-card">
@@ -67,19 +72,33 @@
     </view>
   </block>
 
-  <view class="section-heading"><view class="section-title">找门店与医师</view></view>
-  <view class="card"><view class="row"><button class="secondary" bindtap="stores">找门店</button><button class="secondary" bindtap="doctors">找医师</button><button class="secondary" bindtap="services">找服务</button></view><view class="muted small">无需登录即可浏览公开门店、医师与服务。</view></view>
-
-  <view id="store-search" class="card"><view class="section-title">查找门店</view><view class="filter-grid"><view><view class="label">就诊城市</view><picker range="{{cities}}" value="{{cityIndex}}" bindchange="city"><view class="picker">{{cities[cityIndex]}} ▾</view></picker></view><view><view class="label">需要的服务</view><picker range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="category"><view class="picker">{{categories[categoryIndex].name}} ▾</view></picker></view></view>
-    <input value="{{keyword}}" bindinput="keyword" placeholder="搜索区域或门店名称" maxlength="80" aria-label="搜索区域或门店名称"/>
-    <view class="filter-actions"><button class="compact secondary" bindtap="locate" loading="{{locating}}" disabled="{{locating}}">定位找附近门店</button><label class="small">仅看线上预约 <switch checked="{{onlineOnly}}" bindchange="online"/></label></view><view class="muted small">{{locationNote}}</view>
+  <view id="store-search" class="card">
+    <view class="section-title">{{nearbyActive?'附近门店':'门店目录'}}</view>
+    <view class="muted">{{locationNote}}</view>
+    <view class="filter-actions">
+      <button wx:if="{{locationDenied}}" class="compact secondary" open-type="openSetting" bindopensetting="locationSettings">位置授权设置</button>
+      <button wx:else class="compact secondary" bindtap="locate" loading="{{locating}}" disabled="{{locating}}">{{nearbyActive?'重新定位':'使用当前位置'}}</button>
+      <button class="compact secondary" bindtap="toggleFilters" aria-expanded="{{filtersOpen}}">{{filtersOpen?'收起筛选':'选城市或筛选'}}</button>
+    </view>
+    <view wx:if="{{filtersOpen}}">
+      <view class="filter-grid">
+        <view><view class="label">就诊城市</view><picker range="{{cities}}" value="{{cityIndex}}" bindchange="city"><view class="picker">{{cities[cityIndex]}} ▾</view></picker></view>
+        <view><view class="label">服务类别</view><picker range="{{categories}}" range-key="name" value="{{categoryIndex}}" bindchange="category"><view class="picker">{{categories[categoryIndex].name}} ▾</view></picker></view>
+      </view>
+      <input value="{{keyword}}" bindinput="keyword" placeholder="搜索区域或门店名称" maxlength="80" aria-label="搜索区域或门店名称"/>
+      <label class="small">仅看可线上预约的门店 <switch checked="{{onlineOnly}}" bindchange="online"/></label>
+    </view>
   </view>
-  <view wx:if="{{error}}" class="error" role="alert">{{error}}<button class="secondary" bindtap="load">重新连接</button></view><view wx:if="{{busy}}" class="notice">正在读取门店资料…</view>
-  <view wx:if="{{!busy&&!error}}" class="section-heading"><view class="section-title">为你找到 {{count}} 家门店</view></view>
+  <view wx:if="{{error}}" class="error" role="alert">{{error}}<button class="secondary" bindtap="load">重新连接</button></view>
+  <view wx:if="{{busy}}" class="notice">正在读取门店资料…</view>
+  <view wx:if="{{!busy&&!error}}" class="section-heading"><view class="section-label">共 {{count}} 家门店</view></view>
   <view wx:for="{{rows}}" wx:key="id" class="card branch-card">
-    <view class="clinic-card-top"><text class="status">{{item.opening.state_label}}</text><text class="muted">{{item.distanceLabel}}</text></view><view class="section-title">{{item.name}}</view><image wx:if="{{item.cover}}" src="{{item.cover}}" mode="aspectFill" class="branch-cover" lazy-load/><view class="line">{{item.summary}}</view><view class="muted">{{item.city}} · {{item.district}}</view>
-    <view class="profile-tags"><text wx:for="{{item.services}}" wx:for-item="service" wx:key="id">{{service.name}}</text></view><view class="muted line">{{item.team_count}}位接诊医师<text wx:if="{{item.next_shift_day}}"> · 最近出诊 {{item.next_shift_day}}</text><text wx:elif="{{item.online_booking}}"> · 近期暂无出诊公示</text></view>
-    <view class="muted line"><text wx:for="{{item.team}}" wx:for-item="doctor" wx:key="id">{{doctor.name}} · {{doctor.title}}　</text></view><view class="line">{{item.address}}</view><view class="muted">电话 {{item.phone}} · 今日 {{item.opening.today}}</view><button class="secondary" bindtap="clinic" data-id="{{item.id}}">查看门店</button>
+    <view class="clinic-card-top"><view class="section-title">{{item.name}}</view><text wx:if="{{item.distanceLabel}}" class="distance">{{item.distanceLabel}}</text></view>
+    <view class="line">{{item.address || item.district || item.city}}</view>
+    <view class="muted"><text wx:if="{{item.opening.state_label}}">{{item.opening.state_label}}　</text>{{item.opening.today}}</view>
+    <button class="secondary" bindtap="clinic" data-id="{{item.id}}" aria-label="查看{{item.name}}详情">查看门店</button>
   </view>
-  <view wx:if="{{!busy&&!error&&!rows.length}}" class="notice">没有符合当前条件的门店，可调整城市、区域或服务方向。</view><button wx:if="{{hasMore}}" class="secondary" bindtap="more">继续查看门店</button><view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
+  <view wx:if="{{!busy&&!error&&!rows.length}}" class="notice">没有符合条件的门店。可更换城市或调整筛选。</view>
+  <button wx:if="{{hasMore}}" class="secondary" bindtap="more">查看更多门店</button>
+  <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>

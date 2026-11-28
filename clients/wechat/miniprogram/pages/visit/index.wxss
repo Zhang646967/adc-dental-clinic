@@ -1,0 +1,39 @@
+.patient-flow .visit-switch {
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
+  color: #11665b;
+}
+.visit-summary {
+  border-top: 5rpx solid #167267;
+}
+.visit-state {
+  justify-content: space-between;
+  align-items: center;
+}
+.patient-flow .visit-window {
+  margin: 8rpx 0 20rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #123e37;
+}
+.patient-flow .visit-clinic {
+  margin: 0;
+}
+.visit-team, .visit-address {
+  margin-top: 6rpx;
+}
+.patient-flow .visit-summary > .visit-reschedule {
+  width: 100%;
+  margin: 26rpx 0 4rpx;
+}
+.patient-flow .visit-summary > button.visit-disclosure,
+.patient-flow .visit-summary > button.visit-cancel {
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+.patient-flow .visit-summary > button.visit-cancel {
+  color: #66534e;
+  font-weight: 400;
+}

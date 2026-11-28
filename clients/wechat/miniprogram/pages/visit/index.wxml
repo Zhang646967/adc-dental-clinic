@@ -1,51 +1,46 @@
 <view class="page patient-flow {{textScale}}">
-  <view wx:if="{{visit}}" class="subject-banner">
-    <text>就诊人：{{patientName||'请先选择'}}</text>
-    <view>{{patientCapacity}}</view>
-    <navigator url="/pages/patients/index" open-type="reLaunch">切换就诊人</navigator>
-  </view>
   <view class="title">{{reviewView && reviewView.completedLabel ? '就诊详情' : '预约详情'}}</view>
+  <view wx:if="{{visit}}" class="identity-bar">
+    <view class="identity-main"><text class="identity-name">{{patientName}}</text><text wx:if="{{patientCapacity}}" class="identity-meta">{{patientCapacity}}</text></view>
+    <navigator class="visit-switch" url="/pages/patients/index" open-type="reLaunch" aria-label="切换就诊人">切换就诊人</navigator>
+  </view>
+  <view wx:if="{{busy && !visit}}" class="notice" role="status">正在读取预约…</view>
   <view wx:if="{{error}}" class="error" role="alert">
     {{error}}<text wx:if="{{requestId}}" class="support-code" selectable>查询编号 {{requestId}}</text>
   </view>
   <button wx:if="{{subjectInvalid}}" class="primary" bindtap="recoverSubject" disabled="{{busy}}" loading="{{busy}}">核对账号与就诊人</button>
 
-  <view wx:if="{{visit}}" class="card">
-    <view class="record-head">
-      <view class="pill status-{{record.kind}}">{{visit.status_label}}</view>
-      <view wx:if="{{reviewView && reviewView.settlementState === 'AWAITING_PUBLICATION'}}" class="pill status-rescheduled">结算单待发布</view>
-      <view wx:elif="{{reviewView && reviewView.settlement && reviewView.settlement.reviewPending}}" class="pill status-rescheduled">待复核</view>
-    </view>
-    <view class="section-title">{{visit.clinic}}</view>
-    <view class="muted">{{visit.dentist}} · {{visit.service}}</view>
-    <view class="invoice-line">
+  <view wx:if="{{visit}}" class="card visit-summary">
+    <view class="record-head visit-state">
       <view class="muted">预约时间（北京时间）</view>
-      <view class="time">{{record.whenLabel}}</view>
+      <view class="pill status-{{record.kind}}">{{visit.status_label}}</view>
     </view>
-    <view wx:if="{{reviewView}}" class="invoice-line">
-      <view class="muted">实际到诊</view>
-      <view>{{reviewView.attendedLabel || '尚未登记'}}</view>
-    </view>
-    <view wx:if="{{reviewView && reviewView.completedLabel}}" class="invoice-line">
-      <view class="muted">就诊结束</view>
-      <view>{{reviewView.completedLabel}}</view>
-    </view>
-    <view class="line">{{visit.address}}</view>
-    <view wx:if="{{visit.needs_outcome_review}}" class="notice">到诊结果待核实，请联系门店。</view>
-    <button class="disclosure" bindtap="toggleInfo" aria-expanded="{{infoOpen}}" aria-label="{{infoOpen ? infoCloseLabel : infoOpenLabel}}">{{infoOpen ? infoCloseLabel : infoOpenLabel}}</button>
+    <view class="time visit-window">{{record.whenLabel}}</view>
+    <view wx:if="{{visit.clinic}}" class="section-title visit-clinic">{{visit.clinic}}</view>
+    <view wx:if="{{visit.dentist || visit.service}}" class="visit-team"><text wx:if="{{visit.dentist}}">{{visit.dentist}} 医师</text><text wx:if="{{visit.dentist && visit.service}}"> · </text>{{visit.service}}</view>
+    <view wx:if="{{visit.address}}" class="muted visit-address">{{visit.address}}</view>
+    <view wx:if="{{reviewView && reviewView.attendedLabel}}" class="fact-row"><text>实际到诊</text><text>{{reviewView.attendedLabel}}</text></view>
+    <view wx:if="{{reviewView && reviewView.completedLabel}}" class="fact-row"><text>就诊结束</text><text>{{reviewView.completedLabel}}</text></view>
+    <view wx:if="{{visit.needs_outcome_review}}" class="notice">到诊结果待核实。<navigator class="link" url="/pages/help/index?visit={{visit.id}}">联系门店核实</navigator></view>
+    <view wx:if="{{reviewView && reviewView.settlementState === 'AWAITING_PUBLICATION'}}" class="pill status-rescheduled">结算单待发布</view>
+    <view wx:elif="{{reviewView && reviewView.settlement && reviewView.settlement.reviewPending}}" class="pill status-rescheduled">待复核</view>
+    <button wx:if="{{record.changeAllowed}}" class="primary visit-reschedule" bindtap="reschedule" disabled="{{busy}}">更改预约时间</button>
+    <button class="disclosure visit-disclosure" bindtap="toggleInfo" aria-expanded="{{infoOpen}}" aria-label="{{infoOpen ? infoCloseLabel : infoOpenLabel}}">{{infoOpen ? infoCloseLabel : infoOpenLabel}}</button>
     <view wx:if="{{infoOpen}}" class="detail-panel">
       <view class="invoice-line">
         <view class="muted">{{reviewView && reviewView.completedLabel ? '就诊编号' : '预约编号'}}</view>
         <view class="prose checkout-id">#{{visit.id}}{{visit.visit_no ? ' · ' + visit.visit_no : ''}}</view>
       </view>
-      <view wx:if="{{visit.patient_request && !patientDelegated}}" class="invoice-line">
-        <view class="muted">本人填写的就诊需求</view>
-        <view class="prose">{{visit.patient_request}}</view>
-      </view>
-      <view class="invoice-line">
-        <view class="muted">前台电话</view>
-        <view>{{visit.phone}}</view>
-      </view>
+      <view wx:if="{{visit.phone}}" class="invoice-line"><view class="muted">前台电话</view><text selectable>{{visit.phone}}</text></view>
+      <view wx:if="{{visit.patient_request && !patientDelegated}}" class="invoice-line"><view class="muted">本人填写的就诊需求</view><view class="prose">{{visit.patient_request}}</view></view>
+      <view wx:if="{{record.changeAllowed}}" class="muted">确认改期前保留原预约；改期仅限本门店的同一项服务。</view>
+      <navigator wx:if="{{!visit.needs_outcome_review}}" class="link" url="/pages/help/index?visit={{visit.id}}">联系前台协助</navigator>
+    </view>
+    <button wx:if="{{record.changeAllowed}}" class="disclosure visit-cancel" bindtap="cancel" aria-expanded="{{cancelOpen}}" disabled="{{busy}}">{{cancelOpen?'收起取消申请':'取消这次预约'}}</button>
+    <view wx:if="{{record.changeAllowed && cancelOpen}}" class="detail-panel">
+      <label class="label" for="reason">取消原因</label>
+      <textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请填写取消原因" aria-label="取消原因"/>
+      <button class="danger" bindtap="previewCancel" disabled="{{busy}}" loading="{{busy}}">核对取消内容</button>
     </view>
   </view>
 
@@ -180,18 +175,7 @@
     <button class="secondary" bindtap="invoice">查看本人结算单</button>
   </view>
 
-  <view wx:if="{{record.changeAllowed}}">
-    <button class="primary" bindtap="reschedule">更改预约时间（改期）</button>
-    <view class="muted">确认前保留原约；仅可在本店调整同一服务。</view>
-    <button class="danger" bindtap="cancel">{{cancelOpen?'保留预约，收起取消':'需要取消这次预约'}}</button>
-  </view>
-  <view wx:if="{{record.changeAllowed && cancelOpen}}" class="card">
-    <label class="label" for="reason">取消原因</label>
-    <textarea id="reason" value="{{reason}}" maxlength="500" bindinput="reason" placeholder="请说明安排方面的原因" aria-label="取消原因"/>
-    <button class="danger" bindtap="previewCancel" disabled="{{busy}}" loading="{{busy}}">核对取消内容</button>
-  </view>
-  <navigator wx:if="{{visit}}" class="link" url="/pages/help/index?visit={{visit.id}}">联系前台协助</navigator>
-  <button wx:if="{{visit || (error && !subjectInvalid)}}" class="secondary" bindtap="load" disabled="{{busy}}">刷新预约详情</button>
-  <button bindtap="home">返回我的预约</button>
+  <button wx:if="{{visit || canRetry}}" class="secondary" bindtap="load" disabled="{{busy}}">刷新预约详情</button>
+  <button wx:if="{{visit || error}}" bindtap="home">返回我的预约</button>
   <view wx:if="{{environmentLabel}}" class="page-footnote">{{environmentLabel}}</view>
 </view>
