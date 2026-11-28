@@ -193,8 +193,10 @@ class Course:
 
     def images(self):
         for name, image in self.plan['images'].items():
-            obj = json.loads(run(self.docker + ['image', 'inspect', '--platform', 'linux/' + self.architecture, image], self.log))[0]
-            if obj['Architecture'] != self.architecture:
+            # A locally pulled pinned image reports its OS and architecture even
+            # on Engine API 1.48, which has no platform switch for image inspect.
+            obj = json.loads(run(self.docker + ['image', 'inspect', image], self.log))[0]
+            if (obj.get('Os'), obj['Architecture']) != ('linux', self.architecture):
                 raise ValueError('Image architecture does not match the selected target.')
             if name == 'app' and ((obj['Config'].get('Labels') or {}).get('org.opencontainers.image.revision')
                                    != self.plan['requested_source_commit']):
