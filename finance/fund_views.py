@@ -14,7 +14,7 @@ from finance import fund_services as services
 
 class BasisForm(forms.Form):
     basis=forms.CharField(label='基金用途与银行证据核对依据',max_length=500,widget=forms.Textarea(attrs={'rows':3}),
-        help_text='仅使用合成流水；请核对基金到账或退回用途，不能把患者现金流水重复作为基金凭据。')
+        help_text='按已登记的渠道流水核对基金到账或退回用途，不能把患者现金流水重复作为基金凭据。')
 
 
 class ReviewForm(forms.Form):

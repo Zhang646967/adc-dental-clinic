@@ -64,7 +64,7 @@ def _request(request,source_type,pk,reversal_id=None):
             source=get_object_or_404(EquipmentEvent.objects.select_related('asset__clinic'),pk=pk,asset__clinic_id=clinic)
             balance=dict(known_cost=effective_cost(source)[0],net_equipment_expense=event_net(source.pk),pending=source.cash_entries.filter(state='PENDING').count())
     action=request.POST.get('action','preview')
-    titles={'invoice':'申请模拟收款／退款','equipment':'申请设备费用记账',
+    titles={'invoice':'申请登记线下收款或退款','equipment':'申请设备费用记账',
             'advance':'登记患者预收款','advance_refund':'登记预收原渠道退款'}
     title='申请冲回误记条目' if reversal_id and source_type!='advance_refund' else titles[source_type]
     if request.method=='POST' and action=='confirm':

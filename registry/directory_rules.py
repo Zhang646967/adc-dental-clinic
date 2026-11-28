@@ -21,7 +21,7 @@ LABELS = {'clinic_code': '诊所编码', 'employee_no': '牙医员工编号', 'c
           'name': '名称', 'postal_address': '诊所地址', 'supervisor_name': '主管联络姓名',
           'phone': '联系电话', 'email': '邮箱', 'area_sqm': '面积（平方米）',
           'date_of_birth': '出生日期', 'home_address': '联系地址'}
-REASONS = {'SOURCE_RECORD': '依据已核对的合成基础资料登记',
+REASONS = {'SOURCE_RECORD': '依据已核对的基础资料登记',
            'CORRECT_LINK': '更正误关联的资格记录', 'RESTORE_LINK': '重新核对后恢复资格关联'}
 ACTIONS = frozenset(('attach', 'withdraw'))
 CODE_RE = re.compile(r'[A-Z0-9][A-Z0-9_-]{0,23}\Z')

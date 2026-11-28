@@ -14,7 +14,7 @@ class DirectoryForm(forms.ModelForm):
             'address':'详细地址','entrance':'楼层及入口','public_phone':'公开联系电话',
             'latitude':'距离计算纬度（WGS-84）','longitude':'距离计算经度（WGS-84）',
             'map_latitude':'地图导航纬度（GCJ-02）','map_longitude':'地图导航经度（GCJ-02）',
-            'coordinate_source':'坐标来源与核对依据','synthetic':'合成测试门店（拦截拨号和导航）','is_published':'公开门店资料'}
+            'coordinate_source':'坐标来源与核对依据','synthetic':'验收专用门店（关闭拨号及导航）','is_published':'公开门店资料'}
 
     def clean(self):
         data=super().clean()

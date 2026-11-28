@@ -122,10 +122,10 @@ def resubmit_catalogue(request, pk):
 @require_http_methods(['GET', 'POST'])
 def arrangement_new(request):
     scope(request.user, ('MANAGER',))
-    return _flow(request, title='准备本店课程医保安排', form=ArrangementForm(_bound(request)),
+    return _flow(request, title='准备本店费用测算方案', form=ArrangementForm(_bound(request)),
         prepare=services.prepare_arrangement, confirm=lambda **kw: services.confirm_preparation(expected_kind='arrangement', **kw),
         summary=lambda p: [('目录', p['catalogue']), ('有效日期', f"{p['data']['starts_on']} 至 {p['data']['ends_on']}"),
-            ('合成依据', p['data']['reference']), ('安排性质', '课程模拟，待另一财务账号核对，不证明真实定点资质')])
+            ('测算依据', p['data']['reference']), ('安排性质', '院内测算方案，待财务独立复核。定点资格须向医保机构核实')])
 
 
 @login_required
@@ -161,7 +161,7 @@ def review(request, kind, pk):
         prepare=lambda **kw: services.prepare_review(kind=kind, pk=pk, **kw),
         confirm=lambda **kw: services.confirm_review(expected_kind=kind, expected_pk=pk, **kw),
         summary=lambda p: [('资料编号', p['row'].pk), ('结果', '核对通过并启用' if p['data']['decision'] == 'approve' else '未通过'),
-            ('依据', p['data']['reason']), ('资金影响', '无；此为课程合成资料核对')])
+            ('依据', p['data']['reason']), ('资金影响', '仅核对资料，不产生收付款')])
 
 
 @login_required
@@ -187,10 +187,10 @@ def eligibility(request, pk):
         row, blocker = selectors.eligibility_at(b['clinic'], patient.pk, timezone.localdate())
         return render(request, 'insurance/eligibility.html', dict(patient=patient, current=row, blocker=blocker,
             history=EligibilityFact.objects.filter(clinic_id=b['clinic'], patient=patient).order_by('-version'), form=EligibilityForm()))
-    return _flow(request, title='登记患者模拟待遇核对结果', form=EligibilityForm(_bound(request)),
+    return _flow(request, title='登记患者待遇测算结果', form=EligibilityForm(_bound(request)),
         prepare=lambda **kw: services.prepare_eligibility(patient_id=pk, **kw),
         confirm=lambda **kw: services.confirm_preparation(expected_kind='eligibility', expected_patient_id=pk, **kw),
         summary=lambda p: [('患者业务编号', patient.patient_no), ('参保地', dict(services.REGIONS)[p['data']['insured_region']]),
             ('结果', dict(services.ELIGIBILITY_STATES)[p['data']['state']]), ('版本', p['data']['version']),
-            ('有效日期', f"{p['data']['starts_on']} 至 {p['data']['ends_on']}"), ('合成依据', p['data']['reference']),
+            ('有效日期', f"{p['data']['starts_on']} 至 {p['data']['ends_on']}"), ('测算依据', p['data']['reference']),
             ('影响', '追加核对记录，不扩大患者权限，不产生资金或治疗')])

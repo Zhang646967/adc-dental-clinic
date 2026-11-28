@@ -30,7 +30,7 @@ def _original(row):
         raise RuleError('请先查询原唯一结算请求，取得明确受理结果；已在撤销中的请求继续按原编号办理。')
     outcome = row.simulation_outcome
     if outcome.result != 'ACCEPTED':
-        raise RuleError('原模拟结果未受理，无需发起撤销。')
+        raise RuleError('原测算结果未受理，无需发起撤销。')
     require_no_pending(row.pk)
     cash = _cash(row)
     return dict(request=row.pk, request_id=str(row.request_id), revision=row.lock_version,
@@ -44,7 +44,7 @@ def prepare_cancellation(*, actor, request_id, simulation_mode, reason):
         row = settlements(actor).get(pk=request_id)
         source = _original(row)
         if simulation_mode not in dict(CANCEL_MODES):
-            raise RuleError('请选择明确的本地撤销模拟方式。')
+            raise RuleError('请选择明确的院内测算撤销方式。')
         d = dict(request=row.pk, source_digest=digest(source), simulation_mode=simulation_mode, reason=_text(reason, '撤销依据'))
         return dict(row=row, source=source, data=d, proposal_token=proposal(actor, REQUEST, ROLES, d))
 
@@ -111,7 +111,7 @@ def confirm_cancellation_query(*, actor, proposal_token, confirmed, expected_req
         raise RuleError('原撤销结果尚未明确，不能视为完成。')
     _change(cancel, 'AWAITING_REVIEW')
     _advance(row, 'CANCEL_PENDING')
-    _record(actor, row, p['operation'], 'CANCEL_QUERY', '按原撤销编号取得保留的模拟结果', cancellation=cancel)
+    _record(actor, row, p['operation'], 'CANCEL_QUERY', '按原撤销编号取得已登记的测算结果', cancellation=cancel)
     return row, False
 
 

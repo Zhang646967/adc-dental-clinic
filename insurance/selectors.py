@@ -75,15 +75,15 @@ def eligibility_at(clinic_id, patient_id, on):
     """Internal projection; caller owns patient/financial authorization."""
     row = latest_eligibility(clinic_id, patient_id)
     if not row:
-        return None, '未登记模拟待遇'
+        return None, '尚未登记待遇测算'
     if row.state != 'VERIFIED':
         return row, row.get_state_display()
     if not row.starts_on <= on <= row.ends_on:
-        return row, '模拟待遇不在有效期内'
+        return row, '待遇测算已超出有效期'
     arrangement = ClinicArrangement.objects.filter(clinic_id=clinic_id, clinic__is_active=True,
         state='CONFIRMED', catalogue__state='CONFIRMED', starts_on__lte=on, ends_on__gte=on).select_related('catalogue').first()
     if not arrangement:
-        return row, '本店该日期没有已核对启用的模拟安排'
+        return row, '本店该日期没有已核对启用的测算方案'
     if row.insured_region != arrangement.catalogue.region:
         return row, '参保地与本店目录地区不同，需单独核对异地适用条件'
     return row, ''

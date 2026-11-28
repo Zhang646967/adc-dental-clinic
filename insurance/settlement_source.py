@@ -42,7 +42,7 @@ def quote_source(actor, invoice_id, *, lock=False):
     arrangement = ClinicArrangement.objects.filter(clinic_id=bill.clinic_id, state='CONFIRMED',
         catalogue__state='CONFIRMED', starts_on__lte=bill.service_on, ends_on__gte=bill.service_on).select_related('catalogue').first()
     if arrangement is None:
-        raise RuleError('实际接诊日期没有已核对的本店模拟安排，请先核对日期和来源。')
+        raise RuleError('实际接诊日期没有已核对的本店测算方案，请先核对日期和来源。')
     if lock:
         # Preparation commands use Clinic -> Catalogue -> subject -> fee.
         PolicyCatalogue.objects.select_for_update().get(pk=arrangement.catalogue_id)
@@ -51,7 +51,7 @@ def quote_source(actor, invoice_id, *, lock=False):
             raise RuleError('目录或门店安排已变化，请重新预览。')
     eligibility, blocker = eligibility_at(bill.clinic_id, bill.patient_id, bill.service_on)
     if blocker:
-        raise RuleError(blocker + '；未取得可核对待遇，不能据此模拟清偿。')
+        raise RuleError(blocker + '；未取得可核对待遇，请先补全资料再测算分担。')
     from finance.cash_selectors import invoice_cash_facts
     cash = invoice_cash_facts(invoice.pk)
     if cash['pending']:

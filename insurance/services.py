@@ -43,9 +43,9 @@ def _text(value, label, maximum=500):
 
 
 def _reference(value):
-    value = _text(value, '合成依据编号', 80).upper()
+    value = _text(value, '测算依据编号', 80).upper()
     if not re.fullmatch(r'SIM-[A-Z0-9_-]{1,76}', value):
-        raise RuleError('课程依据编号使用 SIM- 开头的字母数字，不填写真实证件或医保号码。')
+        raise RuleError('院内测算依据编号使用 SIM- 开头的字母数字，不填写真实证件或医保号码。')
     return value
 
 
@@ -150,13 +150,13 @@ def prepare_eligibility(*, actor, patient_id, insured_region, scheme, state, sta
     patient = visible_patients(actor).get(pk=patient_id, is_active=True)
     start, end = _dates(starts_on, ends_on)
     if insured_region not in dict(REGIONS) or scheme not in dict(SCHEMES) or state not in dict(ELIGIBILITY_STATES):
-        raise RuleError('请明确选择参保地、类型和本次模拟核对结果。')
+        raise RuleError('请明确选择参保地、类型和本次待遇测算结果。')
     if state == 'VERIFIED' and (insured_region == 'UNKNOWN' or scheme == 'UNKNOWN'):
         raise RuleError('参保地或类型待核实时，应保留“待核实”，不能记为待遇已核对。')
     old = latest_eligibility(b['clinic'], patient.pk)
     d = dict(kind='eligibility', clinic=b['clinic'], patient=patient.pk, previous=old.pk if old else None,
              version=old.version + 1 if old else 1, insured_region=insured_region, scheme=scheme, state=state,
-             starts_on=str(start), ends_on=str(end), reference=_reference(reference), basis=_text(basis, '本次模拟核对依据'))
+             starts_on=str(start), ends_on=str(end), reference=_reference(reference), basis=_text(basis, '本次待遇测算依据'))
     return dict(data=d, patient=patient, proposal_token=proposal(actor, PREPARE, ('FRONT_DESK',), d))
 
 

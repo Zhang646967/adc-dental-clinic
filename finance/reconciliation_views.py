@@ -65,7 +65,7 @@ def account_edit(request,pk=None):
     if request.workspace.role!='FINANCE':raise PermissionDenied
     row=get_object_or_404(PaymentAccount,pk=pk) if pk else None
     form=(AccountStateForm if row else AccountForm)(request.POST if request.method=='POST' and request.POST.get('action','preview')=='preview' else None)
-    return mutation(request,title='启用／停用渠道账户' if row else '建立合成渠道账户',form=form,
+    return mutation(request,title='启用／停用渠道账户' if row else '登记门店渠道账户',form=form,
         prepare=lambda **v:prepare_account(actor=request.user,account_id=pk,**v),
         confirm=lambda **v:confirm_account(actor=request.user,expected_account_id=pk,**v),
         summary=lambda p:([('渠道账户',row.code),('新状态','启用' if p['data']['active'] else '停用')] if row else
@@ -95,7 +95,7 @@ def import_statement(request):
     from equipment.policies import manager_clinic
     manager_clinic(request.user)
     if request.method=='POST' and request.POST.get('action')=='confirm':
-        return mutation(request,title='确认接受合成流水',form=ExplicitProposalForm(),prepare=None,summary=None,
+        return mutation(request,title='确认登记本批流水',form=ExplicitProposalForm(),prepare=None,summary=None,
             confirm=lambda **v:confirm_import(actor=request.user,**v),destination=lambda r:redirect('statement_batch',pk=r.pk),recovery='reconciliation_home')
     if request.method=='POST' and request.POST.get('action','preview')!='preview':raise PermissionDenied
     form=ImportForm(request.POST if request.method=='POST' else None,request.FILES if request.method=='POST' else None,actor=request.user)
@@ -105,7 +105,7 @@ def import_statement(request):
         except EXPECTED_ERRORS as exc:add_error(form,exc)
         except DatabaseError:return render(request,'business/problem.html',{'problem':'无法保存导入草稿，请核对批次记录。'},status=503)
         else:return render(request,'finance/statement_preview.html',dict(p,form=ExplicitProposalForm(initial={'proposal_token':p['proposal_token']})))
-    return render(request,'finance/reconciliation_edit.html',dict(title='上传并预览合成流水',form=form,upload=True,recovery='reconciliation_home'))
+    return render(request,'finance/reconciliation_edit.html',dict(title='上传并核对流水',form=form,upload=True,recovery='reconciliation_home'))
 
 @login_required
 @never_cache

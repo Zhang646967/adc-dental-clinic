@@ -21,7 +21,7 @@ from finance.cash_forms import CashReviewForm
 class CostForm(forms.Form):
     proposed_cost=forms.DecimalField(label='核实后的整笔事件费用（CNY）',min_value=0,max_digits=16,decimal_places=2,
         help_text='填写总额，不是差额。0表示明确零费用；不填未知费用。')
-    reason=forms.CharField(label='原始凭据与更正依据（合成案例，不含患者资料）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
+    reason=forms.CharField(label='原始凭据与更正依据（请勿填写患者资料）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
 
 @login_required
 @never_cache

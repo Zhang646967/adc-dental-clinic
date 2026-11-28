@@ -22,7 +22,7 @@ from equipment.policies import manager_clinic
 from equipment.maintenance_services import order_scope,owners,available_actions,prepare_maintenance,confirm_maintenance
 
 class MaintenanceForm(forms.Form):
-    note=forms.CharField(label='本次办理说明（仅合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
+    note=forms.CharField(label='本次办理说明',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
     def __init__(self,*args,action,clinic,**kwargs):
         super().__init__(*args,**kwargs)
         if action in ('OPEN','ASSIGN'):
@@ -33,7 +33,7 @@ class MaintenanceForm(forms.Form):
             self.fields['performed']=forms.DateField(label='维修完成事实日',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
             self.fields['cost']=forms.DecimalField(label='本次维修费用（CNY）',max_digits=16,decimal_places=2,min_value=0,required=False,help_text='空白表示未知，0 表示明确无费用；验收后仍需单独财务审核。')
             self.fields['next_due']=forms.DateField(label='下次保养到期日',required=False,widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
-            self.fields['evidence']=forms.CharField(label='维修事实、检查结果和凭据编号',max_length=500,widget=forms.Textarea(attrs={'rows':3}),help_text='只填设备事实与合成凭据，不填患者资料、银行信息或凭据秘密。')
+            self.fields['evidence']=forms.CharField(label='维修事实、检查结果和凭据编号',max_length=500,widget=forms.Textarea(attrs={'rows':3}),help_text='只填设备情况及核对凭据，不填患者资料、银行信息或凭据秘密。')
             self.fields['schedule_checked']=forms.BooleanField(label='已核对出诊影响及后续协调事项；涉及接收暂停／恢复时另行明确办理。')
         self.order_fields([k for k in ('issue','owner','due','performed','cost','next_due','evidence','schedule_checked','note') if k in self.fields])
 

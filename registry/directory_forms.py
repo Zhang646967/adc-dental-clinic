@@ -19,10 +19,10 @@ class RegistrationForm(forms.Form):
             'postal_address': forms.CharField(label='诊所地址', max_length=255),
             'supervisor_name': forms.CharField(label='主管联络姓名', max_length=80, help_text='仅登记联系人；填写姓名不会授予任何账号主管身份。'),
             'phone': forms.CharField(label='联系电话', max_length=32, widget=forms.TextInput(attrs={'inputmode':'tel'})),
-            'email': forms.EmailField(label='邮箱', max_length=254, help_text='本课程仅使用 example.invalid 合成地址，不发送邮件。'),
+            'email': forms.EmailField(label='邮箱', max_length=254, help_text='本页仅登记邮箱，不发送邮件。验收资料使用 example.invalid 地址。'),
             'area_sqm': forms.DecimalField(label='面积（平方米）', max_digits=10, decimal_places=2, min_value=Decimal('0.01')),
             'date_of_birth': forms.DateField(label='出生日期', widget=forms.DateInput(attrs={'type':'date','max':timezone.localdate().isoformat()},format='%Y-%m-%d')),
-            'home_address': forms.CharField(label='联系地址', max_length=255, help_text='只填写虚构演示资料，不录入真实个人信息。'),
+            'home_address': forms.CharField(label='联系地址', max_length=255, help_text='请按已核对的登记依据填写，仅录入办理所需资料。'),
         }
         for key in FIELDS[kind]:
             self.fields[key] = definitions[key]

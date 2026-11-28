@@ -21,7 +21,7 @@ from finance.daily_services import (close_scope,latest,blocker,prepare_close,con
 
 class DailyForm(forms.Form):
     business_date=forms.DateField(label='事实日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
-    evidence=forms.CharField(label='凭据编号与核对范围（仅合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':2}),help_text='四类凭据须分别核实；不要填写患者、银行卡、账号或交易秘密。')
+    evidence=forms.CharField(label='凭据编号与核对范围',max_length=500,widget=forms.Textarea(attrs={'rows':2}),help_text='四类凭据须分别核实；不要填写患者、银行卡、账号或交易秘密。')
     reason=forms.CharField(label='交接说明／差异原因／重开依据',max_length=500,widget=forms.Textarea(attrs={'rows':3}),help_text='有差异时，经办人负责回查原始业务；只说明原因不能使差异通过复核。')
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)

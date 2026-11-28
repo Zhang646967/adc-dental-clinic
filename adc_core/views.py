@@ -109,7 +109,7 @@ def patient_create(request):
             if reception_case:
                 return redirect(reverse('reception_detail',args=[reception_case.pk])+'?'+urlencode({'patient_no':p.patient_no}))
             return redirect("patient_detail", pk=p.pk)
-    return render(request, "form.html", {"form": form, "title": "建立患者档案", "subtitle": "仅录入虚构演示数据；未知不等于无过敏。", "button": "保存患者档案"})
+    return render(request, "form.html", {"form": form, "title": "建立患者档案", "subtitle": "按患者提供的资料建档。过敏史尚未核实时，请保留「未知」。", "button": "保存患者档案"})
 
 @login_required
 @require_GET

@@ -103,7 +103,7 @@ def visit_prescription(request, pk):
     status = 200
     if data is not None:
         if settings.ADC_READ_ONLY:
-            raise PermissionDenied('当前实例仅供只读演示。')
+            raise PermissionDenied('当前入口仅供查阅。')
         check_patient_form(request.user, visit, data.get('patient_binding', ''))
         form_ok, items_ok = form.is_valid(), items.is_valid()
         if form_ok and items_ok:
@@ -154,7 +154,7 @@ def detail(request, pk):
     status = 200
     if request.method == 'POST':
         if settings.ADC_READ_ONLY:
-            raise PermissionDenied('当前实例仅供只读演示。')
+            raise PermissionDenied('当前入口仅供查阅。')
         if form.is_valid():
             values = form.cleaned_data
             if values['version_id'] != version.pk:

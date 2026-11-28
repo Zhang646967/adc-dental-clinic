@@ -9,12 +9,12 @@ class LocalLoginForm(forms.Form):
     username=forms.CharField(label='已有患者账号（首次使用可留空）',required=False,max_length=150)
     password=forms.CharField(label='原账号密码（绑定已有账号时填写）',required=False,strip=False,widget=forms.PasswordInput)
     booking_service=forms.IntegerField(required=False,min_value=1,widget=forms.HiddenInput)
-    confirmed=forms.BooleanField(label='我同意使用本地模拟身份继续患者服务。')
+    confirmed=forms.BooleanField(label='我同意使用验收专用身份继续，此次未通过微信认证。')
 
 
 class PhoneCodeForm(forms.Form):
     code=forms.CharField(label='本地手机授权码',max_length=160,widget=forms.PasswordInput)
-    confirmed=forms.BooleanField(label='我同意绑定此合成联络号码（仅本地模拟）。')
+    confirmed=forms.BooleanField(label='我同意绑定此验收专用号码。本次不发送短信。')
 
 
 class SmsAuthForm(forms.Form):

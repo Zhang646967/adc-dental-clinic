@@ -20,7 +20,7 @@ class FollowUpForm(forms.Form):
     replacement_no = forms.CharField(label='另约成功的预约编号', max_length=40, required=False,
         help_text='选择“已另约”时必填。须先通过原预约流程办理；记录联系结果不会创建预约。')
     note = forms.CharField(label='本次联系结果与依据', max_length=500, widget=forms.Textarea(attrs={'rows':3}),
-        help_text='保留实际沟通结果；只用课程合成资料，不填病历、银行卡或账号秘密。')
+        help_text='保留实际沟通结果；请勿填写病历、银行卡号或密码。')
     def __init__(self, *a, clinic, **kw):
         super().__init__(*a, **kw)
         self.fields['assigned_to'] = forms.ModelChoiceField(label='本店跟进前台', queryset=owners(clinic, ('FRONT_DESK',)))

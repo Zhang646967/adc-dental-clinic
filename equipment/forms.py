@@ -10,7 +10,7 @@ class EquipmentRegisterForm(forms.Form):
     acquired_on=forms.DateField(label='购置／接收日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     acquisition_cost=forms.DecimalField(label='购置成本（CNY，空白表示未登记）',min_value=0,max_digits=16,decimal_places=2,required=False)
     next_service_due=forms.DateField(label='下一次保养到期日（空白表示未登记）',required=False,widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
-    note=forms.CharField(label='登记依据（合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':2}))
+    note=forms.CharField(label='登记依据',max_length=500,widget=forms.Textarea(attrs={'rows':2}))
 
     def clean_acquired_on(self):
         value=self.cleaned_data['acquired_on']
@@ -22,7 +22,7 @@ class EquipmentActionForm(forms.Form):
     performed_on=forms.DateField(label='事实发生日期（北京时间）',widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
     cost=forms.DecimalField(label='本次保养费用（空白表示未登记）',min_value=0,max_digits=16,decimal_places=2,required=False)
     next_service_due=forms.DateField(label='完成保养后的下一到期日',required=False,widget=forms.DateInput(format='%Y-%m-%d',attrs={'type':'date'}))
-    note=forms.CharField(label='原因及本次事实（合成案例）',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
+    note=forms.CharField(label='原因及本次事实',max_length=500,widget=forms.Textarea(attrs={'rows':3}))
 
     def __init__(self,*args,state=None,**kwargs):
         super().__init__(*args,**kwargs)

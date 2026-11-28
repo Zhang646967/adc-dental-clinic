@@ -76,7 +76,7 @@ def create(request, pk):
     if request.method == 'POST' and request.POST.get('action') == 'confirm':
         return _confirm(request, services.confirm_settlement, expected_invoice_id=pk)
     if request.method == 'POST' and request.POST.get('action') != 'preview':
-        raise PermissionDenied('请先预览原账单的逐行模拟分担。')
+        raise PermissionDenied('请先预览原账单的逐项费用分担测算。')
     active = services.settlements(request.user).filter(invoice=invoice, state__in=ACTIVE_SETTLEMENT_STATES).first()
     if active:
         return redirect('insurance_settlement_detail', pk=active.pk)
@@ -108,7 +108,7 @@ def detail(request, pk):
         balance = invoice_balance(_invoice(request.user, row.invoice_id))
         events = list(row.events.select_related('actor').order_by('-sequence'))
         for event in events:
-            event.action_label = {'SUBMIT':'提交模拟请求','QUERY':'查询原编号','REVIEW':'独立复核',
+            event.action_label = {'SUBMIT':'提交费用测算','QUERY':'查询原编号','REVIEW':'独立复核',
                 'CANCEL_START':'发起原结算撤销','CANCEL_QUERY':'查询原撤销结果','CANCEL_REVIEW':'独立核对撤销'}.get(event.action, event.action)
             event.state_label = dict(SETTLEMENT_STATES).get(event.snapshot['state'], event.snapshot['state'])
             if 'cancellation_state' in event.snapshot:
@@ -140,9 +140,9 @@ def query(request, pk):
     try: p = services.prepare_query(actor=request.user, request_id=pk)
     except EXPECTED_ERRORS as exc:
         return render(request, 'business/problem.html', {'problem': str(exc)}, status=409)
-    return render(request, 'business/proposal.html', dict(title='查询原医保模拟请求',
+    return render(request, 'business/proposal.html', dict(title='查询原费用测算请求',
         summary=[('原请求编号', row.request_id), ('当前进度', row.get_state_display()),
-                 ('查询后', '取得同一请求的原模拟结果，待独立复核；不会重新申报或记入现金')],
+                 ('查询后', '取得同一请求的原测算结果，待独立复核；不会重新申报或记入现金')],
         form=ExplicitProposalForm(initial={'proposal_token': p['proposal_token']}), button='查询原编号', recovery_route='insurance_settlements'))
 
 
@@ -161,7 +161,7 @@ def review(request, pk):
         try: p = services.prepare_settlement_review(actor=request.user, request_id=pk, **form.cleaned_data)
         except EXPECTED_ERRORS as exc: add_error(form, exc)
         else:
-            return render(request, 'business/proposal.html', dict(title='独立核对医保模拟分担',
+            return render(request, 'business/proposal.html', dict(title='独立核对医保费用分担测算',
                 summary=[('原请求', row.request_id), ('原账单金额', row.gross_amount), ('现金责任', row.patient_cash),
                     ('个人账户承担', row.personal_account), ('基金承担（应收）', row.fund_amount),
                     ('决定', '核对通过' if p['data']['decision'] == 'APPROVE' else '未通过，原请求仍待处置'), ('依据', p['data']['reason'])],

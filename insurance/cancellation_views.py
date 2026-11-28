@@ -13,7 +13,7 @@ from insurance import cancellation_services as services
 
 
 class CancellationForm(forms.Form):
-    simulation_mode = forms.ChoiceField(label='本地模拟方式', choices=CANCEL_MODES)
+    simulation_mode = forms.ChoiceField(label='院内测算方式', choices=CANCEL_MODES)
     reason = forms.CharField(label='撤销原结算依据', max_length=500, widget=forms.Textarea(attrs={'rows': 3}))
 
 
@@ -29,10 +29,10 @@ class ReviewForm(forms.Form):
 def create(request, pk):
     row = get_object_or_404(settlements(request.user), pk=pk)
     form = CancellationForm(request.POST if request.method=='POST' and request.POST.get('action')=='preview' else None)
-    return mutation(request, title='撤销原医保模拟结算', form=form,
+    return mutation(request, title='撤销原费用分担测算', form=form,
         prepare=lambda **v: services.prepare_cancellation(actor=request.user, request_id=pk, **v),
         confirm=lambda **v: services.confirm_cancellation(actor=request.user, expected_request_id=pk, **v),
-        summary=lambda p: [('原请求', row.request_id), ('原模拟受理编号', p['source']['original_reference']),
+        summary=lambda p: [('原请求', row.request_id), ('原测算编号', p['source']['original_reference']),
             ('原个人账户承担', row.personal_account), ('原基金承担', row.fund_amount),
             ('办理依据', p['data']['reason']), ('提交后', '继续核对原撤销结果、基金退回和独立复核；患者现金不自动退款。')],
         destination=lambda result: redirect('insurance_settlement_detail', pk=result.pk), recovery='insurance_settlements')
