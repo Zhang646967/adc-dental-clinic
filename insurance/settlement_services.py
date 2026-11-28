@@ -36,13 +36,13 @@ def _splits(source, allocations):
     by_id = {}
     for allocation in allocations:
         if not isinstance(allocation, dict) or set(allocation) != {'treatment_record', 'patient_cash', 'personal_account', 'fund_amount'}:
-            raise RuleError('逐行模拟结果格式无效。')
+            raise RuleError('逐项费用测算的格式无效。')
         pk = allocation['treatment_record']
         if type(pk) is not int or pk in by_id:
             raise RuleError('收费行重复或无效，请重新核对原账单。')
         by_id[pk] = allocation
     if set(by_id) != {r['treatment_record'] for r in rows}:
-        raise RuleError('模拟分担不属于当前账单的确切收费行。')
+        raise RuleError('本次分担测算与当前账单的收费项目不符。')
     result = []
     for r in rows:
         a = by_id[r['treatment_record']]
@@ -64,10 +64,10 @@ def prepare_settlement(*, actor, invoice_id, allocations, simulation_mode, reaso
         source = quote_source(actor, invoice_id)
         _no_active(invoice_id)
         if simulation_mode not in dict(SIMULATION_MODES):
-            raise RuleError('请选择明确的本地模拟结果。')
+            raise RuleError('请选择院内费用测算方式。')
         d = dict(invoice=invoice_id, source_digest=source['digest'], allocations=_splits(source, allocations),
             settlement_cursor=invoice_insurance_facts(invoice_id)['cursor'],
-            simulation_mode=simulation_mode, reason=_text(reason, '模拟分担依据'))
+            simulation_mode=simulation_mode, reason=_text(reason, '院内费用分担依据'))
         return dict(source=source['snapshot'], data=d, proposal_token=proposal(actor, REQUEST, ('FRONT_DESK',), d))
 
 
@@ -96,7 +96,7 @@ def _advance(row, state):
 @transaction.atomic
 def confirm_settlement(*, actor, proposal_token, confirmed, expected_invoice_id=None):
     if confirmed is not True:
-        raise RuleError('请明确确认本地模拟分担，不能据此宣称真实医保到账。')
+        raise RuleError('请核对后确认院内分担测算。测算结果未向医保机构申报。')
     p = read_proposal(actor, REQUEST, ('FRONT_DESK',), proposal_token); d = p['data']
     if expected_invoice_id is not None and d['invoice'] != expected_invoice_id:
         raise RuleError('确认内容与当前账单不同，请回到原账单。')
@@ -169,7 +169,7 @@ def confirm_query(*, actor, proposal_token, confirmed, expected_request_id=None)
         raise RuleError('原请求已有新的查询进度，请打开当前结果。')
     result = row.simulation_outcome
     _advance(row, 'AWAITING_REVIEW' if result.result == 'ACCEPTED' else 'DECLINED')
-    _record(actor, row, p['operation'], 'QUERY', '按原唯一请求编号取回本地模拟结果')
+    _record(actor, row, p['operation'], 'QUERY', '按原请求编号取回院内测算结果')
     return row, False
 
 
@@ -191,7 +191,7 @@ def prepare_settlement_review(*, actor, request_id, decision, reason):
     with reporting_snapshot():
         row = settlements(actor).get(pk=request_id)
         if row.created_by_id == actor.pk:
-            raise PermissionDenied('模拟结算须由另一账号独立复核，切换岗位不能自行确认。')
+            raise PermissionDenied('费用分担测算须由另一账号独立复核。')
         if row.state != 'AWAITING_REVIEW' or decision not in ('APPROVE', 'REJECT'):
             raise RuleError('请先查询原请求取得明确结果，再选择独立复核决定。')
         if decision == 'APPROVE':
@@ -218,7 +218,7 @@ def confirm_settlement_review(*, actor, proposal_token, confirmed, expected_requ
         _review_source(actor, initial, lock=True)
     row = _lock_request(actor, d['request'])
     if row.created_by_id == actor.pk:
-        raise PermissionDenied('不能自行复核模拟结算。')
+        raise PermissionDenied('费用分担测算须由另一账号独立复核。')
     if row.state != 'AWAITING_REVIEW' or row.lock_version != d['revision']:
         raise RuleError('原请求已有其他办理结果，请打开当前进度。')
     SettlementReview.objects.create(request=row, operation_id=p['operation'], reviewed_by=actor,

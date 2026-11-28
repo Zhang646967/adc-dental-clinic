@@ -28,6 +28,6 @@
     </dl>
     {% if is_current and can_request_cash and not cash_balance.insurance_pending %}{% if cash_balance.pending or cash_balance.advance_excess or not cash_balance.remaining and not cash_balance.refund_due %}<a href="{% url 'cash_invoice_request' invoice_id %}">申请登记线下收款或退款</a>{% endif %}{% endif %}
     {% if is_current and workspace_role == 'FRONT_DESK' %}<a href="{% url 'insurance_settlement_new' invoice_id %}">核对逐项医保分担</a>{% endif %}
-    <p class="muted">收退款按已记账金额统计。{% if synthetic_statement %}本演练环境未连接真实支付渠道。{% endif %}</p>
+    <p class="muted">收退款按已记账金额统计。{% if synthetic_statement %}此处记录院内账务，当前未连接支付渠道。{% endif %}</p>
   </details>
 </section>

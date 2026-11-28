@@ -21,7 +21,7 @@ REVIEW='adc.fund.transfer.review.v1'
 
 def _write_scope(actor):
     if not settings.ADC_CLINICAL_SYNTHETIC:
-        raise PermissionDenied('本阶段只办理明确的本地合成基金流程。')
+        raise PermissionDenied('当前未开通院内基金核对。')
     lock_finance(actor)
 
 

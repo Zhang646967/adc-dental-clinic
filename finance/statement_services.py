@@ -45,7 +45,7 @@ def prepare_import(*,actor,payment_account_id,source_bytes):
 @business_errors
 @transaction.atomic
 def confirm_import(*,actor,proposal_token,confirmed):
-    if confirmed is not True:raise RuleError('请明确确认接受本批合成流水。')
+    if confirmed is not True:raise RuleError('请核对后确认接收本批流水。')
     p=read_proposal(actor,CONTRACT,('MANAGER',),proposal_token);d=p['data']
     if set(d)!={'batch','digest','account_version'} or type(d['batch']) is not int:raise RuleError('导入确认无效。')
     lock_people(actor.pk);clinic=manager_clinic(actor,lock=True)

@@ -39,7 +39,7 @@ def normalize_items(clinic_id, entries, *, lock=False):
             raise RuleError('请填写大于零、最多三位小数的剂量。')
         for name, ceiling, label in [('frequency', 24, '每日次数'), ('days', 90, '疗程天数'), ('quantity', 9999, '调配数量')]:
             if type(entry[name]) is not int or not 1 <= entry[name] <= ceiling:
-                raise RuleError(f'{label}超出演练表单允许的范围。')
+                raise RuleError(f'{label}超出本处方表单允许的范围。')
         items.append(dict(
             item_id=item.pk, code=item.code, name=item.name, strength=item.strength,
             route=item.route, route_label=item.get_route_display(), dose_unit=item.dose_unit,

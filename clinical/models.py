@@ -27,11 +27,19 @@ class ClinicalReviewerAppointment(models.Model):
 class ProfessionalAuthorization(models.Model):
     STATES = [('PENDING', '待专业审核'), ('APPROVED', '已批准'), ('REJECTED', '未通过'),
               ('SUSPENDED', '已暂停'), ('REVOKED', '已撤销')]
-    SOURCES = [('REGISTRY', '登记机构核验'), ('DOCUMENT', '人工核验原始证明'), ('SYNTHETIC', '明确的合成演练资料')]
+    _SCHEMA_SOURCES = [('REGISTRY', '登记机构核验'), ('DOCUMENT', '人工核验原始证明'), ('SYNTHETIC', '明确的合成演练资料')]
+    SOURCES = [
+        (code, '验收环境登记（未经执业资质核验）' if code == 'SYNTHETIC' else label)
+        for code, label in _SCHEMA_SOURCES
+    ]
+
+    def get_source_kind_display(self):
+        return dict(self.SOURCES).get(self.source_kind, self.source_kind)
+
     user = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
     clinic = models.ForeignKey('registry.Clinic', on_delete=models.PROTECT)
     service = models.ForeignKey('scheduling.BookingService', null=True, blank=True, on_delete=models.PROTECT)
-    source_kind = models.CharField(max_length=16, choices=SOURCES)
+    source_kind = models.CharField(max_length=16, choices=_SCHEMA_SOURCES)
     source_reference = models.CharField(max_length=160)
     issuer = models.CharField(max_length=160)
     credential_from = models.DateTimeField()

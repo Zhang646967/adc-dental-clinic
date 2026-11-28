@@ -39,6 +39,12 @@ class CashEvidenceVersion(models.Model):
     reviewed_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, null=True, blank=True, related_name='cash_evidence_reviewed')
     reviewed_at = models.DateTimeField(null=True, blank=True)
     review_reason = models.CharField(max_length=500, blank=True, default='')
+    @property
+    def display_reason(self):
+        if self.initial and self.reason == '随原始收付款申请提交的合成凭据':
+            return '随原始收付款申请登记的院内凭据（外部收付另行核对）'
+        return self.reason
+
     class Meta:
         db_table = 'adc_cash_evidence'
         indexes = [models.Index(fields=['account','reference'], name='cash_evidence_account_ref_idx')]

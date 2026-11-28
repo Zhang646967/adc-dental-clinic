@@ -24,7 +24,7 @@ APP='adc-local-patient-v1'
 def require_local():
     from accounts.auth_config import local_enabled
     if not local_enabled():
-        raise PermissionDenied('当前环境未启用本地授权替身；请使用已分配患者账号。')
+        raise PermissionDenied('本地身份登录未开通，请使用已分配的患者账号。')
     if settings.ADC_READ_ONLY:raise PermissionDenied('只读实例不能办理账号和联络变更。')
 
 
@@ -42,12 +42,12 @@ def issue_local_code(*,subject=None,user_id=None,phone=None):
     require_local();now=timezone.now();token=secrets.token_urlsafe(32)
     if subject is not None:
         if user_id is not None or phone is not None or not re.fullmatch(r'[a-z0-9_-]{1,64}',subject):
-            raise RuleError('请使用明确的合成登录身份编号。')
+            raise RuleError('请填写分配的本地身份编号。')
         identity,_=ExternalIdentity.objects.get_or_create(provider='LOCAL',app_id=APP,subject=subject)
         row=LocalIdentityCode.objects.create(purpose='LOGIN',digest=_digest(token),identity=identity,expires_at=now+timedelta(minutes=5))
     else:
         if not isinstance(phone,str) or not re.fullmatch(r'0[0-9]{10}',phone):
-            raise RuleError('本地手机替身只接收0开头的十一位合成号码，不验证真实号码。')
+            raise RuleError('本地校验仅接受 0 开头的十一位号码。真实手机号请通过已开通的短信服务核验。')
         user=UserAccount.objects.get(pk=user_id,is_active=True)
         row=LocalIdentityCode.objects.create(purpose='PHONE',digest=_digest(token),user=user,phone=phone,expires_at=now+timedelta(minutes=5))
     return token,row.expires_at
@@ -92,7 +92,7 @@ def exchange_login(*,code,existing_user=None,existing_password=None):
     users={u.pk:u for u in UserAccount.objects.select_for_update().filter(pk__in=user_ids).order_by('pk')}
     from accounts.auth_config import has_live_credentials
     if any(has_live_credentials(u) for u in users.values()):
-        raise PermissionDenied('已接入真实认证的账号不能使用本地模拟凭据。')
+        raise PermissionDenied('已通过平台认证的账号请使用已绑定的登录方式。')
     if existing_user is not None:
         user=users[existing_user.pk]
         if not user.is_active or not user.check_password(existing_password or ''):raise PermissionDenied('原账号核对未通过。')
@@ -116,12 +116,12 @@ def exchange_login(*,code,existing_user=None,existing_password=None):
 @transaction.atomic
 @sensitive_variables()
 def verify_phone(*,actor,code,confirmed):
-    if confirmed is not True:raise RuleError('请明确同意绑定此合成联络号码。')
+    if confirmed is not True:raise RuleError('请确认绑定此本地联络号码。此操作不验证真实手机号。')
     row=_consume(code,'PHONE')
     user=UserAccount.objects.select_for_update().get(pk=actor.pk)
     _account_actor(actor)
     from accounts.auth_config import has_live_credentials
-    if has_live_credentials(user):raise PermissionDenied('真实认证账号不能使用模拟手机凭据。')
+    if has_live_credentials(user):raise PermissionDenied('已通过平台认证的账号须使用平台核验的手机号凭据。')
     if row.user_id!=user.pk:raise PermissionDenied('此手机号凭证不属于当前账号。')
     phone=AccountPhone.objects.select_for_update().filter(user=user).first()
     if phone:
@@ -158,7 +158,7 @@ def set_login_password(*,actor,code,new_password,confirmed):
     user=UserAccount.objects.select_for_update().get(pk=actor.pk)
     _account_actor(actor)
     from accounts.auth_config import has_live_credentials
-    if has_live_credentials(user):raise PermissionDenied('真实认证账号不能使用模拟凭据设置密码。')
+    if has_live_credentials(user):raise PermissionDenied('已通过平台认证的账号请通过其已绑定的身份设置密码。')
     if identity.user_id!=user.pk:raise PermissionDenied('请使用当前绑定身份的新授权凭证。')
     from django.contrib.auth.password_validation import validate_password
     try:validate_password(new_password,user=user)

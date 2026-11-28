@@ -54,7 +54,7 @@ def validate_case(data):
     if result['source_kind'] not in dict(ProfessionalAuthorization.SOURCES):
         raise RuleError('请选择明确的资质核验来源。')
     if result['source_kind'] == 'SYNTHETIC' and not settings.ADC_CLINICAL_SYNTHETIC:
-        raise RuleError('当前环境不接受合成资质。')
+        raise RuleError('当前环境只接受经登记机构或原始证明核验的资质依据。')
     for key, label in [('issuer', '来源机构'), ('source_reference', '证据参考编号')]:
         result[key] = text(data[key], label)
     for key in ('can_read', 'can_record', 'can_refer'):

@@ -16,7 +16,7 @@ def enabled():
 
 def require_enabled():
     if not enabled():
-        raise Http404('批次与护理演练当前未启用。')
+        raise Http404('当前门诊环境未开通批次管理与护理执行。')
 
 
 def warehouse(actor, clinic_id, *, lock=False):

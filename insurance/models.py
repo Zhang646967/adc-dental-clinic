@@ -7,8 +7,13 @@ from django.db.models import F, Q, Value
 STATES = [('DRAFT', '待独立核对'), ('CONFIRMED', '已核对启用'),
           ('REJECTED', '未通过'), ('DISABLED', '已停用，历史保留')]
 CLASSES = [('A', '甲类'), ('B', '乙类'), ('NOT_PAYABLE', '不支付'), ('UNKNOWN', '原表未知')]
-SCHEMES = [('EMPLOYEE', '职工医保（模拟）'), ('RESIDENT', '居民医保（模拟）'), ('UNKNOWN', '类型待核实')]
-ELIGIBILITY_STATES = [('VERIFIED', '模拟待遇已核对'), ('NOT_ELIGIBLE', '本次无适用待遇'), ('UNKNOWN', '待核实')]
+# Django serializes choice labels in migrations. Keep those fields stable while
+# current pages and forms share the public labels below.
+_SCHEMA_SCHEMES = [('EMPLOYEE', '职工医保（模拟）'), ('RESIDENT', '居民医保（模拟）'), ('UNKNOWN', '类型待核实')]
+_SCHEMA_ELIGIBILITY_STATES = [('VERIFIED', '模拟待遇已核对'), ('NOT_ELIGIBLE', '本次无适用待遇'), ('UNKNOWN', '待核实')]
+
+SCHEMES = [('EMPLOYEE', '职工医保'), ('RESIDENT', '居民医保'), ('UNKNOWN', '类型待核实')]
+ELIGIBILITY_STATES = [('VERIFIED', '院内待遇测算依据已核对'), ('NOT_ELIGIBLE', '本次无适用待遇'), ('UNKNOWN', '待核实')]
 
 
 class InclusiveDates(models.Func):
@@ -126,13 +131,19 @@ class FeeMapping(ReviewedPreparation):
 
 
 class EligibilityFact(models.Model):
+    def get_scheme_display(self):
+        return dict(SCHEMES).get(self.scheme, self.scheme)
+
+    def get_state_display(self):
+        return dict(ELIGIBILITY_STATES).get(self.state, self.state)
+
     clinic = models.ForeignKey('registry.Clinic', on_delete=models.PROTECT)
     patient = models.ForeignKey('patients.Patient', on_delete=models.PROTECT)
     version = models.PositiveIntegerField()
     previous = models.OneToOneField('self', on_delete=models.PROTECT, null=True, blank=True, related_name='next_version')
     insured_region = models.CharField(max_length=8)
-    scheme = models.CharField(max_length=12, choices=SCHEMES)
-    state = models.CharField(max_length=16, choices=ELIGIBILITY_STATES)
+    scheme = models.CharField(max_length=12, choices=_SCHEMA_SCHEMES)
+    state = models.CharField(max_length=16, choices=_SCHEMA_ELIGIBILITY_STATES)
     starts_on = models.DateField()
     ends_on = models.DateField()
     reference = models.CharField(max_length=80)

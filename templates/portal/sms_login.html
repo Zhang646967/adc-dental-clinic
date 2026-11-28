@@ -7,7 +7,7 @@
 <p class="lede">{% if binding %}核验后可用此号码登录同一账号。患者档案与家人的代约授权分别核对。{% else %}未注册的号码验证后会创建患者账号，再完成本人档案核验。{% endif %}</p>
 <section class="account-card">
 {% if auth.sms_demo %}<div class="notice"><strong>本地验证码</strong><p>此入口仅接受以 0 开头的 11 位验收专用号码。验证码在本页领取，不发送短信。</p></div>{% endif %}
-{% if sent %}<div class="notice" role="status">{% if sent.demo %}<strong>测试验证码：<span data-test-code>{{ sent.test_code }}</span></strong><p>此号码用于验收，未发送短信。</p>{% else %}<strong>验证码已提交发送</strong><p>请留意手机短信。未收到时，可在60秒后重新获取。</p>{% endif %}<p>五分钟内有效，请勿转发给他人。</p></div>{% endif %}
+{% if sent %}<div class="notice" role="status">{% if sent.demo %}<strong>本地验证码：<span data-test-code>{{ sent.test_code }}</span></strong><p>此方式未向手机发送短信。</p>{% else %}<strong>验证码已提交发送</strong><p>请留意手机短信。未收到时，可在60秒后重新获取。</p>{% endif %}<p>五分钟内有效，请勿转发给他人。</p></div>{% endif %}
 {% if auth.sms_enabled %}<form method="post" id="sms-auth-form">{% csrf_token %}{% if binding %}<input type="hidden" name="account_token" value="{{ account_token }}">{% endif %}
 {% for field in form %}{% if field.name != 'captcha_key' %}<div class="field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}{{ form.non_field_errors }}
 {% include 'portal/sms_captcha.html' %}

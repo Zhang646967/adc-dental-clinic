@@ -22,7 +22,7 @@ from portal.enrollment_display import detail_rows,ACTION_LABELS
 def local_login(request):
     if not (settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PATIENT_IDENTITY_PROVIDER=='local'):
         from django.core.exceptions import PermissionDenied
-        raise PermissionDenied('本环境未启用本地授权替身，请使用已分配账号。')
+        raise PermissionDenied('当前未开通本地身份登录，请使用已分配的患者账号。')
     form=forms.LocalLoginForm(request.POST or None,initial={'booking_service':request.GET.get('service')})
     if request.method=='POST' and form.is_valid():
         d=form.cleaned_data;existing=None

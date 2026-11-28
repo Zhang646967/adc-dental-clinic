@@ -45,7 +45,7 @@ def require_no_pending(claim_id):
 def require_returned(claim_id):
     facts = require_no_pending(claim_id)
     if facts['net_received'] != ZERO:
-        raise RuleError('原申报仍有已到账未退回基金，请先用真实的合成出账凭据逐笔核对退回。')
+        raise RuleError('原申报仍有已到账且未退回的基金，请先逐笔核对原出账凭据与退回金额。')
     return facts
 
 

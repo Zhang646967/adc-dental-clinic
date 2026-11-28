@@ -36,7 +36,7 @@ def phone_number(phone):
     demo=auth_providers.capabilities()['sms_demo']
     pattern=r'0[0-9]{10}' if demo else r'1[3-9][0-9]{9}'
     if not isinstance(phone,str) or not re.fullmatch(pattern,phone):
-        raise RuleError('测试环境请使用0开头的十一位合成号码。' if demo else '请填写有效的中国大陆手机号。')
+        raise RuleError('本地验证码仅接受 0 开头的十一位号码，此方式不发送短信。' if demo else '请填写有效的中国大陆手机号。')
     return phone
 
 

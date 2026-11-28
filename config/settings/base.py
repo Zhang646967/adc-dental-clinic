@@ -97,7 +97,7 @@ ADC_VERSION = "1.0.0-rc.1"
 # stage. Synthetic or local/staging environments retain a compact visible label.
 ADC_PUBLIC_ENVIRONMENT_LABEL = '' if (os.environ.get('DJANGO_SETTINGS_MODULE') == 'config.settings.production'
     and os.environ.get('ADC_DEPLOYMENT_STAGE') == 'production'
-    and os.environ.get('ADC_RC_SYNTHETIC') != '1') else '测试环境'
+    and os.environ.get('ADC_RC_SYNTHETIC') != '1') else '非生产环境'
 from adc_core.operational_logging import logging_config
 LOGGING = logging_config()
 CSRF_FAILURE_VIEW = 'adc_core.request_trace.csrf_failure'

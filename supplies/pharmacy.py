@@ -27,7 +27,7 @@ def lot_for(visit, line, kind, quantity, *, lot_id=None, issue=None, lock=False)
         lots=StockLot.objects.filter(pk=existing.lot_id)
     elif not enabled():
         if lot_id:
-            raise RuleError('批次演练当前未启用，请重新核对发药。')
+            raise RuleError('当前门店环境未启用批次管理，请重新核对发药。')
         return None
     else:
         lots=StockLot.objects.filter(pk=lot_id,item__clinic_id=visit.clinic_id,

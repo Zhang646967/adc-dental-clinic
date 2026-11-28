@@ -16,4 +16,4 @@
 <input type="hidden" name="next" value="{{ next }}"><button class="login-submit" type="submit">登录工作台 <span aria-hidden="true">→</span></button></form>
 <a class="patient-entry" href="{% url 'portal_login' %}"><span>我是患者</span><strong>前往患者服务 <span aria-hidden="true">→</span></strong></a>
 <p class="login-safety"><a href="{% url 'system_entry' %}">了解诊疗服务与患者入口</a></p>
-{% if environment_label %}<p class="login-safety">{{ environment_label }} · 请使用分配的测试账号。</p>{% endif %}</section></main></body></html>
+{% if environment_label %}<p class="login-safety">{{ environment_label }} · 请使用分配给您的岗位账号。</p>{% endif %}</section></main></body></html>

@@ -3,8 +3,15 @@ import uuid
 from django.db import models
 from django.db.models import F, Q
 
-KINDS = [('RECEIPT','模拟收款'),('REFUND','模拟退款'),('EQUIPMENT_EXPENSE','设备费用'),('EXPENSE_REVERSAL','设备费用冲回')]
+_SCHEMA_KINDS = [('RECEIPT','模拟收款'),('REFUND','模拟退款'),('EQUIPMENT_EXPENSE','设备费用'),('EXPENSE_REVERSAL','设备费用冲回')]
+# Public names apply to invoice and advance entries alike.
+KINDS = [('RECEIPT', '收款登记'), ('REFUND', '退款登记'), ('EQUIPMENT_EXPENSE', '设备费用'), ('EXPENSE_REVERSAL', '设备费用冲回')]
+
+
 class CashEntry(models.Model):
+    def get_kind_display(self):
+        return dict(KINDS).get(self.kind, self.kind)
+
     operation_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     clinic = models.ForeignKey('registry.Clinic', on_delete=models.PROTECT)
     invoice = models.ForeignKey('care.Invoice', on_delete=models.PROTECT, null=True, blank=True, related_name='cash_entries')
@@ -14,7 +21,7 @@ class CashEntry(models.Model):
     equipment_event = models.ForeignKey('equipment.EquipmentEvent', on_delete=models.PROTECT, null=True, blank=True, related_name='cash_entries')
     equipment_cost_amendment = models.ForeignKey('equipment.EquipmentCostAmendment', on_delete=models.PROTECT, null=True, blank=True)
     reversal_of = models.ForeignKey('finance.CashEntry', on_delete=models.PROTECT, null=True, blank=True, related_name='reversal_requests')
-    kind = models.CharField(max_length=24, choices=KINDS)
+    kind = models.CharField(max_length=24, choices=_SCHEMA_KINDS)
     amount = models.DecimalField(max_digits=16, decimal_places=2)
     occurred_on = models.DateField()
     reason = models.CharField(max_length=500)

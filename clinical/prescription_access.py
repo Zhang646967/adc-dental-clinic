@@ -15,7 +15,7 @@ def rehearsal_enabled():
 
 def require_rehearsal():
     if not rehearsal_enabled():
-        raise Http404('处方演练当前未启用。')
+        raise Http404('当前门诊环境未开通处方办理。')
 
 
 def active_duties(user_id, kind):

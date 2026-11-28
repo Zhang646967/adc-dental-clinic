@@ -101,7 +101,7 @@ def cloudbase_send(phone,*,captcha_token=None):
     value=cloudbase('verification',{'phone_number':'+86 '+phone,'target':'ANY'},captcha_token=captcha_token)
     reference=value.get('verification_id')
     if not isinstance(reference,str) or not 1<=len(reference)<=512:
-        raise RuleError('短信平台未接受发送，请核对免费额度、测试号码或图片验证码后重试。')
+        raise RuleError('短信平台未接受发送。请核对手机号与图片验证码后重试，或使用账号密码登录。')
     return reference,min(600,max(1,int(value.get('expires_in',600))))
 
 

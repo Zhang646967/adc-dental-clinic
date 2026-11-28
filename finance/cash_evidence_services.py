@@ -47,7 +47,7 @@ def create_initial(*,entry,account_id,reference,actor):
     account,reference=checked_account(account_id,entry.clinic_id,reference,lock=True)
     check_refund_reference(account,reference,advance_refund=entry.is_advance_refund,exclude_entry=entry.pk)
     return CashEvidenceVersion.objects.create(cash_entry=entry,account=account,reference=reference,version=1,initial=True,
-        operation_id=entry.operation_id,prepared_by=actor,reason='随原始收付款申请提交的合成凭据')
+        operation_id=entry.operation_id,prepared_by=actor,reason='随原始收付款申请登记的院内凭据（外部收付另行核对）')
 
 def review_initial(*,entry,actor):
     evidence=CashEvidenceVersion.objects.select_for_update().filter(cash_entry=entry,initial=True,state='PENDING').first()

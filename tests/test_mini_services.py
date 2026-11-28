@@ -228,9 +228,9 @@ class NativeServiceTests(ResourceFixture, TransactionTestCase):
         self.assertEqual(response.json()['data']['wait']['state'], 'WITHDRAWN')
         self.assertEqual(WaitRequest.objects.count(), 1)
 
-    @override_settings(ADC_PUBLIC_ENVIRONMENT_LABEL='测试环境')
+    @override_settings(ADC_PUBLIC_ENVIRONMENT_LABEL='非生产环境')
     def test_native_environment_label_comes_from_server(self):
-        self.assertEqual(self.client.get(reverse('mini_session')).json()['data']['environment_label'], '测试环境')
+        self.assertEqual(self.client.get(reverse('mini_session')).json()['data']['environment_label'], '非生产环境')
 
     @override_settings(ADC_PUBLIC_ENVIRONMENT_LABEL='', ADC_READ_ONLY=True)
     def test_read_only_does_not_hide_services_or_invent_demo_label(self):

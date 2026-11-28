@@ -3,8 +3,11 @@ from django.db import models
 from django.db.models import F, Q
 
 DOCUMENT_KINDS = [('INITIAL', '初诊病历'), ('FOLLOWUP', '复诊病历')]
-EVIDENCE_KINDS = [('ACCOUNT_CONFIRMATION', '医师账号确认（课程验证）'),
+_SCHEMA_EVIDENCE_KINDS = [('ACCOUNT_CONFIRMATION', '医师账号确认（课程验证）'),
                   ('PAPER_REFERENCE', '医师确认并登记纸质原件')]
+
+
+EVIDENCE_KINDS = [('ACCOUNT_CONFIRMATION', '医师账号确认'), ('PAPER_REFERENCE', '医师确认并登记纸质原件')]
 
 
 class ClinicalDocument(models.Model):
@@ -33,6 +36,9 @@ class ClinicalDocumentDraft(models.Model):
 
 
 class ClinicalDocumentVersion(models.Model):
+    def get_evidence_kind_display(self):
+        return dict(EVIDENCE_KINDS).get(self.evidence_kind, self.evidence_kind)
+
     document = models.ForeignKey(ClinicalDocument, on_delete=models.PROTECT, related_name='versions')
     revision = models.PositiveIntegerField()
     previous = models.OneToOneField('self', null=True, blank=True, on_delete=models.PROTECT, related_name='next_version')
@@ -47,7 +53,7 @@ class ClinicalDocumentVersion(models.Model):
     confirmed_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT)
     confirmed_at = models.DateTimeField()
     recorded_at = models.DateTimeField(auto_now_add=True)
-    evidence_kind = models.CharField(max_length=24, choices=EVIDENCE_KINDS)
+    evidence_kind = models.CharField(max_length=24, choices=_SCHEMA_EVIDENCE_KINDS)
     evidence_reference = models.CharField(max_length=500, blank=True)
     amendment_reason = models.CharField(max_length=500, blank=True)
     late_reason = models.CharField(max_length=500, blank=True)

@@ -12,7 +12,7 @@ def scope(actor, roles=ROLES, *, lock=False):
     b = workspace_binding(actor, roles)
     if lock:
         if not settings.ADC_CLINICAL_SYNTHETIC:
-            raise PermissionDenied('本阶段仅支持明确的课程合成医保流程。')
+            raise PermissionDenied('当前未开通院内医保测算。')
         require_writable(actor)
     if b['role'] in ('FRONT_DESK', 'MANAGER'):
         if lock:

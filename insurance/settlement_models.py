@@ -3,21 +3,37 @@ import uuid
 from django.db import models
 from django.db.models import F, Q
 
-SETTLEMENT_STATES = [
+_SCHEMA_SETTLEMENT_STATES = [
     ('PROCESSING', '模拟处理中'), ('UNKNOWN', '回复未知，查询原请求'),
     ('AWAITING_REVIEW', '结果已取得，待独立核对'), ('CONFIRMED', '分担已独立核对'),
     ('REVIEW_REJECTED', '复核未通过，待处置原请求'), ('DECLINED', '模拟结算未受理'),
     ('CANCEL_PENDING', '撤销处置中'), ('CANCELLED', '已完成撤销'),
 ]
+SETTLEMENT_STATES = [
+    (code, {'PROCESSING': '院内测算处理中', 'DECLINED': '本次测算未受理'}.get(code, label))
+    for code, label in _SCHEMA_SETTLEMENT_STATES
+]
 ACTIVE_SETTLEMENT_STATES = tuple(s for s, _ in SETTLEMENT_STATES if s not in ('DECLINED', 'CANCELLED'))
 CREDIT_STATES = ('CONFIRMED', 'CANCEL_PENDING')
-SIMULATION_MODES = [
+_SCHEMA_SIMULATION_MODES = [
     ('ACCEPT', '正常返回合成结果'), ('LOST_SUCCESS', '模拟成功但回复丢失'),
     ('PROCESSING', '模拟先返回处理中'), ('DECLINE', '模拟未受理'),
 ]
 
 
+SIMULATION_MODES = [
+    ('ACCEPT', '取得本次测算结果'), ('LOST_SUCCESS', '已留存结果，需查询原请求'),
+    ('PROCESSING', '处理中，稍后查询'), ('DECLINE', '本次测算未受理'),
+]
+
+
 class SettlementRequest(models.Model):
+    def get_state_display(self):
+        return dict(SETTLEMENT_STATES).get(self.state, self.state)
+
+    def get_simulation_mode_display(self):
+        return dict(SIMULATION_MODES).get(self.simulation_mode, self.simulation_mode)
+
     request_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     operation_id = models.UUIDField(unique=True, editable=False)
     invoice = models.ForeignKey('care.Invoice', on_delete=models.PROTECT, related_name='insurance_requests')
@@ -32,8 +48,8 @@ class SettlementRequest(models.Model):
     fund_amount = models.DecimalField(max_digits=16, decimal_places=2)
     source_snapshot = models.JSONField()
     source_digest = models.CharField(max_length=64)
-    simulation_mode = models.CharField(max_length=16, choices=SIMULATION_MODES)
-    state = models.CharField(max_length=24, choices=SETTLEMENT_STATES)
+    simulation_mode = models.CharField(max_length=16, choices=_SCHEMA_SIMULATION_MODES)
+    state = models.CharField(max_length=24, choices=_SCHEMA_SETTLEMENT_STATES)
     lock_version = models.PositiveIntegerField(default=0)
     created_by = models.ForeignKey('accounts.UserAccount', on_delete=models.PROTECT, related_name='insurance_requests_created')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -78,6 +94,9 @@ class SettlementLine(models.Model):
 
 
 class SimulationOutcome(models.Model):
+    def get_result_display(self):
+        return {'ACCEPTED': '本次院内测算已受理', 'DECLINED': '本次测算未受理'}.get(self.result, self.result)
+
     request = models.OneToOneField(SettlementRequest, on_delete=models.PROTECT, related_name='simulation_outcome')
     reference = models.CharField(max_length=80, unique=True)
     request_digest = models.CharField(max_length=64)
@@ -113,6 +132,12 @@ class SettlementEvent(models.Model):
     snapshot = models.JSONField()
     reason = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def display_reason(self):
+        if self.action == 'QUERY' and self.reason == '按原唯一请求编号取回本地模拟结果':
+            return '按原请求编号取回院内测算结果'
+        return self.reason
 
     class Meta:
         db_table = 'adc_insurance_settlement_event'

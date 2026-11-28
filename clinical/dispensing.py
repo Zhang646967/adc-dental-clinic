@@ -35,7 +35,7 @@ def enabled():
 
 def dispenser(actor, clinic_id, *, lock=False):
     if not enabled():
-        raise Http404('调配与发药演练当前未启用。')
+        raise Http404('当前门诊环境未开通调配与发药。')
     return pharmacist(actor, clinic_id, kind=PrescriptionDuty.Kind.DISPENSE, lock=lock)
 
 
@@ -50,7 +50,7 @@ def _active_approval(case, approval, *, lock=False):
     if case.visit.status != 'CHECKED_IN' or PharmacyStop.objects.filter(approval=approval).exists():
         raise RuleError('本次发药已停止或接诊已关闭。')
     if timezone.now() >= approval.decided_at + APPROVAL_LIFETIME:
-        raise RuleError('该合成处方的发药窗口已到期，请核对并停止剩余调配。')
+        raise RuleError('该处方的发药窗口已到期，请核对并停止剩余调配。')
     reviewers = active_duties(approval.actor_id, PrescriptionDuty.Kind.REVIEW).filter(
         pk=approval.duty_id, clinic_id=case.visit.clinic_id,
     )
@@ -96,7 +96,7 @@ def _action_data(actor, case, kind, reason, line_id=None, issue_id=None, quantit
             catalogue = catalogue.select_for_update(of=('self',))
         by_id = {item.pk: item for item in catalogue}
         if len(by_id) != len(entries) or any(item.rehearsal_unit_price is None for item in by_id.values()):
-            raise RuleError('请先维护全部条目的本店演练单价。')
+            raise RuleError('请先核对并登记全部条目的本店单价。')
         data['lines'] = [
             dict(item=entry['item_id'], name=entry['name'], unit=entry['quantity_unit'], quantity=entry['quantity'],
                  price=str(by_id[entry['item_id']].rehearsal_unit_price))

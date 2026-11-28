@@ -28,9 +28,9 @@ def account_data(request):
     from django.conf import settings
     ctx=account_context(request)
     phone=AccountPhone.objects.filter(user=request.user).first()
-    phone_sources={'LOCAL_SIMULATION':'本地模拟核验','DEMO_SMS':'课程测试验证码','SMS_VERIFIED':'短信验证码已核验','WECHAT_PHONE':'微信手机号授权'}
+    phone_sources={'LOCAL_SIMULATION':'本地登记（未经运营商核验）','DEMO_SMS':'本地验证码（未发送短信）','SMS_VERIFIED':'短信验证码已核验','WECHAT_PHONE':'微信手机号授权'}
     identities=list(ExternalIdentity.objects.filter(user=request.user).order_by('pk').values('id','provider','revision'))
-    labels={'LOCAL':'本地模拟身份','SMS':'手机号登录','WECHAT_MINI':'微信小程序','WECHAT_WEB':'微信扫码登录','WECHAT_MP':'微信内登录'}
+    labels={'LOCAL':'本地身份（未经微信认证）','SMS':'手机号登录','WECHAT_MINI':'微信小程序','WECHAT_WEB':'微信扫码登录','WECHAT_MP':'微信内登录'}
     for item in identities:item['provider_label']=labels[item['provider']]
     from portal.models import PatientAccess
     own=PatientAccess.objects.filter(user=request.user).values('is_active','patient__is_active').first()
