@@ -9,6 +9,8 @@ on:
       - scripts/g4_release.py
       - scripts/g4_course.py
       - adc_core/management/commands/initialize_clinic.py
+      - adc_core/management/commands/forward_release_migrations.py
+      - '**/migrations/[0-9]*.py'
       - checks/clinic_release_rehearsal.py
       - .github/workflows/clinic-installation.yml
   workflow_dispatch:

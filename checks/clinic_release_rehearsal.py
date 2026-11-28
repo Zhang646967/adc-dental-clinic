@@ -18,6 +18,7 @@ from scripts.clinic_release import ClinicInstallation
 from scripts.g4_course import digest, exclusive, private_directory
 from scripts.g4_prepare import prepare
 from scripts.g4_mac_demo import atomic_text
+from scripts.g4_release import applied_migrations, image_migrations, migration_names
 
 
 class Hidden(HTMLParser):
@@ -130,8 +131,16 @@ def check_frontdesk(clinic, folder, account):
     assert sql(clinic, 'SELECT count(*) FROM adc_user WHERE is_superuser OR is_staff;') == '0'
 
 
+def install_empty(clinic, institution):
+    with exclusive(clinic.bundle / 'private/release.lock'):
+        result = clinic.deploy(institution)
+    assert result['status'] == 'ORIGIN_READY'
+    initial = json.loads(records(clinic))
+    assert [initial[k] for k in ('clinics', 'users', 'grants', 'patients', 'visits')] == [1, 1, 1, 0, 0]
+
+
 def exercise(args):
-    active = recovery = None
+    active = recovery = fresh = None
     work = private_directory(args.workdir)
     candidate = json.loads((args.candidate / 'build.json').read_text())
     previous = json.loads((args.previous / 'build.json').read_text())
@@ -147,25 +156,44 @@ def exercise(args):
                 'postal_address': '核验路一号', 'supervisor_name': '何主任', 'phone': '000-0000000',
                 'email': 'office@example.org', 'area_sqm': '160.00'}, 'administrator': admin}))
     try:
-        active = configure(args, candidate, 'first', (args.port, args.port+1))
         recovery = configure(args, candidate, 'recovery', (args.port+2, args.port+3))
-        with exclusive(active.bundle / 'private/release.lock'):
-            result = active.deploy(institution)
-        assert result['status'] == 'ORIGIN_READY'
-        initial = json.loads(records(active))
-        assert [initial[k] for k in ('clinics','users','grants','patients','visits')] == [1,1,1,0,0]
+        old_files = image_migrations(recovery, previous['app_image'])
+        new_files = image_migrations(recovery, candidate['app_image'])
+        additive = old_files != new_files
+        if additive:
+            assert old_files and old_files.items() < new_files.items(), 'Migrations must append to the previous image.'
+            # Verify clean candidate installation separately. The upgrade source
+            # must be created with the old image and its actual old schema.
+            fresh = configure(args, candidate, 'fresh', (args.port+4, args.port+5))
+            install_empty(fresh, institution)
+            assert applied_migrations(fresh) == migration_names(new_files)
+            fresh.dc('stop', '--timeout', '20', timeout=120)
+            fresh = None
+        active = configure(args, previous if additive else candidate, 'first', (args.port, args.port+1))
+        install_empty(active, institution)
         source_storage = active.database_identity()
         desker = Forms(active, work).grant_frontdesk(admin, 'front-' + secrets.token_hex(4))
         check_frontdesk(active, work, desker)
-        # The previous image predates clean installation. Run it against the same
-        # migrated institution before exercising the real old-to-new upgrade.
         previous_sha, current_sha = previous['source_commit'], candidate['source_commit']
-        result = active.upgrade(args.previous, public, current_sha, args.age)
-        assert result['status'] == 'UPGRADED'
+        if not additive:
+            # Older releases without an institution initializer can start against
+            # this clean candidate installation only when every migration matches.
+            result = active.upgrade(args.previous, public, current_sha, args.age)
+            assert result['status'] == 'UPGRADED'
         assert active.plan['requested_source_commit'] == previous_sha
+        assert applied_migrations(active) == migration_names(old_files)
         check_frontdesk(active, work, desker)
         first_patient = Forms(active, work).create_patient(desker)
         prior = records(active)
+        if additive:
+            try:
+                active.upgrade(args.candidate, public, previous_sha, args.age)
+            except ValueError as exc:
+                assert 'explicitly approved additive upgrade' in str(exc)
+            else:
+                raise AssertionError('Schema changes require explicit approval.')
+            assert applied_migrations(active) == migration_names(old_files)
+            assert records(active) == prior and active.status()['status'] == 'ORIGIN_READY'
         # Inject a real TLS trust failure *after* a successful write through the
         # candidate gateway. The ordinary upgrade recovery must keep that write.
         ordinary_status = active.status
@@ -186,23 +214,45 @@ def exercise(args):
         active.status = independent_probe
         try:
             try:
-                active.upgrade(args.candidate, public, previous_sha, args.age)
+                active.upgrade(args.candidate, public, previous_sha, args.age, allow_additive=additive)
             except RuntimeError:
                 action = json.loads((active.bundle / 'private/release-operation.json').read_text())
-                assert action['status'] == 'FAILED_IMAGE_REVERTED' and not action['database_restored']
+                assert not action['database_restored']
+                assert action['status'] == ('FAILED_MAINTENANCE_REQUIRED' if additive else 'FAILED_IMAGE_REVERTED')
             else:
-                raise AssertionError('Trust failure should revert to the previous image.')
+                raise AssertionError('Invalid HTTPS trust must fail the upgrade.')
         finally:
             active.status = ordinary_status
-        assert len(successor) == 1 and active.plan['requested_source_commit'] == previous_sha
-        check_frontdesk(active, work, successor[0])
+        assert len(successor) == 1
+        if additive:
+            # After any migration, reject old writers. Preserve the successful
+            # write and resume the exact candidate on the same migrated volume.
+            assert active.dc('ps', '--status', 'running', '--services').decode().split() == ['db']
+            assert applied_migrations(active) == migration_names(new_files)
+            assert action['database_identity'] == source_storage
+            assert action['added_migrations'] == sorted(migration_names(new_files) - migration_names(old_files))
+            retained = active.bundle / 'private/release-checkpoints' / action['backup']
+            assert digest(retained) == action['backup_sha256']
+            active = ClinicInstallation(active.bundle, context=args.context, rehearsal=True,
+                architecture=args.architecture, ca_file=active.ca_file, resume_additive=True)
+        else:
+            assert active.plan['requested_source_commit'] == previous_sha
+            check_frontdesk(active, work, successor[0])
         following = records(active)
         assert json.loads(following)['users'] == json.loads(prior)['users'] + 1
         assert json.loads(following)['patients'] == json.loads(prior)['patients'] + 1
         assert json.loads(following)['patient_audits'] == json.loads(prior)['patient_audits'] + 1
         assert json.loads(following)['grants'] == json.loads(prior)['grants'] + 1
-        result = active.upgrade(args.candidate, public, previous_sha, args.age)
+        result = active.upgrade(args.candidate, public, previous_sha, args.age, allow_additive=additive)
         assert result['status'] == 'UPGRADED' and active.plan['requested_source_commit'] == current_sha
+        if additive:
+            assert (result['backup_sha256'], result['added_migrations']) == (action['backup_sha256'], action['added_migrations'])
+            try:
+                active.rollback(previous_sha, public, current_sha, args.age)
+            except ValueError as exc:
+                assert 'downgrade is disabled' in str(exc)
+            else:
+                raise AssertionError('An older image must not write the upgraded schema.')
         assert following == records(active) and active.database_identity() == source_storage
         check_frontdesk(active, work, successor[0])
         with exclusive(active.bundle / 'private/release.lock'):
@@ -220,17 +270,19 @@ def exercise(args):
         assert recovery.database_identity()['volume'] != source_storage['volume']
         check_frontdesk(recovery, work, successor[0])
         print(json.dumps({'installation': 'PASS', 'https_login_and_frontdesk_grant': 'PASS',
-               'upgrade': {'previous': previous_sha, 'current': current_sha},
-               'failed_upgrade': 'previous image and original volume; two patient registrations and scoped grants retained',
+               'upgrade': {'previous': previous_sha, 'current': current_sha,
+                           'added_migrations': sorted(migration_names(new_files) - migration_names(old_files))},
+               'failed_upgrade': ('writers stopped after migration; same candidate resumed; downgrade refused'
+                                  if additive else 'previous image reverted on original volume'),
                'patient_registrations': json.loads(following)['patients'],
                'registration_audits': json.loads(following)['patient_audits'],
                'encrypted_restore': result['restore']['comparison'],
                'restore_service_elapsed_ms': result['restore']['elapsed_ms'],
                'decrypt_through_staff_login_ms': round((time.monotonic()-started)*1000),
-               'storage': 'two independent Compose projects and PG17 volumes on the same engine',
+               'storage': 'upgrade and restore used independent Compose projects and PG17 volumes on the same engine',
                'public_or_customer_deployment': False}, indent=2))
     finally:
-        for clinic in (recovery, active):
+        for clinic in (recovery, active, fresh):
             if clinic:
                 # Only our explicitly prepared projects. Leave all volumes for examination.
                 clinic.dc('stop', '--timeout', '20', timeout=120)
