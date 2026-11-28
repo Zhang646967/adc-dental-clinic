@@ -51,18 +51,28 @@ class Forms:
         body, status, location = raw.rsplit('\n', 2)
         return int(status), body, location.removeprefix('https://' + self.host)
 
-    def submit(self, path, values):
+    def submit(self, path, values, *, action=None):
         status, html, _ = self.request(path)
         assert status == 200, (path, status)
         hidden = Hidden()
         hidden.feed(html)
         assert 'csrfmiddlewaretoken' in hidden.values, path
-        status, _, location = self.request(path, hidden.values | values)
+        status, _, location = self.request(action or path, hidden.values | values)
         assert status == 302, (path, status)
         return location
 
     def login(self, account):
         return self.submit('/accounts/login/', account)
+
+    def create_patient(self, account):
+        self.login(account)
+        self.submit('/workspace/select-clinic/', {'clinic': '1'}, action='/workspace/clinic/activate/')
+        detail = self.submit('/patients/new/', dict(clinic='1', name='门诊交接核验',
+            date_of_birth='1980-01-02', billing_address='机构验收用地址', phone='000-0000000',
+            emergency_name='核验联系人', emergency_phone='000-0000001', allergy_status='UNKNOWN'))
+        assert re.fullmatch(r'/patients/[0-9]+/', detail), detail
+        assert self.request(detail)[0] == 200
+        return int(detail.split('/')[-2])
 
     def grant_frontdesk(self, administrator, username):
         self.login(administrator)
@@ -105,6 +115,8 @@ def records(clinic):
      'users',(SELECT count(*) FROM adc_user),
      'grants',(SELECT count(*) FROM adc_role_assignment WHERE is_active),
      'patients',(SELECT count(*) FROM adc_patient),
+     'patient_ids_hash',(SELECT md5(string_agg(patient_no,'/' ORDER BY id)) FROM adc_patient),
+     'patient_audits',(SELECT count(*) FROM adc_audit_event WHERE event_type='PATIENT_CREATED'),
      'visits',(SELECT count(*) FROM adc_visit),
      'grants_hash',(SELECT md5(string_agg(concat_ws('|',id,user_id,role,scope_kind,clinic_id,is_active),'/' ORDER BY id))
                       FROM adc_role_assignment));""")
@@ -152,6 +164,7 @@ def exercise(args):
         assert result['status'] == 'UPGRADED'
         assert active.plan['requested_source_commit'] == previous_sha
         check_frontdesk(active, work, desker)
+        first_patient = Forms(active, work).create_patient(desker)
         prior = records(active)
         # Inject a real TLS trust failure *after* a successful write through the
         # candidate gateway. The ordinary upgrade recovery must keep that write.
@@ -161,6 +174,8 @@ def exercise(args):
             if active.plan['requested_source_commit'] == current_sha and not successor:
                 account = Forms(active, work).grant_frontdesk(admin, 'continuity-' + secrets.token_hex(4))
                 successor.append(account)
+                second_patient = Forms(active, work).create_patient(account)
+                assert second_patient != first_patient
                 orig_ca = active.ca_file
                 try:
                     active.ca_file = recovery.ca_file
@@ -183,6 +198,8 @@ def exercise(args):
         check_frontdesk(active, work, successor[0])
         following = records(active)
         assert json.loads(following)['users'] == json.loads(prior)['users'] + 1
+        assert json.loads(following)['patients'] == json.loads(prior)['patients'] + 1
+        assert json.loads(following)['patient_audits'] == json.loads(prior)['patient_audits'] + 1
         assert json.loads(following)['grants'] == json.loads(prior)['grants'] + 1
         result = active.upgrade(args.candidate, public, previous_sha, args.age)
         assert result['status'] == 'UPGRADED' and active.plan['requested_source_commit'] == current_sha
@@ -203,7 +220,9 @@ def exercise(args):
         check_frontdesk(recovery, work, successor[0])
         print(json.dumps({'installation': 'PASS', 'https_login_and_frontdesk_grant': 'PASS',
                'upgrade': {'previous': previous_sha, 'current': current_sha},
-               'failed_upgrade': 'previous image, original volume, new account and new audited grant retained',
+               'failed_upgrade': 'previous image and original volume; two patient registrations and scoped grants retained',
+               'patient_registrations': json.loads(following)['patients'],
+               'registration_audits': json.loads(following)['patient_audits'],
                'encrypted_restore': result['restore']['comparison'],
                'restore_service_elapsed_ms': result['restore']['elapsed_ms'],
                'decrypt_through_staff_login_ms': round((time.monotonic()-started)*1000),
