@@ -178,7 +178,8 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 .patient-flow.text-scale-xlarge .picker,.patient-flow.text-scale-xlarge textarea,.patient-flow.text-scale-xlarge .input{font-size:55rpx}
 .patient-flow.text-scale-xlarge textarea{height:300rpx}
 
-/* At the two larger steps a card's secondary action takes the full card width:
-   the label stops landing on a single trailing character and the touch target
-   grows with the text. */
-.patient-flow.text-scale-large .card>button.secondary,.patient-flow.text-scale-xlarge .card>button.secondary{width:100%;margin-left:0;margin-right:0}
+/* At the two larger steps the actions take the full content width: the native
+   button default (184px) is narrower than the enlarged label, and a full-width
+   target also keeps the last character off a line of its own. */
+.patient-flow.text-scale-large .card>button,.patient-flow.text-scale-xlarge .card>button,
+.patient-flow.text-scale-large>button,.patient-flow.text-scale-xlarge>button{width:100%;margin-left:0;margin-right:0}
