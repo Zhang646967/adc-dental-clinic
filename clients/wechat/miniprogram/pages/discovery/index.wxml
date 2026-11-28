@@ -96,7 +96,7 @@
     <view class="clinic-card-top"><view class="section-title">{{item.name}}</view><text wx:if="{{item.distanceLabel}}" class="distance">{{item.distanceLabel}}</text></view>
     <view class="line">{{item.address || item.district || item.city}}</view>
     <view class="muted"><text wx:if="{{item.opening.state_label}}">{{item.opening.state_label}}　</text>{{item.opening.today}}</view>
-    <button class="secondary" bindtap="clinic" data-id="{{item.id}}" aria-label="查看{{item.name}}详情">查看门店</button>
+    <button class="secondary" bindtap="clinic" data-id="{{item.id}}" aria-label="查看{{item.name}}详情，{{item.city}} {{item.district}}，{{item.address || '门店编号 ' + item.id}}">查看门店</button>
   </view>
   <view wx:if="{{!busy&&!error&&!rows.length}}" class="notice">没有符合条件的门店。可更换城市或调整筛选。</view>
   <button wx:if="{{hasMore}}" class="secondary" bindtap="more">查看更多门店</button>

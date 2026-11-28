@@ -89,6 +89,11 @@ async function verify(){
      assert.equal(d.p.data.nearbyActive,allowed);assert.equal(d.p.data.rows[0].id,allowed?2:1);
    }
  });
+ await test('a clinic detail button includes its name and locality for branches with the same name',()=>{
+   const markup=fs.readFileSync(path.join(root,'pages/discovery/index.wxml'),'utf8');
+   const storeButton=markup.match(/<button[^>]*bindtap="clinic"[^>]*>/)[0];
+   assert.match(storeButton,/aria-label="[^"]*item.name[^"]*item.city[^"]*item.district[^"]*item.address/);
+ });
  await test('all synthetic contact actions stop before external calls',async()=>{
    const d=page();await d.p.onShow();
    d.p.clinic({currentTarget:{dataset:{id:1}}});
