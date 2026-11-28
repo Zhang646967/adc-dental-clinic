@@ -55,10 +55,13 @@ jobs:
           # The first institutional release was distributed before its branch
           # reached main. Earlier trial images cannot initialize a clinic.
           initializer="adc_core/management/commands/initialize_clinic.py"
-          if ! git cat-file -e "$PREVIOUS:$initializer"; then
-            [[ "$EVENT_NAME" == "pull_request" ]]
+          if ! git cat-file -e "$PREVIOUS:$initializer" 2>/dev/null; then
+            if [[ "$EVENT_NAME" != "pull_request" ]]; then
+              echo "The explicitly selected source has no institutional installer." >&2
+              exit 1
+            fi
             delivered="$(git rev-parse 'refs/tags/clinic-2026.11-rc.1^{commit}')"
-            [[ "$delivered" == "f97a2110e87e9ae16933458e55580538cda46a58" ]]
+            [[ "$delivered" == "f97a2110e87e9ae16933458e55580538cda46a58" ]] || exit 1
             git merge-base --is-ancestor "$PREVIOUS" "$delivered"
             git merge-base --is-ancestor "$delivered" "$current"
             git cat-file -e "$delivered:$initializer"
