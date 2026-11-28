@@ -10,6 +10,8 @@ import pypdfium2
 from PIL import Image, ImageChops
 from pypdf import PdfReader
 
+from case_specifications import read_cases
+
 
 HERE = Path(__file__).resolve().parent
 TARGET = HERE.parents[2] / "课程报告/课程报告_张加良_8210241102.pdf"
@@ -154,18 +156,27 @@ def verify(path):
     appendix = next(d for d in outline if d.title.startswith("附录"))
     appendix_start = reader.get_destination_page_number(appendix)
     cases = json.loads((HERE / "用例目录.json").read_text())
-    actual_ids = re.findall(r"\b(?:SU-\d{2,3}|SF-01)\b", "\n".join(pages[appendix_start:]))
-    insist(actual_ids == [entry["id"] for entry in cases], "Index numbers missing, changed or duplicated")
-    for entry in cases:
-        insist(entry["title"] in "".join("".join(pages[appendix_start:]).split()),
-                f"Use case {entry['id']} missing its title")
+    specifications = read_cases(HERE.parent / "REPORT.md", HERE / "用例目录.json")
+    entries = [item for item in bookmarks(reader.outline)
+               if re.match(r"^(?:SU-\d{2,3}|SF-01)\s", item.title)]
+    ids = [item.title.split()[0] for item in entries]
+    insist(ids == [case["id"] for case in specifications] and set(ids) == {case["id"] for case in cases},
+           "Detailed use-case bookmarks missing, changed or duplicated")
+    numbers = [reader.get_destination_page_number(item) for item in entries] + [len(pages)]
+    insist(numbers[0] == appendix_start and all(a < b for a, b in zip(numbers, numbers[1:])),
+           "Complete specifications must each start on their own identifiable page")
+    for i, case in enumerate(specifications):
+        text = "".join("".join(pages[numbers[i]:numbers[i + 1]]).split())
+        for marker in [case["title"], *(name for name, _ in case["rows"])]:
+            insist("".join(marker.split()) in text, f"{case['id']} lacks {marker}")
     diagrams = ElementTree.parse(HERE / "门诊模型.drawio").getroot().findall("diagram")
     graph = PdfReader(HERE / "门诊模型.pdf")
-    insist(len(diagrams) == len(graph.pages) == 7, "Expected seven editable drawings and vector pages")
-    markers = ["取得就诊安排", "核对并登记到诊", "核对并确认改期", "检查记录版本",
-               "提交已核对的提案", "核实爽约", "adc_clinical_draft"]
+    insist(len(diagrams) == len(graph.pages) == 9, "Expected nine editable drawings and vector pages")
+    markers = ["取得就诊安排", "告知已登记到诊", "核对并确认改期", "检查记录版本",
+               "提交已核对的提案", "核实爽约", "adc_clinical_draft",
+               "送审指定报告版本", "adc_examination_notice"]
     model_refs = re.findall(r"@model (\d+) \| (图 \d+-\d+)", (HERE / "正文.md").read_text())
-    insist(len(model_refs) == len(markers), "Seven figures must be present in the report source")
+    insist(len(model_refs) == len(markers), "Nine figures must be present in the report source")
     for (ordinal, caption), marker in zip(model_refs, markers, strict=True):
         target_page = next((i for i, contents in enumerate(pages)
                             if caption in contents and marker in contents), None)
@@ -175,6 +186,11 @@ def verify(path):
         vertices = [n for n in cells if n.get("vertex") == "1"]
         edges = [n for n in cells if n.get("edge") == "1"]
         insist(len(vertices) >= 4 and len(edges) >= 1, f"Drawing {ordinal} lacks editable content")
+        if ordinal in ("2", "5", "8"):
+            labels = {cell.get("value") for cell in vertices}
+            insist({"sd", "alt"} <= labels and any(cell.get("style", "").find("endArrow=open") >= 0
+                                                  and "dashed=1" in cell.get("style", "") for cell in edges),
+                   f"Sequence {ordinal} requires an alternate operand and a distinct returned message")
     observed = json.loads((HERE / "验收记录.json").read_text())
     verify_appointment_readability(reader, pages, observed)
     verify_patient_navigation(reader, pages, observed["patient_navigation"])
@@ -226,8 +242,9 @@ def verify(path):
         insist(label in compact, "Missing observed appointment chain " + label)
     insist(len(observed["physical_foreign_keys"]) == observed["physical_fk_count_verified_in_figure_scope"],
            "Foreign-key evidence incomplete")
-    toc = reader.pages[reader.get_destination_page_number(next(d for d in outline if d.title == "目录"))]
-    links = [a.get_object() for a in toc.get("/Annots", [])]
+    toc_start = reader.get_destination_page_number(next(d for d in outline if d.title == "目录"))
+    first_chapter = reader.get_destination_page_number(next(d for d in outline if d.title == chapter_names[0]))
+    links = [a.get_object() for page in reader.pages[toc_start:first_chapter] for a in page.get("/Annots", [])]
     valid_pages = {p.indirect_reference.idnum for p in reader.pages}
     insist(all(a["/Dest"][0].idnum in valid_pages for a in links) and len(links) >= 20,
             "Contents links must resolve inside the PDF")
@@ -236,7 +253,7 @@ def verify(path):
                 if "/FontFile2" in (f.get_object().get("/FontDescriptor") or {})]
     insist(any("Songti" in f for f in embedded), "Report must contain embedded Songti glyphs")
     return {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "pages": len(pages),
-            "chapters": len(chapter_names), "case_index_entries": len(actual_ids), "contents_links": len(links),
+            "chapters": len(chapter_names), "full_case_specifications": len(ids), "contents_links": len(links),
             "editable_vector_figures": len(diagrams), "screen_pages": sorted(set(pictures)), "verified_screen_images": len(pictures),
             "embedded_songti_fonts": sorted({f.split("+")[-1] for f in embedded if "Songti" in f})}
 

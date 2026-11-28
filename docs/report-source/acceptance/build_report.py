@@ -18,6 +18,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, Table, TableStyle
 
+from case_specifications import GROUPS, publication_wording, read_cases, specification_tables
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
@@ -44,7 +45,7 @@ def para(text, style):
     if link:
         label, url = link.groups()
         return Paragraph(f'<link href="{escape(url)}" color="#244958"><u>{escape(label)}</u></link>', style)
-    return Paragraph(escape(text), style)
+    return Paragraph(escape(text).replace("\n", "<br/>"), style)
 
 
 def table(rows, width, factor):
@@ -59,7 +60,7 @@ def table(rows, width, factor):
             raise ValueError(f"Table row has {len(row)} columns, expected {columns}")
         style = text_style("table", 10.5 * factor, 15.6 * factor, bold=i == 0)
         grid.append([para(cell, style) for cell in row])
-    t = Table(grid, colWidths=[width * v for v in ratios], hAlign="LEFT")
+    t = Table(grid, colWidths=[width * v for v in ratios], hAlign="LEFT", repeatRows=1)
     t.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LINEABOVE", (0, 0), (-1, 0), 1, INK),
@@ -86,8 +87,36 @@ def report_pages():
             cells.append(f'{row["title_px"]} / {row["time_px"]}')
         size_table.append("| " + " | ".join([str(width), *cells]) + " |")
     text = text.replace("@appointment_metrics", "\n".join(size_table))
+    text = text.replace("# 第五章", design_details() + "\n\n# 第五章", 1)
     return [[s.strip() for s in part.splitlines() if s.strip()]
             for part in re.split(r"^---\s*$", text, flags=re.M)]
+
+
+def design_details():
+    details = json.loads((HERE.parent / "report_source.json").read_text())["design"]
+    sections = []
+    for detail in details:
+        previous, title = detail["heading"].split(" ", 1)
+        if previous == "4.13":
+            # Its historical table counts predate report publication and patient funds.
+            continue
+        number = 10 + len(sections)
+        paragraphs = []
+        for paragraph in detail["paragraphs"]:
+            paragraph = publication_wording(paragraph)
+            paragraph = re.sub(r"统一医师身份和门店层级配置的区分也可见[^。]*\[27\]。", "", paragraph)
+            paragraphs.append(paragraph)
+        sections.append([f"## 4.{number}　{title}", *paragraphs])
+    pages = []
+    pair = []
+    for section in sections:
+        if pair and sum(len(line) for line in pair + section) > 895:
+            pages.append(pair)
+            pair = []
+        pair.extend(section)
+    if pair:
+        pages.append(pair)
+    return "\n\n---\n\n".join("\n".join(page) for page in pages) + "\n\n---"
 
 
 def runs(lines):
@@ -128,7 +157,7 @@ def page_content(c, blocks, chapter_page, plots, overlays, factor, draw):
             else:
                 box = plots.pages[int(name) - 1].cropbox
                 raw_w, raw_h = float(box.width), float(box.height)
-                max_height = 305 * factor
+                max_height = (420 if name in ("5", "8") else 315) * factor
             scale = min((SPAN - 8) / raw_w, max_height / raw_h)
             w, h = raw_w * scale, raw_h * scale
             x = LEFT + (SPAN - w) / 2
@@ -179,11 +208,11 @@ def mark(c, key, title, level=0):
     c.addOutlineEntry(title, key, level=level)
 
 
-def front(c, pages):
+def front(c, pages, group_starts):
     mark(c, "cover", "封面")
     for y, txt, size, font in [
         (710, "中 南 大 学", 29, "SongBold"), (681, "CENTRAL SOUTH UNIVERSITY", 12, "Times-Roman"),
-        (591, "系统分析与设计", 22, "Song"), (544, "系统验收报告", 28, "SongBold"),
+        (591, "系统分析与设计", 22, "Song"), (544, "课 程 项 目 报 告", 28, "SongBold"),
         (445, "ADC 牙科连锁运营管理系统", 22, "SongBold"), (410, "分析与设计", 22, "SongBold"),
     ]:
         c.setFont(font, size)
@@ -235,35 +264,47 @@ def front(c, pages):
         for line in lines:
             if line.startswith("# ") or line.startswith("## ") or re.match(r"^### \d+\.\d+", line):
                 rows.append((line.split(" ", 1)[1], i, line.startswith("# ")))
-    rows.append(("附录　业务用例索引", len(pages) + 1, True))
-    rows.append(("系统用例 147 项、共享核验 1 项", len(pages) + 1, False))
-    gap = min(25, 610 / len(rows))
-    y = H - 138
-    for text, number, main in rows:
-        x = LEFT if main else LEFT + 18
-        c.setFont("SongBold" if main else "Song", 12.8 if main else 11)
-        c.drawString(x, y, text)
-        c.drawRightString(W - RIGHT, y, str(number))
-        key = f"part{number}" if number <= len(pages) else "appendix"
-        c.linkRect("", key, (x, y - 3, W - RIGHT, y + 14), relative=0, thickness=0)
-        y -= gap
-    c.showPage()
+    for group, title in GROUPS:
+        rows.append((f"附录 {group}　{title}", group_starts[group], True))
+    entries = 31
+    for index in range(0, len(rows), entries):
+        if index:
+            header_footer(c, "目　录", ("II", "III", "IV", "V")[index // entries])
+            c.setFont("SongBold", 20)
+            c.drawCentredString(W / 2, H - 99, "目　录（续）")
+        y = H - 138
+        for label, number, main in rows[index:index + entries]:
+            x = LEFT if main else LEFT + 18
+            c.setFont("SongBold" if main else "Song", 12.8 if main else 11)
+            c.drawString(x, y, label)
+            c.drawRightString(W - RIGHT, y, str(number))
+            c.linkRect("", f"part{number}", (x, y - 3, W - RIGHT, y + 14), relative=0, thickness=0)
+            y -= 19.3
+        c.showPage()
 
 
-def appendix(c, examples, index, count):
-    mark(c, "appendix" if not index else f"appendix{index}", "附录　业务用例索引" if not index else
-         f"用例索引（{index + 1}）", level=0 if not index else 1)
-    c.setFont("SongBold", 18)
-    c.drawCentredString(W / 2, TOP - 18, "附录　业务用例索引" if not index else "业务用例索引（续）")
-    c.setFont("Song", 11)
-    c.drawString(LEFT, TOP - 48, f"第 {index + 1} 组，共 {count} 组。按业务编号查阅。")
-    rows = [["编号", "业务目标"]] + [[i["id"], i["title"]] for i in examples]
-    t = table(rows, SPAN, .94)
-    _, h = t.wrap(SPAN, H)
-    y = TOP - 64 - h
-    if y < BOTTOM:
-        raise ValueError("Appendix does not fit")
-    t.drawOn(c, LEFT, y)
+def appendix(c, specifications, first_page, parts):
+    number = first_page
+    for group, title in GROUPS:
+        for index, case in enumerate(item for item in specifications if item["group"] == group):
+            label = f"附录 {group}　{title}"
+            case_title = f"{case['id']}　{case['title']}"
+            for i, fragment in enumerate(parts[case["id"]]):
+                header_footer(c, label, str(number))
+                if index == i == 0:
+                    mark(c, f"part{number}", label)
+                if i == 0:
+                    mark(c, f"case-{case['id']}", case_title, level=1)
+                heading = para(case_title + ("（续）" if i else ""), text_style("case", 15, 22, bold=True))
+                _, h = heading.wrap(SPAN, H)
+                heading.drawOn(c, LEFT, TOP - h)
+                caption = f"表 {group}-{case['number']}　{case['title']}用例规约" + ("（续）" if i else "")
+                c.setFont("Song", 10.5)
+                c.drawCentredString(W / 2, TOP - h - 22, caption)
+                _, height = fragment.wrap(SPAN, H)
+                fragment.drawOn(c, LEFT, TOP - h - 33 - height)
+                number += 1
+                c.showPage()
 
 
 def build(destination, fonts):
@@ -274,19 +315,25 @@ def build(destination, fonts):
     expected = {f"SU-{i:02}" for i in range(1, 148)} | {"SF-01"}
     if len(cases) != 148 or {i["id"] for i in cases} != expected:
         raise ValueError("Business-use-case index incomplete")
-    group_count = (len(cases) + 23) // 24
-    portions = [cases[len(cases) * i // group_count:len(cases) * (i + 1) // group_count]
-                for i in range(group_count)]
+    specifications = read_cases(HERE.parent / "REPORT.md", HERE / "用例目录.json")
+    parts = {case["id"]: specification_tables(case, table, SPAN, TOP - BOTTOM - 81)
+             for case in specifications}
+    group_starts = {}
+    next_page = len(pages) + 1
+    for group, _ in GROUPS:
+        group_starts[group] = next_page
+        next_page += sum(len(parts[case["id"]]) for case in specifications if case["group"] == group)
     plots = PdfReader(HERE / "门诊模型.pdf")
-    if len(plots.pages) != 7:
-        raise ValueError("Expected seven vector drawings")
+    if len(plots.pages) != 9:
+        raise ValueError("Expected nine vector drawings")
     base = BytesIO()
     c = canvas.Canvas(base, pagesize=A4, invariant=1, pageCompression=1)
     c.setAuthor("张加良")
     c.setTitle(TITLE)
     c.setSubject("门诊业务、系统设计与岗位验收")
     c.setCreator("中南大学商学院")
-    front(c, pages)
+    front(c, pages, group_starts)
+    front_pages = c.getPageNumber() - 1
     overlays, page_stats = [], []
     chapter = ""
     for i, lines in enumerate(pages, 1):
@@ -297,18 +344,15 @@ def build(destination, fonts):
         mark(c, f"part{i}", lines[0].split(" ", 1)[1], level=0 if new_chapter else 1)
         header_footer(c, chapter, str(i))
         for factor in (1, .98, .96, .94, .92, .9):
-            last = page_content(c, blocks, i + 2, plots, [], factor, False)
+            last = page_content(c, blocks, i + front_pages - 1, plots, [], factor, False)
             if last >= BOTTOM:
                 break
         else:
             raise ValueError(f"Page {i} does not fit: {last:.1f}pt")
-        page_content(c, blocks, i + 2, plots, overlays, factor, True)
+        page_content(c, blocks, i + front_pages - 1, plots, overlays, factor, True)
         page_stats.append((i, factor, round(last, 1)))
         c.showPage()
-    for i, group in enumerate(portions):
-        header_footer(c, "附录　业务用例索引", str(len(pages) + i + 1))
-        appendix(c, group, i, len(portions))
-        c.showPage()
+    appendix(c, specifications, len(pages) + 1, parts)
     c.save()
     base.seek(0)
     output = PdfWriter(clone_from=base)
@@ -325,11 +369,11 @@ def build(destination, fonts):
         box = drawing.cropbox
         matrix = Transformation().translate(-float(box.left), -float(box.bottom)).scale(scale).translate(x, y)
         output.pages[page_no].merge_transformed_page(drawing, matrix, over=True)
-    if len(overlays) != 7:
-        raise ValueError("Expected exactly seven placements")
+    if len(overlays) != 9:
+        raise ValueError("Expected exactly nine placements")
     with destination.open("wb") as stream:
         output.write(stream)
-    print(f"{len(output.pages)} pages; {len(overlays)} vector diagrams; {len(cases)} indexed cases")
+    print(f"{len(output.pages)} pages; {len(overlays)} vector diagrams; {len(specifications)} full specifications")
     print("Body page, scale and text bottom (pt)", page_stats)
 
 
