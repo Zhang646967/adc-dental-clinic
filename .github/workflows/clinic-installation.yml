@@ -1,0 +1,58 @@
+name: Clinic installation and recovery
+
+on:
+  pull_request:
+    paths:
+      - deployment/clinic/**
+      - scripts/clinic_*.py
+      - scripts/g4_prepare.py
+      - scripts/g4_release.py
+      - scripts/g4_course.py
+      - adc_core/management/commands/initialize_clinic.py
+      - checks/clinic_release_rehearsal.py
+      - .github/workflows/clinic-installation.yml
+  workflow_dispatch:
+    inputs:
+      previous_commit:
+        description: Previously delivered application (full Git commit)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  rehearsal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Prepare isolated Linux tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y age
+          docker version
+          docker compose version
+          docker pull postgres:17
+          docker pull nginx:stable-alpine
+      - name: Build exact releases and verify the installation lifecycle
+        env:
+          PREVIOUS: ${{ inputs.previous_commit || github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ "$PREVIOUS" =~ ^[a-f0-9]{40}$ ]]
+          current="$(git rev-parse HEAD)"
+          private="$RUNNER_TEMP/adc-institution"
+          mkdir -m 700 "$private"
+          pg_digest="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}' | cut -d@ -f2)"
+          nginx_digest="$(docker image inspect nginx:stable-alpine --format '{{index .RepoDigests 0}}' | cut -d@ -f2)"
+          python scripts/clinic_release.py --context default build --source-commit "$PREVIOUS" --artifacts "$private/previous"
+          python scripts/clinic_release.py --context default build --source-commit "$current" --artifacts "$private/current"
+          python checks/clinic_release_rehearsal.py --context default --architecture amd64 --workdir "$private/verification" --candidate "$private/current" --previous "$private/previous" --db-image "postgres:17@$pg_digest" --nginx-image "nginx:stable-alpine@$nginx_digest"
