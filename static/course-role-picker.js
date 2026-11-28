@@ -7,15 +7,16 @@
   const storageKey = 'adc-course-invite:' + endpoint;
   const supplied = new URLSearchParams(location.hash.slice(1)).get('course');
   const invitePattern = /^[A-Za-z0-9_-]{43}$/;
+  const publicTrial = panel.hasAttribute('data-public-trial') && supplied === null;
   let invite = supplied;
   try {
     if (supplied && invitePattern.test(supplied)) sessionStorage.setItem(storageKey, supplied);
-    if (supplied === null) invite = sessionStorage.getItem(storageKey);
+    if (supplied === null && !publicTrial) invite = sessionStorage.getItem(storageKey);
   } catch (_) {
     // The current invitation still works when the browser blocks storage.
   }
   if (supplied !== null) history.replaceState(null, '', location.pathname + location.search);
-  if (!invitePattern.test(invite || '')) return;
+  if (!publicTrial && !invitePattern.test(invite || '')) return;
 
   const choices = panel.querySelector('[data-course-role-options]');
   const message = panel.querySelector('[data-course-role-message]');
@@ -26,10 +27,12 @@
   let filling = false;
 
   async function request(role) {
+    const params = new URLSearchParams(publicTrial ? {trial: 'public'} : {invite});
+    if (role) params.set('role', role);
     const response = await fetch(endpoint, {
       method: 'POST', credentials: 'same-origin', cache: 'no-store',
       headers: {'X-CSRFToken': csrf, Accept: 'application/json'},
-      body: new URLSearchParams(role ? {invite, role} : {invite}),
+      body: params,
     });
     const body = await response.json();
     if (!response.ok || !body.ok) {

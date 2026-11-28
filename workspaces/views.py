@@ -18,6 +18,12 @@ from workspaces.rules import ROLES, CLINIC_ROLES
 
 class WorkspaceLoginView(LoginView):
     login_channel='STAFF'
+    def get_context_data(self, **kwargs):
+        from portal.course_roles import public_trial_roles
+        context = super().get_context_data(**kwargs)
+        context['public_role_trial'] = bool(public_trial_roles())
+        return context
+
     def get_success_url(self):
         return reverse('select_role')
 

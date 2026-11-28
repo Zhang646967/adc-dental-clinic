@@ -1,4 +1,4 @@
-"""Prefill assigned credentials for a private synthetic course invitation."""
+"""Prefill a dedicated trial account, without authenticating or granting access."""
 import hashlib
 import hmac
 import json
@@ -6,6 +6,9 @@ import re
 from pathlib import Path
 
 from django.conf import settings
+from django.contrib.auth.hashers import check_password
+from django.core.exceptions import PermissionDenied
+from django.db import connection
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
@@ -33,24 +36,61 @@ INVITE_PATTERN = re.compile(r'[A-Za-z0-9_-]{43}')
 
 
 @sensitive_variables()
-def invitation(raw):
-    if not settings.ADC_CLINICAL_SYNTHETIC or not settings.ADC_COURSE_ROLE_FILE or not INVITE_PATTERN.fullmatch(raw):
+def current_roster(filename):
+    if not settings.ADC_CLINICAL_SYNTHETIC or not filename:
         return {}
     try:
-        path = Path(settings.ADC_COURSE_ROLE_FILE)
+        path = Path(filename)
         with path.open('rb') as file:
             contents = file.read(16385)
         if len(contents) > 16384:
             return {}
         value = json.loads(contents)
         expiry = parse_datetime(value['expires_at'])
-        digest = hashlib.sha256(raw.encode()).hexdigest()
-        if (expiry is None or not timezone.is_aware(expiry) or expiry <= timezone.now()
-                or not hmac.compare_digest(value['invite_sha256'], digest)):
+        if expiry is None or not timezone.is_aware(expiry) or expiry <= timezone.now():
             return {}
-        return value['roles'] if isinstance(value['roles'], dict) else {}
+        return value if isinstance(value.get('roles'), dict) else {}
     except (OSError, ValueError, TypeError, KeyError):
         return {}
+
+
+@sensitive_variables()
+def invitation(raw):
+    if not INVITE_PATTERN.fullmatch(raw):
+        return {}
+    roster = current_roster(settings.ADC_COURSE_ROLE_FILE)
+    digest = hashlib.sha256(raw.encode()).hexdigest()
+    expected = roster.get('invite_sha256')
+    if isinstance(expected, str) and re.fullmatch('[a-f0-9]{64}', expected) and hmac.compare_digest(expected, digest):
+        return roster['roles']
+    return {}
+
+
+@sensitive_variables()
+def public_trial_roles():
+    if not public_trial_database():
+        return {}
+    roster = current_roster(settings.ADC_PUBLIC_TRIAL_ROLE_FILE)
+    if (roster.get('purpose') != 'public-role-trial-v1' or 'invite_sha256' in roster
+            or roster.get('database') != connection.settings_dict['NAME']):
+        return {}
+    return {
+        role: entry for role, entry in roster['roles'].items()
+        if role in ROLE_OPTIONS and isinstance(entry, dict) and isinstance(entry.get('username'), str)
+        and re.fullmatch(r'trial_' + role + r'(?:_[a-zA-Z0-9_-]+)?', entry['username'])
+    }
+
+
+def public_trial_database():
+    return (settings.ADC_CLINICAL_SYNTHETIC and settings.ADC_PUBLIC_TRIAL_ROLE_FILE
+            and re.fullmatch(r'adc_public_trial_[a-z0-9_]+', connection.settings_dict['NAME'] or ''))
+
+
+def require_personal_password(user):
+    if public_trial_database() and any(
+        re.fullmatch(r'trial_' + role + r'(?:_[a-zA-Z0-9_-]+)?', user.username) for role in ROLE_OPTIONS
+    ):
+        raise PermissionDenied('此岗位使用共用体验账号，密码由门店统一维护。')
 
 
 def assigned_to(role, user):
@@ -67,7 +107,7 @@ def assigned_to(role, user):
 
 
 @sensitive_variables()
-def permitted_entry(role, entry):
+def permitted_entry(role, entry, *, verify_password=False):
     if not isinstance(entry, dict):
         return False
     username, password = entry.get('username'), entry.get('password')
@@ -76,7 +116,8 @@ def permitted_entry(role, entry):
     if not isinstance(password, str) or not 0 < len(password) <= 128:
         return False
     user = UserAccount.objects.filter(username=username, is_active=True, is_staff=False, is_superuser=False).first()
-    return user is not None and user.has_usable_password() and assigned_to(role, user)
+    return (user is not None and user.has_usable_password() and assigned_to(role, user)
+            and (not verify_password or check_password(password, user.password)))
 
 
 @sensitive_post_parameters('invite')
@@ -85,12 +126,16 @@ def permitted_entry(role, entry):
 def prefill(request, channel):
     unavailable = {'status': 404, 'code': 'COURSE_UNAVAILABLE',
                    'message': '体验入口无效或已过期。你可以继续手动登录。'}
-    roles = invitation(request.POST.get('invite', ''))
+    public = request.POST.get('trial') == 'public' and 'invite' not in request.POST
+    if public:
+        roles = public_trial_roles()
+    else:
+        roles = invitation(request.POST.get('invite', ''))
     role = request.POST.get('role', '')
     if role:
         option = ROLE_OPTIONS.get(role)
         entry = roles.get(role)
-        if option is None or option[0] != channel or not permitted_entry(role, entry):
+        if option is None or option[0] != channel or not permitted_entry(role, entry, verify_password=public):
             return result(request, **unavailable)
         return result(request, {'username': entry['username'], 'password': entry['password']})
     choices = [

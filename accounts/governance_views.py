@@ -98,6 +98,8 @@ def change_own_password(request):
             with transaction.atomic():
                 require_writable(request.user)
                 fresh=UserAccount.objects.select_for_update().get(pk=request.user.pk,is_active=True)
+                from portal.course_roles import require_personal_password
+                require_personal_password(fresh)
                 if not fresh.check_password(form.cleaned_data['old_password']):
                     raise ValidationError('密码已变化，请重新登录后重试。')
                 form.user=fresh;form.save()

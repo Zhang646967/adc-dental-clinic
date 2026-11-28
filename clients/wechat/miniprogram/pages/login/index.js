@@ -2,6 +2,7 @@ const navigation=require('../../utils/navigation');
 const api = require('../../utils/api');
 const {showError: presentError} = require('../../utils/format');
 const intent=require('../../utils/booking-intent');
+const config=require('../../config');
 function showError(page,error){presentError(page,error,{stayOnLogin:true});}
 const courseInvitePattern = /^[A-Za-z0-9_-]{43}$/;
 Page({
@@ -9,10 +10,13 @@ Page({
     courseRoles: [], selectedCourseRole: '', courseBusy: false, courseMessage: ''},
   async onLoad(options = {}) {
     const app = getApp();
-    if (typeof options.course === 'string' && courseInvitePattern.test(options.course)) {
-      app.globalData.courseInvite = options.course;
+    const supplied = Object.prototype.hasOwnProperty.call(options, 'course');
+    if (supplied) {
+      app.globalData.courseInvite = typeof options.course === 'string' && courseInvitePattern.test(options.course)
+        ? options.course : '';
     }
     this.courseInvite = app.globalData.courseInvite || '';
+    this.publicTrial = !supplied && !this.courseInvite && config && config.mode === 'experience' && config.publicTrialRoles === true;
     try {
       const session = await api.bootstrap();
       const auth = session.auth_capabilities || {};
@@ -24,14 +28,15 @@ Page({
         navigation.reLaunch({url:intent.destination(app,session)});
         return;
       }
-      if (this.courseInvite) await this.loadCourseRoles();
+      if (this.courseInvite || this.publicTrial) await this.loadCourseRoles();
+      else if (supplied) this.setData({courseMessage:'体验入口无效。你可以手动登录。'});
     }
     catch (e) { showError(this, e); }
   },
   async loadCourseRoles() {
     const invite = this.courseInvite;
     try {
-      const response = await api.request('auth/course-role/', 'POST', {invite});
+      const response = await api.request('auth/course-role/', 'POST', this.publicTrial ? {trial:'public'} : {invite});
       if (this.courseInvite === invite) this.setData({courseRoles: response.roles});
     } catch (error) {
       if (this.courseInvite !== invite) return;
@@ -47,10 +52,10 @@ Page({
   async fillCourseRole(event) {
     const role = event.currentTarget.dataset.role;
     const invite = this.courseInvite;
-    if (this.data.busy || this.data.courseBusy || !invite || !this.data.courseRoles.some(item => item.id === role)) return;
+    if (this.data.busy || this.data.courseBusy || (!invite && !this.publicTrial) || !this.data.courseRoles.some(item => item.id === role)) return;
     this.setData({courseBusy: true, courseMessage: '', selectedCourseRole: '', username: '', password: '', error: ''});
     try {
-      const fields = await api.request('auth/course-role/', 'POST', {invite, role});
+      const fields = await api.request('auth/course-role/', 'POST', this.publicTrial ? {trial:'public',role} : {invite,role});
       if (this.courseInvite !== invite) return;
       this.setData({selectedCourseRole: role, passwordMode: true, username: fields.username,
         password: fields.password, courseMessage: '已填好账号和密码。请点「登录原账号」。'});
@@ -128,5 +133,5 @@ Page({
       this.setData({password:''}); navigation.reLaunch({url:intent.destination(getApp(),session)});
     } catch (e) { this.setData({password:''}); showError(this, e); }
   },
-  onUnload(){this.courseInvite='';this.setData({password:'',localCode:'',smsCode:'',smsChallenge:'',smsNotice:''});}
+  onUnload(){this.courseInvite=null;this.publicTrial=false;this.setData({password:'',localCode:'',smsCode:'',smsChallenge:'',smsNotice:''});}
 });

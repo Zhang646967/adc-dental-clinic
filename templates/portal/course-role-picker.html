@@ -1,5 +1,5 @@
 {% load static %}
-<section data-course-role-picker data-endpoint="{{ course_role_endpoint }}" aria-label="体验角色" hidden>
+<section data-course-role-picker data-endpoint="{{ course_role_endpoint }}"{% if public_role_trial %} data-public-trial{% endif %} aria-label="体验角色" hidden>
   <p><strong>选择体验角色</strong></p>
   <div data-course-role-options></div>
   <p data-course-role-message class="muted" role="status"></p>

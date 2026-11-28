@@ -2,8 +2,10 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from tempfile import TemporaryDirectory
 from threading import Barrier
+from unittest.mock import patch
 import hashlib
 import json
 from django.core.exceptions import PermissionDenied
@@ -101,6 +103,88 @@ class PatientAccountHttpTests(FixtureMixin,TransactionTestCase):
                 self.assertEqual(self.post('mini_course_role', {'invite': invite, 'role': 'owner'}).status_code, 404)
                 logged_in = self.post('mini_login', roles['owner'])
                 self.assertTrue(logged_in.json()['data']['authenticated'])
+                self.assertFalse(Visit.objects.exists())
+
+    def test_public_trial_role_picker_reuses_normal_staff_and_patient_login(self):
+        password = 'isolated-trial-fixture-only'
+        owner = UserAccount.objects.create_user(username='trial_owner', password=password)
+        PatientAccess.objects.create(user=owner, patient=self.p1)
+        self.front.username = 'trial_front_branch'
+        self.front.set_password(password)
+        self.front.save(update_fields=['username', 'password'])
+        roles = {'owner': {'username': owner.username, 'password': password},
+                 'front': {'username': self.front.username, 'password': password},
+                 'manager': {'username': self.manager.username, 'password': 'private-never-listed'}}
+        database = 'adc_public_trial_role_test'
+        roster = {'purpose': 'public-role-trial-v1', 'database': database,
+                  'expires_at': (timezone.now() + timedelta(days=1)).isoformat(), 'roles': roles}
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / 'trial.json'
+            path.write_text(json.dumps(roster))
+            # Only the deployment name is varied. Logins, grants, CSRF and contexts use PostgreSQL.
+            identity = SimpleNamespace(settings_dict={'NAME': database})
+            with override_settings(ADC_PUBLIC_TRIAL_ROLE_FILE=str(path)), patch('portal.course_roles.connection', identity):
+                for endpoint, login_page, role, expected_context in (
+                    ('staff_course_role','login','front','FRONT_DESK'),
+                    ('mini_course_role','portal_login','owner','PATIENT'),
+                ):
+                    self.browser = Client(enforce_csrf_checks=True)
+                    self.state = self.browser.get(reverse('mini_session')).json()['data']
+                    form = self.browser.get(reverse(login_page))
+                    self.assertContains(form, 'data-public-trial')
+                    self.assertNotContains(form, password)
+                    self.assertEqual(self.browser.post(reverse(endpoint), {'trial':'public'}).status_code, 403)
+                    choices = self.post(endpoint, {'trial':'public'})
+                    self.assertEqual([i['id'] for i in choices.json()['data']['roles']], [role])
+                    self.assertNotContains(choices, password)
+                    self.assertEqual(self.post(endpoint, {'trial':'public','invite':'invalid'}).status_code, 404)
+                    self.assertEqual(self.post(endpoint, {'trial':'public','role':'manager'}).status_code, 404)
+                    fields = self.post(endpoint, {'trial':'public','role':role})
+                    self.assertEqual(fields.json()['data'], roles[role])
+                    self.assertEqual(fields['Cache-Control'], 'no-store')
+                    self.assertNotIn('_auth_user_id', self.browser.session)
+                    csrf = self.browser.cookies['csrftoken'].value
+                    logged_in = self.browser.post(reverse(login_page), fields.json()['data'], HTTP_X_CSRFTOKEN=csrf)
+                    self.assertEqual(logged_in.status_code, 302)
+                    context = WorkspaceContext.objects.get(pk=self.browser.session[SESSION_KEY])
+                    self.assertEqual(context.role, expected_context)
+                    from portal.course_roles import require_personal_password
+                    with self.assertRaises(PermissionDenied):
+                        require_personal_password(context.user)
+                    require_personal_password(self.manager)
+                    from workspaces.context import token_for
+                    before = context.user.password
+                    self.browser.post(reverse('own_password_change'), {
+                        'old_password': password, 'new_password1': 'long-changed-visitor-password',
+                        'new_password2': 'long-changed-visitor-password', 'workspace_token': token_for(context),
+                    }, HTTP_X_CSRFTOKEN=self.browser.cookies['csrftoken'].value)
+                    context.user.refresh_from_db()
+                    self.assertEqual(context.user.password, before)
+                self.browser = Client(enforce_csrf_checks=True)
+                self.state = self.browser.get(reverse('mini_session')).json()['data']
+                for bad in [{'database':'adc_public_trial_elsewhere'}, {'purpose':'private'},
+                            {'invite_sha256':'a'*64}, {'expires_at':timezone.now().isoformat()}]:
+                    path.write_text(json.dumps(roster | bad))
+                    self.assertEqual(self.post('mini_course_role', {'trial':'public'}).status_code, 404)
+                    self.assertNotContains(self.browser.get(reverse('login')), 'data-public-trial')
+                path.write_text(json.dumps(roster | {'database':'adc_clinic'}))
+                identity.settings_dict['NAME'] = 'adc_clinic'
+                self.assertEqual(self.post('mini_course_role', {'trial':'public'}).status_code, 404)
+                path.write_text(json.dumps(roster))
+                identity.settings_dict['NAME'] = database
+                with override_settings(ADC_CLINICAL_SYNTHETIC=False):
+                    self.assertEqual(self.post('mini_course_role', {'trial':'public'}).status_code, 404)
+                    for view in ('login','portal_login'):
+                        self.assertNotContains(self.browser.get(reverse(view)), 'data-public-trial')
+                with override_settings(ADC_PUBLIC_TRIAL_ROLE_FILE=''):
+                    for view in ('login','portal_login'):
+                        self.assertNotContains(self.browser.get(reverse(view)), 'data-public-trial')
+                owner.set_password('replacement-for-operator-rotation')
+                owner.save(update_fields=['password'])
+                self.assertEqual(self.post('mini_course_role', {'trial':'public','role':'owner'}).status_code, 404)
+                self.front.is_superuser = True
+                self.front.save(update_fields=['is_superuser'])
+                self.assertEqual(self.post('staff_course_role', {'trial':'public','role':'front'}).status_code, 404)
                 self.assertFalse(Visit.objects.exists())
 
     def test_local_login_creates_pending_channel_without_business_authority(self):

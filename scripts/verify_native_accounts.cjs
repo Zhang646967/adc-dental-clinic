@@ -12,7 +12,7 @@ function page(name,options={}){
   calls.push({route:'account/local-login/',data:{code,username,password,confirmed}});if(options.loginError)throw options.loginError;return session;
  },request:async(route,method='GET',data)=>{calls.push({route,method,data});if(options.request)return options.request(route,method,data);if(route==='account/')return plain(profile);if(route==='discovery/')return {clinics:[{id:1,name:'合成长沙一店'},{id:2,name:'合成长沙二店'}]};throw Error('Unexpected '+route);}};
  const format={exports:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'utils/format.js'),'utf8'),{module:format,wx});
- vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,require:n=>n.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:n.endsWith('/api')?api:n.endsWith('/format')?format.exports:intent});
+ vm.runInNewContext(fs.readFileSync(path.join(root,'pages',name,'index.js'),'utf8'),{Page:p=>definition=p,wx,getApp:()=>state,require:n=>n.endsWith('/navigation')?{navigateTo:wx.navigateTo,reLaunch:wx.reLaunch,redirectTo:wx.redirectTo,consume:()=>null}:n.endsWith('/api')?api:n.endsWith('/format')?format.exports:n.endsWith('/config')?(options.config||{}):intent});
  const p={...definition,data:plain(definition.data),setData:v=>Object.assign(p.data,v)};
  return {p,session,calls,navigation,state,get bootstraps(){return bootstraps;}};
 }
@@ -62,6 +62,24 @@ async function verify(){
   assert.equal(d.calls[3].route, 'login/');
   assert.equal(d.calls[3].data.username, 'delegate');
   assert.equal(d.p.data.password, '');
+ });
+ await test('Only a public experience package lists guest patient roles; filling still waits for normal login', async () => {
+  const config={mode:'experience',publicTrialRoles:true};
+  const options={config,session:{account_authenticated:false},request:async(route,method,data)=>{
+   assert.equal(route,'auth/course-role/');assert.equal(method,'POST');
+   assert.deepEqual(plain(data),data.role?{trial:'public',role:'owner'}:{trial:'public'});
+   return data.role?{username:'trial_owner',password:'synthetic-only'}:{roles:[{id:'owner',label:'患者本人'}]};
+  }};
+  const d=page('login',options);await d.p.onLoad();await d.p.fillCourseRole({currentTarget:{dataset:{role:'owner'}}});
+  assert.equal(d.p.data.username,'trial_owner');assert.equal(d.calls.length,2);assert.equal(d.navigation.length,0);
+  await d.p.login();assert.equal(d.calls[2].route,'login/');assert.equal(d.p.data.password,'');
+  for(const flags of [{mode:'experience'},{mode:'local',publicTrialRoles:true}]){
+   const manual=page('login',{...options,config:flags});await manual.p.onLoad();assert.equal(manual.calls.length,0);
+  }
+  const invalid=page('login',options);await invalid.p.onLoad({course:'bad'});assert.equal(invalid.calls.length,0);
+  const expired=page('login',{...options,request:async(route,method,data)=>{
+   assert.ok(data.invite);assert.equal(data.trial,undefined);throw Object.assign(Error('expired'),{status:404});
+  }});await expired.p.onLoad({course:'B'.repeat(43)});assert.equal(expired.calls.length,1);assert.equal(expired.p.data.courseRoles.length,0);
  });
  await test('manual login remains available with a missing or expired course invitation', async () => {
   const denied = Object.assign(new Error('expired'), {status: 404});

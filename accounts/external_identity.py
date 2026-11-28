@@ -156,6 +156,8 @@ def set_login_password(*,actor,code,new_password,confirmed):
     row=_consume(code,'LOGIN')
     identity=ExternalIdentity.objects.select_for_update().get(pk=row.identity_id)
     user=UserAccount.objects.select_for_update().get(pk=actor.pk)
+    from portal.course_roles import require_personal_password
+    require_personal_password(user)
     _account_actor(actor)
     from accounts.auth_config import has_live_credentials
     if has_live_credentials(user):raise PermissionDenied('已通过平台认证的账号请通过其已绑定的身份设置密码。')
