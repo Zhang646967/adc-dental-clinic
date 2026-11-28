@@ -18,7 +18,7 @@
       <view class="record-head"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}} #{{comparison.original.id}}</view><view class="pill status-upcoming">{{comparison.original.statusLabel||'已预约'}}</view></view>
       <view class="section-title">{{comparison.original.clinic}}</view>
       <view>{{comparison.original.dentist}}<text wx:if="{{comparison.original.serviceLabel}}"> · {{comparison.original.serviceLabel}}</text></view>
-      <view class="time">{{comparison.original.startLabel}} 至 {{comparison.original.endLabel}}<text class="tz"> 北京时间</text></view>
+      <view class="time"><text class="nowrap">{{comparison.original.startLabel}}</text> 至 <text class="nowrap">{{comparison.original.endLabel}}</text><text class="tz"> 北京时间</text></view>
       <view wx:if="{{comparison.original.visitNo}}" class="muted">预约编号</view><view wx:if="{{comparison.original.visitNo}}" class="prose checkout-id">{{comparison.original.visitNo}}</view>
     </view>
     <view wx:elif="{{review.preview.original}}" class="card"><view class="pill">{{review.kind==='cancel'?'将取消的预约':'原预约'}}</view><view>{{review.preview.original.clinic}} · {{review.preview.original.dentist}}</view><view>{{review.preview.original.startLabel}} 至 {{review.preview.original.endLabel}}<text class="tz"> 北京时间</text></view></view>
