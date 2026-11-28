@@ -1,5 +1,5 @@
 {
-  "iphone": "iPhone 交付范围内，须在微信的日常运行方式下核对本版扫码进入、原生选时段、字号放大、VoiceOver 焦点和返回原记录。本版尚缺相应的实机记录，以上项目保留待验。",
+  "iphone": "iPhone 17 Pro Max 已扫码进入版本 9a2c0ad。手机上 09:00 的原预约显示“已改期替代”，10:30 的后继预约显示“已取消”，全程未见绿色诊断面板。原生日期选择、放大字号、VoiceOver 播报与焦点以及其他 iPhone 屏宽本次未实测。",
   "web": {
     "browsers": [
       "Chrome",
@@ -120,5 +120,25 @@
       ],
       "business_tables_unchanged": 18
     }
+  },
+  "iphone_evidence": {
+    "model": "iPhone 17 Pro Max",
+    "preview_commit": "9a2c0adadaa6138cbe742bd56dfc8ecdee9f8f72",
+    "native_source_tree": "d0dfb5e9dd8ae88a827633ecaa8b967a8800c83e",
+    "original": {
+      "local_time": "09:00",
+      "state": "RESCHEDULED"
+    },
+    "successor": {
+      "local_time": "10:30",
+      "state": "CANCELLED"
+    },
+    "green_vconsole_visible": false,
+    "unverified": [
+      "larger_text",
+      "VoiceOver",
+      "native_date_picker",
+      "other_iphone_widths"
+    ]
   }
 }
