@@ -1,7 +1,7 @@
 {
   "site_report_chain": "../../evidence_site_examination/chain.json",
   "server_report_chain": "../../evidence_site_examination/server.json",
-  "iphone": "先前版本 9a2c0ad 已在 iPhone 17 Pro Max 扫码进入。09:00 原约显示「已改期替代」，10:30 后继显示「已取消」，未见绿色诊断面板。本版手机扫码、微信大字号、原生选日、VoiceOver 播报与焦点尚待实机核对。",
+  "iphone": "先前版本 9a2c0ad 已在 iPhone 17 Pro Max 扫码进入。09:00 原约显示「已改期替代」，10:30 后继显示「已取消」，未见绿色诊断面板。本版手机扫码、定位授权与实际位置、微信大字号、原生选日以及 VoiceOver 播报与焦点尚待实机核对。",
   "web": {
     "browsers": [
       "Chrome",
@@ -323,6 +323,147 @@
       "reschedule_previews": 9,
       "reschedule_confirmations": 0,
       "business_writes": 0
+    }
+  },
+  "patient_navigation": {
+    "last_observation_utc": "2026-11-28T08:47:06.573194+00:00",
+    "reschedule": {
+      "application_commit": "684388b523ad1277bc380cedf4d718b83beed37a",
+      "comparison_baseline": "87d9b2084af7bf1c75abad13235ed891f2a784ee",
+      "environment": "微信工具实际机型和字号菜单，独立预约资料库",
+      "cases_390_16": [
+        {
+          "source": 5,
+          "original_start_bjt": "2026-12-05 09:00",
+          "proposed_start_bjt": "2026-12-06 10:30",
+          "single_date_heading": false
+        },
+        {
+          "source": 2,
+          "original_start_bjt": "2026-11-30 09:00",
+          "proposed_start_bjt": "2026-12-01 10:30",
+          "single_date_heading": false
+        },
+        {
+          "source": 5,
+          "original_start_bjt": "2026-12-05 09:00",
+          "proposed_start_bjt": "2026-12-05 10:00",
+          "single_date_heading": true
+        },
+        {
+          "source": 2,
+          "original_start_bjt": "2026-11-30 09:00",
+          "proposed_start_bjt": "2026-11-30 10:00",
+          "single_date_heading": true
+        }
+      ],
+      "comparison_height_css_px": [
+        {
+          "width": 390,
+          "font": 16,
+          "before": 1039,
+          "after": 799
+        },
+        {
+          "width": 375,
+          "font": 26,
+          "before": 1629,
+          "after": 1202
+        }
+      ],
+      "disclosure_and_return_checked": true,
+      "new_confirmations": 0,
+      "tables_unchanged": 33,
+      "visits": 6,
+      "receipts": 1,
+      "private_summary_sha256": "9ef2a4e07312e17a74b47d237a6072c55b784f04dacf2e71f3097a8f68838cc3"
+    },
+    "iphone_this_version": {
+      "location_and_os_permissions": "待实机",
+      "font_and_voiceover": "待实机",
+      "date_picker_gesture": "待实机"
+    },
+    "nearby": {
+      "environment": "微信工具中的访客页面；点击找门店，位置回调使用两个指定参考点和一次拒绝。",
+      "directory_source": "独立验收资料库的匿名门店目录",
+      "distance_meaning": "WGS-84 两点间估算直线距离",
+      "first_two": [
+        {
+          "point": "A",
+          "rows": [
+            {
+              "id": 5,
+              "name": "云庭口腔 · 中心门诊",
+              "metres": 225
+            },
+            {
+              "id": 6,
+              "name": "云庭口腔 · 梅溪湖门诊",
+              "metres": 7824
+            }
+          ]
+        },
+        {
+          "point": "B",
+          "rows": [
+            {
+              "id": 6,
+              "name": "云庭口腔 · 梅溪湖门诊",
+              "metres": 148
+            },
+            {
+              "id": 5,
+              "name": "云庭口腔 · 中心门诊",
+              "metres": 7684
+            }
+          ]
+        }
+      ],
+      "without_coordinates": {
+        "id": 3,
+        "name": "云庭口腔 · 江畔门诊",
+        "label": "距离未知",
+        "position_from_last": 1
+      },
+      "private_directory_snapshot_sha256": "06a2dfc367028b05af1511389a02bf5eca7930c2a5efadc085b328ac0d240d4f",
+      "ranking_probe_commit": "684388b523ad1277bc380cedf4d718b83beed37a",
+      "application_commit": "5359979af3f7b83d07ccd7819ae7234c95458111",
+      "tool": {
+        "sdk": "3.18.0",
+        "width": 390,
+        "height": 671
+      },
+      "manual_cities": [
+        {
+          "city": "长沙",
+          "result_count": 3,
+          "detail_id": 5,
+          "district": "芙蓉区",
+          "button_accessible_name_has_city_and_address": true
+        },
+        {
+          "city": "武汉",
+          "result_count": 1,
+          "detail_id": 8,
+          "district": "洪山区",
+          "button_accessible_name_has_city_and_address": true
+        }
+      ],
+      "location_denied_message": "未授权定位，可手动选择城市。",
+      "ide_record_sha256": "a00716e65811b3a8e24ab7f0f366e242ae451c3f224e96d524c79ee5480cce89",
+      "https_directory": {
+        "checked_at_utc": "2026-11-28T08:47:06.573194+00:00",
+        "environment": "香港租用服务器，独立限时验收应用和数据库",
+        "protocol": "HTTPS",
+        "http_status": 200,
+        "request_id": "fb25164290da4103be57206aae6c6208",
+        "certificate_verified": true,
+        "published_branches_with_wgs84": 4,
+        "branches_without_coordinates": 1,
+        "physical_device_location_observed": false,
+        "http_report_sha256": "e60efb5850d644b0bdb97b4ea1ece4fce0c1393298d9b7d59c41eb443be33972",
+        "distance_snapshot_sha256": "4d76d723d70fdc17554990c02c50adac10a018f14fefb42798cebc8dfcd41223"
+      }
     }
   }
 }

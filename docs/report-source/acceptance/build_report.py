@@ -317,7 +317,8 @@ def build(destination, fonts):
     server_record = json.loads((HERE / inventory["server_report_chain"]).read_text())
     captured = max(datetime.fromisoformat(timestamp.replace("Z", "+00:00")) for timestamp in
                    (site_record["capture_time_utc"], server_record["run_utc"],
-                    inventory["appointment_readability"]["last_observation_utc"])).astimezone(timezone.utc)
+                    inventory["appointment_readability"]["last_observation_utc"],
+                    inventory["patient_navigation"]["last_observation_utc"])).astimezone(timezone.utc)
     output.add_metadata({"/CreationDate": "D:20261127000000Z", "/ModDate": captured.strftime("D:%Y%m%d%H%M%SZ")})
     for page_no, diagram_no, x, y, scale in overlays:
         drawing = plots.pages[diagram_no]

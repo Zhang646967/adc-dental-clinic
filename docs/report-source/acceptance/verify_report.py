@@ -60,6 +60,54 @@ def verify_appointment_readability(reader, pages, observed):
            "The historical device result must be identifiable separately from the current version")
 
 
+def verify_patient_navigation(reader, pages, navigation):
+    def section_text(number):
+        prefix = {"1.2": "第一章", "5.1": "第五章"}.get(number, number + "　")
+        section = next(item for item in bookmarks(reader.outline) if item.title.startswith(prefix))
+        return "".join(pages[reader.get_destination_page_number(section)].split())
+
+    patient = section_text("5.1")
+    settings = section_text("5.6")
+    review = navigation["reschedule"]
+    version = review["application_commit"][:12]
+    insist(version in settings, "Updated version missing from the section on measured results")
+    for label in ["更改预约时间", "查看改期详情", "同日", "换日"]:
+        insist(label in patient, "Current appointment journey missing: " + label)
+    standard = next(row for row in review["comparison_height_css_px"]
+                    if (row["width"], row["font"]) == (390, 16))
+    insist(f'由{standard["before"]}缩至{standard["after"]}逻辑像素' in settings, "Observed heights differ")
+    cases = review["cases_390_16"]
+    sources = {row["source"] for row in cases}
+    insist(len(sources) == 2 and len(cases) == 4 and
+           all({row["single_date_heading"] for row in cases if row["source"] == source} == {True, False}
+               for source in sources), "Both date comparisons required for each retained appointment")
+    insist(review["disclosure_and_return_checked"] and review["new_confirmations"] == 0
+           and review["tables_unchanged"] == 33, "Preview and return observations are inconsistent")
+
+    nearby = navigation["nearby"]
+    first, second = (point["rows"] for point in nearby["first_two"])
+    insist([r["id"] for r in first] == [r["id"] for r in reversed(second)] and
+           all(rows[0]["metres"] < rows[1]["metres"] for rows in (first, second)),
+           "The nearest two branches must reverse order between the two controlled positions")
+    for rows in first, second:
+        insist(f'约{rows[0]["metres"]}米' in settings and rows[0]["name"].split(" · ")[-1] in settings,
+               "The first branch and its displayed distance are missing")
+    for label in ["微信工具分别指定两个位置", nearby["without_coordinates"]["label"], "拒绝定位", "手选城市"]:
+        insist(label in settings, "Nearby branch observations missing: " + label)
+
+    public = nearby["https_directory"]
+    signed = public["published_branches_with_wgs84"]
+    total = signed + public["branches_without_coordinates"]
+    entrance = section_text("1.2")
+    insist(f"可匿名查到{total}家门店，其中{signed}家有坐标" in entrance and
+           nearby["application_commit"][:12] in settings and public["http_status"] == 200
+           and public["certificate_verified"] and not public["physical_device_location_observed"],
+           "Public directory scope does not match the printed evidence")
+    for clinic in nearby["manual_cities"]:
+        insist(clinic["button_accessible_name_has_city_and_address"] and
+               clinic["city"] + clinic["district"] in entrance, "Same-name branch is not distinguishable")
+
+
 def verify_screens(reader, pages, expected):
     text = (HERE / "正文.md").read_text()
     refs = re.findall(r"^@screen ([\w-]+) \| (图 [^\n]+)$", text, re.M)
@@ -129,6 +177,7 @@ def verify(path):
         insist(len(vertices) >= 4 and len(edges) >= 1, f"Drawing {ordinal} lacks editable content")
     observed = json.loads((HERE / "验收记录.json").read_text())
     verify_appointment_readability(reader, pages, observed)
+    verify_patient_navigation(reader, pages, observed["patient_navigation"])
     site_run = json.loads((HERE / observed["site_report_chain"]).read_text())
     pictures = verify_screens(reader, pages, observed["screen_sha256"] | site_run["screenshots"])
     compact = "".join(complete_text.split())
