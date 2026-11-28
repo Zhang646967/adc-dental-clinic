@@ -102,9 +102,6 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
    can split into 北京 / 时间 once the time line wraps. */
 .patient-flow .tz{white-space:nowrap}
 .patient-flow .nowrap{white-space:nowrap}
-/* A time range breaks at the space between its date and time, never at the
-   dash between start and end. */
-.patient-flow .time{word-break:keep-all}
 
 /* 18555: the appointment screens follow the WeChat font size setting.
    The default tier keeps the existing hierarchy; larger steps raise every
