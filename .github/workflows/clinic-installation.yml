@@ -46,11 +46,26 @@ jobs:
       - name: Build exact releases and verify the installation lifecycle
         env:
           PREVIOUS: ${{ inputs.previous_commit || github.event.pull_request.base.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
           umask 077
           [[ "$PREVIOUS" =~ ^[a-f0-9]{40}$ ]]
           current="$(git rev-parse HEAD)"
+          # The first institutional release was distributed before its branch
+          # reached main. Earlier trial images cannot initialize a clinic.
+          initializer="adc_core/management/commands/initialize_clinic.py"
+          if ! git cat-file -e "$PREVIOUS:$initializer"; then
+            [[ "$EVENT_NAME" == "pull_request" ]]
+            delivered="$(git rev-parse 'refs/tags/clinic-2026.11-rc.1^{commit}')"
+            [[ "$delivered" == "f97a2110e87e9ae16933458e55580538cda46a58" ]]
+            git merge-base --is-ancestor "$PREVIOUS" "$delivered"
+            git merge-base --is-ancestor "$delivered" "$current"
+            git cat-file -e "$delivered:$initializer"
+            echo "PR base $PREVIOUS predates institutional installation. Rehearsing the upgrade from delivered release $delivered."
+            PREVIOUS="$delivered"
+          fi
+          echo "Institutional upgrade: $PREVIOUS to $current" >> "$GITHUB_STEP_SUMMARY"
           private="$RUNNER_TEMP/adc-institution"
           mkdir -m 700 "$private"
           pg_digest="$(docker image inspect postgres:17 --format '{{index .RepoDigests 0}}' | cut -d@ -f2)"
