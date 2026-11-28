@@ -49,7 +49,7 @@ def para(text, style):
 
 def table(rows, width, factor):
     columns = len(rows[0])
-    ratios = {2: (.23, .77), 3: (.23, .355, .415),
+    ratios = {2: (.23, .77), 3: (.23, .355, .415), 4: (.25, .25, .25, .25),
               5: (.16, .24, .24, .27, .09)}[columns]
     if columns == 3 and rows[0][-1] == "结论":
         ratios = (.33, .57, .10)
@@ -75,8 +75,17 @@ def table(rows, width, factor):
 
 def report_pages():
     text = (HERE / "正文.md").read_text()
-    device = json.loads((HERE / "验收记录.json").read_text())["iphone"]
-    text = text.replace("@device", device)
+    evidence = json.loads((HERE / "验收记录.json").read_text())
+    text = text.replace("@device", evidence["iphone"])
+    rows = evidence["appointment_readability"]["confirm_page_sizes"]
+    size_table = ["| 屏宽（逻辑像素） | 标准字号 16 | 较大字号 19 | 大字号 26 |"]
+    for width in [375, 390, 430]:
+        cells = []
+        for setting in [16, 19, 26]:
+            row = next(item for item in rows if (item["width"], item["setting"]) == (width, setting))
+            cells.append(f'{row["title_px"]} / {row["time_px"]}')
+        size_table.append("| " + " | ".join([str(width), *cells]) + " |")
+    text = text.replace("@appointment_metrics", "\n".join(size_table))
     return [[s.strip() for s in part.splitlines() if s.strip()]
             for part in re.split(r"^---\s*$", text, flags=re.M)]
 
@@ -306,8 +315,9 @@ def build(destination, fonts):
     inventory = json.loads((HERE / "验收记录.json").read_text())
     site_record = json.loads((HERE / inventory["site_report_chain"]).read_text())
     server_record = json.loads((HERE / inventory["server_report_chain"]).read_text())
-    captured = max(datetime.fromisoformat(site_record["capture_time_utc"]),
-                   datetime.fromisoformat(server_record["run_utc"])).astimezone(timezone.utc)
+    captured = max(datetime.fromisoformat(timestamp.replace("Z", "+00:00")) for timestamp in
+                   (site_record["capture_time_utc"], server_record["run_utc"],
+                    inventory["appointment_readability"]["last_observation_utc"])).astimezone(timezone.utc)
     output.add_metadata({"/CreationDate": "D:20261127000000Z", "/ModDate": captured.strftime("D:%Y%m%d%H%M%SZ")})
     for page_no, diagram_no, x, y, scale in overlays:
         drawing = plots.pages[diagram_no]

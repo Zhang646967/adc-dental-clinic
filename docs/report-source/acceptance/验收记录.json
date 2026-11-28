@@ -1,7 +1,7 @@
 {
   "site_report_chain": "../../evidence_site_examination/chain.json",
   "server_report_chain": "../../evidence_site_examination/server.json",
-  "iphone": "iPhone 17 Pro Max 已扫码进入版本 9a2c0ad。手机上 09:00 的原预约显示“已改期替代”，10:30 的后继预约显示“已取消”，全程未见绿色诊断面板。原生日期选择、放大字号、VoiceOver 播报与焦点以及其他 iPhone 屏宽本次未实测。",
+  "iphone": "先前版本 9a2c0ad 已在 iPhone 17 Pro Max 扫码进入。09:00 原约显示「已改期替代」，10:30 后继显示「已取消」，未见绿色诊断面板。本版手机扫码、微信大字号、原生选日、VoiceOver 播报与焦点尚待实机核对。",
   "web": {
     "browsers": [
       "Chrome",
@@ -209,5 +209,120 @@
     },
     "site_signoff": false,
     "first_time_participant": false
+  },
+  "appointment_readability": {
+    "application_commit": "7d3a90225e5090c3ac3f2f66c7e7ed41baabda43",
+    "last_observation_utc": "2026-11-28T08:18:23+00:00",
+    "channel": "微信工具内置机型与字号菜单，运行时回读屏宽和字号",
+    "sdk": "3.18.0",
+    "confirm_page_sizes": [
+      {
+        "width": 375,
+        "setting": 16,
+        "title_px": 23,
+        "time_px": 18,
+        "entry_visible_in_first_view": true,
+        "confirm_button_height_px": 44.5
+      },
+      {
+        "width": 375,
+        "setting": 19,
+        "title_px": 28,
+        "time_px": 22,
+        "entry_visible_in_first_view": true,
+        "confirm_button_height_px": 49
+      },
+      {
+        "width": 375,
+        "setting": 26,
+        "title_px": 38,
+        "time_px": 30,
+        "entry_visible_in_first_view": false,
+        "confirm_button_height_px": 59.5
+      },
+      {
+        "width": 390,
+        "setting": 16,
+        "title_px": 24,
+        "time_px": 19,
+        "entry_visible_in_first_view": true,
+        "confirm_button_height_px": 46
+      },
+      {
+        "width": 390,
+        "setting": 19,
+        "title_px": 29,
+        "time_px": 22,
+        "entry_visible_in_first_view": true,
+        "confirm_button_height_px": 50.5
+      },
+      {
+        "width": 390,
+        "setting": 26,
+        "title_px": 39,
+        "time_px": 31,
+        "entry_visible_in_first_view": false,
+        "confirm_button_height_px": 61
+      },
+      {
+        "width": 430,
+        "setting": 16,
+        "title_px": 26,
+        "time_px": 21,
+        "entry_visible_in_first_view": true,
+        "confirm_button_height_px": 50
+      },
+      {
+        "width": 430,
+        "setting": 19,
+        "title_px": 32,
+        "time_px": 25,
+        "entry_visible_in_first_view": true,
+        "confirm_button_height_px": 55.5
+      },
+      {
+        "width": 430,
+        "setting": 26,
+        "title_px": 43,
+        "time_px": 34,
+        "entry_visible_in_first_view": false,
+        "confirm_button_height_px": 66
+      }
+    ],
+    "journey": {
+      "original_visit_id": 2,
+      "time_zone": "Asia/Shanghai",
+      "original_start": "2026-11-30 09:00",
+      "original_end": "2026-11-30 09:30",
+      "proposed_start": "2026-12-01 10:30",
+      "proposed_end": "2026-12-01 11:00",
+      "return_candidate_count": 30,
+      "consent_checked": false,
+      "confirmed": false,
+      "horizontal_overflow_observed": false,
+      "date_input_method": "日期控件 change 事件"
+    },
+    "current_iphone_status": {
+      "scan_and_reschedule": "尚待实机核对",
+      "wechat_font_size": "尚待实机核对",
+      "native_date_picker": "尚待实机核对",
+      "voiceover_speech_and_focus": "尚待实机核对"
+    },
+    "read_only_copy": {
+      "read_only": true,
+      "visit_id": 2,
+      "home_action": "查看到诊安排",
+      "service_center_action": "查看到诊安排",
+      "row_action": "查看预约详情",
+      "change_or_cancel_visible": false
+    },
+    "business_effects": {
+      "unchanged_tables": 33,
+      "visit_count": 4,
+      "receipt_count": 1,
+      "reschedule_previews": 9,
+      "reschedule_confirmations": 0,
+      "business_writes": 0
+    }
   }
 }

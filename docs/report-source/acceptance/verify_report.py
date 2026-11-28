@@ -28,6 +28,38 @@ def bookmarks(items):
             yield item
 
 
+def verify_appointment_readability(reader, pages, observed):
+    run = observed["appointment_readability"]
+    section = next(item for item in bookmarks(reader.outline) if item.title.startswith("5.6　"))
+    text = "".join(pages[reader.get_destination_page_number(section)].split())
+    rows = run["confirm_page_sizes"]
+    positions = {(row["width"], row["setting"]) for row in rows}
+    insist(len(rows) == 9 and positions == {(w, s) for w in (375, 390, 430) for s in (16, 19, 26)},
+           "Width and font observations are incomplete or duplicated")
+    for width in (375, 390, 430):
+        sizes = sorted((row for row in rows if row["width"] == width), key=lambda row: row["setting"])
+        printed = str(width) + "".join(f'{row["title_px"]}/{row["time_px"]}' for row in sizes)
+        insist(printed in text, f"The printed sizes at width {width} differ from the observation")
+        for field in ("title_px", "time_px"):
+            insist(sizes[0][field] < sizes[1][field] < sizes[2][field], "Expected successive increase in " + field)
+    for fact in [run["application_commit"][:12], "更改预约时间（改期）", "表5-6", "只读",
+                 "11月30日09:00", "12月1日10:30", "北京时间"]:
+        insist(fact in text, "Missing rescheduling observation: " + fact)
+    readonly = run["read_only_copy"]
+    effects = run["business_effects"]
+    for label in [readonly["home_action"], readonly["row_action"],
+                  f'{effects["unchanged_tables"]}张业务表', f'{effects["visit_count"]}笔预约',
+                  f'{effects["receipt_count"]}份回执', "未提交改期"]:
+        insist(label in text, "Observed access or data effect missing from section 5.6: " + label)
+    insist(readonly["read_only"] and not readonly["change_or_cancel_visible"] and
+           effects["business_writes"] == effects["reschedule_confirmations"] == 0,
+           "Read-only and preview observations must agree with the operator's report")
+    phone = observed["iphone_evidence"]
+    all_text = "".join("".join(pages).split())
+    insist(phone["preview_commit"] != run["application_commit"] and phone["preview_commit"][:7] in all_text,
+           "The historical device result must be identifiable separately from the current version")
+
+
 def verify_screens(reader, pages, expected):
     text = (HERE / "正文.md").read_text()
     refs = re.findall(r"^@screen ([\w-]+) \| (图 [^\n]+)$", text, re.M)
@@ -96,6 +128,7 @@ def verify(path):
         edges = [n for n in cells if n.get("edge") == "1"]
         insist(len(vertices) >= 4 and len(edges) >= 1, f"Drawing {ordinal} lacks editable content")
     observed = json.loads((HERE / "验收记录.json").read_text())
+    verify_appointment_readability(reader, pages, observed)
     site_run = json.loads((HERE / observed["site_report_chain"]).read_text())
     pictures = verify_screens(reader, pages, observed["screen_sha256"] | site_run["screenshots"])
     compact = "".join(complete_text.split())
