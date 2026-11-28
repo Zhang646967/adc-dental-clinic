@@ -471,12 +471,18 @@ class Course:
         return ReceiptBook(folder / 'recovery', self.plan['project']).status(
             self.plan['requested_source_commit'], self.plan['images']['app'], folder, mode='server')
 
-    def restore(self, encrypted, identity, age='age', *, schema_mode='pg-dump'):
+    def restore(self, encrypted, identity, age='age', *, schema_mode='pg-dump',
+                expected_source=None, expected_sha256=None):
         encrypted, identity = private_file(encrypted), private_file(identity)
         with exclusive(self.bundle / 'private/release.lock'), tempfile.TemporaryDirectory(dir=self.bundle / 'private') as temporary:
             temporary = Path(temporary)
             cipher_sha, key_sha = file_digest(encrypted), file_digest(identity)
+            if self.access_mode == 'clinic-writable' and not (
+                    re.fullmatch(r'adc_g4_[0-9a-f]{12}', expected_source or '') and cipher_sha == expected_sha256):
+                raise ValueError('Pin the institution source and ciphertext digest from the custody record.')
             meta = decrypt_backup(encrypted, identity, temporary, self.log, age)
+            if expected_source is not None and meta['project'] != expected_source:
+                raise ValueError('The backup belongs to a different institution installation.')
             if meta['project'] == self.plan['project']:
                 raise ValueError('Restore requires a different project.')
             if meta['source_commit'] != self.plan['requested_source_commit'] or meta['images']['app'] != self.plan['images']['app']:

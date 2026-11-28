@@ -213,7 +213,8 @@ def exercise(args):
         sealed.chmod(0o600)
         assert digest(sealed) == result['sha256']
         started = time.monotonic()
-        result = recovery.restore(sealed, key, args.age, schema_mode='migration-built')
+        result = recovery.restore(sealed, key, args.age, schema_mode='migration-built',
+                                  expected_source=active.plan['project'], expected_sha256=result['sha256'])
         assert result['business_comparison'] == 'PASSED'
         assert recovery.status()['status'] == 'ORIGIN_READY' and following == records(recovery)
         assert recovery.database_identity()['volume'] != source_storage['volume']

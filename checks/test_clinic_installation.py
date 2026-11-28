@@ -38,6 +38,23 @@ class ClinicProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'profiles differ'):
             clinic._restore_decrypted('missing', {}, schema_mode='migration-built')
 
+    def test_recovery_requires_the_independent_custody_record(self):
+        prepare(self.bundle, **self.inputs)
+        with patch('scripts.g4_course.docker_command', return_value=[]):
+            clinic = ClinicInstallation(self.bundle, context='unit', rehearsal=True)
+        archive = self.bundle / 'private/archive.age'
+        identity = self.bundle / 'private/current-identity'
+        for entry in (archive, identity):
+            entry.touch(mode=0o600)
+        with patch('scripts.g4_course.decrypt_backup') as decrypt:
+            with self.assertRaisesRegex(ValueError, 'custody record'):
+                clinic.restore(archive, identity, expected_source='adc_g4_010203040506', expected_sha256='0'*64)
+            decrypt.assert_not_called()
+        from scripts.g4_course import digest
+        with patch('scripts.g4_course.decrypt_backup', return_value={'project':'adc_g4_000000000000'}):
+            with self.assertRaisesRegex(ValueError, 'different institution'):
+                clinic.restore(archive, identity, expected_source='adc_g4_010203040506', expected_sha256=digest(archive))
+
     def test_maintenance_and_runtime_cannot_enable_training(self):
         prepare(self.bundle, **self.inputs)
         for who in ('runtime', 'maintenance'):

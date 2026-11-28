@@ -75,10 +75,10 @@ python3 source/scripts/clinic_release.py --context default --output state/.g4 ba
 
 ## 4　恢复到另一空库
 
-在恢复主机完成第 1 节，以备份时同一完整源提交、同一应用镜像，准备新项目和新卷。为演练指定独立域名和证书，隔离对外访问。跳过第 2 节建档；恢复程序会用迁移创建结构并复核快照后再导入数据。下载授权异地存储中的密文，在恢复机的私密目录校验摘要。密文文件名保留原名，权限 600，解密私钥由保管人提供。
+在恢复主机完成第 1 节，以备份时同一完整源提交、同一应用镜像，准备新项目和新卷。为演练指定独立域名和证书，隔离对外访问。跳过第 2 节建档；恢复程序会用迁移创建结构并复核快照后再导入数据。下载授权异地存储中的密文，在恢复机的私密目录校验摘要。从源机构单独保存的交接记录取安装实例号和密文 SHA-256，分别设为 `ADC_SOURCE_PROJECT` 和 `ADC_BACKUP_SHA256`。仅靠备份目录旁的摘要无法鉴别发送者。密文文件名保留原名，权限 600，解密私钥由保管人提供。
 
 ```sh
-python3 source/scripts/clinic_release.py --context default --output state/.g4 restore --backup-file "$ADC_CIPHERTEXT" --identity-file "$ADC_PRIVATE_IDENTITY"
+python3 source/scripts/clinic_release.py --context default --output state/.g4 restore --backup-file "$ADC_CIPHERTEXT" --identity-file "$ADC_PRIVATE_IDENTITY" --source-project "$ADC_SOURCE_PROJECT" --backup-sha256 "$ADC_BACKUP_SHA256"
 ```
 
 保存 `INDEPENDENT_RESTORE_COMPLETED`、`business_comparison=PASSED`、表数、行数及 `elapsed_ms`。计时从替代数据库及其镜像就绪起，至运行服务启动止；值班人员另外记录从发现故障到用户登录恢复的总时长。用恢复的管理员和普通员工分别登录，核对已发生业务编号、岗位和授权范围。仅在机构批准后安排业务切换。恢复目标已有表、源目标同项目、镜像不符或行摘要不符时会停止。

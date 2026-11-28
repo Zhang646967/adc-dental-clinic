@@ -101,6 +101,8 @@ def main():
     restore = commands.add_parser('restore')
     restore.add_argument('--backup-file', type=Path, required=True)
     restore.add_argument('--identity-file', type=Path, required=True)
+    restore.add_argument('--source-project', required=True, help='Source institution installation from the trusted custody record')
+    restore.add_argument('--backup-sha256', required=True, help='Ciphertext digest from the trusted custody record')
     restore.add_argument('--age', default='age')
     tls = commands.add_parser('issue-tls')
     tls.add_argument('--public-ip', required=True)
@@ -128,7 +130,8 @@ def main():
     if args.action == 'issue-tls':
         return clinic.tls(args.public_ip)
     if args.action == 'restore':
-        return clinic.restore(args.backup_file, args.identity_file, args.age, schema_mode='migration-built')
+        return clinic.restore(args.backup_file, args.identity_file, args.age, schema_mode='migration-built',
+                              expected_source=args.source_project, expected_sha256=args.backup_sha256)
     if args.action == 'upgrade':
         return clinic.upgrade(args.artifacts, args.recipient_file, args.expected_current_commit,
                               args.age, allow_additive=args.allow_additive_migrations)
