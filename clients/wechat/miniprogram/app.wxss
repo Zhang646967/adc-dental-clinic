@@ -98,6 +98,10 @@ page{background:#f7f9f5;color:#193d35;font-size:30rpx;line-height:1.6}.page{padd
 /* 18552: one bill per row; the number wraps without widening the card. */
 .patient-flow .billing-no{font-size:27rpx;word-break:break-all;margin:4rpx 0}
 
+/* The Beijing-time suffix stays one unit at every font size; without this it
+   can split into 北京 / 时间 once the time line wraps. */
+.patient-flow .tz{white-space:nowrap}
+
 /* 18555: the appointment screens follow the WeChat font size setting.
    The default tier keeps the existing hierarchy; larger steps raise every
    patient-facing size, including the original and proposed times, helper
