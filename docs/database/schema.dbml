@@ -938,6 +938,8 @@ Table adc_examination_order {
 
 Table adc_examination_project {
   id "bigint" [pk, not null]
+  operating_revision "bigint" [not null]
+  operating_mode "character varying(10)" [not null]
   service_id "bigint" [not null]
   code "character varying(40)" [not null]
   name "character varying(100)" [not null]

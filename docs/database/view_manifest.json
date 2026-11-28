@@ -62,7 +62,7 @@
     "title": "检查申请、独立审核与患者发布",
     "tables": 10,
     "relationships": 13,
-    "note": "申请关联准确检查记录及预约服务。实际执行时间和依据记录在申请。报告版本和办理事件追加保留。审核、发布、撤回分别登记，active_release 指向当前可查阅的发布事件。患者查阅逐次核对本人、原就诊和当前版本。",
+    "note": "检查项目保留门店所属服务、办理模式及启停修订号。申请关联准确检查记录及预约服务。实际执行时间和依据记录在申请。报告版本和办理事件追加保留。审核、发布、撤回分别登记，active_release 指向当前可查阅的发布事件。患者查阅逐次核对本人、原就诊和当前版本。",
     "columns": {
       "adc_visit": [
         "id",
@@ -86,7 +86,9 @@
         "id",
         "service_id",
         "code",
-        "is_active"
+        "is_active",
+        "operating_mode",
+        "operating_revision"
       ],
       "adc_examination_duty": [
         "id",
@@ -2477,7 +2479,7 @@
     "passed": true,
     "tables": 195,
     "orm_tables": 194,
-    "columns_types_and_nullability_checked": 1896,
+    "columns_types_and_nullability_checked": 1898,
     "model_database_type_differences": [
       {
         "table": "auth_group_permissions",
@@ -2489,7 +2491,7 @@
     "orm_foreign_keys": 566,
     "sql_foreign_keys": 567,
     "sql_only_composite_foreign_keys": 1,
-    "snapshot_sha256": "dfc9e241b588f13bcb083503641b51463594a5c6ceae8e298cceb583f488d436",
+    "snapshot_sha256": "b0ded793cfd26f69574112f3911c7ba0b90d621e432ab6d0c67d4a72877033e7",
     "scope": "Structure documentation only; this is not a new business or capacity acceptance result."
   }
 }

@@ -1,6 +1,6 @@
 # 当前数据库字段目录
 
-结构基线日期：2026-11-13。本目录列出194张ORM业务／框架表；另1张django_migrations为框架迁移日志。
+结构基线日期：2026-11-28。本目录列出194张ORM业务／框架表；另1张django_migrations为框架迁移日志。
 
 字段类型、可空、SQL约束及索引来自数据库只读结构核对；模型映射来自同版本已运行应用。没有读取任何业务行、密码、配置值或字段默认值。
 
@@ -2655,6 +2655,8 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 | 列 | PostgreSQL类型 | 键 | 可空 | 引用 |
 |---|---|---|---|---|
 | id | bigint | PK | 否 | — |
+| operating_revision | bigint | — | 否 | — |
+| operating_mode | character varying(10) | — | 否 | — |
 | service_id | bigint | FK | 否 | `adc_booking_service.id` |
 | code | character varying(40) | — | 否 | — |
 | name | character varying(100) | — | 否 | — |
@@ -2663,8 +2665,10 @@ PK=主键；UK=单列唯一；FK=外键；NULL=可空。复合唯一、条件唯
 数据库约束：
 
 - `adc_examination_proj_service_id_1fce6bc8_fk_adc_booki`：`FOREIGN KEY (service_id) REFERENCES adc_booking_service(id) DEFERRABLE INITIALLY DEFERRED`。
+- `adc_examination_project_operating_revision_check`：`CHECK ((operating_revision >= 0))`。
 - `adc_examination_project_pkey`：`PRIMARY KEY (id)`。
 - `examination_project_code`：`UNIQUE (service_id, code)`。
+- `examination_project_mode_valid`：`CHECK (((operating_mode)::text = ANY ((ARRAY['REHEARSAL'::character varying, 'SITE'::character varying, 'SUSPENDED'::character varying])::text[])))`。
 
 索引（含条件唯一索引）：
 

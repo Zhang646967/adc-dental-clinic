@@ -2,6 +2,7 @@
 import argparse
 import json
 import re
+from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -195,7 +196,7 @@ def front(c, pages):
         ("h1", TITLE), ("h2", "摘　要"),
         ("p", "在连锁口腔门诊中，一次改期会同时影响患者的到店计划、前台的身份核对和医师的接诊安排。若仅保留新时间、用姓名识别人，或者把正在修订的病历作为当前确认版，三个岗位将看到互不一致的事实。"),
         ("p", "本报告以患者预约、门店接待和医师检查记录为主线，结合报告发布、复诊接续与离店结算，说明门诊中的责任移交。以业务用例和业务序列表达组织对外服务，再用系统用例、分析类、协作序列和状态机解释办理过程。物理关系图以 PostgreSQL 中的外键与唯一性约束为依据。"),
-        ("p", "验收时可分别从患者、前台和医师入口核对原预约与后继、同名患者的独立编号、草稿与确认版。报告给出岗位实景、可重复的操作路径及其观察结果。附录保留 147 项业务用例和一项共享核验。"),
+        ("p", "验收时可分别从患者、前台和医师入口核对改期前后的预约、同名患者的编号、草稿与确认版。在正式配置下，三个岗位沿同一笔就诊核对报告发布、本人提醒和复诊预约。附录收录 147 项业务用例和一项共享核验。"),
         ("h3", "关键词　口腔门诊　患者身份　预约改期　临床记录　系统验收"),
     ]
     abstract_bottom = page_content(c, intro, 1, None, [], 1, True)
@@ -208,7 +209,9 @@ def front(c, pages):
         "business and system use cases to admission, chart confirmation, reporting, "
         "follow-up and billing. The last chapter presents observed outcomes, "
         "including how to distinguish an original appointment from its successor, "
-        "two patients with the same name and a draft from the current confirmed record.",
+        "two patients with the same name and a draft from the current confirmed record. "
+        "Under the production configuration, three roles trace one encounter from report publication "
+        "to the patient’s in-app notice and confirmed follow-up.",
         ParagraphStyle("abstract_en", fontName="Times-Roman", fontSize=11.5, leading=17),
     )
     _, en_h = english.wrap(SPAN, H)
@@ -300,7 +303,12 @@ def build(destination, fonts):
     c.save()
     base.seek(0)
     output = PdfWriter(clone_from=base)
-    output.add_metadata({"/CreationDate": "D:20261127000000Z", "/ModDate": "D:20261127000000Z"})
+    inventory = json.loads((HERE / "验收记录.json").read_text())
+    site_record = json.loads((HERE / inventory["site_report_chain"]).read_text())
+    server_record = json.loads((HERE / inventory["server_report_chain"]).read_text())
+    captured = max(datetime.fromisoformat(site_record["capture_time_utc"]),
+                   datetime.fromisoformat(server_record["run_utc"])).astimezone(timezone.utc)
+    output.add_metadata({"/CreationDate": "D:20261127000000Z", "/ModDate": captured.strftime("D:%Y%m%d%H%M%SZ")})
     for page_no, diagram_no, x, y, scale in overlays:
         drawing = plots.pages[diagram_no]
         box = drawing.cropbox

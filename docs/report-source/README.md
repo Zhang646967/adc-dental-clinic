@@ -8,7 +8,7 @@
 | --- | --- |
 | 五章文字、岗位规约与操作结果 | [正文](acceptance/正文.md) |
 | 业务用例、业务序列、系统用例、分析类、分析序列、状态机和物理 ER | [draw.io 可编辑模型](acceptance/门诊模型.drawio) |
-| 患者改期、前台同名档案与医师记录实景 | [插图文件](acceptance/screens/) |
+| 患者改期、前台同名档案、病历及检查报告复诊实景 | [岗位画面](acceptance/screens/) · [检查报告与复诊核对记录](../evidence_site_examination/chain.json) |
 | 各项业务用例编号 | [完整索引](acceptance/用例目录.json) |
 | 数据库字段和约束 | [数据库目录](../database/README.md) · [本报告的关系核对](acceptance/核对物理关系.sql) |
 | 报告编排、证据范围与 PDF 重建 | [编排说明](acceptance/README.md) |

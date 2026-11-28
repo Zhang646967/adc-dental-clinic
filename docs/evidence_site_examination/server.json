@@ -1,0 +1,53 @@
+{
+  "public_evidence": true,
+  "environment": "香港已租用服务器 · 临时内部应用与独立空库",
+  "source_commit": "49c12740b7399e864c3f0c57d1677c901c261a15",
+  "run_utc": "2026-11-28T04:46:43.462555+00:00",
+  "settings": "config.settings.production",
+  "ADC_CLINICAL_SYNTHETIC": false,
+  "data_origin": "本次新建的虚构验收资料，资质凭据形状仅用于验证软件授权。",
+  "clinical_qualification_verified": false,
+  "actual_care": false,
+  "execution_method": "使用业务命令和 Django HTTP 客户端调用真实数据库及视图，患者通过网页预约确认表单提交。",
+  "postgresql_major": 17,
+  "runtime_nonsuperuser": true,
+  "migration": "0024_examination_project_operating_mode",
+  "recorded_migrations": 114,
+  "source_archive_sha256": "9fb66181b127e7fabb19340e3973304d69ea8ad0566452284f2e770835279160",
+  "runtime_image": "sha256:96f42df40fb372dd501c9e4f14587a17f0000a741580eca14b9fed65cf962acd",
+  "patient_journey": {
+    "source_visit": "V-402017C1618A481785988A0250FF6B45",
+    "order_no": "EX-19FC15D7BF3E4ADD966ADBED45DD2E5B",
+    "revision": 1,
+    "release_id": 5,
+    "notice_id": 1,
+    "unread_after_publication": 1,
+    "followup_visit": "V-EC29E32D680F40619586058FA8C5C0E1",
+    "followup_start": "2026-11-29T11:00:00+08:00",
+    "status": "SCHEDULED",
+    "patient_action": "VIEW_APPOINTMENT"
+  },
+  "three_role_checks": {
+    "原医师报告页能回查同一原就诊、检查和复诊预约": true,
+    "患者从站内提醒读到指定版且明确确认后看到已约复诊": true,
+    "前台检查进度可见原就诊和检查，后续安排可见原就诊与复诊预约": true,
+    "前台报告正文HTTP状态": 403,
+    "报告审核与签发人员独立": true
+  },
+  "database_after": {
+    "visits": 2,
+    "inapp_notices": 1,
+    "appointment_links": 1,
+    "patient_booking_receipts_total": 2
+  },
+  "server_scope": {
+    "private_internal_network": true,
+    "published_port": false,
+    "new_database_in_tmpfs": true,
+    "existing_database_or_gateway_connected": false,
+    "private_app_database_network_and_image_removed": true,
+    "public_teacher_entry_changed": false,
+    "external_wechat_message": false,
+    "public_https_path_exercised": false
+  }
+}

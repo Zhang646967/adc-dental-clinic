@@ -10667,6 +10667,32 @@
           "on_delete": null
         },
         {
+          "name": "operating_revision",
+          "column": "operating_revision",
+          "type": "PositiveBigIntegerField",
+          "db_type": "bigint",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": null,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
+          "name": "operating_mode",
+          "column": "operating_mode",
+          "type": "CharField",
+          "db_type": "varchar(10)",
+          "pk": false,
+          "unique": false,
+          "null": false,
+          "max_length": 10,
+          "target_table": null,
+          "target_column": null,
+          "on_delete": null
+        },
+        {
           "name": "service",
           "column": "service_id",
           "type": "ForeignKey",
@@ -30978,6 +31004,12 @@
     },
     {
       "table": "adc_examination_project",
+      "name": "adc_examination_project_operating_revision_check",
+      "kind": "c",
+      "definition": "CHECK ((operating_revision >= 0))"
+    },
+    {
+      "table": "adc_examination_project",
       "name": "adc_examination_project_pkey",
       "kind": "p",
       "definition": "PRIMARY KEY (id)"
@@ -30987,6 +31019,12 @@
       "name": "examination_project_code",
       "kind": "u",
       "definition": "UNIQUE (service_id, code)"
+    },
+    {
+      "table": "adc_examination_project",
+      "name": "examination_project_mode_valid",
+      "kind": "c",
+      "definition": "CHECK (((operating_mode)::text = ANY ((ARRAY['REHEARSAL'::character varying, 'SITE'::character varying, 'SUSPENDED'::character varying])::text[])))"
     },
     {
       "table": "adc_examination_report",
@@ -45739,6 +45777,18 @@
       "null": false
     },
     {
+      "table": "adc_examination_project",
+      "column": "operating_mode",
+      "db_type": "character varying(10)",
+      "null": false
+    },
+    {
+      "table": "adc_examination_project",
+      "column": "operating_revision",
+      "db_type": "bigint",
+      "null": false
+    },
+    {
       "table": "adc_examination_report",
       "column": "id",
       "db_type": "bigint",
@@ -53255,6 +53305,10 @@
       "name": "0023_examination_followup"
     },
     {
+      "app": "clinical",
+      "name": "0024_examination_project_operating_mode"
+    },
+    {
       "app": "contenttypes",
       "name": "0001_initial"
     },
@@ -53507,7 +53561,8 @@
       "name": "0006_c5_batch_nursing"
     }
   ],
-  "observed_database": "PostgreSQL 17.11 isolated synthetic",
-  "observed_on": "2026-11-13",
-  "source_migration": "clinical.0023_examination_followup"
+  "observed_database": "PostgreSQL 17.11 isolated acceptance database with production settings",
+  "observed_on": "2026-11-28",
+  "source_migration": "clinical.0024_examination_project_operating_mode",
+  "source_commit": "49c12740b7399e864c3f0c57d1677c901c261a15"
 }

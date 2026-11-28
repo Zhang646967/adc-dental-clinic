@@ -1,10 +1,18 @@
-# 报告提醒与复诊接续
+# 当前门诊数据库结构
 
-独立 PostgreSQL 17.11 核对 98 份应用迁移、195 张 SQL 表、194 张 ORM 表、567 条外键及 181 项业务触发器。新增提醒与复诊决定两张表，正式预约关联可引用准确决定。原 97 份应用迁移字节保留。 [报告复诊 ER](er_examination_followup.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../EXAMINATION_FOLLOWUP.md)
+运行版本 `49c12740` 在独立 PostgreSQL 17.11 数据库施用 `clinical.0024_examination_project_operating_mode` 后，按只读事务核对了 195 张 SQL 表、194 张 ORM 表、567 条物理外键和 181 项业务触发器。迁移日志共 114 条，其中 99 条属于应用，15 条属于 Django 框架。采集日期为 2026-11-28（UTC）。
 
-# 检查申请、独立审核与患者发布
+检查项目的 `operating_mode` 字段区分演练、门店启用和门店暂停状态。数据库约束限定三个取值。`operating_revision` 为非空、非负的大整数，门店启停后旧预览需要重新核对。两列位于既有项目表，原有服务、申请和报告外键继续沿用。[字段与约束](FIELD_CATALOG.md#adc_examination_project) · [检查与发布 ER](er_examination_release.svg) · [完整结构快照](schema_snapshot.json) · [正式门店开通](../../deployment/clinic/OPERATIONS.md#开通本店检查报告及复诊)
 
-独立 PostgreSQL 17.11 核对 97 份应用迁移、193 张 SQL 表、192 张 ORM 表、562 条外键及 180 项业务触发器。检查申请引用准确检查记录及本店服务，执行职责、报告版本和办理事件各自留存。原 96 份迁移保持原字节。[检查与发布 ER](er_examination_release.svg) · [实际结构快照](schema_snapshot.json) · [办理规则](../EXAMINATION_REPORTS.md)
+核对时逐项比对旧版的 1,441 条约束与 1,022 个索引。PostgreSQL 恢复后可将数组整体的显式类型转换展开为对每个成员的相同转换；对等价表达式保留原快照写法。本次新增两条检查约束。以下为各版当时的观察结果。
+
+## 报告提醒与复诊接续（第 98 份应用迁移）
+
+独立 PostgreSQL 17.11 核对 98 份应用迁移、195 张 SQL 表、194 张 ORM 表、567 条外键及 181 项业务触发器。新增提醒与复诊决定两张表，正式预约关联可引用准确决定。原 97 份应用迁移字节保留。 [报告复诊 ER](er_examination_followup.svg) · [当期结构快照](https://github.com/Zhang646967/adc-dental-clinic/blob/0a214dcc86ddff079721981d6eb54e7441f80efe/docs/database/schema_snapshot.json) · [办理规则](../EXAMINATION_FOLLOWUP.md)
+
+## 检查申请、独立审核与患者发布（第 97 份应用迁移）
+
+独立 PostgreSQL 17.11 核对 97 份应用迁移、193 张 SQL 表、192 张 ORM 表、562 条外键及 180 项业务触发器。检查申请引用准确检查记录及本店服务，执行职责、报告版本和办理事件各自留存。原 96 份迁移保持原字节。[检查与发布 ER](er_examination_release.svg) · [当期结构快照](https://github.com/Zhang646967/adc-dental-clinic/blob/eb625f3f19716020dec1f22079e58a0ddb67a48e/docs/database/schema_snapshot.json) · [办理规则](../EXAMINATION_REPORTS.md)
 
 # C6 预收、抵扣撤销与原渠道退款
 

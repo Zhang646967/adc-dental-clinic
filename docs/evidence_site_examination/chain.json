@@ -1,0 +1,124 @@
+{
+  "public_evidence": true,
+  "subject": "隔离岗位样本",
+  "clinical_qualification_verified": false,
+  "actual_care": false,
+  "external_message_sent": false,
+  "capture_time_utc": "2026-11-28T04:41:12.858279+00:00",
+  "kind": "config.settings.production · 独立 PostgreSQL 17 · Chrome 普通登录与签名确认",
+  "deployment": "本机 HTTPS / 单独回环端口及数据库；未修改租用云主机",
+  "postgresql": "17.11",
+  "runtime_nonsuperuser": true,
+  "recorded_migrations": 114,
+  "checks": {
+    "正式设置且独立普通数据库角色": true,
+    "正式门店项目及授权": true,
+    "独立审核人及负责签发人": true,
+    "首次发布生成一条提醒，读态仅受患者明确操作影响": true,
+    "同一就诊、同一检查、同一版本签发": true,
+    "同一患者门店的复诊按报告保留来源": true,
+    "新预约仅有一张本人回执": true,
+    "未新增费用及临床处置": true
+  },
+  "browser_checks": [
+    "患者正常提交改期并取得新编号",
+    "前台从两位同名患者中按完整编号选中本人",
+    "前台登记同一后继预约到诊",
+    "患者重开同号预约读到已到诊",
+    "医师从本人工作清单接续新编号并确认首版",
+    "同一就诊更正草稿与当前确认第1版可分别打开",
+    "前台不能读取医师确认版原文",
+    "患者不能读取医师确认版原文",
+    "医师从同一已确认病历开具检查申请",
+    "检查执行人通过签名确认登记实际执行",
+    "负责医师提交首版，页面不提供自审入口",
+    "独立审核医师在工作清单审核同一申请",
+    "审核通过与发布之间患者尚未收到消息",
+    "负责医师经预览发布准确版本并安排可预约复诊",
+    "前台仅见同号检查的发布进度",
+    "前台直达报告正文仍被拒绝",
+    "患者从提醒打开该就诊发布的准确报告版本",
+    "本人确认复诊并从新预约回查原就诊",
+    "报告指向同一复诊回执，前台按新编号找到已预约",
+    "医师从复诊调阅同一原就诊、同版报告与复诊目标",
+    "原医师在发布报告查看复诊编号、时间及状态",
+    "前台在后续就诊安排查到原号、同一复诊号、时间与状态，无报告正文",
+    "小程序真实接口读到同一次提醒与相同复诊号",
+    "仅患者明确点击后改变提醒读态，未读计数由1变0",
+    "另一患者直达相同报告返回404且不显示正文"
+  ],
+  "original": {
+    "id": 5,
+    "number": "V-BE88940F2DDB4246B4AB5132E5680E6D",
+    "status": "CHECKED_IN",
+    "appointment_beijing": "2026-12-01T10:30+08:00"
+  },
+  "report": {
+    "number": "EX-7A15B8BB63C84EAC9FCB03BA277D40E9",
+    "id": 1,
+    "version": 1,
+    "notice": 1,
+    "unread": false
+  },
+  "followup": {
+    "id": 6,
+    "number": "V-75D04668C5A84551B0ADE18443C26E32",
+    "status": "SCHEDULED",
+    "end_beijing": "2026-12-01T14:30+08:00",
+    "beijing": "2026-12-01T14:00+08:00",
+    "booking_receipt": 3
+  },
+  "clinic": "云庭口腔 · 江畔门诊",
+  "project_operating_revision": 1,
+  "migration": "clinical.0024_examination_project_operating_mode",
+  "roles": {
+    "responsible_physician_and_reviewer_are_distinct": true,
+    "clinic_desk_has_body": false,
+    "other_patient_report_http_status": 404,
+    "patient_result_from_mini_api_consistent": true
+  },
+  "data_effects": {
+    "initial_visits": 4,
+    "final_visits": 6,
+    "report_versions": 1,
+    "publication_notices": 1,
+    "followup_receipts": 1,
+    "new_invoices": 0,
+    "new_payments": 0,
+    "new_treatments": 0
+  },
+  "events": [
+    "ORDER",
+    "EXECUTE",
+    "SUBMIT",
+    "APPROVE",
+    "PUBLISH"
+  ],
+  "screenshot_count": 13,
+  "screenshots": {
+    "site-exam-doctor.png": "ba2515ca43f45e342e673bc8997fdcc2cbb8c070d2728a14da2f8e63b6e4c28a",
+    "site-exam-patient.png": "b77331baac3a010f6898f655f1cadea9ca891c9513336ff5cf73e79472036e8e",
+    "site-exam-front.png": "449b77b39fefa86a3270ff6e658f5551e5d623f5e016fbb2607e12263333edbb"
+  },
+  "data_source": "人工构造的隔离验收数据，仅检查程序行为；未核验任何自然人的实际执业资格。",
+  "runtime_settings": {
+    "ADC_CLINICAL_SYNTHETIC": false,
+    "ADC_READ_ONLY": false,
+    "DEBUG": false,
+    "SECURE_SSL_REDIRECT": true,
+    "SESSION_COOKIE_SECURE": true
+  },
+  "instrument": "普通 Chrome 经本机固定证书公钥访问，表单由后端校验；小程序部分为已登录患者对共享 HTTPS 接口的只读核对。",
+  "read_observation": {
+    "unread_after_publication": 1,
+    "unread_after_view": 1,
+    "unread_after_explicit_read": 0,
+    "prior_release_visibility": "待审核及独立审核通过后均不产生患者可读的已发布报告。本次在审核通过、发布之前实查了提醒列表。"
+  },
+  "runtime_identity": {
+    "application_commit": "49c12740b7399e864c3f0c57d1677c901c261a15",
+    "fingerprint_files": 991,
+    "ordered_file_fingerprint_sha256": "0c3baf94258e84d2be834437fed775b35145261cafe918aacbd201f5843f9f5d",
+    "algorithm": "按仓库相对路径排序，依次汇入 UTF-8 路径、NUL、文件 SHA-256 小写十六进制值和换行。"
+  }
+}

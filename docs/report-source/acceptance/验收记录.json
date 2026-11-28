@@ -1,4 +1,6 @@
 {
+  "site_report_chain": "../../evidence_site_examination/chain.json",
+  "server_report_chain": "../../evidence_site_examination/server.json",
   "iphone": "iPhone 17 Pro Max 已扫码进入版本 9a2c0ad。手机上 09:00 的原预约显示“已改期替代”，10:30 的后继预约显示“已取消”，全程未见绿色诊断面板。原生日期选择、放大字号、VoiceOver 播报与焦点以及其他 iPhone 屏宽本次未实测。",
   "web": {
     "browsers": [

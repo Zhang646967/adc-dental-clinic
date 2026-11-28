@@ -306,5 +306,12 @@
     "width": 573,
     "height": 770,
     "minPrintedFontPt": 11.081256544502619
+  },
+  "er_examination_release": {
+    "nodes": 10,
+    "edges": 13,
+    "width": 541,
+    "height": 1046,
+    "minPrintedFontPt": 11.736709796672828
   }
 }

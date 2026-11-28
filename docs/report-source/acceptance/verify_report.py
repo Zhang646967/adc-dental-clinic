@@ -7,6 +7,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import pypdfium2
+from PIL import Image, ImageChops
 from pypdf import PdfReader
 
 
@@ -17,6 +18,38 @@ TARGET = HERE.parents[2] / "课程报告/课程报告_张加良_8210241102.pdf"
 def insist(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def bookmarks(items):
+    for item in items:
+        if isinstance(item, list):
+            yield from bookmarks(item)
+        else:
+            yield item
+
+
+def verify_screens(reader, pages, expected):
+    text = (HERE / "正文.md").read_text()
+    refs = re.findall(r"^@screen ([\w-]+) \| (图 [^\n]+)$", text, re.M)
+    insist({name + ".png" for name, _ in refs} == expected.keys() and len(refs) == 6,
+           "Each of the six captured views needs a source and caption")
+    matched = []
+    compact = ["".join(page.split()) for page in pages]
+    for name, caption in refs:
+        filename = name + ".png"
+        asset = HERE / "screens" / filename
+        insist(hashlib.sha256(asset.read_bytes()).hexdigest() == expected[filename],
+               f"Screen image changed since acceptance: {filename}")
+        where = [i for i, page in enumerate(compact) if "".join(caption.split()) in page]
+        insist(len(where) == 1, f"Caption missing or duplicated: {caption}")
+        with Image.open(asset) as source:
+            pixels = source.convert("RGB")
+        images = [item.image.convert("RGB") for item in reader.pages[where[0]].images]
+        insist(any(im.size == pixels.size and ImageChops.difference(im, pixels).getbbox() is None for im in images),
+               f"Printed pixels differ from captured view: {filename}")
+        matched.append(where[0] + 1)
+    insist(sum(len(page.images) for page in reader.pages) == len(matched), "Unexpected screen in report")
+    return matched
 
 
 def verify(path):
@@ -31,7 +64,9 @@ def verify(path):
                 extracted.close()
                 page.close()
     complete_text = "\n".join(pages)
-    forbidden = re.search(r"WorkBuddy|Codex|ChatGPT|模拟|开发者|测试|\bAI\b", complete_text, re.I)
+    audit_text = "\n".join([complete_text, *(str(v) for v in reader.metadata.values()),
+                           *(str(item.title) for item in bookmarks(reader.outline))])
+    forbidden = re.search(r"WorkBuddy|Codex|ChatGPT|模拟|开发者|测试|\bAI\b|SITE_(?:SOURCE|REPORT|COMMIT|TIME)", audit_text, re.I)
     insist(forbidden is None, "Editorial vocabulary appears in the finished report")
     outline = [d for d in reader.outline if isinstance(d, dict)]
     chapter_names = [d.title for d in outline if re.match(r"第[一二三四五]章", d.title)]
@@ -60,13 +95,48 @@ def verify(path):
         vertices = [n for n in cells if n.get("vertex") == "1"]
         edges = [n for n in cells if n.get("edge") == "1"]
         insist(len(vertices) >= 4 and len(edges) >= 1, f"Drawing {ordinal} lacks editable content")
-    pictures = [(i + 1, len(page.images)) for i, page in enumerate(reader.pages) if len(page.images)]
-    insist(len(pictures) == 3 and all(count == 1 for _, count in pictures), "Three distinct screen images required")
     observed = json.loads((HERE / "验收记录.json").read_text())
-    for filename, checksum in observed["screen_sha256"].items():
-        actual = hashlib.sha256((HERE / "screens" / filename).read_bytes()).hexdigest()
-        insist(actual == checksum, f"Screen image changed since acceptance: {filename}")
+    site_run = json.loads((HERE / observed["site_report_chain"]).read_text())
+    pictures = verify_screens(reader, pages, observed["screen_sha256"] | site_run["screenshots"])
     compact = "".join(complete_text.split())
+    site_bookmarks = [item for item in bookmarks(reader.outline) if item.title.startswith(("5.8", "5.9"))]
+    insist(len(site_bookmarks) == 2, "The report publication and follow-up sections need bookmarks")
+    site_pages = "".join("".join(pages[reader.get_destination_page_number(item)].split()) for item in site_bookmarks)
+    facts = [site_run["runtime_identity"]["application_commit"][:12], site_run["clinic"],
+             site_run["original"]["number"], site_run["report"]["number"], site_run["followup"]["number"],
+             site_run["followup"]["beijing"][:16].replace("T", " "), site_run["followup"]["end_beijing"][11:16],
+             f"就诊#{site_run['original']['id']}", f"提醒#{site_run['report']['notice']}",
+             f"复诊#{site_run['followup']['id']}", f"第{site_run['report']['version']}版"]
+    for fact in facts:
+        insist("".join(fact.split()) in site_pages, f"Cross-role observation missing from final pages: {fact}")
+    read = site_run["read_observation"]
+    insist([read["unread_after_" + key] for key in ("publication", "view", "explicit_read")] == [1, 1, 0],
+           "Observed read transition differs from the patient result")
+    insist(site_run["original"]["status"] == "CHECKED_IN" and site_run["followup"]["status"] == "SCHEDULED",
+           "Observed visit status differs from the stated result")
+    effects = site_run["data_effects"]
+    insist(all(effects[k] == 1 for k in ("report_versions", "publication_notices", "followup_receipts"))
+           and all(effects[k] == 0 for k in ("new_invoices", "new_payments", "new_treatments")),
+           "Report observations differ from recorded data effects")
+    server_run = json.loads((HERE / observed["server_report_chain"]).read_text())
+    server_mark = next(item for item in bookmarks(reader.outline) if item.title.startswith("5.10"))
+    server_page = "".join(pages[reader.get_destination_page_number(server_mark)].split())
+    server_trip = server_run["patient_journey"]
+    server_scope = server_run["server_scope"]
+    server_roles = server_run["three_role_checks"]
+    insist(server_run["source_commit"] == site_run["runtime_identity"]["application_commit"] and
+           server_run["settings"] == "config.settings.production" and server_scope["private_internal_network"] and
+           server_scope["new_database_in_tmpfs"] and not server_scope["public_teacher_entry_changed"] and
+           not server_scope["public_https_path_exercised"], "The two installations or their stated scope differs")
+    insist(all(flag is True for key, flag in server_roles.items() if key != "前台报告正文HTTP状态") and
+           server_roles["前台报告正文HTTP状态"] == 403 and server_trip["status"] == "SCHEDULED",
+           "Hosted role projections differ from the report")
+    server_facts = ["香港服务器", server_trip["followup_visit"][-8:], server_trip["followup_start"][:16].replace("T", ""),
+                    str(server_roles["前台报告正文HTTP状态"]), "公网入口仍为原版本"]
+    insist(all(fact in server_page for fact in server_facts), "Hosted follow-up facts missing from section 5.10")
+    insist(server_trip["source_visit"] != site_run["original"]["number"] and
+           server_trip["followup_visit"][-8:] not in site_pages and site_run["followup"]["number"] not in server_page,
+           "The two encounters have been mixed")
     scope = observed["integration"]
     insist(scope["application_commit"][:12] in compact, "Accepted application version missing")
     for chain in (scope["copy_a"]["chain"], scope["copy_b"]["chain"], scope["read_only"]["existing_chain"]):
@@ -85,7 +155,7 @@ def verify(path):
     insist(any("Songti" in f for f in embedded), "Report must contain embedded Songti glyphs")
     return {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "pages": len(pages),
             "chapters": len(chapter_names), "case_index_entries": len(actual_ids), "contents_links": len(links),
-            "editable_vector_figures": len(diagrams), "screen_pages": [i for i, _ in pictures],
+            "editable_vector_figures": len(diagrams), "screen_pages": sorted(set(pictures)), "verified_screen_images": len(pictures),
             "embedded_songti_fonts": sorted({f.split("+")[-1] for f in embedded if "Songti" in f})}
 
 
