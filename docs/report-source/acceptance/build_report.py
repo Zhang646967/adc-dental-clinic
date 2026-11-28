@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
+from xml.etree import ElementTree
 from xml.sax.saxutils import escape
 
 from PIL import Image
@@ -29,6 +30,7 @@ W, H = A4
 LEFT, RIGHT, TOP, BOTTOM = 79, 61, H - 83, 68
 SPAN = W - LEFT - RIGHT
 INK = colors.HexColor("#171717")
+ROMAN = ("I", "II", "III", "IV", "V", "VI", "VII", "VIII")
 
 
 def text_style(name, size, leading, *, bold=False, center=False, indent=0):
@@ -87,9 +89,46 @@ def report_pages():
             cells.append(f'{row["title_px"]} / {row["time_px"]}')
         size_table.append("| " + " | ".join([str(width), *cells]) + " |")
     text = text.replace("@appointment_metrics", "\n".join(size_table))
-    text = text.replace("# 第五章", design_details() + "\n\n# 第五章", 1)
+    business, requirements = (HERE / "business_additions.md").read_text().split("## 3.8", 1)
+    text = text.replace("# 第三章", business.strip().removesuffix("---").rstrip() + "\n\n---\n\n# 第三章", 1)
+    text = text.replace("# 第四章", "## 3.8" + requirements.strip("\n") + "\n\n---\n\n# 第四章", 1)
+    design = [design_details()]
+    design.extend((HERE / file).read_text().strip() for file in
+                  ("architecture_additions.md", "clinical_additions.md", "er_additions.md"))
+    text = text.replace("# 第五章", "\n\n---\n\n".join(design) + "\n\n---\n\n# 第五章", 1)
+    text += "\n\n---\n\n" + (HERE / "verification_additions.md").read_text()
+    text = number_additions(text)
     return [[s.strip() for s in part.splitlines() if s.strip()]
             for part in re.split(r"^---\s*$", text, flags=re.M)]
+
+
+def number_additions(text):
+    section = figure = 0
+    numbered = []
+    for line in text.splitlines():
+        if line.startswith("# "):
+            section = figure = 0
+        if line.startswith("## 4."):
+            section += 1
+            line = re.sub(r"^## 4\.(?:\d+|X)", f"## 4.{section}", line)
+        if line.startswith("@model "):
+            figure += 1
+            line = re.sub(r"(\| 图 \d+-)(?:\d+|X)", rf"\g<1>{figure}", line)
+        numbered.append(line)
+    return "\n".join(numbered)
+
+
+def diagram_pages():
+    doc = ElementTree.parse(HERE / "门诊模型.drawio")
+    return {node.attrib["id"]: i for i, node in enumerate(doc.findall("diagram"))}
+
+
+def figures(pages):
+    for page, lines in enumerate(pages, 1):
+        for kind, label in runs(lines):
+            if kind == "model":
+                identifier, caption = label
+                yield identifier, caption, page
 
 
 def design_details():
@@ -116,7 +155,7 @@ def design_details():
         pair.extend(section)
     if pair:
         pages.append(pair)
-    return "\n\n---\n\n".join("\n".join(page) for page in pages) + "\n\n---"
+    return "\n\n---\n\n".join("\n".join(page) for page in pages)
 
 
 def runs(lines):
@@ -144,9 +183,20 @@ def runs(lines):
         i += 1
 
 
-def page_content(c, blocks, chapter_page, plots, overlays, factor, draw):
+def section_level(kind, value):
+    if kind == "h1":
+        return 0
+    if kind == "h2" or (kind == "h3" and re.match(r"^\d+\.\d+", value)):
+        return 1
+    return None
+
+
+def page_content(c, blocks, chapter_page, model_assets, overlays, factor, draw, *, section_page=None):
     y = TOP
-    for kind, val in blocks:
+    for index, (kind, val) in enumerate(blocks):
+        level = section_level(kind, val)
+        if draw and section_page is not None and level is not None:
+            mark(c, f"section{section_page}-{index}", val, level=level, top=y + 8)
         if kind in ("model", "screen"):
             name, title = val
             if kind == "screen":
@@ -155,9 +205,11 @@ def page_content(c, blocks, chapter_page, plots, overlays, factor, draw):
                     raw_w, raw_h = im.size
                 max_height = 320 * factor
             else:
-                box = plots.pages[int(name) - 1].cropbox
+                plots, lookup = model_assets
+                box = plots.pages[lookup[name]].cropbox
                 raw_w, raw_h = float(box.width), float(box.height)
-                max_height = (420 if name in ("5", "8") else 315) * factor
+                max_height = (315 if name in ("1", "2", "3", "4", "6", "7", "9")
+                              else 365 if name.startswith("e-") else 435) * factor
             scale = min((SPAN - 8) / raw_w, max_height / raw_h)
             w, h = raw_w * scale, raw_h * scale
             x = LEFT + (SPAN - w) / 2
@@ -165,7 +217,7 @@ def page_content(c, blocks, chapter_page, plots, overlays, factor, draw):
             if draw and kind == "screen":
                 c.drawImage(str(asset), x, y, width=w, height=h)
             if draw and kind == "model":
-                overlays.append((chapter_page, int(name) - 1, x, y, scale))
+                overlays.append((chapter_page, lookup[name], x, y, scale))
             y -= 7
             item = para(title, text_style("fig", 10.4, 15, center=True))
             after = 14 * factor
@@ -203,8 +255,11 @@ def header_footer(c, label, page):
     c.drawCentredString(W / 2, 37, page)
 
 
-def mark(c, key, title, level=0):
-    c.bookmarkPage(key)
+def mark(c, key, title, level=0, top=None):
+    if top is None:
+        c.bookmarkPage(key)
+    else:
+        c.bookmarkPage(key, fit="FitH", top=top)
     c.addOutlineEntry(title, key, level=level)
 
 
@@ -261,24 +316,42 @@ def front(c, pages, group_starts):
     c.drawCentredString(W / 2, H - 99, "目　录")
     rows = []
     for i, lines in enumerate(pages, 1):
-        for line in lines:
-            if line.startswith("# ") or line.startswith("## ") or re.match(r"^### \d+\.\d+", line):
-                rows.append((line.split(" ", 1)[1], i, line.startswith("# ")))
+        for index, (kind, value) in enumerate(runs(lines)):
+            level = section_level(kind, value)
+            if level is not None:
+                rows.append((value, i, level == 0, f"section{i}-{index}"))
     for group, title in GROUPS:
-        rows.append((f"附录 {group}　{title}", group_starts[group], True))
+        number = group_starts[group]
+        rows.append((f"附录 {group}　{title}", number, True, f"part{number}"))
     entries = 31
     for index in range(0, len(rows), entries):
         if index:
-            header_footer(c, "目　录", ("II", "III", "IV", "V")[index // entries])
+            header_footer(c, "目　录", ROMAN[index // entries + 1])
             c.setFont("SongBold", 20)
             c.drawCentredString(W / 2, H - 99, "目　录（续）")
         y = H - 138
-        for label, number, main in rows[index:index + entries]:
+        for label, number, main, key in rows[index:index + entries]:
             x = LEFT if main else LEFT + 18
             c.setFont("SongBold" if main else "Song", 12.8 if main else 11)
             c.drawString(x, y, label)
             c.drawRightString(W - RIGHT, y, str(number))
-            c.linkRect("", f"part{number}", (x, y - 3, W - RIGHT, y + 14), relative=0, thickness=0)
+            c.linkRect("", key, (x, y - 3, W - RIGHT, y + 14), relative=0, thickness=0)
+            y -= 19.3
+        c.showPage()
+    roman_index = (len(rows) + entries - 1) // entries + 1
+    illustrations = list(figures(pages))
+    for offset in range(0, len(illustrations), entries):
+        if offset == 0:
+            mark(c, "figures", "图目录")
+        header_footer(c, "图目录", ROMAN[roman_index + offset // entries])
+        c.setFont("SongBold", 20)
+        c.drawCentredString(W / 2, H - 99, "图目录" if not offset else "图目录（续）")
+        y = H - 138
+        for _, label, number in illustrations[offset:offset + entries]:
+            c.setFont("Song", 11)
+            c.drawString(LEFT, y, label)
+            c.drawRightString(W - RIGHT, y, str(number))
+            c.linkRect("", f"part{number}", (LEFT, y - 3, W - RIGHT, y + 14), relative=0, thickness=0)
             y -= 19.3
         c.showPage()
 
@@ -324,8 +397,10 @@ def build(destination, fonts):
         group_starts[group] = next_page
         next_page += sum(len(parts[case["id"]]) for case in specifications if case["group"] == group)
     plots = PdfReader(HERE / "门诊模型.pdf")
-    if len(plots.pages) != 9:
-        raise ValueError("Expected nine vector drawings")
+    lookup = diagram_pages()
+    if len(plots.pages) != len(lookup):
+        raise ValueError("Vector drawing file differs from its editable source")
+    model_assets = plots, lookup
     base = BytesIO()
     c = canvas.Canvas(base, pagesize=A4, invariant=1, pageCompression=1)
     c.setAuthor("张加良")
@@ -341,15 +416,15 @@ def build(destination, fonts):
         new_chapter = lines[0].startswith("# ")
         if new_chapter:
             chapter = lines[0][2:]
-        mark(c, f"part{i}", lines[0].split(" ", 1)[1], level=0 if new_chapter else 1)
+        c.bookmarkPage(f"part{i}")
         header_footer(c, chapter, str(i))
         for factor in (1, .98, .96, .94, .92, .9):
-            last = page_content(c, blocks, i + front_pages - 1, plots, [], factor, False)
+            last = page_content(c, blocks, i + front_pages - 1, model_assets, [], factor, False)
             if last >= BOTTOM:
                 break
         else:
             raise ValueError(f"Page {i} does not fit: {last:.1f}pt")
-        page_content(c, blocks, i + front_pages - 1, plots, overlays, factor, True)
+        page_content(c, blocks, i + front_pages - 1, model_assets, overlays, factor, True, section_page=i)
         page_stats.append((i, factor, round(last, 1)))
         c.showPage()
     appendix(c, specifications, len(pages) + 1, parts)
@@ -369,8 +444,8 @@ def build(destination, fonts):
         box = drawing.cropbox
         matrix = Transformation().translate(-float(box.left), -float(box.bottom)).scale(scale).translate(x, y)
         output.pages[page_no].merge_transformed_page(drawing, matrix, over=True)
-    if len(overlays) != 9:
-        raise ValueError("Expected exactly nine placements")
+    if sorted(item[1] for item in overlays) != list(range(len(lookup))):
+        raise ValueError("Each editable model must be placed exactly once")
     with destination.open("wb") as stream:
         output.write(stream)
     print(f"{len(output.pages)} pages; {len(overlays)} vector diagrams; {len(specifications)} full specifications")

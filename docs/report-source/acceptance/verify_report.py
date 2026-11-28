@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import re
+from unicodedata import normalize
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -10,6 +11,7 @@ import pypdfium2
 from PIL import Image, ImageChops
 from pypdf import PdfReader
 
+from build_report import figures, report_pages, runs, section_level
 from case_specifications import read_cases
 
 
@@ -134,6 +136,74 @@ def verify_screens(reader, pages, expected):
     return matched
 
 
+def legal_fk_edges(diagrams):
+    snapshot = json.loads((HERE.parents[1] / "database/schema_snapshot.json").read_text())
+    fk = {}
+    unique = set()
+    for row in snapshot["constraints"]:
+        definition = row["definition"]
+        if row["kind"] == "f":
+            match = re.match(r"FOREIGN KEY \((\w+)\) REFERENCES (\w+)\(id\)", definition)
+            if match:
+                column, target = match.groups()
+                fk[row["table"], column] = target
+        elif row["kind"] == "u":
+            match = re.fullmatch(r"UNIQUE \((\w+)\)", definition)
+            if match:
+                unique.add((row["table"], match[1]))
+    columns = {(row["table"], row["column"]): row["null"] for row in snapshot["columns"]}
+    count = 0
+    for diagram in diagrams:
+        if not diagram.attrib["id"].startswith("e-"):
+            continue
+        cells = diagram.findall("mxGraphModel/root/mxCell")
+        vertices = {cell.attrib["id"]: cell.attrib.get("value", "") for cell in cells}
+        links = [cell for cell in cells if cell.get("edge") == "1"]
+        insist(links, f"{diagram.attrib['id']} is missing foreign-key connectors")
+        for i, link in enumerate(links):
+            source, column = link.attrib["id"].removeprefix("fk-").split("-")
+            key = source, column
+            insist(link.get("source") == source and link.get("target") == fk[key],
+                   f"Foreign key incorrectly drawn: {source}.{column}")
+            expect = ["0..1" if key in unique else "0..*", "0..1" if columns[key] else "1"]
+            observed = [vertices[f"card-{2 * i + side}"] for side in (0, 1)]
+            insist(observed == expect, f"Incorrect physical cardinality: {source}.{column}")
+            count += 1
+    return count
+
+
+def compact_label(text):
+    return re.sub(r"\s", "", normalize("NFKC", text))
+
+
+def verify_figures(reader, page_text, outline):
+    diagrams = ElementTree.parse(HERE / "门诊模型.drawio").findall("diagram")
+    locations = list(figures(report_pages()))
+    expected = [(key, caption) for key, caption, _ in locations]
+    insist([(g.attrib["id"], g.attrib["name"]) for g in diagrams] == expected and len(expected) >= 40,
+           "The editable figure set must match the report's numbered placements")
+    beginning = reader.get_destination_page_number(next(d for d in outline if d.title.startswith("第一章")))
+    with pypdfium2.PdfDocument(HERE / "门诊模型.pdf") as drawings:
+        insist(len(drawings) == len(diagrams), "Vector PDF does not match editable sheets")
+        for index, (diagram, (key, caption, page)) in enumerate(zip(diagrams, locations, strict=True)):
+            cells = diagram.findall("mxGraphModel/root/mxCell")
+            nodes = [cell for cell in cells if cell.get("vertex") == "1"]
+            arrows = [cell for cell in cells if cell.get("edge") == "1"]
+            insist(len(nodes) >= 4 and arrows, f"{key} lacks editable shapes or connectors")
+            body_offset = beginning + page - 1
+            page_result = compact_label(page_text[body_offset])
+            insist(compact_label(caption) in page_result and len(reader.pages[body_offset].images) == 0,
+                   f"{key} is missing the numbered vector figure on its body page")
+            source = drawings[index].get_textpage()
+            labels = {compact_label(line) for line in source.get_text_bounded().splitlines()}
+            source.close()
+            informative = {label for label in labels if len(label) >= 5}
+            insist(len(informative) >= 3, f"{key} has too few searchable diagram labels")
+            insist(sum(label in page_result for label in informative) * 2 >= len(informative),
+                   f"{key} vector content does not match its body page")
+    return len(diagrams), legal_fk_edges(diagrams)
+
+
 def verify(path):
     reader = PdfReader(path)
     with pypdfium2.PdfDocument(path) as document:
@@ -169,28 +239,7 @@ def verify(path):
         text = "".join("".join(pages[numbers[i]:numbers[i + 1]]).split())
         for marker in [case["title"], *(name for name, _ in case["rows"])]:
             insist("".join(marker.split()) in text, f"{case['id']} lacks {marker}")
-    diagrams = ElementTree.parse(HERE / "门诊模型.drawio").getroot().findall("diagram")
-    graph = PdfReader(HERE / "门诊模型.pdf")
-    insist(len(diagrams) == len(graph.pages) == 9, "Expected nine editable drawings and vector pages")
-    markers = ["取得就诊安排", "告知已登记到诊", "核对并确认改期", "检查记录版本",
-               "提交已核对的提案", "核实爽约", "adc_clinical_draft",
-               "送审指定报告版本", "adc_examination_notice"]
-    model_refs = re.findall(r"@model (\d+) \| (图 \d+-\d+)", (HERE / "正文.md").read_text())
-    insist(len(model_refs) == len(markers), "Nine figures must be present in the report source")
-    for (ordinal, caption), marker in zip(model_refs, markers, strict=True):
-        target_page = next((i for i, contents in enumerate(pages)
-                            if caption in contents and marker in contents), None)
-        insist(target_page is not None and len(reader.pages[target_page].images) == 0,
-                f"{caption} lacks its searchable vector figure")
-        cells = diagrams[int(ordinal) - 1].findall("mxGraphModel/root/mxCell")
-        vertices = [n for n in cells if n.get("vertex") == "1"]
-        edges = [n for n in cells if n.get("edge") == "1"]
-        insist(len(vertices) >= 4 and len(edges) >= 1, f"Drawing {ordinal} lacks editable content")
-        if ordinal in ("2", "5", "8"):
-            labels = {cell.get("value") for cell in vertices}
-            insist({"sd", "alt"} <= labels and any(cell.get("style", "").find("endArrow=open") >= 0
-                                                  and "dashed=1" in cell.get("style", "") for cell in edges),
-                   f"Sequence {ordinal} requires an alternate operand and a distinct returned message")
+    model_count, physical_edges = verify_figures(reader, pages, outline)
     observed = json.loads((HERE / "验收记录.json").read_text())
     verify_appointment_readability(reader, pages, observed)
     verify_patient_navigation(reader, pages, observed["patient_navigation"])
@@ -244,17 +293,31 @@ def verify(path):
            "Foreign-key evidence incomplete")
     toc_start = reader.get_destination_page_number(next(d for d in outline if d.title == "目录"))
     first_chapter = reader.get_destination_page_number(next(d for d in outline if d.title == chapter_names[0]))
-    links = [a.get_object() for page in reader.pages[toc_start:first_chapter] for a in page.get("/Annots", [])]
-    valid_pages = {p.indirect_reference.idnum for p in reader.pages}
-    insist(all(a["/Dest"][0].idnum in valid_pages for a in links) and len(links) >= 20,
-            "Contents links must resolve inside the PDF")
+    figure_toc = reader.get_destination_page_number(next(d for d in outline if d.title == "图目录"))
+    links = [a.get_object() for page in reader.pages[toc_start:figure_toc] for a in page.get("/Annots", [])]
+    sections = [value for page in report_pages() for kind, value in runs(page)
+                if section_level(kind, value) is not None]
+    section_titles = set(sections)
+    section_marks = [item for item in bookmarks(reader.outline) if item.title in section_titles]
+    insist([item.title for item in section_marks] == sections, "A report section is missing its bookmark")
+    listed = section_marks + [item for item in outline if item.title.startswith("附录")]
+    insist([a["/Dest"] for a in links] == [item.dest_array for item in listed],
+            "A contents link does not reach its section bookmark")
+    figure_links = [a.get_object() for page in reader.pages[figure_toc:first_chapter]
+                    for a in page.get("/Annots", [])]
+    expected_destinations = [reader.pages[first_chapter + page - 1].indirect_reference.idnum
+                             for _, _, page in figures(report_pages())]
+    insist([a["/Dest"][0].idnum for a in figure_links] == expected_destinations,
+           "One or more figures cannot be opened directly from their contents entry")
     fonts = reader.pages[0]["/Resources"]["/Font"]
     embedded = [str(f.get_object().get("/BaseFont", "")) for f in fonts.values()
                 if "/FontFile2" in (f.get_object().get("/FontDescriptor") or {})]
     insist(any("Songti" in f for f in embedded), "Report must contain embedded Songti glyphs")
     return {"sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "pages": len(pages),
             "chapters": len(chapter_names), "full_case_specifications": len(ids), "contents_links": len(links),
-            "editable_vector_figures": len(diagrams), "screen_pages": sorted(set(pictures)), "verified_screen_images": len(pictures),
+            "body_pages": appendix_start - first_chapter, "appendix_pages": len(pages) - appendix_start,
+            "editable_vector_figures": model_count, "diagram_links": len(figure_links),
+            "snapshot_checked_foreign_keys": physical_edges, "screen_pages": sorted(set(pictures)), "verified_screen_images": len(pictures),
             "embedded_songti_fonts": sorted({f.split("+")[-1] for f in embedded if "Songti" in f})}
 
 
